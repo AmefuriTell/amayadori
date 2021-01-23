@@ -1,0 +1,47 @@
+#include "hsp3dish.as"
+#module _function_
+    #defcfunc min double a,double b
+        if(a < b):return a:else:return b
+    #defcfunc max double a,double b
+        if(a > b):return a:else:return b
+#global
+
+#define winx double(ginfo_winx)
+#define winy double(ginfo_winy)
+#define d double
+#define d2r deg2rad
+#define r2d rad2deg
+
+#define cx winx / 2.0
+#define cy winy / 2.0
+
+celload "clocknum.bmp",1
+gsel 1:clock_sizex = winx:clock_sizey = winy:gsel 0
+celdiv 1,,,clock_sizex / 2.0,clock_sizey / 2.0
+
+s_c_h_size = min(winx,winy) / 2.0 * 0.8
+m_c_h_size = s_c_h_size
+h_c_h_size = s_c_h_size * 0.75
+repeat
+	redraw 0
+    //??????X?V
+        hour = d(gettime(4))
+        minute = d(gettime(5))
+        second = d(gettime(6))
+        msecond = d(gettime(7))
+
+        s_c_h = (second + msecond / 100.0) * 6.0
+        m_c_h = minute * 6.0 + (second + msecond / 1000.0) / 10.0
+        h_c_h = hour * 30.0 + (minute + second / 60.0 + msecond /6000.0) / 2.0
+        
+    //?e?j??p?x???Z?o
+        color 0,0,0:boxf
+        pos cx,cy:celput 1,,-min(winx,winy) / clock_sizex,min(winx,winy) / clock_sizex
+        color 255,255,255
+        pos 0,0
+        line cx,cy,cx + sin(d2r(s_c_h)) * s_c_h_size,cy - cos(d2r(s_c_h)) * s_c_h_size
+        line cx,cy,cx + sin(d2r(m_c_h)) * m_c_h_size,cy - cos(d2r(m_c_h)) * m_c_h_size
+        line cx,cy,cx + sin(d2r(h_c_h)) * h_c_h_size,cy - cos(d2r(h_c_h)) * h_c_h_size
+    redraw 1
+    wait 5
+loop
