@@ -150,7 +150,7 @@
           if (0) { // XXX disabled for safety typeof dump == 'function') {
             dump(text + '\n'); // fast, straight to the real console
           } else {
-            console.error(text);
+            console.error();
           }
         },
         canvas: document.getElementById('canvas'),
@@ -316,7 +316,6 @@ function assert(check, msg) {
 
       new DataRequest(0, 443, 0, 0).open('GET', '/fizzbuzz.ax');
       new DataRequest(443, 886, 0, 0).open('GET', '/fizzbuzz.data');
-      new DataRequest(886, 1141, 0, 0).open('GET', '/fizzbuzz.hsp');
 
 
     function processPackageData(arrayBuffer) {
@@ -332,7 +331,6 @@ function assert(check, msg) {
 
           DataRequest.prototype.requests["/fizzbuzz.ax"].onload();
           DataRequest.prototype.requests["/fizzbuzz.data"].onload();
-          DataRequest.prototype.requests["/fizzbuzz.hsp"].onload();
 
           Module['removeRunDependency']('datafile_fizzbuzz.data');
 
