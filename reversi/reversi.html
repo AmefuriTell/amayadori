@@ -78,7 +78,7 @@
 
       #controls {
         display: inline-block;
-        float: right;
+        float: center;
         vertical-align: top;
         margin-top: 30px;
         margin-right: 20px;
@@ -100,14 +100,6 @@
   <body>
     <div class="spinner" id='spinner'></div>
     <div class="emscripten" id="status">Downloading...</div>
-
-<span id='controls'>
-  <span><input type="checkbox" id="resize">Resize canvas</span>
-  <span><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</span>
-  <span><input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
-                                                                            document.getElementById('resize').checked)">
-  </span>
-</span>
 
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>
@@ -203,7 +195,7 @@ Module.expectedDataFileDownloads++;
     }
     var PACKAGE_NAME = 'reversi.data';
     var REMOTE_PACKAGE_NAME = (Module['filePackagePrefixURL'] || '') + 'reversi.data';
-    var REMOTE_PACKAGE_SIZE = 31185;
+    var REMOTE_PACKAGE_SIZE = 3892541;
     var PACKAGE_UUID = '51f84d03-0c74-4552-ac13-924e79e76977';
   
     function fetchRemotePackage(packageName, packageSize, callback, errback) {
@@ -314,12 +306,15 @@ function assert(check, msg) {
         ENV.HSP_LIMIT_STEP = "5000";//ブラウザに処理を返すまでの実行ステップ数
     });
 
-      new DataRequest(0, 3312, 0, 0).open('GET', '/reversi.ax');
-      new DataRequest(3312, 8166, 0, 0).open('GET', '/alternate.bmp');
-      new DataRequest(8166, 13020, 0, 0).open('GET', '/back.bmp');
-      new DataRequest(13020, 17874, 0, 0).open('GET', '/black.bmp');
-      new DataRequest(21186, 26331, 0, 0).open('GET', '/Reversi.hsp');
-      new DataRequest(26331, 31185, 0, 0).open('GET', '/white.bmp');
+      new DataRequest(0, 6092, 0, 0).open('GET', '/reversi.ax');
+      new DataRequest(6092, 10946, 0, 0).open('GET', '/alternate.bmp');
+      new DataRequest(10946, 15800, 0, 0).open('GET', '/back.bmp');
+      new DataRequest(15800, 20654, 0, 0).open('GET', '/black.bmp');
+      new DataRequest(20654, 938080, 0, 0).open('GET', '/hsp3dish.js');
+      new DataRequest(944172, 3861382, 0, 0).open('GET', '/reversi.data');
+      new DataRequest(3861382, 3874186, 0, 0).open('GET', '/Reversi.hsp');
+      new DataRequest(3874186, 3887687, 0, 0).open('GET', '/reversi.html');
+      new DataRequest(3887687, 3892541, 0, 0).open('GET', '/white.bmp');
 
 
     function processPackageData(arrayBuffer) {
@@ -337,7 +332,10 @@ function assert(check, msg) {
           DataRequest.prototype.requests["/alternate.bmp"].onload();
           DataRequest.prototype.requests["/back.bmp"].onload();
           DataRequest.prototype.requests["/black.bmp"].onload();
+          DataRequest.prototype.requests["/hsp3dish.js"].onload();
+          DataRequest.prototype.requests["/reversi.data"].onload();
           DataRequest.prototype.requests["/Reversi.hsp"].onload();
+          DataRequest.prototype.requests["/reversi.html"].onload();
           DataRequest.prototype.requests["/white.bmp"].onload();
 
           Module['removeRunDependency']('datafile_reversi.data');
