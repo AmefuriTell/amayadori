@@ -47,7 +47,7 @@ setcls 0
                         k = cnt
                         nexti = i + di(k)
                         nextj = j + dj(k)
-                        if(0 > nexti || nexti > 7 || 0 > nextj || nextj > 7):break
+                        if(0 > nexti || nexti > 7 || 0 > nextj || nextj > 7):continue
                         if(grid(nexti, nextj) == -turn){
                             l = 2
                             repeat 8
@@ -135,7 +135,7 @@ setcls 0
                     break
                 }
             }
-            wait 5
+            await 5
         loop
     return
     #deffunc game
@@ -166,10 +166,11 @@ setcls 0
 repeat
     //ƒƒCƒ“
     game
+    turn = 0
+    print_board
     repeat
         stick key
         if(key != 0):break
-        wait 5
+       	await 5
     loop
-    wait 5
 loop
