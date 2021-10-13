@@ -13,6 +13,6 @@ rem タスクスケジューラに入力させる
 SCHTASKS /Create /XML LoginSetup.xml /TN ""
 
 rem XMLを削除
-del /LoginSetup.xml
+del LoginSetup.xml
 
 pause
