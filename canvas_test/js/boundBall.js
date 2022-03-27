@@ -2,35 +2,66 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var ballRadius = 10;
-var x = canvas.width / 2, y = canvas.height / 2;
-var dx = 2, dy = -2;
+var x = new Array(), y = new Array();
+var dx = new Array(), dy = new Array();
+var color = new Array();
+var ballNum = 0;
 
-function drawBall(argx, argy, argRadius)
+
+function drawBall(argx, argy, argRadius, argColoer)
 {
     ctx.beginPath();
     ctx.arc(argx, argy, argRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = argColoer;
     ctx.fill();
     ctx.closePath();
 }
-function moveBall()
+function drawAllBall()
 {
-    if(x + dx < ballRadius || x + dx > canvas.width - ballRadius)dx = -dx;
-    x += dx;
-    if(y + dy < ballRadius || y + dy > canvas.height - ballRadius)dy = -dy;
-    y += dy;
+    for (let i = 0; i < ballNum; i++)
+    {
+        drawBall(x[i], y[i], ballRadius, color[i]);
+    }
+}
+
+function moveAllBall()
+{
+    for (let i = 0; i < ballNum; i++) {
+        if(x[i] + dx[i] < ballRadius || x[i] + dx[i] > canvas.width - ballRadius)dx[i] = -dx[i];
+        x[i] += dx[i];
+        if(y[i] + dy[i] < ballRadius || y[i] + dy[i] > canvas.height - ballRadius)dy[i] = -dy[i];
+        y[i] += dy[i];
+    }
+}
+
+function createBall()
+{
+    x.push(Math.floor(Math.random() * canvas.width));
+    y.push(Math.floor(Math.random() * canvas.height));
+    dx.push(Math.floor(Math.random() * 10) + 1);
+    if(Math.random() < 0.5)dx[ballNum] = -dx[ballNum];
+    dy.push(Math.floor(Math.random() * 10) + 1);
+    if(Math.random() < 0.5)dy[ballNum] = -dy[ballNum];
+    color.push("#" + Math.floor(Math.random() * 16777215).toString(16));
+
+    ballNum++;
 }
 
 function draw()
 {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawBall(x, y, ballRadius);
+    drawAllBall();
 }
 
 function main()
 {
     draw();
-    moveBall();
+    moveAllBall();
 }
-setInterval(main, 1);
+document.addEventListener("click", clickHandler, true);
+function clickHandler(e)
+{
+    createBall();
+}
+setInterval(main, 10);
