@@ -36,8 +36,8 @@ function moveAllBall()
 
 function createBall()
 {
-    x.push(Math.floor(Math.random() * canvas.width));
-    y.push(Math.floor(Math.random() * canvas.height));
+    x.push(Math.floor(Math.random() * (canvas.width - ballRadius * 2)) + ballRadius);
+    y.push(Math.floor(Math.random() * (canvas.height - ballRadius * 2)) + ballRadius);
     dx.push(Math.floor(Math.random() * 10) + 1);
     if(Math.random() < 0.5)dx[ballNum] = -dx[ballNum];
     dy.push(Math.floor(Math.random() * 10) + 1);
@@ -59,7 +59,7 @@ function main()
     draw();
     moveAllBall();
 }
-document.addEventListener("click", clickHandler, true);
+document.addEventListener("click", clickHandler, false);
 function clickHandler(e)
 {
     createBall();
