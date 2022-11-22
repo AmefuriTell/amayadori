@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0048)file:///tmp/mume20221022-27284-1qcpcxk.fvce.html -->
+<!-- saved from url=(0049)file:///tmp/mume20221022-27284-1dlxdx1.rp41i.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
       <title>278D</title>
       
@@ -377,8 +377,10 @@ pre[data-line] .line-highlight[data-end]:after {
     <span class="token keyword keyword-for">for</span><span class="token punctuation">(</span><span class="token keyword keyword-auto">auto</span> <span class="token operator">&amp;</span>in <span class="token operator">:</span> a<span class="token punctuation">)</span>cin <span class="token operator">&gt;&gt;</span> in<span class="token punctuation">;</span>
 
     cin <span class="token operator">&gt;&gt;</span> q<span class="token punctuation">;</span>
-    <span class="token keyword keyword-long">long</span> <span class="token keyword keyword-long">long</span> all_clear <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-    bitset<span class="token operator">&lt;</span><span class="token number">200010</span><span class="token operator">&gt;</span> changed <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword keyword-long">long</span> <span class="token keyword keyword-long">long</span> savedX <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    bitset<span class="token operator">&lt;</span><span class="token number">200010</span><span class="token operator">&gt;</span> flagBit <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    flagBit<span class="token punctuation">.</span><span class="token function">flip</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
 
     <span class="token keyword keyword-while">while</span> <span class="token punctuation">(</span>q<span class="token operator">--</span><span class="token punctuation">)</span>
     <span class="token punctuation">{</span>
@@ -389,37 +391,28 @@ pre[data-line] .line-highlight[data-end]:after {
         <span class="token punctuation">{</span>
             <span class="token keyword keyword-int">int</span> x<span class="token punctuation">;</span>
             cin <span class="token operator">&gt;&gt;</span> x<span class="token punctuation">;</span>
-            all_clear <span class="token operator">=</span> x<span class="token punctuation">;</span>
-            changed <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+            savedX <span class="token operator">=</span> x<span class="token punctuation">;</span>
+            flagBit <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
         <span class="token keyword keyword-else">else</span> <span class="token keyword keyword-if">if</span> <span class="token punctuation">(</span>t <span class="token operator">==</span> <span class="token number">2</span><span class="token punctuation">)</span>
         <span class="token punctuation">{</span>
             <span class="token keyword keyword-int">int</span> i<span class="token punctuation">,</span>x<span class="token punctuation">;</span>
             cin <span class="token operator">&gt;&gt;</span> i <span class="token operator">&gt;&gt;</span> x<span class="token punctuation">;</span>
             i<span class="token operator">--</span><span class="token punctuation">;</span>
-            <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span>all_clear <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
-            <span class="token punctuation">{</span>
-                a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> x<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
-            <span class="token keyword keyword-else">else</span>
-            <span class="token punctuation">{</span>
-                <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span>changed<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> x<span class="token punctuation">;</span>
-                <span class="token keyword keyword-else">else</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> x<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+
+            <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span>flagBit<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> x<span class="token punctuation">;</span>
+            <span class="token keyword keyword-else">else</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> x<span class="token punctuation">;</span>
             
-            changed<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            flagBit<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
         <span class="token keyword keyword-else">else</span>
         <span class="token punctuation">{</span>
             <span class="token keyword keyword-int">int</span> i<span class="token punctuation">;</span>
             cin <span class="token operator">&gt;&gt;</span> i<span class="token punctuation">;</span>
             i<span class="token operator">--</span><span class="token punctuation">;</span>
-            <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span>all_clear <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>cout <span class="token operator">&lt;&lt;</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
-            <span class="token keyword keyword-else">else</span>
-            <span class="token punctuation">{</span>
-                <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span><span class="token operator">!</span>changed<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>cout <span class="token operator">&lt;&lt;</span> all_clear <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
-                <span class="token keyword keyword-else">else</span> cout <span class="token operator">&lt;&lt;</span> all_clear <span class="token operator">+</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+            
+            <span class="token keyword keyword-if">if</span><span class="token punctuation">(</span>flagBit<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>cout <span class="token operator">&lt;&lt;</span> savedX <span class="token operator">+</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+            <span class="token keyword keyword-else">else</span> cout <span class="token operator">&lt;&lt;</span> savedX <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
     
