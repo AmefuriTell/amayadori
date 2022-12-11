@@ -28,7 +28,7 @@ let ImageCodeInput = document.getElementById('ImageCode');
 
 ImageCodeInput.addEventListener('change', function(e) {
 	var file = e.target.files[0];
-	console.log(file);
+	//console.log(file);
 	var reader = new FileReader();
 
 	reader.onload = function(evt)
@@ -47,7 +47,7 @@ ImageCodeInput.addEventListener('change', function(e) {
 
 			var data = ct.getImageData(0, 0, cv.width, cv.height);
 
-			console.log(data);
+			createTextCode(data);
 		};
 
 		img.src = src_data;

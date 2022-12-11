@@ -7,7 +7,7 @@ function createImageCode(data)
 
     for(i = 0; i < data.length; i++)
     {
-        console.log(data[i]);
+        //console.log(data[i]);
 
         var r = data[i];
         var g = data[(i + 1) % data.length];
@@ -20,6 +20,10 @@ function createImageCode(data)
         imageData.data[(i * 4) + 3] = a;
     }
     ctx.putImageData(imageData, 0, 0);
-    console.log("END");
+    //console.log("END");
+
+    canvas.toBlob(blob => {
+        document.getElementById('downloadPng').href = window.URL.createObjectURL(blob);
+    });
     return;
 }
