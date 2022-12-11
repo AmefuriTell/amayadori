@@ -9,9 +9,9 @@ TextCodeInput.addEventListener('change', function(e) {
 
 		if(file.size == 0)return;
 
-		if(file.size > 810000)
+		if(file.size > 640000)
 		{
-			alert("810kB以下のものを入力してください.");
+			alert("640kB以下のものを入力してください.");
 			return;
 		}
 		reader.onload = function(evt)
