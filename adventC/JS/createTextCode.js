@@ -1,11 +1,25 @@
 function createTextCode(data)
 {
+    document.getElementById("resultText").innerText = "";
     let binary = [];
     
     for(i = 0; i < 800*800; i++)
     {
         if(data.data[i * 4 + 3] == 0)break;
-        binary.push(data.data[i * 4]);
+        if(data.data[i * 4 + 3] == 255)
+        {
+            binary.push(data.data[i * 4 + 0]);
+            binary.push(data.data[i * 4 + 1]);
+            binary.push(data.data[i * 4 + 2]);
+        }else if(data.data[i * 4 + 3] == 254)
+        {
+            binary.push(data.data[i * 4 + 0]);
+            binary.push(data.data[i * 4 + 1]);
+        }
+        else if(data.data[i * 4 + 3] == 253)
+        {
+            binary.push(data.data[i * 4 + 0]);
+        }
     }
 
     var str = "";

@@ -5,20 +5,23 @@ function createImageCode(data)
 
     var imageData = ctx.createImageData(800, 800);
 
-    for(i = 0; i < data.length; i++)
+    for(i = 0; i < data.length; i+=3)
     {
-        //console.log(data[i]);
-
         var r = data[i];
         var g = data[(i + 1) % data.length];
         var b = data[(i + 2) % data.length];
         var a = 255;
 
-        imageData.data[(i * 4) + 0] = r;
-        imageData.data[(i * 4) + 1] = g;
-        imageData.data[(i * 4) + 2] = b;
-        imageData.data[(i * 4) + 3] = a;
+        if(i + 1 >= data.length)a--;
+        if(i + 2 >= data.length)a--;
+
+        imageData.data[((i / 3) * 4) + 0] = r;
+        imageData.data[((i / 3) * 4) + 1] = g;
+        imageData.data[((i / 3) * 4) + 2] = b;
+        imageData.data[((i / 3) * 4) + 3] = a;
     }
+    console.log(imageData.data);
+    
     ctx.putImageData(imageData, 0, 0);
     //console.log("END");
 
