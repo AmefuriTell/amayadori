@@ -27,6 +27,7 @@ import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress }
 import { canLaunch, clockRuns } from "./clock.js";
 import { PAD_DISTANCE, padPosition, pullDelta, toScreen as viewToScreen, viewTurn } from "./view.js";
 import { ZZFX_VOLUME, loadMuted, saveMuted, soundFor } from "./sound.js";
+import { insideArea, missAhead, visibleArea } from "./skip.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
@@ -40,6 +41,8 @@ const EDGE_PX = 8;
 const RESULT_DELAY_MS = 600;
 const EXPLOSION_DELAY_MS = 1300;
 const STARS = 140;
+// 隕石を描く半径（px）。画面の範囲の外へ出たかを見るときの余白にも使う。
+const METEOR_PX = 7;
 
 
 // options.share(message): 結果を共有する（Discord の shareLink、単体のページでは share.js）。無ければ共有のボタンを出さない。
@@ -79,6 +82,8 @@ export function openGame(onClose, options = {}) {
   let padSlide = 0;
   let flying = null;
   let trail = [];
+  // 飛んでいる隕石が、前の刻みで画面に見えていたか（外へ出た時に 1 回だけ先読みするため）。
+  let inView = true;
   // 引っ張っている間の、ゴムの先（世界の位置）。指を置いた所からの動きを、隕石の位置に足したもの。
   let drag = null;
   // 引っ張っている指（2 本目の指を無視するため）と、置いた所（画面の px）。
@@ -481,6 +486,7 @@ export function openGame(onClose, options = {}) {
     if (canLaunch({ flying, panelOpen: !panel.hidden, pulled })) {
       flying = launch(pad, launchVelocity(pad, drag), clock, 0, world);
       trail = [];
+      inView = true;
       play("launch");
     }
     drag = null;
@@ -505,6 +511,21 @@ export function openGame(onClose, options = {}) {
     advance(flying, seconds);
     trail.push({ x: flying.x, y: flying.y });
     if (trail.length > 400) trail.shift();
+    if (!flying.result) {
+      // 画面の外へ出るたびに 1 回先読みし、画面に戻らずに外れると分かれば、待たずにその最終状態にする
+      // （判定は advance のまま。外れの結果は時計を使わないので、時計は進めない。進めると月と地球が一瞬で飛んで見えるため。
+      // 先読みした分の跡は足さない）。
+      const area = visibleArea(size, METEOR_PX);
+      const visible = (point) => insideArea(point, area);
+      const nowVisible = visible(flying);
+      if (inView && !nowVisible) {
+        const ahead = missAhead(flying, visible);
+        if (ahead) {
+          Object.assign(flying, ahead);
+        }
+      }
+      inView = nowVisible;
+    }
     if (flying.result) {
       const result = flying.result;
       if (result.kind === "earth") {
@@ -630,7 +651,7 @@ export function openGame(onClose, options = {}) {
     if (!impact) {
       c.fillStyle = "#ff9f1c";
       c.beginPath();
-      c.arc(meteorAt.x, meteorAt.y, 7, 0, Math.PI * 2);
+      c.arc(meteorAt.x, meteorAt.y, METEOR_PX, 0, Math.PI * 2);
       c.fill();
     }
 
