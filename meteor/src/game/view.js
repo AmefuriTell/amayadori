@@ -1,6 +1,8 @@
 // 世界（地球の半径 1、数学の向き）と画面（px、下向きが +y）の変換と、隕石の置き場。画面に頼らないので試験できる。
 // 置き場は世界の中で 1 か所（padSign・padSlide だけで決まる）。横長の画面は見せ方だけを 90° 回し、置き場を長い辺の側に見せる。
 
+import { MAX_PULL } from "./physics.js";
+
 // 隕石を置く所: 地球から（月の軌道の外）この距離。世界の上下（y の向き）に置く。
 export const PAD_DISTANCE = 6.7;
 
@@ -33,6 +35,24 @@ export function toWorld(px, py, size) {
   const x = (px - center.x) / size.scale;
   const y = (center.y - py) / size.scale;
   return { x: x * cos + y * sin, y: -x * sin + y * cos };
+}
+
+// 引き 1.0（地球の半径）あたりの指の動き（CSS px）。いっぱいの 3.0 は 180 px。画面の大きさ（scale）によらない。
+export const PULL_PX = 60;
+
+// 指の動き（startPx → nowPx、画面の px）を世界の向きの引き { x, y } に。向き（turn・上下）は toWorld と同じ。長さは MAX_PULL で切る。
+export function pullDelta(startPx, nowPx, size) {
+  const now = toWorld(nowPx.x, nowPx.y, size);
+  const start = toWorld(startPx.x, startPx.y, size);
+  const k = size.scale / PULL_PX;
+  let dx = (now.x - start.x) * k;
+  let dy = (now.y - start.y) * k;
+  const length = Math.hypot(dx, dy);
+  if (length > MAX_PULL) {
+    dx *= MAX_PULL / length;
+    dy *= MAX_PULL / length;
+  }
+  return { x: dx, y: dy };
 }
 
 // 隕石の置き場（世界の位置）。padSign（+1・-1）の側に、padSlide だけ横へずらす。
