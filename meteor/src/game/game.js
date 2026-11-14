@@ -11,6 +11,7 @@ import {
   launch,
   launchVelocity,
   longitudeAt,
+  impactPower,
   missKm,
   moonPositions,
   preview,
@@ -25,7 +26,7 @@ import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
 import { canLaunch, clockRuns } from "./clock.js";
 import { PAD_DISTANCE, padPosition, toScreen as viewToScreen, toWorld as viewToWorld, viewTurn } from "./view.js";
-import { loadMuted, saveMuted, soundFor } from "./sound.js";
+import { ZZFX_VOLUME, loadMuted, saveMuted, soundFor } from "./sound.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
@@ -246,6 +247,8 @@ export function openGame(onClose, options = {}) {
       saveMuted(muted);
       sound.textContent = soundLabel();
     });
+    // 行き先ではなく切り替えなので、移動の行と見た目を分ける（game.css）。
+    sound.classList.add("game-toggle");
     openPanel("ほかの遊び方", "", [
       button(left > 0 ? `今日のお題へ（残り${left}回）` : "今日の結果", startDaily),
       link("ステージ", showStages),
@@ -414,6 +417,8 @@ export function openGame(onClose, options = {}) {
     import("zzfx")
       .then((module) => {
         audio = module.ZZFX;
+        // ZzFX は全体の音量を 2 回掛けるので 1 にし、大きさは sound.js の引数だけで決める。
+        audio.volume = ZZFX_VOLUME;
       })
       .catch(() => {
         audioFailed = true;
@@ -425,7 +430,8 @@ export function openGame(onClose, options = {}) {
 
   // iOS Safari は、操作の外で作った AudioContext を止めたままにするので、離したときにも同期的に動かし直す。
   function resumeAudio() {
-    if (!audio || audio.audioContext.state !== "suspended") return;
+    // iOS では電話などの後に "interrupted" になることもあるので、動いていなければ動かし直す。
+    if (!audio || audio.audioContext.state === "running") return;
     try {
       audio.audioContext.resume().catch(() => {});
     } catch {
@@ -491,6 +497,9 @@ export function openGame(onClose, options = {}) {
     }
     drag = null;
   });
+  // 保険: iOS Safari の版によっては pointerup が操作として扱われないので、touchend と click でも動かし直す（鳴らしはしない）。
+  overlay.addEventListener("touchend", resumeAudio, { passive: true });
+  overlay.addEventListener("click", resumeAudio);
   canvas.addEventListener("pointercancel", (event) => {
     if (event.pointerId !== activePointer) return;
     activePointer = null;
@@ -514,7 +523,7 @@ export function openGame(onClose, options = {}) {
         const longitude = longitudeAt(result.angle, flying.t, earthStart, world.earthPeriod);
         impact = { longitude, km: missKm(longitude, target.longitude) };
         // 近く当てたほど大きく爆発させる。
-        explosion = createExplosion(impact.km < 300 ? 1 : impact.km < 1000 ? 0.75 : impact.km < 3000 ? 0.5 : 0.3);
+        explosion = createExplosion(impactPower(impact.km));
         explosionAt = null;
         play("earth", impact.km);
       } else {

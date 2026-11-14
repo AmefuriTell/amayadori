@@ -170,10 +170,24 @@ export function outerOrbit(world) {
   return Math.max(0, ...world.moons.map((moon) => moon.distance + moon.radius));
 }
 
+// ずれ（km）の段: 区切り・評価の言葉・当たったときの強さ（爆発の大きさと効果音）。区切りはここだけで決める。
+const GRADES = [
+  { below: 300, label: "ぴったり！", power: 1 },
+  { below: 1000, label: "おしい！", power: 0.75 },
+  { below: 3000, label: "まあまあ", power: 0.5 },
+  { below: Infinity, label: "遠い…", power: 0.3 },
+];
+
+function grade(km) {
+  return GRADES.find((item) => km < item.below) || GRADES[GRADES.length - 1];
+}
+
 // ずれから、短い評価の言葉。
 export function rating(km) {
-  if (km < 300) return "ぴったり！";
-  if (km < 1000) return "おしい！";
-  if (km < 3000) return "まあまあ";
-  return "遠い…";
+  return grade(km).label;
+}
+
+// ずれから、当たったときの強さ（0〜1。近いほど大きい）。爆発の大きさ（game.js）と効果音（sound.js）が使う。
+export function impactPower(km) {
+  return grade(km).power;
 }
