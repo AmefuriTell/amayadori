@@ -9,21 +9,29 @@ export function viewTurn(width, height) {
   return width > height ? -Math.PI / 2 : 0;
 }
 
-// 世界の位置を画面の px に。size は { width, height, scale, turn }（scale は地球の半径の px）。回してから上下を返す。
+// 地球の中心の画面の位置（px）。size に cx・cy が無ければ画面の真ん中。
+function centerOf(size) {
+  return { x: size.cx ?? size.width / 2, y: size.cy ?? size.height / 2 };
+}
+
+// 世界の位置を画面の px に。size は { width, height, scale, turn, cx, cy }（scale は地球の半径の px、cx・cy は地球の中心の px）。
+// 回してから上下を返す。
 export function toScreen(point, size) {
   const cos = Math.cos(size.turn || 0);
   const sin = Math.sin(size.turn || 0);
   const x = point.x * cos - point.y * sin;
   const y = point.x * sin + point.y * cos;
-  return { x: size.width / 2 + x * size.scale, y: size.height / 2 - y * size.scale };
+  const center = centerOf(size);
+  return { x: center.x + x * size.scale, y: center.y - y * size.scale };
 }
 
 // 画面の px を世界の位置に（toScreen の逆）。
 export function toWorld(px, py, size) {
   const cos = Math.cos(size.turn || 0);
   const sin = Math.sin(size.turn || 0);
-  const x = (px - size.width / 2) / size.scale;
-  const y = (size.height / 2 - py) / size.scale;
+  const center = centerOf(size);
+  const x = (px - center.x) / size.scale;
+  const y = (center.y - py) / size.scale;
   return { x: x * cos + y * sin, y: -x * sin + y * cos };
 }
 

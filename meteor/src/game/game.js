@@ -66,7 +66,7 @@ export function openGame(onClose, options = {}) {
   const context = canvas.getContext("2d");
   const stars = Array.from({ length: STARS }, () => ({ x: Math.random(), y: Math.random(), size: Math.random() < 0.85 ? 1 : 2, level: 90 + Math.floor(Math.random() * 140) }));
 
-  let size = { width: 0, height: 0, scale: 1, ratio: 1, turn: 0 };
+  let size = { width: 0, height: 0, scale: 1, ratio: 1, turn: 0, cx: 0, cy: 0 };
   let clock = 0;
   let last = performance.now();
   let target = null;
@@ -119,11 +119,14 @@ export function openGame(onClose, options = {}) {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     let scale = Math.min(width, height) / 2 / VIEW_RADIUS;
-    // 隕石が長い辺の向きの、どちらの側に置いても入るように縮める（縦長は上の欄の下・下の安全域の上まで）。
+    // 隕石が長い辺の向きの、どちらの側に置いても入るように縮める。縦長では地球の中心を、上の欄の下と下の安全域の上の
+    // 真ん中にずらす（見出しが折り返す小さい画面でも、地球を小さくしすぎないように）。横長は画面の真ん中のまま。
     const { top, bottom } = reserved();
-    const room = height >= width ? Math.min(height / 2 - top, bottom - height / 2) : width / 2 - EDGE_PX;
+    const portrait = height >= width;
+    const room = portrait ? (bottom - top) / 2 : width / 2 - EDGE_PX;
     scale = Math.min(scale, room / (PAD_DISTANCE + PAD_MARGIN));
-    size = { width, height, ratio, scale, turn: viewTurn(width, height) };
+    const cy = portrait ? (top + bottom) / 2 : height / 2;
+    size = { width, height, ratio, scale, turn: viewTurn(width, height), cx: width / 2, cy };
     return true;
   }
 
@@ -167,16 +170,15 @@ export function openGame(onClose, options = {}) {
     } else {
       title.textContent = `🎯 ${target.name} に当てろ${best === null ? "" : `（いちばん近かったのは ${Math.round(best).toLocaleString()} km）`}`;
     }
-    // 見出しの長さで上の欄の高さが変わるので、測り直してから置く。
+    // 見出しの長さで上の欄の高さが変わるので、測り直す。置き場は padSign・padSlide だけで決まる。
     resize();
     placePad();
   }
 
-  // 欄を出すときの見出し。飛んでいる途中は置き直さない（onResize と同じ）。
+  // 欄を出すときの見出し。上の欄の高さが変わるので測り直す。
   function setTitle(text) {
     title.textContent = text;
     resize();
-    if (!flying) placePad();
   }
 
   function button(label, onClick) {
@@ -223,7 +225,7 @@ export function openGame(onClose, options = {}) {
   function showOthers() {
     // ほかの遊び方。この欄は startDaily・startFree・startStage（どれも newRound を通る）でしか閉じない（狙いは必ず 0 秒から）。
     const left = dailyRecord.left;
-    // 上の見出しは空にする（欄の見出しと重ねない）。上の欄の高さが変わるので測り直して置き直す。
+    // 上の見出しは空にする（欄の見出しと重ねない）。上の欄の高さが変わるので測り直す。
     setTitle("");
     const link = (label, onClick) => {
       const item = element("button", label, "game-other");
@@ -592,9 +594,8 @@ export function openGame(onClose, options = {}) {
     // 引っ張っている途中なら取りやめる（大きさが変わると、指の動きと隕石の位置の対応がずれるため）。
     drag = null;
     activePointer = null;
-    if (!resize()) return;
-    // 飛んでいる途中は置き直さない（次の回の newRound で、同じ側に置き直す）。
-    if (!flying) placePad();
+    // 置き場は世界の中で決まっているので、測り直すだけでよい（置き直さない）。
+    resize();
   };
   close.addEventListener("click", shut);
   others.addEventListener("click", () => {

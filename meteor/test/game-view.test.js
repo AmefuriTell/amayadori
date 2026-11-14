@@ -7,6 +7,8 @@ import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, l
 // iPhone 13 相当（縦長）と 1280×800（横長）。scale はおよその値（地球の半径の px）。
 const PHONE = { width: 390, height: 844, scale: 34, turn: viewTurn(390, 844) };
 const PC = { width: 1280, height: 800, scale: 70, turn: viewTurn(1280, 800) };
+// 縦長で地球の中心を上の欄と下の安全域の真ん中へずらした画面（見出しが折り返す小さい画面など）。
+const SMALL = { width: 320, height: 480, scale: 22.5, turn: viewTurn(320, 480), cx: 160, cy: 262 };
 const close = (a, b, message) => assert.ok(Math.abs(a - b) < 1e-12, `${message}: ${a} vs ${b}`);
 
 test("the view turns only on landscape screens", () => {
@@ -16,7 +18,7 @@ test("the view turns only on landscape screens", () => {
 });
 
 test("toWorld undoes toScreen on both screens", () => {
-  for (const size of [PHONE, PC]) {
+  for (const size of [PHONE, PC, SMALL, { ...PC, cy: 419 }]) {
     for (const point of [{ x: 0, y: 0 }, { x: 1.3, y: -2.4 }, { x: -6.7, y: 0.8 }]) {
       const screen = toScreen(point, size);
       const back = toWorld(screen.x, screen.y, size);
@@ -24,6 +26,12 @@ test("toWorld undoes toScreen on both screens", () => {
       close(back.y, point.y, "y");
     }
   }
+});
+
+test("the Earth's centre on screen is cx, cy when given", () => {
+  assert.deepEqual(toScreen({ x: 0, y: 0 }, SMALL), { x: 160, y: 262 });
+  assert.deepEqual(toWorld(160, 262, SMALL), { x: 0, y: 0 });
+  assert.deepEqual(toScreen({ x: 0, y: 0 }, PHONE), { x: 195, y: 422 });
 });
 
 test("the pad is the same world point on any screen, and shown on the long side", () => {
@@ -74,8 +82,16 @@ test("the same pull on screen gives the same world pull and the same km on both 
     for (const [away, side] of [[1.5, 0], [2.2, 0.6], [MAX_PULL * 0.9, -0.9]]) {
       const phone = pullOnScreen(PHONE, pad, away, side);
       const pc = pullOnScreen(PC, pad, away, side);
+      const small = pullOnScreen(SMALL, pad, away, side);
       close(phone.x, pc.x, "pull x");
       close(phone.y, pc.y, "pull y");
+      close(phone.x, small.x, "pull x (shifted centre)");
+      close(phone.y, small.y, "pull y (shifted centre)");
+      const c = throwKm(pad, small, challenge);
+      const d = throwKm(pad, phone, challenge);
+      assert.equal(typeof c, typeof d);
+      if (typeof c === "number") assert.ok(Math.abs(c - d) < 1e-6, `${c} vs ${d}`);
+      else assert.equal(c, d);
       // 地球と反対へ引いた（隕石は地球へ向かって飛ぶ）。
       assert.ok(phone.x * pad.x + phone.y * pad.y > 0);
       const a = throwKm(pad, phone, challenge);
