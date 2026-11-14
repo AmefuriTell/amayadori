@@ -2,9 +2,8 @@
 // 地図・Discord の SDK・サーバーの API は使わない。`npm run build` で meteor.js・meteor.css にまとめる。
 // 閉じるボタンはトップのページ（このページの 1 つ上）へ戻る。結果の共有は、端末の共有の機能、無ければクリップボードへの写し。
 // 𝕏 への投稿は、投稿の画面を新しいタブで開く。
-// 共有したリンク（?daily）から開いた人は、そのまま今日のお題に入る。
 import { openGame } from "./game/game.js";
-import { postUrl, shareResult, wantsDaily, xIntentUrl } from "./share.js";
+import { postUrl, shareResult, xIntentUrl } from "./share.js";
 
 // 「🏠 トップへ」で離れたか。bfcache で戻ったときも、ページの中の値はそのまま残る。
 let leftForTop = false;
@@ -22,5 +21,5 @@ if (typeof document !== "undefined") {
   });
   // 𝕏 への投稿は、投稿の画面（Web Intent）を新しいタブで開く（スマートフォンでは 𝕏 のアプリが開くこともある）。
   const post = (message, daily) => window.open(xIntentUrl(message, postUrl(window.location.href, daily)), "_blank", "noopener");
-  openGame(backToTop, { closeLabel: "🏠 トップへ", share: (message) => shareResult(message), post, daily: wantsDaily(window.location.search) });
+  openGame(backToTop, { closeLabel: "🏠 トップへ", share: (message) => shareResult(message), post });
 }

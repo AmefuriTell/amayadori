@@ -47,8 +47,3 @@ export async function shareResult(message, nav = globalThis.navigator, href = gl
   await nav.clipboard.writeText(`${message} ${url}`);
   return { success: true, copied: true };
 }
-
-// 開いた URL が今日のお題への案内（?daily）か。
-export function wantsDaily(search) {
-  return new URLSearchParams(search).has("daily");
-}

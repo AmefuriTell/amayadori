@@ -1,5 +1,5 @@
 // 「軌道に乗せろ」の画面と操作（docs/design/activity-map.md §4 の K）。計算は orbit.js（衛星）と physics.js（地球と月）。
-// 隕石当て（game.js）のメニューから開き、「🎯 隕石当てへ」で戻る。「🗺️ 地図へ」で地図に戻る（単体のページでは「🏠 トップへ」）。
+// 隕石当て（game.js）の「ほかの遊び方」から開き、「今日のお題へ」で戻る。「🗺️ 地図へ」で地図に戻る（単体のページでは「🏠 トップへ」）。
 // 点数は端末の中だけ。
 import "./game.css";
 import { element } from "../dom.js";
@@ -136,7 +136,7 @@ export function openOrbitGame(onClose, options = {}) {
         button("ふつう", () => ((mutual = false), showSetup()), !mutual),
         button("🧲 引き合う", () => ((mutual = true), showSetup()), mutual),
         button("はじめる", start),
-        button("🎯 隕石当てへ", () => switchTo(openGame)),
+        button("今日のお題へ", () => switchTo(openGame)),
       ],
     );
   }
@@ -177,7 +177,7 @@ export function openOrbitGame(onClose, options = {}) {
         button("もう一度", start),
         ...(options.post && score.points > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
         button("設定を変える", showSetup),
-        button("🎯 隕石当てへ", () => switchTo(openGame)),
+        button("今日のお題へ", () => switchTo(openGame)),
       ],
     );
   }
@@ -449,8 +449,8 @@ export function openOrbitGame(onClose, options = {}) {
   }
   function switchTo(open) {
     cleanup();
-    // 共有のリンクから開いたとき（daily）も、戻った先はメニューにする（いきなり今日のお題に入らないように）。
-    open(onClose, { ...options, daily: false });
+    // 戻った先（隕石当て）は、開くとすぐ今日のお題（残りが無ければ今日の結果）。
+    open(onClose, options);
   }
   close.addEventListener("click", () => {
     cleanup();
