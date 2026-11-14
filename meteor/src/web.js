@@ -1,5 +1,5 @@
-// 隕石当て・軌道に乗せろを、Discord の外の単体のページ（GitHub Pages など）で遊ぶための入口（docs/design/activity-map.md §4 の L）。
-// 地図・Discord の SDK・サーバーの API は使わない。`npm run build:web` で web-dist/meteor.js・meteor.css にまとめる。
+// 隕石当て・軌道に乗せろを、GitHub Pages の単体のページで遊ぶための入口（DESIGN.md）。
+// 地図・Discord の SDK・サーバーの API は使わない。`npm run build` で meteor.js・meteor.css にまとめる。
 // 閉じるボタンはトップのページ（このページの 1 つ上）へ戻る。結果の共有は、端末の共有の機能、無ければクリップボードへの写し。
 // 𝕏 への投稿は、投稿の画面を新しいタブで開く。
 // 共有したリンク（?daily）から開いた人は、そのまま今日のお題に入る。
