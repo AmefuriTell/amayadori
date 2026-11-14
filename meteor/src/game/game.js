@@ -400,8 +400,9 @@ export function openGame(onClose, options = {}) {
   function update(seconds) {
     // 投げるまでは時間を止める（いつ離すかで結果が変わらないように）。離した瞬間から地球も月も動く。
     // 当たった後・結果を出している間も flying は残るので、自転・印・爆発は動き続ける。
-    // メニュー（mode が null）の後ろの地球と月は、今までどおり回しておく（始めるときに newRound が時計を 0 に戻す）。
-    if (flying || mode === null) clock += seconds;
+    // 欄（メニュー・ステージの一覧・今日の結果）を出している間も回しておく。欄は newRound でしか閉じず、
+    // そこで時計を 0 に戻すので、狙いは必ず 0 秒から始まる。
+    if (flying || !panel.hidden) clock += seconds;
     if (explosion) advanceExplosion(explosion, seconds);
     if (!flying || flying.result) return;
     advance(flying, seconds);
