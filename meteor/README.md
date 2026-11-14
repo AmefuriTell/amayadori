@@ -20,5 +20,6 @@ PR と master では GitHub Actions（`.github/workflows/meteor.yml`）が試験
 ## 決まり
 
 - ライブラリ・フォント・画像は npm で入れて同梱する。CDN や外のサイトからは読み込まない。
+- 使っているライブラリ: 効果音の ZzFX（`zzfx@1.3.2`、MIT License）。ビルドの道具は esbuild。
 - アクセス解析にイベントは送らない（ページの読み込みの計測だけ）。
 - 設計は [DESIGN.md](DESIGN.md)。
