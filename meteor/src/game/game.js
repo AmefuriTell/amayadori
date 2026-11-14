@@ -25,6 +25,7 @@ import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
 import { canLaunch, clockRuns } from "./clock.js";
 import { PAD_DISTANCE, padPosition, toScreen as viewToScreen, toWorld as viewToWorld, viewTurn } from "./view.js";
+import { loadMuted, saveMuted, soundFor } from "./sound.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
@@ -100,6 +101,12 @@ export function openGame(onClose, options = {}) {
   let explosion = null;
   let explosionAt = null;
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  // 効果音（sound.js）。消音は端末に覚える。ZzFX は最初に触ったときに読み込む（読み込むと AudioContext が作られるため）。
+  // audio は読み込んだ ZZFX。読み込めなかったら（AudioContext が無いなど）audioFailed にして、二度と試さず無音で続ける。
+  let muted = loadMuted();
+  let audio = null;
+  let audioLoading = false;
+  let audioFailed = false;
 
   function reserved() {
     // 上の欄（ボタンと、折り返すこともある見出し）の下と、下の安全域の上（px）。Discord のメニューの分も含む。
@@ -232,11 +239,19 @@ export function openGame(onClose, options = {}) {
       item.addEventListener("click", onClick);
       return item;
     };
+    // 音のあり・なし。押すとその場で切り替えて覚える。
+    const soundLabel = () => (muted ? "音: なし" : "音: あり");
+    const sound = link(soundLabel(), () => {
+      muted = !muted;
+      saveMuted(muted);
+      sound.textContent = soundLabel();
+    });
     openPanel("ほかの遊び方", "", [
       button(left > 0 ? `今日のお題へ（残り${left}回）` : "今日の結果", startDaily),
       link("ステージ", showStages),
       link("フリー練習", startFree),
       link("軌道に乗せろ", () => switchTo(openOrbitGame)),
+      sound,
     ]);
   }
 
@@ -363,6 +378,73 @@ export function openGame(onClose, options = {}) {
     openPanel(heading, detail, [button("もう一度", () => newRound(true)), button("次の的", () => newRound(false)), ...post]);
   }
 
+  function loadAudio() {
+    if (muted || audio || audioLoading || audioFailed) return;
+    audioLoading = true;
+    // iPhone の消音スイッチに従い、ほかのアプリの音楽を止めないように（AudioContext を作る前に決める）。
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = "ambient";
+    } catch {
+      // 決められなくても鳴らせる。
+    }
+    /*! @license ZzFX v1.3.2 (c) 2019 Frank Force, MIT License
+     *
+     * MIT License
+     *
+     * Copyright (c) 2019 Frank Force
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+    import("zzfx")
+      .then((module) => {
+        audio = module.ZZFX;
+      })
+      .catch(() => {
+        audioFailed = true;
+      })
+      .finally(() => {
+        audioLoading = false;
+      });
+  }
+
+  // iOS Safari は、操作の外で作った AudioContext を止めたままにするので、離したときにも同期的に動かし直す。
+  function resumeAudio() {
+    if (!audio || audio.audioContext.state !== "suspended") return;
+    try {
+      audio.audioContext.resume().catch(() => {});
+    } catch {
+      // 動かせなければ鳴らないだけ。
+    }
+  }
+
+  // 鳴らす。閉じた後（shut・switchTo）は鳴らさない。
+  function play(event, km) {
+    if (muted || !audio || !overlay.isConnected) return;
+    const sounds = soundFor(event, km);
+    if (!sounds) return;
+    try {
+      for (const sound of sounds) audio.play(...sound);
+    } catch {
+      // 鳴らせなくても遊べる。
+    }
+  }
+
   function pointerPosition(event) {
     const rect = canvas.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
@@ -370,6 +452,7 @@ export function openGame(onClose, options = {}) {
 
   // 画面のどこを触っても、そこから引っ張って狙える（隕石が画面の端に近くても、十分に引けるように）。
   canvas.addEventListener("pointerdown", (event) => {
+    loadAudio();
     // 欄（ほかの遊び方・結果など）を出している間は投げられない。
     if (!panel.hidden || flying || impact || activePointer !== null) return;
     canvas.setPointerCapture(event.pointerId);
@@ -395,6 +478,7 @@ export function openGame(onClose, options = {}) {
     drag = { x: pad.x + dx, y: pad.y + dy };
   });
   canvas.addEventListener("pointerup", (event) => {
+    resumeAudio();
     if (event.pointerId !== activePointer) return;
     activePointer = null;
     if (!drag) return;
@@ -403,6 +487,7 @@ export function openGame(onClose, options = {}) {
     if (canLaunch({ flying, panelOpen: !panel.hidden, pulled })) {
       flying = launch(pad, launchVelocity(pad, drag), clock, 0, world);
       trail = [];
+      play("launch");
     }
     drag = null;
   });
@@ -431,11 +516,15 @@ export function openGame(onClose, options = {}) {
         // 近く当てたほど大きく爆発させる。
         explosion = createExplosion(impact.km < 300 ? 1 : impact.km < 1000 ? 0.75 : impact.km < 3000 ? 0.5 : 0.3);
         explosionAt = null;
+        play("earth", impact.km);
       } else {
         impact = { longitude: null, km: null };
         if (result.kind === "moon") {
           explosion = createExplosion(0.55);
           explosionAt = moonAnchor(world, clock, flying);
+          play("moon");
+        } else {
+          play("away");
         }
       }
       resultTimer = window.setTimeout(() => showResult(result.kind, impact.km), explosion ? EXPLOSION_DELAY_MS : RESULT_DELAY_MS);
