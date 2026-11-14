@@ -49,7 +49,7 @@ export function openGame(onClose, options = {}) {
   const canvas = element("canvas", undefined, "game-canvas");
   const bar = element("div", undefined, "game-bar");
   const title = element("div", "", "game-title");
-  const hint = element("div", "画面のどこかを触って引っ張り、離すと隕石が反対へ飛びます。地球も月も動いています", "game-hint");
+  const hint = element("div", "画面のどこかを触って引っ張り、離すと隕石が反対へ飛びます", "game-hint");
   // 下の安全域（--saib）の高さを測るための、見えない目印。
   const probe = element("div", undefined, "game-probe");
   // 閉じるボタンの文言（地図の Activity では地図へ戻る。Discord の外の単体のページではトップへ戻る）。
@@ -398,7 +398,9 @@ export function openGame(onClose, options = {}) {
   });
 
   function update(seconds) {
-    clock += seconds;
+    // 投げるまでは時間を止める（いつ離すかで結果が変わらないように）。離した瞬間から地球も月も動く。
+    // 当たった後・結果を出している間も flying は残るので、自転・印・爆発は動き続ける。
+    if (flying) clock += seconds;
     if (explosion) advanceExplosion(explosion, seconds);
     if (!flying || flying.result) return;
     advance(flying, seconds);
