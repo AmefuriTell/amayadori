@@ -19,10 +19,11 @@ import {
 import { nextTarget, polarPoint } from "./targets.js";
 import { landShapes } from "./draw.js";
 import { openOrbitGame } from "./orbit-game.js";
-import { DAILY_ATTEMPTS, afterThrow, dailyChallenge, loadDaily, saveDaily, shareMessage } from "./daily.js";
+import { afterThrow, dailyChallenge, loadDaily, saveDaily, shareMessage } from "./daily.js";
 import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, isExplosionOver, moonAnchor, shakeOffset } from "./explosion.js";
 import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
+import { clockRuns } from "./clock.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
@@ -43,7 +44,7 @@ const STARS = 140;
 // options.post(message, daily): 結果を 𝕏 に投稿する画面を開く（daily は今日のお題の結果か。付ける URL が変わる）。
 //   無ければ「𝕏 にポスト」のボタンを出さない。
 // options.closeLabel: 閉じるボタンの文言（既定は「🗺️ 地図へ」）。
-// options.daily: true なら、開いてすぐ今日のお題（共有のリンクから開いたとき）。
+// 開くとすぐ今日のお題（残りが無ければ今日の結果）。ほかの遊び方は上の欄の「ほかの遊び方」から。
 export function openGame(onClose, options = {}) {
   const overlay = element("div", undefined, "game");
   const canvas = element("canvas", undefined, "game-canvas");
@@ -54,7 +55,9 @@ export function openGame(onClose, options = {}) {
   const probe = element("div", undefined, "game-probe");
   // 閉じるボタンの文言（地図の Activity では地図へ戻る。Discord の外の単体のページではトップへ戻る）。
   const close = element("button", options.closeLabel || "🗺️ 地図へ", "game-button");
-  bar.append(close, title);
+  // ほかの遊び方（ステージ・フリー練習・軌道に乗せろ）への入口。文字だけのボタン。
+  const others = element("button", "ほかの遊び方", "game-link");
+  bar.append(close, title, others);
   const panel = element("div", undefined, "game-panel");
   panel.hidden = true;
   overlay.append(canvas, bar, hint, panel, probe);
@@ -77,12 +80,12 @@ export function openGame(onClose, options = {}) {
   let drag = null;
   // 引っ張っている指（2 本目の指を無視するため）と、置いた所（画面の px）。
   let activePointer = null;
-  // 操作の説明は、最初に引っ張るまで、投げられる間だけ出す（メニューや結果の欄と重ならないように）。
+  // 操作の説明は、最初に引っ張るまで、投げられる間だけ出す（ほかの遊び方や結果の欄と重ならないように）。
   let hinted = false;
   let dragStart = null;
   let impact = null;
   let best = null;
-  // "daily"（今日のお題）・"free"（フリー練習）・"stage"（ステージ）。開いたときは選ぶ画面（null）。
+  // "daily"（今日のお題）・"free"（フリー練習）・"stage"（ステージ）。開いたときは今日のお題（startDaily で決める）。
   let mode = null;
   // 遊んでいる世界（地球の回る速さと月）。ステージだけ面ごとに変わり、ほかはふつうの世界。
   let world = DEFAULT_WORLD;
@@ -184,7 +187,7 @@ export function openGame(onClose, options = {}) {
   }
 
   function openPanel(heading, detail, buttons) {
-    panel.replaceChildren(element("div", heading, "game-result"), element("div", detail, "game-detail"), ...buttons);
+    panel.replaceChildren(element("div", heading, "game-result"), ...(detail ? [element("div", detail, "game-detail")] : []), ...buttons);
     panel.hidden = false;
     hint.hidden = true;
   }
@@ -198,6 +201,9 @@ export function openGame(onClose, options = {}) {
       // 今日の分は投げ終えている。結果と共有だけ出す（的は見せたまま）。
       ({ target, earthStart, padSign, padSlide } = challenge);
       title.textContent = `📅 今日のお題 ${challenge.label}: ${target.name}`;
+      // 開いてすぐここへ来ることもあるので、見出しに合わせて測り直し、隕石を置く（中心に描かないように）。
+      resize();
+      placePad();
       showDailySummary();
       return;
     }
@@ -210,24 +216,19 @@ export function openGame(onClose, options = {}) {
     newRound(false);
   }
 
-  function showMenu() {
-    // 開いたときの画面: 今日のお題か、フリー練習か。前の回の跡（当たった印・飛んだ跡）は消す。
-    mode = null;
-    world = DEFAULT_WORLD;
-    flying = null;
-    trail = [];
-    impact = null;
-    explosion = null;
-    // 後ろには今日のお題の地球と隕石を見せておく。
-    ({ target, earthStart, padSign, padSlide } = challenge);
-    placePad();
-    title.textContent = "🎯 隕石を当てろ";
+  function showOthers() {
+    // ほかの遊び方。この欄は startDaily・startFree・startStage（どれも newRound を通る）でしか閉じない（狙いは必ず 0 秒から）。
     const left = dailyRecord.left;
-    openPanel("隕石を当てろ", `今日のお題はみんな同じ的。1日${DAILY_ATTEMPTS}回まで`, [
-      button(left > 0 ? `📅 今日のお題（残り${left}回）` : "📅 今日の結果", startDaily),
-      button("🪐 ステージ", showStages),
-      button("🎲 フリー練習", startFree),
-      button("🛰️ 軌道に乗せろ", () => switchTo(openOrbitGame)),
+    const link = (label, onClick) => {
+      const item = element("button", label, "game-other");
+      item.addEventListener("click", onClick);
+      return item;
+    };
+    openPanel("ほかの遊び方", "", [
+      button(left > 0 ? `今日のお題へ（残り${left}回）` : "今日の結果", startDaily),
+      link("ステージ", showStages),
+      link("フリー練習", startFree),
+      link("軌道に乗せろ", () => switchTo(openOrbitGame)),
     ]);
   }
 
@@ -237,8 +238,7 @@ export function openGame(onClose, options = {}) {
     window.clearTimeout(resultTimer);
     window.removeEventListener("resize", onResize);
     overlay.remove();
-    // 共有のリンクから開いたとき（daily）も、移った先から戻るとメニューにする。
-    open(onClose, { ...options, daily: false });
+    open(onClose, options);
   }
 
   function startStage(index) {
@@ -263,7 +263,7 @@ export function openGame(onClose, options = {}) {
       return item;
     });
     const done = progress.cleared >= STAGES.length ? "全部クリア！" : `${CLEAR_KM.toLocaleString()} km 未満に当てると次の面が開きます`;
-    openPanel("🪐 ステージ", done, [...items, button("メニュー", showMenu)]);
+    openPanel("🪐 ステージ", done, [...items, button("戻る", showOthers)]);
   }
 
   function shareButton() {
@@ -296,7 +296,7 @@ export function openGame(onClose, options = {}) {
 
   function showDailySummary() {
     const result = dailyRecord.best === null ? "今日は当たりませんでした" : `いちばん近かったのは ${Math.round(dailyRecord.best).toLocaleString()} km（${rating(dailyRecord.best)}）`;
-    openPanel("今日はおしまい", `${result}。また明日！`, [...dailyPost(), ...shareButton(), button("🎲 フリー練習", startFree)]);
+    openPanel("今日はおしまい", `${result}。また明日！`, [...dailyPost(), ...shareButton()]);
   }
 
   function showResult(kind, km) {
@@ -318,10 +318,10 @@ export function openGame(onClose, options = {}) {
       saveDaily(challenge.key, dailyRecord);
       title.textContent = `📅 今日のお題 ${challenge.label}: ${target.name}（残り${dailyRecord.left}回）`;
       if (dailyRecord.left === 0) {
-        openPanel(heading, `${detail}。今日はおしまい`, [...dailyPost(), ...shareButton(), button("🎲 フリー練習", startFree)]);
+        openPanel(heading, `${detail}。今日はおしまい`, [...dailyPost(), ...shareButton()]);
         return;
       }
-      openPanel(heading, `${detail}（残り${dailyRecord.left}回）`, [button("もう一度", () => newRound(true)), ...dailyPost(), ...shareButton(), button("メニュー", showMenu)]);
+      openPanel(heading, `${detail}（残り${dailyRecord.left}回）`, [button("もう一度", () => newRound(true)), ...dailyPost(), ...shareButton()]);
       return;
     }
     if (mode === "stage") {
@@ -332,7 +332,9 @@ export function openGame(onClose, options = {}) {
       // 「もう一度」は同じ的・同じ向き・同じ置き場でやり直す（狙いを詰められるように）。「別の的」で変える。
       // 次の面が開いていれば（前にクリアした面のやり直しでも）、次の面へ進める。
       const more = isOpen(progress, next) ? [button(`次の面へ（${STAGES[next].name}）`, () => startStage(next))] : [];
-      const retry = [button("もう一度", () => newRound(true)), button("別の的", () => newRound(false)), button("ステージ一覧", showStages)];
+      const again = button("もう一度", () => newRound(true));
+      const rest = [button("別の的", () => newRound(false))];
+      const list = button("ステージ一覧", showStages);
       const cleared = progress.cleared > before;
       const stage = { number: stageIndex + 1, name: STAGES[stageIndex].name };
       const post =
@@ -342,14 +344,14 @@ export function openGame(onClose, options = {}) {
             ? postButton(() => hitMessage({ stage, cleared }, target.name, km, rating), false)
             : [];
       if (cleared) {
-        openPanel(`クリア！ ${heading}`, next < STAGES.length ? `${detail}。次の面が開きました` : `${detail}。全部の面をクリアしました！`, [...more, ...post, ...retry]);
+        openPanel(`クリア！ ${heading}`, next < STAGES.length ? `${detail}。次の面が開きました` : `${detail}。全部の面をクリアしました！`, [again, ...more, ...rest, ...post, list]);
         return;
       }
-      openPanel(heading, detail, [...more, ...post, ...retry]);
+      openPanel(heading, detail, [again, ...more, ...rest, ...post, list]);
       return;
     }
     const post = kind === "earth" ? postButton(() => hitMessage({ stage: null, cleared: false }, target.name, km, rating), false) : [];
-    openPanel(heading, detail, [button("もう一度", () => newRound(true)), button("次の的", () => newRound(false)), ...post, button("メニュー", showMenu)]);
+    openPanel(heading, detail, [button("もう一度", () => newRound(true)), button("次の的", () => newRound(false)), ...post]);
   }
 
   function pointerPosition(event) {
@@ -359,8 +361,8 @@ export function openGame(onClose, options = {}) {
 
   // 画面のどこを触っても、そこから引っ張って狙える（隕石が画面の端に近くても、十分に引けるように）。
   canvas.addEventListener("pointerdown", (event) => {
-    // 選ぶ画面・結果の画面の間は投げられない。
-    if (mode === null || !panel.hidden || flying || impact || activePointer !== null) return;
+    // 欄（ほかの遊び方・結果など）を出している間は投げられない。
+    if (!panel.hidden || flying || impact || activePointer !== null) return;
     canvas.setPointerCapture(event.pointerId);
     activePointer = event.pointerId;
     dragStart = pointerPosition(event);
@@ -400,9 +402,9 @@ export function openGame(onClose, options = {}) {
   function update(seconds) {
     // 投げるまでは時間を止める（いつ離すかで結果が変わらないように）。離した瞬間から地球も月も動く。
     // 当たった後・結果を出している間も flying は残るので、自転・印・爆発は動き続ける。
-    // 欄（メニュー・ステージの一覧・今日の結果）を出している間も回しておく。欄は newRound でしか閉じず、
+    // 欄（ほかの遊び方・ステージの一覧・今日の結果）を出している間も回しておく。欄は newRound でしか閉じず、
     // そこで時計を 0 に戻すので、狙いは必ず 0 秒から始まる。
-    if (flying || !panel.hidden) clock += seconds;
+    if (clockRuns(flying, !panel.hidden)) clock += seconds;
     if (explosion) advanceExplosion(explosion, seconds);
     if (!flying || flying.result) return;
     advance(flying, seconds);
@@ -584,9 +586,13 @@ export function openGame(onClose, options = {}) {
     if (!flying) placePad();
   };
   close.addEventListener("click", shut);
+  others.addEventListener("click", () => {
+    // 投げてから結果の欄が出るまでは何もしない（飛んでいる回を欄で隠さないように）。
+    if (flying && panel.hidden) return;
+    showOthers();
+  });
   window.addEventListener("resize", onResize);
   resize();
-  if (options.daily) startDaily();
-  else showMenu();
+  startDaily();
   frame = window.requestAnimationFrame(tick);
 }

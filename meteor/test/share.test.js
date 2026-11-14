@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, wantsDaily, xIntentUrl } from "../src/share.js";
+import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, xIntentUrl } from "../src/share.js";
 
 test("share uses the device share sheet when there is one, with a link to today's challenge", async () => {
   const shared = [];
@@ -23,9 +23,6 @@ test("a cancelled share sheet or no clipboard is a failure (the game then shows 
 
 test("the shared link opens today's challenge", () => {
   assert.equal(shareUrl("https://a.test/amayadori/meteor/?foo=1#bar"), "https://a.test/amayadori/meteor/?daily");
-  assert.ok(wantsDaily("?daily"));
-  assert.ok(!wantsDaily(""));
-  assert.ok(!wantsDaily("?x=1"));
 });
 
 test("the post to X opens the web intent with the text, the link and the hashtag", () => {
