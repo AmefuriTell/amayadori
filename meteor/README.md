@@ -8,7 +8,7 @@ GitHub Pages はビルドしないので、ビルドした `meteor.js`・`meteor
 
 ```sh
 cd meteor
-npm ci
+npm ci          # Node は .nvmrc の版（22）。esbuild は package.json で版を固定している
 npm test        # 試験（node --test）
 npm run build   # src/ から meteor.js・meteor.css を作り、index.html の ?v= を中身の SHA-256 の先頭 10 文字に変える
 ```
