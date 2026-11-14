@@ -1,0 +1,32 @@
+# 隕石を当てろ（meteor/）の試験とビルド。コミットしたビルドの結果（meteor.js・meteor.css・index.html の ?v=）が
+# ソースから作り直したものと同じかも確かめる（GitHub Pages はビルドしないので、作り忘れを見つけるため）。
+name: meteor
+
+on:
+  pull_request:
+    paths: ["meteor/**", ".github/workflows/meteor.yml"]
+  push:
+    branches: [master]
+    paths: ["meteor/**", ".github/workflows/meteor.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: meteor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: meteor/.nvmrc
+          cache: npm
+          cache-dependency-path: meteor/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: コミットしたビルドの結果がソースと同じか
+        run: git diff --exit-code -- . || { echo "::error::npm run build の結果をコミットしてください"; exit 1; }

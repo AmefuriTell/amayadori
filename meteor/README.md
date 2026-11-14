@@ -15,6 +15,8 @@ npm run build   # src/ から meteor.js・meteor.css を作り、index.html の 
 
 `?v=` は、更新の直後にブラウザが古いファイルを読まないための印。手で変えなくてよい。
 
+PR と master では GitHub Actions（`.github/workflows/meteor.yml`）が試験とビルドを動かし、コミットしたビルドの結果がソースと食い違えば失敗にする。
+
 ## 決まり
 
 - ライブラリ・フォント・画像は npm で入れて同梱する。CDN や外のサイトからは読み込まない。
