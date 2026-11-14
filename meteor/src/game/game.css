@@ -1,0 +1,150 @@
+/* 隕石当て・軌道に乗せろのゲームの見た目（game/game.js・orbit-game.js が読み込む）。地図の Activity の中でも、
+   Discord の外の単体のページ（web.js）でも同じものを使う。 */
+:root {
+  /* Discord のスマートフォンのアプリが上下に重ねるメニューの分。Discord の外では端末の安全な余白、それも無ければ 0。
+     地図の Activity の app.css と同じ定め（どちらが先に読まれても同じ値になる）。 */
+  --sait: var(--discord-safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --saib: var(--discord-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --sail: var(--discord-safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --sair: var(--discord-safe-area-inset-right, env(safe-area-inset-right, 0px));
+}
+
+.game {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #05070d;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+.game-canvas {
+  display: block;
+  touch-action: none;
+}
+.game-bar {
+  position: absolute;
+  top: calc(var(--sait) + 8px);
+  left: calc(var(--sail) + 8px);
+  right: calc(var(--sair) + 8px);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  pointer-events: none;
+}
+.game-bar .game-button {
+  pointer-events: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.game-title {
+  font-weight: bold;
+  text-shadow: 0 1px 3px #000;
+}
+.game-hint {
+  position: absolute;
+  bottom: calc(var(--saib) + 16px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+.game-panel {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--saib) + 24px);
+  transform: translateX(-50%);
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(30, 31, 34, 0.92);
+  text-align: center;
+  min-width: 220px;
+}
+.game-probe {
+  position: absolute;
+  left: 0;
+  bottom: var(--saib);
+  height: 0;
+  width: 0;
+}
+.game-panel[hidden],
+.game-hint[hidden] {
+  display: none;
+}
+.game-result {
+  font-size: 22px;
+  font-weight: bold;
+}
+.game-detail {
+  margin: 4px 0 10px;
+  font-size: 14px;
+}
+.game-button {
+  margin: 0 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #5865f2;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+.game-panel .game-stage {
+  display: block;
+  width: 100%;
+  margin: 4px 0;
+  text-align: left;
+}
+.game-panel .game-stage:disabled {
+  background: #4e5058;
+  color: #b5bac1;
+  cursor: default;
+}
+
+/* 「軌道に乗せろ」の操作（加速・早送り・ズーム・終了）。画面の下に並べる。 */
+.orbit-bottom {
+  position: absolute;
+  left: calc(var(--sail) + 8px);
+  right: calc(var(--sair) + 8px);
+  bottom: calc(var(--saib) + 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.orbit-bottom .orbit-controls {
+  pointer-events: auto;
+}
+.orbit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.orbit-controls[hidden] {
+  display: none;
+}
+.orbit-controls .game-button {
+  margin: 0;
+}
+.game-button[aria-pressed="true"] {
+  background: #3ba55d;
+}
+.game-button:disabled {
+  background: #4e5058;
+  color: #b5bac1;
+  cursor: default;
+}
+/* 下の操作の並びの上に、同じ縦の並びの中で出す（重ならないように）。 */
+.orbit-bottom .game-hint.orbit-hint {
+  position: static;
+  padding: 0 12px;
+}
+
+/* 「𝕏 にポスト」のボタン（𝕏 の色）。 */
+.game-button.game-button-x {
+  background: #000;
+  border: 1px solid #555;
+  font-weight: bold;
+}
