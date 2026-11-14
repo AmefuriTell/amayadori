@@ -16,7 +16,7 @@
 | `src/game/physics.js`・`orbit.js` | 計算（1/240 秒刻みの速度ベルレ法）。画面に頼らないので試験できる |
 | `src/game/daily.js`・`stages.js`・`posts.js`・`targets.js` | 今日のお題・ステージ・投稿の文・的の都市 |
 | `src/game/draw.js`・`explosion.js`・`game.css` | 陸の描き方・爆発・見た目 |
-| `assets/world_land.json` | 陸の形（Natural Earth 1:110m、パブリックドメイン） |
+| `assets/world_land.json` | 陸の形（Natural Earth 1:110m、パブリックドメイン。weatherDiscordBot の `scripts/build_marine_areas.py` が作ったもの） |
 
 ## 遊び
 
