@@ -512,15 +512,15 @@ export function openGame(onClose, options = {}) {
     trail.push({ x: flying.x, y: flying.y });
     if (trail.length > 400) trail.shift();
     if (!flying.result) {
-      // 画面の外へ出た時に 1 回だけ先読みし、画面に戻らずに外れると分かれば、待たずにその最終状態にする
-      // （判定は advance のまま。時計も同じだけ進め、clock と flying.t をそろえる。先読みした分の跡は足さない）。
+      // 画面の外へ出るたびに 1 回先読みし、画面に戻らずに外れると分かれば、待たずにその最終状態にする
+      // （判定は advance のまま。外れの結果は時計を使わないので、時計は進めない。進めると月と地球が一瞬で飛んで見えるため。
+      // 先読みした分の跡は足さない）。
       const area = visibleArea(size, METEOR_PX);
       const visible = (point) => insideArea(point, area);
       const nowVisible = visible(flying);
       if (inView && !nowVisible) {
         const ahead = missAhead(flying, visible);
         if (ahead) {
-          clock += ahead.t - flying.t;
           Object.assign(flying, ahead);
         }
       }
