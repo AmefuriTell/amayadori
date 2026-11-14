@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "../src/game/stages.js";
+import { PAD_DISTANCE, padPosition } from "../src/game/view.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, moonPositions, outerOrbit } from "../src/game/physics.js";
 
 // 作り替える前（世界を引数にする前、#83 の時点）の物理で、同じ投げ方を計算した値。
@@ -27,15 +28,15 @@ test("every stage is a sane world: moons outside the Earth and inside the play a
 });
 
 test("every stage can be cleared from the real pad within the real pull", () => {
-  // 画面と同じ置き場（半径 6.7）から、引ける長さ（MAX_PULL）までで投げ、時刻・向き・強さを変えて、
+  // 画面と同じ置き場（padPosition。半径 6.7 の上か下）から、引ける長さ（MAX_PULL）までで投げ、時刻・向き・強さを変えて、
   // 赤道を 30° ごとに分けたどの区間にも当てられることを確かめる（どの的も、間合いしだいで狙える）。
   for (const stage of STAGES) {
     const covered = new Set();
-    for (const pad of [{ x: 0, y: 6.7 }, { x: 0, y: -6.7 }, { x: 6.7, y: 0 }]) {
+    for (const pad of [padPosition(1, 0), padPosition(-1, 0)]) {
       for (let t = 0; t < stage.world.earthPeriod; t += 1.5) {
         for (let side = -2.5; side <= 2.5; side += 0.5) {
           for (const pull of [1.2, 2.0, MAX_PULL]) {
-            const outward = { x: pad.x / 6.7, y: pad.y / 6.7 };
+            const outward = { x: pad.x / PAD_DISTANCE, y: pad.y / PAD_DISTANCE };
             const to = { x: pad.x + outward.x * pull - outward.y * side, y: pad.y + outward.y * pull + outward.x * side };
             const state = launch(pad, launchVelocity(pad, to), t, 0, stage.world);
             advance(state, MAX_FLIGHT + 1);

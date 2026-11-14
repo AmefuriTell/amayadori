@@ -24,12 +24,13 @@ import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, isExp
 import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
 import { canLaunch, clockRuns } from "./clock.js";
+import { PAD_DISTANCE, padPosition, toScreen as viewToScreen, toWorld as viewToWorld, viewTurn } from "./view.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
-// 隕石を置く所: 地球から（月の軌道の外）この距離。画面の長い辺の向きに置く。入らなければ地球ごと縮めて入れる
+// 隕石は世界の中の 1 か所（view.js の padPosition。地球から PAD_DISTANCE、世界の上か下）に置く。横長の画面は見せ方だけを
+// 90° 回し、置き場を長い辺の側に見せる。縦長では上下どちらに置いても入るように、横長では左右に入るように、地球ごと縮める
 // （正方形に近い画面で、隕石が月の通り道の上に来て、投げた瞬間に月に当たらないように）。
-const PAD_DISTANCE = 6.7;
 // 隕石の外側に残す余白（地球の半径で）と、画面の縁・上の欄・下の安全域から離す長さ（px）。
 const PAD_MARGIN = 0.5;
 const EDGE_PX = 8;
@@ -65,13 +66,13 @@ export function openGame(onClose, options = {}) {
   const context = canvas.getContext("2d");
   const stars = Array.from({ length: STARS }, () => ({ x: Math.random(), y: Math.random(), size: Math.random() < 0.85 ? 1 : 2, level: 90 + Math.floor(Math.random() * 140) }));
 
-  let size = { width: 0, height: 0, scale: 1, ratio: 1 };
+  let size = { width: 0, height: 0, scale: 1, ratio: 1, turn: 0 };
   let clock = 0;
   let last = performance.now();
   let target = null;
   let earthStart = 0;
   let pad = { x: 0, y: 0 };
-  // 隕石を置く側（+1・-1）と、横へのずらし（地球の半径で）。回ごとに決め、画面の大きさが変わっても同じ側に置き直す。
+  // 隕石を置く側（+1・-1）と、横へのずらし（地球の半径で）。回ごとに決める。置き場は世界の中で決まり、画面の向きでは変わらない。
   let padSign = 1;
   let padSlide = 0;
   let flying = null;
@@ -118,33 +119,24 @@ export function openGame(onClose, options = {}) {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     let scale = Math.min(width, height) / 2 / VIEW_RADIUS;
-    // 隕石が長い辺の向きの、広い側に入るように縮める。
+    // 隕石が長い辺の向きの、どちらの側に置いても入るように縮める（縦長は上の欄の下・下の安全域の上まで）。
     const { top, bottom } = reserved();
-    const room = height >= width ? Math.max(height / 2 - top, bottom - height / 2) : width / 2 - EDGE_PX;
+    const room = height >= width ? Math.min(height / 2 - top, bottom - height / 2) : width / 2 - EDGE_PX;
     scale = Math.min(scale, room / (PAD_DISTANCE + PAD_MARGIN));
-    size = { width, height, ratio, scale };
+    size = { width, height, ratio, scale, turn: viewTurn(width, height) };
     return true;
   }
 
   function toScreen(point) {
-    return { x: size.width / 2 + point.x * size.scale, y: size.height / 2 - point.y * size.scale };
+    return viewToScreen(point, size);
   }
 
   function toWorld(px, py) {
-    return { x: (px - size.width / 2) / size.scale, y: (size.height / 2 - py) / size.scale };
+    return viewToWorld(px, py, size);
   }
 
   function placePad() {
-    // 画面の長い辺の向きの、padSign の側に置く。縦長でその側（上の欄の下・下の安全域の上）に入らなければ、反対の側に置く。
-    if (size.height >= size.width) {
-      const { top, bottom } = reserved();
-      const need = (PAD_DISTANCE + PAD_MARGIN) * size.scale;
-      const fits = (sign) => (sign > 0 ? size.height / 2 - top : bottom - size.height / 2) >= need;
-      const sign = fits(padSign) ? padSign : -padSign;
-      pad = { x: padSlide, y: sign * PAD_DISTANCE };
-    } else {
-      pad = { x: padSign * PAD_DISTANCE, y: padSlide };
-    }
+    pad = padPosition(padSign, padSlide);
   }
 
   function newRound(sameTarget) {
@@ -387,9 +379,12 @@ export function openGame(onClose, options = {}) {
   });
   canvas.addEventListener("pointermove", (event) => {
     if (event.pointerId !== activePointer || !drag) return;
+    // 指の動きを世界の長さに直す（回した画面でも、ゴムが指に付いていくように）。
     const at = pointerPosition(event);
-    let dx = (at.x - dragStart.x) / size.scale;
-    let dy = -(at.y - dragStart.y) / size.scale;
+    const now = toWorld(at.x, at.y);
+    const start = toWorld(dragStart.x, dragStart.y);
+    let dx = now.x - start.x;
+    let dy = now.y - start.y;
     const length = Math.hypot(dx, dy);
     if (length > MAX_PULL) {
       dx *= MAX_PULL / length;
@@ -469,7 +464,7 @@ export function openGame(onClose, options = {}) {
     }
     c.setLineDash([]);
 
-    // 地球（北極の上から見た地図。自転で回す）。数学の向きで描くため、上下を返してから回す。
+    // 地球（北極の上から見た地図。自転で回す）。数学の向きで描くため、上下を返してから回す（横長なら画面の回し分も足す）。
     const rotation = angleOfLongitude(0, clock, earthStart, world.earthPeriod);
     c.save();
     c.translate(center.x, center.y);
@@ -483,7 +478,7 @@ export function openGame(onClose, options = {}) {
     c.fillStyle = "#4f86b8";
     c.fill();
     c.clip();
-    c.rotate(rotation);
+    c.rotate(rotation + size.turn);
     c.fillStyle = "#d9d2bd";
     c.fill(landShapes(), "evenodd");
     c.restore();
