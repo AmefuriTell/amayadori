@@ -23,7 +23,7 @@ import { afterThrow, dailyChallenge, loadDaily, saveDaily, shareMessage } from "
 import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, isExplosionOver, moonAnchor, shakeOffset } from "./explosion.js";
 import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
-import { clockRuns } from "./clock.js";
+import { canLaunch, clockRuns } from "./clock.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
 const VIEW_RADIUS = 5.7;
@@ -180,6 +180,13 @@ export function openGame(onClose, options = {}) {
     placePad();
   }
 
+  // 欄を出すときの見出し。飛んでいる途中は置き直さない（onResize と同じ）。
+  function setTitle(text) {
+    title.textContent = text;
+    resize();
+    if (!flying) placePad();
+  }
+
   function button(label, onClick) {
     const item = element("button", label, "game-button");
     item.addEventListener("click", onClick);
@@ -200,6 +207,11 @@ export function openGame(onClose, options = {}) {
     if (dailyRecord.left === 0) {
       // 今日の分は投げ終えている。結果と共有だけ出す（的は見せたまま）。
       ({ target, earthStart, padSign, padSlide } = challenge);
+      // 前の回（フリー練習・ステージ）の跡（当たった印・飛んだ跡・爆発）を消す。
+      flying = null;
+      trail = [];
+      impact = null;
+      explosion = null;
       title.textContent = `📅 今日のお題 ${challenge.label}: ${target.name}`;
       // 開いてすぐここへ来ることもあるので、見出しに合わせて測り直し、隕石を置く（中心に描かないように）。
       resize();
@@ -219,6 +231,8 @@ export function openGame(onClose, options = {}) {
   function showOthers() {
     // ほかの遊び方。この欄は startDaily・startFree・startStage（どれも newRound を通る）でしか閉じない（狙いは必ず 0 秒から）。
     const left = dailyRecord.left;
+    // 上の見出しは空にする（欄の見出しと重ねない）。上の欄の高さが変わるので測り直して置き直す。
+    setTitle("");
     const link = (label, onClick) => {
       const item = element("button", label, "game-other");
       item.addEventListener("click", onClick);
@@ -263,6 +277,7 @@ export function openGame(onClose, options = {}) {
       return item;
     });
     const done = progress.cleared >= STAGES.length ? "全部クリア！" : `${CLEAR_KM.toLocaleString()} km 未満に当てると次の面が開きます`;
+    setTitle("");
     openPanel("🪐 ステージ", done, [...items, button("戻る", showOthers)]);
   }
 
@@ -387,7 +402,8 @@ export function openGame(onClose, options = {}) {
     activePointer = null;
     if (!drag) return;
     const pulled = Math.hypot(drag.x - pad.x, drag.y - pad.y);
-    if (pulled > 0.3) {
+    // 欄が開いていれば（引っ張っている間に開いたとき）発射せず、引っ張りを捨てる（狙いは必ず 0 秒から）。
+    if (canLaunch({ flying, panelOpen: !panel.hidden, pulled })) {
       flying = launch(pad, launchVelocity(pad, drag), clock, 0, world);
       trail = [];
     }
@@ -587,8 +603,8 @@ export function openGame(onClose, options = {}) {
   };
   close.addEventListener("click", shut);
   others.addEventListener("click", () => {
-    // 投げてから結果の欄が出るまでは何もしない（飛んでいる回を欄で隠さないように）。
-    if (flying && panel.hidden) return;
+    // 引っ張っている間と、投げてから結果の欄が出るまでは何もしない（飛んでいる回を欄で隠さないように）。
+    if (activePointer !== null || (flying && panel.hidden)) return;
     showOthers();
   });
   window.addEventListener("resize", onResize);
