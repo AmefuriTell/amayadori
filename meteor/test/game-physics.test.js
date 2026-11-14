@@ -115,3 +115,21 @@ test("the preview stops where the flight would end", () => {
   const points = preview({ x: 1.5, y: 0 }, { x: -2, y: 0 }, 0, Math.PI);
   assert.ok(points.length > 0 && points.length < 24);
 });
+
+// 隕石当てでは投げるまで時計を止める。同じ置き場・同じ速さなら、いつ投げても t=0 から始まり、同じ所に当たる。
+function landing(throwAt) {
+  const state = launch({ x: 6, y: 1.5 }, { x: -1.2, y: -0.2 }, throwAt, Math.PI);
+  advance(state, 20);
+  assert.equal(state.result.kind, "earth");
+  return longitudeAt(state.result.angle, state.t, 0.7);
+}
+
+test("the same throw from t=0 always hits the same longitude", () => {
+  const first = landing(0);
+  for (let i = 0; i < 3; i += 1) assert.equal(landing(0), first);
+});
+
+test("throwing one second later on a turning world misses by over 500 km (why the clock stops while aiming)", () => {
+  const km = missKm(landing(0), landing(1));
+  assert.ok(km > 500, `${km} km`);
+});
