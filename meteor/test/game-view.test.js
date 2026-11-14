@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAD_DISTANCE, padPosition, toScreen, toWorld, viewTurn } from "../src/game/view.js";
+import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, toScreen, toWorld, viewTurn } from "../src/game/view.js";
 import { dailyChallenge } from "../src/game/daily.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, missKm } from "../src/game/physics.js";
 
@@ -106,4 +106,45 @@ test("the same pull on screen gives the same world pull and the same km on both 
     }
   }
   assert.ok(earthHits > 0);
+});
+
+test("the same finger move gives the same pull on any screen size", () => {
+  const start = { x: 200, y: 400 };
+  const now = { x: 237, y: 351 };
+  const a = pullDelta(start, now, PHONE);
+  const b = pullDelta(start, now, { ...PHONE, scale: 70 });
+  close(a.x, b.x, "x");
+  close(a.y, b.y, "y");
+  close(Math.hypot(a.x, a.y), Math.hypot(37, 49) / PULL_PX, "length");
+});
+
+test("pullDelta points the same way as toWorld", () => {
+  // 回さない画面: 上へ 60 px は世界の +y へ 1.0。
+  const up = pullDelta({ x: 100, y: 300 }, { x: 100, y: 240 }, PHONE);
+  close(up.x, 0, "x");
+  close(up.y, 1, "y");
+  // -90° 回した画面: 画面の右が世界の上。右へ 60 px は世界の +y、上へ 60 px は世界の -x。
+  const right = pullDelta({ x: 300, y: 300 }, { x: 360, y: 300 }, PC);
+  close(right.x, 0, "x");
+  close(right.y, 1, "y");
+  const upPc = pullDelta({ x: 300, y: 300 }, { x: 300, y: 240 }, PC);
+  close(upPc.x, -1, "x");
+  close(upPc.y, 0, "y");
+  // toWorld の差と同じ向き。
+  for (const size of [PHONE, PC]) {
+    const s = { x: 120, y: 500 };
+    const n = { x: 170, y: 470 };
+    const w1 = toWorld(s.x, s.y, size);
+    const w2 = toWorld(n.x, n.y, size);
+    const p = pullDelta(s, n, size);
+    close(p.x, ((w2.x - w1.x) * size.scale) / PULL_PX, "x");
+    close(p.y, ((w2.y - w1.y) * size.scale) / PULL_PX, "y");
+  }
+});
+
+test("a long finger move stops at MAX_PULL", () => {
+  for (const size of [PHONE, PC]) {
+    const p = pullDelta({ x: 0, y: 0 }, { x: 600, y: -800 }, size);
+    close(Math.hypot(p.x, p.y), MAX_PULL, "length");
+  }
 });

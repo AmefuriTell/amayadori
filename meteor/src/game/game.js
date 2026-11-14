@@ -25,7 +25,7 @@ import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, isExp
 import { allClearedMessage, hitMessage, xButton } from "./posts.js";
 import { CLEAR_KM, STAGES, afterStageThrow, isOpen, loadProgress, saveProgress } from "./stages.js";
 import { canLaunch, clockRuns } from "./clock.js";
-import { PAD_DISTANCE, padPosition, toScreen as viewToScreen, toWorld as viewToWorld, viewTurn } from "./view.js";
+import { PAD_DISTANCE, padPosition, pullDelta, toScreen as viewToScreen, viewTurn } from "./view.js";
 import { ZZFX_VOLUME, loadMuted, saveMuted, soundFor } from "./sound.js";
 
 // 地球の半径（px）は、どの面のいちばん外の月の軌道（5.3）も画面の短い辺に収まるように決める（面で大きさを変えない）。
@@ -140,10 +140,6 @@ export function openGame(onClose, options = {}) {
 
   function toScreen(point) {
     return viewToScreen(point, size);
-  }
-
-  function toWorld(px, py) {
-    return viewToWorld(px, py, size);
   }
 
   function placePad() {
@@ -470,18 +466,10 @@ export function openGame(onClose, options = {}) {
   });
   canvas.addEventListener("pointermove", (event) => {
     if (event.pointerId !== activePointer || !drag) return;
-    // 指の動きを世界の長さに直す（回した画面でも、ゴムが指に付いていくように）。
-    const at = pointerPosition(event);
-    const now = toWorld(at.x, at.y);
-    const start = toWorld(dragStart.x, dragStart.y);
-    let dx = now.x - start.x;
-    let dy = now.y - start.y;
-    const length = Math.hypot(dx, dy);
-    if (length > MAX_PULL) {
-      dx *= MAX_PULL / length;
-      dy *= MAX_PULL / length;
-    }
-    drag = { x: pad.x + dx, y: pad.y + dy };
+    // 指の動きを世界の向きの引きに直す（回した画面でも向きが合うように）。感度は画面の大きさによらず 60 px ＝ 1.0
+    // （世界の長さのままだと scale の小さいスマホで 1 px の重みが PC の約 2 倍になり、狙いにくい）。
+    const pull = pullDelta(dragStart, pointerPosition(event), size);
+    drag = { x: pad.x + pull.x, y: pad.y + pull.y };
   });
   canvas.addEventListener("pointerup", (event) => {
     resumeAudio();
