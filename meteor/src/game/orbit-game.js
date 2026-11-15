@@ -41,6 +41,7 @@ import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
+import { PULL_PX } from "./view.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -315,8 +316,9 @@ export function openOrbitGame(onClose, options = {}) {
     }
     if (event.pointerId !== activePointer) return;
     const at = pointerPosition(event);
-    let dx = (at.x - dragStart.x) / scale();
-    let dy = -(at.y - dragStart.y) / scale();
+    // 引きの強さは画面の大きさ・ズームによらず PULL_PX（60 px）で 1.0（隕石当てと同じ。スマホと PC で同じ手応えにする）。
+    let dx = (at.x - dragStart.x) / PULL_PX;
+    let dy = -(at.y - dragStart.y) / PULL_PX;
     const length = Math.hypot(dx, dy);
     if (length > MAX_PULL) {
       dx *= MAX_PULL / length;
