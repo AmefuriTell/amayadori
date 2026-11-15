@@ -4,7 +4,7 @@
 // 点数は端末の中だけ。
 import "./game.css";
 import { element } from "../dom.js";
-import { DEFAULT_WORLD, MAX_PULL, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
+import { DEFAULT_WORLD, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
 import {
   BOOST,
   GAME_SECONDS,
@@ -41,7 +41,7 @@ import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
-import { PULL_PX } from "./view.js";
+import { screenPull } from "./view.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -90,10 +90,10 @@ export function openOrbitGame(onClose, options = {}) {
   let playing = false;
   let trails = new Map();
   let best = loadBest();
-  // 引っ張り: 指を置いた所（画面の px）と、衛星の置き場（世界の位置）、今の指の位置から決めたゴムの先（世界）。
+  // 引っ張り: 指を置いた所（画面の px）。
   let activePointer = null;
   let dragStart = null;
-  // 置くときの位置（世界）と、引っ張った向きと長さ（世界。元からゴムの先まで）。
+  // 置くときの位置（世界）と、引き（指の動き ÷ 60 px。地球の半径を 1 とする長さ。元からゴムの先まで）。
   let placeFrom = null;
   let dragPull = null;
   // 引っ張っている間の道筋（predictOrbit）の前の結果。時刻と引きの量（位置・速度）が同じなら計算し直さない。
@@ -316,15 +316,8 @@ export function openOrbitGame(onClose, options = {}) {
     }
     if (event.pointerId !== activePointer) return;
     const at = pointerPosition(event);
-    // 引きの強さは画面の大きさ・ズームによらず PULL_PX（60 px）で 1.0（隕石当てと同じ。スマホと PC で同じ手応えにする）。
-    let dx = (at.x - dragStart.x) / PULL_PX;
-    let dy = -(at.y - dragStart.y) / PULL_PX;
-    const length = Math.hypot(dx, dy);
-    if (length > MAX_PULL) {
-      dx *= MAX_PULL / length;
-      dy *= MAX_PULL / length;
-    }
-    dragPull = { x: dx, y: dy };
+    // 引きの強さは画面の大きさ・ズームによらず 60 px で 1.0（隕石当てと同じ。スマホと PC で同じ手応えにする）。
+    dragPull = screenPull(dragStart, at);
   });
   const lift = (event) => {
     touches.delete(event.pointerId);

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, toScreen, toWorld, viewTurn } from "../src/game/view.js";
+import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
 import { dailyChallenge } from "../src/game/daily.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, missKm } from "../src/game/physics.js";
 
@@ -147,4 +147,13 @@ test("a long finger move stops at MAX_PULL", () => {
     const p = pullDelta({ x: 0, y: 0 }, { x: 600, y: -800 }, size);
     close(Math.hypot(p.x, p.y), MAX_PULL, "length");
   }
+});
+
+test("screenPull: 60 px is a pull of 1, up on the screen is +y, and it stops at MAX_PULL", () => {
+  const a = screenPull({ x: 100, y: 100 }, { x: 160, y: 100 });
+  assert.ok(Math.abs(a.x - 1) < 1e-12 && Math.abs(a.y) < 1e-12);
+  const up = screenPull({ x: 100, y: 100 }, { x: 100, y: 40 });
+  assert.ok(Math.abs(up.y - 1) < 1e-12);
+  const far = screenPull({ x: 0, y: 0 }, { x: 1000, y: 0 });
+  assert.ok(Math.abs(Math.hypot(far.x, far.y) - MAX_PULL) < 1e-12);
 });
