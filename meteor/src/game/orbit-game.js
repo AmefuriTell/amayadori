@@ -44,7 +44,7 @@ import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
-import { screenPull } from "./view.js";
+import { PULL_PX, screenPull } from "./view.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -530,12 +530,13 @@ export function openOrbitGame(onClose, options = {}) {
     if (dragPull) {
       const origin = dragOrigin();
       if (style === "launch" && coaching(best, game)) {
-        // 周回に乗せるまで、ゴムの先が入るべき範囲（扇形）を次に出す衛星の色で薄く塗る（引きの線の下）。
+        // 周回に乗せるまで、指を動かす先の範囲（扇形）を次に出す衛星の色で塗る（引きの線の下）。指を置いた所から、指の動きの px
+        // （引き × PULL_PX。screenPull の逆で、画面の y は下向き）で描く。世界の縮尺で射場の上に描くと、スマホでは指の引きと合わないため。
         c.fillStyle = COLORS[game.satellites.length % COLORS.length];
-        c.globalAlpha = 0.15;
+        c.globalAlpha = 0.3;
         c.beginPath();
-        aimZone(launchSite(game, earthStart)).forEach((point, pointIndex) => {
-          const at = toScreen(point);
+        aimZone(launchSite(game, earthStart)).forEach((pull, pointIndex) => {
+          const at = { x: dragStart.x + pull.x * PULL_PX, y: dragStart.y - pull.y * PULL_PX };
           if (pointIndex === 0) c.moveTo(at.x, at.y);
           else c.lineTo(at.x, at.y);
         });

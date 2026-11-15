@@ -290,10 +290,12 @@ export function aimLineStyle(end, satelliteColor) {
   return { color: "#ffffff", alpha: 0.45, dash: [4, 6] };
 }
 
-// 周回に乗せるまでの手がかり（DESIGN.md）。打ち上げの正解の範囲: 打ち出す向きは真上から自転の向きへ from〜to 度、強さは引き near〜far。
-// てっぺん（外へ向かう速さが CUE_RISING 未満）で、道筋が 1 周回る線になるまで噴射する。
-export const AIM_ZONE = { from: 55, to: 80, near: 2.0, far: 2.75 };
+// 周回に乗せるまでの手がかり（DESIGN.md）。打ち上げの正解の範囲: 打ち出す向きは真上から自転の向きへ from〜to 度、強さは引き near〜far
+// （合図から 0.6〜1 秒遅れて押し始める人でも乗る範囲）。てっぺん（外へ向かう速さが CUE_RISING 未満、地球の中心から CUE_HEIGHT より外）で、
+// 道筋が 1 周回る線になるまで噴射する（CUE_HEIGHT は、弱く打って上がり切らずに落ちていく衛星に合図を出さないため）。
+export const AIM_ZONE = { from: 55, to: 85, near: 2.5, far: 2.875 };
 export const CUE_RISING = 0.15;
+export const CUE_HEIGHT = 1.2;
 
 // 射場の外向き（真上）と自転の向きの単位ベクトル（site は launchSite の結果）。
 function siteAxes(site) {
@@ -304,13 +306,14 @@ function siteAxes(site) {
   return { up, along: { x: -up.y * sense, y: up.x * sense } };
 }
 
-// ゴムの先が入るべき範囲（扇形）の多角形（世界の点）。ぱちんこ式なので、打ち出す向きの反対側（真下から自転と逆の向きへ from〜to 度）。
+// 引きが入るべき範囲（扇形）の多角形（引きのベクトルの点。射場からゴムの先まで）。ぱちんこ式なので、打ち出す向きの反対側
+// （真下から自転と逆の向きへ from〜to 度）。画面には、指を置いた所から指の動きの px（引き × PULL_PX）で描く。
 export function aimZone(site, steps = 6) {
   const { up, along } = siteAxes(site);
   const arc = (radius) =>
     Array.from({ length: steps + 1 }, (_, index) => {
       const a = ((AIM_ZONE.from + ((AIM_ZONE.to - AIM_ZONE.from) * index) / steps) * Math.PI) / 180;
-      return { x: site.position.x - radius * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: site.position.y - radius * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
+      return { x: -radius * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: -radius * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
     });
   return [...arc(AIM_ZONE.far), ...arc(AIM_ZONE.near).reverse()];
 }
@@ -324,11 +327,11 @@ export function inAimZone(site, pull) {
   return length >= AIM_ZONE.near - e && length <= AIM_ZONE.far + e && angle >= AIM_ZONE.from - e && angle <= AIM_ZONE.to + e;
 }
 
-// 今が噴射の時か: 打ち上げてまだ 1 周していない衛星が、燃料を残して、てっぺんにいて、道筋（end）がまだ 1 周回る線でない。
+// 今が噴射の時か: 打ち上げてまだ 1 周していない衛星が、燃料を残して、CUE_HEIGHT より高いてっぺんにいて、道筋（end）がまだ 1 周回る線でない。
 export function boostCue(satellite, end) {
   if (!satellite || !satellite.alive || satellite.launched !== true || satellite.turns !== 0 || satellite.fuel < BOOST - 1e-9) return false;
   const r = Math.hypot(satellite.x, satellite.y);
-  return (satellite.x * satellite.vx + satellite.y * satellite.vy) / r < CUE_RISING && end !== "turn";
+  return r > CUE_HEIGHT && (satellite.x * satellite.vx + satellite.y * satellite.vy) / r < CUE_RISING && end !== "turn";
 }
 
 // 手がかりを出すか: まだ記録が無く、今のゲームで 1 周した衛星も無い間だけ。

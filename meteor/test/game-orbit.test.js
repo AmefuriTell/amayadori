@@ -618,33 +618,48 @@ function pullAt(site, deg, length) {
   return { x: -length * (Math.cos(a) * up.x - Math.sin(a) * up.y), y: -length * (Math.cos(a) * up.y + Math.sin(a) * up.x) };
 }
 
-test("aim zone: launching from its centre and corners and boosting on the cue makes the first turn (16 moons and Earth angles)", () => {
-  const mid = [(AIM_ZONE.from + AIM_ZONE.to) / 2, (AIM_ZONE.near + AIM_ZONE.far) / 2];
-  for (const [deg, length, need] of [[...mid, 16], [AIM_ZONE.from, AIM_ZONE.near, 14], [AIM_ZONE.from, AIM_ZONE.far, 14], [AIM_ZONE.to, AIM_ZONE.near, 14], [AIM_ZONE.to, AIM_ZONE.far, 14]]) {
-    let turned = 0;
-    for (let k = 0; k < 16; k += 1) {
-      const game = step(createOrbitGame(DEFAULT_WORLD), k * 1.7);
-      const site = launchSite(game, k * 0.61);
-      const pull = pullAt(site, deg, length);
-      assert.equal(inAimZone(site, pull), true);
-      const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), k * 0.61);
-      for (let t = 0; satellite.alive && satellite.turns === 0 && t < 240; t += 0.2) {
-        if (boostCue(satellite, predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end)) boost(satellite);
-        step(game, 0.2);
+// 人の押し方: 合図（boostCue）が出てから REACT 秒遅れて押し始め、合図の間だけ EVERY 秒ごとに押す（合図が消えてまた出たら、また REACT 秒待つ）。
+function humanBoostTurns(deg, length, react, every) {
+  let turned = 0;
+  for (let k = 0; k < 16; k += 1) {
+    const game = step(createOrbitGame(DEFAULT_WORLD), k * 1.7);
+    const site = launchSite(game, k * 0.61);
+    const pull = pullAt(site, deg, length);
+    assert.equal(inAimZone(site, pull), true);
+    const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), k * 0.61);
+    const dt = 0.05;
+    let next = Infinity;
+    let was = false;
+    for (let t = 0; satellite.alive && satellite.turns === 0 && t < 240; t += dt) {
+      step(game, dt);
+      const cue = boostCue(satellite, predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end);
+      if (cue && !was) next = t + react;
+      was = cue;
+      if (cue && t >= next - 1e-9) {
+        boost(satellite);
+        next = t + every;
       }
-      turned += satellite.turns >= 1 ? 1 : 0;
     }
-    assert.ok(turned >= need, `${deg}° ${length}: ${turned}/16`);
+    turned += satellite.turns >= 1 ? 1 : 0;
+  }
+  return turned;
+}
+
+test("aim zone: from its centre and corners, a person who boosts 0.6 s after the cue and every 0.35 s makes the first turn (16 moons and Earth angles)", () => {
+  const mid = [(AIM_ZONE.from + AIM_ZONE.to) / 2, (AIM_ZONE.near + AIM_ZONE.far) / 2];
+  for (const [deg, length] of [mid, [AIM_ZONE.from, AIM_ZONE.near], [AIM_ZONE.from, AIM_ZONE.far], [AIM_ZONE.to, AIM_ZONE.near], [AIM_ZONE.to, AIM_ZONE.far]]) {
+    const turned = humanBoostTurns(deg, length, 0.6, 0.35);
+    assert.ok(turned >= 13, `${deg}° ${length}: ${turned}/16`);
   }
 });
 
-test("aim zone: straight up or sideways at strength 3 is outside; the polygon sits below the site, against the spin", () => {
+test("aim zone: straight up or sideways at strength 3 is outside; the polygon is the pulls below the site, against the spin", () => {
   const site = launchSite(createOrbitGame(DEFAULT_WORLD), 0.3);
   assert.equal(inAimZone(site, pullAt(site, 0, 3)), false);
   assert.equal(inAimZone(site, pullAt(site, 90, 3)), false);
   const zone = aimZone(site);
   assert.equal(zone.length, 14);
-  for (const point of zone) assert.equal(inAimZone(site, { x: point.x - site.position.x, y: point.y - site.position.y }), true);
+  for (const pull of zone) assert.equal(inAimZone(site, pull), true);
 });
 
 test("boostCue: not right after launch, yes near the top, not once the line goes round; coaching stops after a record or a turn", () => {
@@ -662,4 +677,19 @@ test("boostCue: not right after launch, yes near the top, not once the line goes
   assert.equal(coaching({ mutual: 1 }, game), false);
   satellite.turns = 1;
   assert.equal(coaching({}, game), false);
+});
+
+test("boostCue: a weak shot that falls back without rising past CUE_HEIGHT never shows the cue", () => {
+  const game = createOrbitGame(DEFAULT_WORLD);
+  const site = launchSite(game, 0);
+  const pull = pullAt(site, 67.5, 1.0);
+  const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), 0);
+  let steps = 0;
+  while (satellite.alive && steps < 400) {
+    assert.equal(boostCue(satellite, predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end), false);
+    step(game, 0.05);
+    steps += 1;
+  }
+  assert.equal(satellite.alive, false);
+  assert.ok(steps > 3);
 });
