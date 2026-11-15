@@ -12,11 +12,14 @@ import {
   SAT_RADIUS,
   addSatellite,
   aimClick,
+  aimZone,
   aimLineStyle,
   boost,
   boostTarget,
   canPlace,
+  boostCue,
   clampZoom,
+  coaching,
   createOrbitGame,
   endSound,
   firstTurns,
@@ -404,6 +407,10 @@ export function openOrbitGame(onClose, options = {}) {
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);
     boostButton.disabled = !playing || shots === 0;
+    // 周回に乗せるまで（coaching）、噴射の時（boostCue）だけ、ボタンの地を対象の衛星の色にする。
+    const cue = coaching(best, game) && boostCue(target, followEnd);
+    boostButton.classList.toggle("orbit-boost-now", cue);
+    if (cue) boostButton.style.setProperty("--orbit-cue", COLORS[game.satellites.indexOf(target) % COLORS.length]);
     controls.hidden = !playing;
   }
 
@@ -522,6 +529,20 @@ export function openOrbitGame(onClose, options = {}) {
     for (const explosion of explosions) drawExplosion(c, explosion, toScreen(anchorPosition(explosion.at, game.world, game.t, rotation)));
     if (dragPull) {
       const origin = dragOrigin();
+      if (style === "launch" && coaching(best, game)) {
+        // 周回に乗せるまで、ゴムの先が入るべき範囲（扇形）を次に出す衛星の色で薄く塗る（引きの線の下）。
+        c.fillStyle = COLORS[game.satellites.length % COLORS.length];
+        c.globalAlpha = 0.15;
+        c.beginPath();
+        aimZone(launchSite(game, earthStart)).forEach((point, pointIndex) => {
+          const at = toScreen(point);
+          if (pointIndex === 0) c.moveTo(at.x, at.y);
+          else c.lineTo(at.x, at.y);
+        });
+        c.closePath();
+        c.fill();
+        c.globalAlpha = 1;
+      }
       const end = { x: origin.x + dragPull.x, y: origin.y + dragPull.y };
       const from = toScreen(origin);
       const to = toScreen(end);

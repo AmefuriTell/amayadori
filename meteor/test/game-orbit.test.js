@@ -1,8 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE } from "../src/game/physics.js";
+import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE, launchVelocity } from "../src/game/physics.js";
 import {
+  AIM_ZONE,
+  CUE_RISING,
   aimClick,
+  aimZone,
+  boostCue,
+  coaching,
+  inAimZone,
   aimLineStyle,
   BOOST,
   CRUISE_AFTER,
@@ -602,4 +608,58 @@ test("aimLineStyle: only the orbit that goes around uses the satellite colour; t
     }
   }
   assert.deepEqual(aimLineStyle("long", "#ffd166").dash, []);
+});
+
+// 射場から、真上から自転の向きへ deg 度、強さ length で打ち出す引き（ぱちんこ式なので反対向き）。
+function pullAt(site, deg, length) {
+  const r = Math.hypot(site.position.x, site.position.y);
+  const up = { x: site.position.x / r, y: site.position.y / r };
+  const a = (deg * Math.PI) / 180;
+  return { x: -length * (Math.cos(a) * up.x - Math.sin(a) * up.y), y: -length * (Math.cos(a) * up.y + Math.sin(a) * up.x) };
+}
+
+test("aim zone: launching from its centre and corners and boosting on the cue makes the first turn (16 moons and Earth angles)", () => {
+  const mid = [(AIM_ZONE.from + AIM_ZONE.to) / 2, (AIM_ZONE.near + AIM_ZONE.far) / 2];
+  for (const [deg, length, need] of [[...mid, 16], [AIM_ZONE.from, AIM_ZONE.near, 14], [AIM_ZONE.from, AIM_ZONE.far, 14], [AIM_ZONE.to, AIM_ZONE.near, 14], [AIM_ZONE.to, AIM_ZONE.far, 14]]) {
+    let turned = 0;
+    for (let k = 0; k < 16; k += 1) {
+      const game = step(createOrbitGame(DEFAULT_WORLD), k * 1.7);
+      const site = launchSite(game, k * 0.61);
+      const pull = pullAt(site, deg, length);
+      assert.equal(inAimZone(site, pull), true);
+      const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), k * 0.61);
+      for (let t = 0; satellite.alive && satellite.turns === 0 && t < 240; t += 0.2) {
+        if (boostCue(satellite, predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end)) boost(satellite);
+        step(game, 0.2);
+      }
+      turned += satellite.turns >= 1 ? 1 : 0;
+    }
+    assert.ok(turned >= need, `${deg}° ${length}: ${turned}/16`);
+  }
+});
+
+test("aim zone: straight up or sideways at strength 3 is outside; the polygon sits below the site, against the spin", () => {
+  const site = launchSite(createOrbitGame(DEFAULT_WORLD), 0.3);
+  assert.equal(inAimZone(site, pullAt(site, 0, 3)), false);
+  assert.equal(inAimZone(site, pullAt(site, 90, 3)), false);
+  const zone = aimZone(site);
+  assert.equal(zone.length, 14);
+  for (const point of zone) assert.equal(inAimZone(site, { x: point.x - site.position.x, y: point.y - site.position.y }), true);
+});
+
+test("boostCue: not right after launch, yes near the top, not once the line goes round; coaching stops after a record or a turn", () => {
+  const game = createOrbitGame(DEFAULT_WORLD);
+  const site = launchSite(game, 0);
+  const pull = pullAt(site, 67.5, 2.375);
+  const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), 0);
+  assert.equal(boostCue(satellite, "earth"), false);
+  while ((satellite.x * satellite.vx + satellite.y * satellite.vy) / Math.hypot(satellite.x, satellite.y) >= CUE_RISING) step(game, 0.05);
+  assert.equal(satellite.alive, true);
+  assert.equal(boostCue(satellite, "earth"), true);
+  assert.equal(boostCue(satellite, "turn"), false);
+  assert.equal(coaching({}, game), true);
+  assert.equal(coaching({ normal: 3 }, game), false);
+  assert.equal(coaching({ mutual: 1 }, game), false);
+  satellite.turns = 1;
+  assert.equal(coaching({}, game), false);
 });

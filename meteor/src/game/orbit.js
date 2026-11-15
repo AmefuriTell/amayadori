@@ -290,6 +290,52 @@ export function aimLineStyle(end, satelliteColor) {
   return { color: "#ffffff", alpha: 0.45, dash: [4, 6] };
 }
 
+// 周回に乗せるまでの手がかり（DESIGN.md）。打ち上げの正解の範囲: 打ち出す向きは真上から自転の向きへ from〜to 度、強さは引き near〜far。
+// てっぺん（外へ向かう速さが CUE_RISING 未満）で、道筋が 1 周回る線になるまで噴射する。
+export const AIM_ZONE = { from: 55, to: 80, near: 2.0, far: 2.75 };
+export const CUE_RISING = 0.15;
+
+// 射場の外向き（真上）と自転の向きの単位ベクトル（site は launchSite の結果）。
+function siteAxes(site) {
+  const { position, spin } = site;
+  const r = Math.hypot(position.x, position.y);
+  const up = { x: position.x / r, y: position.y / r };
+  const sense = up.x * spin.y - up.y * spin.x < 0 ? -1 : 1;
+  return { up, along: { x: -up.y * sense, y: up.x * sense } };
+}
+
+// ゴムの先が入るべき範囲（扇形）の多角形（世界の点）。ぱちんこ式なので、打ち出す向きの反対側（真下から自転と逆の向きへ from〜to 度）。
+export function aimZone(site, steps = 6) {
+  const { up, along } = siteAxes(site);
+  const arc = (radius) =>
+    Array.from({ length: steps + 1 }, (_, index) => {
+      const a = ((AIM_ZONE.from + ((AIM_ZONE.to - AIM_ZONE.from) * index) / steps) * Math.PI) / 180;
+      return { x: site.position.x - radius * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: site.position.y - radius * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
+    });
+  return [...arc(AIM_ZONE.far), ...arc(AIM_ZONE.near).reverse()];
+}
+
+// 引き（射場からゴムの先まで）が範囲に入っているか。
+export function inAimZone(site, pull) {
+  const { up, along } = siteAxes(site);
+  const length = Math.hypot(pull.x, pull.y);
+  const angle = (Math.atan2(-(pull.x * along.x + pull.y * along.y), -(pull.x * up.x + pull.y * up.y)) * 180) / Math.PI;
+  const e = 1e-9;
+  return length >= AIM_ZONE.near - e && length <= AIM_ZONE.far + e && angle >= AIM_ZONE.from - e && angle <= AIM_ZONE.to + e;
+}
+
+// 今が噴射の時か: 打ち上げてまだ 1 周していない衛星が、燃料を残して、てっぺんにいて、道筋（end）がまだ 1 周回る線でない。
+export function boostCue(satellite, end) {
+  if (!satellite || !satellite.alive || satellite.launched !== true || satellite.turns !== 0 || satellite.fuel < BOOST - 1e-9) return false;
+  const r = Math.hypot(satellite.x, satellite.y);
+  return (satellite.x * satellite.vx + satellite.y * satellite.vy) / r < CUE_RISING && end !== "turn";
+}
+
+// 手がかりを出すか: まだ記録が無く、今のゲームで 1 周した衛星も無い間だけ。
+export function coaching(best, game) {
+  return !(best.normal > 0 || best.mutual > 0) && !game.satellites.some((satellite) => satellite.turns >= 1);
+}
+
 // ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。
 export function isOver(game) {
   if (game.started !== null && elapsed(game) >= GAME_SECONDS - 1e-9) return true;
