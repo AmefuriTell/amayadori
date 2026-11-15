@@ -399,7 +399,11 @@ export function openOrbitGame(onClose, options = {}) {
       isCancelled: () => run !== gifRun || !overlay.isConnected,
     })
       .catch(() => null)
-      .then((blob) => (made.blob = blob));
+      .then((blob) => {
+        made.done = true;
+        made.blob = blob;
+        return blob;
+      });
     gif = made;
   }
 
