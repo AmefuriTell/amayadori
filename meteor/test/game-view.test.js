@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
+import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, pullPx, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
 import { dailyChallenge } from "../src/game/daily.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, missKm } from "../src/game/physics.js";
 
@@ -156,4 +156,16 @@ test("screenPull: 60 px is a pull of 1, up on the screen is +y, and it stops at 
   assert.ok(Math.abs(up.y - 1) < 1e-12);
   const far = screenPull({ x: 0, y: 0 }, { x: 1000, y: 0 });
   assert.ok(Math.abs(Math.hypot(far.x, far.y) - MAX_PULL) < 1e-12);
+});
+
+test("pullPx is the inverse of screenPull for pulls under MAX_PULL", () => {
+  const starts = [{ x: 0, y: 0 }, { x: 137.3, y: 421.9 }, { x: -83.7, y: -251.1 }, { x: 389, y: -17.5 }];
+  const pulls = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1.3, y: 2.2 }, { x: 0.7, y: -2.6 }, { x: -2.1, y: -2.05 }];
+  for (const s of starts) {
+    for (const p of pulls) {
+      assert.ok(Math.hypot(p.x, p.y) < MAX_PULL);
+      const back = screenPull(s, pullPx(s, p));
+      assert.ok(Math.abs(back.x - p.x) < 1e-9 && Math.abs(back.y - p.y) < 1e-9, `${JSON.stringify(s)} ${JSON.stringify(p)}`);
+    }
+  }
 });

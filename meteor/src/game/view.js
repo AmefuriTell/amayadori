@@ -71,3 +71,8 @@ export function screenPull(startPx, nowPx) {
   }
   return { x: dx, y: dy };
 }
+
+// screenPull の逆: 指を置いた所 startPx から引き pull（上が +y）だけ動かした指先の画面の px。
+export function pullPx(startPx, pull) {
+  return { x: startPx.x + pull.x * PULL_PX, y: startPx.y - pull.y * PULL_PX };
+}
