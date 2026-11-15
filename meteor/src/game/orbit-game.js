@@ -53,6 +53,32 @@ const VIEW_RADIUS = 5.7;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
+
+// 衛星 1 機: 本体の四角と左右の太陽電池パネル（細い線でつなぐ）。パネルは進む向き（angle）に直角に並べる。
+// size は前の丸の半径。パネルを含めた幅は 5.8 × size（丸の直径の 2.9 倍）。パネルは同じ色で不透明度 0.7。
+function drawSatellite(c, x, y, angle, color, size) {
+  const body = 0.9 * size;
+  const gap = 0.4 * size;
+  const length = 1.6 * size;
+  const thick = 0.8 * size;
+  c.save();
+  c.translate(x, y);
+  c.rotate(angle);
+  c.fillStyle = color;
+  c.fillRect(-body, -body, 2 * body, 2 * body);
+  c.globalAlpha *= 0.7;
+  c.strokeStyle = color;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(0, -body);
+  c.lineTo(0, -body - gap);
+  c.moveTo(0, body);
+  c.lineTo(0, body + gap);
+  c.stroke();
+  c.fillRect(-thick / 2, -body - gap - length, thick, length);
+  c.fillRect(-thick / 2, body + gap, thick, length);
+  c.restore();
+}
 // 時計の速さの段（下の欄のボタンで順に切り替える）。
 const SPEEDS = [1, 4, 16];
 // 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
@@ -109,6 +135,7 @@ export function openOrbitGame(onClose, options = {}) {
   let earthStart = 0;
   let playing = false;
   let trails = new Map();
+  const headings = new Map();
   let best = loadBest();
   // 引っ張り: 指を置いた所（画面の px）。
   let activePointer = null;
@@ -604,10 +631,7 @@ export function openOrbitGame(onClose, options = {}) {
       }
       if (satellite.alive) {
         const at = toScreen(satellite);
-        c.fillStyle = color;
-        c.beginPath();
-        c.arc(at.x, at.y, Math.max(3, SAT_RADIUS * s), 0, Math.PI * 2);
-        c.fill();
+        drawSatellite(c, at.x, at.y, heading(satellite.id, satellite.vx, satellite.vy), color, Math.max(3, SAT_RADIUS * s));
       }
     });
     const rotation = angleOfLongitude(0, game.t, earthStart, game.world.earthPeriod);
@@ -660,6 +684,12 @@ export function openOrbitGame(onClose, options = {}) {
 
   // 設定の欄の後ろの見本（遊ぶ時と同じ図柄: 赤い射場の点・白い引きの線・衛星の色の跡）を、時刻でなぞって薄く描く。
   // 置くは、初めの PREVIEW_PULL の間は時間を止めて引きの線を出して縮め、その後に回す。動きを減らす設定では終わりの形だけを出す。
+  // 衛星の向き（画面の上での進む向きの角度）。速さがほぼ 0 の時は前の向きのまま。
+  function heading(key, vx, vy) {
+    if (Math.hypot(vx, vy) > 1e-6) headings.set(key, Math.atan2(-vy, vx));
+    return headings.get(key) || 0;
+  }
+
   function drawPreview() {
     const c = context;
     const s = scale();
@@ -714,12 +744,14 @@ export function openOrbitGame(onClose, options = {}) {
       }
       c.stroke();
     }
-    [first, second].forEach((point, colorIndex) => {
-      const at = toScreen(point);
-      c.fillStyle = COLORS[colorIndex];
-      c.beginPath();
-      c.arc(at.x, at.y, Math.max(3, SAT_RADIUS * s), 0, Math.PI * 2);
-      c.fill();
+    [preview.firstPath, preview.secondPath].forEach((path, colorIndex) => {
+      // 見本の向きは、道筋の前後の点の差（速さの向き）から取る。
+      const at = toScreen(colorIndex === 0 ? first : second);
+      const i = Math.min(path.length - 1, index);
+      const ahead = path[Math.min(path.length - 1, i + 1)];
+      const behind = path[Math.max(0, i - 1)];
+      const angle = heading(`preview${colorIndex}`, ahead.x - behind.x, ahead.y - behind.y);
+      drawSatellite(c, at.x, at.y, angle, COLORS[colorIndex], Math.max(3, SAT_RADIUS * s));
     });
     c.globalAlpha = 1;
   }
