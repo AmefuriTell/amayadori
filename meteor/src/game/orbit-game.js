@@ -195,7 +195,8 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function finishGame() {
-    // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる）。
+    // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる。早送りの印は残さない）。
+    speed = 1;
     updateHud();
     playing = false;
     cancelDrag();
@@ -396,7 +397,7 @@ export function openOrbitGame(onClose, options = {}) {
     }
     const score = scoreOf(game);
     const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
-    if (playing) setText(title, `🛰️ ${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
+    if (playing) setText(title, `🛰️ ${score.turns} 周・残り衛星 ${satellitesLeft(game)}${speed > 1 ? "\u200a»\u200a" : "・"}残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);
