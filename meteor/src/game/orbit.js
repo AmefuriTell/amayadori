@@ -295,7 +295,7 @@ export function aimClick(before, after) {
 export function aimLineStyle(end, satelliteColor) {
   if (end === "turn") return { color: satelliteColor, alpha: 0.6, dash: [] };
   if (end === "long") return { color: "#ffffff", alpha: 0.6, dash: [] };
-  return { color: "#ffffff", alpha: 0.35, dash: [4, 6] };
+  return { color: "#ffffff", alpha: 0.45, dash: [4, 6] };
 }
 
 // ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。

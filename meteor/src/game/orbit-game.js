@@ -517,10 +517,10 @@ export function openOrbitGame(onClose, options = {}) {
         aimEnd = predicted.end;
       }
       // 線の見た目: 1 周回るなら次に出す衛星の色の実線、落ちる・ぶつかる・飛んでいくなら薄い白の破線、時間切れ（long）は白。
-      const style = aimLineStyle(predicted.end, COLORS[game.satellites.length % COLORS.length]);
-      c.strokeStyle = style.color;
-      c.globalAlpha = style.alpha;
-      c.setLineDash(style.dash);
+      const lineStyle = aimLineStyle(predicted.end, COLORS[game.satellites.length % COLORS.length]);
+      c.strokeStyle = lineStyle.color;
+      c.globalAlpha = lineStyle.alpha;
+      c.setLineDash(lineStyle.dash);
       c.lineWidth = 1.5;
       c.beginPath();
       predicted.points.forEach((point, pointIndex) => {
