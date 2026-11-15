@@ -39,6 +39,8 @@ import {
   scoreOf,
   step,
   turnsOf,
+  PREVIEW_START,
+  previewShot,
 } from "../src/game/orbit.js";
 
 const NO_MOON = { ...DEFAULT_WORLD, moons: [] };
@@ -615,4 +617,33 @@ test("boostCue: a weak shot that falls back without rising past CUE_HEIGHT never
   }
   assert.equal(satellite.alive, false);
   assert.ok(steps > 3);
+});
+
+test("the launch preview, boosted on the cue like a player, stays up for several turns", () => {
+  const game = createOrbitGame(DEFAULT_WORLD, false);
+  const shot = previewShot(game, "launch");
+  // 射場から、扇形の中心の引きで打ち出す。
+  assert.deepEqual(shot.position, launchSite(game, PREVIEW_START).position);
+  const satellite = launchFromSite(game, shot.velocity, PREVIEW_START);
+  assert.ok(satellite);
+  // 画面の見本と同じく、合図の間は 0.4 秒ごとに、道筋が 1 周回る線になるまで噴射する。
+  let boostedAt = -Infinity;
+  for (let index = 0; index < 30 * 90; index += 1) {
+    step(game, 1 / 30);
+    if (game.t - boostedAt >= 0.4 - 1e-9 && boostCue(satellite, null) && predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end !== "turn") {
+      if (boost(satellite)) boostedAt = game.t;
+    }
+  }
+  assert.ok(satellite.alive);
+  assert.ok(satellite.turns >= 3, `turns ${satellite.turns}`);
+});
+
+test("the place preview goes round at circular speed", () => {
+  const game = createOrbitGame(DEFAULT_WORLD, false);
+  const shot = previewShot(game, "place");
+  assert.ok(canPlace(game, shot.position));
+  const satellite = addSatellite(game, shot.position, shot.velocity);
+  step(game, 60);
+  assert.ok(satellite.alive);
+  assert.ok(satellite.turns >= 3, `turns ${satellite.turns}`);
 });
