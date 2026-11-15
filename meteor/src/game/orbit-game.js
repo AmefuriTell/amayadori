@@ -282,7 +282,8 @@ export function openOrbitGame(onClose, options = {}) {
       // 捕まえられない環境でも続ける。
     }
     // 遊んでいる間に画面を触ったら、すぐ ×1 に戻す（狙って加速したい時や、次の衛星を出す時に間に合うように）。
-    // 早送り中に触った時は ×1 に戻すだけで、引っ張りも説明も出さない（2 本目の指のズームは下で今までどおり）。
+    // 早送り中に触った時も、そのまま引っ張れる（止めるだけの 1 回が要ると、次の衛星を出せないと感じるため）。
+    // 引きが短ければ出ないので、止めたいだけのタップで衛星は出ない。その時は「置けません」などの説明も出さない。
     const wasCruising = playing && panel.hidden && speed > 1;
     if (playing && panel.hidden) {
       speed = 1;
@@ -295,18 +296,19 @@ export function openOrbitGame(onClose, options = {}) {
       else pinch = null;
       return;
     }
-    if (wasCruising) return;
     if (!playing || !panel.hidden || activePointer !== null || satellitesLeft(game) <= 0) return;
     const at = pointerPosition(event);
     if (style === "place") {
       const from = toWorld(at);
       if (!canPlace(game, from)) {
+        if (wasCruising) return;
         hint.hidden = false;
         hint.textContent = "そこには置けません（地球・月・回っている衛星に近すぎるか、遠すぎます）";
         return;
       }
       placeFrom = from;
     } else if (!canLaunch(game, earthStart)) {
+      if (wasCruising) return;
       hint.hidden = false;
       hint.textContent = "前の衛星が射場から離れるまで待ってください";
       return;
