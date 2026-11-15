@@ -423,6 +423,8 @@ export function openOrbitGame(onClose, options = {}) {
     if (touching) lastAction = game.t;
     const target = targetSpeed(game, lastAction, touching);
     speed = target === 1 ? 1 : speed + (target - speed) * Math.min(1, seconds * 3);
+    // 引いている間はゲームの時間を止める（射場・月・衛星が動かず、狙ったとおりに打てる。2 本指のズームは cancelDrag で外れる）。
+    if (activePointer !== null && dragPull) return;
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);
     // 早送りでも跡の線が角張らないよう、0.25 ゲーム秒以下に区切って進め、区切りごとに跡へ点を足す。
