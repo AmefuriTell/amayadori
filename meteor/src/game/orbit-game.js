@@ -375,7 +375,13 @@ export function openOrbitGame(onClose, options = {}) {
   function makeGif() {
     const run = gifRun;
     const made = { blob: null, ready: null };
-    made.ready = makeOrbitGif(gifRecord, { colors: COLORS, stars, isCancelled: () => run !== gifRun || !overlay.isConnected })
+    made.ready = makeOrbitGif(gifRecord, {
+      colors: COLORS,
+      stars,
+      // 縮尺は月の軌道の内側の点で決める（飛んでいった衛星の跡は画面の外へ出ていく線のまま）。
+      limit: Math.max(0, ...game.world.moons.map((moon) => moon.distance)),
+      isCancelled: () => run !== gifRun || !overlay.isConnected,
+    })
       .catch(() => null)
       .then((blob) => (made.blob = blob));
     gif = made;

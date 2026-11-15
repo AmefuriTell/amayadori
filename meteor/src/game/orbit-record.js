@@ -2,8 +2,8 @@
 // 絵を描く所（orbit-gif.js）から分けて、画面に頼らずに node --test で確かめる。
 // 記録は { t: ゲームの時刻, x, y, c: 色の番号 } の並び（時刻の順）。
 
-// 記録の間隔（ゲームの秒。速さによらずゲームの時間で数える）。
-export const RECORD_EVERY = 0.5;
+// 記録の間隔（ゲームの秒。速さによらずゲームの時間で数える）。0.5 秒では低い軌道の跡が角張ったので 0.25 秒。
+export const RECORD_EVERY = 0.25;
 // GIF の大きさ（px）・コマの数・1 コマの長さ（ms。15 fps）・最後のコマを止めて見せる長さ（ms）・縁の余白（px）。
 export const GIF_SIZE = 360;
 export const GIF_FRAMES = 45;
@@ -13,9 +13,13 @@ export const GIF_MARGIN = 14;
 // 地球の縁（drawEarth の大気の輪の半径）。
 const EARTH_EDGE = 1.08;
 
-// 地球の半径の px: 記録した全点と地球が、余白を除いた所に収まる大きさ。
-export function gifScale(points, size = GIF_SIZE, margin = GIF_MARGIN) {
-  const far = points.reduce((most, point) => Math.max(most, Math.hypot(point.x, point.y)), EARTH_EDGE);
+// 地球の半径の px: 記録した点と地球が、余白を除いた所に収まる大きさ。地球から limit（月の軌道の半径）より遠い点は数えない
+// （飛んでいった衛星に合わせると地球が小さくなりすぎるため。その跡は画面の外へ出ていく線のまま描く）。
+export function gifScale(points, size = GIF_SIZE, margin = GIF_MARGIN, limit = Infinity) {
+  const far = points.reduce((most, point) => {
+    const distance = Math.hypot(point.x, point.y);
+    return distance > limit ? most : Math.max(most, distance);
+  }, EARTH_EDGE);
   return (size / 2 - margin) / far;
 }
 

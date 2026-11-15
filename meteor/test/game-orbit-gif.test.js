@@ -13,14 +13,16 @@ const points = [
   { t: 2, x: 3, y: 2, c: 0 },
 ];
 
-test("the record is taken every half a game second", () => {
-  assert.equal(RECORD_EVERY, 0.5);
+test("the record is taken every quarter of a game second", () => {
+  assert.equal(RECORD_EVERY, 0.25);
 });
 
 test("the gif fits every recorded point and the earth inside the margin", () => {
   assert.equal(gifScale(points, 360, 14), 166 / 4);
   // 点が地球の中だけなら、地球（大気の輪 1.08）が収まる大きさ。
   assert.equal(gifScale([{ t: 0, x: 0.5, y: 0, c: 0 }], 360, 14), 166 / 1.08);
+  // 月の軌道（limit）より遠い点（飛んでいった衛星）は縮尺に数えない。
+  assert.equal(gifScale([...points, { t: 3, x: 12, y: 0, c: 0 }], 360, 14, 5), 166 / 4);
 });
 
 test("the frames grow from the first record to the last, the last frame has everything", () => {

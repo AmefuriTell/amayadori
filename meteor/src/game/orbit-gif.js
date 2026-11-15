@@ -1,6 +1,7 @@
 // 軌道に乗せろの投稿に付ける GIF: 360 px の正方形に、地球を中心に衛星ごとの跡の線が伸びていく（約 3 秒・45 コマ、
 // 最後のコマを 1 秒ほど止めて、くり返す。文字は入れない）。DESIGN.md。符号化は gifenc（MIT）。
 // 画面に出さない canvas で 1 コマずつ描き、コマごとに間をあけて画面を固まらせない。
+/*! gifenc 1.0.3 | MIT License | Copyright (c) 2017 Matt DesLauriers */
 import { GIFEncoder, applyPalette, quantize } from "gifenc";
 import { drawEarth, drawSatellite, drawSpace } from "./draw.js";
 import { SAT_RADIUS } from "./orbit.js";
@@ -16,12 +17,13 @@ function makeCanvas(size) {
   return canvas;
 }
 
-// points は記録（orbit-record.js）、colors は色の番号の色、stars は背景の星。isCancelled が真になったらやめて null を返す。
-export async function makeOrbitGif(points, { colors, stars, isCancelled = () => false }) {
+// points は記録（orbit-record.js）、colors は色の番号の色、stars は背景の星、limit は縮尺に数える点の地球からの距離の上限
+// （月の軌道の半径）。isCancelled が真になったらやめて null を返す。
+export async function makeOrbitGif(points, { colors, stars, limit = Infinity, isCancelled = () => false }) {
   if (!points.length) return null;
   const size = GIF_SIZE;
   const center = { x: size / 2, y: size / 2 };
-  const scale = gifScale(points, size);
+  const scale = gifScale(points, size, undefined, limit);
   const toScreen = (point) => ({ x: center.x + point.x * scale, y: center.y - point.y * scale });
   // 背景と地球はどのコマも同じなので 1 回だけ描いておく（地球の回転は 0）。
   const back = makeCanvas(size);
