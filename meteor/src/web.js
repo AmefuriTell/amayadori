@@ -47,11 +47,11 @@ if (typeof document !== "undefined") {
     gif.note?.(`${text} [v=${version} mobile=${isMobileDevice(navigator)} share=${Boolean(navigator.share)} canShare=${probe} gif=${state} err=${lastError}]`);
   };
   // 共有に渡す。waited は、GIF ができるのを待った後か（待つと押した操作の有効な時間を過ぎ、NotAllowedError になることがある）。
-  // 共有の途中（sharing）は押しても何もしない。取りやめ・前の共有がまだ開いている（InvalidStateError）は何も出さない。
+  // 取りやめ・前の共有がまだ開いている（InvalidStateError）は何も出さない（二度押しはこれで守る。share の決着しない端末で押せなくならないよう、印は付けない）。
   const shareGif = (blob, message, url, gif, waited) => {
     const file = new File([blob], "orbit.gif", { type: "image/gif" });
     if (!navigator.canShare?.({ files: [file] })) return false;
-    gif.sharing = true;
+    say(gif, "");
     navigator
       .share({ files: [file], text: xShareText(message, url) })
       .then(
@@ -63,8 +63,7 @@ if (typeof document !== "undefined") {
           gif.noShare = true;
           say(gif, "共有できませんでした。もう一度押してください");
         },
-      )
-      .finally(() => (gif.sharing = false));
+      );
     return true;
   };
   const post = (message, daily, gif) => {
