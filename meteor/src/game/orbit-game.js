@@ -208,7 +208,8 @@ export function openOrbitGame(onClose, options = {}) {
           max: baseScale() * 2.5,
         })
       : homeView();
-    camera = easeView(camera, goal, seconds, 0.4);
+    // 引く（縮尺が小さくなる）時はゆっくり（0.9 秒）、寄る時は 0.4 秒。
+    camera = easeView(camera, goal, seconds, goal.scale < camera.scale ? 0.9 : 0.4);
   }
   // 手でズームしたら、その衛星の追いかけをやめる。今の寄りを zoom に移す（見え方が跳ばないように）。追っていたら true。
   function stopFollow() {
@@ -740,7 +741,8 @@ export function openOrbitGame(onClose, options = {}) {
       const target = boostTarget(game);
       if (target && target.turns === 0) {
         const lineEnd = drawAimLine(target, { x: target.vx, y: target.vy }, COLORS[game.satellites.indexOf(target) % COLORS.length]);
-        followPath = predicted.points;
+        // 飛んでいく線（遠くまで伸びる）は寄りに入れない（噴射しすぎた時に画面が大きく振れないように）。
+        followPath = predicted.end === "away" ? [] : predicted.points;
         clickOnTurn(followEnd, lineEnd);
         followEnd = lineEnd;
       }
