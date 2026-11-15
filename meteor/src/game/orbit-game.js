@@ -47,7 +47,8 @@ const VIEW_RADIUS = 5.7;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
-const END_TEXT = { earth: "地球に落ちた", moon: "月にぶつかった", crash: "衛星どうしでぶつかった", away: "遠くへ飛んでいった" };
+// 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
+const END_SHORT = { earth: "落ちた", moon: "月", crash: "衝突", away: "飛んだ" };
 
 export function openOrbitGame(onClose, options = {}) {
   const overlay = element("div", undefined, "game");
@@ -136,8 +137,10 @@ export function openOrbitGame(onClose, options = {}) {
     item.addEventListener("click", onClick);
     return item;
   }
+  // detail は文字列か要素（要素ならそのまま説明の行にする。無ければ説明の行を出さない）。
   function openPanel(heading, detail, buttons) {
-    panel.replaceChildren(element("div", heading, "game-result"), element("div", detail, "game-detail"), ...buttons);
+    const detailRow = typeof detail === "string" ? element("div", detail, "game-detail") : detail;
+    panel.replaceChildren(element("div", heading, "game-result"), ...(detailRow ? [detailRow] : []), ...buttons);
     panel.hidden = false;
     hint.hidden = true;
   }
@@ -194,16 +197,27 @@ export function openOrbitGame(onClose, options = {}) {
       best = { ...best, [key]: score.points };
       saveBest(best);
     }
-    const lines = game.satellites.map((satellite, index) => `${index + 1}機目: ${satellite.turns}周${satellite.end ? `・${END_TEXT[satellite.end]}` : "・回り続けた"}`);
     openPanel(
       `${record ? "新記録！ " : ""}軌道ポイント ${score.points}`,
-      `合計 ${score.turns} 周・いちばん大きな軌道は地球の半径の ${score.biggest.toFixed(1)} 倍（${lines.join("、") || "衛星なし"}）`,
+      satelliteLine(),
       [
         button("もう一度", start),
         ...(options.post && score.points > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
         resultLinks(),
       ],
     );
+  }
+
+  // 結果の説明の 1 行: 衛星ごとの周の数（いなくなった衛星は短い終わり方も）を衛星の色で並べる。衛星が無ければ出さない。
+  function satelliteLine() {
+    if (!game.satellites.length) return undefined;
+    const row = element("div", undefined, "game-detail orbit-result-line");
+    game.satellites.forEach((satellite, index) => {
+      const item = element("span", `${satellite.turns}周${satellite.end ? ` ${END_SHORT[satellite.end]}` : ""}`);
+      item.style.color = COLORS[index % COLORS.length];
+      row.append(...(index ? ["　"] : []), item);
+    });
+    return row;
   }
 
   // 結果の画面の下の、文字だけのリンクの 1 行（設定を変える・今日のお題へ）。
