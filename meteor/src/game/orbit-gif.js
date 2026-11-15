@@ -79,13 +79,13 @@ export async function makeOrbitGif(points, { colors, stars, limit = Infinity, is
     c.globalAlpha = 1;
   }
 
-  // whole が真なら、記録の終わりまでの全体を遊ぶ時の濃さで描く（最後に止めるコマ）。偽なら 2 段（全体を薄く・直近を濃く）。
-  function drawFrame(cutoff, whole) {
+  // 2 段で描く（そこまでの全体を薄く・直近を濃く）。最後に止めるコマも同じ（長い回でも厚い帯にならず、最後の 1 周が濃く乗る）。
+  function drawFrame(cutoff) {
     c.drawImage(back, 0, 0);
     for (const path of gifPaths(points, cutoff, GIF_RECENT)) {
       const color = colors[path.color % colors.length];
       const at = path.points.map(toScreen);
-      if (whole || path.ended) line(at, color, path.ended ? FAINT : ALPHA);
+      if (path.ended) line(at, color, FAINT);
       else {
         line(at, color, FAINT);
         line(path.recent.map(toScreen), color, ALPHA);
@@ -103,19 +103,19 @@ export async function makeOrbitGif(points, { colors, stars, limit = Infinity, is
 
   const cutoffs = gifCutoffs(points);
   const end = points[points.length - 1].t;
-  // 色は 256 色以下。最後のコマ（全体を濃く）と、動くコマを 5 つ（薄い跡・濃い跡・衛星の印。途中でいなくなる衛星の色も入るように）
+  // 色は 256 色以下。最後のコマと、動くコマを 5 つ（薄い跡・濃い跡・衛星の印。途中でいなくなる衛星の色も入るように）
   // から選び、全コマで同じパレットを使う。
-  const picks = [drawFrame(end, true), ...[0, 0.25, 0.5, 0.75, 1].map((share) => drawFrame(cutoffs[Math.max(0, Math.ceil(share * cutoffs.length) - 1)], false))];
+  const picks = [drawFrame(end), ...[0, 0.25, 0.5, 0.75, 1].map((share) => drawFrame(cutoffs[Math.max(0, Math.ceil(share * cutoffs.length) - 1)]))];
   const sample = new Uint8ClampedArray(picks[0].length * picks.length);
   picks.forEach((data, index) => sample.set(data, index * data.length));
   const palette = quantize(sample, 256);
   await pause();
   const gif = GIFEncoder();
-  const frames = [...cutoffs.map((cutoff) => [cutoff, false]), [end, true]];
+  const frames = [...cutoffs, end];
   for (let index = 0; index < frames.length; index += 1) {
     if (isCancelled()) return null;
     const final = index === frames.length - 1;
-    gif.writeFrame(applyPalette(drawFrame(...frames[index]), palette), size, size, {
+    gif.writeFrame(applyPalette(drawFrame(frames[index]), palette), size, size, {
       palette: index === 0 ? palette : undefined,
       delay: final ? GIF_DELAY + GIF_HOLD : GIF_DELAY,
       repeat: 0,
