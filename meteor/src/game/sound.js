@@ -11,7 +11,7 @@ export const ZZFX_VOLUME = 1;
 const STORAGE_KEY = "meteor.sound";
 
 // event: "launch"（投げた・衛星を出した）・"earth"（地球に当たった。km は的からのずれ）・"moon"（月に当たった）・"away"（外れ・飛んでいった）・
-// "orbit"（軌道に乗せろで、衛星が最初の 1 周を回り切った）。
+// "orbit"（軌道に乗せろで、衛星が最初の 1 周を回り切った）・"aim"（軌道に乗せろで、引いている線が 1 周回る線になった）。
 // 鳴らす音（ZzFX の引数）の一覧を返す。知らない event は null。
 export function soundFor(event, km) {
   if (event === "launch") {
@@ -36,6 +36,10 @@ export function soundFor(event, km) {
   if (event === "orbit") {
     // 最初の 1 周（軌道に乗せろ）: 短い上がり調子の「ピロン」。正弦波 880 Hz を 0.06 秒で 1320 Hz へ跳ね上げ、0.3 秒で消す。
     return [[0.35, 0, 880, 0, 0.04, 0.25, 0, 1, 0, 0, 440, 0.06]];
+  }
+  if (event === "aim") {
+    // 引いている線が 1 周回る線になった（軌道に乗せろ）: ごく小さく短い「カチッ」。正弦波 1400 Hz を約 0.03 秒。
+    return [[0.12, 0, 1400, 0, 0.005, 0.025, 0]];
   }
   return null;
 }

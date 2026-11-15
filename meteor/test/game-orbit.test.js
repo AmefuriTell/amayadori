@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE } from "../src/game/physics.js";
 import {
+  aimClick,
   BOOST,
   CRUISE_AFTER,
   CRUISE_AFTER_PLACING,
@@ -516,4 +517,11 @@ test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give
     assert.equal(satellite.turns, other.turns, `${index}`);
   });
   assert.ok(Math.abs(scoreOf(slow).points - scoreOf(fast).points) <= 0.5, `${scoreOf(slow).points} vs ${scoreOf(fast).points}`);
+});
+
+test("aimClick: true only when the predicted end turns into a full turn", () => {
+  assert.equal(aimClick(null, "turn"), true);
+  assert.equal(aimClick("earth", "turn"), true);
+  assert.equal(aimClick("turn", "turn"), false);
+  assert.equal(aimClick("turn", "away"), false);
 });
