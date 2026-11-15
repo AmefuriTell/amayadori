@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, xIntentUrl } from "../src/share.js";
+import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, xIntentUrl, xShareText } from "../src/share.js";
 
 test("share uses the device share sheet when there is one, with a link to today's challenge", async () => {
   const shared = [];
@@ -37,4 +37,8 @@ test("the link in a post leads to today's challenge only for daily results", () 
   assert.equal(postUrl("https://example.test/meteor/?daily#a", true), "https://example.test/meteor/?daily");
   assert.equal(postUrl("https://example.test/meteor/?daily#a", false), "https://example.test/meteor/");
   assert.equal(pageUrl(PUBLIC_GAME_URL), "https://amefuritell.github.io/amayadori/meteor/");
+});
+
+test("the text for sharing a post with a file has the text, the link and the hashtag", () => {
+  assert.equal(xShareText("🛰️ 軌道に乗せろ（ふつうモード）: 3 周", "https://example.test/meteor/"), "🛰️ 軌道に乗せろ（ふつうモード）: 3 周 https://example.test/meteor/ #隕石を当てろ");
 });

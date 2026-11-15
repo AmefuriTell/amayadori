@@ -54,3 +54,29 @@ export function drawEarth(c, center, scale, rotation) {
   c.fill(landShapes(), "evenodd");
   c.restore();
 }
+
+// 衛星 1 機: 本体の四角と左右の太陽電池パネル（細い線でつなぐ）。パネルは進む向き（angle）に直角に並べる。
+// size は前の丸の半径。パネルを含めた幅は 5.8 × size（丸の直径の 2.9 倍）。パネルは同じ色で不透明度 0.7。
+export function drawSatellite(c, x, y, angle, color, size) {
+  const body = 0.9 * size;
+  const gap = 0.4 * size;
+  const length = 1.6 * size;
+  const thick = 0.8 * size;
+  c.save();
+  c.translate(x, y);
+  c.rotate(angle);
+  c.fillStyle = color;
+  c.fillRect(-body, -body, 2 * body, 2 * body);
+  c.globalAlpha *= 0.7;
+  c.strokeStyle = color;
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(0, -body);
+  c.lineTo(0, -body - gap);
+  c.moveTo(0, body);
+  c.lineTo(0, body + gap);
+  c.stroke();
+  c.fillRect(-thick / 2, -body - gap - length, thick, length);
+  c.fillRect(-thick / 2, body + gap, thick, length);
+  c.restore();
+}

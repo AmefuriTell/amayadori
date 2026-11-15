@@ -31,6 +31,12 @@ export function xIntentUrl(text, url) {
   return intent.href;
 }
 
+// 端末の共有で 𝕏 に渡す文（Web Intent と同じ中身: 文・URL・ハッシュタグ）。共有だと URL の欄が落ちる 𝕏 のアプリがあるので、
+// URL も文の中に入れる。
+export function xShareText(text, url) {
+  return `${text} ${url} #${HASHTAG}`;
+}
+
 // 投稿に付ける URL: 今日のお題の結果なら ?daily 付き（開いた人が同じお題に挑める）、ほかはページそのもの。
 export function postUrl(base, daily) {
   return daily ? shareUrl(base) : pageUrl(base);
