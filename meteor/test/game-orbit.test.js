@@ -360,3 +360,16 @@ test("predictOrbit leaves the game as it was", () => {
   assert.equal(game.nextId, 2);
   assert.equal(game.satellites.length, 1);
 });
+
+test("predictOrbit: the same place and speed gives a different line later, because the moon has moved", () => {
+  // 画面は時計が進めば計算し直す（orbit-game.js）。その理由を残す: 月の近くを通る軌道は、時刻で結果が変わる。
+  const early = createOrbitGame(DEFAULT_WORLD);
+  const late = createOrbitGame(DEFAULT_WORLD);
+  late.t = 3;
+  const position = { x: 0, y: -4 };
+  const velocity = { x: Math.sqrt(EARTH_GM / 4), y: 0 };
+  const a = predictOrbit(early, position, velocity);
+  const b = predictOrbit(late, position, velocity);
+  const last = (r) => r.points[r.points.length - 1];
+  assert.ok(a.end !== b.end || Math.hypot(last(a).x - last(b).x, last(a).y - last(b).y) > 0.1);
+});

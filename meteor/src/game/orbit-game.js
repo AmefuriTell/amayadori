@@ -442,7 +442,8 @@ export function openOrbitGame(onClose, options = {}) {
         velocity = { x: velocity.x + spin.x, y: velocity.y + spin.y };
       }
       // 1 周回るか、落ちる・飛んでいくまで（最長 240 秒）の道筋を線 1 本で見せ、落ちる所に赤い点を描く。
-      const key = `${origin.x},${origin.y},${velocity.x},${velocity.y}`;
+      // 印に時刻を入れる（指を止めていても月は動くので、時計が進めば計算し直す。進まない 1 機目の前だけ使い回す）。
+      const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
       if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, origin, velocity) };
       c.strokeStyle = "rgba(255,255,255,0.6)";
       c.lineWidth = 1.5;
