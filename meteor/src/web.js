@@ -35,17 +35,57 @@ if (typeof document !== "undefined") {
   // があれば付ける: Web Intent では画像を付けられないので、スマホ・タブレットで端末の共有にファイルを渡せればそれで（文に URL と
   // ハッシュタグを入れる）、ほかは投稿の画面を先に開いて（ポップアップを止められないように同期で）、GIF を 1 回だけ保存させる
   // （添付は利用者が手で）。共有が取りやめ以外で失敗したら、その場では開かず（止められるため）、次に押した時に開いて保存する。
+  // ?debug を付けた時だけ、案内の行に共有の状態を足す（実機で GIF が付かない原因を絞るため）。
+  const debug = new URLSearchParams(window.location.search).has("debug");
+  let lastError = "-";
+  const say = (gif, text) => {
+    if (!debug) return gif.note?.(text);
+    const script = document.querySelector('script[src*="meteor.js"]');
+    const version = script ? new URL(script.src).searchParams.get("v") : "?";
+    const probe = navigator.canShare?.({ files: [new File([], "orbit.gif", { type: "image/gif" })] });
+    const state = gif.blob ? gif.blob.size : gif.done ? "null" : "作成中";
+    gif.note?.(`${text} [v=${version} mobile=${isMobileDevice(navigator)} share=${Boolean(navigator.share)} canShare=${probe} gif=${state} err=${lastError}]`);
+  };
+  // 共有に渡す。waited は、GIF ができるのを待った後か（待つと押した操作の有効な時間を過ぎ、NotAllowedError になることがある）。
+  // 取りやめ・前の共有がまだ開いている（InvalidStateError）は何も出さない（二度押しはこれで守る。share の決着しない端末で押せなくならないよう、印は付けない）。
+  const shareGif = (blob, message, url, gif, waited) => {
+    const file = new File([blob], "orbit.gif", { type: "image/gif" });
+    if (!navigator.canShare?.({ files: [file] })) return false;
+    say(gif, "");
+    navigator
+      .share({ files: [file], text: xShareText(message, url) })
+      .then(
+        () => say(gif, ""),
+        (error) => {
+          lastError = error?.name || "Error";
+          if (lastError === "AbortError" || lastError === "InvalidStateError") return say(gif, "");
+          if (lastError === "NotAllowedError" && waited) return say(gif, "GIF ができました。もう一度押してください");
+          gif.noShare = true;
+          say(gif, "共有できませんでした。もう一度押してください");
+        },
+      );
+    return true;
+  };
   const post = (message, daily, gif) => {
     const url = postUrl(window.location.href, daily);
-    const file = gif?.blob && !gif.noShare && isMobileDevice(navigator) ? new File([gif.blob], "orbit.gif", { type: "image/gif" }) : null;
-    if (file && navigator.canShare?.({ files: [file] })) {
-      navigator.share({ files: [file], text: xShareText(message, url) }).catch((error) => {
-        if (error?.name === "AbortError") return;
+    if (gif?.sharing) return;
+    // スマホで、GIF の型のファイルを共有に渡せる時だけ共有を使う（渡せなければ、待たずに投稿の画面と保存へ）。
+    const mobileShare =
+      gif && !gif.noShare && isMobileDevice(navigator) && navigator.share && navigator.canShare?.({ files: [new File([], "orbit.gif", { type: "image/gif" })] });
+    if (mobileShare && gif.blob && shareGif(gif.blob, message, url, gif, false)) return;
+    // スマホでまだ GIF ができていない時は、できるのを待って共有する（前は待たずに投稿の画面を開き、Android の Chrome で GIF が付かなかった）。
+    if (mobileShare && !gif.blob && !gif.done) {
+      gif.sharing = true;
+      say(gif, "GIF を作っています…");
+      gif.ready.then((blob) => {
+        gif.sharing = false;
+        if (blob && shareGif(blob, message, url, gif, true)) return;
         gif.noShare = true;
-        gif.note?.("共有できませんでした。もう一度押してください");
+        say(gif, "共有できませんでした。もう一度押してください");
       });
       return;
     }
+    if (debug && gif) say(gif, "投稿の画面を開きます");
     window.open(xIntentUrl(message, url), "_blank", "noopener");
     if (!gif || gif.saved) return;
     gif.saved = true;

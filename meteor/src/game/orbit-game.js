@@ -388,7 +388,7 @@ export function openOrbitGame(onClose, options = {}) {
       ready: null,
       note: (text) => {
         note.textContent = text;
-        note.hidden = false;
+        note.hidden = !text;
       },
     };
     made.ready = makeOrbitGif(gifRecord, {
@@ -399,7 +399,11 @@ export function openOrbitGame(onClose, options = {}) {
       isCancelled: () => run !== gifRun || !overlay.isConnected,
     })
       .catch(() => null)
-      .then((blob) => (made.blob = blob));
+      .then((blob) => {
+        made.done = true;
+        made.blob = blob;
+        return blob;
+      });
     gif = made;
   }
 
