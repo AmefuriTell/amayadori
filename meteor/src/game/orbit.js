@@ -8,7 +8,7 @@
 // 少ないので、「たくさん回る（安全）」と「大きく回る（点は多いが危ない）」のどちらを取るかを考える遊びになる。
 import { DEFAULT_WORLD, STEP, angleOfLongitude, moonPositions } from "./physics.js";
 
-// 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。早送りで縮められる）。
+// 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。全機を出し終えて操作が無くなると、画面が自動で早送りする）。
 export const SATELLITES = 3;
 export const GAME_SECONDS = 600;
 // 衛星の大きさ（ぶつかりの判定。2 機の中心がこの 2 倍より近いとぶつかる）と、引き合うモードでの衛星の重さ（地球の 1/100）。
@@ -322,8 +322,16 @@ export function endSound(before, game) {
   return null;
 }
 
-// 早送りの速さの選択肢。
-export const SPEEDS = [1, 4, 16];
+// 自動の早送り: 全機を出し終え、生きている衛星があり、最後の操作（衛星を出す・加速）から CRUISE_AFTER 秒（ゲームの時間）たったら、
+// 画面は時計を CRUISE_SPEED 倍で進める（それ以外は ×1）。step() は STEP 刻みなので、倍率で点は（ほぼ）変わらない。
+export const CRUISE_SPEED = 32;
+export const CRUISE_AFTER = 10;
+
+// targetSpeed: 今の目標の速さ（lastAction は最後に衛星を出した・加速した時刻 game.t）。
+export function targetSpeed(game, lastAction) {
+  const cruising = satellitesLeft(game) <= 0 && game.satellites.some((satellite) => satellite.alive) && game.t - lastAction >= CRUISE_AFTER;
+  return cruising ? CRUISE_SPEED : 1;
+}
 
 // ズームの範囲（画面の基準の大きさに掛ける倍率）。
 export const ZOOM_MIN = 0.35;

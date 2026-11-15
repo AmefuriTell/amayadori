@@ -10,7 +10,6 @@ import {
   GAME_SECONDS,
   SATELLITES,
   SAT_RADIUS,
-  SPEEDS,
   addSatellite,
   boost,
   boostTarget,
@@ -31,6 +30,7 @@ import {
   saveBest,
   scoreOf,
   step,
+  targetSpeed,
   turnsOf,
 } from "./orbit.js";
 import { drawEarth, drawSpace, makeStars } from "./draw.js";
@@ -59,11 +59,10 @@ export function openOrbitGame(onClose, options = {}) {
   bar.append(close, title, back);
   const controls = element("div", undefined, "orbit-controls");
   const boostButton = element("button", "", "game-button orbit-boost");
-  const speedButtons = SPEEDS.map((speed) => element("button", `×${speed}`, "game-button orbit-speed"));
   const zoomOut = element("button", "－", "game-button orbit-zoom");
   const zoomIn = element("button", "＋", "game-button orbit-zoom");
   const finish = element("button", "終了", "game-button");
-  controls.append(boostButton, ...speedButtons, zoomOut, zoomIn, finish);
+  controls.append(boostButton, zoomOut, zoomIn, finish);
   const hint = element("div", "", "game-hint orbit-hint");
   // 説明と操作のボタンを下に縦に積む（ボタンが 2 段に折れても、説明が重ならないように）。
   const bottom = element("div", undefined, "orbit-bottom");
@@ -77,7 +76,9 @@ export function openOrbitGame(onClose, options = {}) {
 
   let size = { width: 0, height: 0, ratio: 1 };
   let zoom = 1;
+  // 時計の進む速さ（全機を出し終えて操作が無くなると、targetSpeed で自動に早送りする）と、最後に操作した時刻（game.t）。
   let speed = 1;
+  let lastAction = 0;
   let style = "place";
   let mutual = false;
   let game = createOrbitGame(DEFAULT_WORLD, mutual);
@@ -98,7 +99,7 @@ export function openOrbitGame(onClose, options = {}) {
   let pinch = null;
   let frame = 0;
   let last = performance.now();
-  // 地球・月に落ちた衛星や、ぶつかった衛星の爆発（世界の位置。早送りしていても、見える速さで進める）。
+  // 地球・月に落ちた衛星や、ぶつかった衛星の爆発（世界の位置。自動で早送りしていても、見える速さで進める）。
   let explosions = [];
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   // 効果音（隕石当てと同じ audio.js。消音は隕石当ての「ほかの遊び方」の「音: あり／なし」）。最初に触ったときに読み込み、
@@ -160,8 +161,9 @@ export function openOrbitGame(onClose, options = {}) {
     earthStart = Math.random() * Math.PI * 2;
     trails = new Map();
     explosions = [];
-    // 早送りは毎回 ×1 から（前のゲームの ×16 のまま始まると、打ち上げてすぐ落ちて加速が間に合わないため）。
+    // 毎回 ×1 から（早送りのまま始まると、打ち上げてすぐ落ちて加速が間に合わないため）。
     speed = 1;
+    lastAction = 0;
     cancelDrag();
     playing = true;
     panel.hidden = true;
@@ -292,6 +294,7 @@ export function openOrbitGame(onClose, options = {}) {
       const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
       if (satellite) {
         trails.set(satellite.id, []);
+        lastAction = game.t;
         audio.play("launch");
       }
     }
@@ -316,13 +319,8 @@ export function openOrbitGame(onClose, options = {}) {
   );
   zoomIn.addEventListener("click", () => (zoom = clampZoom(zoom * 1.25)));
   zoomOut.addEventListener("click", () => (zoom = clampZoom(zoom / 1.25)));
-  speedButtons.forEach((item, index) =>
-    item.addEventListener("click", () => {
-      speed = SPEEDS[index];
-    }),
-  );
   boostButton.addEventListener("click", () => {
-    if (playing) boost(boostTarget(game));
+    if (playing && boost(boostTarget(game))) lastAction = game.t;
   });
   finish.addEventListener("click", () => {
     if (playing) finishGame();
@@ -351,39 +349,53 @@ export function openOrbitGame(onClose, options = {}) {
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `🔥 加速（${shots}）`);
     boostButton.disabled = !playing || shots === 0;
-    speedButtons.forEach((item, index) => item.setAttribute("aria-pressed", String(SPEEDS[index] === speed)));
     controls.hidden = !playing;
   }
 
   function update(seconds) {
     explosions = explosions.filter((explosion) => advanceExplosion(explosion, seconds));
     if (!playing) return;
+    // 速さを目標へ滑らかに寄せる。目標が ×1 に戻ったら（加速した時など）すぐ ×1 にする。
+    const target = targetSpeed(game, lastAction);
+    speed = target === 1 ? 1 : speed + (target - speed) * Math.min(1, seconds * 3);
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);
-    step(game, seconds * speed);
+    // 早送りでも跡の線が角張らないよう、0.25 ゲーム秒以下に区切って進め、区切りごとに跡へ点を足す。
+    // いなくなった衛星の爆発の場所は、いなくなった区切りの時刻で決める（音と爆発はフレームの後でまとめて 1 回）。
+    const total = seconds * speed;
+    const parts = Math.max(1, Math.ceil(total / 0.25));
+    const anchors = new Map();
+    for (let part = 0; part < parts; part += 1) {
+      step(game, total / parts);
+      for (const satellite of alive) {
+        // 遠くへ飛んでいったものは爆発させない。
+        if (satellite.alive || satellite.end === "away" || anchors.has(satellite.id)) continue;
+        // 月に落ちたら月に、地球に落ちたら自転に付いていく（早送りでも爆発が置き去りにならないように）。ぶつかり合いはその場。
+        anchors.set(
+          satellite.id,
+          satellite.end === "moon"
+            ? moonAnchor(game.world, game.t, satellite)
+            : satellite.end === "earth"
+              ? earthAnchor(satellite, angleOfLongitude(0, game.t, earthStart, game.world.earthPeriod))
+              : { x: satellite.x, y: satellite.y },
+        );
+      }
+      for (const satellite of game.satellites) {
+        const trail = trails.get(satellite.id);
+        if (!trail || !satellite.alive) continue;
+        trail.push({ x: satellite.x, y: satellite.y });
+        if (trail.length > TRAIL_POINTS) trail.shift();
+      }
+    }
     // 最初の 1 周を回り切った衛星があれば 1 回だけ鳴らす。いなくなった衛星があれば、その理由で 1 回（衝突を優先）。
     if (firstTurns(turnsBefore, game)) audio.play("orbit");
     const gone = endSound(turnsBefore, game);
     if (gone) audio.play(gone.event, gone.km);
     for (const satellite of alive) {
-      // 遠くへ飛んでいったものは爆発させない。
-      if (!satellite.alive && satellite.end !== "away") {
-        const explosion = createExplosion(satellite.end === "crash" ? 0.7 : 0.45);
-        // 月に落ちたら月に、地球に落ちたら自転に付いていく（×16 でも爆発が置き去りにならないように）。ぶつかり合いはその場。
-        explosion.at =
-          satellite.end === "moon"
-            ? moonAnchor(game.world, game.t, satellite)
-            : satellite.end === "earth"
-              ? earthAnchor(satellite, angleOfLongitude(0, game.t, earthStart, game.world.earthPeriod))
-              : { x: satellite.x, y: satellite.y };
-        explosions.push(explosion);
-      }
-    }
-    for (const satellite of game.satellites) {
-      const trail = trails.get(satellite.id);
-      if (!trail || !satellite.alive) continue;
-      trail.push({ x: satellite.x, y: satellite.y });
-      if (trail.length > TRAIL_POINTS) trail.shift();
+      if (!anchors.has(satellite.id)) continue;
+      const explosion = createExplosion(satellite.end === "crash" ? 0.7 : 0.45);
+      explosion.at = anchors.get(satellite.id);
+      explosions.push(explosion);
     }
     if (isOver(game)) finishGame();
   }
