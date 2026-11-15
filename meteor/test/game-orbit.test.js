@@ -168,8 +168,8 @@ test("zoom is clamped and best scores are kept per mode", () => {
   const data = new Map();
   const storage = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
   assert.deepEqual(loadBest(storage), {});
-  saveBest({ normal: 42.5, mutual: 7 }, storage);
-  assert.deepEqual(loadBest(storage), { normal: 42.5, mutual: 7 });
+  saveBest({ normal: 42, mutual: 7 }, storage);
+  assert.deepEqual(loadBest(storage), { normal: 42, mutual: 7 });
   storage.setItem("weatherbot.orbitTurns", "{bad");
   assert.deepEqual(loadBest(storage), {});
   assert.equal(ESCAPE_DISTANCE > MOON_DISTANCE * 2, true);

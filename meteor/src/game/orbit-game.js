@@ -157,7 +157,11 @@ export function openOrbitGame(onClose, options = {}) {
     title.textContent = "🛰️ 軌道に乗せろ";
     openPanel(
       "🛰️ 軌道に乗せろ",
-      `衛星を${SATELLITES}機、地球の周りに回らせる${bestText === undefined ? "" : `（いちばん良かったのは ${bestText} 周）`}`,
+      element(
+        "div",
+        `衛星を${SATELLITES}機、地球の周りに回す${bestText === undefined ? "" : `（最高 ${bestText} 周）`}`,
+        "game-detail orbit-result-line",
+      ),
       [
         button("📍 置く", () => ((style = "place"), showSetup()), style === "place"),
         button("🚀 打ち上げ", () => ((style = "launch"), showSetup()), style === "launch"),
