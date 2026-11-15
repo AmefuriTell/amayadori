@@ -35,7 +35,6 @@ import {
   saveBest,
   scoreOf,
   step,
-  targetSpeed,
   turnsOf,
 } from "./orbit.js";
 import { drawEarth, drawSpace, makeStars } from "./draw.js";
@@ -51,6 +50,8 @@ const VIEW_RADIUS = 5.7;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
+// 時計の速さの段（下の欄のボタンで順に切り替える）。
+const SPEEDS = [1, 4, 16];
 // 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
 const END_SHORT = { earth: "落ちた", moon: "月", crash: "衝突", away: "飛んだ" };
 
@@ -66,10 +67,11 @@ export function openOrbitGame(onClose, options = {}) {
   bar.append(close, title, back);
   const controls = element("div", undefined, "orbit-controls");
   const boostButton = element("button", "", "game-button orbit-boost");
-  const zoomOut = element("button", "－", "game-button orbit-zoom");
-  const zoomIn = element("button", "＋", "game-button orbit-zoom");
-  const finish = element("button", "終了", "game-button");
-  controls.append(boostButton, zoomOut, zoomIn, finish);
+  // 時計の速さのボタン（押すたびに ×1 → ×4 → ×16 → ×1。文字は今の速さ）。
+  // 主役は噴射だけなので、速さと終了は地を薄くして静かにする（同じ重さのボタンを 3 つ並べない）。
+  const speedButton = element("button", "×1", "game-button orbit-quiet orbit-speed");
+  const finish = element("button", "終了", "game-button orbit-quiet orbit-finish");
+  controls.append(boostButton, speedButton, finish);
   const hint = element("div", "", "game-hint orbit-hint");
   // 説明と操作のボタンを下に縦に積む（ボタンが 2 段に折れても、説明が重ならないように）。
   const bottom = element("div", undefined, "orbit-bottom");
@@ -83,9 +85,8 @@ export function openOrbitGame(onClose, options = {}) {
 
   let size = { width: 0, height: 0, ratio: 1 };
   let zoom = 1;
-  // 時計の進む速さ（操作が無くなると、targetSpeed で自動に早送りする）と、最後に操作した時刻（game.t）。
+  // 時計の進む速さ（下の欄のボタンで選ぶ。衛星を出した時だけ ×1 に戻す）。
   let speed = 1;
-  let lastAction = 0;
   // 置き方（"launch"・"place"）。開くたびに打ち上げから（設定で「置く」に変えたら、閉じるまでそのまま）。
   let style = "launch";
   let mutual = false;
@@ -113,7 +114,7 @@ export function openOrbitGame(onClose, options = {}) {
   let pinch = null;
   let frame = 0;
   let last = performance.now();
-  // 地球・月に落ちた衛星や、ぶつかった衛星の爆発（世界の位置。自動で早送りしていても、見える速さで進める）。
+  // 地球・月に落ちた衛星や、ぶつかった衛星の爆発（世界の位置。速めていても、見える速さで進める）。
   let explosions = [];
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   // 効果音（隕石当てと同じ audio.js。消音は隕石当ての「ほかの遊び方」の「音: あり／なし」）。最初に触ったときに読み込み、
@@ -181,9 +182,8 @@ export function openOrbitGame(onClose, options = {}) {
     earthStart = Math.random() * Math.PI * 2;
     trails = new Map();
     explosions = [];
-    // 毎回 ×1 から（早送りのまま始まると、打ち上げてすぐ落ちて加速が間に合わないため）。
-    speed = 1;
-    lastAction = 0;
+    // 毎回 ×1 から（速めたまま始まると、打ち上げてすぐ落ちて加速が間に合わないため）。
+    setSpeed(1);
     cancelDrag();
     followEnd = null;
     playing = true;
@@ -198,8 +198,8 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function finishGame() {
-    // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる。早送りの印は残さない）。
-    speed = 1;
+    // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる。速さの印は残さない）。
+    setSpeed(1);
     updateHud();
     playing = false;
     cancelDrag();
@@ -263,8 +263,7 @@ export function openOrbitGame(onClose, options = {}) {
     aimEnd = null;
   }
 
-  // 引っ張りの元。打ち上げのときは今の射場（引っ張っている間も地球と一緒に回る。指を置いた時の位置のままにすると、
-  // 道筋と実際の打ち上げがずれる）。置くときは触った所。
+  // 引っ張りの元。打ち上げのときは今の射場（引いている間は時間が止まるので、射場も止まっている）。置くときは触った所。
   function dragOrigin() {
     return style === "launch" ? launchSite(game, earthStart).position : placeFrom;
   }
@@ -274,23 +273,19 @@ export function openOrbitGame(onClose, options = {}) {
     pinch = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom };
   }
 
+  // 右クリックや Mac の Ctrl + クリックでメニューを出さない（出ると pointerup が届かず、時間が止まったままになるため）。
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
   canvas.addEventListener("pointerdown", (event) => {
     audio.load();
+    // マウスの右ボタンなどでは引きを始めず、指としても数えない（コンテキストメニューが出ると pointerup が届かず、時間が止まったままになるため）。
+    if (event.pointerType === "mouse" && event.button !== 0) return;
     touches.set(event.pointerId, pointerPosition(event));
     // 引っ張りを始めない時も指（マウス）を捕まえる。canvas の外で離しても pointerup が届き、touches に残らないように
-    // （残ると「触れている」ままになり、早送りが始まらない）。
+    // （残ると 2 本指のズームの数え方がずれる）。
     try {
       canvas.setPointerCapture(event.pointerId);
     } catch {
       // 捕まえられない環境でも続ける。
-    }
-    // 遊んでいる間に画面を触ったら、すぐ ×1 に戻す（狙って加速したい時や、次の衛星を出す時に間に合うように）。
-    // 早送り中に触った時も、そのまま引っ張れる（止めるだけの 1 回が要ると、次の衛星を出せないと感じるため）。
-    // 引きが短ければ出ないので、止めたいだけのタップで衛星は出ない。その時は「置けません」などの説明も出さない。
-    const wasCruising = playing && panel.hidden && speed > 1;
-    if (playing && panel.hidden) {
-      speed = 1;
-      lastAction = game.t;
     }
     if (touches.size >= 2) {
       // 2 本目の指: 引っ張りをやめて、2 本指のズームにする。3 本目以降はズームを止める（指の組が変わってズームが跳ねないように）。
@@ -304,14 +299,12 @@ export function openOrbitGame(onClose, options = {}) {
     if (style === "place") {
       const from = toWorld(at);
       if (!canPlace(game, from)) {
-        if (wasCruising) return;
         hint.hidden = false;
         hint.textContent = "そこには置けません（地球・月・回っている衛星に近すぎるか、遠すぎます）";
         return;
       }
       placeFrom = from;
     } else if (!canLaunch(game, earthStart)) {
-      if (wasCruising) return;
       hint.hidden = false;
       hint.textContent = "前の衛星が射場から離れるまで待ってください";
       return;
@@ -351,7 +344,8 @@ export function openOrbitGame(onClose, options = {}) {
       const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
       if (satellite) {
         trails.set(satellite.id, []);
-        lastAction = game.t;
+        // 衛星を出した時だけ ×1 に戻す（×16 のまま打ち上げると、てっぺんの噴射が間に合わないため）。
+        setSpeed(1);
         audio.play("launch");
         followEnd = aimEnd;
       }
@@ -375,15 +369,19 @@ export function openOrbitGame(onClose, options = {}) {
     },
     { passive: false },
   );
-  zoomIn.addEventListener("click", () => (zoom = clampZoom(zoom * 1.25)));
-  zoomOut.addEventListener("click", () => (zoom = clampZoom(zoom / 1.25)));
+  speedButton.addEventListener("click", () => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length]));
   boostButton.addEventListener("click", () => {
-    if (playing && boost(boostTarget(game))) lastAction = game.t;
+    if (playing && activePointer === null) boost(boostTarget(game));
   });
   finish.addEventListener("click", () => {
     if (playing) finishGame();
   });
   back.addEventListener("click", () => switchTo(openGame));
+
+  function setSpeed(value) {
+    speed = value;
+    setText(speedButton, `×${value}`);
+  }
 
   function setText(node, text) {
     if (node.textContent !== text) node.textContent = text;
@@ -406,7 +404,8 @@ export function openOrbitGame(onClose, options = {}) {
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);
-    boostButton.disabled = !playing || shots === 0;
+    // 引いている間は噴射できない（時間が止まっているのに燃料だけ減らないように）。
+    boostButton.disabled = !playing || shots === 0 || activePointer !== null;
     // 周回に乗せるまで（coaching）、噴射の時（boostCue）だけ、ボタンの地を対象の衛星の色にする。
     const cue = coaching(best, game) && boostCue(target, followEnd);
     boostButton.classList.toggle("orbit-boost-now", cue);
@@ -417,17 +416,11 @@ export function openOrbitGame(onClose, options = {}) {
   function update(seconds) {
     explosions = explosions.filter((explosion) => advanceExplosion(explosion, seconds));
     if (!playing) return;
-    // 速さを目標へ滑らかに寄せる。目標が ×1 に戻ったら（加速した時など）すぐ ×1 にする。
-    // 指が触れている間（引っ張り・ズーム）は早送りせず、待ち時間も数え直す（置かずに離した直後に早送りしないように）。
-    const touching = activePointer !== null || touches.size > 0;
-    if (touching) lastAction = game.t;
-    const target = targetSpeed(game, lastAction, touching);
-    speed = target === 1 ? 1 : speed + (target - speed) * Math.min(1, seconds * 3);
     // 引いている間はゲームの時間を止める（射場・月・衛星が動かず、狙ったとおりに打てる。2 本指のズームは cancelDrag で外れる）。
     if (activePointer !== null && dragPull) return;
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);
-    // 早送りでも跡の線が角張らないよう、0.25 ゲーム秒以下に区切って進め、区切りごとに跡へ点を足す。
+    // 速めても跡の線が角張らないよう、0.25 ゲーム秒以下に区切って進め、区切りごとに跡へ点を足す。
     // いなくなった衛星の爆発の場所は、いなくなった区切りの時刻で決める（音と爆発はフレームの後でまとめて 1 回）。
     const total = seconds * speed;
     const parts = Math.max(1, Math.ceil(total / 0.25));
@@ -438,7 +431,7 @@ export function openOrbitGame(onClose, options = {}) {
       for (const satellite of alive) {
         // 遠くへ飛んでいったものは爆発させない。
         if (satellite.alive || satellite.end === "away" || anchors.has(satellite.id)) continue;
-        // 月に落ちたら月に、地球に落ちたら自転に付いていく（早送りでも爆発が置き去りにならないように）。ぶつかり合いはその場。
+        // 月に落ちたら月に、地球に落ちたら自転に付いていく（速めても爆発が置き去りにならないように）。ぶつかり合いはその場。
         anchors.set(
           satellite.id,
           satellite.end === "moon"
@@ -577,7 +570,7 @@ export function openOrbitGame(onClose, options = {}) {
 
   // 道筋の線: origin から velocity で出した 1 機が、1 周回るか、落ちる・飛んでいくまで（最長 240 秒）を線 1 本で見せ、
   // 地球・月に落ちる所に赤い点を描く。線の見た目は aimLineStyle（1 周回るなら color の実線）。終わり方（predictOrbit の end）を返す。
-  // 印に時刻を入れる（指を止めていても月は動くので、時計が進めば計算し直す。使い回せるのは時計が止まっている間だけ）。
+  // 印に時刻を入れる（時計が進めば月も動くので計算し直す。引いている間は時計が止まっているので使い回せる）。
   function drawAimLine(origin, velocity, color) {
     const c = context;
     const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
