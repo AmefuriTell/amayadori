@@ -48,3 +48,15 @@ test("the first-turn sound is a short sine ping, quieter than the 1000 km explos
   assert.ok(frequency + pitchJump > frequency && frequency + pitchJump <= 1400);
   assert.ok(attack + sustain + release <= 0.4);
 });
+
+test("the aim click is a tiny sine tick, quieter and shorter than the first-turn ping", () => {
+  const sounds = soundFor("aim");
+  assert.ok(Array.isArray(sounds) && sounds.length > 0 && sounds.every(Array.isArray));
+  const orbit = soundFor("orbit")[0];
+  const [volume, , frequency, attack, sustain, release, shape] = sounds[0];
+  const length = (sound) => sound[3] + sound[4] + sound[5];
+  assert.equal(shape, 0);
+  assert.ok(frequency >= 1200 && frequency <= 1600, `${frequency}`);
+  assert.ok(volume < orbit[0], `${volume}`);
+  assert.ok(length(sounds[0]) < length(orbit), `${length(sounds[0])}`);
+});

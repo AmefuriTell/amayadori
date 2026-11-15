@@ -11,6 +11,8 @@ import {
   SATELLITES,
   SAT_RADIUS,
   addSatellite,
+  aimClick,
+  aimLineStyle,
   boost,
   boostTarget,
   canPlace,
@@ -94,6 +96,9 @@ export function openOrbitGame(onClose, options = {}) {
   let dragPull = null;
   // 引っ張っている間の道筋（predictOrbit）の前の結果。時刻と引きの量（位置・速度）が同じなら計算し直さない。
   let predicted = null;
+  // 前の道筋の終わり方と、最後に「カチッ」（aim）を鳴らした時刻（performance.now()。境目で鳴り続けないように 150 ms あける）。
+  let aimEnd = null;
+  let aimAt = -Infinity;
   // 2 本指のズーム: 指ごとの位置と、始めた時の指の間の距離とズーム。
   const touches = new Map();
   let pinch = null;
@@ -103,7 +108,7 @@ export function openOrbitGame(onClose, options = {}) {
   let explosions = [];
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   // 効果音（隕石当てと同じ audio.js。消音は隕石当ての「ほかの遊び方」の「音: あり／なし」）。最初に触ったときに読み込み、
-  // 閉じた後は鳴らさない。鳴らすのは出した時・最初の 1 周・いなくなった時だけ（DESIGN.md の「音」）。
+  // 閉じた後は鳴らさない。鳴らすのは出した時・引いて 1 周回る線になった時・最初の 1 周・いなくなった時だけ（DESIGN.md の「音」）。
   const muted = loadMuted();
   const audio = createAudio({ isMuted: () => muted, isOpen: () => overlay.isConnected });
 
@@ -177,6 +182,8 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function finishGame() {
+    // 終わったコマの点・周を上の表示にも出してから止める（結果の画面の数字とそろえる）。
+    updateHud();
     playing = false;
     cancelDrag();
     const score = scoreOf(game);
@@ -215,6 +222,7 @@ export function openOrbitGame(onClose, options = {}) {
     placeFrom = null;
     dragPull = null;
     predicted = null;
+    aimEnd = null;
   }
 
   // 引っ張りの元。打ち上げのときは今の射場（引っ張っている間も地球と一緒に回る。指を置いた時の位置のままにすると、
@@ -499,8 +507,20 @@ export function openOrbitGame(onClose, options = {}) {
       // 1 周回るか、落ちる・飛んでいくまで（最長 240 秒）の道筋を線 1 本で見せ、落ちる所に赤い点を描く。
       // 印に時刻を入れる（指を止めていても月は動くので、時計が進めば計算し直す。使い回せるのは時計が止まっている間だけ）。
       const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
-      if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, origin, velocity) };
-      c.strokeStyle = "rgba(255,255,255,0.6)";
+      if (!predicted || predicted.key !== key) {
+        predicted = { key, ...predictOrbit(game, origin, velocity) };
+        const now = performance.now();
+        if (aimClick(aimEnd, predicted.end) && now - aimAt >= 150) {
+          audio.play("aim");
+          aimAt = now;
+        }
+        aimEnd = predicted.end;
+      }
+      // 線の見た目: 1 周回るなら次に出す衛星の色の実線、落ちる・ぶつかる・飛んでいくなら薄い白の破線、時間切れ（long）は白。
+      const lineStyle = aimLineStyle(predicted.end, COLORS[game.satellites.length % COLORS.length]);
+      c.strokeStyle = lineStyle.color;
+      c.globalAlpha = lineStyle.alpha;
+      c.setLineDash(lineStyle.dash);
       c.lineWidth = 1.5;
       c.beginPath();
       predicted.points.forEach((point, pointIndex) => {
@@ -509,6 +529,8 @@ export function openOrbitGame(onClose, options = {}) {
         else c.lineTo(at.x, at.y);
       });
       c.stroke();
+      c.globalAlpha = 1;
+      c.setLineDash([]);
       if (predicted.end === "earth" || predicted.end === "moon") {
         const at = toScreen(predicted.points[predicted.points.length - 1]);
         c.fillStyle = "#ff5a5f";
@@ -516,11 +538,6 @@ export function openOrbitGame(onClose, options = {}) {
         c.arc(at.x, at.y, 3, 0, Math.PI * 2);
         c.fill();
       }
-      const pulled = Math.min(1, Math.hypot(dragPull.x, dragPull.y) / MAX_PULL);
-      c.font = "bold 13px system-ui, sans-serif";
-      c.textAlign = "center";
-      c.fillStyle = "#ffffff";
-      c.fillText(`${Math.round(pulled * 100)}%`, from.x, from.y - 14);
     }
   }
 

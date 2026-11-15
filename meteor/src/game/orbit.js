@@ -285,6 +285,19 @@ export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 24
   return { points, end };
 }
 
+// 引いている間の道筋の終わり方（predictOrbit の end）が、1 周回る（"turn"）に変わったか（変わった時だけ小さく鳴らす）。
+export function aimClick(before, after) {
+  return after === "turn" && before !== "turn";
+}
+
+// 道筋の線の見た目。1 周回るなら次に出す衛星の色の実線、時間切れ（long）は白の実線、
+// 落ちる・ぶつかる・飛んでいくは薄い白の破線（衛星の色と重ならず、色を見分けにくくても線の形で分かるように）。
+export function aimLineStyle(end, satelliteColor) {
+  if (end === "turn") return { color: satelliteColor, alpha: 0.6, dash: [] };
+  if (end === "long") return { color: "#ffffff", alpha: 0.6, dash: [] };
+  return { color: "#ffffff", alpha: 0.45, dash: [4, 6] };
+}
+
 // ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。
 export function isOver(game) {
   if (game.started !== null && elapsed(game) >= GAME_SECONDS - 1e-9) return true;
