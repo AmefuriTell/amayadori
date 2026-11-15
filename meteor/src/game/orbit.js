@@ -2,10 +2,8 @@
 //
 // 宇宙の好きな場所に衛星を置いて打ち出し、地球を回らせ続ける。衛星は（1 回に 3 機まで）同時に動く。地球と月（physics.js の世界）が引き、
 // 「引き合うモード」では衛星どうしも引き合う。地球に落ちる・月や衛星どうしでぶつかる・遠くへ出ると、その衛星はいなくなる。
-// 点数（軌道ポイント）は、1 周回り切るごとに、その 1 周で地球からいちばん遠くまで行った距離（地球の半径の何倍か）の 2 乗を足したもの。
-// 大きな軌道は 1 周に時間がかかる（周期は距離の 1.5 乗に比例）ので、距離そのものを足すと小さな軌道ほど得になる。2 乗にすると、
-// 時間あたりの点は大きな軌道ほど増える（距離の 0.5 乗に比例）。大きな軌道は月に乱されやすく、飛んでいきやすく、時間内に回り切れる周も
-// 少ないので、「たくさん回る（安全）」と「大きく回る（点は多いが危ない）」のどちらを取るかを考える遊びになる。
+// 点は回り切った周の合計（画面に出る輪の数そのもの）。小さな輪ほど早く回れて周が増えるが、低すぎると地球に落ちやすく、
+// 同じ低い輪に何機も入れるとぶつかりやすいので、どこを回らせるかを考える遊びになる。
 import { DEFAULT_WORLD, STEP, angleOfLongitude, moonPositions } from "./physics.js";
 
 // 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。操作が無くなると、画面が自動で早送りする）。
@@ -117,7 +115,6 @@ export function boostTarget(game) {
 
 function createSatellite(game, position, velocity) {
   if (game.started === null) game.started = game.t;
-  const r = Math.hypot(position.x, position.y);
   const satellite = {
     id: game.nextId++,
     x: position.x,
@@ -128,13 +125,10 @@ function createSatellite(game, position, velocity) {
     fuel: FUEL,
     // いなくなった理由（"earth"・"moon"・"crash"・"away"）。回っている間は null。
     end: null,
-    // 回り切った周の数と、その周ごとのいちばん遠い距離の和（軌道ポイント）、いちばん大きな周のいちばん遠い距離。
+    // 回り切った周の数。
     turns: 0,
-    points: 0,
-    biggest: 0,
-    // 今の周で、地球の周りを回った角度（符号付き）と、いちばん遠くまで行った距離。
+    // 今の周で、地球の周りを回った角度（符号付き）。
     sweep: 0,
-    revMax: r,
     angle: Math.atan2(position.y, position.x),
   };
   game.satellites.push(satellite);
@@ -177,22 +171,17 @@ function retire(satellite, reason) {
   satellite.end = reason;
 }
 
-// 周回を数える: 地球の周りを回った角度を足し、1 周（2π）を超えたら、その周のいちばん遠い距離を点に足す。
+// 周回を数える: 地球の周りを回った角度を足し、1 周（2π）を超えたら周を 1 つ足す。
 function track(satellite) {
-  const r = Math.hypot(satellite.x, satellite.y);
   const angle = Math.atan2(satellite.y, satellite.x);
   let delta = angle - satellite.angle;
   if (delta > Math.PI) delta -= TAU;
   if (delta < -Math.PI) delta += TAU;
   satellite.angle = angle;
   satellite.sweep += delta;
-  satellite.revMax = Math.max(satellite.revMax, r);
   if (Math.abs(satellite.sweep) >= TAU) {
     satellite.turns += 1;
-    satellite.points += satellite.revMax ** 2;
-    satellite.biggest = Math.max(satellite.biggest, satellite.revMax);
     satellite.sweep -= Math.sign(satellite.sweep) * TAU;
-    satellite.revMax = r;
   }
 }
 
@@ -307,14 +296,9 @@ export function isOver(game) {
   return satellitesLeft(game) === 0 && game.satellites.every((satellite) => !satellite.alive);
 }
 
-// 結果: 軌道ポイント（小数 1 桁）、回り切った周の合計、いちばん大きな周（地球の半径の何倍か）。
+// 結果（点）: 回り切った周の合計。
 export function scoreOf(game) {
-  const points = game.satellites.reduce((sum, satellite) => sum + satellite.points, 0);
-  return {
-    points: Math.round(points * 10) / 10,
-    turns: game.satellites.reduce((sum, satellite) => sum + satellite.turns, 0),
-    biggest: Math.max(0, ...game.satellites.map((satellite) => satellite.biggest)),
-  };
+  return { turns: game.satellites.reduce((sum, satellite) => sum + satellite.turns, 0) };
 }
 
 // 音の合図（orbit-game.js が step の前後で使う。DESIGN.md の「音」）。
@@ -370,8 +354,9 @@ export function clampZoom(zoom) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
 }
 
-// いちばん良かった結果（モードごと）を端末に覚える。読めなければ無し。
-const BEST_STORAGE = "weatherbot.orbitBest";
+// いちばん良かった結果（モードごと、回り切った周の合計）を端末に覚える。読めなければ無し。
+// 点の単位が変わったので、前のキー（weatherbot.orbitBest）は読まない（消しもしない）。
+const BEST_STORAGE = "weatherbot.orbitTurns";
 export function loadBest(storage = globalThis.localStorage) {
   try {
     const saved = JSON.parse(storage.getItem(BEST_STORAGE) || "null");
