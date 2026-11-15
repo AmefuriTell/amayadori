@@ -37,3 +37,14 @@ test("the mute setting is saved and read back, and unreadable storage means soun
   assert.equal(loadMuted(broken), false);
   saveMuted(true, broken);
 });
+
+test("the first-turn sound is a short sine ping, quieter than the 1000 km explosion", () => {
+  const sounds = soundFor("orbit");
+  assert.ok(Array.isArray(sounds) && sounds.length > 0 && sounds.every(Array.isArray));
+  assert.ok(sounds[0][0] < soundFor("earth", 1000)[0][0], `${sounds[0][0]}`);
+  const [, , frequency, attack, sustain, release, shape, , , , pitchJump] = sounds[0];
+  assert.equal(shape, 0);
+  assert.equal(frequency, 880);
+  assert.ok(frequency + pitchJump > frequency && frequency + pitchJump <= 1400);
+  assert.ok(attack + sustain + release <= 0.4);
+});

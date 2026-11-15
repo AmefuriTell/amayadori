@@ -301,6 +301,27 @@ export function scoreOf(game) {
   };
 }
 
+// 音の合図（orbit-game.js が step の前後で使う。DESIGN.md の「音」）。
+// turnsOf: 生きている衛星ごとの、回り切った周の数（id → turns）。step の前に覚えておく。
+export function turnsOf(game) {
+  return new Map(game.satellites.filter((satellite) => satellite.alive).map((satellite) => [satellite.id, satellite.turns]));
+}
+
+// firstTurns: step の前（before。turnsOf の結果）に 0 周だった衛星が、後で 1 周以上になったか（何機あっても 1 つの真偽）。
+export function firstTurns(before, game) {
+  return game.satellites.some((satellite) => before.get(satellite.id) === 0 && satellite.turns >= 1);
+}
+
+// endSound: step の前に生きていて、後でいなくなった衛星の理由から、鳴らす音を 1 つ選ぶ（衝突を優先）。無ければ null。
+// 地球と衝突は爆発音（"earth"。強さは 1000 km の段）、月は "moon"、飛んでいったのは "away"。
+export function endSound(before, game) {
+  const ends = new Set(game.satellites.filter((satellite) => before.has(satellite.id) && !satellite.alive).map((satellite) => satellite.end));
+  if (ends.has("crash") || ends.has("earth")) return { event: "earth", km: 1000 };
+  if (ends.has("moon")) return { event: "moon" };
+  if (ends.has("away")) return { event: "away" };
+  return null;
+}
+
 // 早送りの速さの選択肢。
 export const SPEEDS = [1, 4, 16];
 

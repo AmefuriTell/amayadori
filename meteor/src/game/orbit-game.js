@@ -17,6 +17,8 @@ import {
   canPlace,
   clampZoom,
   createOrbitGame,
+  endSound,
+  firstTurns,
   canLaunch,
   beforeFirstSatellite,
   elapsed,
@@ -29,11 +31,14 @@ import {
   saveBest,
   scoreOf,
   step,
+  turnsOf,
 } from "./orbit.js";
 import { drawEarth, drawSpace, makeStars } from "./draw.js";
 import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, earthAnchor, moonAnchor, shakeOffset } from "./explosion.js";
 import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
+import { loadMuted } from "./sound.js";
+import { createAudio } from "./audio.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -96,6 +101,10 @@ export function openOrbitGame(onClose, options = {}) {
   // 地球・月に落ちた衛星や、ぶつかった衛星の爆発（世界の位置。早送りしていても、見える速さで進める）。
   let explosions = [];
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  // 効果音（隕石当てと同じ audio.js。消音は隕石当ての「ほかの遊び方」の「音: あり／なし」）。最初に触ったときに読み込み、
+  // 閉じた後は鳴らさない。鳴らすのは出した時・最初の 1 周・いなくなった時だけ（DESIGN.md の「音」）。
+  const muted = loadMuted();
+  const audio = createAudio({ isMuted: () => muted, isOpen: () => overlay.isConnected });
 
   function scale() {
     return (Math.min(size.width, size.height) / 2 / VIEW_RADIUS) * zoom;
@@ -218,6 +227,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   canvas.addEventListener("pointerdown", (event) => {
+    audio.load();
     touches.set(event.pointerId, pointerPosition(event));
     if (touches.size >= 2) {
       // 2 本目の指: 引っ張りをやめて、2 本指のズームにする。3 本目以降はズームを止める（指の組が変わってズームが跳ねないように）。
@@ -272,6 +282,7 @@ export function openOrbitGame(onClose, options = {}) {
     else pinch = null;
   };
   canvas.addEventListener("pointerup", (event) => {
+    audio.resume();
     lift(event);
     if (event.pointerId !== activePointer) return;
     // 終わったゲームには足さない（引っ張っている間に時間切れや「終了」になったとき）。
@@ -279,10 +290,16 @@ export function openOrbitGame(onClose, options = {}) {
       const from = dragOrigin();
       const velocity = launchVelocity(from, { x: from.x + dragPull.x, y: from.y + dragPull.y });
       const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
-      if (satellite) trails.set(satellite.id, []);
+      if (satellite) {
+        trails.set(satellite.id, []);
+        audio.play("launch");
+      }
     }
     cancelDrag();
   });
+  // 保険: iOS Safari の版によっては pointerup が操作として扱われないので、touchend と click でも動かし直す（鳴らしはしない）。
+  overlay.addEventListener("touchend", audio.resume, { passive: true });
+  overlay.addEventListener("click", audio.resume);
   canvas.addEventListener("pointercancel", (event) => {
     lift(event);
     if (event.pointerId === activePointer) cancelDrag();
@@ -342,7 +359,12 @@ export function openOrbitGame(onClose, options = {}) {
     explosions = explosions.filter((explosion) => advanceExplosion(explosion, seconds));
     if (!playing) return;
     const alive = game.satellites.filter((satellite) => satellite.alive);
+    const turnsBefore = turnsOf(game);
     step(game, seconds * speed);
+    // 最初の 1 周を回り切った衛星があれば 1 回だけ鳴らす。いなくなった衛星があれば、その理由で 1 回（衝突を優先）。
+    if (firstTurns(turnsBefore, game)) audio.play("orbit");
+    const gone = endSound(turnsBefore, game);
+    if (gone) audio.play(gone.event, gone.km);
     for (const satellite of alive) {
       // 遠くへ飛んでいったものは爆発させない。
       if (!satellite.alive && satellite.end !== "away") {
