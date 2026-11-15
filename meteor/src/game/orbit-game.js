@@ -5,10 +5,11 @@
 // 点数は端末の中だけ。
 import "./game.css";
 import { element } from "../dom.js";
-import { DEFAULT_WORLD, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
+import { angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
 import {
   BOOST,
   GAME_SECONDS,
+  ORBIT_WORLD,
   SATELLITES,
   SAT_RADIUS,
   addSatellite,
@@ -109,7 +110,7 @@ export function openOrbitGame(onClose, options = {}) {
   // 置き方（"launch"・"place"）。開くたびに打ち上げから（設定で「置く」に変えたら、閉じるまでそのまま）。
   let style = "launch";
   let mutual = false;
-  let game = createOrbitGame(DEFAULT_WORLD, mutual);
+  let game = createOrbitGame(ORBIT_WORLD, mutual);
   let earthStart = 0;
   let playing = false;
   let trails = new Map();
@@ -287,7 +288,7 @@ export function openOrbitGame(onClose, options = {}) {
   // 2 機目（緑）は円軌道でただ回る（終わりに 1 機目の少し先にいるように始めの向きを決める）。どちらも引き合わせずに計算する
   // （引き合うは、近い時に 2 機を結ぶ線で見せる）。
   function buildPreview() {
-    const demo = createOrbitGame(DEFAULT_WORLD, false);
+    const demo = createOrbitGame(ORBIT_WORLD, false);
     const shot = previewShot(demo, style);
     const first = style === "place" ? addSatellite(demo, shot.position, shot.velocity) : launchFromSite(demo, shot.velocity, PREVIEW_START);
     const firstPath = [{ x: first.x, y: first.y }];
@@ -302,11 +303,11 @@ export function openOrbitGame(onClose, options = {}) {
     }
     const end = firstPath[firstPath.length - 1];
     const radius = PREVIEW_SECOND_RADIUS;
-    const speed = Math.sqrt(DEFAULT_WORLD.earthGM / radius);
+    const speed = Math.sqrt(ORBIT_WORLD.earthGM / radius);
     const angle = Math.atan2(end.y, end.x) + PREVIEW_SECOND_AHEAD - (speed / radius) * PREVIEW_GAME;
     const position = { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
     // predictOrbit は渡したゲームの時刻から月を動かすので、始めの時刻（0）のゲームで計算する。
-    const secondPath = predictOrbit(createOrbitGame(DEFAULT_WORLD, false), position, { x: -Math.sin(angle) * speed, y: Math.cos(angle) * speed }, {
+    const secondPath = predictOrbit(createOrbitGame(ORBIT_WORLD, false), position, { x: -Math.sin(angle) * speed, y: Math.cos(angle) * speed }, {
       dt: PREVIEW_DT,
       limit: PREVIEW_GAME,
       every: PREVIEW_DT,
@@ -315,7 +316,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function start() {
-    game = createOrbitGame(DEFAULT_WORLD, mutual);
+    game = createOrbitGame(ORBIT_WORLD, mutual);
     earthStart = Math.random() * Math.PI * 2;
     trails = new Map();
     gifRecord = [];
