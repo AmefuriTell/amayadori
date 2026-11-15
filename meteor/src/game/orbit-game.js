@@ -155,6 +155,11 @@ export function openOrbitGame(onClose, options = {}) {
     cancelDrag();
     playing = true;
     panel.hidden = true;
+    showStartHint();
+  }
+
+  // 始めたときの案内（1 機目を出す前に、衛星を出さずに引っ張りが終わったときにも出し直す）。
+  function showStartHint() {
     hint.hidden = false;
     hint.textContent = style === "place" ? "地球のそばを触って引き、離すと反対へ飛ぶ" : "引っ張って離すと射場から打ち上げ";
   }
@@ -191,6 +196,8 @@ export function openOrbitGame(onClose, options = {}) {
     return { x: (point.x - size.width / 2) / scale(), y: (size.height / 2 - point.y) / scale() };
   }
   function cancelDrag() {
+    // 1 機目を出す前に、衛星を出さずに引っ張りが終わったら（短い引き・2 本目の指・取りやめ・大きさの変化）、消した案内を戻す。
+    if (activePointer !== null && playing && beforeFirstSatellite(game)) showStartHint();
     activePointer = null;
     dragStart = null;
     placeFrom = null;
@@ -311,6 +318,8 @@ export function openOrbitGame(onClose, options = {}) {
   function updateHud() {
     const waiting = playing && beforeFirstSatellite(game);
     back.hidden = !waiting;
+    // 狭い画面でも、1 機目の前の題は 1 行に収める（右に「今日のお題へ」があるため）。
+    title.classList.toggle("orbit-title-waiting", waiting);
     if (waiting) {
       setText(title, "🛰️ 軌道に乗せろ");
       controls.hidden = true;
