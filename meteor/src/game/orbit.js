@@ -45,6 +45,11 @@ export function elapsed(game) {
   return game.started === null ? 0 : game.t - game.started;
 }
 
+// まだ 1 機も出していないか（画面は、この間は遊ぶときのボタンを出さない）。
+export function beforeFirstSatellite(game) {
+  return game.started === null;
+}
+
 // 回っている衛星から離れているか。
 function clearOfSatellites(game, position) {
   return game.satellites.every((satellite) => !satellite.alive || Math.hypot(position.x - satellite.x, position.y - satellite.y) > 2 * SAT_RADIUS + SATELLITE_PLACE_MARGIN);

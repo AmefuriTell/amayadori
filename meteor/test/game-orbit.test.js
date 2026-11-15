@@ -10,6 +10,7 @@ import {
   SATELLITES,
   SAT_RADIUS,
   addSatellite,
+  beforeFirstSatellite,
   boost,
   boostTarget,
   canLaunch,
@@ -272,4 +273,19 @@ test("three satellites touching at once all crash", () => {
   game.started = 0;
   step(game, 0.5);
   assert.deepEqual(game.satellites.map((s) => s.end), ["crash", "crash", "crash"]);
+});
+
+test("before the first satellite, until one is placed", () => {
+  const game = createOrbitGame(NO_MOON);
+  assert.equal(beforeFirstSatellite(game), true);
+  step(game, 30);
+  assert.equal(beforeFirstSatellite(game), true);
+  const { position, velocity } = circular(2);
+  assert.ok(addSatellite(game, position, velocity));
+  assert.equal(beforeFirstSatellite(game), false);
+});
+
+test("loadBest reads a record saved in the current shape", () => {
+  const storage = { getItem: (key) => (key === "weatherbot.orbitBest" ? '{"normal":222.2,"mutual":50}' : null), setItem: () => {} };
+  assert.deepEqual(loadBest(storage), { normal: 222.2, mutual: 50 });
 });

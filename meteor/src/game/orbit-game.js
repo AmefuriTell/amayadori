@@ -1,5 +1,6 @@
 // 「軌道に乗せろ」の画面と操作（docs/design/activity-map.md §4 の K）。計算は orbit.js（衛星）と physics.js（地球と月）。
 // 隕石当て（game.js）の「ほかの遊び方」から開き、「今日のお題へ」で戻る。「🗺️ 地図へ」で地図に戻る（単体のページでは「🏠 トップへ」）。
+// 開くとすぐ「置く・ふつう」で 1 機目を置ける。打ち上げ・引き合うは結果の画面の「設定を変える」から選ぶ。
 // 点数は端末の中だけ。
 import "./game.css";
 import { element } from "../dom.js";
@@ -17,6 +18,7 @@ import {
   clampZoom,
   createOrbitGame,
   canLaunch,
+  beforeFirstSatellite,
   elapsed,
   isOver,
   launchFromSite,
@@ -48,7 +50,9 @@ export function openOrbitGame(onClose, options = {}) {
   // 閉じるボタンの文言（地図の Activity では地図へ戻る。Discord の外の単体のページではトップへ戻る）。
   const close = element("button", options.closeLabel || "🗺️ 地図へ", "game-button");
   const title = element("div", "", "game-title");
-  bar.append(close, title);
+  // 1 機目を出す前だけ出す、隕石当ての今日のお題への戻り（文字だけのボタン）。
+  const back = element("button", "今日のお題へ", "game-link");
+  bar.append(close, title, back);
   const controls = element("div", undefined, "orbit-controls");
   const boostButton = element("button", "", "game-button orbit-boost");
   const speedButtons = SPEEDS.map((speed) => element("button", `×${speed}`, "game-button orbit-speed"));
@@ -123,7 +127,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function showSetup() {
-    // 遊び方を選ぶ画面: 置き方（置く・打ち上げ）と、衛星どうしが引き合うか。
+    // 遊び方を選ぶ画面（結果の画面の「設定を変える」から開く）: 置き方（置く・打ち上げ）と、衛星どうしが引き合うか。
     playing = false;
     const bestText = best[mutual ? "mutual" : "normal"];
     title.textContent = "🛰️ 軌道に乗せろ";
@@ -151,11 +155,13 @@ export function openOrbitGame(onClose, options = {}) {
     cancelDrag();
     playing = true;
     panel.hidden = true;
+    showStartHint();
+  }
+
+  // 始めたときの案内（1 機目を出す前に、衛星を出さずに引っ張りが終わったときにも出し直す）。
+  function showStartHint() {
     hint.hidden = false;
-    hint.textContent =
-      style === "place"
-        ? "衛星を置きたい所を触って、引っ張って離すと反対へ飛びます。飛んでいる間は「🔥 加速」で進む向きに速くできます"
-        : "画面のどこかを触って引っ張り、離すと射場から打ち上げます。いちばん高い所で「🔥 加速」すると軌道が丸くなります";
+    hint.textContent = style === "place" ? "地球のそばを触って引き、離すと反対へ飛ぶ" : "引っ張って離すと射場から打ち上げ";
   }
 
   function finishGame() {
@@ -190,6 +196,8 @@ export function openOrbitGame(onClose, options = {}) {
     return { x: (point.x - size.width / 2) / scale(), y: (size.height / 2 - point.y) / scale() };
   }
   function cancelDrag() {
+    // 1 機目を出す前に、衛星を出さずに引っ張りが終わったら（短い引き・2 本目の指・取りやめ・大きさの変化）、消した案内を戻す。
+    if (activePointer !== null && playing && beforeFirstSatellite(game)) showStartHint();
     activePointer = null;
     dragStart = null;
     placeFrom = null;
@@ -300,12 +308,23 @@ export function openOrbitGame(onClose, options = {}) {
   finish.addEventListener("click", () => {
     if (playing) finishGame();
   });
+  back.addEventListener("click", () => switchTo(openGame));
 
   function setText(node, text) {
     if (node.textContent !== text) node.textContent = text;
   }
 
+  // 1 機目を出す前は、遊ぶときのボタン（時間も加速もまだ役目が無い）と点の表示を隠し、今日のお題への戻りを出す。
   function updateHud() {
+    const waiting = playing && beforeFirstSatellite(game);
+    back.hidden = !waiting;
+    // 狭い画面でも、1 機目の前の題は 1 行に収める（右に「今日のお題へ」があるため）。
+    title.classList.toggle("orbit-title-waiting", waiting);
+    if (waiting) {
+      setText(title, "🛰️ 軌道に乗せろ");
+      controls.hidden = true;
+      return;
+    }
     const score = scoreOf(game);
     const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
     if (playing) setText(title, `🛰️ ${score.points} 点・${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
@@ -463,6 +482,6 @@ export function openOrbitGame(onClose, options = {}) {
   };
   window.addEventListener("resize", onResize);
   resize();
-  showSetup();
+  start();
   frame = window.requestAnimationFrame(tick);
 }
