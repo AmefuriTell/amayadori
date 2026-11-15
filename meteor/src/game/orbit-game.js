@@ -605,8 +605,8 @@ export function openOrbitGame(onClose, options = {}) {
     boostButton.disabled = !playing || shots === 0 || activePointer !== null;
     // 周回に乗せるまで（coaching）、噴射の時（boostCue）だけ、ボタンの地を対象の衛星の色にする。
     const cue = coaching(best, game) && boostCue(target, followEnd);
+    // 合図の色は衛星によらず 1 色（衛星ごとに変えると「黄色が押す時」と覚えた人が 2 機目以降を見逃したため）。
     boostButton.classList.toggle("orbit-boost-now", cue);
-    if (cue) boostButton.style.setProperty("--orbit-cue", COLORS[game.satellites.indexOf(target) % COLORS.length]);
     controls.hidden = !playing;
   }
 
