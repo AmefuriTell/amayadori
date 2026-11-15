@@ -22,6 +22,7 @@ import {
   launchFromSite,
   launchSite,
   loadBest,
+  predictOrbit,
   saveBest,
   satellitesLeft,
   scoreOf,
@@ -288,4 +289,74 @@ test("before the first satellite, until one is placed", () => {
 test("loadBest reads a record saved in the current shape", () => {
   const storage = { getItem: (key) => (key === "weatherbot.orbitBest" ? '{"normal":222.2,"mutual":50}' : null), setItem: () => {} };
   assert.deepEqual(loadBest(storage), { normal: 222.2, mutual: 50 });
+});
+
+test("predictOrbit: a circular orbit at r=3 without a moon comes back to where it started after one turn", () => {
+  const game = createOrbitGame(NO_MOON);
+  const { position, velocity } = circular(3);
+  const { points, end } = predictOrbit(game, position, velocity);
+  assert.equal(end, "turn");
+  // 周期は 2π√(27/GM)。
+  const seconds = (points.length - 1) * 0.25;
+  assert.ok(Math.abs(seconds - 2 * Math.PI * Math.sqrt(27 / EARTH_GM)) < 0.3 && Math.abs(seconds - 23.1) < 0.3, `${seconds}`);
+  const lastPoint = points[points.length - 1];
+  assert.ok(Math.hypot(lastPoint.x - position.x, lastPoint.y - position.y) < 0.05);
+});
+
+test("predictOrbit: faster than escape speed at r=6 flies away", () => {
+  const game = createOrbitGame(DEFAULT_WORLD);
+  const v = Math.sqrt((2 * EARTH_GM) / 6) * 1.05;
+  assert.equal(predictOrbit(game, { x: 0, y: -6 }, { x: v, y: 0 }).end, "away");
+});
+
+test("predictOrbit: thrown toward the earth falls on it", () => {
+  const game = createOrbitGame(DEFAULT_WORLD);
+  const { points, end } = predictOrbit(game, { x: 3, y: 0 }, { x: -0.5, y: 0 });
+  assert.equal(end, "earth");
+  const lastPoint = points[points.length - 1];
+  assert.ok(Math.hypot(lastPoint.x, lastPoint.y) <= 1);
+});
+
+test("predictOrbit agrees with step() for several throws with the moon", () => {
+  const outcome = (satellite) => (satellite.turns > 0 ? "turn" : satellite.end || "long");
+  const cases = [];
+  for (const r of [2, 3, 4.5, 6, 8]) {
+    for (const factor of [0.6, 0.9, 1, 1.15, 1.4]) cases.push({ r, factor, angle: r });
+  }
+  const ends = new Set();
+  for (const { r, factor, angle } of cases) {
+    const game = createOrbitGame(DEFAULT_WORLD);
+    step(game, 7);
+    const { position, velocity } = circular(r, angle);
+    velocity.x *= factor;
+    velocity.y *= factor;
+    if (!canPlace(game, position)) continue;
+    const predicted = predictOrbit(game, position, velocity).end;
+    const satellite = addSatellite(game, position, velocity);
+    for (let t = 0; t < 240 && satellite.alive && satellite.turns === 0; t += 0.5) step(game, 0.5);
+    assert.equal(predicted, outcome(satellite), `r=${r} ×${factor}`);
+    ends.add(predicted);
+  }
+  for (const end of ["turn", "earth", "away"]) assert.ok(ends.has(end), `${[...ends]}`);
+});
+
+test("predictOrbit stops at its limit for a very long throw and keeps the points few", () => {
+  // 月なしで半径 15 の円軌道（周期 2π√(15³/GM) ≈ 258 秒）は、240 秒たっても 1 周しない。
+  const game = createOrbitGame(NO_MOON);
+  const { position, velocity } = circular(15);
+  const { points, end } = predictOrbit(game, position, velocity);
+  assert.equal(end, "long");
+  assert.ok(points.length <= 961, `${points.length}`);
+  assert.ok(points.length > 900, `${points.length}`);
+});
+
+test("predictOrbit leaves the game as it was", () => {
+  const game = createOrbitGame(DEFAULT_WORLD, true);
+  addSatellite(game, ...Object.values(circular(2)));
+  step(game, 3);
+  const before = JSON.stringify(game);
+  predictOrbit(game, { x: 0, y: 4 }, { x: -0.5, y: 0 });
+  assert.equal(JSON.stringify(game), before);
+  assert.equal(game.nextId, 2);
+  assert.equal(game.satellites.length, 1);
 });

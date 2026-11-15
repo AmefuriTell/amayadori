@@ -4,7 +4,7 @@
 // 点数は端末の中だけ。
 import "./game.css";
 import { element } from "../dom.js";
-import { DEFAULT_WORLD, MAX_PULL, angleOfLongitude, launchVelocity, moonPositions, preview } from "./physics.js";
+import { DEFAULT_WORLD, MAX_PULL, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
 import {
   BOOST,
   GAME_SECONDS,
@@ -24,6 +24,7 @@ import {
   launchFromSite,
   launchSite,
   loadBest,
+  predictOrbit,
   satellitesLeft,
   saveBest,
   scoreOf,
@@ -36,8 +37,6 @@ import { openGame } from "./game.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
-// 投げる前に見せる、少し先までの道筋（秒）。軌道を作る遊びなので、隕石当てより長めに見せる。
-const PREVIEW_SECONDS = 4;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
@@ -87,6 +86,8 @@ export function openOrbitGame(onClose, options = {}) {
   // 置くときの位置（世界）と、引っ張った向きと長さ（世界。元からゴムの先まで）。
   let placeFrom = null;
   let dragPull = null;
+  // 引っ張っている間の道筋（predictOrbit）の前の結果。引きの量（位置・速度）が同じなら計算し直さない。
+  let predicted = null;
   // 2 本指のズーム: 指ごとの位置と、始めた時の指の間の距離とズーム。
   const touches = new Map();
   let pinch = null;
@@ -202,6 +203,7 @@ export function openOrbitGame(onClose, options = {}) {
     dragStart = null;
     placeFrom = null;
     dragPull = null;
+    predicted = null;
   }
 
   // 引っ張りの元。打ち上げのときは今の射場（引っ張っている間も地球と一緒に回る。指を置いた時の位置のままにすると、
@@ -439,10 +441,24 @@ export function openOrbitGame(onClose, options = {}) {
         const { spin } = launchSite(game, earthStart);
         velocity = { x: velocity.x + spin.x, y: velocity.y + spin.y };
       }
-      c.fillStyle = "rgba(255,255,255,0.8)";
-      for (const point of preview(origin, velocity, game.t, 0, PREVIEW_SECONDS, 0.08, game.world)) {
+      // 1 周回るか、落ちる・飛んでいくまで（最長 240 秒）の道筋を線 1 本で見せ、落ちる所に赤い点を描く。
+      const key = `${origin.x},${origin.y},${velocity.x},${velocity.y}`;
+      if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, origin, velocity) };
+      c.strokeStyle = "rgba(255,255,255,0.6)";
+      c.lineWidth = 1.5;
+      c.beginPath();
+      predicted.points.forEach((point, pointIndex) => {
         const at = toScreen(point);
-        c.fillRect(at.x - 1.5, at.y - 1.5, 3, 3);
+        if (pointIndex === 0) c.moveTo(at.x, at.y);
+        else c.lineTo(at.x, at.y);
+      });
+      c.stroke();
+      if (predicted.end === "earth" || predicted.end === "moon") {
+        const at = toScreen(predicted.points[predicted.points.length - 1]);
+        c.fillStyle = "#ff5a5f";
+        c.beginPath();
+        c.arc(at.x, at.y, 3, 0, Math.PI * 2);
+        c.fill();
       }
       const pulled = Math.min(1, Math.hypot(dragPull.x, dragPull.y) / MAX_PULL);
       c.font = "bold 13px system-ui, sans-serif";

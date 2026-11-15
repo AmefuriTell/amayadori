@@ -238,6 +238,53 @@ export function step(game, seconds) {
   return game;
 }
 
+// 引っ張っている間に見せる道筋: position から velocity で出した 1 機が、1 周回り切るか、地球・月に落ちるか、遠くへ出るか、
+// limit 秒たつまでを先読みする（速度ベルレ法、dt 秒刻み。決まりは step() と同じ）。points は every 秒ごとの位置（最初と最後は必ず入れる）、
+// end は "turn"（1 周した）・"earth"・"moon"・"away"・"long"（limit 秒たっても決まらない）。
+// 引き合うモードでも、ほかの衛星の重さとぶつかりは入れない（その 1 機を地球と月だけで動かす）。game は書き換えない。
+export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 240, every = 0.25 } = {}) {
+  const alone = { world: game.world, mutual: false };
+  let x = position.x;
+  let y = position.y;
+  let vx = velocity.x;
+  let vy = velocity.y;
+  let angle = Math.atan2(y, x);
+  let sweep = 0;
+  const points = [{ x, y }];
+  const steps = Math.round(limit / dt);
+  let mark = every;
+  let [a] = accelerations(alone, moonPositions(game.world, game.t), [{ x, y }]);
+  let end = "long";
+  for (let index = 1; index <= steps; index += 1) {
+    const moonsNext = moonPositions(game.world, game.t + index * dt);
+    x += vx * dt + 0.5 * a.x * dt * dt;
+    y += vy * dt + 0.5 * a.y * dt * dt;
+    const [b] = accelerations(alone, moonsNext, [{ x, y }]);
+    vx += 0.5 * (a.x + b.x) * dt;
+    vy += 0.5 * (a.y + b.y) * dt;
+    a = b;
+    const r = Math.hypot(x, y);
+    if (r <= 1) end = "earth";
+    else if (moonsNext.some((moon) => Math.hypot(x - moon.x, y - moon.y) <= moon.radius + SAT_RADIUS)) end = "moon";
+    else if (r >= ESCAPE_DISTANCE) end = "away";
+    else {
+      const now = Math.atan2(y, x);
+      let delta = now - angle;
+      if (delta > Math.PI) delta -= TAU;
+      if (delta < -Math.PI) delta += TAU;
+      angle = now;
+      sweep += delta;
+      if (Math.abs(sweep) >= TAU) end = "turn";
+    }
+    const done = end !== "long" || index === steps;
+    const due = index * dt >= mark - 1e-9;
+    while (index * dt >= mark - 1e-9) mark += every;
+    if (done || due) points.push({ x, y });
+    if (done) break;
+  }
+  return { points, end };
+}
+
 // ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。
 export function isOver(game) {
   if (game.started !== null && elapsed(game) >= GAME_SECONDS - 1e-9) return true;
