@@ -474,6 +474,65 @@ test("targetSpeed: waits CRUISE_AFTER_PLACING seconds while satellites are left,
   assert.equal(targetSpeed(game, lastAction), 1);
 });
 
+test("targetSpeed: no fast-forward while a launched satellite is still rising, even after all three are out", () => {
+  const game = createOrbitGame(NO_MOON);
+  // 2 機を円軌道に置いてから、3 機目を射場から真上（外向き）に大きく打ち上げる（引きの上限より速く、てっぺんまで 10 秒より長くかける）。
+  for (const [r, angle] of [[2.5, 0], [3.5, 2]]) {
+    const { position, velocity } = circular(r, angle);
+    assert.ok(addSatellite(game, position, velocity));
+  }
+  const site = launchSite(game, 0).position;
+  const r0 = Math.hypot(site.x, site.y);
+  const satellite = launchFromSite(game, { x: (site.x / r0) * 1.85, y: (site.y / r0) * 1.85 }, 0);
+  assert.ok(satellite);
+  const lastAction = game.t;
+  const outward = () => (satellite.x * satellite.vx + satellite.y * satellite.vy) / Math.hypot(satellite.x, satellite.y);
+  // 上がっている間は、待ち時間（CRUISE_AFTER 秒）を過ぎても ×1。
+  let risingChecked = 0;
+  while (outward() > 0.05) {
+    if (game.t - lastAction >= CRUISE_AFTER) {
+      assert.equal(targetSpeed(game, lastAction), 1);
+      risingChecked += 1;
+    }
+    step(game, 0.25);
+  }
+  assert.ok(satellite.alive);
+  assert.ok(elapsed(game) > CRUISE_AFTER && risingChecked > 0, `rose for ${elapsed(game)} s`);
+  assert.equal(satellitesLeft(game), 0);
+  // てっぺんを過ぎ（外へ向かう速さが 0.05 以下になれば）、待ち時間がたっているので CRUISE_SPEED。
+  step(game, 0.5);
+  assert.ok(outward() <= 0.05);
+  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  // 噴射など操作した直後は ×1、待ち時間がたてば CRUISE_SPEED（上がり切った後は早送りの決まりどおり）。
+  assert.equal(targetSpeed(game, game.t), 1);
+});
+
+test("a launch with no boost falls back to Earth; boosting a few times at the top makes the line go round", () => {
+  const game = createOrbitGame(NO_MOON);
+  const site = launchSite(game, 0).position;
+  const r0 = Math.hypot(site.x, site.y);
+  // 外向きから 60° 東へ傾けて打ち上げる。
+  const angle = Math.atan2(site.y, site.x) + Math.PI / 3;
+  const satellite = launchFromSite(game, { x: Math.cos(angle) * 1.2, y: Math.sin(angle) * 1.2 }, 0);
+  const line = () => predictOrbit(game, { x: satellite.x, y: satellite.y }, { x: satellite.vx, y: satellite.vy }).end;
+  // 噴射 0 回なら、打ち上げた直後も途中も地球に落ちる線。
+  assert.equal(line(), "earth");
+  let before = r0;
+  for (;;) {
+    step(game, 0.05);
+    const now = Math.hypot(satellite.x, satellite.y);
+    if (now < before) break;
+    before = now;
+  }
+  assert.ok(satellite.alive);
+  assert.equal(line(), "earth");
+  // てっぺんで噴射を重ねると、ある回数から 1 周回る線になる。
+  let shots = 0;
+  while (line() !== "turn" && boost(satellite)) shots += 1;
+  assert.equal(line(), "turn");
+  assert.ok(shots >= 2, `turned after ${shots} shots`);
+});
+
 test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbits and points", () => {
   const run = (split) => {
     const game = createOrbitGame(DEFAULT_WORLD);

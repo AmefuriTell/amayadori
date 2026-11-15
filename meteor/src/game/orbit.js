@@ -87,7 +87,10 @@ export function launchSite(game, start = 0) {
 export function launchFromSite(game, velocity, start = 0) {
   if (!canLaunch(game, start)) return null;
   const { position, spin } = launchSite(game, start);
-  return createSatellite(game, position, { x: velocity.x + spin.x, y: velocity.y + spin.y });
+  const satellite = createSatellite(game, position, { x: velocity.x + spin.x, y: velocity.y + spin.y });
+  // 射場から打ち上げた衛星の印（上がっている途中は早送りしない。targetSpeed）。
+  satellite.launched = true;
+  return satellite;
 }
 
 // 衛星を置いて打ち出す。置けなければ null。
@@ -337,15 +340,26 @@ export function endSound(before, game) {
 
 // 自動の早送り: 生きている衛星があり、指が触れておらず、最後の操作（画面を触る・衛星を出す・加速）から待ち時間（ゲームの時間）たったら、
 // 画面は時計を CRUISE_SPEED 倍で進める（それ以外は ×1）。待ち時間は、残りの衛星がある間は CRUISE_AFTER_PLACING 秒
-// （次をどこに置くか考える間）、全機を出し終えた後は CRUISE_AFTER 秒。step() は STEP 刻みなので、倍率で点は（ほぼ）変わらない。
+// （次をどこに置くか考える間）、全機を出し終えた後は CRUISE_AFTER 秒。ただし、射場から打ち上げてまだ 1 周していない衛星が上がっている途中
+// （外へ向かう速さが RISING_SPEED より大きい）の間は待ち時間がたっても早送りしない（打ち上げて、てっぺんで噴射する前に ×32 にならないように）。
+// step() は STEP 刻みなので、倍率で点は（ほぼ）変わらない。
 export const CRUISE_SPEED = 32;
 export const CRUISE_AFTER = 10;
 export const CRUISE_AFTER_PLACING = 30;
+export const RISING_SPEED = 0.05;
+
+// 射場から打ち上げて 1 周する前の衛星が、地球から外へ向かって上がっている途中か（外へ向かう速さ (x·vx + y·vy)/r が RISING_SPEED より大きい）。
+// 置いた衛星は数えない（月に乱された円軌道でも外へ向かう速さが 0.05 を超え、置くモードの早送りが変わってしまうため）。
+function rising(satellite) {
+  const r = Math.hypot(satellite.x, satellite.y);
+  return satellite.alive && satellite.launched === true && satellite.turns === 0 && (satellite.x * satellite.vx + satellite.y * satellite.vy) / r > RISING_SPEED;
+}
 
 // targetSpeed: 今の目標の速さ（lastAction は最後に画面を触った・衛星を出した・加速した時刻 game.t、touching は指が触れているか）。
 export function targetSpeed(game, lastAction, touching = false) {
   const wait = satellitesLeft(game) > 0 ? CRUISE_AFTER_PLACING : CRUISE_AFTER;
-  const cruising = !touching && game.satellites.some((satellite) => satellite.alive) && game.t - lastAction >= wait;
+  const cruising =
+    !touching && game.satellites.some((satellite) => satellite.alive) && !game.satellites.some(rising) && game.t - lastAction >= wait;
   return cruising ? CRUISE_SPEED : 1;
 }
 
