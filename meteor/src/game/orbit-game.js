@@ -157,7 +157,11 @@ export function openOrbitGame(onClose, options = {}) {
     title.textContent = "🛰️ 軌道に乗せろ";
     openPanel(
       "🛰️ 軌道に乗せろ",
-      `衛星を${SATELLITES}機、地球の周りに回らせる。1 周ごとに、その周でいちばん遠くまで行った距離（地球の半径の何倍か）の 2 乗が点になる（大きく回るほど多い）${bestText === undefined ? "" : `（いちばん良かったのは ${bestText}）`}`,
+      element(
+        "div",
+        `衛星を${SATELLITES}機、地球の周りに回す${bestText === undefined ? "" : `（最高 ${bestText} 周）`}`,
+        "game-detail orbit-result-line",
+      ),
       [
         button("📍 置く", () => ((style = "place"), showSetup()), style === "place"),
         button("🚀 打ち上げ", () => ((style = "launch"), showSetup()), style === "launch"),
@@ -191,24 +195,24 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function finishGame() {
-    // 終わったコマの点・周を上の表示にも出してから止める（結果の画面の数字とそろえる）。
+    // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる）。
     updateHud();
     playing = false;
     cancelDrag();
     const score = scoreOf(game);
     const key = mutual ? "mutual" : "normal";
-    // 0 点（何も回らなかった）は記録にしない。
-    const record = score.points > 0 && (best[key] === undefined || score.points > best[key]);
+    // 0 周（何も回らなかった）は記録にしない。
+    const record = score.turns > 0 && (best[key] === undefined || score.turns > best[key]);
     if (record) {
-      best = { ...best, [key]: score.points };
+      best = { ...best, [key]: score.turns };
       saveBest(best);
     }
     openPanel(
-      `${record ? "新記録！ " : ""}軌道ポイント ${score.points}`,
+      `${game.mutual ? "🧲 " : ""}${record ? "新記録！ " : ""}${score.turns} 周`,
       satelliteLine(),
       [
         button("もう一度", start),
-        ...(options.post && score.points > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
+        ...(options.post && score.turns > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
         resultLinks(),
       ],
     );
@@ -392,7 +396,7 @@ export function openOrbitGame(onClose, options = {}) {
     }
     const score = scoreOf(game);
     const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
-    if (playing) setText(title, `🛰️ ${score.points} 点・${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
+    if (playing) setText(title, `🛰️ ${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);

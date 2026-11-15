@@ -19,7 +19,7 @@ export function allClearedMessage(stageCount) {
 // 軌道に乗せろの結果。
 export function orbitMessage(score, mutual, record) {
   const mode = mutual ? "🧲引き合うモード" : "ふつうモード";
-  return `🛰️ 軌道に乗せろ（${mode}）: ${score.points.toLocaleString("ja-JP")} 点・${score.turns} 周・いちばん大きな軌道は地球の半径の ${score.biggest.toFixed(1)} 倍${record ? " 新記録！" : ""}`;
+  return `🛰️ 軌道に乗せろ（${mode}）: ${score.turns} 周${record ? " 新記録！" : ""}`;
 }
 
 // 「𝕏 にポスト」のボタンを、𝕏 の色（黒）にする。

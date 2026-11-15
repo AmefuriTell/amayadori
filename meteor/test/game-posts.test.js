@@ -9,7 +9,7 @@ test("the post for a hit says where, how far and how good", () => {
   assert.equal(allClearedMessage(5), "🪐 隕石当て 全5ステージ クリア！");
 });
 
-test("the post for the orbit game has the points, turns and the biggest orbit", () => {
-  assert.equal(orbitMessage({ points: 12345, turns: 7, biggest: 4.26 }, false, true), "🛰️ 軌道に乗せろ（ふつうモード）: 12,345 点・7 周・いちばん大きな軌道は地球の半径の 4.3 倍 新記録！");
-  assert.equal(orbitMessage({ points: 0, turns: 0, biggest: 0 }, true, false), "🛰️ 軌道に乗せろ（🧲引き合うモード）: 0 点・0 周・いちばん大きな軌道は地球の半径の 0.0 倍");
+test("the post for the orbit game has the turns", () => {
+  assert.equal(orbitMessage({ turns: 7 }, false, true), "🛰️ 軌道に乗せろ（ふつうモード）: 7 周 新記録！");
+  assert.equal(orbitMessage({ turns: 0 }, true, false), "🛰️ 軌道に乗せろ（🧲引き合うモード）: 0 周");
 });

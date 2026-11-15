@@ -46,7 +46,7 @@ function circular(r, angle = 0) {
   return { position: { x: r * Math.cos(angle), y: r * Math.sin(angle) }, velocity: { x: -v * Math.sin(angle), y: v * Math.cos(angle) } };
 }
 
-test("a circular orbit without a moon keeps going and counts turns with its size", () => {
+test("a circular orbit without a moon keeps going and counts turns", () => {
   const game = createOrbitGame(NO_MOON);
   const { position, velocity } = circular(2);
   addSatellite(game, position, velocity);
@@ -55,12 +55,10 @@ test("a circular orbit without a moon keeps going and counts turns with its size
   const [satellite] = game.satellites;
   assert.ok(satellite.alive);
   assert.equal(satellite.turns, 7);
-  // 1 周ごとに、いちばん遠い距離（ほぼ 2）の 2 乗を足す。
-  assert.ok(Math.abs(satellite.points - 28) < 0.1, `${satellite.points}`);
-  assert.ok(Math.abs(satellite.biggest - 2) < 0.01);
+  assert.deepEqual(scoreOf(game), { turns: 7 });
 });
 
-test("a bigger orbit makes fewer turns but more points (size matters, as asked)", () => {
+test("a smaller orbit makes more turns (the score is the turns)", () => {
   const score = (r) => {
     const game = createOrbitGame(NO_MOON);
     const { position, velocity } = circular(r);
@@ -70,10 +68,7 @@ test("a bigger orbit makes fewer turns but more points (size matters, as asked)"
   };
   const small = score(1.5);
   const big = score(4);
-  assert.ok(small.turns > big.turns);
-  assert.ok(big.biggest > small.biggest);
-  // 時間あたりの点は大きな軌道ほど多い（距離をそのまま足すと、小さな軌道ほど得になっていた）。
-  assert.ok(big.points > small.points, `${big.points} vs ${small.points}`);
+  assert.ok(small.turns > big.turns, `${small.turns} vs ${big.turns}`);
 });
 
 test("a clockwise orbit counts turns too", () => {
@@ -173,9 +168,9 @@ test("zoom is clamped and best scores are kept per mode", () => {
   const data = new Map();
   const storage = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
   assert.deepEqual(loadBest(storage), {});
-  saveBest({ normal: 42.5, mutual: 7 }, storage);
-  assert.deepEqual(loadBest(storage), { normal: 42.5, mutual: 7 });
-  storage.setItem("weatherbot.orbitBest", "{bad");
+  saveBest({ normal: 42, mutual: 7 }, storage);
+  assert.deepEqual(loadBest(storage), { normal: 42, mutual: 7 });
+  storage.setItem("weatherbot.orbitTurns", "{bad");
   assert.deepEqual(loadBest(storage), {});
   assert.equal(ESCAPE_DISTANCE > MOON_DISTANCE * 2, true);
   assert.ok(SAT_RADIUS > 0);
@@ -278,7 +273,7 @@ test("three satellites touching at once all crash", () => {
   // 3 機を少し離して置き、同じ点へ向けて動かす（置ける間隔を空けて、真ん中で同時に触れる）。
   game.satellites.push(
     ...[[-0.5, 3], [0.5, 3], [0, 3.5]].map(([x, y], index) => ({
-      id: 100 + index, x, y, vx: -x * 2, vy: (3.1 - y) * 2, alive: true, fuel: 0, end: null, turns: 0, points: 0, biggest: 0, sweep: 0, revMax: 3, angle: Math.atan2(y, x),
+      id: 100 + index, x, y, vx: -x * 2, vy: (3.1 - y) * 2, alive: true, fuel: 0, end: null, turns: 0, sweep: 0, angle: Math.atan2(y, x),
     })),
   );
   game.started = 0;
@@ -297,8 +292,17 @@ test("before the first satellite, until one is placed", () => {
 });
 
 test("loadBest reads a record saved in the current shape", () => {
-  const storage = { getItem: (key) => (key === "weatherbot.orbitBest" ? '{"normal":222.2,"mutual":50}' : null), setItem: () => {} };
-  assert.deepEqual(loadBest(storage), { normal: 222.2, mutual: 50 });
+  const storage = { getItem: (key) => (key === "weatherbot.orbitTurns" ? '{"normal":222,"mutual":50}' : null), setItem: () => {} };
+  assert.deepEqual(loadBest(storage), { normal: 222, mutual: 50 });
+});
+
+test("loadBest does not read the old record (weatherbot.orbitBest, in the old points) and saveBest leaves it", () => {
+  const data = new Map([["weatherbot.orbitBest", '{"normal":853.6}']]);
+  const storage = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
+  assert.deepEqual(loadBest(storage), {});
+  saveBest({ normal: 3 }, storage);
+  assert.equal(data.get("weatherbot.orbitTurns"), '{"normal":3}');
+  assert.equal(data.get("weatherbot.orbitBest"), '{"normal":853.6}');
 });
 
 test("predictOrbit: a circular orbit at r=3 without a moon comes back to where it started after one turn", () => {
@@ -533,7 +537,7 @@ test("a 60-degree launch with no boost falls back to Earth; boosting a few times
   assert.ok(shots >= 2, `turned after ${shots} shots`);
 });
 
-test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbits and points", () => {
+test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbits and turns", () => {
   const run = (split) => {
     const game = createOrbitGame(DEFAULT_WORLD);
     for (const [r, angle] of [[1.3, 0], [2.4, 2], [3.5, 4]]) {
@@ -554,7 +558,7 @@ test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbit
     assert.ok(Math.hypot(satellite.x - other.x, satellite.y - other.y) < 1e-6, `${index}`);
   });
   assert.ok(whole.satellites.every((satellite) => satellite.turns > 0));
-  assert.ok(Math.abs(scoreOf(whole).points - scoreOf(parts).points) < 0.05);
+  assert.equal(scoreOf(whole).turns, scoreOf(parts).turns);
 });
 
 test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give the same game over 600 seconds", () => {
@@ -576,7 +580,7 @@ test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give
     assert.equal(satellite.end, other.end, `${index}`);
     assert.equal(satellite.turns, other.turns, `${index}`);
   });
-  assert.ok(Math.abs(scoreOf(slow).points - scoreOf(fast).points) <= 0.5, `${scoreOf(slow).points} vs ${scoreOf(fast).points}`);
+  assert.equal(scoreOf(slow).turns, scoreOf(fast).turns);
 });
 
 test("aimClick: true only when the predicted end turns into a full turn", () => {
