@@ -6,6 +6,7 @@ import {
   ESCAPE_DISTANCE,
   FUEL,
   LAUNCH_RADIUS,
+  MIN_PLACE_DISTANCE,
   GAME_SECONDS,
   SATELLITES,
   SAT_RADIUS,
@@ -18,6 +19,8 @@ import {
   elapsed,
   clampZoom,
   createOrbitGame,
+  endSound,
+  firstTurns,
   isOver,
   launchFromSite,
   launchSite,
@@ -27,6 +30,7 @@ import {
   satellitesLeft,
   scoreOf,
   step,
+  turnsOf,
 } from "../src/game/orbit.js";
 
 const NO_MOON = { ...DEFAULT_WORLD, moons: [] };
@@ -372,4 +376,54 @@ test("predictOrbit: the same place and speed gives a different line later, becau
   const b = predictOrbit(late, position, velocity);
   const last = (r) => r.points[r.points.length - 1];
   assert.ok(a.end !== b.end || Math.hypot(last(a).x - last(b).x, last(a).y - last(b).y) > 0.1);
+});
+
+test("the first-turn cue fires exactly once for a grazing circular orbit (not on later turns)", () => {
+  const game = createOrbitGame(NO_MOON);
+  const { position, velocity } = circular(MIN_PLACE_DISTANCE + 0.05);
+  addSatellite(game, position, velocity);
+  let cues = 0;
+  for (let index = 0; index < 60 * 120; index += 1) {
+    const before = turnsOf(game);
+    step(game, 1 / 60);
+    if (firstTurns(before, game)) cues += 1;
+  }
+  assert.ok(game.satellites[0].alive);
+  assert.ok(game.satellites[0].turns >= 3, `${game.satellites[0].turns}`);
+  assert.equal(cues, 1);
+});
+
+test("the first-turn cue counts once even when two satellites finish their first turn in the same frame", () => {
+  const game = createOrbitGame(NO_MOON);
+  const a = addSatellite(game, { x: 2, y: 0 }, { x: 0, y: 1 });
+  const b = addSatellite(game, { x: -2, y: 0 }, { x: 0, y: -1 });
+  const before = turnsOf(game);
+  a.turns = 1;
+  b.turns = 1;
+  assert.equal(firstTurns(before, game), true);
+  assert.equal(firstTurns(turnsOf(game), game), false);
+});
+
+test("the leaving sound follows the reason, prefers a crash, and ignores satellites that were already gone", () => {
+  const game = createOrbitGame(NO_MOON);
+  const sats = [0, 1, 2].map((index) => addSatellite(game, { x: 2 + index, y: 0 }, { x: 0, y: 0.5 }));
+  const before = turnsOf(game);
+  assert.equal(endSound(before, game), null);
+  const gone = (satellite, end) => Object.assign(satellite, { alive: false, end });
+  gone(sats[0], "moon");
+  assert.deepEqual(endSound(before, game), { event: "moon" });
+  gone(sats[1], "away");
+  assert.deepEqual(endSound(before, game), { event: "moon" });
+  gone(sats[2], "crash");
+  assert.deepEqual(endSound(before, game), { event: "earth", km: 1000 });
+  assert.equal(endSound(turnsOf(game), game), null);
+  const one = (end) => {
+    const g = createOrbitGame(NO_MOON);
+    const s = addSatellite(g, { x: 2, y: 0 }, { x: 0, y: 0.5 });
+    const b = turnsOf(g);
+    gone(s, end);
+    return endSound(b, g);
+  };
+  assert.deepEqual(one("earth"), { event: "earth", km: 1000 });
+  assert.deepEqual(one("away"), { event: "away" });
 });

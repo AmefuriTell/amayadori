@@ -3,14 +3,15 @@
 //   pitchJump, pitchJumpTime, repeatTime, noise, modulation, bitCrush, delay, sustainVolume, decay, tremolo, filter]。
 // shape は 0 正弦波・1 三角波・2 のこぎり波・4 ノイズ。slide は 1 につき毎秒 500 Hz 動く。filter は負で低域だけ通す。
 // ZzFX は全体の音量 ZZFX.volume を 2 回（サンプルを作るときと、鳴らすときの gain）掛け、真ん中に置く StereoPanner で
-// さらに約 0.71 倍になる。game.js は読み込んだ後に ZZFX.volume を ZZFX_VOLUME（1）にするので、
+// さらに約 0.71 倍になる。audio.js は読み込んだ後に ZZFX.volume を ZZFX_VOLUME（1）にするので、
 // 出る音の大きさはおよそ「引数の volume × 波形の振れ × 0.71」。
 import { impactPower } from "./physics.js";
 
 export const ZZFX_VOLUME = 1;
 const STORAGE_KEY = "meteor.sound";
 
-// event: "launch"（投げた）・"earth"（地球に当たった。km は的からのずれ）・"moon"（月に当たった）・"away"（外れ）。
+// event: "launch"（投げた・衛星を出した）・"earth"（地球に当たった。km は的からのずれ）・"moon"（月に当たった）・"away"（外れ・飛んでいった）・
+// "orbit"（軌道に乗せろで、衛星が最初の 1 周を回り切った）。
 // 鳴らす音（ZzFX の引数）の一覧を返す。知らない event は null。
 export function soundFor(event, km) {
   if (event === "launch") {
@@ -31,6 +32,10 @@ export function soundFor(event, km) {
   if (event === "away") {
     // 外れ: のこぎり波を 300 Hz から 0.45 秒で約 165 Hz まで下げる（倍音で小さいスピーカーでも聞こえる。低域通過で丸める）。
     return [[0.26, 0.05, 300, 0.02, 0.1, 0.33, 2, 1, -0.6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, -800]];
+  }
+  if (event === "orbit") {
+    // 最初の 1 周（軌道に乗せろ）: 短い上がり調子の「ピロン」。正弦波 880 Hz を 0.06 秒で 1320 Hz へ跳ね上げ、0.3 秒で消す。
+    return [[0.35, 0, 880, 0, 0.04, 0.25, 0, 1, 0, 0, 440, 0.06]];
   }
   return null;
 }
