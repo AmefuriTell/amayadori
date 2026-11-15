@@ -579,10 +579,8 @@ test("aim zone: from its centre and corners, a person who boosts 0.6 s after the
   }
 });
 
-test("aim zone: from its centre, a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
-  // 月の重さが地球の 1/8 のままだと、合図どおりに乗せても 600 秒残るのは 1/32、5 周以内に落ちるのが 31/32 だった（ORBIT_WORLD の注釈）。
-  const deg = (AIM_ZONE.from + AIM_ZONE.to) / 2;
-  const length = (AIM_ZONE.near + AIM_ZONE.far) / 2;
+// 扇形の中の 1 点（deg, length）から打ち、合図から 0.6 秒遅れて 0.35 秒ごとに押す人で、月と地球の向きを 32 通り変えて 600 秒回す。
+function humanLaunchLasts(deg, length) {
   const N = 32;
   let survived = 0;
   let fellSoon = 0;
@@ -609,8 +607,30 @@ test("aim zone: from its centre, a person who boosts on the cue gets a satellite
     survived += satellite.alive ? 1 : 0;
     fellSoon += !satellite.alive && satellite.turns <= 5 ? 1 : 0;
   }
+  return { N, survived, fellSoon };
+}
+
+test("aim zone: from its centre, a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
+  // 月の重さが地球の 1/8 のままだと、合図どおりに乗せても 600 秒残るのは 1/32、5 周以内に落ちるのが 31/32 だった（ORBIT_WORLD の注釈）。
+  const { N, survived, fellSoon } = humanLaunchLasts((AIM_ZONE.from + AIM_ZONE.to) / 2, (AIM_ZONE.near + AIM_ZONE.far) / 2);
   assert.ok(survived >= 24, `alive after 600 s: ${survived}/${N}`);
   assert.ok(fellSoon <= 4, `gone within 5 turns: ${fellSoon}/${N}`);
+});
+
+test("aim zone: from its outer edge (far, centre angle), a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
+  // 前の扇形（引き 2.5〜2.875）では、外側の端（70°・2.875）から打つと 600 秒残るのは 3/32 だった（DESIGN.md）。
+  const { N, survived } = humanLaunchLasts((AIM_ZONE.from + AIM_ZONE.to) / 2, AIM_ZONE.far);
+  assert.ok(survived >= 24, `alive after 600 s: ${survived}/${N}`);
+});
+
+test("aim zone: from each of its four corners, a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
+  // 67.5〜87.5° の扇形では、角度の両端（例えば 87.5°・2.53）から打つと 600 秒残るのは 14/32 だった（DESIGN.md）。
+  for (const deg of [AIM_ZONE.from, AIM_ZONE.to]) {
+    for (const length of [AIM_ZONE.near, AIM_ZONE.far]) {
+      const { N, survived } = humanLaunchLasts(deg, length);
+      assert.ok(survived >= 24, `${deg}°, ${length}: alive after 600 s: ${survived}/${N}`);
+    }
+  }
 });
 
 test("aim zone: straight up or sideways at strength 3 is outside; the polygon is the pulls below the site, against the spin", () => {

@@ -739,7 +739,7 @@ export function openOrbitGame(onClose, options = {}) {
         // 周回に乗せるまで、指を動かす先の範囲（扇形）を次に出す衛星の色で塗る（引きの線の下）。指を置いた所から、指の動きの px
         // （pullPx: 引き × PULL_PX）で描く。世界の縮尺で射場の上に描くと、スマホでは指の引きと合わないため。
         c.fillStyle = COLORS[game.satellites.length % COLORS.length];
-        c.globalAlpha = 0.3;
+        c.globalAlpha = 0.45;
         c.beginPath();
         aimZone(launchSite(game, earthStart)).forEach((pull, pointIndex) => {
           const at = pullPx(dragStart, pull);
