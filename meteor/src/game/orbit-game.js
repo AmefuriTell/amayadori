@@ -232,6 +232,8 @@ export function openOrbitGame(onClose, options = {}) {
     audio.load();
     touches.set(event.pointerId, pointerPosition(event));
     // 遊んでいる間に画面を触ったら、すぐ ×1 に戻す（狙って加速したい時や、次の衛星を出す時に間に合うように）。
+    // 早送り中に触った時は ×1 に戻すだけで、引っ張りも説明も出さない（2 本目の指のズームは下で今までどおり）。
+    const wasCruising = playing && panel.hidden && speed > 1;
     if (playing && panel.hidden) {
       speed = 1;
       lastAction = game.t;
@@ -243,6 +245,7 @@ export function openOrbitGame(onClose, options = {}) {
       else pinch = null;
       return;
     }
+    if (wasCruising) return;
     if (!playing || !panel.hidden || activePointer !== null || satellitesLeft(game) <= 0) return;
     const at = pointerPosition(event);
     if (style === "place") {
@@ -361,7 +364,8 @@ export function openOrbitGame(onClose, options = {}) {
     explosions = explosions.filter((explosion) => advanceExplosion(explosion, seconds));
     if (!playing) return;
     // 速さを目標へ滑らかに寄せる。目標が ×1 に戻ったら（加速した時など）すぐ ×1 にする。
-    const target = targetSpeed(game, lastAction);
+    // 指が触れている間（引っ張り・ズーム）は早送りしない。
+    const target = targetSpeed(game, lastAction, activePointer !== null || touches.size > 0);
     speed = target === 1 ? 1 : speed + (target - speed) * Math.min(1, seconds * 3);
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);

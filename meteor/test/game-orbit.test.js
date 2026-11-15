@@ -4,6 +4,7 @@ import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE } from "../src/game/physics.js";
 import {
   BOOST,
   CRUISE_AFTER,
+  CRUISE_AFTER_PLACING,
   CRUISE_SPEED,
   ESCAPE_DISTANCE,
   FUEL,
@@ -431,22 +432,35 @@ test("the leaving sound follows the reason, prefers a crash, and ignores satelli
   assert.deepEqual(one("away"), { event: "away" });
 });
 
-test("targetSpeed: fast-forwards when some satellite flies and nothing was done for CRUISE_AFTER seconds", () => {
+test("targetSpeed: waits CRUISE_AFTER_PLACING seconds while satellites are left, CRUISE_AFTER after all are out, and never while touching", () => {
   const game = createOrbitGame(DEFAULT_WORLD);
   let lastAction = 0;
+  const place = (r, angle) => {
+    const { position, velocity } = circular(r, angle);
+    assert.ok(addSatellite(game, position, velocity));
+    lastAction = game.t;
+  };
   // 衛星が 0 機なら、何秒たっても ×1。
-  step(game, CRUISE_AFTER + 5);
+  step(game, CRUISE_AFTER_PLACING + 5);
   assert.equal(targetSpeed(game, lastAction), 1);
-  const { position, velocity } = circular(2, 0);
-  assert.ok(addSatellite(game, position, velocity));
-  lastAction = game.t;
-  // 1 機だけでも、出した直後・10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
+  // 残りがある間: 30 秒未満は ×1、30 秒以上で CRUISE_SPEED（1 機だけでも）。
+  place(2, 0);
   assert.equal(targetSpeed(game, lastAction), 1);
-  step(game, CRUISE_AFTER - 0.5);
+  step(game, CRUISE_AFTER_PLACING - 0.5);
   assert.equal(targetSpeed(game, lastAction), 1);
   // （STEP を足し合わせた時刻の丸めの誤差があるので、少しだけ多く進める）
   step(game, 0.51);
   assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  // 指が触れている間は ×1。
+  assert.equal(targetSpeed(game, lastAction, true), 1);
+  // 出し終えた後: 10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
+  place(2.6, 2);
+  place(3.2, 4);
+  step(game, CRUISE_AFTER - 0.5);
+  assert.equal(targetSpeed(game, lastAction), 1);
+  step(game, 0.51);
+  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  assert.equal(targetSpeed(game, lastAction, true), 1);
   // 操作した直後（画面を触る・加速）は ×1 に戻る。
   assert.ok(boost(boostTarget(game)));
   lastAction = game.t;
