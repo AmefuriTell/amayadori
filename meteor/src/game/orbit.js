@@ -4,7 +4,7 @@
 // 「引き合うモード」では衛星どうしも引き合う。地球に落ちる・月や衛星どうしでぶつかる・遠くへ出ると、その衛星はいなくなる。
 // 点は回り切った周の合計（画面に出る輪の数そのもの）。小さな輪ほど早く回れて周が増えるが、低すぎると地球に落ちやすく、
 // 同じ低い輪に何機も入れるとぶつかりやすいので、どこを回らせるかを考える遊びになる。
-import { DEFAULT_WORLD, STEP, angleOfLongitude, moonPositions } from "./physics.js";
+import { DEFAULT_WORLD, STEP, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
 
 // 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められる）。
 export const SATELLITES = 3;
@@ -316,6 +316,29 @@ export function aimZone(site, steps = 6) {
       return { x: -radius * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: -radius * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
     });
   return [...arc(AIM_ZONE.far), ...arc(AIM_ZONE.near).reverse()];
+}
+
+// 設定の欄の後ろに出す見本の、初めの位置と速さ（画面に頼らない）。速さは引きから決めた速さで、打ち上げは launchFromSite、
+// 置くは addSatellite にそのまま渡す。打ち上げ: 射場から、扇形（aimZone）の中心の引きで打ち出す（てっぺんでは噴射の合図で噴射する）。
+// 置く: 決まった 1 点（PREVIEW_PLACE）から、地球を回る円軌道の速さで、自転と同じ向きへ打ち出す。
+// 見本の地球の回り始めの向きは PREVIEW_START（射場が画面の右の少し上に来て、噴射の合図で噴射すれば周回に乗る向き）。
+// 置く点は地球の中心から 1.4（月に乱されず回り続ける高さ）。
+export const PREVIEW_START = -2;
+export const PREVIEW_PLACE = { x: -0.99, y: 0.99 };
+export function previewShot(game, style) {
+  if (style === "place") {
+    const { x, y } = PREVIEW_PLACE;
+    const r = Math.hypot(x, y);
+    const speed = Math.sqrt(game.world.earthGM / r);
+    return { position: { x, y }, velocity: { x: (-y / r) * speed, y: (x / r) * speed } };
+  }
+  const site = launchSite(game, PREVIEW_START);
+  const { up, along } = siteAxes(site);
+  const a = (((AIM_ZONE.from + AIM_ZONE.to) / 2) * Math.PI) / 180;
+  const length = (AIM_ZONE.near + AIM_ZONE.far) / 2;
+  const pull = { x: -length * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: -length * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
+  const { position } = site;
+  return { position: { ...position }, velocity: launchVelocity(position, { x: position.x + pull.x, y: position.y + pull.y }) };
 }
 
 // 引き（射場からゴムの先まで）が範囲に入っているか。
