@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE } from "../src/game/physics.js";
 import {
   BOOST,
+  CRUISE_AFTER,
+  CRUISE_AFTER_PLACING,
+  CRUISE_SPEED,
   ESCAPE_DISTANCE,
   FUEL,
   LAUNCH_RADIUS,
@@ -30,6 +33,7 @@ import {
   satellitesLeft,
   scoreOf,
   step,
+  targetSpeed,
   turnsOf,
 } from "../src/game/orbit.js";
 
@@ -426,4 +430,90 @@ test("the leaving sound follows the reason, prefers a crash, and ignores satelli
   };
   assert.deepEqual(one("earth"), { event: "earth", km: 1000 });
   assert.deepEqual(one("away"), { event: "away" });
+});
+
+test("targetSpeed: waits CRUISE_AFTER_PLACING seconds while satellites are left, CRUISE_AFTER after all are out, and never while touching", () => {
+  const game = createOrbitGame(DEFAULT_WORLD);
+  let lastAction = 0;
+  const place = (r, angle) => {
+    const { position, velocity } = circular(r, angle);
+    assert.ok(addSatellite(game, position, velocity));
+    lastAction = game.t;
+  };
+  // 衛星が 0 機なら、何秒たっても ×1。
+  step(game, CRUISE_AFTER_PLACING + 5);
+  assert.equal(targetSpeed(game, lastAction), 1);
+  // 残りがある間: 30 秒未満は ×1、30 秒以上で CRUISE_SPEED（1 機だけでも）。
+  place(2, 0);
+  assert.equal(targetSpeed(game, lastAction), 1);
+  step(game, CRUISE_AFTER_PLACING - 0.5);
+  assert.equal(targetSpeed(game, lastAction), 1);
+  // （STEP を足し合わせた時刻の丸めの誤差があるので、少しだけ多く進める）
+  step(game, 0.51);
+  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  // 指が触れている間は ×1。
+  assert.equal(targetSpeed(game, lastAction, true), 1);
+  // 出し終えた後: 10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
+  place(2.6, 2);
+  place(3.2, 4);
+  step(game, CRUISE_AFTER - 0.5);
+  assert.equal(targetSpeed(game, lastAction), 1);
+  step(game, 0.51);
+  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  assert.equal(targetSpeed(game, lastAction, true), 1);
+  // 操作した直後（画面を触る・加速）は ×1 に戻る。
+  assert.ok(boost(boostTarget(game)));
+  lastAction = game.t;
+  assert.equal(targetSpeed(game, lastAction), 1);
+  step(game, CRUISE_AFTER + 0.01);
+  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
+  // 全機いなくなったら ×1。
+  for (const satellite of game.satellites) satellite.alive = false;
+  assert.equal(targetSpeed(game, lastAction), 1);
+});
+
+test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbits and points", () => {
+  const run = (split) => {
+    const game = createOrbitGame(DEFAULT_WORLD);
+    for (const [r, angle] of [[1.3, 0], [2.4, 2], [3.5, 4]]) {
+      const { position, velocity } = circular(r, angle);
+      addSatellite(game, position, velocity);
+    }
+    if (split) for (let i = 0; i < 120; i += 1) step(game, 0.25);
+    else step(game, 30);
+    return game;
+  };
+  const whole = run(false);
+  const parts = run(true);
+  assert.ok(Math.abs(whole.t - parts.t) < 1e-6);
+  whole.satellites.forEach((satellite, index) => {
+    const other = parts.satellites[index];
+    assert.equal(satellite.alive, other.alive);
+    assert.equal(satellite.turns, other.turns);
+    assert.ok(Math.hypot(satellite.x - other.x, satellite.y - other.y) < 1e-6, `${index}`);
+  });
+  assert.ok(whole.satellites.every((satellite) => satellite.turns > 0));
+  assert.ok(Math.abs(scoreOf(whole).points - scoreOf(parts).points) < 0.05);
+});
+
+test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give the same game over 600 seconds", () => {
+  const run = (next) => {
+    const game = createOrbitGame(DEFAULT_WORLD);
+    for (const [r, angle] of [[1.3, 0], [2.4, 2], [2.9, 4]]) {
+      const { position, velocity } = circular(r, angle);
+      addSatellite(game, position, velocity);
+    }
+    for (let i = 0; !isOver(game); i += 1) step(game, next(i));
+    return game;
+  };
+  // ×1: 1/60 秒に決まったゆらぎを足したコマ。×32: 1/60 × 32 を 3 つに区切った 0.25 秒未満の dt。
+  const slow = run((i) => 1 / 60 + 0.004 * Math.sin(i * 1.7));
+  const fast = run(() => 32 / 60 / 3);
+  assert.ok(Math.abs(elapsed(slow) - GAME_SECONDS) < 1e-6 && Math.abs(elapsed(fast) - GAME_SECONDS) < 1e-6);
+  slow.satellites.forEach((satellite, index) => {
+    const other = fast.satellites[index];
+    assert.equal(satellite.end, other.end, `${index}`);
+    assert.equal(satellite.turns, other.turns, `${index}`);
+  });
+  assert.ok(Math.abs(scoreOf(slow).points - scoreOf(fast).points) <= 0.5, `${scoreOf(slow).points} vs ${scoreOf(fast).points}`);
 });
