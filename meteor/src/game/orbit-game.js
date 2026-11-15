@@ -76,7 +76,7 @@ export function openOrbitGame(onClose, options = {}) {
 
   let size = { width: 0, height: 0, ratio: 1 };
   let zoom = 1;
-  // 時計の進む速さ（全機を出し終えて操作が無くなると、targetSpeed で自動に早送りする）と、最後に操作した時刻（game.t）。
+  // 時計の進む速さ（操作が無くなると、targetSpeed で自動に早送りする）と、最後に操作した時刻（game.t）。
   let speed = 1;
   let lastAction = 0;
   let style = "place";
@@ -231,6 +231,11 @@ export function openOrbitGame(onClose, options = {}) {
   canvas.addEventListener("pointerdown", (event) => {
     audio.load();
     touches.set(event.pointerId, pointerPosition(event));
+    // 遊んでいる間に画面を触ったら、すぐ ×1 に戻す（狙って加速したい時や、次の衛星を出す時に間に合うように）。
+    if (playing && panel.hidden) {
+      speed = 1;
+      lastAction = game.t;
+    }
     if (touches.size >= 2) {
       // 2 本目の指: 引っ張りをやめて、2 本指のズームにする。3 本目以降はズームを止める（指の組が変わってズームが跳ねないように）。
       cancelDrag();
@@ -367,6 +372,7 @@ export function openOrbitGame(onClose, options = {}) {
     const anchors = new Map();
     for (let part = 0; part < parts; part += 1) {
       step(game, total / parts);
+      const over = isOver(game);
       for (const satellite of alive) {
         // 遠くへ飛んでいったものは爆発させない。
         if (satellite.alive || satellite.end === "away" || anchors.has(satellite.id)) continue;
@@ -386,6 +392,8 @@ export function openOrbitGame(onClose, options = {}) {
         trail.push({ x: satellite.x, y: satellite.y });
         if (trail.length > TRAIL_POINTS) trail.shift();
       }
+      // 時間切れ（または全機いなくなった）なら、残りの区切りで同じ位置の点を積まない。
+      if (over) break;
     }
     // 最初の 1 周を回り切った衛星があれば 1 回だけ鳴らす。いなくなった衛星があれば、その理由で 1 回（衝突を優先）。
     if (firstTurns(turnsBefore, game)) audio.play("orbit");

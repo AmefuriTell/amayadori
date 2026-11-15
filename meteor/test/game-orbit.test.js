@@ -431,29 +431,23 @@ test("the leaving sound follows the reason, prefers a crash, and ignores satelli
   assert.deepEqual(one("away"), { event: "away" });
 });
 
-test("targetSpeed: fast-forwards only after every satellite is out, some still fly, and nothing was done for CRUISE_AFTER seconds", () => {
+test("targetSpeed: fast-forwards when some satellite flies and nothing was done for CRUISE_AFTER seconds", () => {
   const game = createOrbitGame(DEFAULT_WORLD);
   let lastAction = 0;
-  const place = (r, angle) => {
-    const { position, velocity } = circular(r, angle);
-    assert.ok(addSatellite(game, position, velocity));
-    lastAction = game.t;
-  };
-  place(2, 0);
-  step(game, 1);
-  place(2.6, 2);
-  // 2 機まで: 何秒たっても ×1。
+  // 衛星が 0 機なら、何秒たっても ×1。
   step(game, CRUISE_AFTER + 5);
   assert.equal(targetSpeed(game, lastAction), 1);
-  place(3.2, 4);
-  // 3 機を出した直後・10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
+  const { position, velocity } = circular(2, 0);
+  assert.ok(addSatellite(game, position, velocity));
+  lastAction = game.t;
+  // 1 機だけでも、出した直後・10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
   assert.equal(targetSpeed(game, lastAction), 1);
   step(game, CRUISE_AFTER - 0.5);
   assert.equal(targetSpeed(game, lastAction), 1);
   // （STEP を足し合わせた時刻の丸めの誤差があるので、少しだけ多く進める）
   step(game, 0.51);
   assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
-  // 操作した直後（加速など）は ×1 に戻る。
+  // 操作した直後（画面を触る・加速）は ×1 に戻る。
   assert.ok(boost(boostTarget(game)));
   lastAction = game.t;
   assert.equal(targetSpeed(game, lastAction), 1);
@@ -486,4 +480,26 @@ test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbit
   });
   assert.ok(whole.satellites.every((satellite) => satellite.turns > 0));
   assert.ok(Math.abs(scoreOf(whole).points - scoreOf(parts).points) < 0.05);
+});
+
+test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give the same game over 600 seconds", () => {
+  const run = (next) => {
+    const game = createOrbitGame(DEFAULT_WORLD);
+    for (const [r, angle] of [[1.3, 0], [2.4, 2], [2.9, 4]]) {
+      const { position, velocity } = circular(r, angle);
+      addSatellite(game, position, velocity);
+    }
+    for (let i = 0; !isOver(game); i += 1) step(game, next(i));
+    return game;
+  };
+  // ×1: 1/60 秒に決まったゆらぎを足したコマ。×32: 1/60 × 32 を 3 つに区切った 0.25 秒未満の dt。
+  const slow = run((i) => 1 / 60 + 0.004 * Math.sin(i * 1.7));
+  const fast = run(() => 32 / 60 / 3);
+  assert.ok(Math.abs(elapsed(slow) - GAME_SECONDS) < 1e-6 && Math.abs(elapsed(fast) - GAME_SECONDS) < 1e-6);
+  slow.satellites.forEach((satellite, index) => {
+    const other = fast.satellites[index];
+    assert.equal(satellite.end, other.end, `${index}`);
+    assert.equal(satellite.turns, other.turns, `${index}`);
+  });
+  assert.ok(Math.abs(scoreOf(slow).points - scoreOf(fast).points) <= 0.5, `${scoreOf(slow).points} vs ${scoreOf(fast).points}`);
 });
