@@ -180,6 +180,8 @@ export function openOrbitGame(onClose, options = {}) {
     playing = false;
     cancelDrag();
     setSpeed(1);
+    // 見本は決まった大きさで見せる（前のゲームのズームを持ち込まない）。
+    zoom = 1;
     explosions = [];
     title.textContent = "軌道に乗せろ";
     const detail = element("div", "", "game-detail orbit-result-line");
@@ -394,6 +396,7 @@ export function openOrbitGame(onClose, options = {}) {
   canvas.addEventListener("pointermove", (event) => {
     if (touches.has(event.pointerId)) touches.set(event.pointerId, pointerPosition(event));
     if (pinch && touches.size === 2) {
+      if (preview) return;
       const [a, b] = [...touches.values()];
       zoom = clampZoom((pinch.zoom * Math.hypot(a.x - b.x, a.y - b.y)) / Math.max(1, pinch.distance));
       return;
@@ -439,6 +442,8 @@ export function openOrbitGame(onClose, options = {}) {
     "wheel",
     (event) => {
       event.preventDefault();
+      // 設定の欄の間は見本の大きさを変えない。
+      if (preview) return;
       // 行（deltaMode 1）やページ（2）単位で来るホイール（Firefox など）は、px に直す。
       const pixels = event.deltaY * (event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? size.height : 1);
       zoom = clampZoom(zoom * Math.exp(-pixels * 0.0015));
@@ -547,7 +552,9 @@ export function openOrbitGame(onClose, options = {}) {
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
     drawSpace(c, width, height, stars);
     const shake = shakeOffset(explosions[explosions.length - 1], reduceMotion);
-    c.setTransform(ratio, 0, 0, ratio, shake.x * ratio, shake.y * ratio);
+    // 設定の欄の間だけ、絵を上の欄と設定の欄の間の真ん中へ上げる（見本が欄の裏に隠れないように）。
+    const lift = preview ? Math.max(0, height / 2 - (bar.offsetTop + bar.offsetHeight + panel.offsetTop) / 2) : 0;
+    c.setTransform(ratio, 0, 0, ratio, shake.x * ratio, (shake.y - lift) * ratio);
     const center = toScreen({ x: 0, y: 0 });
     c.strokeStyle = "rgba(255,255,255,0.12)";
     c.setLineDash([4, 6]);
