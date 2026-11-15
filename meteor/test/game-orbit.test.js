@@ -623,6 +623,16 @@ test("aim zone: from its outer edge (far, centre angle), a person who boosts on 
   assert.ok(survived >= 24, `alive after 600 s: ${survived}/${N}`);
 });
 
+test("aim zone: from each of its four corners, a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
+  // 67.5〜87.5° の扇形では、角度の両端（例えば 87.5°・2.53）から打つと 600 秒残るのは 14/32 だった（DESIGN.md）。
+  for (const deg of [AIM_ZONE.from, AIM_ZONE.to]) {
+    for (const length of [AIM_ZONE.near, AIM_ZONE.far]) {
+      const { N, survived } = humanLaunchLasts(deg, length);
+      assert.ok(survived >= 24, `${deg}°, ${length}: alive after 600 s: ${survived}/${N}`);
+    }
+  }
+});
+
 test("aim zone: straight up or sideways at strength 3 is outside; the polygon is the pulls below the site, against the spin", () => {
   const site = launchSite(createOrbitGame(ORBIT_WORLD), 0.3);
   assert.equal(inAimZone(site, pullAt(site, 0, 3)), false);

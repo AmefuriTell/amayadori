@@ -297,7 +297,7 @@ export function aimLineStyle(end, satelliteColor) {
 // 周回に乗せるまでの手がかり（DESIGN.md）。打ち上げの正解の範囲: 打ち出す向きは真上から自転の向きへ from〜to 度、強さは引き near〜far
 // （合図から 0.6〜1 秒遅れて押し始める人でも乗る範囲）。てっぺん（外へ向かう速さが CUE_RISING 未満、地球の中心から CUE_HEIGHT より外）で、
 // 道筋が 1 周回る線になるまで噴射する（CUE_HEIGHT は、弱く打って上がり切らずに落ちていく衛星に合図を出さないため）。
-export const AIM_ZONE = { from: 67.5, to: 87.5, near: 2.38, far: 2.53 };
+export const AIM_ZONE = { from: 73, to: 81, near: 2.38, far: 2.53 };
 export const CUE_RISING = 0.15;
 export const CUE_HEIGHT = 1.2;
 
