@@ -31,6 +31,14 @@ export function xIntentUrl(text, url) {
   return intent.href;
 }
 
+// 端末の共有で GIF を渡すのはスマホ・タブレットだけ（PC の Chrome・Edge・Safari でも canShare は真になるが、OS の共有の窓からは
+// 𝕏 に投稿しにくいため）。userAgentData があればその mobile、無ければ UA の名前で。iPadOS は Mac の UA でタッチの点が 2 以上。
+export function isMobileDevice(nav) {
+  const agent = nav.userAgent || "";
+  if (/Macintosh/.test(agent) && nav.maxTouchPoints > 1) return true;
+  return nav.userAgentData?.mobile ?? /Android|iPhone|iPad|iPod/.test(agent);
+}
+
 // 端末の共有で 𝕏 に渡す文（Web Intent と同じ中身: 文・URL・ハッシュタグ）。共有だと URL の欄が落ちる 𝕏 のアプリがあるので、
 // URL も文の中に入れる。
 export function xShareText(text, url) {

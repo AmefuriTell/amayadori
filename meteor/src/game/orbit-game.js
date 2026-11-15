@@ -358,23 +358,38 @@ export function openOrbitGame(onClose, options = {}) {
       saveBest(best);
     }
     const canPost = Boolean(options.post) && score.turns > 0;
+    // 終わった時の位置を、生きている全機について 1 回記録する（最後の記録の後に終えても、ほかの衛星がいなくなった扱いにならないように）。
+    if (!gifRecord.length || gifRecord[gifRecord.length - 1].t < game.t - 1e-9) {
+      for (const satellite of game.satellites) if (satellite.alive) recordSatellite(satellite);
+    }
+    // 投稿の案内の 1 行（共有に失敗した・GIF を保存した。web.js が gif.note で出す）。
+    const note = element("div", "", "game-detail");
+    note.hidden = true;
     // 投稿の GIF は結果の画面が出た時に裏で作り始める（押してから作ると、端末の共有に要る直前の操作が切れることがあるため）。
-    if (canPost) makeGif();
+    if (canPost) makeGif(note);
     openPanel(
       `${game.mutual ? "🧲 " : ""}${record ? "新記録！ " : ""}${score.turns} 周`,
       satelliteLine(),
       [
         button("もう一度", start),
-        ...(canPost ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false, gif)))] : []),
+        ...(canPost ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false, gif))), note] : []),
         resultLinks(),
       ],
     );
   }
 
   // 投稿の GIF を作る（gif.blob はできたら入る。新しく始めた・閉じたらやめる。作れなければ null のまま）。
-  function makeGif() {
+  // gif.note は結果の欄に案内を 1 行出す。gif.noShare・gif.saved は web.js が付ける印。
+  function makeGif(note) {
     const run = gifRun;
-    const made = { blob: null, ready: null };
+    const made = {
+      blob: null,
+      ready: null,
+      note: (text) => {
+        note.textContent = text;
+        note.hidden = false;
+      },
+    };
     made.ready = makeOrbitGif(gifRecord, {
       colors: COLORS,
       stars,
