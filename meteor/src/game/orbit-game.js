@@ -201,10 +201,20 @@ export function openOrbitGame(onClose, options = {}) {
       [
         button("もう一度", start),
         ...(options.post && score.points > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
-        button("設定を変える", showSetup),
-        button("今日のお題へ", () => switchTo(openGame)),
+        resultLinks(),
       ],
     );
+  }
+
+  // 結果の画面の下の、文字だけのリンクの 1 行（設定を変える・今日のお題へ）。
+  function resultLinks() {
+    const row = element("div", undefined, "orbit-result-links");
+    const setup = element("button", "設定を変える", "game-link");
+    setup.addEventListener("click", showSetup);
+    const daily = element("button", "今日のお題へ", "game-link");
+    daily.addEventListener("click", () => switchTo(openGame));
+    row.append(setup, daily);
+    return row;
   }
 
   function pointerPosition(event) {
