@@ -102,7 +102,7 @@
   cursor: default;
 }
 
-/* 「軌道に乗せろ」の操作（加速・ズーム・終了）。画面の下に並べる。 */
+/* 「軌道に乗せろ」の操作（噴射・速さ・終了）。画面の下に並べる。 */
 .orbit-bottom {
   position: absolute;
   left: calc(var(--sail) + 8px);
@@ -127,6 +127,18 @@
 }
 .orbit-controls .game-button {
   margin: 0;
+}
+/* 速さと終了は地を薄くして、主役の噴射より静かにする。 */
+.orbit-controls .orbit-quiet {
+  background: rgba(255, 255, 255, 0.12);
+}
+/* 速さは ×16 でも幅が変わらないように（続けて押すので、隣のボタンがずれないように）。 */
+.orbit-controls .orbit-speed {
+  min-width: 48px;
+}
+/* 続けて押す速さのボタンと、確認なしでゲームを終える終了の間を少し空ける。 */
+.orbit-controls .orbit-finish {
+  margin-left: 10px;
 }
 .game-button[aria-pressed="true"] {
   background: #3ba55d;

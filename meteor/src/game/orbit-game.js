@@ -50,9 +50,9 @@ const VIEW_RADIUS = 5.7;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
-// 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
 // 時計の速さの段（下の欄のボタンで順に切り替える）。
 const SPEEDS = [1, 4, 16];
+// 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
 const END_SHORT = { earth: "落ちた", moon: "月", crash: "衝突", away: "飛んだ" };
 
 export function openOrbitGame(onClose, options = {}) {
@@ -68,8 +68,9 @@ export function openOrbitGame(onClose, options = {}) {
   const controls = element("div", undefined, "orbit-controls");
   const boostButton = element("button", "", "game-button orbit-boost");
   // 時計の速さのボタン（押すたびに ×1 → ×4 → ×16 → ×1。文字は今の速さ）。
-  const speedButton = element("button", "×1", "game-button");
-  const finish = element("button", "終了", "game-button");
+  // 主役は噴射だけなので、速さと終了は地を薄くして静かにする（同じ重さのボタンを 3 つ並べない）。
+  const speedButton = element("button", "×1", "game-button orbit-quiet orbit-speed");
+  const finish = element("button", "終了", "game-button orbit-quiet orbit-finish");
   controls.append(boostButton, speedButton, finish);
   const hint = element("div", "", "game-hint orbit-hint");
   // 説明と操作のボタンを下に縦に積む（ボタンが 2 段に折れても、説明が重ならないように）。
@@ -272,6 +273,8 @@ export function openOrbitGame(onClose, options = {}) {
     pinch = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom };
   }
 
+  // 右クリックや Mac の Ctrl + クリックでメニューを出さない（出ると pointerup が届かず、時間が止まったままになるため）。
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
   canvas.addEventListener("pointerdown", (event) => {
     audio.load();
     // マウスの右ボタンなどでは引きを始めず、指としても数えない（コンテキストメニューが出ると pointerup が届かず、時間が止まったままになるため）。
