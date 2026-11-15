@@ -22,6 +22,7 @@ import {
   canPlace,
   boostCue,
   clampZoom,
+  ZOOM_MIN,
   coaching,
   createOrbitGame,
   endSound,
@@ -46,7 +47,7 @@ import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
-import { pullPx, screenPull } from "./view.js";
+import { easeView, followFrame, pullPx, screenPull } from "./view.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -167,11 +168,60 @@ export function openOrbitGame(onClose, options = {}) {
   const muted = loadMuted();
   const audio = createAudio({ isMuted: () => muted, isOpen: () => overlay.isConnected });
 
+  // カメラ（見ている世界の中心と、地球の半径の px）。出したばかりの衛星（boostTarget）を最初の 1 周まで追い、
+  // 地球・衛星・道筋が 1 枚に収まるように寄せる（DESIGN.md）。追い終わると地球中心・利用者の zoom へ戻る。
+  // followPath は追っている衛星の道筋（引いている間に predicted が次の狙いの線に変わるので別に残す）。
+  // followOff は手でズームして追いかけをやめた衛星の id。
+  let camera = null;
+  let followPath = null;
+  let followOff = null;
+  function baseScale() {
+    return Math.min(size.width, size.height) / 2 / VIEW_RADIUS;
+  }
+  function homeView() {
+    return { x: 0, y: 0, scale: baseScale() * zoom };
+  }
   function scale() {
-    return (Math.min(size.width, size.height) / 2 / VIEW_RADIUS) * zoom;
+    return camera ? camera.scale : baseScale() * zoom;
   }
   function toScreen(point) {
-    return { x: size.width / 2 + point.x * scale(), y: size.height / 2 - point.y * scale() };
+    const cx = camera ? camera.x : 0;
+    const cy = camera ? camera.y : 0;
+    return { x: size.width / 2 + (point.x - cx) * scale(), y: size.height / 2 - (point.y - cy) * scale() };
+  }
+  // 今追っている衛星（追っていなければ null）。動きを減らす設定では追わない。
+  function followed() {
+    const target = playing && !reduceMotion ? boostTarget(game) : null;
+    return target && target.turns === 0 && target.id !== followOff ? target : null;
+  }
+  function stepCamera(seconds) {
+    if (!size.width) return;
+    if (!camera) camera = homeView();
+    // 引いている間はカメラも止める（指を置いた所と世界の対応がずれないように）。
+    if (activePointer !== null && dragPull) return;
+    const target = followed();
+    const goal = target && followPath
+      ? followFrame([{ x: target.x, y: target.y }, ...(followPath || [])], size.width, size.height, {
+          side: 16,
+          edge: 120,
+          min: baseScale() * ZOOM_MIN,
+          max: baseScale() * 2.5,
+        })
+      : homeView();
+    // 引く（縮尺が小さくなる）時はゆっくり（0.9 秒）、寄る時は 0.4 秒。
+    camera = easeView(camera, goal, seconds, goal.scale < camera.scale ? 0.9 : 0.4);
+  }
+  // 手でズームしたら、その衛星の追いかけをやめる。今の寄りを zoom に移す（見え方が跳ばないように）。追っていたら true。
+  function stopFollow() {
+    const target = followed();
+    if (!target || !camera) return false;
+    followOff = target.id;
+    zoom = clampZoom(camera.scale / baseScale());
+    return true;
+  }
+  // 追っていない時のズームは、すぐ効かせる（寄せる処理を通さない）。戻る途中なら、その比のまま掛ける。
+  function applyZoom(before) {
+    if (camera && zoom !== before) camera.scale *= zoom / before;
   }
   function resize() {
     const width = overlay.clientWidth;
@@ -289,6 +339,9 @@ export function openOrbitGame(onClose, options = {}) {
     setSpeed(1);
     cancelDrag();
     followEnd = null;
+    followPath = null;
+    followOff = null;
+    camera = homeView();
     playing = true;
     panel.hidden = true;
     panel.classList.remove("orbit-setup");
@@ -355,7 +408,9 @@ export function openOrbitGame(onClose, options = {}) {
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }
   function toWorld(point) {
-    return { x: (point.x - size.width / 2) / scale(), y: (size.height / 2 - point.y) / scale() };
+    const cx = camera ? camera.x : 0;
+    const cy = camera ? camera.y : 0;
+    return { x: cx + (point.x - size.width / 2) / scale(), y: cy + (size.height / 2 - point.y) / scale() };
   }
   function cancelDrag() {
     // 1 機目を出す前に、衛星を出さずに引っ張りが終わったら（短い引き・2 本目の指・取りやめ・大きさの変化）、消した案内を戻す。
@@ -374,6 +429,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function startPinch() {
+    if (!preview) stopFollow();
     const [a, b] = [...touches.values()];
     pinch = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom };
   }
@@ -425,7 +481,10 @@ export function openOrbitGame(onClose, options = {}) {
     if (pinch && touches.size === 2) {
       if (preview) return;
       const [a, b] = [...touches.values()];
+      const before = zoom;
+      const following = stopFollow();
       zoom = clampZoom((pinch.zoom * Math.hypot(a.x - b.x, a.y - b.y)) / Math.max(1, pinch.distance));
+      if (!following) applyZoom(before);
       return;
     }
     if (event.pointerId !== activePointer) return;
@@ -454,6 +513,8 @@ export function openOrbitGame(onClose, options = {}) {
         setSpeed(1);
         audio.play("launch");
         followEnd = aimEnd;
+        // 追う先を出したばかりの衛星へ移す（道筋は次のフレームで描く時に覚える）。
+        followPath = null;
       }
     }
     cancelDrag();
@@ -473,7 +534,11 @@ export function openOrbitGame(onClose, options = {}) {
       if (preview) return;
       // 行（deltaMode 1）やページ（2）単位で来るホイール（Firefox など）は、px に直す。
       const pixels = event.deltaY * (event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? size.height : 1);
+      // 追いかけ中なら外して今の寄りから（その瞬間は跳ばさず、新しい zoom へ寄せる）。追っていなければすぐ効かせる。
+      const following = stopFollow();
+      const before = zoom;
       zoom = clampZoom(zoom * Math.exp(-pixels * 0.0015));
+      if (!following) applyZoom(before);
     },
     { passive: false },
   );
@@ -676,6 +741,8 @@ export function openOrbitGame(onClose, options = {}) {
       const target = boostTarget(game);
       if (target && target.turns === 0) {
         const lineEnd = drawAimLine(target, { x: target.vx, y: target.vy }, COLORS[game.satellites.indexOf(target) % COLORS.length]);
+        // 飛んでいく線（遠くまで伸びる）の間は追わずに地球中心へ戻す（噴射しすぎた時に画面が大きく振れたり、衛星が端に張り付いたりしないように）。
+        followPath = predicted.end === "away" ? null : predicted.points;
         clickOnTurn(followEnd, lineEnd);
         followEnd = lineEnd;
       }
@@ -801,6 +868,9 @@ export function openOrbitGame(onClose, options = {}) {
     const seconds = Math.min(0.05, (now - last) / 1000);
     last = now;
     update(seconds);
+    // カメラは時間を止める判定（update の中）の後に動かす。設定の欄の間は地球中心・zoom 1 に固定する。
+    if (preview) camera = homeView();
+    else stepCamera(seconds);
     updateHud();
     draw();
     frame = window.requestAnimationFrame(tick);
