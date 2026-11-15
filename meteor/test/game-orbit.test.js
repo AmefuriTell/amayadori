@@ -15,6 +15,7 @@ import {
   FUEL,
   LAUNCH_RADIUS,
   MIN_PLACE_DISTANCE,
+  ORBIT_WORLD,
   GAME_SECONDS,
   SATELLITES,
   SAT_RADIUS,
@@ -102,7 +103,7 @@ test("satellites fall to Earth, fly away, or hit each other", () => {
 
 test("the Moon disturbs orbits and can be hit", () => {
   // 月の軌道のすぐ外の円軌道は、月に乱されて長くは同じ形でいられない（落ちる・ぶつかる・飛び去るのどれか）。
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   const { position, velocity } = circular(MOON_DISTANCE + 0.5, Math.PI / 3);
   addSatellite(game, position, velocity);
   step(game, GAME_SECONDS);
@@ -131,7 +132,7 @@ test("in mutual mode satellites pull each other; in normal mode they do not", ()
 });
 
 test("placing: not too close to Earth or the Moon, not too far, at most SATELLITES", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   assert.ok(!canPlace(game, { x: 1.1, y: 0 }));
   assert.ok(!canPlace(game, { x: MOON_DISTANCE, y: 0 }));
   assert.ok(!canPlace(game, { x: 20, y: 0 }));
@@ -260,7 +261,7 @@ test("a satellite cannot be placed or launched on top of a flying one", () => {
 });
 
 test("game time starts at the first satellite; Earth and Moon move before that", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   step(game, 100);
   assert.equal(elapsed(game), 0);
   assert.ok(game.t > 99);
@@ -322,13 +323,13 @@ test("predictOrbit: a circular orbit at r=3 without a moon comes back to where i
 });
 
 test("predictOrbit: faster than escape speed at r=6 flies away", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   const v = Math.sqrt((2 * EARTH_GM) / 6) * 1.05;
   assert.equal(predictOrbit(game, { x: 0, y: -6 }, { x: v, y: 0 }).end, "away");
 });
 
 test("predictOrbit: thrown toward the earth falls on it", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   const { points, end } = predictOrbit(game, { x: 3, y: 0 }, { x: -0.5, y: 0 });
   assert.equal(end, "earth");
   const lastPoint = points[points.length - 1];
@@ -343,7 +344,7 @@ test("predictOrbit agrees with step() for several throws with the moon", () => {
   }
   const ends = new Set();
   for (const { r, factor, angle } of cases) {
-    const game = createOrbitGame(DEFAULT_WORLD);
+    const game = createOrbitGame(ORBIT_WORLD);
     step(game, 7);
     const { position, velocity } = circular(r, angle);
     velocity.x *= factor;
@@ -369,7 +370,7 @@ test("predictOrbit stops at its limit for a very long throw and keeps the points
 });
 
 test("predictOrbit leaves the game as it was", () => {
-  const game = createOrbitGame(DEFAULT_WORLD, true);
+  const game = createOrbitGame(ORBIT_WORLD, true);
   addSatellite(game, ...Object.values(circular(2)));
   step(game, 3);
   const before = JSON.stringify(game);
@@ -381,8 +382,8 @@ test("predictOrbit leaves the game as it was", () => {
 
 test("predictOrbit: the same place and speed gives a different line later, because the moon has moved", () => {
   // 画面は時計が進めば計算し直す（orbit-game.js）。その理由を残す: 月の近くを通る軌道は、時刻で結果が変わる。
-  const early = createOrbitGame(DEFAULT_WORLD);
-  const late = createOrbitGame(DEFAULT_WORLD);
+  const early = createOrbitGame(ORBIT_WORLD);
+  const late = createOrbitGame(ORBIT_WORLD);
   late.t = 3;
   const position = { x: 0, y: -4 };
   const velocity = { x: Math.sqrt(EARTH_GM / 4), y: 0 };
@@ -470,7 +471,7 @@ test("a 60-degree launch with no boost falls back to Earth; boosting a few times
 
 test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbits and turns", () => {
   const run = (split) => {
-    const game = createOrbitGame(DEFAULT_WORLD);
+    const game = createOrbitGame(ORBIT_WORLD);
     for (const [r, angle] of [[1.3, 0], [2.4, 2], [3.5, 4]]) {
       const { position, velocity } = circular(r, angle);
       addSatellite(game, position, velocity);
@@ -494,7 +495,7 @@ test("step: one 30-second step and 120 steps of 0.25 seconds give the same orbit
 
 test("step: uneven frame steps (like ×1) and 0.25-second parts (like ×32) give the same game over 600 seconds", () => {
   const run = (next) => {
-    const game = createOrbitGame(DEFAULT_WORLD);
+    const game = createOrbitGame(ORBIT_WORLD);
     for (const [r, angle] of [[1.3, 0], [2.4, 2], [2.9, 4]]) {
       const { position, velocity } = circular(r, angle);
       addSatellite(game, position, velocity);
@@ -547,7 +548,7 @@ function pullAt(site, deg, length) {
 function humanBoostTurns(deg, length, react, every) {
   let turned = 0;
   for (let k = 0; k < 16; k += 1) {
-    const game = step(createOrbitGame(DEFAULT_WORLD), k * 1.7);
+    const game = step(createOrbitGame(ORBIT_WORLD), k * 1.7);
     const site = launchSite(game, k * 0.61);
     const pull = pullAt(site, deg, length);
     assert.equal(inAimZone(site, pull), true);
@@ -578,8 +579,42 @@ test("aim zone: from its centre and corners, a person who boosts 0.6 s after the
   }
 });
 
+test("aim zone: from its centre, a person who boosts on the cue gets a satellite that lasts (32 moon and Earth angles, 600 s)", () => {
+  // 月の重さが地球の 1/8 のままだと、合図どおりに乗せても 600 秒残るのは 1/32、5 周以内に落ちるのが 31/32 だった（ORBIT_WORLD の注釈）。
+  const deg = (AIM_ZONE.from + AIM_ZONE.to) / 2;
+  const length = (AIM_ZONE.near + AIM_ZONE.far) / 2;
+  const N = 32;
+  let survived = 0;
+  let fellSoon = 0;
+  for (let k = 0; k < N; k += 1) {
+    const earthAngle = (k * 2.399) % (Math.PI * 2);
+    const game = step(createOrbitGame(ORBIT_WORLD), (k * 24) / N);
+    const site = launchSite(game, earthAngle);
+    const pull = pullAt(site, deg, length);
+    const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), earthAngle);
+    const dt = 0.05;
+    let next = Infinity;
+    let was = false;
+    for (let t = 0; satellite.alive && satellite.turns === 0 && t < 240; t += dt) {
+      step(game, dt);
+      const cue = boostCue(satellite, predictOrbit(game, satellite, { x: satellite.vx, y: satellite.vy }).end);
+      if (cue && !was) next = t + 0.6;
+      was = cue;
+      if (cue && t >= next - 1e-9) {
+        boost(satellite);
+        next = t + 0.35;
+      }
+    }
+    while (satellite.alive && elapsed(game) < GAME_SECONDS - 1e-6) step(game, 0.25);
+    survived += satellite.alive ? 1 : 0;
+    fellSoon += !satellite.alive && satellite.turns <= 5 ? 1 : 0;
+  }
+  assert.ok(survived >= 24, `alive after 600 s: ${survived}/${N}`);
+  assert.ok(fellSoon <= 4, `gone within 5 turns: ${fellSoon}/${N}`);
+});
+
 test("aim zone: straight up or sideways at strength 3 is outside; the polygon is the pulls below the site, against the spin", () => {
-  const site = launchSite(createOrbitGame(DEFAULT_WORLD), 0.3);
+  const site = launchSite(createOrbitGame(ORBIT_WORLD), 0.3);
   assert.equal(inAimZone(site, pullAt(site, 0, 3)), false);
   assert.equal(inAimZone(site, pullAt(site, 90, 3)), false);
   const zone = aimZone(site);
@@ -588,7 +623,7 @@ test("aim zone: straight up or sideways at strength 3 is outside; the polygon is
 });
 
 test("boostCue: not right after launch, yes near the top, not once the line goes round; coaching stops after a record or a turn", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   const site = launchSite(game, 0);
   const pull = pullAt(site, 67.5, 2.375);
   const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), 0);
@@ -605,7 +640,7 @@ test("boostCue: not right after launch, yes near the top, not once the line goes
 });
 
 test("boostCue: a weak shot that falls back without rising past CUE_HEIGHT never shows the cue", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
+  const game = createOrbitGame(ORBIT_WORLD);
   const site = launchSite(game, 0);
   const pull = pullAt(site, 67.5, 1.0);
   const satellite = launchFromSite(game, launchVelocity(site.position, { x: site.position.x + pull.x, y: site.position.y + pull.y }), 0);
@@ -620,7 +655,7 @@ test("boostCue: a weak shot that falls back without rising past CUE_HEIGHT never
 });
 
 test("the launch preview, boosted on the cue like a player, stays up for several turns", () => {
-  const game = createOrbitGame(DEFAULT_WORLD, false);
+  const game = createOrbitGame(ORBIT_WORLD, false);
   const shot = previewShot(game, "launch");
   // 射場から、扇形の中心の引きで打ち出す。
   assert.deepEqual(shot.position, launchSite(game, PREVIEW_START).position);
@@ -639,7 +674,7 @@ test("the launch preview, boosted on the cue like a player, stays up for several
 });
 
 test("the place preview goes round at circular speed", () => {
-  const game = createOrbitGame(DEFAULT_WORLD, false);
+  const game = createOrbitGame(ORBIT_WORLD, false);
   const shot = previewShot(game, "place");
   assert.ok(canPlace(game, shot.position));
   const satellite = addSatellite(game, shot.position, shot.velocity);

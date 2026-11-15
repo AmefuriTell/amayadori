@@ -31,10 +31,14 @@ export const LAUNCH_LONGITUDE = 131;
 export const BOOST = 0.08;
 export const FUEL = 0.48;
 
+// 軌道に乗せろの世界: 月の重さだけ隕石当て（physics.js の DEFAULT_WORLD）の 1/4（大きさ・距離・周期は同じ）。
+// 地球の 1/8 の月では、合図どおりに乗せた衛星もほとんど 1〜5 周で月に乱されて落ちたため（DESIGN.md）。
+export const ORBIT_WORLD = { ...DEFAULT_WORLD, moons: DEFAULT_WORLD.moons.map((moon) => ({ ...moon, gm: moon.gm / 4 })) };
+
 const TAU = Math.PI * 2;
 
 // started は 1 機目を出した時刻（ゲームの時間はそこから数える。狙っている間に時間が減らないように）。地球と月は始めから動く。
-export function createOrbitGame(world = DEFAULT_WORLD, mutual = false) {
+export function createOrbitGame(world = ORBIT_WORLD, mutual = false) {
   return { world, mutual, t: 0, started: null, satellites: [], nextId: 1 };
 }
 
