@@ -181,6 +181,8 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function finishGame() {
+    // 終わったコマの点・周を上の表示にも出してから止める（結果の画面の数字とそろえる）。
+    updateHud();
     playing = false;
     cancelDrag();
     const score = scoreOf(game);
