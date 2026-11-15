@@ -59,3 +59,15 @@ export function pullDelta(startPx, nowPx, size) {
 export function padPosition(padSign, padSlide) {
   return { x: padSlide, y: padSign * PAD_DISTANCE };
 }
+
+// 回さない画面（軌道に乗せろ）の引き: 指の動き（画面の px）を、上を +y にした引き { x, y } に。PULL_PX で 1.0、長さは MAX_PULL で切る。
+export function screenPull(startPx, nowPx) {
+  let dx = (nowPx.x - startPx.x) / PULL_PX;
+  let dy = -(nowPx.y - startPx.y) / PULL_PX;
+  const length = Math.hypot(dx, dy);
+  if (length > MAX_PULL) {
+    dx *= MAX_PULL / length;
+    dy *= MAX_PULL / length;
+  }
+  return { x: dx, y: dy };
+}
