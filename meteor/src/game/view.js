@@ -76,3 +76,30 @@ export function screenPull(startPx, nowPx) {
 export function pullPx(startPx, pull) {
   return { x: startPx.x + pull.x * PULL_PX, y: startPx.y - pull.y * PULL_PX };
 }
+
+// 追いかけのカメラの目標: 地球（半径 1 の円）と points（衛星と道筋）が、画面の使える所（幅 width・高さ height から
+// 左右 side・上下 edge px を除いた所）に収まる中心（世界の位置）と縮尺（地球の半径の px）。縮尺は [min, max] で切る。
+export function followFrame(points, width, height, { side = 16, edge = 120, min = 0, max = Infinity } = {}) {
+  let left = -1;
+  let right = 1;
+  let bottom = -1;
+  let top = 1;
+  for (const p of points) {
+    left = Math.min(left, p.x);
+    right = Math.max(right, p.x);
+    bottom = Math.min(bottom, p.y);
+    top = Math.max(top, p.y);
+  }
+  const fit = Math.min((width - 2 * side) / (right - left), (height - 2 * edge) / (top - bottom));
+  return { x: (left + right) / 2, y: (bottom + top) / 2, scale: Math.min(max, Math.max(min, fit)) };
+}
+
+// カメラを目標へ近づける（時定数 tau 秒の指数。縮尺は比で寄せる）。seconds は画面の秒（ゲームの速さによらない）。
+export function easeView(view, target, seconds, tau = 0.4) {
+  const k = 1 - Math.exp(-seconds / tau);
+  return {
+    x: view.x + (target.x - view.x) * k,
+    y: view.y + (target.y - view.y) * k,
+    scale: view.scale * Math.pow(target.scale / view.scale, k),
+  };
+}

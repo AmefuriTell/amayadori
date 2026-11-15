@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAD_DISTANCE, PULL_PX, padPosition, pullDelta, pullPx, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
+import { PAD_DISTANCE, PULL_PX, easeView, followFrame, padPosition, pullDelta, pullPx, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
 import { dailyChallenge } from "../src/game/daily.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, missKm } from "../src/game/physics.js";
 
@@ -168,4 +168,29 @@ test("pullPx is the inverse of screenPull for pulls under MAX_PULL", () => {
       assert.ok(Math.abs(back.x - p.x) < 1e-9 && Math.abs(back.y - p.y) < 1e-9, `${JSON.stringify(s)} ${JSON.stringify(p)}`);
     }
   }
+});
+
+test("followFrame centers the box around the earth and the points, and fits it inside the margins", () => {
+  const f = followFrame([{ x: 5, y: 0 }], 390, 844, { side: 16, edge: 120 });
+  close(f.x, 2, "x");
+  close(f.y, 0, "y");
+  close(f.scale, Math.min((390 - 32) / 6, (844 - 240) / 2), "scale");
+  const only = followFrame([], 1280, 800, { side: 16, edge: 120 });
+  assert.ok(only.x === 0 && only.y === 0);
+  close(only.scale, (800 - 240) / 2, "earth only");
+  assert.equal(followFrame([], 1280, 800, { max: 100 }).scale, 100);
+  assert.equal(followFrame([{ x: 0, y: 500 }], 390, 844, { min: 12 }).scale, 12);
+});
+
+test("easeView moves the center exponentially and the scale by ratio, with a 0.4 s time constant", () => {
+  const view = { x: 0, y: 0, scale: 40 };
+  const goal = { x: 2, y: -1, scale: 160 };
+  const a = easeView(view, goal, 0.4);
+  const k = 1 - Math.exp(-1);
+  close(a.x, 2 * k, "x");
+  close(a.y, -k, "y");
+  close(a.scale, 40 * Math.pow(4, k), "scale");
+  const steps = Array.from({ length: 8 }).reduce((v) => easeView(v, goal, 0.05), view);
+  assert.ok(Math.abs(steps.x - a.x) < 1e-12 && Math.abs(steps.scale - a.scale) < 1e-9);
+  assert.deepEqual(easeView(view, goal, 0), view);
 });
