@@ -41,13 +41,15 @@ import {
   step,
   turnsOf,
 } from "./orbit.js";
-import { drawEarth, drawSpace, makeStars } from "./draw.js";
+import { drawEarth, drawSatellite, drawSpace, makeStars } from "./draw.js";
 import { advanceExplosion, anchorPosition, createExplosion, drawExplosion, earthAnchor, moonAnchor, shakeOffset } from "./explosion.js";
 import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
 import { easeView, followFrame, pullPx, screenPull } from "./view.js";
+import { RECORD_EVERY } from "./orbit-record.js";
+import { makeOrbitGif } from "./orbit-gif.js";
 
 // ズームが 1 のとき、月の軌道の外（半径 5.7）が画面の短い辺に収まる大きさにする（隕石当てと同じ）。
 const VIEW_RADIUS = 5.7;
@@ -55,31 +57,6 @@ const VIEW_RADIUS = 5.7;
 const TRAIL_POINTS = 500;
 const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
 
-// 衛星 1 機: 本体の四角と左右の太陽電池パネル（細い線でつなぐ）。パネルは進む向き（angle）に直角に並べる。
-// size は前の丸の半径。パネルを含めた幅は 5.8 × size（丸の直径の 2.9 倍）。パネルは同じ色で不透明度 0.7。
-function drawSatellite(c, x, y, angle, color, size) {
-  const body = 0.9 * size;
-  const gap = 0.4 * size;
-  const length = 1.6 * size;
-  const thick = 0.8 * size;
-  c.save();
-  c.translate(x, y);
-  c.rotate(angle);
-  c.fillStyle = color;
-  c.fillRect(-body, -body, 2 * body, 2 * body);
-  c.globalAlpha *= 0.7;
-  c.strokeStyle = color;
-  c.lineWidth = 1;
-  c.beginPath();
-  c.moveTo(0, -body);
-  c.lineTo(0, -body - gap);
-  c.moveTo(0, body);
-  c.lineTo(0, body + gap);
-  c.stroke();
-  c.fillRect(-thick / 2, -body - gap - length, thick, length);
-  c.fillRect(-thick / 2, body + gap, thick, length);
-  c.restore();
-}
 // 時計の速さの段（下の欄のボタンで順に切り替える）。
 const SPEEDS = [1, 4, 16];
 // 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
@@ -136,6 +113,13 @@ export function openOrbitGame(onClose, options = {}) {
   let earthStart = 0;
   let playing = false;
   let trails = new Map();
+  // 投稿の GIF のための跡の記録（trails は古い点を捨てるので別に持つ）。ゲームの時間で RECORD_EVERY ごとに、生きている衛星ごとの
+  // 位置と色の番号（{ t, x, y, c }）。出した時にもその衛星の位置を入れる（跡が射場・置いた所から始まるように）。
+  let gifRecord = [];
+  let nextRecord = 0;
+  // 結果の画面で裏で作る GIF（{ blob: できたら Blob, ready: Promise }）。作り直しを見分ける番号。
+  let gif = null;
+  let gifRun = 0;
   const headings = new Map();
   let best = loadBest();
   // 引っ張り: 指を置いた所（画面の px）。
@@ -334,6 +318,10 @@ export function openOrbitGame(onClose, options = {}) {
     game = createOrbitGame(DEFAULT_WORLD, mutual);
     earthStart = Math.random() * Math.PI * 2;
     trails = new Map();
+    gifRecord = [];
+    nextRecord = RECORD_EVERY;
+    gif = null;
+    gifRun += 1;
     explosions = [];
     // 毎回 ×1 から（速めたまま始まると、打ち上げてすぐ落ちて加速が間に合わないため）。
     setSpeed(1);
@@ -369,15 +357,49 @@ export function openOrbitGame(onClose, options = {}) {
       best = { ...best, [key]: score.turns };
       saveBest(best);
     }
+    const canPost = Boolean(options.post) && score.turns > 0;
+    // 終わった時の位置を、生きている全機について 1 回記録する（最後の記録の後に終えても、ほかの衛星がいなくなった扱いにならないように）。
+    if (!gifRecord.length || gifRecord[gifRecord.length - 1].t < game.t - 1e-9) {
+      for (const satellite of game.satellites) if (satellite.alive) recordSatellite(satellite);
+    }
+    // 投稿の案内の 1 行（共有に失敗した・GIF を保存した。web.js が gif.note で出す）。
+    const note = element("div", "", "game-detail");
+    note.hidden = true;
+    // 投稿の GIF は結果の画面が出た時に裏で作り始める（押してから作ると、端末の共有に要る直前の操作が切れることがあるため）。
+    if (canPost) makeGif(note);
     openPanel(
       `${game.mutual ? "🧲 " : ""}${record ? "新記録！ " : ""}${score.turns} 周`,
       satelliteLine(),
       [
         button("もう一度", start),
-        ...(options.post && score.turns > 0 ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false)))] : []),
+        ...(canPost ? [xButton(button("𝕏 にポスト", () => options.post(orbitMessage(score, game.mutual, record), false, gif))), note] : []),
         resultLinks(),
       ],
     );
+  }
+
+  // 投稿の GIF を作る（gif.blob はできたら入る。新しく始めた・閉じたらやめる。作れなければ null のまま）。
+  // gif.note は結果の欄に案内を 1 行出す。gif.noShare・gif.saved は web.js が付ける印。
+  function makeGif(note) {
+    const run = gifRun;
+    const made = {
+      blob: null,
+      ready: null,
+      note: (text) => {
+        note.textContent = text;
+        note.hidden = false;
+      },
+    };
+    made.ready = makeOrbitGif(gifRecord, {
+      colors: COLORS,
+      stars,
+      // 縮尺は月の軌道の内側の点で決める（飛んでいった衛星の跡は画面の外へ出ていく線のまま）。
+      limit: Math.max(0, ...game.world.moons.map((moon) => moon.distance)),
+      isCancelled: () => run !== gifRun || !overlay.isConnected,
+    })
+      .catch(() => null)
+      .then((blob) => (made.blob = blob));
+    gif = made;
   }
 
   // 結果の説明の 1 行: 衛星ごとの周の数（いなくなった衛星は短い終わり方も）を衛星の色で並べる。衛星が無ければ出さない。
@@ -509,6 +531,7 @@ export function openOrbitGame(onClose, options = {}) {
       const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
       if (satellite) {
         trails.set(satellite.id, []);
+        recordSatellite(satellite);
         // 衛星を出した時だけ ×1 に戻す（×16 のまま打ち上げると、てっぺんの噴射が間に合わないため）。
         setSpeed(1);
         audio.play("launch");
@@ -621,6 +644,10 @@ export function openOrbitGame(onClose, options = {}) {
         trail.push({ x: satellite.x, y: satellite.y });
         if (trail.length > TRAIL_POINTS) trail.shift();
       }
+      if (game.t >= nextRecord - 1e-9) {
+        for (const satellite of game.satellites) if (satellite.alive) recordSatellite(satellite);
+        nextRecord += RECORD_EVERY;
+      }
       // 時間切れ（または全機いなくなった）なら、残りの区切りで同じ位置の点を積まない。
       if (over) break;
     }
@@ -635,6 +662,10 @@ export function openOrbitGame(onClose, options = {}) {
       explosions.push(explosion);
     }
     if (isOver(game)) finishGame();
+  }
+
+  function recordSatellite(satellite) {
+    gifRecord.push({ t: game.t, x: satellite.x, y: satellite.y, c: game.satellites.indexOf(satellite) % COLORS.length });
   }
 
   function draw() {

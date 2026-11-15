@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, xIntentUrl } from "../src/share.js";
+import { PUBLIC_GAME_URL, pageUrl, postUrl, shareResult, shareUrl, xIntentUrl, xShareText, isMobileDevice } from "../src/share.js";
 
 test("share uses the device share sheet when there is one, with a link to today's challenge", async () => {
   const shared = [];
@@ -37,4 +37,22 @@ test("the link in a post leads to today's challenge only for daily results", () 
   assert.equal(postUrl("https://example.test/meteor/?daily#a", true), "https://example.test/meteor/?daily");
   assert.equal(postUrl("https://example.test/meteor/?daily#a", false), "https://example.test/meteor/");
   assert.equal(pageUrl(PUBLIC_GAME_URL), "https://amefuritell.github.io/amayadori/meteor/");
+});
+
+test("the text for sharing a post with a file has the text, the link and the hashtag", () => {
+  assert.equal(xShareText("🛰️ 軌道に乗せろ（ふつうモード）: 3 周", "https://example.test/meteor/"), "🛰️ 軌道に乗せろ（ふつうモード）: 3 周 https://example.test/meteor/ #隕石を当てろ");
+});
+
+test("only phones and tablets share the gif with the device share sheet", () => {
+  const iphone = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
+  const mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15";
+  const windows = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+  assert.equal(isMobileDevice({ userAgent: iphone, maxTouchPoints: 5 }), true);
+  assert.equal(isMobileDevice({ userAgent: "Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile", userAgentData: { mobile: true } }), true);
+  // iPadOS の Safari は Mac の UA。タッチの点で見分ける。
+  assert.equal(isMobileDevice({ userAgent: mac, maxTouchPoints: 5 }), true);
+  assert.equal(isMobileDevice({ userAgent: mac, maxTouchPoints: 0 }), false);
+  assert.equal(isMobileDevice({ userAgent: windows, maxTouchPoints: 0, userAgentData: { mobile: false } }), false);
+  // タッチのある Windows・ChromeOS の PC も、userAgentData が PC と言えば PC。
+  assert.equal(isMobileDevice({ userAgent: windows, maxTouchPoints: 10, userAgentData: { mobile: false } }), false);
 });
