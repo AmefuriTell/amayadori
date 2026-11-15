@@ -200,7 +200,7 @@ export function openOrbitGame(onClose, options = {}) {
     // 引いている間はカメラも止める（指を置いた所と世界の対応がずれないように）。
     if (activePointer !== null && dragPull) return;
     const target = followed();
-    const goal = target
+    const goal = target && followPath
       ? followFrame([{ x: target.x, y: target.y }, ...(followPath || [])], size.width, size.height, {
           side: 16,
           edge: 120,
@@ -741,8 +741,8 @@ export function openOrbitGame(onClose, options = {}) {
       const target = boostTarget(game);
       if (target && target.turns === 0) {
         const lineEnd = drawAimLine(target, { x: target.vx, y: target.vy }, COLORS[game.satellites.indexOf(target) % COLORS.length]);
-        // 飛んでいく線（遠くまで伸びる）は寄りに入れない（噴射しすぎた時に画面が大きく振れないように）。
-        followPath = predicted.end === "away" ? [] : predicted.points;
+        // 飛んでいく線（遠くまで伸びる）の間は追わずに地球中心へ戻す（噴射しすぎた時に画面が大きく振れたり、衛星が端に張り付いたりしないように）。
+        followPath = predicted.end === "away" ? null : predicted.points;
         clickOnTurn(followEnd, lineEnd);
         followEnd = lineEnd;
       }
