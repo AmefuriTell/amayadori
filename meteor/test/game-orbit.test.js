@@ -11,9 +11,6 @@ import {
   inAimZone,
   aimLineStyle,
   BOOST,
-  CRUISE_AFTER,
-  CRUISE_AFTER_PLACING,
-  CRUISE_SPEED,
   ESCAPE_DISTANCE,
   FUEL,
   LAUNCH_RADIUS,
@@ -41,7 +38,6 @@ import {
   satellitesLeft,
   scoreOf,
   step,
-  targetSpeed,
   turnsOf,
 } from "../src/game/orbit.js";
 
@@ -442,79 +438,6 @@ test("the leaving sound follows the reason, prefers a crash, and ignores satelli
   };
   assert.deepEqual(one("earth"), { event: "earth", km: 1000 });
   assert.deepEqual(one("away"), { event: "away" });
-});
-
-test("targetSpeed: waits CRUISE_AFTER_PLACING seconds while satellites are left, CRUISE_AFTER after all are out, and never while touching", () => {
-  const game = createOrbitGame(DEFAULT_WORLD);
-  let lastAction = 0;
-  const place = (r, angle) => {
-    const { position, velocity } = circular(r, angle);
-    assert.ok(addSatellite(game, position, velocity));
-    lastAction = game.t;
-  };
-  // 衛星が 0 機なら、何秒たっても ×1。
-  step(game, CRUISE_AFTER_PLACING + 5);
-  assert.equal(targetSpeed(game, lastAction), 1);
-  // 残りがある間: 30 秒未満は ×1、30 秒以上で CRUISE_SPEED（1 機だけでも）。
-  place(2, 0);
-  assert.equal(targetSpeed(game, lastAction), 1);
-  step(game, CRUISE_AFTER_PLACING - 0.5);
-  assert.equal(targetSpeed(game, lastAction), 1);
-  // （STEP を足し合わせた時刻の丸めの誤差があるので、少しだけ多く進める）
-  step(game, 0.51);
-  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
-  // 指が触れている間は ×1。
-  assert.equal(targetSpeed(game, lastAction, true), 1);
-  // 出し終えた後: 10 秒未満は ×1、10 秒以上で CRUISE_SPEED。
-  place(2.6, 2);
-  place(3.2, 4);
-  step(game, CRUISE_AFTER - 0.5);
-  assert.equal(targetSpeed(game, lastAction), 1);
-  step(game, 0.51);
-  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
-  assert.equal(targetSpeed(game, lastAction, true), 1);
-  // 操作した直後（画面を触る・加速）は ×1 に戻る。
-  assert.ok(boost(boostTarget(game)));
-  lastAction = game.t;
-  assert.equal(targetSpeed(game, lastAction), 1);
-  step(game, CRUISE_AFTER + 0.01);
-  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
-  // 全機いなくなったら ×1。
-  for (const satellite of game.satellites) satellite.alive = false;
-  assert.equal(targetSpeed(game, lastAction), 1);
-});
-
-test("targetSpeed: no fast-forward while a launched satellite is still rising, even after all three are out", () => {
-  const game = createOrbitGame(NO_MOON);
-  // 2 機を円軌道に置いてから、3 機目を射場から真上（外向き）に大きく打ち上げる（引きの上限より速く、てっぺんまで 10 秒より長くかける）。
-  for (const [r, angle] of [[2.5, 0], [3.5, 2]]) {
-    const { position, velocity } = circular(r, angle);
-    assert.ok(addSatellite(game, position, velocity));
-  }
-  const site = launchSite(game, 0).position;
-  const r0 = Math.hypot(site.x, site.y);
-  const satellite = launchFromSite(game, { x: (site.x / r0) * 1.85, y: (site.y / r0) * 1.85 }, 0);
-  assert.ok(satellite);
-  const lastAction = game.t;
-  const outward = () => (satellite.x * satellite.vx + satellite.y * satellite.vy) / Math.hypot(satellite.x, satellite.y);
-  // 上がっている間は、待ち時間（CRUISE_AFTER 秒）を過ぎても ×1。
-  let risingChecked = 0;
-  while (outward() > 0.05) {
-    if (game.t - lastAction >= CRUISE_AFTER) {
-      assert.equal(targetSpeed(game, lastAction), 1);
-      risingChecked += 1;
-    }
-    step(game, 0.25);
-  }
-  assert.ok(satellite.alive);
-  assert.ok(elapsed(game) > CRUISE_AFTER && risingChecked > 0, `rose for ${elapsed(game)} s`);
-  assert.equal(satellitesLeft(game), 0);
-  // てっぺんを過ぎ（外へ向かう速さが 0.05 以下になれば）、待ち時間がたっているので CRUISE_SPEED。
-  step(game, 0.5);
-  assert.ok(outward() <= 0.05);
-  assert.equal(targetSpeed(game, lastAction), CRUISE_SPEED);
-  // 噴射など操作した直後は ×1、待ち時間がたてば CRUISE_SPEED（上がり切った後は早送りの決まりどおり）。
-  assert.equal(targetSpeed(game, game.t), 1);
 });
 
 test("a 60-degree launch with no boost falls back to Earth; boosting a few times at the top makes the line go round", () => {
