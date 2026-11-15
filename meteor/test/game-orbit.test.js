@@ -507,7 +507,7 @@ test("targetSpeed: no fast-forward while a launched satellite is still rising, e
   assert.equal(targetSpeed(game, game.t), 1);
 });
 
-test("a launch with no boost falls back to Earth; boosting a few times at the top makes the line go round", () => {
+test("a 60-degree launch with no boost falls back to Earth; boosting a few times at the top makes the line go round", () => {
   const game = createOrbitGame(NO_MOON);
   const site = launchSite(game, 0).position;
   const r0 = Math.hypot(site.x, site.y);
