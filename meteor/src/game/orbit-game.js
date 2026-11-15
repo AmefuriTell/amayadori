@@ -364,8 +364,10 @@ export function openOrbitGame(onClose, options = {}) {
     explosions = explosions.filter((explosion) => advanceExplosion(explosion, seconds));
     if (!playing) return;
     // 速さを目標へ滑らかに寄せる。目標が ×1 に戻ったら（加速した時など）すぐ ×1 にする。
-    // 指が触れている間（引っ張り・ズーム）は早送りしない。
-    const target = targetSpeed(game, lastAction, activePointer !== null || touches.size > 0);
+    // 指が触れている間（引っ張り・ズーム）は早送りせず、待ち時間も数え直す（置かずに離した直後に早送りしないように）。
+    const touching = activePointer !== null || touches.size > 0;
+    if (touching) lastAction = game.t;
+    const target = targetSpeed(game, lastAction, touching);
     speed = target === 1 ? 1 : speed + (target - speed) * Math.min(1, seconds * 3);
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);
