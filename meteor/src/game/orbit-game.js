@@ -396,7 +396,7 @@ export function openOrbitGame(onClose, options = {}) {
     }
     const score = scoreOf(game);
     const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
-    if (playing) setText(title, `🛰️ ${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
+    if (playing) setText(title, `🛰️ ${score.turns} 周・残り衛星 ${satellitesLeft(game)}・残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}${speed > 1 ? " »" : ""}`);
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);
