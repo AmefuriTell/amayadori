@@ -2,12 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   GIF_AFTER_TURN,
+  GIF_FOCUS_CAP,
   GIF_LOW_PERIOD,
   GIF_MAX_FRAMES,
   GIF_MIN_FRAMES,
   RECORD_EVERY,
   gifCutoffs,
   gifFocusEnd,
+  gifFocusRanges,
   gifPaths,
   gifSatellites,
   gifScale,
@@ -81,8 +83,39 @@ test("the frames skip the time with no satellite and step at most a sixth of a l
   assert.ok(cutoffs.length >= GIF_MIN_FRAMES && cutoffs.length <= GIF_MAX_FRAMES);
   // 短い回は下限、長い回は上限のコマ数。
   assert.equal(gifCutoffs(circle(0, 1.5, 4, 0, 6)).length, GIF_MIN_FRAMES);
-  assert.equal(gifCutoffs(circle(0, 5, 400, 0, 600)).length, GIF_MAX_FRAMES);
+  // 長い回（回り切らない高い衛星を 30 秒おきに 8 機。区間は 1 機 20 秒で、合わせると上限を超える）は上限のコマ数。
+  const many = Array.from({ length: 8 }, (_, index) => circle(index, 5, 400, index * 30, 600)).flat().sort((a, b) => a.t - b.t);
+  const capped = gifCutoffs(many);
+  assert.equal(capped.length, GIF_MAX_FRAMES);
+  // 区間を短くして収めるので、区間の中の 1 コマはやはり低い軌道の 1/6 周以下。
+  const inner = capped.slice(1).map((cutoff, index) => cutoff - capped[index]).filter((step) => step < 5);
+  assert.ok(Math.max(...inner) <= GIF_LOW_PERIOD / 6 + 1e-9);
   assert.deepEqual(gifCutoffs([]), []);
+});
+
+test("satellites launched minutes apart each get their own focus range, so a frame stays under a sixth of a low orbit", () => {
+  // 1 機目を 0 秒、2 機目を 150 秒、3 機目を 300 秒に出し、どれも低い軌道で 600 秒まで回り続ける。
+  const record = [0, 150, 300].map((from, index) => circle(index, 1.2, GIF_LOW_PERIOD, from, 600)).flat().sort((a, b) => a.t - b.t);
+  const ranges = gifFocusRanges(record);
+  assert.equal(ranges.length, 3);
+  ranges.forEach(([from, to], index) => {
+    assert.equal(from, [0, 150, 300][index]);
+    assert.ok(Math.abs(to - (from + GIF_LOW_PERIOD + GIF_AFTER_TURN)) <= RECORD_EVERY + 1e-9, `${to}`);
+  });
+  const cutoffs = gifCutoffs(record);
+  assert.ok(cutoffs.length >= GIF_MIN_FRAMES && cutoffs.length <= GIF_MAX_FRAMES);
+  // 区間のつなぎ目（150 秒・300 秒の前）の 1 コマの跳びを除き、1 コマで進むのは低い軌道の 1/6 周以下。
+  const steps = cutoffs.slice(1).map((cutoff, index) => [cutoffs[index], cutoff]);
+  const inside = steps.filter(([from, to]) => ranges.some(([a, b]) => from >= a - 1e-9 && to <= b + 1e-9));
+  assert.equal(inside.length, steps.length - 2);
+  assert.ok(Math.max(...inside.map(([from, to]) => to - from)) <= GIF_LOW_PERIOD / 6 + 1e-9);
+  // 区間の外（回り切って 3 秒の後〜次を出すまで）に入るコマは無い。
+  assert.ok(cutoffs.every((cutoff) => ranges.some(([a, b]) => cutoff >= a - 1e-9 && cutoff <= b + 1e-9)));
+  // 区間は出してから 20 秒まで（回り切らない高い衛星）。
+  assert.deepEqual(gifFocusRanges(circle(0, 5, 400, 10, 600)), [[10, 10 + GIF_FOCUS_CAP]]);
+  // コマの数は見せる時間の長さに比例する: 回り切らない高い衛星を 3 機（区間は 20 秒ずつ、合わせて 60 秒）なら 60 / (1/6 周) コマ。
+  const high = [0, 100, 200].map((from, index) => circle(index, 5, 400, from, 600)).flat().sort((a, b) => a.t - b.t);
+  assert.equal(gifCutoffs(high).length, Math.ceil((3 * GIF_FOCUS_CAP) / (GIF_LOW_PERIOD / 6)));
 });
 
 test("each frame draws the whole line up to that time, the recent part, and ended once it is gone", () => {

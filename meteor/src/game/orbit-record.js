@@ -9,14 +9,17 @@ export const GIF_SIZE = 360;
 export const GIF_DELAY = 50;
 export const GIF_HOLD = 1000;
 export const GIF_MARGIN = 14;
-// 動くコマの数の下限と上限。1 コマで衛星の印が進む量を、低い軌道（GIF_LOW_PERIOD）の 1/6 周以下を目安にして決める。
+// 動くコマの数の下限と上限。コマの数は見せる時間の長さに比例させ、1 コマで衛星の印が進む量を低い軌道（GIF_LOW_PERIOD）の
+// 1/6 周以下にする。上限は再生 8 秒（20 fps で 160 コマ）。衛星は 3 機までで見どころは 1 機 GIF_FOCUS_CAP 秒までなので、ふつうは届かない。
 export const GIF_MIN_FRAMES = 45;
-export const GIF_MAX_FRAMES = 90;
+export const GIF_MAX_FRAMES = 160;
 // 低い軌道（地球の中心から 1.2、地球の重さ 2.0）の 1 周の秒。
 export const GIF_LOW_PERIOD = 2 * Math.PI * Math.sqrt(1.2 ** 3 / 2);
-// 濃く描く直近の跡の長さ（ゲームの秒。低い軌道の 1 周ほど）と、最後に出した衛星が 1 周を回り切ってから見せる秒。
+// 濃く描く直近の跡の長さ（ゲームの秒。低い軌道の 1 周ほど）と、衛星が 1 周を回り切ってから見せる秒。
 export const GIF_RECENT = 8;
 export const GIF_AFTER_TURN = 3;
+// 衛星ごとの見どころの区間の長さの上限（出してからのゲームの秒）。高い軌道で 1 周が長くても、ここまで。
+export const GIF_FOCUS_CAP = 20;
 // 地球の縁（drawEarth の大気の輪の半径）。
 const EARTH_EDGE = 1.08;
 const TAU = Math.PI * 2;
@@ -52,43 +55,72 @@ export function gifSatellites(points) {
   return [...map.values()].map(({ color, first, last, turnAt }) => ({ color, first, last, turnAt }));
 }
 
-// 動くコマが見せる範囲の終わり（見どころ）: 最後に出した衛星が 1 周を回り切った時刻 + GIF_AFTER_TURN。
-// 回り切らなければ、その衛星の記録の終わり（いなくなった時刻か、ゲームの終わり）。記録の終わりは超えない。
-export function gifFocusEnd(points) {
-  if (!points.length) return 0;
-  const satellites = gifSatellites(points);
-  const latest = satellites.reduce((most, satellite) => (satellite.first > most.first ? satellite : most));
-  const end = latest.turnAt === null ? latest.last : latest.turnAt + GIF_AFTER_TURN;
-  return Math.min(end, points[points.length - 1].t);
+// 衛星ごとの見どころの区間（ゲームの時刻）を、重なりを合わせて時刻の順に並べたもの。区間は [出した時刻, 1 周を回り切った
+// 時刻 + GIF_AFTER_TURN]。回り切らなければ [出した時刻, その衛星の記録の終わり]。どちらも出してから cap 秒までと、記録の終わりまで。
+export function gifFocusRanges(points, cap = GIF_FOCUS_CAP) {
+  if (!points.length) return [];
+  const last = points[points.length - 1].t;
+  const ranges = gifSatellites(points)
+    .map((satellite) => {
+      const end = satellite.turnAt === null ? satellite.last : satellite.turnAt + GIF_AFTER_TURN;
+      return [satellite.first, Math.min(end, satellite.first + cap, last)];
+    })
+    .sort((a, b) => a[0] - b[0]);
+  const merged = [];
+  for (const [from, to] of ranges) {
+    const top = merged[merged.length - 1];
+    if (top && from <= top[1] + 1e-9) top[1] = Math.max(top[1], to);
+    else merged.push([from, to]);
+  }
+  return merged;
 }
 
-// 動くコマごとの、そこまで描く時刻。記録の初めから見どころの終わりまでを、生きている衛星がいない時間（記録の間があいた所）を
-// 詰めた時間軸で等しく分ける。コマの数は、1 コマで進むゲームの秒が低い軌道の 1/6 周以下になるように（下限と上限の間で）。
-export function gifCutoffs(points, { min = GIF_MIN_FRAMES, max = GIF_MAX_FRAMES, lowPeriod = GIF_LOW_PERIOD } = {}) {
+const rangesLength = (ranges) => ranges.reduce((sum, [from, to]) => sum + (to - from), 0);
+
+// 動くコマが見せる範囲の終わり: 見どころの区間の最後の終わり。
+export function gifFocusEnd(points) {
+  const ranges = gifFocusRanges(points);
+  return ranges.length ? ranges[ranges.length - 1][1] : 0;
+}
+
+// 動くコマごとの、そこまで描く時刻。見どころの区間を合わせて区間の外を詰めた時間軸で等しく分ける（区間のつなぎ目は 1 コマで飛ぶ）。
+// コマの数は、1 コマで進むゲームの秒が低い軌道の 1/6 周以下になるように（下限と上限の間で）。上限でも足りなければ、
+// 区間の長さの上限（cap）を短くして収める。
+export function gifCutoffs(points, { min = GIF_MIN_FRAMES, max = GIF_MAX_FRAMES, lowPeriod = GIF_LOW_PERIOD, cap = GIF_FOCUS_CAP } = {}) {
   if (!points.length) return [];
-  const end = gifFocusEnd(points);
-  // 詰めた時間軸: 記録の時刻ごとに、前の時刻からの間（RECORD_EVERY より長い間は RECORD_EVERY に詰める）を足す。
-  const times = [];
-  for (const point of points) {
-    if (point.t > end + 1e-9) break;
-    if (!times.length || point.t > times[times.length - 1] + 1e-9) times.push(point.t);
+  const step = lowPeriod / 6;
+  let ranges = gifFocusRanges(points, cap);
+  if (rangesLength(ranges) > max * step) {
+    // 区間の合わせた長さは cap について減らない。収まる cap を 2 分で探す。
+    let low = 0;
+    let high = cap;
+    for (let index = 0; index < 40; index += 1) {
+      const mid = (low + high) / 2;
+      if (rangesLength(gifFocusRanges(points, mid)) <= max * step) low = mid;
+      else high = mid;
+    }
+    ranges = gifFocusRanges(points, low);
   }
-  if (times[times.length - 1] < end - 1e-9) times.push(end);
-  const axis = [0];
-  for (let index = 1; index < times.length; index += 1) axis.push(axis[index - 1] + Math.min(times[index] - times[index - 1], RECORD_EVERY));
-  const total = axis[axis.length - 1];
-  const frames = Math.min(max, Math.max(min, Math.ceil(total / (lowPeriod / 6))));
+  const total = rangesLength(ranges);
+  const frames = Math.min(max, Math.max(min, Math.ceil(total / step - 1e-9)));
   const cutoffs = [];
-  let segment = 1;
   for (let frame = 1; frame <= frames; frame += 1) {
-    if (frame === frames || total === 0) {
-      cutoffs.push(frame === frames ? times[times.length - 1] : times[0]);
+    if (total === 0) {
+      cutoffs.push(ranges[0][0]);
       continue;
     }
-    const at = (total * frame) / frames;
-    while (segment < axis.length - 1 && axis[segment] < at) segment += 1;
-    const share = (at - axis[segment - 1]) / (axis[segment] - axis[segment - 1]);
-    cutoffs.push(times[segment - 1] + share * (times[segment] - times[segment - 1]));
+    if (frame === frames) {
+      cutoffs.push(ranges[ranges.length - 1][1]);
+      continue;
+    }
+    // 時間軸の位置 at が入る区間（つなぎ目ちょうどなら前の区間の終わり）。
+    let at = (total * frame) / frames;
+    let index = 0;
+    while (index < ranges.length - 1 && at > ranges[index][1] - ranges[index][0] + 1e-9) {
+      at -= ranges[index][1] - ranges[index][0];
+      index += 1;
+    }
+    cutoffs.push(Math.min(ranges[index][1], ranges[index][0] + at));
   }
   return cutoffs;
 }
