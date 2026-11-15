@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { DEFAULT_WORLD, EARTH_GM, MOON_DISTANCE } from "../src/game/physics.js";
 import {
   aimClick,
+  aimLineStyle,
   BOOST,
   CRUISE_AFTER,
   CRUISE_AFTER_PLACING,
@@ -524,4 +525,18 @@ test("aimClick: true only when the predicted end turns into a full turn", () => 
   assert.equal(aimClick("earth", "turn"), true);
   assert.equal(aimClick("turn", "turn"), false);
   assert.equal(aimClick("turn", "away"), false);
+});
+
+test("aimLineStyle: only the orbit that goes around uses the satellite colour; the others are a faint dashed white", () => {
+  for (const color of ["#ffd166", "#06d6a0", "#ef476f"]) {
+    const turn = aimLineStyle("turn", color);
+    assert.equal(turn.color, color);
+    assert.deepEqual(turn.dash, []);
+    for (const end of ["earth", "moon", "away"]) {
+      const miss = aimLineStyle(end, color);
+      assert.notEqual(miss.color, color);
+      assert.ok(miss.dash.length > 0);
+    }
+  }
+  assert.deepEqual(aimLineStyle("long", "#ffd166").dash, []);
 });

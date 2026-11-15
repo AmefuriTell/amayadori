@@ -242,11 +242,6 @@ export function step(game, seconds) {
 // limit 秒たつまでを先読みする（速度ベルレ法、dt 秒刻み。決まりは step() と同じ）。points は every 秒ごとの位置（最初と最後は必ず入れる）、
 // end は "turn"（1 周した）・"earth"・"moon"・"away"・"long"（limit 秒たっても決まらない）。
 // 引き合うモードでも、ほかの衛星の重さとぶつかりは入れない（その 1 機を地球と月だけで動かす）。game は書き換えない。
-// 引いている間の道筋の終わり方（predictOrbit の end）が、1 周回る（"turn"）に変わったか（変わった時だけ小さく鳴らす）。
-export function aimClick(before, after) {
-  return after === "turn" && before !== "turn";
-}
-
 export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 240, every = 0.25 } = {}) {
   const alone = { world: game.world, mutual: false };
   let x = position.x;
@@ -288,6 +283,19 @@ export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 24
     if (done) break;
   }
   return { points, end };
+}
+
+// 引いている間の道筋の終わり方（predictOrbit の end）が、1 周回る（"turn"）に変わったか（変わった時だけ小さく鳴らす）。
+export function aimClick(before, after) {
+  return after === "turn" && before !== "turn";
+}
+
+// 道筋の線の見た目。1 周回るなら次に出す衛星の色の実線、時間切れ（long）は白の実線、
+// 落ちる・ぶつかる・飛んでいくは薄い白の破線（衛星の色と重ならず、色を見分けにくくても線の形で分かるように）。
+export function aimLineStyle(end, satelliteColor) {
+  if (end === "turn") return { color: satelliteColor, alpha: 0.6, dash: [] };
+  if (end === "long") return { color: "#ffffff", alpha: 0.6, dash: [] };
+  return { color: "#ffffff", alpha: 0.35, dash: [4, 6] };
 }
 
 // ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。

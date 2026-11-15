@@ -12,6 +12,7 @@ import {
   SAT_RADIUS,
   addSatellite,
   aimClick,
+  aimLineStyle,
   boost,
   boostTarget,
   canPlace,
@@ -515,16 +516,11 @@ export function openOrbitGame(onClose, options = {}) {
         }
         aimEnd = predicted.end;
       }
-      // 線の色: 1 周回るなら次に出す衛星の色、落ちる・ぶつかる・飛んでいくなら赤、回り切らないまま時間切れ（long）は白。
-      if (predicted.end === "turn") {
-        c.strokeStyle = COLORS[game.satellites.length % COLORS.length];
-        c.globalAlpha = 0.6;
-      } else if (predicted.end === "long") {
-        c.strokeStyle = "rgba(255,255,255,0.6)";
-      } else {
-        c.strokeStyle = "#ff5a5f";
-        c.globalAlpha = 0.6;
-      }
+      // 線の見た目: 1 周回るなら次に出す衛星の色の実線、落ちる・ぶつかる・飛んでいくなら薄い白の破線、時間切れ（long）は白。
+      const style = aimLineStyle(predicted.end, COLORS[game.satellites.length % COLORS.length]);
+      c.strokeStyle = style.color;
+      c.globalAlpha = style.alpha;
+      c.setLineDash(style.dash);
       c.lineWidth = 1.5;
       c.beginPath();
       predicted.points.forEach((point, pointIndex) => {
@@ -534,6 +530,7 @@ export function openOrbitGame(onClose, options = {}) {
       });
       c.stroke();
       c.globalAlpha = 1;
+      c.setLineDash([]);
       if (predicted.end === "earth" || predicted.end === "moon") {
         const at = toScreen(predicted.points[predicted.points.length - 1]);
         c.fillStyle = "#ff5a5f";
