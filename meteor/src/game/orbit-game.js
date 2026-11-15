@@ -388,7 +388,7 @@ export function openOrbitGame(onClose, options = {}) {
       ready: null,
       note: (text) => {
         note.textContent = text;
-        note.hidden = false;
+        note.hidden = !text;
       },
     };
     made.ready = makeOrbitGif(gifRecord, {

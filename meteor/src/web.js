@@ -35,12 +35,29 @@ if (typeof document !== "undefined") {
   // があれば付ける: Web Intent では画像を付けられないので、スマホ・タブレットで端末の共有にファイルを渡せればそれで（文に URL と
   // ハッシュタグを入れる）、ほかは投稿の画面を先に開いて（ポップアップを止められないように同期で）、GIF を 1 回だけ保存させる
   // （添付は利用者が手で）。共有が取りやめ以外で失敗したら、その場では開かず（止められるため）、次に押した時に開いて保存する。
+  const shareGif = (blob, message, url, gif) => {
+    const file = new File([blob], "orbit.gif", { type: "image/gif" });
+    if (!navigator.canShare?.({ files: [file] })) return false;
+    navigator.share({ files: [file], text: xShareText(message, url) }).catch((error) => {
+      if (error?.name === "AbortError") return;
+      gif.noShare = true;
+      gif.note?.("共有できませんでした。もう一度押してください");
+    });
+    return true;
+  };
   const post = (message, daily, gif) => {
     const url = postUrl(window.location.href, daily);
-    const file = gif?.blob && !gif.noShare && isMobileDevice(navigator) ? new File([gif.blob], "orbit.gif", { type: "image/gif" }) : null;
-    if (file && navigator.canShare?.({ files: [file] })) {
-      navigator.share({ files: [file], text: xShareText(message, url) }).catch((error) => {
-        if (error?.name === "AbortError") return;
+    const mobileShare = gif && !gif.noShare && isMobileDevice(navigator) && navigator.share;
+    if (mobileShare && gif.blob && shareGif(gif.blob, message, url, gif)) return;
+    // スマホでまだ GIF ができていない時は、できるのを待って共有する（押した操作は数秒は有効。前は待たずに投稿の画面を開き、GIF が付かなかった）。
+    // 待っても作れない・共有できない時は、次に押した時に投稿の画面と保存へ。
+    if (mobileShare && !gif.blob && gif.ready) {
+      gif.note?.("GIF を作っています…");
+      gif.ready.then((blob) => {
+        if (blob && shareGif(blob, message, url, gif)) {
+          gif.note?.("");
+          return;
+        }
         gif.noShare = true;
         gif.note?.("共有できませんでした。もう一度押してください");
       });
