@@ -231,6 +231,13 @@ export function openOrbitGame(onClose, options = {}) {
   canvas.addEventListener("pointerdown", (event) => {
     audio.load();
     touches.set(event.pointerId, pointerPosition(event));
+    // 引っ張りを始めない時も指（マウス）を捕まえる。canvas の外で離しても pointerup が届き、touches に残らないように
+    // （残ると「触れている」ままになり、早送りが始まらない）。
+    try {
+      canvas.setPointerCapture(event.pointerId);
+    } catch {
+      // 捕まえられない環境でも続ける。
+    }
     // 遊んでいる間に画面を触ったら、すぐ ×1 に戻す（狙って加速したい時や、次の衛星を出す時に間に合うように）。
     // 早送り中に触った時は ×1 に戻すだけで、引っ張りも説明も出さない（2 本目の指のズームは下で今までどおり）。
     const wasCruising = playing && panel.hidden && speed > 1;
