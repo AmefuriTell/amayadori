@@ -86,7 +86,7 @@ export function openOrbitGame(onClose, options = {}) {
   // 置くときの位置（世界）と、引っ張った向きと長さ（世界。元からゴムの先まで）。
   let placeFrom = null;
   let dragPull = null;
-  // 引っ張っている間の道筋（predictOrbit）の前の結果。引きの量（位置・速度）が同じなら計算し直さない。
+  // 引っ張っている間の道筋（predictOrbit）の前の結果。時刻と引きの量（位置・速度）が同じなら計算し直さない。
   let predicted = null;
   // 2 本指のズーム: 指ごとの位置と、始めた時の指の間の距離とズーム。
   const touches = new Map();
@@ -442,7 +442,7 @@ export function openOrbitGame(onClose, options = {}) {
         velocity = { x: velocity.x + spin.x, y: velocity.y + spin.y };
       }
       // 1 周回るか、落ちる・飛んでいくまで（最長 240 秒）の道筋を線 1 本で見せ、落ちる所に赤い点を描く。
-      // 印に時刻を入れる（指を止めていても月は動くので、時計が進めば計算し直す。進まない 1 機目の前だけ使い回す）。
+      // 印に時刻を入れる（指を止めていても月は動くので、時計が進めば計算し直す。使い回せるのは時計が止まっている間だけ）。
       const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
       if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, origin, velocity) };
       c.strokeStyle = "rgba(255,255,255,0.6)";
