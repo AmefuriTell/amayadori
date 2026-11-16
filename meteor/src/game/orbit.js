@@ -4,13 +4,14 @@
 // 「引き合うモード」では衛星どうしも引き合う。地球に落ちる・月や衛星どうしでぶつかる・遠くへ出ると、その衛星はいなくなる。
 // 点は回り切った周の合計（画面に出る輪の数そのもの）。小さな輪ほど早く回れて周が増えるが、低すぎると地球に落ちやすく、
 // 同じ低い輪に何機も入れるとぶつかりやすいので、どこを回らせるかを考える遊びになる。
-import { DEFAULT_WORLD, STEP, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
+import { DEFAULT_WORLD, STEP, angleOfLongitude, moonPositions } from "./physics.js";
 
-// 同時に回せる衛星の数（いなくなった分は出し直せる）と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められる）。
+// 同時に回せる衛星の数（いなくなった分は出し直せる）と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められ、
+// 3 機とも 1 周して出せない間は自動で ×16 になる。autoSpeed）。
 export const SATELLITES = 3;
 // 衛星の色（枠の番号 slot で決まる）。枠は同時に回せる数だけあるので、色は衛星の数以上にする。
 export const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
-export const GAME_SECONDS = 600;
+export const GAME_SECONDS = 180;
 // 衛星の大きさ（ぶつかりの判定。2 機の中心がこの 2 倍より近いとぶつかる）と、引き合うモードでの衛星の重さ（地球の 1/100）。
 export const SAT_RADIUS = 0.06;
 export const SAT_GM = 0.02;
@@ -32,6 +33,9 @@ export const LAUNCH_LONGITUDE = 131;
 // 1 回の加速の大きさと、1 機の衛星が持つ燃料（加速できる合計）。
 export const BOOST = 0.08;
 export const FUEL = 0.48;
+// 打ち上げの向き（真上から自転の向きへの度）と速さ（base + perPull × 引きの長さ。引きは 3 まで）。引きの向きは使わない（DESIGN.md）。
+export const LAUNCH_ANGLE = 77.5;
+export const LAUNCH_SPEED = { base: 1.28, perPull: 0.06 };
 
 // 軌道に乗せろの世界: 月の重さだけ隕石当て（physics.js の DEFAULT_WORLD）の 1/4（大きさ・距離・周期は同じ）。
 // 地球の 1/8 の月では、合図どおりに乗せた衛星もほとんど 1〜5 周で月に乱されて落ちたため（DESIGN.md）。
@@ -93,6 +97,23 @@ export function launchSite(game, start = 0) {
     position: { x: LAUNCH_RADIUS * Math.cos(angle), y: LAUNCH_RADIUS * Math.sin(angle) },
     spin: { x: -speed * Math.sin(angle), y: speed * Math.cos(angle) },
   };
+}
+
+// 射場から打ち上げる速度（自転の分は入れない。launchFromSite に渡す）。向きは LAUNCH_ANGLE で決まり、引きの長さ pullLength で速さだけが変わる。
+export function launchShot(site, pullLength) {
+  const { up, along } = siteAxes(site);
+  const speed = LAUNCH_SPEED.base + LAUNCH_SPEED.perPull * Math.min(pullLength, 3);
+  const a = (LAUNCH_ANGLE * Math.PI) / 180;
+  return { x: speed * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: speed * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
+}
+
+// 射場の外向き（真上）と自転の向きの単位ベクトル（site は launchSite の結果）。
+function siteAxes(site) {
+  const { position, spin } = site;
+  const r = Math.hypot(position.x, position.y);
+  const up = { x: position.x / r, y: position.y / r };
+  const sense = up.x * spin.y - up.y * spin.x < 0 ? -1 : 1;
+  return { up, along: { x: -up.y * sense, y: up.x * sense } };
 }
 
 // 射場から打ち上げる。velocity は引っ張って決めた速さで、自転の速さを足して打ち出す。打ち上げられなければ null。
@@ -248,7 +269,7 @@ export function step(game, seconds) {
 
 // 引っ張っている間に見せる道筋: position から velocity で出した 1 機が、1 周回り切るか、地球・月に落ちるか、遠くへ出るか、
 // limit 秒たつまでを先読みする（速度ベルレ法、dt 秒刻み。決まりは step() と同じ）。points は every 秒ごとの位置（最初と最後は必ず入れる）、
-// end は "turn"（1 周した）・"earth"・"moon"・"away"・"long"（limit 秒たっても決まらない）。
+// end は "turn"（1 周した）・"earth"・"moon"・"away"・"long"（limit 秒たっても決まらない）。low は先読みした道筋のいちばん小さい半径。
 // 引き合うモードでも、ほかの衛星の重さとぶつかりは入れない（その 1 機を地球と月だけで動かす）。game は書き換えない。
 export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 240, every = 0.25 } = {}) {
   const alone = { world: game.world, mutual: false };
@@ -263,6 +284,7 @@ export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 24
   let mark = every;
   let [a] = accelerations(alone, moonPositions(game.world, game.t), [{ x, y }]);
   let end = "long";
+  let low = Infinity;
   for (let index = 1; index <= steps; index += 1) {
     const moonsNext = moonPositions(game.world, game.t + index * dt);
     x += vx * dt + 0.5 * a.x * dt * dt;
@@ -272,6 +294,7 @@ export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 24
     vy += 0.5 * (a.y + b.y) * dt;
     a = b;
     const r = Math.hypot(x, y);
+    low = Math.min(low, r);
     if (r <= 1) end = "earth";
     else if (moonsNext.some((moon) => Math.hypot(x - moon.x, y - moon.y) <= moon.radius + SAT_RADIUS)) end = "moon";
     else if (r >= ESCAPE_DISTANCE) end = "away";
@@ -290,7 +313,7 @@ export function predictOrbit(game, position, velocity, { dt = 1 / 30, limit = 24
     if (done || due) points.push({ x, y });
     if (done) break;
   }
-  return { points, end };
+  return { points, end, low };
 }
 
 // 引いている間の道筋の終わり方（predictOrbit の end）が、1 周回る（"turn"）に変わったか（変わった時だけ小さく鳴らす）。
@@ -306,36 +329,15 @@ export function aimLineStyle(end, satelliteColor) {
   return { color: "#ffffff", alpha: 0.45, dash: [4, 6] };
 }
 
-// 周回に乗せるまでの手がかり（DESIGN.md）。打ち上げの正解の範囲: 打ち出す向きは真上から自転の向きへ from〜to 度、強さは引き near〜far
-// （合図から 0.6〜1 秒遅れて押し始める人でも乗る範囲）。てっぺん（外へ向かう速さが CUE_RISING 未満、地球の中心から CUE_HEIGHT より外）で、
-// 道筋が 1 周回る線になるまで噴射する（CUE_HEIGHT は、弱く打って上がり切らずに落ちていく衛星に合図を出さないため）。
-export const AIM_ZONE = { from: 74, to: 81, near: 2.38, far: 2.53 };
+// 噴射の合図（DESIGN.md）: てっぺん（外へ向かう速さが CUE_RISING 未満、地球の中心から CUE_HEIGHT より外）で、道筋が 1 周回る線で、
+// しかもいちばん低い所が CUE_SAFE 以上になるまで噴射する（CUE_HEIGHT は、弱く打って上がり切らずに落ちていく衛星に合図を出さないため。
+// CUE_SAFE は、地表すれすれの 1 周で合図が消え、月に乱されてすぐ落ちないため）。
 export const CUE_RISING = 0.15;
 export const CUE_HEIGHT = 1.2;
-
-// 射場の外向き（真上）と自転の向きの単位ベクトル（site は launchSite の結果）。
-function siteAxes(site) {
-  const { position, spin } = site;
-  const r = Math.hypot(position.x, position.y);
-  const up = { x: position.x / r, y: position.y / r };
-  const sense = up.x * spin.y - up.y * spin.x < 0 ? -1 : 1;
-  return { up, along: { x: -up.y * sense, y: up.x * sense } };
-}
-
-// 引きが入るべき範囲（扇形）の多角形（引きのベクトルの点。射場からゴムの先まで）。ぱちんこ式なので、打ち出す向きの反対側
-// （真下から自転と逆の向きへ from〜to 度）。画面には、指を置いた所から指の動きの px（引き × PULL_PX）で描く。
-export function aimZone(site, steps = 6) {
-  const { up, along } = siteAxes(site);
-  const arc = (radius) =>
-    Array.from({ length: steps + 1 }, (_, index) => {
-      const a = ((AIM_ZONE.from + ((AIM_ZONE.to - AIM_ZONE.from) * index) / steps) * Math.PI) / 180;
-      return { x: -radius * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: -radius * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
-    });
-  return [...arc(AIM_ZONE.far), ...arc(AIM_ZONE.near).reverse()];
-}
+export const CUE_SAFE = 1.15;
 
 // 設定の欄の後ろに出す見本の、初めの位置と速さ（画面に頼らない）。速さは引きから決めた速さで、打ち上げは launchFromSite、
-// 置くは addSatellite にそのまま渡す。打ち上げ: 射場から、扇形（aimZone）の中心の引きで打ち出す（てっぺんでは噴射の合図で噴射する）。
+// 置くは addSatellite にそのまま渡す。打ち上げ: 射場から、引き 1.5 で打ち出す（launchShot。てっぺんでは噴射の合図で噴射する）。
 // 置く: 決まった 1 点（PREVIEW_PLACE）から、地球を回る円軌道の速さで、自転と同じ向きへ打ち出す。
 // 見本の地球の回り始めの向きは PREVIEW_START（射場が画面の右の少し上に来て、噴射の合図で噴射すれば周回に乗る向き）。
 // 置く点は地球の中心から 1.4（月に乱されず回り続ける高さ）。
@@ -349,33 +351,21 @@ export function previewShot(game, style) {
     return { position: { x, y }, velocity: { x: (-y / r) * speed, y: (x / r) * speed } };
   }
   const site = launchSite(game, PREVIEW_START);
-  const { up, along } = siteAxes(site);
-  const a = (((AIM_ZONE.from + AIM_ZONE.to) / 2) * Math.PI) / 180;
-  const length = (AIM_ZONE.near + AIM_ZONE.far) / 2;
-  const pull = { x: -length * (Math.cos(a) * up.x + Math.sin(a) * along.x), y: -length * (Math.cos(a) * up.y + Math.sin(a) * along.y) };
-  const { position } = site;
-  return { position: { ...position }, velocity: launchVelocity(position, { x: position.x + pull.x, y: position.y + pull.y }) };
+  return { position: { ...site.position }, velocity: launchShot(site, 1.5) };
 }
 
-// 引き（射場からゴムの先まで）が範囲に入っているか。
-export function inAimZone(site, pull) {
-  const { up, along } = siteAxes(site);
-  const length = Math.hypot(pull.x, pull.y);
-  const angle = (Math.atan2(-(pull.x * along.x + pull.y * along.y), -(pull.x * up.x + pull.y * up.y)) * 180) / Math.PI;
-  const e = 1e-9;
-  return length >= AIM_ZONE.near - e && length <= AIM_ZONE.far + e && angle >= AIM_ZONE.from - e && angle <= AIM_ZONE.to + e;
-}
-
-// 今が噴射の時か: 打ち上げてまだ 1 周していない衛星が、燃料を残して、CUE_HEIGHT より高いてっぺんにいて、道筋（end）がまだ 1 周回る線でない。
-export function boostCue(satellite, end) {
+// 今が噴射の時か: 打ち上げてまだ 1 周していない衛星が、燃料を残して、CUE_HEIGHT より高いてっぺんにいて、道筋が 1 周回る線（end）で
+// いちばん低い所（low）が CUE_SAFE 以上、にまだなっていない。
+export function boostCue(satellite, end, low) {
   if (!satellite || !satellite.alive || satellite.launched !== true || satellite.turns !== 0 || satellite.fuel < BOOST - 1e-9) return false;
   const r = Math.hypot(satellite.x, satellite.y);
-  return r > CUE_HEIGHT && (satellite.x * satellite.vx + satellite.y * satellite.vy) / r < CUE_RISING && end !== "turn";
+  return r > CUE_HEIGHT && (satellite.x * satellite.vx + satellite.y * satellite.vy) / r < CUE_RISING && !(end === "turn" && low >= CUE_SAFE);
 }
 
-// 手がかりを出すか: まだ記録が無く、今のゲームで 1 周した衛星も無い間だけ。
-export function coaching(best, game) {
-  return !(best.normal > 0 || best.mutual > 0) && !game.satellites.some((satellite) => satellite.turns >= 1);
+// 時計の速さ: 出せる衛星が無く（3 機とも回っている）、回っている全機が 1 周以上なら 16（待つだけの間を早送りする）。ほかは 1。
+export function autoSpeed(game) {
+  const alive = game.satellites.filter((satellite) => satellite.alive);
+  return satellitesLeft(game) === 0 && alive.every((satellite) => satellite.turns >= 1) ? 16 : 1;
 }
 
 // ゲームが終わったか: 時間切れだけ（全部いなくなっても、出し直せるので続く）。
@@ -417,8 +407,9 @@ export function clampZoom(zoom) {
 }
 
 // いちばん良かった結果（打ち上げだけ。モードごと、回り切った周の合計）を端末に覚える。読めなければ無し。
-// 同時に 3 機まで出し直せる決まりに変えて点の重みが変わったので、前のキー（weatherbot.orbitTurns・weatherbot.orbitBest）は読まない（消しもしない）。
-const BEST_STORAGE = "weatherbot.orbitLaunch";
+// 打ち上げの向きを自動にし、ゲームを 180 秒にして点の重みが変わったので、前のキー（weatherbot.orbitLaunch・weatherbot.orbitTurns・
+// weatherbot.orbitBest）は読まない（消しもしない）。
+const BEST_STORAGE = "weatherbot.orbitLaunch3";
 export function loadBest(storage = globalThis.localStorage) {
   try {
     const saved = JSON.parse(storage.getItem(BEST_STORAGE) || "null");
