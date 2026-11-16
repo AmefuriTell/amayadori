@@ -10,8 +10,9 @@ export const GIF_DELAY = 50;
 export const GIF_HOLD = 1000;
 export const GIF_MARGIN = 14;
 // 動くコマの数の下限と上限。コマの数は見せる時間の長さに比例させ、1 コマで衛星の印が進む量を低い軌道（GIF_LOW_PERIOD）の
-// 1/6 周以下にする。上限は再生 8 秒（20 fps で 160 コマ）。衛星は 3 機までで見どころは 1 機 GIF_FOCUS_CAP 秒までなので、ふつうは届かない。
-export const GIF_MIN_FRAMES = 45;
+// 1/6 周以下にする。上限は再生 8 秒（20 fps で 160 コマ）。衛星は 3 機までで、見どころは 1 機 GIF_FOCUS_CAP 秒まで、終わりの区間は
+// GIF_END_MAX 秒までなので、合わせて 120 秒・124 コマまでで届かない。
+export const GIF_MIN_FRAMES = 30;
 export const GIF_MAX_FRAMES = 160;
 // 低い軌道（地球の中心から 1.2、地球の重さ 2.0）の 1 周の秒。
 export const GIF_LOW_PERIOD = 2 * Math.PI * Math.sqrt(1.2 ** 3 / 2);
@@ -20,6 +21,9 @@ export const GIF_RECENT = 8;
 export const GIF_AFTER_TURN = 3;
 // 衛星ごとの見どころの区間の長さの上限（出してからのゲームの秒）。高い軌道で 1 周が長くても、ここまで。
 export const GIF_FOCUS_CAP = 20;
+// 終わりの区間の長さ: ゲームの長さのこの割合で、この秒まで。
+export const GIF_END_SHARE = 0.1;
+export const GIF_END_MAX = 60;
 // 地球の縁（drawEarth の大気の輪の半径）。
 const EARTH_EDGE = 1.08;
 const TAU = Math.PI * 2;
@@ -57,15 +61,20 @@ export function gifSatellites(points) {
 
 // 衛星ごとの見どころの区間（ゲームの時刻）を、重なりを合わせて時刻の順に並べたもの。区間は [出した時刻, 1 周を回り切った
 // 時刻 + GIF_AFTER_TURN]。回り切らなければ [出した時刻, その衛星の記録の終わり]。どちらも出してから cap 秒までと、記録の終わりまで。
+// ほかに終わりの区間: 記録の終わりに生きている衛星ごとに [max(出した時刻, 終わり − L), 終わり]（L はゲームの長さの
+// GIF_END_SHARE、GIF_END_MAX 秒まで）。長く遊んだ回ほど長く見せ、コマが増える。
+// 衛星は色の番号（何機目か % 色の数）で分ける。衛星の数（SATELLITES）は色の数以下なので、番号は衛星ごとに一意（試験で確かめる）。
 export function gifFocusRanges(points, cap = GIF_FOCUS_CAP) {
   if (!points.length) return [];
   const last = points[points.length - 1].t;
-  const ranges = gifSatellites(points)
-    .map((satellite) => {
-      const end = satellite.turnAt === null ? satellite.last : satellite.turnAt + GIF_AFTER_TURN;
-      return [satellite.first, Math.min(end, satellite.first + cap, last)];
-    })
-    .sort((a, b) => a[0] - b[0]);
+  const satellites = gifSatellites(points);
+  const ranges = satellites.map((satellite) => {
+    const end = satellite.turnAt === null ? satellite.last : satellite.turnAt + GIF_AFTER_TURN;
+    return [satellite.first, Math.min(end, satellite.first + cap, last)];
+  });
+  const tail = Math.min(GIF_END_MAX, (last - points[0].t) * GIF_END_SHARE);
+  if (tail > 0) for (const satellite of satellites) if (satellite.last >= last - 1e-9) ranges.push([Math.max(satellite.first, last - tail), last]);
+  ranges.sort((a, b) => a[0] - b[0]);
   const merged = [];
   for (const [from, to] of ranges) {
     const top = merged[merged.length - 1];

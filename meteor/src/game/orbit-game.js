@@ -10,6 +10,7 @@ import {
   BOOST,
   GAME_SECONDS,
   ORBIT_WORLD,
+  COLORS,
   SATELLITES,
   SAT_RADIUS,
   addSatellite,
@@ -56,7 +57,6 @@ import { makeOrbitGif } from "./orbit-gif.js";
 const VIEW_RADIUS = 5.7;
 // 飛んだ跡の点の数（衛星ごと）。
 const TRAIL_POINTS = 500;
-const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
 
 // 時計の速さの段（下の欄のボタンで順に切り替える）。
 const SPEEDS = [1, 4, 16];

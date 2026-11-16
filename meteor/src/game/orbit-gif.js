@@ -1,6 +1,6 @@
-// 軌道に乗せろの投稿に付ける GIF: 360 px の正方形に、地球を中心に衛星ごとの跡の線が伸びていく（20 fps・45〜160 コマ、
+// 軌道に乗せろの投稿に付ける GIF: 360 px の正方形に、地球を中心に衛星ごとの跡の線が伸びていく（20 fps・30〜160 コマ、
 // 最後に記録の終わりまでの全体を 1 秒ほど止めて見せ、くり返す。文字は入れない）。DESIGN.md。符号化は gifenc（MIT）。
-// 動くコマは衛星ごとの見どころ（出してから最初の 1 周まで）の区間を合わせて見せ、区間の外は詰める。
+// 動くコマは衛星ごとの見どころ（出してから最初の 1 周まで）と終わりの区間を合わせて見せ、区間の外は詰める。
 // 跡は 2 段: そのコマの時刻までの全体を薄く、直近（GIF_RECENT 秒）を遊ぶ時の濃さで描き、先頭に衛星の印。
 // 画面に出さない canvas で 1 コマずつ描き、コマごとに間をあけて画面を固まらせない。
 import { GIFEncoder, applyPalette, quantize } from "gifenc";
@@ -105,7 +105,13 @@ export async function makeOrbitGif(points, { colors, stars, limit = Infinity, is
   const end = points[points.length - 1].t;
   // 色は 256 色以下。最後のコマと、動くコマを 5 つ（薄い跡・濃い跡・衛星の印。途中でいなくなる衛星の色も入るように）
   // から選び、全コマで同じパレットを使う。
-  const picks = [drawFrame(end), ...[0, 0.25, 0.5, 0.75, 1].map((share) => drawFrame(cutoffs[Math.max(0, Math.ceil(share * cutoffs.length) - 1)]))];
+  // 1 コマ描くごとに間をあける（遅い端末で画面が止まらないように）。
+  const picks = [];
+  for (const cutoff of [end, ...[0, 0.25, 0.5, 0.75, 1].map((share) => cutoffs[Math.max(0, Math.ceil(share * cutoffs.length) - 1)])]) {
+    if (isCancelled()) return null;
+    picks.push(drawFrame(cutoff));
+    await pause();
+  }
   const sample = new Uint8ClampedArray(picks[0].length * picks.length);
   picks.forEach((data, index) => sample.set(data, index * data.length));
   const palette = quantize(sample, 256);
