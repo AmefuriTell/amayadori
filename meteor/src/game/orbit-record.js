@@ -1,6 +1,7 @@
 // 軌道に乗せろの投稿に付ける GIF（衛星の跡が伸びていく絵）の、記録と組み立ての計算（DESIGN.md）。
 // 絵を描く所（orbit-gif.js）から分けて、画面に頼らずに node --test で確かめる。
-// 記録は { t: ゲームの時刻, x, y, c: 色の番号 } の並び（時刻の順）。
+// 記録は { t: ゲームの時刻, x, y, s: 衛星の id, c: 色の番号（枠の番号 slot） } の並び（時刻の順）。
+// 衛星は s で分ける（同じ色の枠を後の衛星が使い回しても、前の衛星の終わりから線がつながらないように）。
 
 // 記録の間隔（ゲームの秒。速さによらずゲームの時間で数える）。0.5 秒では低い軌道の跡が角張ったので 0.25 秒。
 export const RECORD_EVERY = 0.25;
@@ -10,8 +11,8 @@ export const GIF_DELAY = 50;
 export const GIF_HOLD = 1000;
 export const GIF_MARGIN = 14;
 // 動くコマの数の下限と上限。コマの数は見せる時間の長さに比例させ、1 コマで衛星の印が進む量を低い軌道（GIF_LOW_PERIOD）の
-// 1/6 周以下にする。上限は再生 8 秒（20 fps で 160 コマ）。衛星は 3 機までで、見どころは 1 機 GIF_FOCUS_CAP 秒まで、終わりの区間は
-// GIF_END_MAX 秒までなので、合わせて 120 秒・124 コマまでで届かない。
+// 1/6 周以下にする。上限は再生 8 秒（20 fps で 160 コマ）。衛星は出し直せるので何機にもなりうる。見どころが長くて上限を超える時は、
+// 区間の長さの上限を縮めて収める（gifCutoffs）。
 export const GIF_MIN_FRAMES = 30;
 export const GIF_MAX_FRAMES = 160;
 // 低い軌道（地球の中心から 1.2、地球の重さ 2.0）の 1 周の秒。
@@ -38,14 +39,14 @@ export function gifScale(points, size = GIF_SIZE, margin = GIF_MARGIN, limit = I
   return (size / 2 - margin) / far;
 }
 
-// 色ごとの、記録の初めと終わりの時刻と、最初の 1 周を回り切った時刻（地球の周りを回った角度が 2π に届いた時。届かなければ null）。
+// 衛星（s）ごとの、色と、記録の初めと終わりの時刻と、最初の 1 周を回り切った時刻（地球の周りを回った角度が 2π に届いた時。届かなければ null）。
 export function gifSatellites(points) {
   const map = new Map();
   for (const point of points) {
     const angle = Math.atan2(point.y, point.x);
-    const satellite = map.get(point.c);
+    const satellite = map.get(point.s);
     if (!satellite) {
-      map.set(point.c, { color: point.c, first: point.t, last: point.t, turnAt: null, angle, sweep: 0 });
+      map.set(point.s, { color: point.c, first: point.t, last: point.t, turnAt: null, angle, sweep: 0 });
       continue;
     }
     let delta = angle - satellite.angle;
@@ -63,7 +64,7 @@ export function gifSatellites(points) {
 // 時刻 + GIF_AFTER_TURN]。回り切らなければ [出した時刻, その衛星の記録の終わり]。どちらも出してから cap 秒までと、記録の終わりまで。
 // ほかに終わりの区間: 記録の終わりに生きている衛星ごとに [max(出した時刻, 終わり − L), 終わり]（L はゲームの長さの
 // GIF_END_SHARE、GIF_END_MAX 秒まで）。長く遊んだ回ほど長く見せ、コマが増える。
-// 衛星は色の番号（何機目か % 色の数）で分ける。衛星の数（SATELLITES）は色の数以下なので、番号は衛星ごとに一意（試験で確かめる）。
+// 衛星は id（s）で分ける。
 export function gifFocusRanges(points, cap = GIF_FOCUS_CAP) {
   if (!points.length) return [];
   const last = points[points.length - 1].t;
@@ -134,16 +135,16 @@ export function gifCutoffs(points, { min = GIF_MIN_FRAMES, max = GIF_MAX_FRAMES,
   return cutoffs;
 }
 
-// その時刻までの、色ごとの跡の線。points はその時刻までの全部、recent は直近 recent 秒（1 つ前の点からつなぐ）。
+// その時刻までの、衛星（s）ごとの跡の線（color は色の番号 c）。points はその時刻までの全部、recent は直近 recent 秒（1 つ前の点からつなぐ）。
 // ended は、その衛星の記録がその時刻より前に終わっている（いなくなった）か。
 export function gifPaths(points, cutoff, recent = Infinity) {
   const lastOf = new Map();
-  for (const point of points) lastOf.set(point.c, point.t);
+  for (const point of points) lastOf.set(point.s, point.t);
   const paths = new Map();
   for (const point of points) {
     if (point.t > cutoff + 1e-9) break;
-    if (!paths.has(point.c)) paths.set(point.c, { color: point.c, points: [], recent: [], ended: lastOf.get(point.c) < cutoff - 1e-9 });
-    const path = paths.get(point.c);
+    if (!paths.has(point.s)) paths.set(point.s, { color: point.c, points: [], recent: [], ended: lastOf.get(point.s) < cutoff - 1e-9 });
+    const path = paths.get(point.s);
     const at = { x: point.x, y: point.y };
     if (point.t >= cutoff - recent - 1e-9 && !path.recent.length && path.points.length) path.recent.push(path.points[path.points.length - 1]);
     if (point.t >= cutoff - recent - 1e-9) path.recent.push(at);

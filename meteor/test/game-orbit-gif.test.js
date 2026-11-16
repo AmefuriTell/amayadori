@@ -18,23 +18,23 @@ import {
 } from "../src/game/orbit-record.js";
 import { COLORS, SATELLITES } from "../src/game/orbit.js";
 
-// 2 機: 0 番は 0〜2 秒、1 番は 1〜1.5 秒（そこでいなくなる）。
+// 2 機: 0 番（id 1）は 0〜2 秒、1 番（id 2）は 1〜1.5 秒（そこでいなくなる）。
 const points = [
-  { t: 0, x: 1, y: 0, c: 0 },
-  { t: 0.5, x: 2, y: 0, c: 0 },
-  { t: 1, x: 3, y: 0, c: 0 },
-  { t: 1, x: 0, y: 1, c: 1 },
-  { t: 1.5, x: 3, y: 1, c: 0 },
-  { t: 1.5, x: 0, y: -4, c: 1 },
-  { t: 2, x: 3, y: 2, c: 0 },
+  { t: 0, x: 1, y: 0, s: 1, c: 0 },
+  { t: 0.5, x: 2, y: 0, s: 1, c: 0 },
+  { t: 1, x: 3, y: 0, s: 1, c: 0 },
+  { t: 1, x: 0, y: 1, s: 2, c: 1 },
+  { t: 1.5, x: 3, y: 1, s: 1, c: 0 },
+  { t: 1.5, x: 0, y: -4, s: 2, c: 1 },
+  { t: 2, x: 3, y: 2, s: 1, c: 0 },
 ];
 
-// 半径 r の円を period 秒で回る衛星の記録（from から to まで RECORD_EVERY ごと）。
-function circle(c, r, period, from, to) {
+// 半径 r の円を period 秒で回る衛星の記録（from から to まで RECORD_EVERY ごと）。衛星の id は s（省けば色の番号 c と同じ）。
+function circle(c, r, period, from, to, s = c) {
   const out = [];
   for (let t = from; t <= to + 1e-9; t += RECORD_EVERY) {
     const angle = (2 * Math.PI * (t - from)) / period;
-    out.push({ t, x: r * Math.cos(angle), y: r * Math.sin(angle), c });
+    out.push({ t, x: r * Math.cos(angle), y: r * Math.sin(angle), s, c });
   }
   return out;
 }
@@ -46,9 +46,9 @@ test("the record is taken every quarter of a game second", () => {
 test("the gif fits every recorded point and the earth inside the margin", () => {
   assert.equal(gifScale(points, 360, 14), 166 / 4);
   // 点が地球の中だけなら、地球（大気の輪 1.08）が収まる大きさ。
-  assert.equal(gifScale([{ t: 0, x: 0.5, y: 0, c: 0 }], 360, 14), 166 / 1.08);
+  assert.equal(gifScale([{ t: 0, x: 0.5, y: 0, s: 1, c: 0 }], 360, 14), 166 / 1.08);
   // 月の軌道（limit）より遠い点（飛んでいった衛星）は縮尺に数えない。
-  assert.equal(gifScale([...points, { t: 3, x: 12, y: 0, c: 0 }], 360, 14, 5), 166 / 4);
+  assert.equal(gifScale([...points, { t: 3, x: 12, y: 0, s: 1, c: 0 }], 360, 14, 5), 166 / 4);
 });
 
 test("the first full turn of each satellite is found from the recorded angles", () => {
@@ -81,9 +81,9 @@ test("each satellite's range ends a few seconds after its first turn, and the en
   assert.equal(gifFocusEnd(circle(0, 1.5, 6, 0, 1)), 1);
 });
 
-test("satellites are told apart by color number, so there are at least as many colors as satellites", () => {
+test("satellites are told apart by id, and there are at least as many colors as flying satellites", () => {
   assert.ok(SATELLITES <= COLORS.length);
-  // 3 機それぞれの色の番号が別の衛星になる。
+  // 3 機それぞれが別の衛星になる。
   const record = [0, 1, 2].map((index) => circle(index, 1.5, 6, index * 10, 40)).flat().sort((a, b) => a.t - b.t);
   assert.deepEqual(gifSatellites(record).map((satellite) => satellite.first), [0, 10, 20]);
 });
@@ -168,4 +168,22 @@ test("each frame draws the whole line up to that time, the recent part, and ende
   assert.deepEqual(all[0].recent, [{ x: 3, y: 0 }, { x: 3, y: 1 }, { x: 3, y: 2 }]);
   assert.equal(all[0].ended, false);
   assert.equal(all[1].ended, true);
+});
+
+test("a satellite that reuses a color is a separate line, not joined to the earlier one's end", () => {
+  // 色 0 の 1 機目（id 1）は 0〜30 秒で（半径 3 で）いなくなり、40 秒から同じ色 0 の 4 機目（id 4）が半径 1.5 で回る。
+  const record = [...circle(0, 3, 20, 0, 30, 1), ...circle(1, 2, 12, 0, 600, 2), ...circle(0, 1.5, 6, 40, 600, 4)].sort((a, b) => a.t - b.t);
+  const paths = gifPaths(record, 100);
+  const zero = paths.filter((path) => path.color === 0);
+  assert.equal(zero.length, 2);
+  assert.equal(zero[0].ended, true);
+  assert.equal(zero[1].ended, false);
+  // 4 機目の線は、1 機目の終わり（半径 3）からではなく、自分の初め（半径 1.5）から始まる。
+  assert.ok(Math.abs(Math.hypot(zero[1].points[0].x, zero[1].points[0].y) - 1.5) < 1e-9);
+  assert.ok(zero[1].points.every((point) => Math.abs(Math.hypot(point.x, point.y) - 1.5) < 1e-9));
+  assert.equal(gifSatellites(record).length, 3);
+  // 衛星を何機出し直しても、コマは上限まで。
+  const many = Array.from({ length: 12 }, (_, index) => circle(index % 3, 5, 400, index * 45, Math.min(600, index * 45 + 60), index + 1)).flat().sort((a, b) => a.t - b.t);
+  assert.ok(gifCutoffs(many).length <= GIF_MAX_FRAMES);
+  assert.ok(gifCutoffs(record).length <= GIF_MAX_FRAMES);
 });
