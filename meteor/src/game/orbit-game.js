@@ -14,8 +14,8 @@ import {
   SATELLITES,
   SAT_RADIUS,
   addSatellite,
+  autoSpeed,
   aimClick,
-  aimZone,
   aimLineStyle,
   PREVIEW_START,
   previewShot,
@@ -25,7 +25,6 @@ import {
   boostCue,
   clampZoom,
   ZOOM_MIN,
-  coaching,
   createOrbitGame,
   endSound,
   firstTurns,
@@ -34,6 +33,7 @@ import {
   elapsed,
   isOver,
   launchFromSite,
+  launchShot,
   launchSite,
   loadBest,
   nextSlot,
@@ -86,7 +86,7 @@ export function openOrbitGame(onClose, options = {}) {
   bar.append(close, title, back);
   const controls = element("div", undefined, "orbit-controls");
   const boostButton = element("button", "", "game-button orbit-boost");
-  // 時計の速さのボタン（押すたびに ×1 → ×4 → ×16 → ×1。文字は今の速さ）。
+  // 時計の速さのボタン（押すたびに ×1 → ×4 → ×16 → ×1。文字は選んだ速さ）。
   // 主役は噴射だけなので、速さと終了は地を薄くして静かにする（同じ重さのボタンを 3 つ並べない）。
   const speedButton = element("button", "×1", "game-button orbit-quiet orbit-speed");
   const finish = element("button", "終了", "game-button orbit-quiet orbit-finish");
@@ -104,8 +104,10 @@ export function openOrbitGame(onClose, options = {}) {
 
   let size = { width: 0, height: 0, ratio: 1 };
   let zoom = 1;
-  // 時計の進む速さ（下の欄のボタンで選ぶ。衛星を出した時だけ ×1 に戻す）。
+  // 選んだ時計の速さ（下の欄のボタンで選ぶ。衛星を出した時だけ ×1 に戻す）と、実際に進めている速さ
+  // （max(選んだ速さ, autoSpeed)。3 機とも 1 周して待つだけの間は ×16。上の欄の「»」はこちらで出す）。
   let speed = 1;
+  let rate = 1;
   // 置き方（"launch"・"place"）。開くたびに打ち上げから（設定で「置く」に変えたら、閉じるまでそのまま）。
   let style = "launch";
   let mutual = false;
@@ -136,6 +138,9 @@ export function openOrbitGame(onClose, options = {}) {
   // 離した後の道筋（いちばん新しい衛星が 1 周回るまで）の前の終わり方。離した時に、引いていた時の最後の終わり方から始める
   // （離した直後に続けてカチッが鳴らないように）。
   let followEnd = null;
+  // 離した後の道筋のいちばん低い所（predictOrbit の low。噴射の合図 boostCue に渡す）と、引いていた時の最後の道筋の low。
+  let followLow = null;
+  let aimLow = null;
   // 2 本指のズーム: 指ごとの位置と、始めた時の指の間の距離とズーム。
   const touches = new Map();
   let pinch = null;
@@ -148,7 +153,7 @@ export function openOrbitGame(onClose, options = {}) {
   let previewAt = 0;
   const reduceMotion = Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   // 効果音（隕石当てと同じ audio.js。消音は隕石当ての「ほかの遊び方」の「音: あり／なし」）。最初に触ったときに読み込み、
-  // 閉じた後は鳴らさない。鳴らすのは出した時・道筋の線が 1 周回る線になった時（引いている時も離した後も）・最初の 1 周・いなくなった時だけ（DESIGN.md の「音」）。
+  // 閉じた後は鳴らさない。鳴らすのは出した時・道筋の線が 1 周回る線になった時（離した後。置くモードは引いている時も）・最初の 1 周・いなくなった時だけ（DESIGN.md の「音」）。
   const muted = loadMuted();
   const audio = createAudio({ isMuted: () => muted, isOpen: () => overlay.isConnected });
 
@@ -284,7 +289,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   // 見本の道筋を 1 回だけ計算する（選び直した時だけ）。遊ぶ時と同じ計算: 1 機目（黄）は previewShot から打ち上げるか置き、
-  // 打ち上げはてっぺんの噴射の合図（boostCue）で、道筋が 1 周回る線になるまで PREVIEW_BOOST_GAP ごとに噴射する。
+  // 打ち上げはてっぺんの噴射の合図（boostCue）で、合図が消えるまで PREVIEW_BOOST_GAP ごとに噴射する。
   // 2 機目（緑）は円軌道でただ回る（終わりに 1 機目の少し先にいるように始めの向きを決める）。どちらも引き合わせずに計算する
   // （引き合うは、近い時に 2 機を結ぶ線で見せる）。
   function buildPreview() {
@@ -296,8 +301,9 @@ export function openOrbitGame(onClose, options = {}) {
     const steps = Math.round(PREVIEW_GAME / PREVIEW_DT);
     for (let index = 0; index < steps; index += 1) {
       step(demo, PREVIEW_DT);
-      if (first.alive && demo.t - boostedAt >= PREVIEW_BOOST_GAP - 1e-9 && boostCue(first, null)) {
-        if (predictOrbit(demo, first, { x: first.vx, y: first.vy }).end !== "turn" && boost(first)) boostedAt = demo.t;
+      if (first.alive && demo.t - boostedAt >= PREVIEW_BOOST_GAP - 1e-9 && boostCue(first, null, null)) {
+        const line = predictOrbit(demo, first, { x: first.vx, y: first.vy });
+        if (boostCue(first, line.end, line.low) && boost(first)) boostedAt = demo.t;
       }
       firstPath.push({ x: first.x, y: first.y });
     }
@@ -328,6 +334,7 @@ export function openOrbitGame(onClose, options = {}) {
     setSpeed(1);
     cancelDrag();
     followEnd = null;
+    followLow = null;
     followPath = null;
     followOff = null;
     camera = homeView();
@@ -347,6 +354,7 @@ export function openOrbitGame(onClose, options = {}) {
   function finishGame() {
     // 終わったコマの周を上の表示にも出してから止める（結果の画面の数字とそろえる。速さの印は残さない）。
     setSpeed(1);
+    rate = 1;
     updateHud();
     playing = false;
     cancelDrag();
@@ -450,6 +458,7 @@ export function openOrbitGame(onClose, options = {}) {
     dragPull = null;
     predicted = null;
     aimEnd = null;
+    aimLow = null;
   }
 
   // 引っ張りの元。打ち上げのときは今の射場（引いている間は時間が止まるので、射場も止まっている）。置くときは触った所。
@@ -534,8 +543,11 @@ export function openOrbitGame(onClose, options = {}) {
     // 終わったゲームには足さない（引っ張っている間に時間切れや「終了」になったとき）。
     if (playing && dragPull && Math.hypot(dragPull.x, dragPull.y) > 0.3) {
       const from = dragOrigin();
-      const velocity = launchVelocity(from, { x: from.x + dragPull.x, y: from.y + dragPull.y });
-      const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
+      // 打ち上げは向きを自動で決め、引きの長さで速さだけを変える（launchShot）。置くは引きの反対へ。
+      const satellite =
+        style === "place"
+          ? addSatellite(game, from, launchVelocity(from, { x: from.x + dragPull.x, y: from.y + dragPull.y }))
+          : launchFromSite(game, launchShot(launchSite(game, earthStart), Math.hypot(dragPull.x, dragPull.y)), earthStart);
       if (satellite) {
         // 枠を使い回す時は、その枠の前の衛星の跡を消す（画面の跡は枠の数まで）。
         for (const other of game.satellites) if (other !== satellite && other.slot === satellite.slot) trails.delete(other.id);
@@ -545,6 +557,7 @@ export function openOrbitGame(onClose, options = {}) {
         setSpeed(1);
         audio.play("launch");
         followEnd = aimEnd;
+        followLow = aimLow;
         // 追う先を出したばかりの衛星へ移す（道筋は次のフレームで描く時に覚える）。
         followPath = null;
       }
@@ -585,6 +598,7 @@ export function openOrbitGame(onClose, options = {}) {
 
   function setSpeed(value) {
     speed = value;
+    rate = Math.max(value, autoSpeed(game));
     setText(speedButton, `×${value}`);
   }
 
@@ -606,14 +620,14 @@ export function openOrbitGame(onClose, options = {}) {
     }
     const score = scoreOf(game);
     const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
-    if (playing) setText(title, `${score.turns} 周・残り衛星 ${satellitesLeft(game)}${speed > 1 ? "\u200a»\u200a" : "・"}残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
+    if (playing) setText(title, `${score.turns} 周・残り衛星 ${satellitesLeft(game)}${rate > 1 ? "\u200a»\u200a" : "・"}残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
     setText(boostButton, `噴射（${shots}）`);
     // 引いている間は噴射できない（時間が止まっているのに燃料だけ減らないように）。
     boostButton.disabled = !playing || shots === 0 || activePointer !== null;
-    // 周回に乗せるまで（coaching）、噴射の時（boostCue）だけ、ボタンの地を黄色にする。
-    const cue = coaching(best, game) && boostCue(target, followEnd);
+    // 噴射の時（boostCue。離した後の道筋の終わり方といちばん低い所で決める）だけ、ボタンの地を黄色にする（記録や何機目かによらず毎回）。
+    const cue = boostCue(target, followEnd, followLow);
     // 合図の色は衛星によらず 1 色（衛星ごとに変えると「黄色が押す時」と覚えた人が 2 機目以降を見逃したため）。
     boostButton.classList.toggle("orbit-boost-now", cue);
     controls.hidden = !playing;
@@ -627,12 +641,15 @@ export function openOrbitGame(onClose, options = {}) {
     const alive = game.satellites.filter((satellite) => satellite.alive);
     const turnsBefore = turnsOf(game);
     // 速めても跡の線が角張らないよう、0.25 ゲーム秒以下に区切って進め、区切りごとに跡へ点を足す。
+    // 速さは区切りごとに max(選んだ速さ, autoSpeed) で見直す（衛星がいなくなった区切りから先は選んだ速さ。×1 なら爆発が等速で見える）。
     // いなくなった衛星の爆発の場所は、いなくなった区切りの時刻で決める（音と爆発はフレームの後でまとめて 1 回）。
-    const total = seconds * speed;
-    const parts = Math.max(1, Math.ceil(total / 0.25));
     const anchors = new Map();
-    for (let part = 0; part < parts; part += 1) {
-      step(game, total / parts);
+    let left = seconds;
+    while (left > 1e-9) {
+      const now = Math.max(speed, autoSpeed(game));
+      const part = Math.min(left * now, 0.25);
+      step(game, part);
+      left -= part / now;
       const over = isOver(game);
       for (const satellite of alive) {
         // 遠くへ飛んでいったものは爆発させない。
@@ -660,6 +677,8 @@ export function openOrbitGame(onClose, options = {}) {
       // 時間切れなら、残りの区切りで同じ位置の点を積まない。
       if (over) break;
     }
+    // 上の欄の「»」は、次に進める実際の速さで出す（選んだのが ×1 なら、衛星がいなくなったフレームで消える）。
+    rate = Math.max(speed, autoSpeed(game));
     // 最初の 1 周を回り切った衛星があれば 1 回だけ鳴らす。いなくなった衛星があれば、その理由で 1 回（衝突を優先）。
     if (firstTurns(turnsBefore, game)) audio.play("orbit");
     const gone = endSound(turnsBefore, game);
@@ -743,23 +762,7 @@ export function openOrbitGame(onClose, options = {}) {
     for (const explosion of explosions) drawExplosion(c, explosion, toScreen(anchorPosition(explosion.at, game.world, game.t, rotation)));
     if (dragPull) {
       const origin = dragOrigin();
-      if (style === "launch" && coaching(best, game)) {
-        // 周回に乗せるまで、指を動かす先の範囲（扇形）を次に出す衛星の色で塗る（引きの線の下）。指を置いた所から、指の動きの px
-        // （pullPx: 引き × PULL_PX）で描く。世界の縮尺で射場の上に描くと、スマホでは指の引きと合わないため。
-        c.fillStyle = COLORS[nextSlot(game) % COLORS.length];
-        c.globalAlpha = 0.45;
-        c.beginPath();
-        aimZone(launchSite(game, earthStart)).forEach((pull, pointIndex) => {
-          const at = pullPx(dragStart, pull);
-          if (pointIndex === 0) c.moveTo(at.x, at.y);
-          else c.lineTo(at.x, at.y);
-        });
-        c.closePath();
-        c.fill();
-        c.globalAlpha = 1;
-      }
-      // 引きの線は、指を置いた所から指先まで（指の縮尺。扇形と同じ所・同じ縮尺にして、線の先が扇形に入るのを見せる）。
-      // 射場（置く点）からは道筋だけを出す。
+      // 引きの線は、指を置いた所から指先まで（指の縮尺）。射場（置く点）からは道筋だけを出す。
       const tip = pullPx(dragStart, dragPull);
       c.strokeStyle = "rgba(255,255,255,0.6)";
       c.lineWidth = 1.5;
@@ -767,15 +770,22 @@ export function openOrbitGame(onClose, options = {}) {
       c.moveTo(dragStart.x, dragStart.y);
       c.lineTo(tip.x, tip.y);
       c.stroke();
-      const end = { x: origin.x + dragPull.x, y: origin.y + dragPull.y };
-      let velocity = launchVelocity(origin, end);
+      const color = COLORS[nextSlot(game) % COLORS.length];
       if (style === "launch") {
-        const { spin } = launchSite(game, earthStart);
-        velocity = { x: velocity.x + spin.x, y: velocity.y + spin.y };
+        // 打ち上げ: 射場からてっぺん（半径が最大の点）までを、次の衛星の色の実線で描く（落ちる所の赤い点・破線・カチッは出さない）。
+        const site = launchSite(game, earthStart);
+        const shot = launchShot(site, Math.hypot(dragPull.x, dragPull.y));
+        const line = predict(origin, { x: shot.x + site.spin.x, y: shot.y + site.spin.y });
+        drawApexLine(line.points, color);
+        aimEnd = line.end;
+        aimLow = line.low;
+      } else {
+        const end = { x: origin.x + dragPull.x, y: origin.y + dragPull.y };
+        const lineEnd = drawAimLine(origin, launchVelocity(origin, end), color);
+        clickOnTurn(aimEnd, lineEnd);
+        aimEnd = lineEnd;
+        aimLow = predicted.low;
       }
-      const lineEnd = drawAimLine(origin, velocity, COLORS[nextSlot(game) % COLORS.length]);
-      clickOnTurn(aimEnd, lineEnd);
-      aimEnd = lineEnd;
     } else if (playing) {
       // 離した後も、いちばん新しい衛星が 1 周回り切るまで、今の位置と速さからの道筋を出し続ける（噴射で線が変わるのが見えるように）。
       const target = boostTarget(game);
@@ -785,6 +795,7 @@ export function openOrbitGame(onClose, options = {}) {
         followPath = predicted.end === "away" ? null : predicted.points;
         clickOnTurn(followEnd, lineEnd);
         followEnd = lineEnd;
+        followLow = predicted.low;
       }
     }
   }
@@ -868,8 +879,7 @@ export function openOrbitGame(onClose, options = {}) {
   // 印に時刻を入れる（時計が進めば月も動くので計算し直す。引いている間は時計が止まっているので使い回せる）。
   function drawAimLine(origin, velocity, color) {
     const c = context;
-    const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
-    if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, { x: origin.x, y: origin.y }, velocity) };
+    predict(origin, velocity);
     // 線の見た目: 1 周回るなら衛星の色の実線、落ちる・ぶつかる・飛んでいくなら薄い白の破線、時間切れ（long）は白。
     const lineStyle = aimLineStyle(predicted.end, color);
     c.strokeStyle = lineStyle.color;
@@ -893,6 +903,33 @@ export function openOrbitGame(onClose, options = {}) {
       c.fill();
     }
     return predicted.end;
+  }
+
+  // origin から velocity で出した道筋（predictOrbit）。時刻・位置・速度が前と同じなら計算し直さない。
+  function predict(origin, velocity) {
+    const key = `${game.t},${origin.x},${origin.y},${velocity.x},${velocity.y}`;
+    if (!predicted || predicted.key !== key) predicted = { key, ...predictOrbit(game, { x: origin.x, y: origin.y }, velocity) };
+    return predicted;
+  }
+
+  // 打ち上げで引いている間の道筋: 初めの点からてっぺん（半径が最大の点）までを color の実線で描く。
+  function drawApexLine(points, color) {
+    const c = context;
+    let top = 0;
+    points.forEach((point, index) => {
+      if (Math.hypot(point.x, point.y) > Math.hypot(points[top].x, points[top].y)) top = index;
+    });
+    c.strokeStyle = color;
+    c.globalAlpha = 0.6;
+    c.lineWidth = 1.5;
+    c.beginPath();
+    points.slice(0, top + 1).forEach((point, index) => {
+      const at = toScreen(point);
+      if (index === 0) c.moveTo(at.x, at.y);
+      else c.lineTo(at.x, at.y);
+    });
+    c.stroke();
+    c.globalAlpha = 1;
   }
 
   // 線が 1 周回らない線から 1 周回る線に変わった時に小さく鳴らす（境目で鳴り続けないように 150 ms あける）。
