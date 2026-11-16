@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAD_DISTANCE, PULL_PX, easeView, followFrame, padPosition, pullDelta, pullPx, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
+import { PAD_DISTANCE, PULL_PX, easeView, followFrame, followsShot, padPosition, pullDelta, pullPx, screenPull, toScreen, toWorld, viewTurn } from "../src/game/view.js";
 import { dailyChallenge } from "../src/game/daily.js";
 import { DEFAULT_WORLD, MAX_FLIGHT, MAX_PULL, advance, launch, launchVelocity, longitudeAt, missKm } from "../src/game/physics.js";
 
@@ -193,4 +193,9 @@ test("easeView moves the center exponentially and the scale by ratio, with a 0.4
   const steps = Array.from({ length: 8 }).reduce((v) => easeView(v, goal, 0.05), view);
   assert.ok(Math.abs(steps.x - a.x) < 1e-12 && Math.abs(steps.scale - a.scale) < 1e-9);
   assert.deepEqual(easeView(view, goal, 0), view);
+});
+
+test("the camera follows a new satellite only in launch mode", () => {
+  assert.equal(followsShot("launch"), true);
+  assert.equal(followsShot("place"), false);
 });

@@ -77,6 +77,12 @@ export function pullPx(startPx, pull) {
   return { x: startPx.x + pull.x * PULL_PX, y: startPx.y - pull.y * PULL_PX };
 }
 
+// カメラが出したばかりの衛星を追うか。打ち上げだけ追う。置くモードは触った画面の点が置く場所なので、
+// 寄ると次に狙った点が地球の中に写ってずれるため、追わずに地球中心・利用者のズームのままにする（DESIGN.md）。
+export function followsShot(style) {
+  return style === "launch";
+}
+
 // 追いかけのカメラの目標: 地球（半径 1 の円）と points（衛星と道筋）が、画面の使える所（幅 width・高さ height から
 // 左右 side・上下 edge px を除いた所）に収まる中心（世界の位置）と縮尺（地球の半径の px）。縮尺は [min, max] で切る。
 export function followFrame(points, width, height, { side = 16, edge = 120, min = 0, max = Infinity } = {}) {
