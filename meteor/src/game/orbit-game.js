@@ -50,7 +50,7 @@ import { orbitMessage, xButton } from "./posts.js";
 import { openGame } from "./game.js";
 import { loadMuted } from "./sound.js";
 import { createAudio } from "./audio.js";
-import { easeView, followFrame, pullPx, screenPull } from "./view.js";
+import { easeView, followFrame, followsShot, pullPx, screenPull } from "./view.js";
 import { RECORD_EVERY } from "./orbit-record.js";
 import { makeOrbitGif } from "./orbit-gif.js";
 
@@ -157,7 +157,7 @@ export function openOrbitGame(onClose, options = {}) {
   const muted = loadMuted();
   const audio = createAudio({ isMuted: () => muted, isOpen: () => overlay.isConnected });
 
-  // カメラ（見ている世界の中心と、地球の半径の px）。出したばかりの衛星（boostTarget）を最初の 1 周まで追い、
+  // カメラ（見ている世界の中心と、地球の半径の px）。打ち上げでは出したばかりの衛星（boostTarget）を最初の 1 周まで追い、
   // 地球・衛星・道筋が 1 枚に収まるように寄せる（DESIGN.md）。追い終わると地球中心・利用者の zoom へ戻る。
   // followPath は追っている衛星の道筋（引いている間に predicted が次の狙いの線に変わるので別に残す）。
   // followOff は手でズームして追いかけをやめた衛星の id。
@@ -178,9 +178,9 @@ export function openOrbitGame(onClose, options = {}) {
     const cy = camera ? camera.y : 0;
     return { x: size.width / 2 + (point.x - cx) * scale(), y: size.height / 2 - (point.y - cy) * scale() };
   }
-  // 今追っている衛星（追っていなければ null）。動きを減らす設定では追わない。
+  // 今追っている衛星（追っていなければ null）。追うのは打ち上げだけ（followsShot）。動きを減らす設定では追わない。
   function followed() {
-    const target = playing && !reduceMotion ? boostTarget(game) : null;
+    const target = playing && !reduceMotion && followsShot(style) ? boostTarget(game) : null;
     return target && target.turns === 0 && target.id !== followOff ? target : null;
   }
   function stepCamera(seconds) {
