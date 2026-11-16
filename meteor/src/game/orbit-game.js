@@ -619,7 +619,7 @@ export function openOrbitGame(onClose, options = {}) {
       return;
     }
     const score = scoreOf(game);
-    const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game)));
+    const left = Math.max(0, Math.ceil(GAME_SECONDS - elapsed(game) - 1e-9)); // isOver と同じ誤差を許す（終わりに 0:01 が残らない）
     if (playing) setText(title, `${score.turns} 周・残り衛星 ${satellitesLeft(game)}${rate > 1 ? "\u200a»\u200a" : "・"}残り ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`);
     const target = boostTarget(game);
     const shots = target ? Math.floor((target.fuel + 1e-9) / BOOST) : 0;
@@ -773,12 +773,16 @@ export function openOrbitGame(onClose, options = {}) {
       const color = COLORS[nextSlot(game) % COLORS.length];
       if (style === "launch") {
         // 打ち上げ: 射場からてっぺん（半径が最大の点）までを、次の衛星の色の実線で描く（落ちる所の赤い点・破線・カチッは出さない）。
-        const site = launchSite(game, earthStart);
-        const shot = launchShot(site, Math.hypot(dragPull.x, dragPull.y));
-        const line = predict(origin, { x: shot.x + site.spin.x, y: shot.y + site.spin.y });
-        drawApexLine(line.points, color);
-        aimEnd = line.end;
-        aimLow = line.low;
+        // 離しても打たない短い引き（0.3 以下）では線も出さない。
+        const pull = Math.hypot(dragPull.x, dragPull.y);
+        if (pull > 0.3) {
+          const site = launchSite(game, earthStart);
+          const shot = launchShot(site, pull);
+          const line = predict(origin, { x: shot.x + site.spin.x, y: shot.y + site.spin.y });
+          drawApexLine(line.points, color);
+          aimEnd = line.end;
+          aimLow = line.low;
+        }
       } else {
         const end = { x: origin.x + dragPull.x, y: origin.y + dragPull.y };
         const lineEnd = drawAimLine(origin, launchVelocity(origin, end), color);
