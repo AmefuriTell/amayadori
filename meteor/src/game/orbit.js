@@ -1,14 +1,14 @@
 // 「軌道に乗せろ」の計算（docs/design/activity-map.md §4 の K）。画面に頼らない純粋な計算だけを置く（node --test で確かめる）。
 //
-// 宇宙の好きな場所に衛星を置いて打ち出し、地球を回らせ続ける。衛星は（1 回に 3 機まで）同時に動く。地球と月（physics.js の世界）が引き、
+// 宇宙の好きな場所に衛星を置いて打ち出し、地球を回らせ続ける。衛星は（同時に 3 機まで）同時に動く。地球と月（physics.js の世界）が引き、
 // 「引き合うモード」では衛星どうしも引き合う。地球に落ちる・月や衛星どうしでぶつかる・遠くへ出ると、その衛星はいなくなる。
 // 点は回り切った周の合計（画面に出る輪の数そのもの）。小さな輪ほど早く回れて周が増えるが、低すぎると地球に落ちやすく、
 // 同じ低い輪に何機も入れるとぶつかりやすいので、どこを回らせるかを考える遊びになる。
 import { DEFAULT_WORLD, STEP, angleOfLongitude, launchVelocity, moonPositions } from "./physics.js";
 
-// 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められる）。
+// 同時に回せる衛星の数（いなくなった分は出し直せる）と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められる）。
 export const SATELLITES = 3;
-// 衛星の色（何機目かで決まる）。投稿の GIF の記録は色の番号で衛星を分けるので（orbit-record.js）、色は衛星の数以上にする。
+// 衛星の色（枠の番号 slot で決まる）。枠は同時に回せる数だけあるので、色は衛星の数以上にする。
 export const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
 export const GAME_SECONDS = 600;
 // 衛星の大きさ（ぶつかりの判定。2 機の中心がこの 2 倍より近いとぶつかる）と、引き合うモードでの衛星の重さ（地球の 1/100）。
@@ -72,9 +72,17 @@ export function canLaunch(game, start = 0) {
   return satellitesLeft(game) > 0 && clearOfSatellites(game, launchSite(game, start).position);
 }
 
-// 置ける衛星が残っているか。
+// あと何機出せるか（同時に回せる数 − 今回っている数。落ちた・ぶつかった・飛んだ分は出し直せる）。
 export function satellitesLeft(game) {
-  return SATELLITES - game.satellites.length;
+  return SATELLITES - game.satellites.filter((satellite) => satellite.alive).length;
+}
+
+// 次に出す衛星の枠の番号（回っている衛星が使っていない最小の番号）。
+export function nextSlot(game) {
+  const used = new Set(game.satellites.filter((satellite) => satellite.alive).map((satellite) => satellite.slot));
+  let slot = 0;
+  while (used.has(slot)) slot += 1;
+  return slot;
 }
 
 // 射場の今の位置と、自転で動いている速さ（打ち上げの初めの速さに足す）。start は地球の回り始めの向き。
@@ -123,6 +131,8 @@ function createSatellite(game, position, velocity) {
   if (game.started === null) game.started = game.t;
   const satellite = {
     id: game.nextId++,
+    // 枠の番号（0〜SATELLITES−1。色は COLORS[slot]）。
+    slot: nextSlot(game),
     x: position.x,
     y: position.y,
     vx: velocity.x,
@@ -368,13 +378,12 @@ export function coaching(best, game) {
   return !(best.normal > 0 || best.mutual > 0) && !game.satellites.some((satellite) => satellite.turns >= 1);
 }
 
-// ゲームが終わったか: 時間切れか、全部置いて全部いなくなった。
+// ゲームが終わったか: 時間切れだけ（全部いなくなっても、出し直せるので続く）。
 export function isOver(game) {
-  if (game.started !== null && elapsed(game) >= GAME_SECONDS - 1e-9) return true;
-  return satellitesLeft(game) === 0 && game.satellites.every((satellite) => !satellite.alive);
+  return game.started !== null && elapsed(game) >= GAME_SECONDS - 1e-9;
 }
 
-// 結果（点）: 回り切った周の合計。
+// 結果（点）: 回り切った周の合計（いなくなった衛星の周も入れる）。
 export function scoreOf(game) {
   return { turns: game.satellites.reduce((sum, satellite) => sum + satellite.turns, 0) };
 }
@@ -407,9 +416,9 @@ export function clampZoom(zoom) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
 }
 
-// いちばん良かった結果（モードごと、回り切った周の合計）を端末に覚える。読めなければ無し。
-// 点の単位が変わったので、前のキー（weatherbot.orbitBest）は読まない（消しもしない）。
-const BEST_STORAGE = "weatherbot.orbitTurns";
+// いちばん良かった結果（打ち上げだけ。モードごと、回り切った周の合計）を端末に覚える。読めなければ無し。
+// 同時に 3 機まで出し直せる決まりに変えて点の重みが変わったので、前のキー（weatherbot.orbitTurns・weatherbot.orbitBest）は読まない（消しもしない）。
+const BEST_STORAGE = "weatherbot.orbitLaunch";
 export function loadBest(storage = globalThis.localStorage) {
   try {
     const saved = JSON.parse(storage.getItem(BEST_STORAGE) || "null");

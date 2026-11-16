@@ -36,6 +36,7 @@ import {
   launchFromSite,
   launchSite,
   loadBest,
+  nextSlot,
   predictOrbit,
   satellitesLeft,
   saveBest,
@@ -60,8 +61,6 @@ const TRAIL_POINTS = 500;
 
 // 時計の速さの段（下の欄のボタンで順に切り替える）。
 const SPEEDS = [1, 4, 16];
-// 結果の画面で、いなくなった衛星の周の数の後ろに付ける短い終わり方（回り続けたら何も付けない）。
-const END_SHORT = { earth: "落ちた", moon: "月", crash: "衝突", away: "飛んだ" };
 // 設定の欄の後ろの見本: くり返しの長さ（秒）・その間に進めるゲームの秒・置くの引きの線を出す割合・見本の不透明度・
 // 2 機目（緑）の回る半径と、くり返しの終わりに 1 機目より先にいる角度（引き合うの線が終わりに近くで見えるように）。
 const PREVIEW_LOOP = 4;
@@ -115,7 +114,7 @@ export function openOrbitGame(onClose, options = {}) {
   let playing = false;
   let trails = new Map();
   // 投稿の GIF のための跡の記録（trails は古い点を捨てるので別に持つ）。ゲームの時間で RECORD_EVERY ごとに、生きている衛星ごとの
-  // 位置と色の番号（{ t, x, y, c }）。出した時にもその衛星の位置を入れる（跡が射場・置いた所から始まるように）。
+  // 位置と衛星の id と色の番号（{ t, x, y, s, c }）。出した時にもその衛星の位置を入れる（跡が射場・置いた所から始まるように）。
   let gifRecord = [];
   let nextRecord = 0;
   // 結果の画面で裏で作る GIF（{ blob: できたら Blob, ready: Promise }）。作り直しを見分ける番号。
@@ -271,7 +270,8 @@ export function openOrbitGame(onClose, options = {}) {
     daily.addEventListener("click", () => switchTo(openGame));
     function refresh() {
       const bestText = best[mutual ? "mutual" : "normal"];
-      setText(detail, `衛星を${SATELLITES}機、地球の周りに回す${bestText === undefined ? "" : `（最高 ${bestText} 周）`}`);
+      // 最高は打ち上げを選んでいる時だけ（置くは記録にしない）。
+      setText(detail, `衛星を${SATELLITES}機、地球の周りに回す${style !== "launch" || bestText === undefined ? "" : `（最高 ${bestText} 周）`}`);
       styles.update();
       modes.update();
       preview = buildPreview();
@@ -352,8 +352,8 @@ export function openOrbitGame(onClose, options = {}) {
     cancelDrag();
     const score = scoreOf(game);
     const key = mutual ? "mutual" : "normal";
-    // 0 周（何も回らなかった）は記録にしない。
-    const record = score.turns > 0 && (best[key] === undefined || score.turns > best[key]);
+    // 0 周（何も回らなかった）と置くモードは記録にしない。
+    const record = style === "launch" && score.turns > 0 && (best[key] === undefined || score.turns > best[key]);
     if (record) {
       best = { ...best, [key]: score.turns };
       saveBest(best);
@@ -407,13 +407,15 @@ export function openOrbitGame(onClose, options = {}) {
     gif = made;
   }
 
-  // 結果の説明の 1 行: 衛星ごとの周の数（いなくなった衛星は短い終わり方も）を衛星の色で並べる。衛星が無ければ出さない。
+  // 結果の説明の 1 行: 枠（色）ごとの周の合計を、使った枠の色で並べる（3 つまで）。衛星が無ければ出さない。
   function satelliteLine() {
     if (!game.satellites.length) return undefined;
     const row = element("div", undefined, "game-detail orbit-result-line");
-    game.satellites.forEach((satellite, index) => {
-      const item = element("span", `${satellite.turns}周${satellite.end ? ` ${END_SHORT[satellite.end]}` : ""}`);
-      item.style.color = COLORS[index % COLORS.length];
+    const totals = new Map();
+    for (const satellite of game.satellites) totals.set(satellite.slot, (totals.get(satellite.slot) || 0) + satellite.turns);
+    [...totals.keys()].sort((a, b) => a - b).forEach((slot, index) => {
+      const item = element("span", `${totals.get(slot)}周`);
+      item.style.color = COLORS[slot % COLORS.length];
       row.append(...(index ? ["　"] : []), item);
     });
     return row;
@@ -535,6 +537,8 @@ export function openOrbitGame(onClose, options = {}) {
       const velocity = launchVelocity(from, { x: from.x + dragPull.x, y: from.y + dragPull.y });
       const satellite = style === "place" ? addSatellite(game, from, velocity) : launchFromSite(game, velocity, earthStart);
       if (satellite) {
+        // 枠を使い回す時は、その枠の前の衛星の跡を消す（画面の跡は枠の数まで）。
+        for (const other of game.satellites) if (other !== satellite && other.slot === satellite.slot) trails.delete(other.id);
         trails.set(satellite.id, []);
         recordSatellite(satellite);
         // 衛星を出した時だけ ×1 に戻す（×16 のまま打ち上げると、てっぺんの噴射が間に合わないため）。
@@ -653,7 +657,7 @@ export function openOrbitGame(onClose, options = {}) {
         for (const satellite of game.satellites) if (satellite.alive) recordSatellite(satellite);
         nextRecord += RECORD_EVERY;
       }
-      // 時間切れ（または全機いなくなった）なら、残りの区切りで同じ位置の点を積まない。
+      // 時間切れなら、残りの区切りで同じ位置の点を積まない。
       if (over) break;
     }
     // 最初の 1 周を回り切った衛星があれば 1 回だけ鳴らす。いなくなった衛星があれば、その理由で 1 回（衝突を優先）。
@@ -670,7 +674,7 @@ export function openOrbitGame(onClose, options = {}) {
   }
 
   function recordSatellite(satellite) {
-    gifRecord.push({ t: game.t, x: satellite.x, y: satellite.y, c: game.satellites.indexOf(satellite) % COLORS.length });
+    gifRecord.push({ t: game.t, x: satellite.x, y: satellite.y, s: satellite.id, c: satellite.slot });
   }
 
   function draw() {
@@ -714,8 +718,8 @@ export function openOrbitGame(onClose, options = {}) {
       c.arc(site.x, site.y, 4, 0, Math.PI * 2);
       c.fill();
     }
-    game.satellites.forEach((satellite, index) => {
-      const color = COLORS[index % COLORS.length];
+    game.satellites.forEach((satellite) => {
+      const color = COLORS[satellite.slot % COLORS.length];
       const trail = trails.get(satellite.id) || [];
       if (trail.length > 1) {
         c.strokeStyle = color;
@@ -742,7 +746,7 @@ export function openOrbitGame(onClose, options = {}) {
       if (style === "launch" && coaching(best, game)) {
         // 周回に乗せるまで、指を動かす先の範囲（扇形）を次に出す衛星の色で塗る（引きの線の下）。指を置いた所から、指の動きの px
         // （pullPx: 引き × PULL_PX）で描く。世界の縮尺で射場の上に描くと、スマホでは指の引きと合わないため。
-        c.fillStyle = COLORS[game.satellites.length % COLORS.length];
+        c.fillStyle = COLORS[nextSlot(game) % COLORS.length];
         c.globalAlpha = 0.45;
         c.beginPath();
         aimZone(launchSite(game, earthStart)).forEach((pull, pointIndex) => {
@@ -769,14 +773,14 @@ export function openOrbitGame(onClose, options = {}) {
         const { spin } = launchSite(game, earthStart);
         velocity = { x: velocity.x + spin.x, y: velocity.y + spin.y };
       }
-      const lineEnd = drawAimLine(origin, velocity, COLORS[game.satellites.length % COLORS.length]);
+      const lineEnd = drawAimLine(origin, velocity, COLORS[nextSlot(game) % COLORS.length]);
       clickOnTurn(aimEnd, lineEnd);
       aimEnd = lineEnd;
     } else if (playing) {
       // 離した後も、いちばん新しい衛星が 1 周回り切るまで、今の位置と速さからの道筋を出し続ける（噴射で線が変わるのが見えるように）。
       const target = boostTarget(game);
       if (target && target.turns === 0) {
-        const lineEnd = drawAimLine(target, { x: target.vx, y: target.vy }, COLORS[game.satellites.indexOf(target) % COLORS.length]);
+        const lineEnd = drawAimLine(target, { x: target.vx, y: target.vy }, COLORS[target.slot % COLORS.length]);
         // 飛んでいく線（遠くまで伸びる）の間は追わずに地球中心へ戻す（噴射しすぎた時に画面が大きく振れたり、衛星が端に張り付いたりしないように）。
         followPath = predicted.end === "away" ? null : predicted.points;
         clickOnTurn(followEnd, lineEnd);

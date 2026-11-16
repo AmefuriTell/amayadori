@@ -34,6 +34,7 @@ import {
   launchFromSite,
   launchSite,
   loadBest,
+  nextSlot,
   predictOrbit,
   saveBest,
   satellitesLeft,
@@ -143,11 +144,15 @@ test("placing: not too close to Earth or the Moon, not too far, at most SATELLIT
   assert.equal(addSatellite(game, { x: 0, y: 6 }, { x: 1, y: 0 }), null);
 });
 
-test("the game ends when time is up or every satellite is placed and gone", () => {
+test("the game ends only when time is up, not when every satellite is gone", () => {
   const game = createOrbitGame(NO_MOON);
   assert.ok(!isOver(game));
   for (let index = 0; index < SATELLITES; index += 1) addSatellite(game, { x: 0, y: 3 + index * 0.5 }, { x: 0, y: 0 });
   step(game, 30);
+  assert.ok(game.satellites.every((satellite) => !satellite.alive));
+  assert.ok(!isOver(game));
+  assert.equal(satellitesLeft(game), SATELLITES);
+  step(game, GAME_SECONDS);
   assert.ok(isOver(game));
   const long = createOrbitGame(NO_MOON);
   const { position, velocity } = circular(2);
@@ -175,7 +180,7 @@ test("zoom is clamped and best scores are kept per mode", () => {
   assert.deepEqual(loadBest(storage), {});
   saveBest({ normal: 42, mutual: 7 }, storage);
   assert.deepEqual(loadBest(storage), { normal: 42, mutual: 7 });
-  storage.setItem("weatherbot.orbitTurns", "{bad");
+  storage.setItem("weatherbot.orbitLaunch", "{bad");
   assert.deepEqual(loadBest(storage), {});
   assert.equal(ESCAPE_DISTANCE > MOON_DISTANCE * 2, true);
   assert.ok(SAT_RADIUS > 0);
@@ -297,17 +302,68 @@ test("before the first satellite, until one is placed", () => {
 });
 
 test("loadBest reads a record saved in the current shape", () => {
-  const storage = { getItem: (key) => (key === "weatherbot.orbitTurns" ? '{"normal":222,"mutual":50}' : null), setItem: () => {} };
+  const storage = { getItem: (key) => (key === "weatherbot.orbitLaunch" ? '{"normal":222,"mutual":50}' : null), setItem: () => {} };
   assert.deepEqual(loadBest(storage), { normal: 222, mutual: 50 });
 });
 
-test("loadBest does not read the old record (weatherbot.orbitBest, in the old points) and saveBest leaves it", () => {
-  const data = new Map([["weatherbot.orbitBest", '{"normal":853.6}']]);
+test("loadBest reads only the new key (not weatherbot.orbitTurns or weatherbot.orbitBest) and saveBest leaves the old ones", () => {
+  const data = new Map([["weatherbot.orbitBest", '{"normal":853.6}'], ["weatherbot.orbitTurns", '{"normal":91,"mutual":40}']]);
   const storage = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
   assert.deepEqual(loadBest(storage), {});
   saveBest({ normal: 3 }, storage);
-  assert.equal(data.get("weatherbot.orbitTurns"), '{"normal":3}');
+  assert.equal(data.get("weatherbot.orbitLaunch"), '{"normal":3}');
+  assert.deepEqual(loadBest(storage), { normal: 3 });
   assert.equal(data.get("weatherbot.orbitBest"), '{"normal":853.6}');
+  assert.equal(data.get("weatherbot.orbitTurns"), '{"normal":91,"mutual":40}');
+});
+
+test("satellitesLeft counts the flying satellites: one gone after three lets a fourth go out", () => {
+  const game = createOrbitGame(NO_MOON);
+  const [a, b, c] = [2, 3, 4].map((r, index) => {
+    const { position, velocity } = circular(r, index * 2);
+    return addSatellite(game, position, velocity);
+  });
+  assert.ok(a && b && c);
+  assert.equal(satellitesLeft(game), 0);
+  assert.equal(addSatellite(game, circular(5).position, circular(5).velocity), null);
+  assert.equal(launchFromSite(game, { x: 0, y: 2 }, 0), null);
+  // 1 機を地球へ落とす（いなくなる）。
+  b.vx = 0;
+  b.vy = 0;
+  b.x = 0;
+  b.y = 1.05;
+  step(game, 1);
+  assert.equal(b.alive, false);
+  assert.equal(satellitesLeft(game), 1);
+  const { position, velocity } = circular(5, 1);
+  assert.ok(addSatellite(game, position, velocity));
+  assert.equal(satellitesLeft(game), 0);
+  assert.equal(game.satellites.length, 4);
+});
+
+test("slot: 0, 1, 2 in order; the next one after slot 1 is gone takes slot 1; flying slots never overlap", () => {
+  const game = createOrbitGame(NO_MOON);
+  const made = [2, 3, 4].map((r, index) => {
+    const { position, velocity } = circular(r, index * 2);
+    return addSatellite(game, position, velocity);
+  });
+  assert.deepEqual(made.map((satellite) => satellite.slot), [0, 1, 2]);
+  assert.equal(nextSlot(game), 3);
+  made[1].x = 0;
+  made[1].y = 1.05;
+  made[1].vx = 0;
+  made[1].vy = 0;
+  step(game, 1);
+  assert.equal(nextSlot(game), 1);
+  const { position, velocity } = circular(5, 1);
+  const fourth = addSatellite(game, position, velocity);
+  assert.equal(fourth.slot, 1);
+  const slots = game.satellites.filter((satellite) => satellite.alive).map((satellite) => satellite.slot);
+  assert.equal(new Set(slots).size, slots.length);
+  assert.deepEqual([...slots].sort(), [0, 1, 2]);
+  // いなくなった衛星の周も点に入る。
+  made[1].turns = 4;
+  assert.equal(scoreOf(game).turns, game.satellites.reduce((sum, satellite) => sum + satellite.turns, 0));
 });
 
 test("predictOrbit: a circular orbit at r=3 without a moon comes back to where it started after one turn", () => {
