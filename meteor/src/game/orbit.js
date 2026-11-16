@@ -8,6 +8,8 @@ import { DEFAULT_WORLD, STEP, angleOfLongitude, launchVelocity, moonPositions } 
 
 // 1 回に置ける衛星の数と、1 回のゲームの長さ（ゲームの時計の秒。画面は下の欄のボタンで ×1・×4・×16 に速められる）。
 export const SATELLITES = 3;
+// 衛星の色（何機目かで決まる）。投稿の GIF の記録は色の番号で衛星を分けるので（orbit-record.js）、色は衛星の数以上にする。
+export const COLORS = ["#ffd166", "#06d6a0", "#ef476f"];
 export const GAME_SECONDS = 600;
 // 衛星の大きさ（ぶつかりの判定。2 機の中心がこの 2 倍より近いとぶつかる）と、引き合うモードでの衛星の重さ（地球の 1/100）。
 export const SAT_RADIUS = 0.06;
