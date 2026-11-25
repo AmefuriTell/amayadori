@@ -1,0 +1,73 @@
+{
+  "id": "q-4.1-0006",
+  "task": "4.1",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "AWS Lambda"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A team adds a CloudWatch Logs subscription filter that sends matching log events from a log group to an AWS Lambda function for real-time processing. Before the code is written, the team asks what the function will receive and what delivery guarantees it can rely on. Which statements are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The function receives the log data gzip-compressed and base64 encoded in the awslogs.data field."
+    },
+    {
+      "key": "B",
+      "text": "Events are delivered at least once, so the function should handle occasional duplicate events."
+    },
+    {
+      "key": "C",
+      "text": "Events are delivered exactly once, so the function does not need to handle duplicates."
+    },
+    {
+      "key": "D",
+      "text": "The function receives plain-text log events, because compression applies only to Kinesis destinations."
+    },
+    {
+      "key": "E",
+      "text": "The log group can have up to 10 subscription filters, so each team can add its own."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "サブスクリプションフィルターで送るログは gzip で圧縮され、Lambda は awslogs.data のフィールドに base64 で符号化されたデータを受け取る。配信は少なくとも 1 回で、まれに重複がある。ロググループに付けられるサブスクリプションフィルターは 5 つまで。",
+    "per_choice": {
+      "A": "正しい。gzip で圧縮され、base64 で awslogs.data に入る。",
+      "B": "正しい。少なくとも 1 回の配信で、重複があり得る。",
+      "C": "少なくとも 1 回で、重複は起こり得る。",
+      "D": "送り先が何でも gzip で圧縮される。",
+      "E": "ロググループごとに 5 つまで。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html",
+      "source_id": "S4",
+      "quote": "AWS Lambda receives the data base64 encoded in the awslogs.data field."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+      "source_id": "S3",
+      "quote": "Subscription filters ensure at least one time delivery of events, while duplicate events may occasionally occur."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+      "source_id": "S3",
+      "quote": "When log events are sent to the receiving service, they are compressed with the gzip format."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+      "source_id": "S3",
+      "quote": "Each log group can have up to five subscription filters associated with it."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

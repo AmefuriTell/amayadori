@@ -1,0 +1,68 @@
+{
+  "id": "q-4.1-0005",
+  "task": "4.1",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon Data Firehose",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A data team wants all CloudWatch metrics from the AWS/EC2 and AWS/RDS namespaces delivered continuously to an Amazon S3 data lake in Apache Parquet format. Metrics that are added to these namespaces later must be included automatically. The team does not want to write code that polls CloudWatch. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a metric stream with the Quick S3 setup and choose Parquet as the output format of the stream."
+    },
+    {
+      "key": "B",
+      "text": "Create a metric stream with an include filter for AWS/EC2 and an exclude filter for every namespace except AWS/RDS."
+    },
+    {
+      "key": "C",
+      "text": "Run an AWS Lambda function every minute that calls GetMetricData and writes Parquet files to Amazon S3."
+    },
+    {
+      "key": "D",
+      "text": "Create a metric stream with include filters for the two namespaces, sent to a Firehose delivery stream that converts the data to Parquet."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "メトリクスストリームは CloudWatch のメトリクスをほぼリアルタイムに送り続ける。Firehose を使う形では、JSON と OpenTelemetry の形式を直接扱い、Parquet などへは Firehose の変換で変える。名前空間で絞る filter は include か exclude のどちらかだけで、作った後に条件に合う新しいメトリクスも自動で入る。",
+    "per_choice": {
+      "A": "ストリームが直接選べる形式は JSON と OpenTelemetry だけ。",
+      "B": "1 つのストリームに include と exclude の両方の filter は置けない。",
+      "C": "自分で問い合わせるコードを持つことになり、要件に反する。",
+      "D": "正しい。2 つの名前空間を含めて送り、Firehose で Parquet に変える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+      "source_id": "S1",
+      "quote": "or you can configure transformations in your Firehose delivery stream to convert the data to a different format such as Parquet."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+      "source_id": "S1",
+      "quote": "A single metric stream can have only include or exclude filters, but not both."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+      "source_id": "S1",
+      "quote": "the new metrics are automatically included in the stream."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+      "source_id": "S1",
+      "quote": "Each stream can use either JSON format, OpenTelemetry 1.0.0, or OpenTelemetry 0.7.0 format."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

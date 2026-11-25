@@ -1,0 +1,81 @@
+{
+  "item": "C-0045",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "メトリクスストリームは CloudWatch のメトリクスをほぼリアルタイムに送り続ける。Firehose を使う形では、JSON と OpenTelemetry の形式を直接扱い、Parquet などへは Firehose の変換で変える。名前空間で絞る filter は include か exclude のどちらかだけで、作った後に条件に合う新しいメトリクスも自動で入る。",
+        "per_choice": {
+          "A": "正しい。2 つの名前空間を含めて送り、Firehose で Parquet に変える。",
+          "B": "ストリームが直接選べる形式は JSON と OpenTelemetry だけ。",
+          "C": "1 つのストリームに include と exclude の両方の filter は置けない。",
+          "D": "自分で問い合わせるコードを持つことになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "or you can configure transformations in your Firehose delivery stream to convert the data to a different format such as Parquet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "A single metric stream can have only include or exclude filters, but not both."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "the new metrics are automatically included in the stream."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "Each stream can use either JSON format, OpenTelemetry 1.0.0, or OpenTelemetry 0.7.0 format."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "サブスクリプションフィルターで送るログは gzip で圧縮され、Lambda は awslogs.data のフィールドに base64 で符号化されたデータを受け取る。配信は少なくとも 1 回で、まれに重複がある。ロググループに付けられるサブスクリプションフィルターは 5 つまで。",
+        "per_choice": {
+          "A": "正しい。gzip で圧縮され、base64 で awslogs.data に入る。",
+          "B": "正しい。少なくとも 1 回の配信で、重複があり得る。",
+          "C": "少なくとも 1 回で、重複は起こり得る。",
+          "D": "送り先が何でも gzip で圧縮される。",
+          "E": "ロググループごとに 5 つまで。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda receives the data base64 encoded in the awslogs.data field."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "Subscription filters ensure at least one time delivery of events, while duplicate events may occasionally occur."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "When log events are sent to the receiving service, they are compressed with the gzip format."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "Each log group can have up to five subscription filters associated with it."
+        }
+      ]
+    }
+  ]
+}
