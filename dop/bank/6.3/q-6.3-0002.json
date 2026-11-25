@@ -1,0 +1,62 @@
+{
+  "id": "q-6.3-0002",
+  "task": "6.3",
+  "services": [
+    "AWS CloudTrail",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An auditor requires the company to prove that AWS CloudTrail log files in Amazon S3 were not modified or deleted after delivery. The auditor also wants proof that no log files were delivered during a specific period when no activity occurred. The company wants to rely on a built-in CloudTrail capability instead of building its own process. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on CloudTrail log file integrity validation, and validate the log files with the hourly files that CloudTrail delivers."
+    },
+    {
+      "key": "B",
+      "text": "Turn on S3 Versioning for the log bucket so that every change to a log file keeps an earlier version."
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that stores a hash of each new log file in Amazon DynamoDB, and compare the hashes during audits."
+    },
+    {
+      "key": "D",
+      "text": "Send the trail to Amazon CloudWatch Logs as well, and compare the events in both places during audits."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けた全てのログファイルのハッシュを作り、1 時間ごとにその時間のログファイルとハッシュを並べたファイルも届ける。これで、届けた後の変更・削除・偽造を見つけられ、ある期間にログファイルが届けられなかったことも言える。",
+    "per_choice": {
+      "A": "正しい。CloudTrail の機能だけで、変更・削除の有無と、届けられなかった期間を示せる。",
+      "B": "変更の前の版は残るが、どれが CloudTrail の届けたままのファイルかや、ある期間に届けられた物が無いことは示せない。",
+      "C": "自分で仕組みを作ることになり、要件に反する。",
+      "D": "比べる手間がかかり、届けた後に変えられていないことの証明にはならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+      "source_id": "S3",
+      "quote": "When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+      "source_id": "S3",
+      "quote": "Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+      "source_id": "S3",
+      "quote": "assert positively that no log files were delivered to your account during a given period of time."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

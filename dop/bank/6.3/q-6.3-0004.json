@@ -1,0 +1,62 @@
+{
+  "id": "q-6.3-0004",
+  "task": "6.3",
+  "services": [
+    "AWS Config",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations with 40 accounts in four Regions, and AWS Config records resources in every account. The security team needs one view of configuration and compliance data for all accounts and Regions from its security account. The security account must not be able to change anything in the source accounts, and the team does not want to approve access in each account one by one. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an AWS Config aggregator in the security account that uses the organization as its source."
+    },
+    {
+      "key": "B",
+      "text": "Create an AWS Config aggregator in the security account that lists each account, and authorize it in every source account."
+    },
+    {
+      "key": "C",
+      "text": "Create an IAM role with AWS Config write permissions in every account, and switch to each role to review the data."
+    },
+    {
+      "key": "D",
+      "text": "Write an AWS Lambda function that copies configuration snapshots from every account to the security account each day."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "アグリゲーターは、許された元のアカウントとリージョンのデータを集約アカウントへ写し、読むだけの見え方を作る。元のアカウントやリージョンを変える権限は持たない。AWS Organizations の一部のアカウントを集める時は、承認が要らない。",
+    "per_choice": {
+      "A": "正しい。組織を元にすれば各アカウントでの承認が要らず、読むだけで変えられない。",
+      "B": "読むだけの見え方は作れるが、アカウントごとに承認する作業が要り、要件に反する。",
+      "C": "書き込みの権限を与えることになり、変えられない要件に反する。1 つの見え方にもならない。",
+      "D": "自分で仕組みを作ることになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+      "source_id": "S4",
+      "quote": "Aggregators provide a read-only view into the source accounts and Regions that the aggregator is authorized to view by replicating data from the source accounts into the aggregator account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+      "source_id": "S4",
+      "quote": "Aggregators do not provide mutating access into a source account or region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+      "source_id": "S4",
+      "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
