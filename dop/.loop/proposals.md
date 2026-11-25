@@ -108,3 +108,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>問題に stem_ja・choices[].text_ja を足す。英語は根拠と照らす元として残す。q validate が日本語の有無・条件の語・数字・英語の名前・正解の長さを見る。C3 は日本語版で答えを見ずに解き、reveal で英語と照らして kind: translation を書く。今の bank は訳の項目（T-、loop seed --translate、10 問ずつ）で日本語を足す（英語を変えさせない。答えの位置も変えない）。アプリは日本語を先に出し、英語に切り替えられるようにする（A-0008）。利用者が方向を選び、推奨の形で入れた</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-013" from="A-0012" status="adopted">
+  <issue>アプリに「分からない」（無回答の不正解）を足した。これを L1 の「誤りが疑わしい問題」（正答率 20% 未満）に数えると、知らないだけの問題が見直しに回る</issue>
+  <kind>tool + doc</kind>
+  <change>learn weak は「分からない」を苦手のタスクの判定には数え、誤りが疑わしい問題の判定には数えない。利用者の依頼（分からないボタン）に伴う細部として入れた（ループの実行中はツールだけ直し、pause してから L1 の文書を直した）</change>
+</proposal>
+```

@@ -24,7 +24,7 @@
 ```json
 {
   "weak_task":        { "rule": "タスク番号ごとの正答率（問題ごとの最新の答え）が 70% 未満、かつ解いた問題が 5 以上", "adds": "content 項目（count 5、priority 2、source learn）。同じタスクの learn の項目が残っていれば足さない" },
-  "suspect_question": { "rule": "その問題の正答率（全ての答え）が 20% 未満で 3 回以上解かれた、または「誤りを報告」（端末の記録か [DOP] の issue）がある", "adds": "recheck 項目（priority 1）。タスクごとにまとめ、理由と報告のコメントを note に書く。進めている recheck に入っている問題は足さない" },
+  "suspect_question": { "rule": "その問題の正答率（全ての答え。「分からない」は数えない）が 20% 未満で 3 回以上解かれた、または「誤りを報告」（端末の記録か [DOP] の issue）がある", "adds": "recheck 項目（priority 1）。タスクごとにまとめ、理由と報告のコメントを note に書く。進めている recheck に入っている問題は足さない" },
   "pass_signal":      { "rule": "直近 100 回の答えの正答率が 80% 以上", "adds": "なし。利用者に伝える（模試ができたら模試の結果に変える）" },
   "thin_task":        { "rule": "（使わない）", "adds": "試験ガイドの範囲は loop seed で足し済み" }
 }

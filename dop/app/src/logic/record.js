@@ -27,6 +27,11 @@ export function addAnswer(answers, entry) {
   return next.length > MAX_ANSWERS ? next.slice(next.length - MAX_ANSWERS) : next;
 }
 
+/** 「分からない」（A-0012）: 無回答の不正解 */
+export function skipEntry(q, at = Date.now()) {
+  return { id: q.id, task: q.task, domain: q.domain, selected: [], correct: false, skipped: true, at };
+}
+
 /** 問題ごとの最新の答え（id → 答え） */
 export function latestById(answers) {
   const map = new Map();

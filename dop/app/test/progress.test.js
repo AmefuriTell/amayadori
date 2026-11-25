@@ -9,10 +9,10 @@ test('A-0010 AC1 進み具合の読み込みと続きの場所', () => {
   assert.equal(parseProgress('{bad'), null);
   assert.equal(parseProgress('{"id":3,"selected":[]}'), null);
   const p = parseProgress('{"id":"b","selected":["B"],"answered":true,"correct":1}');
-  assert.deepEqual(resume(qs, p), { index: 1, selected: ['B'], answered: true, correct: 1 });
-  assert.deepEqual(resume(qs, parseProgress('{"id":"gone","selected":["A"]}')), { index: 0, selected: [], answered: false, correct: 0 });
-  assert.deepEqual(resume(qs, parseProgress('{"id":"a","selected":["Z"],"answered":true}')), { index: 0, selected: [], answered: false, correct: 0 });
-  assert.deepEqual(resume(qs, parseProgress('{"done":true,"correct":2}')), { index: 3, selected: [], answered: false, correct: 2 });
-  assert.deepEqual(snapshot({ questions: qs, index: 2, selected: ['A'], answered: false, correct: 1 }), { id: 'c', selected: ['A'], answered: false, correct: 1 });
+  assert.deepEqual(resume(qs, p), { index: 1, selected: ['B'], answered: true, skipped: false, correct: 1 });
+  assert.deepEqual(resume(qs, parseProgress('{"id":"gone","selected":["A"]}')), { index: 0, selected: [], answered: false, skipped: false, correct: 0 });
+  assert.deepEqual(resume(qs, parseProgress('{"id":"a","selected":["Z"],"answered":true}')), { index: 0, selected: [], answered: false, skipped: false, correct: 0 });
+  assert.deepEqual(resume(qs, parseProgress('{"done":true,"correct":2}')), { index: 3, selected: [], answered: false, skipped: false, correct: 2 });
+  assert.deepEqual(snapshot({ questions: qs, index: 2, selected: ['A'], answered: false, correct: 1 }), { id: 'c', selected: ['A'], answered: false, skipped: false, correct: 1 });
   assert.deepEqual(snapshot({ questions: qs, index: 3, selected: [], answered: false, correct: 3 }), { done: true, correct: 3 });
 });
