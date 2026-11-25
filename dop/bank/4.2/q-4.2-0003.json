@@ -1,0 +1,78 @@
+{
+  "id": "q-4.2-0003",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A DevOps engineer manages CloudWatch dashboards as code through the CloudWatch API. A new log widget must show the results of a CloudWatch Logs Insights query over two log groups, app-a and app-b, that are in a different AWS account. The engineer wants the dashboard definition to be the only change. Which configuration choices are correct for the widget? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the accountId property of the widget to the ID of the account that contains the log groups."
+    },
+    {
+      "key": "B",
+      "text": "Start the query string with SOURCE 'app-a' | SOURCE 'app-b' and then add a pipe character followed by the query syntax."
+    },
+    {
+      "key": "C",
+      "text": "List the log groups separated by commas at the start of the query string, and then add the query syntax."
+    },
+    {
+      "key": "D",
+      "text": "Create the widget in the console only, because cross-account dashboards cannot be created with the API."
+    },
+    {
+      "key": "E",
+      "text": "Omit the view property to show the results as a line chart, which is the default view for log widgets."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "log の種類のウィジェットは Logs Insights の問い合わせの結果を表す。別アカウントの問い合わせでは、ログを持つアカウントの ID を指定する。問い合わせの文字列は、各ロググループの名前の前に SOURCE を付けてパイプ（|）でつなぎ、さらにパイプを置いてから問い合わせの構文を書く。",
+    "per_choice": {
+      "A": "正しい。別アカウントの問い合わせでは、ログを持つアカウントの ID を指定する。",
+      "B": "正しい。各ロググループに SOURCE を付け、パイプで区切り、パイプの後に問い合わせを書く。",
+      "C": "ロググループはパイプで区切る。",
+      "D": "API と SDK でもダッシュボードを作れ、cross-account cross-Region のための項目もある。",
+      "E": "view を省くと表で表示される。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+      "source_id": "S3",
+      "quote": "The account ID of the AWS account containing the logs, if this is a cross-account query."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+      "source_id": "S3",
+      "quote": "You must pre-pend each log group name with SOURCE."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+      "source_id": "S3",
+      "quote": "Separate multiple log groups with a pipe character (|)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+      "source_id": "S3",
+      "quote": "If you omit this parameter, the results are displayed as a table."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+      "source_id": "S2",
+      "quote": "To enable cross-account cross-Region dashboards, we have added new parameters to the dashboard body structure"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
