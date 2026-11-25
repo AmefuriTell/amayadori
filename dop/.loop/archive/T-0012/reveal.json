@@ -1,0 +1,328 @@
+{
+  "item": "T-0012",
+  "questions": [
+    {
+      "id": "q-4.2-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company has 30 AWS accounts in us-east-1. The central operations team works only in a monitoring account. The team must create alarms in that account on metrics from the other accounts, and must run one CloudWatch Logs Insights query across log groups in many accounts at once. Only selected namespaces and log groups may be shared. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a dashboard in each account, and have the operations team switch roles into each account to create alarms and run queries."
+        },
+        {
+          "key": "B",
+          "text": "Set up CloudWatch cross-account observability with the central account as the monitoring account, and share filtered namespaces and log groups from each source account."
+        },
+        {
+          "key": "C",
+          "text": "Run an AWS Lambda function in each account that copies metrics into the central account with PutMetricData, and copy the logs to a central log group."
+        },
+        {
+          "key": "D",
+          "text": "Create a cross-account dashboard in the central account, and create the alarms in each source account."
+        }
+      ],
+      "explanation": {
+        "summary": "cross-account observability では、監視アカウントで、元のアカウントのメトリクスのグラフを作り、元のアカウントのメトリクスを見るアラームを作り、1 つの Logs Insights の問い合わせで複数のアカウントの複数のロググループを調べられる。元のアカウントは、共有するメトリクスの名前空間やロググループを絞れる。",
+        "per_choice": {
+          "A": "アカウントごとの作業になり、1 つの問い合わせで複数のアカウントを調べる要件にも合わない。",
+          "B": "正しい。監視アカウントでアラームも問い合わせもでき、共有する物を絞れる。",
+          "C": "自分で写す仕組みを作ることになり、手間が大きい。",
+          "D": "アラームを中央のアカウントで作る要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+          "source_id": "S1",
+          "quote": "Create alarms in the monitoring account that watch metrics in source accounts."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+          "source_id": "S1",
+          "quote": "A single CloudWatch Logs Insights query in a monitoring account can query multiple log groups in multiple source accounts at once."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Unified-Cross-Account.html",
+          "source_id": "S4",
+          "quote": "You can choose to share the metrics from all namespaces with the monitoring account, or filter to a subset of namespaces."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0002",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company runs workloads in four AWS accounts and in two Regions, us-east-1 and ap-northeast-1. Managers want one CloudWatch dashboard that shows graphs, alarms, and CloudWatch Logs Insights results from all accounts and both Regions together. The company wants to use built-in CloudWatch features and avoid copying data. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set up CloudWatch cross-account observability in us-east-1 only, and build the dashboard in the monitoring account."
+        },
+        {
+          "key": "B",
+          "text": "Build one dashboard in each Region of each account, and give managers links to all eight dashboards."
+        },
+        {
+          "key": "C",
+          "text": "Enable the accounts as sharing accounts and the managers' account as a monitoring account, and build a cross-account cross-Region dashboard."
+        },
+        {
+          "key": "D",
+          "text": "Export the metrics and logs from every account and Region to Amazon S3 each hour, and visualize them in a separate tool."
+        }
+      ],
+      "explanation": {
+        "summary": "cross-account cross-Region のダッシュボードは、複数のアカウントと複数のリージョンの CloudWatch のデータを 1 つのダッシュボードにまとめ、グラフ・アラーム・Logs Insights のウィジェットを置ける。作る前に、共有するアカウントと監視するアカウントを少なくとも 1 つずつ有効にする。cross-account observability は 1 つのリージョンの中のアカウントをまたぐ物。",
+        "per_choice": {
+          "A": "cross-account observability は 1 つのリージョンの中でアカウントをまたぐ物で、us-east-1 だけでは ap-northeast-1 のデータが入らない。",
+          "B": "1 つのダッシュボードにする要件に合わない。",
+          "C": "正しい。複数のアカウントとリージョンを 1 つのダッシュボードにまとめられる。",
+          "D": "データを写すことになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create_xaxr_dashboard.html",
+          "source_id": "S5",
+          "quote": "You can create cross-account cross-Region dashboards, which summarize your CloudWatch data from multiple AWS accounts and multiple Regions into one dashboard."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create_xaxr_dashboard.html",
+          "source_id": "S5",
+          "quote": "Before you can create a cross-account cross-Region dashboard, you must enable at least one sharing account and at least one monitoring account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Unified-Cross-Account.html",
+          "source_id": "S4",
+          "quote": "With Amazon CloudWatch cross-account observability, you can monitor and troubleshoot applications that span multiple accounts within a Region."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A DevOps engineer manages CloudWatch dashboards as code through the CloudWatch API. A new log widget must show the results of a CloudWatch Logs Insights query over two log groups, app-a and app-b, that are in a different AWS account. The engineer wants the dashboard definition to be the only change. Which configuration choices are correct for the widget? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the accountId property of the widget to the ID of the account that contains the log groups."
+        },
+        {
+          "key": "B",
+          "text": "Start the query string with SOURCE 'app-a' | SOURCE 'app-b' and then add a pipe character followed by the query syntax."
+        },
+        {
+          "key": "C",
+          "text": "List the log groups separated by commas at the start of the query string, and then add the query syntax."
+        },
+        {
+          "key": "D",
+          "text": "Create the widget in the console only, because cross-account dashboards cannot be created with the API."
+        },
+        {
+          "key": "E",
+          "text": "Omit the view property to show the results as a line chart, which is the default view for log widgets."
+        }
+      ],
+      "explanation": {
+        "summary": "log の種類のウィジェットは Logs Insights の問い合わせの結果を表す。別アカウントの問い合わせでは、ログを持つアカウントの ID を指定する。問い合わせの文字列は、各ロググループの名前の前に SOURCE を付けてパイプ（|）でつなぎ、さらにパイプを置いてから問い合わせの構文を書く。",
+        "per_choice": {
+          "A": "正しい。別アカウントの問い合わせでは、ログを持つアカウントの ID を指定する。",
+          "B": "正しい。各ロググループに SOURCE を付け、パイプで区切り、パイプの後に問い合わせを書く。",
+          "C": "ロググループはパイプで区切る。",
+          "D": "API と SDK でもダッシュボードを作れ、cross-account cross-Region のための項目もある。",
+          "E": "view を省くと表で表示される。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+          "source_id": "S3",
+          "quote": "The account ID of the AWS account containing the logs, if this is a cross-account query."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+          "source_id": "S3",
+          "quote": "You must pre-pend each log group name with SOURCE."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+          "source_id": "S3",
+          "quote": "Separate multiple log groups with a pipe character (|)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Dashboard-Body-Structure.html",
+          "source_id": "S3",
+          "quote": "If you omit this parameter, the results are displayed as a table."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+          "source_id": "S2",
+          "quote": "To enable cross-account cross-Region dashboards, we have added new parameters to the dashboard body structure"
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An application publishes a custom metric named Latency in the namespace MyApp with two dimensions, Service and InstanceId. A DevOps engineer creates an alarm on Latency in MyApp with only the dimension Service=checkout, but the alarm shows no data. The team wants one alarm per service with the LEAST operational effort. What should the engineer do?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Wait, because CloudWatch automatically combines the InstanceId values into the Service-only metric after a few hours."
+        },
+        {
+          "key": "B",
+          "text": "Also publish Latency with only the Service dimension, and keep the alarm on that dimension combination."
+        },
+        {
+          "key": "C",
+          "text": "Change the alarm to use a different namespace so that CloudWatch searches all dimension combinations."
+        },
+        {
+          "key": "D",
+          "text": "Create the alarm on a SEARCH expression that finds all InstanceId values for the service."
+        }
+      ],
+      "explanation": {
+        "summary": "CloudWatch は、同じ名前のメトリクスでも、ディメンションの組ごとに別のメトリクスとして扱う。取り出せるのは、実際に発行したディメンションの組だけで、名前空間・名前・ディメンションは作った時と同じ値を指定する。Service だけの組で見たいなら、その組でも発行する。SEARCH の式にはアラームを作れない。",
+        "per_choice": {
+          "A": "組ごとに別のメトリクスで、自動ではまとめられない。",
+          "B": "正しい。Service だけの組でも発行すれば、その組にアラームを付けられる。",
+          "C": "名前空間は作った時と同じ値を指定する必要がある。",
+          "D": "SEARCH の式にはアラームを作れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S2",
+          "quote": "CloudWatch treats each unique combination of dimensions as a separate metric, even if the metrics have the same metric name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S2",
+          "quote": "You can only retrieve statistics using combinations of dimensions that you specifically published."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+          "source_id": "S4",
+          "quote": "You can't create an alarm based on the SEARCH expression."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0005",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A payment API publishes custom metrics for latency, request count, and error count. The SRE team needs an alarm within 30 seconds when p99 latency is too high, and a separate alarm when the error rate (errors divided by requests) exceeds 2%. The team does not want to run code that computes these values. Which actions should the team take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Publish raw high-resolution latency data, and alarm on p99 with a 10-second period."
+        },
+        {
+          "key": "B",
+          "text": "Alarm on a metric math expression that divides errors by requests into one time series."
+        },
+        {
+          "key": "C",
+          "text": "Publish only pre-summarized statistic sets for latency, and create the p99 alarm on those sets."
+        },
+        {
+          "key": "D",
+          "text": "Create a regular alarm with a 10-second period on the standard-resolution latency metric instead."
+        },
+        {
+          "key": "E",
+          "text": "Create an alarm on a SEARCH expression that returns both the error metric and the request metric."
+        }
+      ],
+      "explanation": {
+        "summary": "高い解像度のメトリクスには、10 秒か 30 秒の期間の高い解像度のアラームを付けられる（60 秒の倍数のふつうのアラームも可）。パーセンタイルの統計は、カスタムメトリクスなら要約していない生のデータ点を発行した時に使える。アラームは 1 つのメトリクスか、1 本の時系列を作るメトリクスの数式に付けられ、SEARCH の式には付けられない。",
+        "per_choice": {
+          "A": "正しい。生のデータ点で p99 が使え、10 秒の期間で 30 秒以内に気づける。",
+          "B": "正しい。数式で率を作り、1 本の時系列にアラームを付ける。",
+          "C": "パーセンタイルは要約していない生のデータ点が要る。",
+          "D": "10 秒や 30 秒の期間は高い解像度のアラームのもので、ふつうのアラームは 60 秒の倍数。",
+          "E": "SEARCH の式にはアラームを作れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S1",
+          "quote": "you can specify a high-resolution alarm with a period of 10 seconds or 30 seconds, or you can set a regular alarm with a period of any multiple of 60 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S3",
+          "quote": "Percentile statistics are available for custom metrics as long as you publish the raw, unsummarized data points for your custom metric."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+          "source_id": "S4",
+          "quote": "The expression that you choose for the alarm must produce a single time series and show only one line on the graph."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0006",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A single Amazon EC2 instance runs a legacy license server that cannot be placed in an Auto Scaling group. When the underlying AWS hardware has a problem, the instance must be recovered automatically and keep running as the same instance. The instance type supports recovery. Which configuration BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "A CloudWatch alarm on StatusCheckFailed_System with the recover action."
+        },
+        {
+          "key": "B",
+          "text": "A CloudWatch alarm on StatusCheckFailed_Instance with the recover action."
+        },
+        {
+          "key": "C",
+          "text": "A CloudWatch alarm on StatusCheckFailed_System with the terminate action."
+        },
+        {
+          "key": "D",
+          "text": "A CloudWatch alarm on StatusCheckFailed_System with the stop action, and a person who starts the instance again."
+        }
+      ],
+      "explanation": {
+        "summary": "EC2 のインスタンスごとのメトリクスのアラームには、停止・終了・再起動・復旧のアクションを付けられる。復旧（recover）のアクションは StatusCheckFailed_System でだけ使え、StatusCheckFailed_Instance では使えない。対応するのは一部のインスタンスの種類だけ。",
+        "per_choice": {
+          "A": "正しい。システムの状態の確認の失敗で、自動で復旧する。",
+          "B": "復旧のアクションは StatusCheckFailed_Instance では使えない。",
+          "C": "インスタンスが終了してしまい、同じインスタンスとして動き続ける要件に反する。",
+          "D": "人が起こし直すことになり、自動で戻す要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+          "source_id": "S6",
+          "quote": "The recover action can be used only with StatusCheckFailed_System, not with StatusCheckFailed_Instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+          "source_id": "S5",
+          "quote": "The main difference between using the stop and the terminate alarm actions is that you can easily restart a stopped instance if you need to run it again later."
+        }
+      ]
+    }
+  ]
+}
