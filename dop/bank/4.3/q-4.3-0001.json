@@ -1,0 +1,67 @@
+{
+  "id": "q-4.3-0001",
+  "task": "4.3",
+  "services": [
+    "Amazon RDS",
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon RDS DB instance has storage autoscaling enabled. The allocated storage is 950 GiB, and the maximum storage threshold is 1,000 GiB. Free storage space has been at 4% of the allocated storage for the last hour, no storage modifications have occurred in the last 24 hours, and the storage has not grown. The company wants storage to keep growing automatically as data increases. What should the DevOps engineer do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Raise the maximum storage threshold well above the current allocated storage so that the next increment fits."
+    },
+    {
+      "key": "B",
+      "text": "Wait at least another hour, because autoscaling starts only after the low-storage condition lasts several hours."
+    },
+    {
+      "key": "C",
+      "text": "Create a CloudWatch alarm on FreeStorageSpace that invokes an AWS Lambda function to modify the allocated storage."
+    },
+    {
+      "key": "D",
+      "text": "Lower the maximum storage threshold to 950 GiB so that autoscaling treats the instance as full and scales immediately."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "空きが割り当ての 10% 以下の状態が 5 分以上続くと自動拡張が始まり、増える量は 10 GiB・割り当ての 10%・予測の増加のうち大きい方。950 GiB の 10% は 95 GiB なので、増やすと最大のしきい値 1,000 GiB を超え、超える時は自動拡張は起きない。しきい値は今の割り当てより少なくとも 10% 多くし、26% 以上多くするのが勧められている。",
+    "per_choice": {
+      "A": "正しい。次の増加分が収まるように、最大のしきい値を上げる。",
+      "B": "低い空きが 5 分続けば始まる条件はもう満たしている。止まっている原因は最大のしきい値。",
+      "C": "自分で仕組みを作ることになり、手間が大きい。最大のしきい値を上げれば足りる。",
+      "D": "最大のしきい値は今の割り当てより少なくとも 10% 多くする必要があり、下げても拡張は起きない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+      "source_id": "S1",
+      "quote": "- Free available space is less than or equal to 10 percent of the allocated storage."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+      "source_id": "S1",
+      "quote": "- 10 percent of currently allocated storage"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+      "source_id": "S2",
+      "quote": "Autoscaling doesn't occur if the maximum storage threshold would be exceeded by the storage increment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+      "source_id": "S2",
+      "quote": "You must set the maximum storage threshold to at least 10% more than the current allocated storage."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
