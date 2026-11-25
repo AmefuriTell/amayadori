@@ -1,0 +1,62 @@
+{
+  "id": "q-2.1-0002",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A network team's AWS CloudFormation stack exports a subnet ID, and three application stacks in the same account and Region import it with Fn::ImportValue. The network team must change the exported value. A new application stack in a different AWS account must also read this stack's outputs. Values must not be copied by hand. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Update the three application stacks to stop importing the value, and then change the exported value."
+    },
+    {
+      "key": "B",
+      "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account."
+    },
+    {
+      "key": "C",
+      "text": "Use Fn::ImportValue in the new stack in the other account with the same export name."
+    },
+    {
+      "key": "D",
+      "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically."
+    },
+    {
+      "key": "E",
+      "text": "Delete the network stack and create it again with the new value, and then update the importing stacks."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "別のスタックが出力を import している間は、export しているスタックを消すことも、出力の値を変えることもできない。先に import を外す。Export と Fn::ImportValue は同じアカウントとリージョンの中だけで、別のアカウントやリージョンの出力は Fn::GetStackOutput で読む。",
+    "per_choice": {
+      "A": "正しい。import を全部外してから値を変える。",
+      "B": "正しい。アカウントやリージョンをまたぐ参照には Fn::GetStackOutput を使う。",
+      "C": "Export と Fn::ImportValue による参照は同じアカウントとリージョンの中だけ。",
+      "D": "import されている間は、出力の値を変えられない。",
+      "E": "import されている間は、export しているスタックを消せない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+      "source_id": "S3",
+      "quote": "After another stack imports an output value, you can't delete the stack that is exporting the output value or modify the exported output value."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+      "source_id": "S3",
+      "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

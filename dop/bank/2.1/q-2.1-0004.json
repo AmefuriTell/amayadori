@@ -1,0 +1,64 @@
+{
+  "id": "q-2.1-0004",
+  "task": "2.1",
+  "services": [
+    "AWS CDK",
+    "AWS CloudFormation",
+    "Amazon S3",
+    "Amazon ECR"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company has an AWS CDK app with Lambda function code and a container image as assets. The company will deploy the app for the first time to two new environments: an account in us-east-1 and an account in eu-west-1. The company wants the CDK CLI to handle asset storage, and wants to prepare both environments with as few manual steps as possible. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app."
+    },
+    {
+      "key": "B",
+      "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation."
+    },
+    {
+      "key": "C",
+      "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy."
+    },
+    {
+      "key": "D",
+      "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "cdk bootstrap は、環境に CDKToolkit という CloudFormation スタックを置き、S3 バケットと ECR リポジトリを作る。CDK CLI はデプロイの時にこれらへテンプレートとアセットを置く。環境の引数は 1 回のコマンドに何度でも書けるので、2 つの環境を一度に準備できる。",
+    "per_choice": {
+      "A": "正しい。1 回の bootstrap で両方の環境を準備できる。",
+      "B": "準備（bootstrap）していない環境では、アセットが無く、テンプレートが 51,200 バイト未満のスタックしかデプロイできない。",
+      "C": "CDK CLI に置き場所を任せる要件に反し、手の作業も増える。bootstrap がこれらを作る。",
+      "D": "bootstrap は環境ごとに要る。eu-west-1 の環境が準備されない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+      "source_id": "S5",
+      "quote": "The bootstrap stack is a CloudFormation stack that provisions an Amazon S3 bucket and Amazon ECR repository in the AWS environment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+      "source_id": "S5",
+      "quote": "This argument can be provided multiple times in a single command to deploy the bootstrap stack to multiple environments."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html",
+      "source_id": "S6",
+      "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
