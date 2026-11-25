@@ -1,0 +1,66 @@
+{
+  "id": "q-2.3-0005",
+  "task": "2.3",
+  "services": [
+    "AWS Step Functions"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company automates account offboarding with AWS Step Functions. One step sends a request to an external approval system, and the workflow must pause until a manager responds, which can take up to three days. Each step must run exactly once, and the team wants to avoid polling code. Which design meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "An Express workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+    },
+    {
+      "key": "B",
+      "text": "A Standard workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+    },
+    {
+      "key": "C",
+      "text": "A Standard workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+    },
+    {
+      "key": "D",
+      "text": "An Express workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Standard のワークフローは実行が正確に 1 回で、最長 1 年動ける。コールバックのタスク（task token）は、SendTaskSuccess か SendTaskFailure でトークンが返るまでワークフローを止める。Express は最長 5 分で、少なくとも 1 回の実行、使える統合のパターンは Request Response だけ。",
+    "per_choice": {
+      "A": "Express は Request Response の統合だけで、最長 5 分なので 3 日待てない。",
+      "B": "動くが、待つ間ずっと問い合わせる仕組みを持つことになり、要件に反する。",
+      "C": "正しい。正確に 1 回の実行で、トークンが返るまで止まる。",
+      "D": "Express は最長 5 分で、少なくとも 1 回の実行なので、要件に合わない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S1",
+      "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S1",
+      "quote": "Express workflows have at-least-once workflow execution and can run for up to five minutes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S2",
+      "quote": "Express Workflows only support Request Response integrations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html",
+      "source_id": "S3",
+      "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

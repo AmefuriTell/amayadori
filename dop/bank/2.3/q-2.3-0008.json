@@ -1,0 +1,62 @@
+{
+  "id": "q-2.3-0008",
+  "task": "2.3",
+  "services": [
+    "AWS Step Functions",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A high-volume IoT ingestion workflow in AWS Step Functions finishes each execution in a few seconds. Each step only needs an HTTP response from the called service before continuing. The team accepts that a step might run more than once and has made the steps idempotent. The team wants the workflow type designed for high event rates. Which choice BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A Standard workflow, because it supports every integration pattern and runs each step exactly once."
+    },
+    {
+      "key": "B",
+      "text": "An Express workflow that uses .waitForTaskToken integrations so that each step waits for a callback."
+    },
+    {
+      "key": "C",
+      "text": "A Standard workflow that uses .waitForTaskToken integrations to limit duplicate executions."
+    },
+    {
+      "key": "D",
+      "text": "An Express workflow that uses Request Response service integrations."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Express のワークフローは、ストリームの処理や IoT のデータの取り込みのような、イベントの多い処理に向く。実行は少なくとも 1 回で、手順が 2 回以上動くことがある。最長 5 分で、使える統合のパターンは Request Response だけ。",
+    "per_choice": {
+      "A": "Standard は長く動く、監査の要る処理に向く。今回の要件は高い頻度の処理。",
+      "B": "Express は Request Response の統合しか使えない。",
+      "C": "コールバックを待つ必要は無く、高い頻度の処理に向く型でもない。",
+      "D": "正しい。高い頻度に向き、HTTP の応答を受けて次へ進む統合で足りる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S1",
+      "quote": "Express workflows are ideal for high-event-rate workloads, such as streaming data processing and IoT data ingestion."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S1",
+      "quote": "Standard workflows are ideal for long-running, auditable workflows, as they show execution history and visual debugging."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+      "source_id": "S2",
+      "quote": "Express Workflows only support Request Response integrations."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
