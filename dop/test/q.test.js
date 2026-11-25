@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { sandbox, toAuthor, question, verify, toVerify, toGate } from './helpers.js';
+import { sandbox, toAuthor, question, verify, toVerify, toGate, SOURCES } from './helpers.js';
 import { placeAnswer } from '../tools/q.mjs';
 
 function authored(sb, qs) {
@@ -183,4 +183,20 @@ test('verdict: 外れても検証役が根拠で確かめて ok なら通し、�
   // 外れて検証役も fix にした時は今までどおり fix
   verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['C'], confidence: 'mid' }, issues: [], verdict: 'fix' }]);
   assert.equal(sb.run('q', 'verdict', id).result, 'fix');
+});
+
+test('見直し（recheck）で捨てた問題は bank で retired になる', () => {
+  const sb = sandbox();
+  sb.write('bank/1.1/q-1.1-0001.json', question({ status: 'verified' }));
+  sb.run('loop', 'add', '--json', '{"kind":"recheck","task":"1.1","question_ids":["q-1.1-0001"],"priority":1}');
+  sb.run('loop', 'start');
+  const id = sb.run('loop', 'next').item.id;
+  sb.write(`work/${id}/sources.md`, SOURCES);
+  sb.write(`work/${id}/raw/page.md`, SOURCES);
+  sb.run('docs', 'check', id);
+  sb.run('loop', 'advance', '--result', 'ok');
+  toVerify(sb, id);
+  verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['A'], confidence: 'high' }, issues: [{ kind: 'fact', detail: 'x' }], verdict: 'drop' }]);
+  assert.equal(sb.run('q', 'verdict', id).result, 'drop');
+  assert.equal(sb.read('bank/1.1/q-1.1-0001.json').status, 'retired');
 });

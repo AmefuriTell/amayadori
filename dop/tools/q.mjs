@@ -280,6 +280,14 @@ const commands = {
       if (verdict === 'ok' && hardButSound) q.low_confidence = true;
     }
     const kept = batch.questions.filter((q) => results[q.id] !== 'drop');
+    // 見直し（recheck）で捨てた問題は、bank の物を retired にする（アプリに出さない）
+    if (batch.recheck) {
+      for (const q of dropped) {
+        const file = paths.bank(q.task, `${q.id}.json`);
+        const cur = readJSON(file, null);
+        if (cur) writeJSON(file, { ...cur, status: 'retired', last_checked: today(), note: [cur.note, '見直しで捨てた（誤りが直せなかった）'].filter(Boolean).join(' / ') });
+      }
+    }
     if (dropped.length) {
       const prev = readJSON(paths.work(id, 'dropped.json'), []);
       writeJSON(paths.work(id, 'dropped.json'), [...prev, ...dropped.map((q) => ({ question: q, why: feedback[q.id] ?? v.questions.find((x) => x.qid === q.id) }))]);
