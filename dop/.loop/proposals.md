@@ -72,7 +72,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ## C-0074（2026-11-25）から
 
 ```xml
-<proposal id="P-009" from="C-0074" status="open">
+<proposal id="P-009" from="C-0074" status="adopted">
   <issue>公式ドキュメントが試験より新しくなっている所がある（Security Hub CSPM の central configuration がレガシーになり、declarative policies に置き換わった）。試験（DOP-C02）が古い形のまま出題する可能性がある</issue>
   <kind>doc + app</kind>
   <change>こうした問題には note に「試験とずれるかもしれない」を書き（q-6.2-0002 で実施）、アプリで印を出す。新旧で答えが変わる問題は作らない（C-0074 ではそうした）。決まりとして C2 に足すかは人が決める</change>
@@ -96,3 +96,5 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>外れても、検証役が ok にし重い指摘が無ければ ok にして「AI の確信が低い」の印を付ける。利用者の不在中に、任された判断として入れた（ループを pause してから文書を変えた）</change>
 </proposal>
 ```
+
+- P-009 を利用者が採った（2026-11-26）。C2 の書き方に足し、アプリで note の印を出す項目（A-0007）を足した。

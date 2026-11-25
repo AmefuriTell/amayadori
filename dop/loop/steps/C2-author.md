@@ -42,6 +42,7 @@
     <r>正解の理由になる事実は、必ず sources.md の S 番号で示す（references に url と 200 字までの原文）。</r>
     <r>sources.md に無い事実を正解の理由にしない。足りなければ問題を減らし、note に書く。</r>
     <r>config/service-status.json で retired / closed_to_new のサービスを正解にしない。</r>
+    <r>公式ドキュメントが試験より新しくなっている所（sources.md の S0 や「legacy」「replaced」「recommended」などの記述）は、新旧で答えが変わる問題を作らない。どちらでも正しい所だけを問題にし、問題の note に「試験とずれるかもしれない」点を書く（P-009）。</r>
   </grounding>
   <explanation>
     <r>summary: 正解の理由を 2〜3 文。</r>
