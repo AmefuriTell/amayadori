@@ -1,0 +1,63 @@
+{
+  "id": "q-2.2-0008",
+  "task": "2.2",
+  "services": [
+    "AWS Control Tower",
+    "AWS Config",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company set up AWS Control Tower a year ago. A team now wants to bring an existing account, which is in an unregistered OU of the same organization, under Control Tower governance by enrolling it into a governed OU. The enrollment fails because the account already has an AWS Config configuration recorder and delivery channel. The company also asks whether this account could replace the current log archive account. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Enroll the account as the new log archive account, because existing Config resources are allowed for that role."
+    },
+    {
+      "key": "B",
+      "text": "Move the account to a different organization first, and then enroll it into the governed OU."
+    },
+    {
+      "key": "C",
+      "text": "Remove the existing AWS Config resources from the account, and enroll it into the governed OU again."
+    },
+    {
+      "key": "D",
+      "text": "Keep the AWS Config resources and register the unregistered OU instead, so the account does not need to meet any conditions."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+    "per_choice": {
+      "A": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+      "B": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+      "C": "正しい。Config のリソースを外してから登録し直す。",
+      "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+      "source_id": "S1",
+      "quote": "The account to be enrolled must not have existing AWS Config resources."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+      "source_id": "S1",
+      "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+      "source_id": "S1",
+      "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
