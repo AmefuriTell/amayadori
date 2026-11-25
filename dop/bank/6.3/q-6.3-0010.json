@@ -1,0 +1,69 @@
+{
+  "id": "q-6.3-0010",
+  "task": "6.3",
+  "services": [
+    "Elastic Load Balancing",
+    "Amazon CloudWatch Logs",
+    "Amazon EC2"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "During a security review, a company finds that it has no record of the HTTP requests that reached its Application Load Balancer, and no central copy of the application log files that are written to local disks on its Amazon EC2 instances. The company wants both kinds of logs collected with managed features. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Enable access logs on the Application Load Balancer and specify an Amazon S3 bucket for them."
+    },
+    {
+      "key": "B",
+      "text": "Install the CloudWatch agent on the instances and configure it to send the application log files to CloudWatch Logs."
+    },
+    {
+      "key": "C",
+      "text": "Find the existing access logs in the load balancer's console, because access logs are always on."
+    },
+    {
+      "key": "D",
+      "text": "Enable VPC Flow Logs, which record the HTTP request paths that reach the load balancer."
+    },
+    {
+      "key": "E",
+      "text": "Enable CloudTrail management events, which copy the application log files from the instances."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "Elastic Load Balancing のアクセスログは既定で無効の任意の機能で、有効にすると指定した S3 バケットに圧縮したファイルで置かれる。CloudWatch エージェントは、EC2 のインスタンスやオンプレミスのサーバーからログを集めて CloudWatch Logs に送る。VPC フローログはネットワークインターフェイスの IP の通信の情報を記録する物。",
+    "per_choice": {
+      "A": "正しい。既定で無効なので、有効にして S3 に置く。",
+      "B": "正しい。エージェントがインスタンスのログを CloudWatch Logs に集める。",
+      "C": "アクセスログは既定で無効。",
+      "D": "フローログは IP の通信の情報で、HTTP のリクエストの中身は記録しない。",
+      "E": "CloudTrail の管理イベントは AWS の操作の記録で、インスタンスのログファイルは集めない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html",
+      "source_id": "S6",
+      "quote": "Access logs is an optional feature of Elastic Load Balancing that is disabled by default."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html",
+      "source_id": "S7",
+      "quote": "In all three models, the agent collects logs from Amazon EC2 instances and on-premises servers into Amazon CloudWatch Logs."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+      "source_id": "S3",
+      "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

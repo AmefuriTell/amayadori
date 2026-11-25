@@ -1,0 +1,68 @@
+{
+  "id": "q-6.3-0009",
+  "task": "6.3",
+  "services": [
+    "Amazon VPC",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A security team wants records of every rejected connection attempt to the network interfaces in one subnet, stored in Amazon S3 for later queries. The records should be aggregated at the shortest interval that VPC Flow Logs supports. Accepted traffic should not be recorded. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a flow log for the subnet that captures rejected traffic and publishes to Amazon S3."
+    },
+    {
+      "key": "B",
+      "text": "Set the flow log's maximum aggregation interval to 1 minute."
+    },
+    {
+      "key": "C",
+      "text": "Set the flow log's maximum aggregation interval to 30 seconds."
+    },
+    {
+      "key": "D",
+      "text": "Create a flow log that captures all traffic and publishes directly to Amazon OpenSearch Service."
+    },
+    {
+      "key": "E",
+      "text": "Keep the default maximum aggregation interval, which is the shortest interval available."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "フローログは VPC・サブネット・ネットワークインターフェイスに作れ、記録する通信の種類（受け入れ・拒否・全て）と送り先を決める。送り先は CloudWatch Logs・S3・Data Firehose。集計の最大の間隔は既定で 10 分で、作る時に 1 分にできる。",
+    "per_choice": {
+      "A": "正しい。サブネットの拒否された通信だけを S3 に送る。",
+      "B": "正しい。1 分が選べる最も短い間隔。",
+      "C": "選べるのは既定の 10 分か 1 分。",
+      "D": "送り先は CloudWatch Logs・S3・Data Firehose で、受け入れた通信も記録してしまう。",
+      "E": "既定は 10 分で、最も短い間隔ではない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html",
+      "source_id": "S4",
+      "quote": "The type of traffic to capture (accepted traffic, rejected traffic, or all traffic)"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+      "source_id": "S3",
+      "quote": "Flow log data can be published to the following locations: Amazon CloudWatch Logs, Amazon S3, or Amazon Data Firehose."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-log-records.html",
+      "source_id": "S5",
+      "quote": "By default, the maximum aggregation interval is 10 minutes. When you create a flow log, you can optionally specify a maximum aggregation interval of 1 minute."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

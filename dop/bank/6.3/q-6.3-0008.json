@@ -1,0 +1,63 @@
+{
+  "id": "q-6.3-0008",
+  "task": "6.3",
+  "services": [
+    "AWS CloudTrail",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Auditors must see who downloaded objects from one sensitive Amazon S3 bucket. The account's trail logs only management events, and the account has hundreds of other busy buckets. The company wants to capture the needed activity while keeping CloudTrail costs as low as possible. Which solution meets these requirements MOST cost-effectively?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Enable data events on the trail with advanced event selectors that match only that bucket and the GetObject operation."
+    },
+    {
+      "key": "B",
+      "text": "Enable data events on the trail for all S3 buckets in the account."
+    },
+    {
+      "key": "C",
+      "text": "Keep the current trail, because management events already record GetObject calls on objects."
+    },
+    {
+      "key": "D",
+      "text": "Enable CloudTrail Insights on the trail so that unusual download activity is recorded."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "証跡は既定ではデータイベントを記録しない。データイベントは S3 のオブジェクトへの GetObject などのリソースの操作で、量が多く追加の料金がかかる。高度なイベントセレクター（advanced event selectors）で細かく絞れば、必要なイベントだけを記録して費用を抑えられる。",
+    "per_choice": {
+      "A": "正しい。必要なバケットと操作だけに絞って記録する。",
+      "B": "忙しい他のバケットのイベントも記録し、費用が増える。",
+      "C": "GetObject のようなオブジェクトの操作はデータイベントで、既定では記録されない。",
+      "D": "Insights は API の呼び出しの率の異常を見る物で、誰がオブジェクトを取ったかの記録にはならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "By default, trails and event data stores do not log data events. Additional charges apply for data events."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "Amazon S3 object-level API activity (for example, GetObject, DeleteObject, and PutObject API operations) on objects in S3 buckets."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "You can use advanced event selectors to create fine-grained selectors, which help you control costs by only logging the specific events of interest for your use cases."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "選択肢 D の Insights の説明は C-0079 の出典（Insights は API の呼び出しの率と誤りの率）による",
+  "last_checked": "2026-11-26"
+}

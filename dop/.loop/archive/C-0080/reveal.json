@@ -1,0 +1,105 @@
+{
+  "item": "C-0080",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "証跡は既定ではデータイベントを記録しない。データイベントは S3 のオブジェクトへの GetObject などのリソースの操作で、量が多く追加の料金がかかる。高度なイベントセレクター（advanced event selectors）で細かく絞れば、必要なイベントだけを記録して費用を抑えられる。",
+        "per_choice": {
+          "A": "正しい。必要なバケットと操作だけに絞って記録する。",
+          "B": "忙しい他のバケットのイベントも記録し、費用が増える。",
+          "C": "GetObject のようなオブジェクトの操作はデータイベントで、既定では記録されない。",
+          "D": "Insights は API の呼び出しの率の異常を見る物で、誰がオブジェクトを取ったかの記録にはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "By default, trails and event data stores do not log data events. Additional charges apply for data events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "Amazon S3 object-level API activity (for example, GetObject, DeleteObject, and PutObject API operations) on objects in S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "You can use advanced event selectors to create fine-grained selectors, which help you control costs by only logging the specific events of interest for your use cases."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "フローログは VPC・サブネット・ネットワークインターフェイスに作れ、記録する通信の種類（受け入れ・拒否・全て）と送り先を決める。送り先は CloudWatch Logs・S3・Data Firehose。集計の最大の間隔は既定で 10 分で、作る時に 1 分にできる。",
+        "per_choice": {
+          "A": "正しい。サブネットの拒否された通信だけを S3 に送る。",
+          "B": "正しい。1 分が選べる最も短い間隔。",
+          "C": "選べるのは既定の 10 分か 1 分。",
+          "D": "送り先は CloudWatch Logs・S3・Data Firehose で、受け入れた通信も記録してしまう。",
+          "E": "既定は 10 分で、最も短い間隔ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html",
+          "source_id": "S4",
+          "quote": "The type of traffic to capture (accepted traffic, rejected traffic, or all traffic)"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+          "source_id": "S3",
+          "quote": "Flow log data can be published to the following locations: Amazon CloudWatch Logs, Amazon S3, or Amazon Data Firehose."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-log-records.html",
+          "source_id": "S5",
+          "quote": "By default, the maximum aggregation interval is 10 minutes. When you create a flow log, you can optionally specify a maximum aggregation interval of 1 minute."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Elastic Load Balancing のアクセスログは既定で無効の任意の機能で、有効にすると指定した S3 バケットに圧縮したファイルで置かれる。CloudWatch エージェントは、EC2 のインスタンスやオンプレミスのサーバーからログを集めて CloudWatch Logs に送る。VPC フローログはネットワークインターフェイスの IP の通信の情報を記録する物。",
+        "per_choice": {
+          "A": "正しい。既定で無効なので、有効にして S3 に置く。",
+          "B": "正しい。エージェントがインスタンスのログを CloudWatch Logs に集める。",
+          "C": "アクセスログは既定で無効。",
+          "D": "フローログは IP の通信の情報で、HTTP のリクエストの中身は記録しない。",
+          "E": "CloudTrail の管理イベントは AWS の操作の記録で、インスタンスのログファイルは集めない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html",
+          "source_id": "S6",
+          "quote": "Access logs is an optional feature of Elastic Load Balancing that is disabled by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html",
+          "source_id": "S7",
+          "quote": "In all three models, the agent collects logs from Amazon EC2 instances and on-premises servers into Amazon CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+          "source_id": "S3",
+          "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
+        }
+      ]
+    }
+  ]
+}
