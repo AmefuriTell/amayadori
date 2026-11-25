@@ -32,3 +32,27 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 
 - P-003 は書き方（C2）だけ採った。語の重なりで見え見えを見つける検査は、試しの 5 問で効かなかった（誤りの選択肢にも同じ数字が入っており、見え見えなのは意味の上だった）ので入れていない。
 - P-004 は採った。検証役は出典を見ずに解き、q verdict が全問 high の束に too_easy を付ける。
+
+## C-0001（2026-11-25）から
+
+```xml
+<proposal id="P-005" from="C-0001" status="open">
+  <issue>検証役が「事実として正しいが sources.md に無い補足」を style で書くと、q verdict が fix にして C2 へ戻す。直す中身が無いのに 1 往復増える</issue>
+  <kind>tool + doc</kind>
+  <change>検証役が verdict を ok にした問題の style は、記録だけにして戻さない（giveaway は今のまま戻す）。C3 の判定の決まりも合わせる</change>
+</proposal>
+
+<proposal id="P-006" from="C-0017,C-0001" status="open">
+  <issue>P-003 の書き方にした C-0001 でも、検証役は 3 問とも確信度 high で正解した（too_easy が 2 束続いた）。出典なしで解いても易しい</issue>
+  <kind>doc</kind>
+  <change>Professional の難しさに寄せる案: 1 問に要件を 3 つ以上（止まる時間・費用・手間・権限など）入れ、どの誤りの選択肢も少なくとも 1 つは満たす。2 つのサービスを組み合わせる問題を 1 束に 1 問以上</change>
+</proposal>
+```
+
+```xml
+<proposal id="P-007" from="C-0001" status="open">
+  <issue>直した後の検証役が、前の検証役の求めた直し（「これから push する分だけ」）を「sources.md に無い」として fix にし、問題が drop になった（q-1.1-0002）。検証役どうしの判断が食い違う</issue>
+  <kind>doc</kind>
+  <change>fix で足す事実は、C2 で researcher に根拠を sources.md へ足してもらってから書く（根拠なしに足さない）。検証役には、前の回の指摘（feedback.json）だけを渡し、その直しが根拠に基づくかを見てもらう</change>
+</proposal>
+```

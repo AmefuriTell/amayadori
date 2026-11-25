@@ -1,0 +1,98 @@
+{
+  "item": "C-0001",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+        "per_choice": {
+          "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+          "B": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+          "C": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+          "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ECR のレプリケーションは、レジストリの設定としてリージョンごとに構成し、リポジトリを別のリージョンや別のアカウントへコピーするかを決める。パイプラインを変えずに、これから push するイメージを別リージョンと別アカウントに置ける。",
+        "per_choice": {
+          "A": "別アカウントから取り出せるようにするだけで、コピーは作られない。us-east-1 が使えない時は取り出せない。",
+          "B": "動くが、パイプラインを変えないという条件に反し、手間も増える。",
+          "C": "正しい。送り元のリージョンのレジストリ設定でレプリケーションを構成すれば、パイプラインを変えずに別リージョンと別アカウントへコピーできる。",
+          "D": "ライフサイクルポリシーは使わないイメージを片付けるためのもので、コピーはしない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S2",
+          "quote": "This is configured as a registry setting and is on a per-Region basis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry-settings.html",
+          "source_id": "S3",
+          "quote": "The replication configuration controls whether Amazon ECR copies your repositories across AWS Regions or AWS accounts"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S2",
+          "quote": "You define rules that result in the cleaning up of unused images."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "外部接続（external connection）を持つ共有のリポジトリを中央のチームが持ち、それを各チームのリポジトリの upstream にする。upstream は同じドメインの中で設定でき、各チームのリポジトリから社内のパッケージと公開のパッケージの両方を取れる。",
+        "per_choice": {
+          "A": "正しい。公開の npmjs から取り込む入口を 1 か所にまとめられる。",
+          "B": "正しい。同じドメインの中なら、あるリポジトリのパッケージを別のリポジトリで使えるようにできる。",
+          "C": "あるリポジトリのパッケージを別のリポジトリで使えるようにできるのは、同じドメインの中だけ。ドメインを分ける構成はこの要件に合わない。",
+          "D": "CodeArtifact のリポジトリのパッケージは公開できない。",
+          "E": "各チームが別々に外部接続を持つことになり、中央のチームがまとめて管理する要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can make packages in one repository available to another repository in the same domain."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
+        }
+      ]
+    }
+  ]
+}

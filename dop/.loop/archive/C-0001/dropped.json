@@ -1,0 +1,84 @@
+[
+  {
+    "question": {
+      "id": "q-1.1-0002",
+      "task": "1.1",
+      "services": [
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds container images in a CI/CD pipeline and pushes them to Amazon ECR in us-east-1 in its production account. For disaster recovery, every image that the pipeline pushes from now on must also be available in eu-west-1 and in a separate backup account, even if us-east-1 is unavailable. The company does not want to change the pipeline. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a repository policy in us-east-1 that allows the backup account to pull the images."
+        },
+        {
+          "key": "B",
+          "text": "Add pipeline steps that tag and push each image to registries in the other Region and account."
+        },
+        {
+          "key": "C",
+          "text": "Add a replication rule to the us-east-1 private registry settings with both destinations."
+        },
+        {
+          "key": "D",
+          "text": "Create a lifecycle policy rule that copies new images to the backup account in eu-west-1."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ECR のレプリケーションは、レジストリの設定としてリージョンごとに構成し、リポジトリを別のリージョンや別のアカウントへコピーするかを決める。パイプラインを変えずに、これから push するイメージを別リージョンと別アカウントに置ける。",
+        "per_choice": {
+          "A": "別アカウントから取り出せるようにするだけで、コピーは作られない。us-east-1 が使えない時は取り出せない。",
+          "B": "動くが、パイプラインを変えないという条件に反し、手間も増える。",
+          "C": "正しい。送り元のリージョンのレジストリ設定でレプリケーションを構成すれば、パイプラインを変えずに別リージョンと別アカウントへコピーできる。",
+          "D": "ライフサイクルポリシーは使わないイメージを片付けるためのもので、コピーはしない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S2",
+          "quote": "This is configured as a registry setting and is on a per-Region basis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry-settings.html",
+          "source_id": "S3",
+          "quote": "The replication configuration controls whether Amazon ECR copies your repositories across AWS Regions or AWS accounts"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S2",
+          "quote": "You define rules that result in the cleaning up of unused images."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    "why": {
+      "qid": "q-1.1-0002",
+      "blind": {
+        "answer": [
+          "C"
+        ],
+        "confidence": "high",
+        "reason": "ECR cross-Region and cross-account replication rule configured in registry settings; no pipeline change."
+      },
+      "match": true,
+      "issues": [
+        {
+          "kind": "unsupported",
+          "where": "explanation.summary",
+          "detail": "「これから push するイメージ」(レプリケーションは設定後の push だけが対象) は sources.md (S2, S3) に書かれていない。正しい事実だが根拠が無い。S3 などに該当文を足すか、解説からこの言い回しを外す。",
+          "source": "S3"
+        }
+      ],
+      "verdict": "fix"
+    }
+  }
+]
