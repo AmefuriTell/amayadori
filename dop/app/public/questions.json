@@ -2171,22 +2171,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company manages a production stack in AWS CloudFormation that contains an Amazon RDS DB instance and an Amazon S3 bucket that stores audit logs. Before any update is applied, the operations team must see whether any resource will be replaced or deleted. If a future template change removes the S3 bucket from the stack, the bucket must not be deleted. The team does not want to add manual backup steps. Which approach meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある企業は、Amazon RDS の DB インスタンスと、監査ログを保存する Amazon S3 バケットを含む本番のスタックを AWS CloudFormation で管理しています。運用チームは、更新を適用する前に、置き換えや削除が起きるリソースがあるかを確認する必要があります。今後のテンプレートの変更で S3 バケットがスタックから外された場合でも、バケットは削除されてはなりません。チームは手動のバックアップの手順を追加したくありません。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging."
+          "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging.",
+          "text_ja": "S3 バケットに DeletionPolicy: Retain を追加し、ステージングでテストした後、各更新を UpdateStack の呼び出しで直接適用する。"
         },
         {
           "key": "B",
-          "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket."
+          "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket.",
+          "text_ja": "更新ごとに変更セットを作成して確認してから実行する。S3 バケットに DeletionPolicy: Retain を追加する。"
         },
         {
           "key": "C",
-          "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy."
+          "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy.",
+          "text_ja": "更新ごとに変更セットを作成して確認してから実行する。S3 バケットの DeletionPolicy は変更しない。"
         },
         {
           "key": "D",
-          "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket."
+          "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket.",
+          "text_ja": "更新ごとに変更セットを作成して確認してから実行する。バケットのスナップショットを取る既定のポリシーに任せる。"
         }
       ],
       "answer": [
@@ -2231,26 +2236,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A network team's AWS CloudFormation stack exports a subnet ID, and three application stacks in the same account and Region import it with Fn::ImportValue. The network team must change the exported value. A new application stack in a different AWS account must also read this stack's outputs. Values must not be copied by hand. Which actions should the company take? (Choose TWO.)",
+      "stem_ja": "ネットワークチームの AWS CloudFormation スタックはサブネット ID をエクスポートしており、同じアカウントとリージョンにある 3 つのアプリケーションのスタックが Fn::ImportValue でそれをインポートしています。ネットワークチームは、エクスポートした値を変更する必要があります。また、別の AWS アカウントにある新しいアプリケーションのスタックも、このスタックの出力を読む必要があります。値を手で写してはなりません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "Update the three application stacks to stop importing the value, and then change the exported value."
+          "text": "Update the three application stacks to stop importing the value, and then change the exported value.",
+          "text_ja": "3 つのアプリケーションのスタックを更新して値のインポートをやめさせてから、エクスポートした値を変更する。"
         },
         {
           "key": "B",
-          "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account."
+          "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account.",
+          "text_ja": "新しいスタックで Fn::GetStackOutput を使い、別のアカウントのネットワークのスタックの出力を読む。"
         },
         {
           "key": "C",
-          "text": "Use Fn::ImportValue in the new stack in the other account with the same export name."
+          "text": "Use Fn::ImportValue in the new stack in the other account with the same export name.",
+          "text_ja": "別のアカウントの新しいスタックで、同じエクスポート名の Fn::ImportValue を使う。"
         },
         {
           "key": "D",
-          "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically."
+          "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically.",
+          "text_ja": "先にエクスポートした値を変更し、インポートしているスタックは CloudFormation に自動で更新させる。"
         },
         {
           "key": "E",
-          "text": "Delete the network stack and create it again with the new value, and then update the importing stacks."
+          "text": "Delete the network stack and create it again with the new value, and then update the importing stacks.",
+          "text_ja": "ネットワークのスタックを削除して新しい値で作り直し、その後インポートしているスタックを更新する。"
         }
       ],
       "answer": [
@@ -2291,22 +2302,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A team defines an AWS Lambda function with an AWS SAM template. The team wants each new version to receive traffic through an alias, with the traffic shift handled by AWS CodeDeploy. The team does not want to write the CodeDeploy application, deployment group, or IAM role resources by hand, and wants to keep the template short. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "あるチームは、AWS SAM のテンプレートで AWS Lambda 関数を定義しています。チームは、新しいバージョンごとにエイリアスを通じてトラフィックを受け、トラフィックの移行は AWS CodeDeploy に任せたいと考えています。チームは、CodeDeploy のアプリケーション、デプロイグループ、IAM ロールのリソースを手で書きたくなく、テンプレートを短く保ちたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Add the AutoPublishAlias property to the function and update the alias to the new version after each deployment."
+          "text": "Add the AutoPublishAlias property to the function and update the alias to the new version after each deployment.",
+          "text_ja": "関数に AutoPublishAlias プロパティを追加し、デプロイのたびにエイリアスを新しいバージョンに更新する。"
         },
         {
           "key": "B",
-          "text": "Add AWS::CodeDeploy::Application, AWS::CodeDeploy::DeploymentGroup, and an IAM role to the template next to the function."
+          "text": "Add AWS::CodeDeploy::Application, AWS::CodeDeploy::DeploymentGroup, and an IAM role to the template next to the function.",
+          "text_ja": "関数の横に、AWS::CodeDeploy::Application、AWS::CodeDeploy::DeploymentGroup、IAM ロールをテンプレートに追加する。"
         },
         {
           "key": "C",
-          "text": "Publish a Lambda version after each deployment and change the weights of a weighted alias with a script."
+          "text": "Publish a Lambda version after each deployment and change the weights of a weighted alias with a script.",
+          "text_ja": "デプロイのたびに Lambda のバージョンを発行し、スクリプトで加重エイリアスの重みを変える。"
         },
         {
           "key": "D",
-          "text": "Add the AutoPublishAlias and DeploymentPreference properties to the AWS::Serverless::Function resource."
+          "text": "Add the AutoPublishAlias and DeploymentPreference properties to the AWS::Serverless::Function resource.",
+          "text_ja": "AWS::Serverless::Function リソースに AutoPublishAlias と DeploymentPreference のプロパティを追加する。"
         }
       ],
       "answer": [
@@ -2350,22 +2366,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company has an AWS CDK app with Lambda function code and a container image as assets. The company will deploy the app for the first time to two new environments: an account in us-east-1 and an account in eu-west-1. The company wants the CDK CLI to handle asset storage, and wants to prepare both environments with as few manual steps as possible. What should the company do with the LEAST operational effort?",
+      "stem_ja": "ある企業には、Lambda 関数のコードとコンテナイメージをアセットとして持つ AWS CDK のアプリがあります。企業は、このアプリを 2 つの新しい環境（us-east-1 のアカウントと eu-west-1 のアカウント）に初めてデプロイします。企業は、アセットの保存を CDK CLI に任せ、両方の環境をできるだけ少ない手作業で準備したいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app."
+          "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app.",
+          "text_ja": "両方の環境を指定した cdk bootstrap コマンドを 1 回実行し、その後アプリの cdk deploy を実行する。"
         },
         {
           "key": "B",
-          "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation."
+          "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation.",
+          "text_ja": "各環境に cdk deploy を実行する。CDK CLI は準備なしでスタックとアセットをデプロイする。"
         },
         {
           "key": "C",
-          "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy."
+          "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy.",
+          "text_ja": "各環境に S3 バケットと ECR リポジトリを手で作成し、その後 cdk deploy を実行する。"
         },
         {
           "key": "D",
-          "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments."
+          "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments.",
+          "text_ja": "us-east-1 だけで cdk bootstrap を実行し、その後両方の環境に cdk deploy を実行する。"
         }
       ],
       "answer": [
@@ -2406,22 +2427,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company updates a StackSet that has stack instances in 100 accounts across four Regions. To limit the impact of a bad change, the update must process 10 accounts at a time, must finish one Region before starting the next, and must stop before moving to another Region if more than 2 accounts fail in a Region. Which operation preferences BEST meet these requirements?",
+      "stem_ja": "ある企業は、4 つのリージョンにわたる 100 個のアカウントにスタックインスタンスを持つ StackSet を更新します。誤った変更の影響を抑えるため、更新は一度に 10 個のアカウントを処理し、1 つのリージョンを終えてから次のリージョンを始め、あるリージョンで 2 個を超えるアカウントが失敗したら、別のリージョンに進む前に止まる必要があります。これらの要件を最もよく満たすオペレーションの設定はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Parallel."
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Parallel.",
+          "text_ja": "最大同時アカウント数 10、障害耐性 2、リージョンの同時実行 Parallel。"
         },
         {
           "key": "B",
-          "text": "Maximum concurrent accounts 100, failure tolerance 2, Region concurrency Sequential."
+          "text": "Maximum concurrent accounts 100, failure tolerance 2, Region concurrency Sequential.",
+          "text_ja": "最大同時アカウント数 100、障害耐性 2、リージョンの同時実行 Sequential。"
         },
         {
           "key": "C",
-          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Sequential."
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Sequential.",
+          "text_ja": "最大同時アカウント数 10、障害耐性 2、リージョンの同時実行 Sequential。"
         },
         {
           "key": "D",
-          "text": "Maximum concurrent accounts 10, failure tolerance 10, Region concurrency Sequential."
+          "text": "Maximum concurrent accounts 10, failure tolerance 10, Region concurrency Sequential.",
+          "text_ja": "最大同時アカウント数 10、障害耐性 10、リージョンの同時実行 Sequential。"
         }
       ],
       "answer": [
@@ -2463,22 +2489,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A DevOps engineer sets Maximum concurrent accounts to 20 and Failure tolerance to 0 for a StackSet update that targets 200 accounts, using the default concurrency mode. The update processes only one account at a time and takes many hours. The engineer wants the operation to run 20 accounts at a time regardless of failures. What should the engineer do with the LEAST operational effort?",
+      "stem_ja": "DevOps エンジニアは、200 個のアカウントを対象とする StackSet の更新で、既定の同時実行モードのまま、最大同時アカウント数を 20、障害耐性を 0 に設定しました。更新は一度に 1 つのアカウントしか処理せず、何時間もかかります。エンジニアは、失敗の有無にかかわらず、一度に 20 個のアカウントを処理させたいと考えています。エンジニアは最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Set the concurrency mode to SOFT_FAILURE_TOLERANCE in the operation preferences."
+          "text": "Set the concurrency mode to SOFT_FAILURE_TOLERANCE in the operation preferences.",
+          "text_ja": "オペレーションの設定で、同時実行モードを SOFT_FAILURE_TOLERANCE にする。"
         },
         {
           "key": "B",
-          "text": "Set Region concurrency to Parallel so that more accounts are processed at the same time."
+          "text": "Set Region concurrency to Parallel so that more accounts are processed at the same time.",
+          "text_ja": "より多くのアカウントを同時に処理するように、リージョンの同時実行を Parallel にする。"
         },
         {
           "key": "C",
-          "text": "Split the accounts into 10 StackSets and run their updates at the same time."
+          "text": "Split the accounts into 10 StackSets and run their updates at the same time.",
+          "text_ja": "アカウントを 10 個の StackSet に分け、それぞれの更新を同時に実行する。"
         },
         {
           "key": "D",
-          "text": "Increase Maximum concurrent accounts to 200, and keep the default concurrency mode."
+          "text": "Increase Maximum concurrent accounts to 200, and keep the default concurrency mode.",
+          "text_ja": "最大同時アカウント数を 200 に増やし、同時実行モードは既定のままにする。"
         }
       ],
       "answer": [
@@ -2519,22 +2550,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A StackSet deploys a template with an InstanceType parameter to 30 accounts. The production accounts in eu-west-1 need a larger InstanceType value than the StackSet default. The value must stay in place when the StackSet is updated later, drift detection must not report these stacks as drifted because of the different value, and the company wants to keep a single StackSet. What should the company do with the LEAST operational effort?",
+      "stem_ja": "ある StackSet は、InstanceType パラメータを持つテンプレートを 30 個のアカウントにデプロイしています。eu-west-1 の本番のアカウントでは、StackSet の既定値より大きい InstanceType の値が必要です。この値は今後 StackSet を更新しても維持され、値が違うことでドリフトの検出がこれらのスタックをドリフトと報告してはならず、企業は StackSet を 1 つのままにしたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Change the StackSet's InstanceType parameter value, so that every stack uses the larger value."
+          "text": "Change the StackSet's InstanceType parameter value, so that every stack uses the larger value.",
+          "text_ja": "すべてのスタックが大きい値を使うように、StackSet の InstanceType パラメータの値を変更する。"
         },
         {
           "key": "B",
-          "text": "Override the InstanceType parameter value for the stack instances in the production accounts in eu-west-1."
+          "text": "Override the InstanceType parameter value for the stack instances in the production accounts in eu-west-1.",
+          "text_ja": "eu-west-1 の本番のアカウントのスタックインスタンスで、InstanceType パラメータの値を上書きする。"
         },
         {
           "key": "C",
-          "text": "Create a second StackSet with the larger value for the production accounts in eu-west-1."
+          "text": "Create a second StackSet with the larger value for the production accounts in eu-west-1.",
+          "text_ja": "eu-west-1 の本番のアカウント用に、大きい値を持つ 2 つ目の StackSet を作成する。"
         },
         {
           "key": "D",
-          "text": "Override a new ProdInstanceType parameter only for the production stack instances, without changing the template."
+          "text": "Override a new ProdInstanceType parameter only for the production stack instances, without changing the template.",
+          "text_ja": "テンプレートを変えずに、本番のスタックインスタンスだけで新しい ProdInstanceType パラメータを上書きする。"
         }
       ],
       "answer": [
@@ -2576,26 +2612,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A platform team works from a member account in AWS Organizations and must create and manage StackSets with service-managed permissions for the organization, without signing in to the management account. The security team asks how this delegation works before approving it. Which statements are correct? (Choose TWO.)",
+      "stem_ja": "プラットフォームチームは AWS Organizations のメンバーアカウントで作業しており、管理アカウントにサインインせずに、組織向けにサービスマネージド型のアクセス許可の StackSet を作成・管理する必要があります。セキュリティチームは、承認する前にこの委任の仕組みを確認したいと考えています。正しい説明はどれですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "The platform team's account can be registered as a delegated administrator for StackSets."
+          "text": "The platform team's account can be registered as a delegated administrator for StackSets.",
+          "text_ja": "プラットフォームチームのアカウントを、StackSets の委任管理者として登録できる。"
         },
         {
           "key": "B",
-          "text": "StackSets with service-managed permissions that a delegated administrator creates are created in the management account."
+          "text": "StackSets with service-managed permissions that a delegated administrator creates are created in the management account.",
+          "text_ja": "委任管理者が作成したサービスマネージド型のアクセス許可の StackSet は、管理アカウントの中に作成される。"
         },
         {
           "key": "C",
-          "text": "The management account can limit the delegated administrator to deploy only to specific OUs."
+          "text": "The management account can limit the delegated administrator to deploy only to specific OUs.",
+          "text_ja": "管理アカウントは、委任管理者がデプロイできる先を特定の OU だけに制限できる。"
         },
         {
           "key": "D",
-          "text": "An organization can register up to 10 delegated administrators for StackSets at one time."
+          "text": "An organization can register up to 10 delegated administrators for StackSets at one time.",
+          "text_ja": "組織は、StackSets の委任管理者を同時に最大 10 個まで登録できる。"
         },
         {
           "key": "E",
-          "text": "A delegated administrator can create StackSets only with self-managed permissions."
+          "text": "A delegated administrator can create StackSets only with self-managed permissions.",
+          "text_ja": "委任管理者は、セルフマネージド型のアクセス許可でしか StackSet を作成できない。"
         }
       ],
       "answer": [

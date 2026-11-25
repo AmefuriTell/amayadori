@@ -23,7 +23,7 @@ export function jaErrors(q) {
     const jaN = new Set(nums(ja));
     const miss = nums(en).filter((n) => !jaN.has(n));
     if (miss.length) out.push(`${where}: 英語の数字 ${[...new Set(miss)].join(', ')} が日本語に無い`);
-    const lost = codeTokens(en).filter((t) => !ja.includes(t));
+    const lost = codeTokens(en).filter((t) => !ja.includes(t) && !(t.endsWith('s') && ja.includes(t.slice(0, -1)))); // 複数形の s は日本語に無い
     if (lost.length) out.push(`${where}: 英語の名前 ${lost.slice(0, 5).join(', ')} を日本語でもそのまま書く`);
   }
   if (typeof q.stem_ja === 'string') {

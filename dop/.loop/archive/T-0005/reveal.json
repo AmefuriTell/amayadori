@@ -1,0 +1,430 @@
+{
+  "item": "T-0005",
+  "questions": [
+    {
+      "id": "q-2.1-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company manages a production stack in AWS CloudFormation that contains an Amazon RDS DB instance and an Amazon S3 bucket that stores audit logs. Before any update is applied, the operations team must see whether any resource will be replaced or deleted. If a future template change removes the S3 bucket from the stack, the bucket must not be deleted. The team does not want to add manual backup steps. Which approach meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging."
+        },
+        {
+          "key": "B",
+          "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket."
+        },
+        {
+          "key": "C",
+          "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy."
+        },
+        {
+          "key": "D",
+          "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket."
+        }
+      ],
+      "explanation": {
+        "summary": "change set を作ると、実行する前に、どのリソースが足される・変わる・消されるかを見られ、実行を決めた時だけ変更される。DeletionPolicy の Retain を付けたリソースは、スタックの削除や、更新でスタックから外れる時にも消されずに残る。",
+        "per_choice": {
+          "A": "バケットは残るが、本番に当てる前に何が変わるかを見る手段が無い。",
+          "B": "正しい。change set で事前に確かめ、Retain でバケットを残す。",
+          "C": "何も指定しないと CloudFormation はリソースを消すので、テンプレートから外した時にバケットが消える。",
+          "D": "既定の動きはリソースを消すこと。既定が Snapshot なのは RDS の一部のリソースだけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html",
+          "source_id": "S1",
+          "quote": "For example, you can see which resources CloudFormation will add, modify, or delete."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "If a resource has no DeletionPolicy attribute, CloudFormation deletes the resource by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "This capability also applies to stack update operations that lead to resources being deleted from stacks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A network team's AWS CloudFormation stack exports a subnet ID, and three application stacks in the same account and Region import it with Fn::ImportValue. The network team must change the exported value. A new application stack in a different AWS account must also read this stack's outputs. Values must not be copied by hand. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Update the three application stacks to stop importing the value, and then change the exported value."
+        },
+        {
+          "key": "B",
+          "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account."
+        },
+        {
+          "key": "C",
+          "text": "Use Fn::ImportValue in the new stack in the other account with the same export name."
+        },
+        {
+          "key": "D",
+          "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically."
+        },
+        {
+          "key": "E",
+          "text": "Delete the network stack and create it again with the new value, and then update the importing stacks."
+        }
+      ],
+      "explanation": {
+        "summary": "別のスタックが出力を import している間は、export しているスタックを消すことも、出力の値を変えることもできない。先に import を外す。Export と Fn::ImportValue は同じアカウントとリージョンの中だけで、別のアカウントやリージョンの出力は Fn::GetStackOutput で読む。",
+        "per_choice": {
+          "A": "正しい。import を全部外してから値を変える。",
+          "B": "正しい。アカウントやリージョンをまたぐ参照には Fn::GetStackOutput を使う。",
+          "C": "Export と Fn::ImportValue による参照は同じアカウントとリージョンの中だけ。",
+          "D": "import されている間は、出力の値を変えられない。",
+          "E": "import されている間は、export しているスタックを消せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "source_id": "S3",
+          "quote": "After another stack imports an output value, you can't delete the stack that is exporting the output value or modify the exported output value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "source_id": "S3",
+          "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0003",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A team defines an AWS Lambda function with an AWS SAM template. The team wants each new version to receive traffic through an alias, with the traffic shift handled by AWS CodeDeploy. The team does not want to write the CodeDeploy application, deployment group, or IAM role resources by hand, and wants to keep the template short. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add the AutoPublishAlias property to the function and update the alias to the new version after each deployment."
+        },
+        {
+          "key": "B",
+          "text": "Add AWS::CodeDeploy::Application, AWS::CodeDeploy::DeploymentGroup, and an IAM role to the template next to the function."
+        },
+        {
+          "key": "C",
+          "text": "Publish a Lambda version after each deployment and change the weights of a weighted alias with a script."
+        },
+        {
+          "key": "D",
+          "text": "Add the AutoPublishAlias and DeploymentPreference properties to the AWS::Serverless::Function resource."
+        }
+      ],
+      "explanation": {
+        "summary": "AutoPublishAlias を指定すると AWS SAM が Lambda のエイリアスとバージョンを作り、DeploymentPreference を指定すると CodeDeploy のアプリケーションとデプロイグループ（Role を指定しなければ IAM ロールも）を作る。両方を書けば、手で書くリソースなしで CodeDeploy が通信を移す。",
+        "per_choice": {
+          "A": "エイリアスとバージョンはできるが、CodeDeploy のリソースは作られず、CodeDeploy が通信を移す形にならない。",
+          "B": "動くが、手で書かないという要件と、テンプレートを短くする要件に反する。",
+          "C": "CodeDeploy を使わず、スクリプトの保守も要る。",
+          "D": "正しい。2 つの性質だけで、必要なリソースを SAM が作る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "When the AutoPublishAlias property of an AWS::Serverless::Function is specified, AWS SAM generates the following CloudFormation resources: AWS::Lambda::Alias and AWS::Lambda::Version."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "AWS SAM generates the following resources CloudFormation resources: AWS::CodeDeploy::Application and AWS::CodeDeploy::DeploymentGroup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "if the Role property of the DeploymentPreference object is not specified, AWS SAM also generates an AWS::IAM::Role CloudFormation resource."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company has an AWS CDK app with Lambda function code and a container image as assets. The company will deploy the app for the first time to two new environments: an account in us-east-1 and an account in eu-west-1. The company wants the CDK CLI to handle asset storage, and wants to prepare both environments with as few manual steps as possible. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app."
+        },
+        {
+          "key": "B",
+          "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation."
+        },
+        {
+          "key": "C",
+          "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy."
+        },
+        {
+          "key": "D",
+          "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments."
+        }
+      ],
+      "explanation": {
+        "summary": "cdk bootstrap は、環境に CDKToolkit という CloudFormation スタックを置き、S3 バケットと ECR リポジトリを作る。CDK CLI はデプロイの時にこれらへテンプレートとアセットを置く。環境の引数は 1 回のコマンドに何度でも書けるので、2 つの環境を一度に準備できる。",
+        "per_choice": {
+          "A": "正しい。1 回の bootstrap で両方の環境を準備できる。",
+          "B": "準備（bootstrap）していない環境では、アセットが無く、テンプレートが 51,200 バイト未満のスタックしかデプロイできない。",
+          "C": "CDK CLI に置き場所を任せる要件に反し、手の作業も増える。bootstrap がこれらを作る。",
+          "D": "bootstrap は環境ごとに要る。eu-west-1 の環境が準備されない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "source_id": "S5",
+          "quote": "The bootstrap stack is a CloudFormation stack that provisions an Amazon S3 bucket and Amazon ECR repository in the AWS environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "source_id": "S5",
+          "quote": "This argument can be provided multiple times in a single command to deploy the bootstrap stack to multiple environments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html",
+          "source_id": "S6",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0005",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company updates a StackSet that has stack instances in 100 accounts across four Regions. To limit the impact of a bad change, the update must process 10 accounts at a time, must finish one Region before starting the next, and must stop before moving to another Region if more than 2 accounts fail in a Region. Which operation preferences BEST meet these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Parallel."
+        },
+        {
+          "key": "B",
+          "text": "Maximum concurrent accounts 100, failure tolerance 2, Region concurrency Sequential."
+        },
+        {
+          "key": "C",
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Sequential."
+        },
+        {
+          "key": "D",
+          "text": "Maximum concurrent accounts 10, failure tolerance 10, Region concurrency Sequential."
+        }
+      ],
+      "explanation": {
+        "summary": "Maximum concurrent accounts は同時に処理するアカウントの数、Failure tolerance はリージョンごとに許すアカウントの失敗の数で、これに達すると他のリージョンへ進まずに止まる。Region concurrency は Sequential（1 リージョンずつ）か Parallel（複数のリージョンを同時に）を選ぶ。",
+        "per_choice": {
+          "A": "Parallel では複数のリージョンを同時に処理し、1 リージョンずつの要件に反する。",
+          "B": "100 アカウントを同時に処理し、10 ずつの要件に反する。",
+          "C": "正しい。10 アカウントずつ、1 リージョンずつ、失敗が許す数を超えたら止まる。",
+          "D": "10 アカウントの失敗まで許すので、2 を超えたら止める要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Maximum concurrent accounts, specify how many accounts are processed concurrently."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Failure tolerance, specify the maximum number of account failures allowed per Region. The operation will stop and won't proceed to other Regions once this limit is reached."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Region concurrency, choose how to process Regions: Sequential (one Region at a time) or Parallel (multiple Regions concurrently)."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0006",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A DevOps engineer sets Maximum concurrent accounts to 20 and Failure tolerance to 0 for a StackSet update that targets 200 accounts, using the default concurrency mode. The update processes only one account at a time and takes many hours. The engineer wants the operation to run 20 accounts at a time regardless of failures. What should the engineer do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the concurrency mode to SOFT_FAILURE_TOLERANCE in the operation preferences."
+        },
+        {
+          "key": "B",
+          "text": "Set Region concurrency to Parallel so that more accounts are processed at the same time."
+        },
+        {
+          "key": "C",
+          "text": "Split the accounts into 10 StackSets and run their updates at the same time."
+        },
+        {
+          "key": "D",
+          "text": "Increase Maximum concurrent accounts to 200, and keep the default concurrency mode."
+        }
+      ],
+      "explanation": {
+        "summary": "既定の Strict Failure Tolerance では、実際の同時の数は「Maximum concurrent accounts」と「Failure tolerance + 1」の小さい方から始まる。Failure tolerance が 0 なら 1 アカウントずつになる。Soft Failure Tolerance は Failure tolerance と同時の数を切り離し、失敗の数にかかわらず Maximum concurrent accounts の数で動かす。",
+        "per_choice": {
+          "A": "正しい。失敗の数にかかわらず 20 アカウントずつ動く。",
+          "B": "リージョンを同時に処理するだけで、各リージョンの中のアカウントは 1 つずつのまま。",
+          "C": "StackSet を分けることになり、管理の手間が大きい。",
+          "D": "既定のままでは同時の数は Failure tolerance + 1 の 1 のまま。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S3",
+          "quote": "The initial actual concurrency is set to the lower of either the value of the Maximum concurrent accounts, or the value of Failure tolerance +1. This is the default behavior."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S3",
+          "quote": "This allows StackSet operations to run at the concurrency level set by the Maximum concurrent accounts value, regardless of the number of failures."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S4",
+          "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0007",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A StackSet deploys a template with an InstanceType parameter to 30 accounts. The production accounts in eu-west-1 need a larger InstanceType value than the StackSet default. The value must stay in place when the StackSet is updated later, drift detection must not report these stacks as drifted because of the different value, and the company wants to keep a single StackSet. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Change the StackSet's InstanceType parameter value, so that every stack uses the larger value."
+        },
+        {
+          "key": "B",
+          "text": "Override the InstanceType parameter value for the stack instances in the production accounts in eu-west-1."
+        },
+        {
+          "key": "C",
+          "text": "Create a second StackSet with the larger value for the production accounts in eu-west-1."
+        },
+        {
+          "key": "D",
+          "text": "Override a new ProdInstanceType parameter only for the production stack instances, without changing the template."
+        }
+      ],
+      "explanation": {
+        "summary": "パラメータの値の上書きは、選んだアカウントとリージョンのスタックに当たる。StackSet を更新しても、上書きした値は更新されずに残る。ドリフトの検出は各スタックの上書きした値を考えに入れる。上書きできるのは StackSet にあるパラメータだけで、パラメータを足すにはテンプレートを更新する。",
+        "per_choice": {
+          "A": "全てのスタックの値が変わり、本番だけ大きくする要件に反する。",
+          "B": "正しい。そのスタックだけ値が変わり、更新でも残り、ドリフトにもならない。",
+          "C": "StackSet を 1 つにする要件に反する。",
+          "D": "StackSet に無いパラメータは上書きできない。足すにはテンプレートの更新が要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "source_id": "S5",
+          "quote": "During StackSet updates, any parameter values overridden for a stack aren't updated, but retain their overridden value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "source_id": "S5",
+          "quote": "You can only override parameter values that are specified in the StackSet; to add or delete a parameter itself, you need to update the StackSet template."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-drift.html",
+          "source_id": "S6",
+          "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0008",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A platform team works from a member account in AWS Organizations and must create and manage StackSets with service-managed permissions for the organization, without signing in to the management account. The security team asks how this delegation works before approving it. Which statements are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "The platform team's account can be registered as a delegated administrator for StackSets."
+        },
+        {
+          "key": "B",
+          "text": "StackSets with service-managed permissions that a delegated administrator creates are created in the management account."
+        },
+        {
+          "key": "C",
+          "text": "The management account can limit the delegated administrator to deploy only to specific OUs."
+        },
+        {
+          "key": "D",
+          "text": "An organization can register up to 10 delegated administrators for StackSets at one time."
+        },
+        {
+          "key": "E",
+          "text": "A delegated administrator can create StackSets only with self-managed permissions."
+        }
+      ],
+      "explanation": {
+        "summary": "管理アカウントのほかに、委任管理者の権限を持つメンバーアカウントも、組織の service-managed の StackSet を作って管理できる。委任管理者が作った物も含め、service-managed の StackSet は管理アカウントに作られる。委任管理者は同時に 5 つまでで、組織のアカウントへ展開する全ての権限を持ち、管理アカウントは特定の OU や操作に絞れない。",
+        "per_choice": {
+          "A": "正しい。メンバーアカウントを委任管理者として登録できる。",
+          "B": "正しい。委任管理者が作った物も管理アカウントに作られる。",
+          "C": "管理アカウントは、委任管理者の展開を特定の OU や操作に絞れない。",
+          "D": "同時に登録できる委任管理者は 5 つまで。",
+          "E": "委任管理者は service-managed の StackSet を作って管理できる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "member accounts with delegated administrator permissions can create and manage StackSets with service-managed permissions for the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "StackSets with service-managed permissions are created in the management account, including StackSets created by delegated administrators."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "The management account can't limit delegated administrator permissions to deploy to specific OUs or to perform specific StackSet operations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "Your organization can have up to five registered delegated administrators at one time."
+        }
+      ]
+    }
+  ]
+}
