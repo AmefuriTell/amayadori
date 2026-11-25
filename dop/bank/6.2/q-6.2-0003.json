@@ -1,0 +1,52 @@
+{
+  "id": "q-6.2-0003",
+  "task": "6.2",
+  "services": [
+    "AWS Control Tower",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Control Tower. A detective control is enabled on the Workloads OU. One account in the Workloads OU runs a legacy system that cannot meet the control yet. The company must keep the control for every other account in the OU, must not report this account as noncompliant, and wants to avoid writing custom rules. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Disable the control for only the legacy account and keep it enabled for the rest of the Workloads OU."
+    },
+    {
+      "key": "B",
+      "text": "Disable the control on the Workloads OU and create a custom AWS Config rule for the other accounts."
+    },
+    {
+      "key": "C",
+      "text": "Move the legacy account to a separate OU where the control is not enabled."
+    },
+    {
+      "key": "D",
+      "text": "Keep the account in the Workloads OU and suppress the noncompliant results each week."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Control Tower のコントロールは OU 全体に当たり、OU の中の全てのアカウントが影響を受ける。1 つのアカウントだけを外すには、そのコントロールを有効にしていない別の OU へ移す。",
+    "per_choice": {
+      "A": "コントロールは OU の単位で当たり、OU の中の 1 つのアカウントだけを外すことはできない。",
+      "B": "自分でルールを作ることになり、要件に反する。",
+      "C": "正しい。別の OU に移せば、そのコントロールは当たらない。",
+      "D": "毎週の手作業になり、noncompliant と出さない要件にも合わない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html",
+      "source_id": "S5",
+      "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

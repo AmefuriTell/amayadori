@@ -1,0 +1,179 @@
+{
+  "item": "C-0074",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "task": "6.2",
+      "services": [
+        "AWS Security Hub CSPM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Security Hub CSPM in us-east-1 and eu-west-1. The company sets us-east-1 as the home Region for cross-Region aggregation and links all other Regions. Workloads were recently deployed in ap-south-1, but no findings from ap-south-1 appear in us-east-1. The company wants these findings in the home Region and wants to keep a single place to review them. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Wait for cross-Region aggregation to enable Security Hub CSPM in ap-south-1 for each account."
+        },
+        {
+          "key": "B",
+          "text": "Enable Security Hub CSPM in ap-south-1 for the accounts that have workloads there."
+        },
+        {
+          "key": "C",
+          "text": "Change the home Region to ap-south-1 so that findings from that Region are collected."
+        },
+        {
+          "key": "D",
+          "text": "Export findings from ap-south-1 to Amazon S3 each day and import them into us-east-1."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "リージョンをまたぐ集約は、Security Hub CSPM を有効にしているリージョンのデータだけを集める。集約の設定で Security Hub CSPM が有効になることは無いので、ap-south-1 で有効にする必要がある。",
+        "per_choice": {
+          "A": "集約の設定によって Security Hub CSPM が自動で有効になることは無い。",
+          "B": "正しい。有効にすれば、リンクしたリージョンとしてホームリージョンに集まる。",
+          "C": "ホームリージョンを変えても、ap-south-1 で有効になっていなければデータは集まらない。見る場所も変わってしまう。",
+          "D": "毎日の書き出しと取り込みの仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "source_id": "S4",
+          "quote": "Security Hub CSPM only aggregates data from Regions where an account has Security Hub CSPM enabled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "source_id": "S4",
+          "quote": "Security Hub CSPM is not automatically enabled for an account based on the cross-Region aggregation configuration."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-6.2-0002",
+      "task": "6.2",
+      "services": [
+        "AWS Security Hub CSPM",
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS Organizations. The security team works from a dedicated security account and must manage AWS Security Hub CSPM for every account in the organization. Accounts that join the organization later must be enabled and configured without extra work. The company wants to follow the currently recommended way to manage Security Hub CSPM across an organization. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "From the Organizations management account, designate the security account as the Security Hub CSPM delegated administrator."
+        },
+        {
+          "key": "B",
+          "text": "Attach a Security Hub CSPM declarative policy to the organization root."
+        },
+        {
+          "key": "C",
+          "text": "Sign in to each member account and enable Security Hub CSPM in every Region."
+        },
+        {
+          "key": "D",
+          "text": "Send an invitation from the security account to each new account when it joins the organization."
+        },
+        {
+          "key": "E",
+          "text": "Make the security account the Organizations management account so that it controls all accounts."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Organizations と連携すると、管理アカウントが Security Hub CSPM の委任管理者を決める。宣言型ポリシー（declarative policy）は組織のアカウントで Security Hub CSPM をまとめて有効にして設定でき、組織に入ったアカウントや OU に移ったアカウントも引き継ぐ。宣言型ポリシーは、組織全体で管理する推奨の方法として、レガシーになった central configuration に置き換わっている。",
+        "per_choice": {
+          "A": "正しい。委任管理者を決めると、そのアカウントで Security Hub CSPM が自動で有効になり、組織を管理できる。",
+          "B": "正しい。ルートに付けると、後から入るアカウントも引き継ぐ。",
+          "C": "アカウントごとの作業になり、後から入るアカウントにも同じ作業が要る。",
+          "D": "アカウントが入るたびに作業が要り、要件に反する。",
+          "E": "管理アカウントを入れ替えることになり、要件に関係無い大きな変更になる。委任管理者を決めれば足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-accounts.html",
+          "source_id": "S1",
+          "quote": "When you integrate Security Hub CSPM and AWS Organizations, the Organizations management account designates a Security Hub CSPM delegated administrator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "source_id": "S3",
+          "quote": "Accounts that join the organization, or move into an OU that has an attached declarative policy, inherit the declarative policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "source_id": "S3",
+          "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25",
+      "note": "central configuration はレガシー（2026-11-25 の公式ドキュメント）。試験が古い形のままなら central configuration の選択肢が出る可能性がある"
+    },
+    {
+      "id": "q-6.2-0003",
+      "task": "6.2",
+      "services": [
+        "AWS Control Tower",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Control Tower. A detective control is enabled on the Workloads OU. One account in the Workloads OU runs a legacy system that cannot meet the control yet. The company must keep the control for every other account in the OU, must not report this account as noncompliant, and wants to avoid writing custom rules. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Disable the control for only the legacy account and keep it enabled for the rest of the Workloads OU."
+        },
+        {
+          "key": "B",
+          "text": "Move the legacy account to a separate OU where the control is not enabled."
+        },
+        {
+          "key": "C",
+          "text": "Disable the control on the Workloads OU and create a custom AWS Config rule for the other accounts."
+        },
+        {
+          "key": "D",
+          "text": "Keep the account in the Workloads OU and suppress the noncompliant results each week."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Control Tower のコントロールは OU 全体に当たり、OU の中の全てのアカウントが影響を受ける。1 つのアカウントだけを外すには、そのコントロールを有効にしていない別の OU へ移す。",
+        "per_choice": {
+          "A": "コントロールは OU の単位で当たり、OU の中の 1 つのアカウントだけを外すことはできない。",
+          "B": "正しい。別の OU に移せば、そのコントロールは当たらない。",
+          "C": "自分でルールを作ることになり、要件に反する。",
+          "D": "毎週の手作業になり、noncompliant と出さない要件にも合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html",
+          "source_id": "S5",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

@@ -68,3 +68,13 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>too_easy は記録だけにし、書き方を変える理由にしない。難しさは利用者の正答率（L1）で見る</change>
 </proposal>
 ```
+
+## C-0074（2026-11-25）から
+
+```xml
+<proposal id="P-009" from="C-0074" status="open">
+  <issue>公式ドキュメントが試験より新しくなっている所がある（Security Hub CSPM の central configuration がレガシーになり、declarative policies に置き換わった）。試験（DOP-C02）が古い形のまま出題する可能性がある</issue>
+  <kind>doc + app</kind>
+  <change>こうした問題には note に「試験とずれるかもしれない」を書き（q-6.2-0002 で実施）、アプリで印を出す。新旧で答えが変わる問題は作らない（C-0074 ではそうした）。決まりとして C2 に足すかは人が決める</change>
+</proposal>
+```
