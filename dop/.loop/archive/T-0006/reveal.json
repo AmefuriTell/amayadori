@@ -1,0 +1,420 @@
+{
+  "item": "T-0006",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company uses AWS Organizations. The security team maintains an AWS CloudFormation template with baseline resources. Every account that is placed in the Workloads OU, now or in the future, must receive the baseline in two Regions without anyone taking action. The team does not want to create IAM roles in each account. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a StackSet with self-managed permissions that targets the Workloads OU, and add the execution role to new accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, and add stack instances when accounts arrive."
+        },
+        {
+          "key": "C",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, with automatic deployments enabled."
+        },
+        {
+          "key": "D",
+          "text": "Create an Amazon EventBridge rule for new accounts that invokes an AWS Lambda function to create the stack in each Region."
+        }
+      ],
+      "explanation": {
+        "summary": "service-managed のアクセス許可なら、CloudFormation が各アカウントとリージョンの IAM ロールを作るので、自分で作らなくてよい。自動デプロイを有効にすると、対象の組織や OU にアカウントが入った時に自動でスタックを足す。",
+        "per_choice": {
+          "A": "self-managed では各アカウントに実行用のロールを用意する必要があり、要件に反する。",
+          "B": "アカウントが入るたびに人が作業することになり、「誰も作業しない」要件に反する。",
+          "C": "正しい。ロールは CloudFormation が作り、新しいアカウントにも自動で展開される。",
+          "D": "動くが、Lambda の作成と保守が要り、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-associate-stackset-with-org.html",
+          "source_id": "S3",
+          "quote": "With this model, you don't need to create IAM roles in each target account and AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S4",
+          "quote": "CloudFormation can automatically deploy additional stacks to new AWS Organizations accounts when they're added to your target organization or organizational units (OUs)."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0002",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company creates accounts with AWS Control Tower Account Factory and places them in a Prod OU. A StackSet with service-managed permissions and automatic deployments targets the Prod OU and uses an account-level filter to exclude sandbox accounts. A new sandbox account placed in the Prod OU still received the stack. The company must keep automatic deployments for production accounts and must keep the baseline out of sandbox accounts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add the new sandbox account ID to the account-level exclusion filter of the StackSet."
+        },
+        {
+          "key": "B",
+          "text": "Place sandbox accounts in a separate OU that the StackSet does not target."
+        },
+        {
+          "key": "C",
+          "text": "Turn off automatic deployments and add stack instances for each new production account by hand."
+        },
+        {
+          "key": "D",
+          "text": "Turn off automatic deployments only for the sandbox account, and keep them for the other accounts."
+        }
+      ],
+      "explanation": {
+        "summary": "自動デプロイは、アカウント単位の絞り込み（account level targeting filters）を考えない。また自動デプロイは StackSet の単位で有効にする。対象の OU に入ったアカウントには展開されるので、外したいアカウントは対象でない OU に置く。",
+        "per_choice": {
+          "A": "自動デプロイはアカウント単位の絞り込みを考えないので、足しても新しいアカウントには展開される。",
+          "B": "正しい。対象の OU に入らなければ展開されない。",
+          "C": "外せるが、本番のアカウントの自動デプロイを続ける要件に反し、手の作業が増える。",
+          "D": "自動デプロイは StackSet の単位で有効にするもので、アカウントごとには切り替えられない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S5",
+          "quote": "Automatic deployments do not consider account level targeting filters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S5",
+          "quote": "The automatic deployments feature is enabled at the StackSet level."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S4",
+          "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0003",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company uses AWS Organizations. Administrators in member accounts have broad IAM permissions. The security team must make sure that no IAM user or role in any member account can stop the organization's CloudTrail logging, even administrators. Automation in the management account must still be able to manage the trail. Developers' existing permissions must not change. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add an IAM policy that denies cloudtrail:StopLogging to every role in each member account."
+        },
+        {
+          "key": "B",
+          "text": "Attach an SCP that denies cloudtrail:StopLogging and cloudtrail:DeleteTrail to the OUs that contain the member accounts."
+        },
+        {
+          "key": "C",
+          "text": "Attach an SCP that grants CloudTrail permissions only to the security team's role, and remove CloudTrail permissions from IAM policies."
+        },
+        {
+          "key": "D",
+          "text": "Move the trail's management to the management account and remove all IAM permissions for CloudTrail in member accounts."
+        }
+      ],
+      "explanation": {
+        "summary": "SCP は、組織の IAM ユーザーとロールができる操作に上限（ガードレール）を設ける。権限を与えることはしない。管理アカウントのユーザーやロールには効かないので、管理アカウントの自動化はそのまま動く。",
+        "per_choice": {
+          "A": "各アカウントの管理者が IAM のポリシーを外せるので守れず、全アカウントで作業する手間も大きい。",
+          "B": "正しい。管理者を含むメンバーアカウントの全員に上限を設け、管理アカウントには効かず、開発者の IAM のポリシーも変えない。",
+          "C": "SCP は権限を与えない。IAM のポリシーから権限を外すと、開発者の権限が変わる要件違反にもなる。",
+          "D": "メンバーアカウントの IAM の権限を広く外すことになり、開発者の権限を変えない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "SCPs don't affect users or roles in the management account."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0004",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company has set up AWS Control Tower. Teams request new AWS accounts several times each week. Each new account must start from a pre-approved configuration, be enrolled in the governed environment, and have the company's controls applied automatically. The platform team wants to stop running its own scripts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create each account with the AWS Organizations CreateAccount API, and apply the controls with a script afterward."
+        },
+        {
+          "key": "B",
+          "text": "Create each account in the AWS Organizations console, and enroll it in AWS Control Tower later by hand."
+        },
+        {
+          "key": "C",
+          "text": "Copy an existing account's IAM roles and settings to each new account with an AWS Lambda function."
+        },
+        {
+          "key": "D",
+          "text": "Use AWS Control Tower Account Factory to create and enroll each account from the approved template."
+        }
+      ],
+      "explanation": {
+        "summary": "Account Factory は、承認済みの設定で新しいアカウントの作成をそろえる、設定できるアカウントのテンプレート。アカウントを作って登録し、コントロールやポリシーを当てるところまで自動で行う。AWS Service Catalog のプロビジョニングされた製品の上に作られている。",
+        "per_choice": {
+          "A": "アカウントは作れるが、コントロールを当てるスクリプトを持ち続けることになり、要件に反する。",
+          "B": "登録を人が行うので、自動で当てる要件に合わず、手間も大きい。",
+          "C": "自分のコードを持つことになり、要件に反する。登録やコントロールの適用もされない。",
+          "D": "正しい。作成・登録・コントロールの適用を Account Factory が自動で行う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "source_id": "S1",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "source_id": "S2",
+          "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0005",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "After a merger, a company must move a member account that was invited into organization A into organization B. The account must not run as a standalone account at any point, because consolidated billing must continue. Organization B was created a month ago. Which statements about the migration are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "The management account of organization B sends the invitation, and the migrating account accepts it."
+        },
+        {
+          "key": "B",
+          "text": "The account does not need to leave organization A or operate as a standalone account before it joins organization B."
+        },
+        {
+          "key": "C",
+          "text": "The management account of organization A sends the invitation to organization B on behalf of the account."
+        },
+        {
+          "key": "D",
+          "text": "The account must wait four days after it joined organization A, because invited accounts have a waiting period."
+        },
+        {
+          "key": "E",
+          "text": "The account belongs to both organizations until organization A removes it."
+        }
+      ],
+      "explanation": {
+        "summary": "組織の間でアカウントを移すには、新しい組織の管理アカウントから招待を送り、移るアカウントで受け入れる。移るアカウントは、今の組織を先に抜けたり、単独のアカウントとして動いたりする必要は無い。組織で作ったアカウントは作ってから 4 日待つ必要があるが、招待で入ったアカウントにはこの待ちは無い。アカウントは 1 つの組織にしか入れない。",
+        "per_choice": {
+          "A": "正しい。新しい組織の管理アカウントが招待し、移るアカウントが受け入れる。",
+          "B": "正しい。先に抜ける必要は無い。",
+          "C": "招待は新しい組織の管理アカウントから送る。",
+          "D": "4 日の待ちは組織で作ったアカウントの物で、招待で入ったアカウントには無い。",
+          "E": "アカウントは 1 つの組織にしか入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "The migrating account doesn't need to leave its current organization or operate as a standalone account first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "Invited accounts are not subject to this waiting period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "An account can only join one organization."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0006",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company invited 20 existing AWS accounts into its organization. Administrators in the management account try to switch to the OrganizationAccountAccessRole role in these accounts, as they do for accounts that were created in the organization, but the role does not exist. The administrators need this cross-account access in every invited account. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Remove the accounts from the organization and invite them again so that the role is created on acceptance."
+        },
+        {
+          "key": "B",
+          "text": "Wait 15 days, because AWS Organizations creates the role when the invitation period ends."
+        },
+        {
+          "key": "C",
+          "text": "Turn on consolidated billing so that the management account gains access to the member accounts."
+        },
+        {
+          "key": "D",
+          "text": "Create the OrganizationAccountAccessRole role in each invited account, with a trust policy for the management account."
+        }
+      ],
+      "explanation": {
+        "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+        "per_choice": {
+          "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+          "B": "15 日は招待に返事をする期限で、ロールは作られない。",
+          "C": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。",
+          "D": "正しい。招待されたアカウントには自分で作る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "Each invitation must be responded to within 15 days, or it expires."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0007",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company with all features enabled in AWS Organizations wants the CostCenter tag key to use one consistent case, and wants tagging requests that set an invalid CostCenter value on Amazon EC2 instances to be blocked. The FinOps team also asks whether a tag policy will flag EC2 instances that have no CostCenter tag at all. Which statements are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "A tag policy enforced for the EC2 instance resource type blocks noncompliant tagging requests."
+        },
+        {
+          "key": "B",
+          "text": "Resources that have no CostCenter tag are not evaluated for compliance with the tag policy."
+        },
+        {
+          "key": "C",
+          "text": "A tag policy evaluates untagged EC2 instances and reports them as noncompliant."
+        },
+        {
+          "key": "D",
+          "text": "Tag policies are available in organizations that have only consolidated billing features enabled."
+        },
+        {
+          "key": "E",
+          "text": "A tag policy blocks noncompliant tagging requests on every resource type, even without specifying resource types for enforcement."
+        }
+      ],
+      "explanation": {
+        "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+        "per_choice": {
+          "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+          "B": "正しい。タグの無いリソースは評価されない。",
+          "C": "タグの無いリソースは評価されない。",
+          "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+          "E": "強制されるのは、指定したリソースの種類だけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Tag policies are available only in an organization that has all features enabled."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0008",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company set up AWS Control Tower a year ago. A team now wants to bring an existing account, which is in an unregistered OU of the same organization, under Control Tower governance by enrolling it into a governed OU. The enrollment fails because the account already has an AWS Config configuration recorder and delivery channel. The company also asks whether this account could replace the current log archive account. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Enroll the account as the new log archive account, because existing Config resources are allowed for that role."
+        },
+        {
+          "key": "B",
+          "text": "Move the account to a different organization first, and then enroll it into the governed OU."
+        },
+        {
+          "key": "C",
+          "text": "Remove the existing AWS Config resources from the account, and enroll it into the governed OU again."
+        },
+        {
+          "key": "D",
+          "text": "Keep the AWS Config resources and register the unregistered OU instead, so the account does not need to meet any conditions."
+        }
+      ],
+      "explanation": {
+        "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+        "per_choice": {
+          "A": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+          "B": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+          "C": "正しい。Config のリソースを外してから登録し直す。",
+          "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "The account to be enrolled must not have existing AWS Config resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ]
+    }
+  ]
+}
