@@ -7564,22 +7564,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company lets developers create IAM roles for their AWS Lambda functions in a shared account. Any role that a developer creates must never be able to do more than read and write one Amazon S3 bucket and one Amazon DynamoDB table. Other teams in the same account need broader permissions. The security team does not want to review each role by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある企業は、共有のアカウントで、開発者が自分の AWS Lambda 関数用の IAM ロールを作れるようにしています。開発者が作るロールは、1 つの Amazon S3 バケットと 1 つの Amazon DynamoDB テーブルの読み書きより多くのことが決してできてはなりません。同じアカウントのほかのチームには、より広いアクセス許可が必要です。セキュリティチームは、各ロールを手で確認したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Attach a permissions boundary to each developer that allows the S3 and DynamoDB access, and give the Lambda roles no other policies."
+          "text": "Attach a permissions boundary to each developer that allows the S3 and DynamoDB access, and give the Lambda roles no other policies.",
+          "text_ja": "S3 と DynamoDB へのアクセスを許可するアクセス許可の境界を各開発者に付け、Lambda のロールにはほかのポリシーを付けない。"
         },
         {
           "key": "B",
-          "text": "Apply an SCP to the account that denies every action except the S3 and DynamoDB access."
+          "text": "Apply an SCP to the account that denies every action except the S3 and DynamoDB access.",
+          "text_ja": "S3 と DynamoDB へのアクセス以外のすべてのアクションを拒否する SCP をアカウントに適用する。"
         },
         {
           "key": "C",
-          "text": "Create a managed policy that allows only the S3 and DynamoDB access, and allow developers to create roles only when that policy is attached as the permissions boundary."
+          "text": "Create a managed policy that allows only the S3 and DynamoDB access, and allow developers to create roles only when that policy is attached as the permissions boundary.",
+          "text_ja": "S3 と DynamoDB へのアクセスだけを許可する管理ポリシーを作り、それを境界として付けた時だけ開発者がロールを作れるようにする。"
         },
         {
           "key": "D",
-          "text": "Give developers full IAM permissions and have the security team remove extra permissions from new roles every week."
+          "text": "Give developers full IAM permissions and have the security team remove extra permissions from new roles every week.",
+          "text_ja": "開発者に IAM の完全なアクセス許可を与え、セキュリティチームが毎週新しいロールから余分なアクセス許可を外す。"
         }
       ],
       "answer": [
@@ -7618,22 +7623,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "An application's IAM role has the AdministratorAccess policy. AWS CloudTrail has recorded the role's activity for the last 90 days. The security team must replace the policy with a fine-grained policy that allows only the actions that the application actually uses. The new policy must be tested in a staging environment before production, and the team wants to avoid writing the policy by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "あるアプリケーションの IAM ロールには AdministratorAccess のポリシーが付いています。AWS CloudTrail は、直近の 90 日間のこのロールの活動を記録しています。セキュリティチームは、このポリシーを、アプリケーションが実際に使うアクションだけを許可するきめ細かいポリシーに置き換える必要があります。新しいポリシーは本番の前にステージング環境でテストする必要があり、チームはポリシーを手で書くことを避けたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Remove permissions from AdministratorAccess one service at a time in production until the application fails, and keep the last working version."
+          "text": "Remove permissions from AdministratorAccess one service at a time in production until the application fails, and keep the last working version.",
+          "text_ja": "本番で、アプリケーションが失敗するまで AdministratorAccess からサービスを 1 つずつ外し、最後に動いた版を残す。"
         },
         {
           "key": "B",
-          "text": "Use IAM Access Analyzer to generate a policy from the role's CloudTrail activity, test it in staging, and then deploy it to production."
+          "text": "Use IAM Access Analyzer to generate a policy from the role's CloudTrail activity, test it in staging, and then deploy it to production.",
+          "text_ja": "IAM Access Analyzer でロールの CloudTrail の活動からポリシーを生成し、ステージングでテストしてから本番にデプロイする。"
         },
         {
           "key": "C",
-          "text": "Attach a permissions boundary that allows only the services the team expects, and keep AdministratorAccess on the role."
+          "text": "Attach a permissions boundary that allows only the services the team expects, and keep AdministratorAccess on the role.",
+          "text_ja": "チームが想定するサービスだけを許可するアクセス許可の境界を付け、ロールの AdministratorAccess はそのままにする。"
         },
         {
           "key": "D",
-          "text": "Read the application's source code to list the API calls, and write a new policy for those actions by hand."
+          "text": "Read the application's source code to list the API calls, and write a new policy for those actions by hand.",
+          "text_ja": "アプリケーションのソースコードを読んで API の呼び出しを一覧にし、それらのアクションの新しいポリシーを手で書く。"
         }
       ],
       "answer": [
@@ -7673,22 +7683,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company uses AWS Organizations. The security team must find Amazon S3 buckets and IAM roles in any account whose resource-based policies allow access from principals outside the organization. The team wants a finding for each such resource and does not want to maintain scripts that parse policies. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。セキュリティチームは、どのアカウントであれ、リソースベースのポリシーが組織の外のプリンシパルからのアクセスを許可している Amazon S3 バケットと IAM ロールを見つける必要があります。チームは、そうしたリソースごとに検出結果を得たく、ポリシーを解析するスクリプトを保守したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Use IAM last accessed information in each account to find resources that were used by external principals."
+          "text": "Use IAM last accessed information in each account to find resources that were used by external principals.",
+          "text_ja": "各アカウントで IAM の最終アクセス情報を使い、外部のプリンシパルが使ったリソースを見つける。"
         },
         {
           "key": "B",
-          "text": "Attach a permissions boundary to every IAM role so that external principals cannot use the roles."
+          "text": "Attach a permissions boundary to every IAM role so that external principals cannot use the roles.",
+          "text_ja": "外部のプリンシパルがロールを使えないように、すべての IAM ロールにアクセス許可の境界を付ける。"
         },
         {
           "key": "C",
-          "text": "Run a scheduled script that reads every bucket policy and role trust policy and reports external principals."
+          "text": "Run a scheduled script that reads every bucket policy and role trust policy and reports external principals.",
+          "text_ja": "すべてのバケットポリシーとロールの信頼ポリシーを読み、外部のプリンシパルを報告する、スケジュールされたスクリプトを動かす。"
         },
         {
           "key": "D",
-          "text": "Use IAM Access Analyzer with the organization as the zone of trust, and review its findings."
+          "text": "Use IAM Access Analyzer with the organization as the zone of trust, and review its findings.",
+          "text_ja": "組織を信頼ゾーンにして IAM Access Analyzer を使い、その検出結果を確認する。"
         }
       ],
       "answer": [
@@ -7730,26 +7745,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "An IAM role has an identity-based policy that allows s3:* on a bucket and explicitly denies s3:DeleteObject on the same bucket. The role also has a permissions boundary that allows only s3:GetObject and s3:PutObject on that bucket. No other policies apply. Which requests made by the role to the bucket will be allowed? (Choose TWO.)",
+      "stem_ja": "ある IAM ロールには、バケットに対する s3:* を許可し、同じバケットに対する s3:DeleteObject を明示的に拒否するアイデンティティベースのポリシーがあります。ロールには、そのバケットに対する s3:GetObject と s3:PutObject だけを許可するアクセス許可の境界もあります。ほかに適用されるポリシーはありません。このロールがバケットに対して行うリクエストのうち、許可されるものはどれですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "s3:GetObject"
+          "text": "s3:GetObject",
+          "text_ja": "s3:GetObject のリクエスト"
         },
         {
           "key": "B",
-          "text": "s3:ListBucket"
+          "text": "s3:ListBucket",
+          "text_ja": "s3:ListBucket のリクエスト"
         },
         {
           "key": "C",
-          "text": "s3:PutObject"
+          "text": "s3:PutObject",
+          "text_ja": "s3:PutObject のリクエスト"
         },
         {
           "key": "D",
-          "text": "s3:DeleteObject"
+          "text": "s3:DeleteObject",
+          "text_ja": "s3:DeleteObject のリクエスト"
         },
         {
           "key": "E",
-          "text": "s3:PutBucketPolicy"
+          "text": "s3:PutBucketPolicy",
+          "text_ja": "s3:PutBucketPolicy のリクエスト"
         }
       ],
       "answer": [
@@ -7788,22 +7809,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company has 40 project teams, and each team uses an IAM role. Teams create new Amazon S3 buckets and DynamoDB tables every week. Today the security team writes a separate policy for each team that lists the ARNs of the team's resources, and must update the policies whenever a resource is added. The company wants least privilege with fewer policies and no policy updates when resources are added. Which approach meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある企業には 40 のプロジェクトチームがあり、各チームが IAM ロールを使っています。チームは毎週新しい Amazon S3 バケットと DynamoDB テーブルを作ります。今は、セキュリティチームがチームごとにそのチームのリソースの ARN を並べた別々のポリシーを書いており、リソースが増えるたびにポリシーを更新する必要があります。企業は、少ないポリシーで最小権限を保ち、リソースが増えてもポリシーを更新しないようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night."
+          "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night.",
+          "text_ja": "チームごとのポリシーを残し、毎晩新しいリソースの ARN をチームのポリシーに書き足すスクリプトを追加する。"
         },
         {
           "key": "B",
-          "text": "Use the AWS managed job function policies for each team so that new resources are included automatically."
+          "text": "Use the AWS managed job function policies for each team so that new resources are included automatically.",
+          "text_ja": "新しいリソースが自動で含まれるように、各チームに AWS 管理の職務機能のポリシーを使う。"
         },
         {
           "key": "C",
-          "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month."
+          "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month.",
+          "text_ja": "すべてのチームのロールに S3 と DynamoDB への完全なアクセスを与え、毎月アクセスログを確認する。"
         },
         {
           "key": "D",
-          "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag."
+          "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag.",
+          "text_ja": "各ロールと各リソースにプロジェクトのタグを付け、プリンシパルのタグとリソースのタグが一致する時にアクセスを許可する 1 つのポリシーを使う。"
         }
       ],
       "answer": [
@@ -7846,26 +7872,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "Employees sign in to AWS through IAM Identity Center, and the identity source stores each user's department. Each department's Amazon S3 buckets are tagged with a department tag. Employees must access only their own department's buckets, and the company does not want to create one permission set per department or IAM users. Which actions should the company take? (Choose TWO.)",
+      "stem_ja": "従業員は IAM Identity Center を通じて AWS にサインインし、アイデンティティソースには各ユーザーの部署が保存されています。各部署の Amazon S3 バケットには部署のタグが付いています。従業員は自分の部署のバケットだけにアクセスできる必要があり、企業は部署ごとのアクセス許可セットや IAM ユーザーを作りたくありません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute."
+          "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute.",
+          "text_ja": "IAM Identity Center の [アクセス制御の属性] のページで、Department のユーザー属性を選ぶ。"
         },
         {
           "key": "B",
-          "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag."
+          "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag.",
+          "text_ja": "1 つのアクセス許可セットに、aws:PrincipalTag/Department とバケットの部署タグが一致する時だけ S3 を許可するポリシーを入れる。"
         },
         {
           "key": "C",
-          "text": "Create a separate permission set for each department that lists that department's bucket ARNs."
+          "text": "Create a separate permission set for each department that lists that department's bucket ARNs.",
+          "text_ja": "部署ごとに、その部署のバケットの ARN を並べた別々のアクセス許可セットを作る。"
         },
         {
           "key": "D",
-          "text": "Create an IAM user for each employee and tag the user with the department."
+          "text": "Create an IAM user for each employee and tag the user with the department.",
+          "text_ja": "従業員ごとに IAM ユーザーを作り、ユーザーに部署のタグを付ける。"
         },
         {
           "key": "E",
-          "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name."
+          "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name.",
+          "text_ja": "各バケットポリシーに、許可する IAM Identity Center のグループ名として部署を書く。"
         }
       ],
       "answer": [
@@ -7909,22 +7941,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company uses IAM Identity Center with AWS Organizations. Fifteen database administrators need the same RDS, DynamoDB, and Aurora administration permissions in 25 accounts. Staff join and leave the DBA team every month, and the security team wants policy changes to reach all accounts automatically. Which approach meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある企業は、AWS Organizations と一緒に IAM Identity Center を使用しています。15 人のデータベース管理者は、25 個のアカウントで同じ RDS、DynamoDB、Aurora の管理のアクセス許可を必要としています。DBA チームには毎月人が加わったり抜けたりし、セキュリティチームはポリシーの変更がすべてのアカウントに自動で届くようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts."
+          "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts.",
+          "text_ja": "Database Admin のアクセス許可セットを 1 つ作り、25 個すべてのアカウントで 15 人の管理者それぞれに個別に割り当てる。"
         },
         {
           "key": "B",
-          "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts."
+          "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts.",
+          "text_ja": "Database Admin のアクセス許可セットを 1 つ作り、25 個すべてのアカウントで DBA のグループに割り当てる。割り当ては最大 10 アカウントずつ繰り返す。"
         },
         {
           "key": "C",
-          "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change."
+          "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change.",
+          "text_ja": "25 個の各アカウントに同じポリシーの IAM ロールを作り、ポリシーが変わるたびに 25 個のロールを更新する。"
         },
         {
           "key": "D",
-          "text": "Create 25 permission sets, one for each account, and assign each to the DBA group."
+          "text": "Create 25 permission sets, one for each account, and assign each to the DBA group.",
+          "text_ja": "アカウントごとに 1 つずつ、25 個のアクセス許可セットを作り、それぞれを DBA のグループに割り当てる。"
         }
       ],
       "answer": [
@@ -7966,22 +8003,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company gives a third-party monitoring vendor access to its AWS account through an IAM role that the vendor assumes. The vendor serves many customers from one AWS account. The company must prevent another customer of the vendor from tricking the vendor into accessing the company's resources by supplying the company's role ARN. Which configuration BEST meets this requirement?",
+      "stem_ja": "ある企業は、外部の監視ベンダーが引き受ける IAM ロールを通じて、ベンダーに AWS アカウントへのアクセスを与えています。ベンダーは 1 つの AWS アカウントから多くの顧客にサービスを提供しています。企業は、ベンダーの別の顧客が企業のロールの ARN を渡すことで、ベンダーをだまして企業のリソースにアクセスさせることを防ぐ必要があります。この要件を最もよく満たす設定はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret."
+          "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret.",
+          "text_ja": "ロールの信頼ポリシーでベンダーのアカウントだけを許可し、企業が作って秘密にしておく ExternalId の値を必須にする。"
         },
         {
           "key": "B",
-          "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role."
+          "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role.",
+          "text_ja": "ロールを引き受けられるのはベンダーだけなので、ロールの信頼ポリシーで条件なしにベンダーのアカウントだけを許可する。"
         },
         {
           "key": "C",
-          "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days."
+          "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days.",
+          "text_ja": "ロールの代わりにアクセスキー付きの IAM ユーザーをベンダー用に作り、90 日ごとにキーをローテーションする。"
         },
         {
           "key": "D",
-          "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company."
+          "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company.",
+          "text_ja": "ロールの信頼ポリシーでベンダーのアカウントだけを許可し、ベンダーが企業のために発行する一意の値の ExternalId の条件を必須にする。"
         }
       ],
       "answer": [
