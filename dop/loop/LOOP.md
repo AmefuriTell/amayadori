@@ -51,7 +51,9 @@ AI はこのファイルと、今いる工程の 1 枚（`steps/<id>.md`）だ�
 }
 ```
 
-- 移るのは `loop advance --result <key>` だけ。AI が状態のファイルを直接書き換えない。
+- 移るのは `loop advance --result <key>`（S0 は `loop next`、S9 は `loop close`）だけ。AI が状態のファイルを直接書き換えない。
+- C1〜C4・A3・L1 の結果は、ツールが `work/<ID>/result.json` に札を書き、advance はその札と照らす（ツールを通らずに進めない）。
+- この表は `tools/loop.mjs` がそのまま読む。表を変えるとツールの動きも変わる。
 - `fix` / `fail` で戻るたびに attempts が 1 増える。上限で blocked。
 
 ## 3. 役割
@@ -77,7 +79,7 @@ AI はこのファイルと、今いる工程の 1 枚（`steps/<id>.md`）だ�
     <path>Web のドキュメントの本文 → researcher が work/&lt;ID&gt;/sources.md に抜き出す</path>
     <path>試験・ビルドのログの全文 → ツールが失敗した所だけ返す。全文は .loop/reports/ にあり、失敗の原因が分からない時だけ読む</path>
     <path>tools/** の中身 → tools.md の入出力だけ見る</path>
-    <path>.loop/state.json → loop status で聞く</path>
+    <path>.loop/state.json・.loop/backlog.json → loop status で聞く</path>
   </do_not_read>
   <tool_output_contract>1 回の出力は JSON で 30 行まで: { "ok": bool, "summary": "1 行", "items": [...最大 10], "details_path": "..." }</tool_output_contract>
 </context_rules>
@@ -116,15 +118,16 @@ dop/
 
 - backlog が空、または 1 回の実行で `max_items_per_session` を閉じた。
 - 人の関門に当たった。
-- 同じ工程で同じ失敗が 2 回続いた（ツールが `"repeat": true` を返す）。直し方を変えずに 3 回目をしない。
+- 同じ工程で同じ失敗が 2 回続いた（ツールが `"repeat": true` を返す）。直し方を変えずに 3 回目をしない。`loop block --reason "…"` で人に回す。
+- 人に「止めて」と言われた → `loop pause`（Stop の hook は、ループの途中では止まらせないため）。
 
 ## 8. 毎回のはじめ方（AI への指示）
 
 ```xml
 <bootstrap>
-  <step>node dop/tools/loop.mjs status を呼ぶ</step>
+  <step>node dop/tools/loop.mjs start を呼ぶ（この回の数を 0 に戻し、続きの state を返す）</step>
   <step>出力の state に対応する steps/*.md を 1 枚読む</step>
-  <step>その文書の actions を順に行い、最後に loop advance --result &lt;key&gt; を呼ぶ</step>
+  <step>その文書の actions を順に行い、最後に loop advance --result &lt;key&gt; を呼ぶ（S0 は loop next、S9 は loop close）</step>
   <step>出力の次の state で 2 に戻る。止まる条件なら、何をしたか 3 行で報告して終える</step>
 </bootstrap>
 ```

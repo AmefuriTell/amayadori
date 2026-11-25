@@ -6,21 +6,21 @@
 <step id="C3_verify" actor="verifier" context="fresh">
   <purpose>正解が 1 つに決まり、根拠どおりに正しいことを確かめる。</purpose>
   <inputs>
-    <tool>q:blind work/&lt;ID&gt;/questions.json → 答え・解説・references を抜いた問題を出す</tool>
+    <tool>q blind &lt;ID&gt; → 答え・解説・references を抜いた問題を work/&lt;ID&gt;/blind.json に書く</tool>
     <file>work/&lt;ID&gt;/sources.md</file>
   </inputs>
   <actions>
-    <a by="orchestrator">verifier を新しい文脈で起こす。author のやり取りは渡さない。渡すのは q:blind の出力と sources.md と下の指示だけ。</a>
+    <a by="orchestrator">dop-verifier のエージェントを起こす。author のやり取りは渡さない。渡すのは項目 ID だけ。</a>
     <a by="verifier">1 周目: 各問を解き、答えと確信度（high/mid/low）と理由を書く（答えはまだ見ない）。</a>
-    <a by="verifier">2 周目: q:reveal で答えと解説を受け取り、照らす。</a>
+    <a by="verifier">2 周目: q reveal で答えと解説を受け取り、照らす（blind が全問そろうまで reveal は断る）。</a>
     <a by="verifier">verify.json を書く（下の形）。</a>
-    <a by="orchestrator">q:verdict を呼ぶ。束としての結論をツールが出す。</a>
+    <a by="orchestrator">q verdict を呼ぶ。束としての結論（result）をツールが出す。その result で advance する。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/verify.json, 戻る時は work/&lt;ID&gt;/feedback.json（q:verdict が作る）</file></outputs>
   <exit>
-    <pass>全問 verdict が ok</pass>
+    <pass>残った問題が全部 ok（drop の問題は dropped.json へ移し、束から外す）</pass>
     <fix>fix が 1 問以上 → feedback.json を作って C2 へ</fix>
-    <drop>attempts が上限、または全問 drop → S9（作れた分だけ残す）</drop>
+    <drop>全問 drop → S9（この束からは bank に入れない）</drop>
   </exit>
 </step>
 ```
@@ -48,6 +48,6 @@
 
 - `match: false` → 少なくとも fix（答えが割れる問題は、本番の形として悪いか、正解が違う）。
 - issues に `fact`・`two_correct`・`no_correct`・`unsupported`・`deprecated` → fix。
-- 同じ問題が 2 回 fix → drop。
+- 同じ問題が 2 回 fix（言い回しだけの fix は数えない）→ drop。
 - `style`・`giveaway`（答えが見え見え）だけ → fix だが attempts を数えない。
 - blind で `confidence: low` かつ match → ok。問題に `low_confidence: true` を付け、アプリで印を出す（人は事前に読まないため）。

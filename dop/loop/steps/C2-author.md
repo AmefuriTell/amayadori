@@ -10,11 +10,12 @@
   </inputs>
   <actions>
     <a>feedback.json があれば、指摘された問題だけ直す。ほかは触らない。</a>
-    <a>無ければ下の「書き方」で count 問書き、work/&lt;ID&gt;/questions.json に置く。</a>
-    <a>q:validate を呼ぶ。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
+    <a>無ければ下の「書き方」で count 問書き、work/&lt;ID&gt;/questions.json に { "item": "&lt;ID&gt;", "questions": [ … ] } の形で置く。id は q-&lt;task&gt;-0001 から仮に振る（q publish が振り直す）。</a>
+    <a>recheck の項目では questions.json に bank の問題が入っている（"recheck": true）。feedback か item.note の指摘の所だけ直し、id は変えない。</a>
+    <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/questions.json（status は draft）</file></outputs>
-  <exit>q:validate が ok → loop advance --result ok</exit>
+  <exit>q validate が ok → loop advance --result ok</exit>
 </step>
 ```
 

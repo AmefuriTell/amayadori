@@ -1,0 +1,25 @@
+# DOP 問題集（dop/）のツールの試験。
+name: dop
+
+on:
+  pull_request:
+    paths: ["dop/**", ".github/workflows/dop.yml"]
+  push:
+    branches: [master]
+    paths: ["dop/**", ".github/workflows/dop.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: dop/.nvmrc
+      - run: npm test

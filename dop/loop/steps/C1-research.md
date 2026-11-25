@@ -8,16 +8,16 @@
     <config>config/exam.json の該当タスクの説明, config/service-status.json</config>
   </inputs>
   <actions>
-    <a by="orchestrator">researcher を起こし、下の「researcher への指示」を渡す。</a>
-    <a by="researcher">docs:fetch で公式ページを取る（1 項目 3〜6 ページ）。ツールが本文を見出しごとに切って work/&lt;ID&gt;/raw/ に置く。</a>
+    <a by="orchestrator">dop-researcher のエージェントを起こし、項目 ID・topic・services を渡す（下の指示はエージェントの定義が読む）。</a>
+    <a by="researcher">docs fetch &lt;url&gt; --item &lt;ID&gt; で公式ページを取る（1 項目 3〜6 ページ）。ツールが本文を見出しごとに切って work/&lt;ID&gt;/raw/ に置き、見出しと語数だけを返す。</a>
     <a by="researcher">raw から、topic に関係する段落だけを sources.md に写す（1 出典 300 語まで、原文のまま、URL と見出しを付ける）。</a>
-    <a by="orchestrator">sources:check を呼ぶ（出典の数・URL の許可・語数）。</a>
+    <a by="orchestrator">docs check &lt;ID&gt; を呼ぶ（出典の数・URL の許可・語数）。</a>
   </actions>
   <outputs>
     <file>work/&lt;ID&gt;/sources.md</file>
   </outputs>
   <exit>
-    <ok>sources:check が ok → loop advance --result ok</ok>
+    <ok>docs check が ok → loop advance --result ok</ok>
     <no_source>公式の根拠が 2 つ未満 → 項目に note を付けて loop advance --result no_source（問題は作らない）</no_source>
   </exit>
 </step>

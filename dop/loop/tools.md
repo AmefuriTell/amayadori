@@ -7,80 +7,81 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 
 ```xml
 <tool_contract>
-  <call>node dop/tools/&lt;file&gt;.mjs &lt;cmd&gt; [args]（package.json に npm run の別名も置く）</call>
-  <stdout>JSON 1 つ、30 行まで: { "ok": bool, "summary": "1 行", "items": [ 最大 10 件 ], "details_path": "…", "repeat": bool }</stdout>
+  <call>node dop/tools/&lt;loop|q|docs&gt;.mjs &lt;cmd&gt; [args]（リポジトリの根から。dop/ の中なら npm run loop -- &lt;cmd&gt; でもよい）</call>
+  <stdout>JSON 1 つ、30 行まで: { "ok": bool, "summary": "1 行", …, "items": [ 最大 10 件 ], "more": 残りの数, "details_path": "…", "repeat": bool }</stdout>
   <details>全文・ログ・一覧は details_path（.loop/reports/ の下）に書く。AI は ok=false で原因が summary と items で分からない時だけ読む。</details>
-  <exit_code>0 = ok、1 = 検査で落ちた、2 = 使い方の誤り・ツールの故障</exit_code>
-  <repeat>直前の同じ工程の失敗と items が同じなら true（LOOP.md 7 章で止まる）</repeat>
-  <deterministic>同じ入力なら同じ出力。乱数を使う所は項目 ID を種にする。</deterministic>
-  <network>docs:fetch と q:linkcheck だけが外へ出る。ほかは手元だけ。</network>
+  <exit_code>0 = ok、1 = 検査で落ちた、2 = 使い方の誤り・今の工程では使えない・ツールの故障</exit_code>
+  <repeat>直前の同じ検査の失敗と items が同じなら true（LOOP.md 7 章で止まる）</repeat>
+  <deterministic>同じ入力なら同じ出力。乱数を使う所（正解の位置）は項目 ID を種にする。</deterministic>
+  <network>docs fetch・q linkcheck・q gate --net だけが外へ出る（curl を使う）。ほかは手元だけ。</network>
+  <data>作業の物（.loop/・work/・bank/）の置き場は環境変数 DOP_DATA で変えられる（試験で使う）。既定は dop/。</data>
 </tool_contract>
 ```
 
 ## 一覧
 
-| ツール | 工程 | 入力 | 出力の items | AI から隔離するもの |
-| --- | --- | --- | --- | --- |
-| `loop status` | 毎回のはじめ | なし | state, item, doc, attempts | state.json・backlog.json の全体 |
-| `loop next` | S0 | なし | 次の item と state | 並べ方の決まり |
-| `loop advance --result <key>` | 各工程の終わり | 結果の key | 次の state と doc | 状態の移り方の表・attempts の数え方 |
-| `loop close` | S9 | なし | runs の 1 行・repeated_issues | runs.jsonl の過去分 |
-| `loop add --json <item>` | 人・L1 | backlog の 1 項目 | 付けた ID | backlog の重複の確認 |
-| `docs:fetch <url>` | C1 | URL（許可したドメインだけ） | 見出しの一覧と各語数 | ページの HTML・ナビ・不要な部分 |
-| `sources:check <ID>` | C1 | work/<ID>/sources.md | 出典の数・語数超え・許可外の URL | |
-| `q:validate <file>` | C2 | questions.json | スキーマの誤り（JSON Pointer と理由） | スキーマの細部 |
-| `q:blind <file>` / `q:reveal <file>` | C3 | questions.json | 答えを抜いた問題 / 答えと解説 | 答え（verifier が先に見ないように） |
-| `q:verdict <ID>` | C3 | verify.json | 束の結論・feedback.json の場所 | 判定の決まり |
-| `q:gate <ID>` | C4 | work/<ID>/ | 落ちた検査と問題 ID | C4-gate.md の検査の全部 |
-| `q:publish <ID>` | C4 | work/<ID>/ | bank に入れた問題 ID | 選択肢の並べ替え・ファイル名の付け方 |
-| `q:find --task 1.2 --service CodeDeploy` | どこでも | 条件 | 問題 ID と 1 行の要約（最大 10） | bank の全体 |
-| `q:coverage` | S0・L1 | なし | タスク番号ごとの数・目標・不足 | bank の全体 |
-| `q:dedupe <file>` | C4（q:gate の中） | questions.json | 似ている bank の問題 ID と率 | bank の全体 |
-| `q:linkcheck` | C4・週 1 | なし | 切れた URL と問題 ID | |
-| `q:stats` | 週 1 | なし | 正解の位置・長さの偏り | |
-| `app:check <ID>` | A3 | spec.json | AC ごとの合否・失敗の要点 | 試験・ビルド・e2e のログ全文 |
-| `app:data` | A2・A3 | なし | app/public/questions.json の問題数 | bank → 配信用 JSON の変換 |
-| `learn:weak` | L1 | .loop/answers/*.json | 足した項目 | 解答の記録の全部 |
-| `aws:cost` | 人に聞かれた時・週 1 | なし | 今月の費用（サービス別の上位 5） | Cost Explorer の生の応答（人の承認後に作る） |
+`L` = `node dop/tools/loop.mjs`、`Q` = `node dop/tools/q.mjs`、`D` = `node dop/tools/docs.mjs`。
 
-## ハーネス（Claude Code）に入れるもの
+| コマンド | 工程 | 入力 | 出力の主な鍵 | AI から隔離するもの | 状態 |
+| --- | --- | --- | --- | --- | --- |
+| `L start` | 毎回のはじめ | なし | state, doc, item | state.json・backlog.json | 済 |
+| `L status` | いつでも | なし | state, doc, item, human_reason | 同上 | 済 |
+| `L next` | S0 | なし | state, doc, item / empty | 並べ方の決まり・coverage | 済 |
+| `L advance --result <key>` | 各工程の終わり | 結果の key | state, doc, item, stop | 状態の移り方・attempts・札の照合 | 済 |
+| `L close` | S9 | なし | outcome, repeated_issues, human_needed | runs.jsonl・archive への移動 | 済 |
+| `L add --json '<項目か配列>'` / `--file` | 人・L1 | backlog の項目 | added | ID の振り方・重複の確認 | 済 |
+| `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
+| `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
+| `L pause` | 人に止められた時 | なし | state | | 済 |
+| `D fetch <url> --item <ID>` | C1 | 許可した URL | 見出しと語数、file | HTML・ナビ・不要な部分 | 済 |
+| `D check <ID>` | C1 | work/<ID>/sources.md | 誤り | | 済 |
+| `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由） | スキーマの細部 | 済 |
+| `Q blind <ID>` / `Q reveal <ID>` | C3 | questions.json | file（blind.json / reveal.json） | 答え（先に見ないように） | 済 |
+| `Q verdict <ID>` | C3 | verify.json | result, 問ごとの verdict | 判定の決まり・drop の移動 | 済 |
+| `Q gate <ID> [--net]` | C4 | work/<ID>/ | 落ちた検査 | C4 の検査の全部 | 済 |
+| `Q publish <ID>` | C4 | work/<ID>/ | bank に入れた問題 ID | 並べ替え・番号の振り方 | 済 |
+| `Q find [--task --service --text --id]` | どこでも | 条件 | id・task・services・問題文の先頭 | bank の全体 | 済 |
+| `Q coverage` | いつでも | なし | タスク（ドメイン）ごとの数・目標・不足 | bank の全体 | 済 |
+| `Q dedupe <ID>` | いつでも | questions.json | 似ている bank の問題と率 | bank の全体 | 済 |
+| `Q stats` | 週 1 | なし | 正解の位置・ドメイン別の数 | | 済 |
+| `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
+| `app:data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 未（アプリと一緒に） |
+| `app:check <ID>` | A3 | spec.json | AC ごとの合否 | 試験・ビルド・e2e のログ全文 | 未（アプリと一緒に） |
+| `learn:weak` | L1 | .loop/answers/*.json | 足した項目 | 解答の記録の全部 | 未（記録の書き出しの後） |
+| `aws:cost` | 週 1 | なし | 今月の費用 | Cost Explorer の応答 | 未（AWS へ移す時） |
 
-ツールを「呼び忘れ」させないため、Claude Code の仕組みで自動で動かす。
+## ハーネス（Claude Code）に入れたもの
+
+ツールを「呼び忘れ」させないため、Claude Code の仕組みで自動で動かす。中身はリポジトリの根の `.claude/`。
+
+```xml
+<harness>
+  <hook event="PostToolUse" matcher="Write|Edit|MultiEdit" run="tools/hooks.mjs post-write">dop/work/&lt;ID&gt;/questions.json を書いたら形を確かめ、誤りを AI に返す</hook>
+  <hook event="PreToolUse" matcher="Write|Edit|MultiEdit" run="tools/hooks.mjs pre-write">ループの実行中（loop start から STOP・HUMAN・pause まで）は loop/LOOP.md と loop/steps/*.md を書き換えさせない</hook>
+  <hook event="Stop" run="tools/hooks.mjs stop">ループの途中なら止まらせず、次に呼ぶコマンドを返す（2 回目は止まってよい）</hook>
+  <permissions_deny>Read(./dop/bank/**), Read(./dop/.loop/state.json), Read(./dop/.loop/backlog.json)</permissions_deny>
+  <agent name="dop-researcher" model="haiku">C1。docs fetch・check。返事は 3 行</agent>
+  <agent name="dop-verifier" model="sonnet">C3。Web なし。blind → reveal → verify.json</agent>
+  <skill name="dop-loop">LOOP.md 8 章のはじめ方</skill>
+</harness>
+```
+
+- 読む禁止は `cat` などで抜けられる。強制ではなく「間違って読まない」ための柵。
+- ツールを直す人（ループの外の作業）は `dop/tools/` を読んでよい。
+
+## 結果の札（result.json）
+
+ツールが `work/<ID>/result.json` に `{ "state", "result", "count" }` を書き、`L advance` はこれと照らして進める。札を書くのは次の時だけ。
 
 ```json
 {
-  "hooks": {
-    "PostToolUse": [
-      { "matcher": "Write|Edit", "when": "path が dop/work/*/questions.json", "run": "q:validate", "on_fail": "誤りをそのまま AI に返す（次の手で直させる）" },
-      { "matcher": "Write|Edit", "when": "path が dop/loop/steps/*.md か dop/loop/LOOP.md", "run": "拒否", "reason": "工程の文書は S9 の proposals を人が採った時だけ変える" }
-    ],
-    "Stop": [
-      { "run": "loop status --check", "on_fail": "工程の途中（advance を呼んでいない）なら止まらせず、呼ぶように返す。人の関門なら止まってよい" }
-    ]
-  },
-  "permissions": {
-    "deny": ["Read(dop/bank/**)", "Read(dop/.loop/state.json)", "Read(dop/.loop/backlog.json)", "Read(dop/tools/**)"]
-  },
-  "agents": {
-    "dop-researcher": { "model": "haiku", "tools": ["WebFetch", "Bash(docs:fetch)", "Read(dop/work/**)", "Write(dop/work/*/sources.md)"] },
-    "dop-verifier":   { "model": "sonnet 以上", "tools": ["Read(dop/work/*/sources.md)", "Bash(q:blind|q:reveal)", "Write(dop/work/*/verify.json)"], "note": "Web を使わせない（sources.md の外の知識で正解を決めないため。ただし sources.md に無いが正しいと思う事は issues に unsupported として書く）" }
-  },
-  "skill": { "name": "dop-loop", "body": "LOOP.md 8 章 bootstrap を行う" }
+  "C1_research": { "ok": "D check が ok" },
+  "C2_author":   { "ok": "Q validate が ok" },
+  "C3_verify":   { "pass|fix|drop": "Q verdict（fix で言い回しだけなら count: false）" },
+  "C4_gate":     { "pass": "Q publish が ok", "fail": "Q gate か Q publish が落ちた" },
+  "A3_check":    { "pass|fail": "app:check（未）" },
+  "L1_learn":    { "ok": "learn:weak（未）" }
 }
 ```
 
-- hooks の deny（Read の禁止）は `cat` などで抜けられる。強制ではなく「間違って読まない」ための柵。
-- 上は設計。実際の `.claude/settings.json` の書き方に合わせるのは、ツールを作る時に行う。
-
-## 作る順番（ツールを作る app 項目とは別の、最初の準備）
-
-```json
-[
-  { "order": 1, "tools": ["loop status/next/advance/close/add"], "why": "これが無いとループが回らない" },
-  { "order": 2, "tools": ["q:validate", "q:blind", "q:reveal", "q:verdict"], "why": "C2・C3 の最小" },
-  { "order": 3, "tools": ["docs:fetch", "sources:check"], "why": "C1。初めは researcher が WebFetch で代わりをしてもよい" },
-  { "order": 4, "tools": ["q:gate", "q:publish", "q:dedupe", "q:find", "q:coverage"], "why": "bank に入れる" },
-  { "order": 5, "tools": ["app:data", "app:check"], "why": "A3。アプリの骨組みと一緒に" },
-  { "order": 6, "tools": ["learn:weak", "q:linkcheck", "q:stats", "aws:cost"], "why": "回り出してから" }
-]
-```
+C1 の `no_source`、A1 の `ok`・`need_human` は AI の判断で進めてよい（札は要らない）。
