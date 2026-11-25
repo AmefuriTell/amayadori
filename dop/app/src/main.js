@@ -4,7 +4,8 @@ import { addAnswer, domainStats } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang } from './storage.js';
+import { RATES, questionScript, answerScript } from './logic/speech.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, saveSpeech } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -17,6 +18,8 @@ const state = {
   reports: storedReports.reports,
   report: null, // 報告の欄を開いている間 { kind, comment, status }
   lang: loadLang(), // 問題文と選択肢の言葉（P-012）
+  speech: loadSpeech(), // 読み上げ（A-0009）{ on, rate }
+  spokenKey: null, // 最後に読んだ段（"問題の番号:答えたか"）。同じ段は読み直さない
 };
 
 for (const tab of document.querySelectorAll('.tab')) {
@@ -51,7 +54,60 @@ async function load() {
   }
 }
 
+// ---- 読み上げ（A-0009）: ブラウザの speechSynthesis。外へは送らない -------------
+const synth = typeof window.SpeechSynthesisUtterance === 'function' && window.speechSynthesis ? window.speechSynthesis : null;
+
+function speak(parts) {
+  if (!synth) return;
+  synth.cancel();
+  const voices = synth.getVoices?.() ?? [];
+  for (const p of parts) {
+    const u = new window.SpeechSynthesisUtterance(p.text);
+    u.lang = p.lang === 'ja' ? 'ja-JP' : 'en-US';
+    u.rate = state.speech.rate;
+    const voice = voices.find((v) => String(v.lang).replace('_', '-').startsWith(u.lang));
+    if (voice) u.voice = voice;
+    synth.speak(u);
+  }
+}
+
+function stopSpeech() {
+  if (synth && state.spokenKey) synth.cancel();
+  state.spokenKey = null;
+}
+
+// 問題が出た時と答えた時に 1 回だけ読む
+function autoSpeak(q, view) {
+  const key = `${state.index}:${state.answered}`;
+  if (!synth || !state.speech.on || key === state.spokenKey) return;
+  state.spokenKey = key;
+  speak(state.answered ? answerScript(q, grade(q, state.selected)) : questionScript(view));
+}
+
+function setSpeech(change) {
+  state.speech = { ...state.speech, ...change };
+  saveSpeech(state.speech);
+}
+
+function renderSpeech() {
+  const on = state.speech.on;
+  return el('div', { class: 'speech', 'data-testid': 'speech' },
+    el('button', {
+      type: 'button', class: on ? '' : 'secondary', 'aria-pressed': on ? 'true' : 'false', disabled: !synth,
+      onclick: () => { setSpeech({ on: !on }); if (on) stopSpeech(); else state.spokenKey = null; render(); },
+      text: on ? '読み上げ オン' : '読み上げ',
+    }),
+    synth ? null : el('span', { class: 'muted small', 'data-testid': 'speech-hint', text: 'このブラウザは読み上げに対応していません' }),
+    synth && on ? el('button', { type: 'button', class: 'secondary', onclick: () => { state.spokenKey = null; render(); }, text: 'もう一度' }) : null,
+    synth && on ? el('label', { class: 'small' }, '速さ ', el('select', {
+      'aria-label': '読み上げの速さ',
+      onchange: (ev) => { setSpeech({ rate: Number(ev.target.value) }); },
+    }, RATES.map((r) => el('option', { value: String(r), selected: r === state.speech.rate, text: `${r}` })))) : null,
+  );
+}
+
 function render() {
+  if (state.view !== 'solve' || state.index >= state.questions.length) stopSpeech();
   for (const tab of document.querySelectorAll('.tab')) {
     if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
   }
@@ -94,6 +150,7 @@ function render() {
 
   const card = el('section', { class: 'card', 'aria-labelledby': 'stem' },
     meta,
+    renderSpeech(),
     el('p', { class: 'stem', id: 'stem', 'data-testid': 'stem', lang: view.lang, text: view.stem }),
     multi ? el('p', { class: 'hint', 'data-testid': 'select-hint', text: `${q.select_count} つ選ぶ` }) : null,
     list,
@@ -106,6 +163,7 @@ function render() {
     card.append(renderAnswer(q));
   }
   app.replaceChildren(card);
+  autoSpeak(q, view);
 }
 
 function renderAnswer(q) {

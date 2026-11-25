@@ -2,6 +2,7 @@
 import { RECORD_KEY, parseRecord, serializeRecord } from './logic/record.js';
 import { REPORT_KEY, parseReports, serializeReports } from './logic/report.js';
 import { LANG_KEY, parseLang } from './logic/lang.js';
+import { SPEECH_KEY, parseSpeech } from './logic/speech.js';
 
 export function loadAnswers() {
   try {
@@ -57,6 +58,23 @@ export function loadLang() {
 export function saveLang(lang) {
   try {
     window.localStorage.setItem(LANG_KEY, lang);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadSpeech() {
+  try {
+    return parseSpeech(window.localStorage.getItem(SPEECH_KEY));
+  } catch {
+    return parseSpeech(null);
+  }
+}
+
+export function saveSpeech(speech) {
+  try {
+    window.localStorage.setItem(SPEECH_KEY, JSON.stringify(speech));
     return true;
   } catch {
     return false;
