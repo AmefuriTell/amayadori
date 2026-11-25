@@ -1,0 +1,57 @@
+{
+  "id": "q-5.1-0004",
+  "task": "5.1",
+  "services": [
+    "Amazon EventBridge",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A web store account (111122223333) must send newOrderCreated events with the source com.exampleCorp.webStore to a central event bus named central-event-bus in a separate account (123456789012). The central account must accept only these events from the web store account, following least privilege. Which solution meets these requirements with the LEAST privilege?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach a resource-based policy to the event bus in the web store account that allows account 123456789012 to read the events."
+    },
+    {
+      "key": "B",
+      "text": "Attach a resource-based policy to central-event-bus that allows every account in the organization to publish any event."
+    },
+    {
+      "key": "C",
+      "text": "Attach a resource-based policy to central-event-bus in account 123456789012 that allows account 111122223333 to publish only events with that source and detail-type."
+    },
+    {
+      "key": "D",
+      "text": "Create an IAM user in account 123456789012 and store its access keys in the web store application to call PutEvents."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "別アカウントのイベントバスへ送るには、受け取る側（バスの持ち主）のアカウントのイベントバスにリソースベースのポリシーを付け、送る側のアカウントに発行を許す。条件で source と detail-type を絞れば、決めたイベントだけを受け付けられる。",
+    "per_choice": {
+      "A": "ポリシーは受け取る側のバスに付ける。送る側のバスに付けても、中央のバスへの発行は許されない。",
+      "B": "全てのアカウントの全てのイベントを許すことになり、最小権限に反する。",
+      "C": "正しい。受け取る側のバスで、送る側のアカウントに、決めたイベントだけの発行を許す。",
+      "D": "長く使う認証情報をアプリに持たせることになり、最小権限の考え方にも合わない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+      "source_id": "S6",
+      "quote": "but only for events with a source value set to com.exampleCorp.webStore and a detail-type set to newOrderCreated."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+      "source_id": "S6",
+      "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

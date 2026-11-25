@@ -78,3 +78,5 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>こうした問題には note に「試験とずれるかもしれない」を書き（q-6.2-0002 で実施）、アプリで印を出す。新旧で答えが変わる問題は作らない（C-0074 ではそうした）。決まりとして C2 に足すかは人が決める</change>
 </proposal>
 ```
+
+- C-0063（2026-11-25）: EventBridge のドキュメントにも新しい API（Custom Event Bus と Classic、CreateSubscriber、PutRawEvents、JSONata の変換、既定の再試行 5 回・300 秒）が出ていた。従来のルールの既定の再試行とは違う可能性があり、試験とずれるので、P-009 に沿って新旧で答えが変わる所（S5・S7）は問題にしなかった。

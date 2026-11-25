@@ -1,0 +1,62 @@
+{
+  "id": "q-5.1-0001",
+  "task": "5.1",
+  "services": [
+    "Amazon EventBridge",
+    "AWS CloudTrail"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security team wants an Amazon EventBridge rule on the default event bus to start an investigation workflow whenever anyone calls read-only management APIs such as Describe* on sensitive resources. CloudTrail is enabled in the account. The rule is enabled, but it never matches these read-only calls, although it matches write calls. The team wants to fix this without writing code. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the rule state to ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS."
+    },
+    {
+      "key": "B",
+      "text": "Move the rule to a partner event bus so that it receives all AWS management events."
+    },
+    {
+      "key": "C",
+      "text": "Disable and enable the rule again so that EventBridge rebuilds its event pattern."
+    },
+    {
+      "key": "D",
+      "text": "Create an AWS Lambda function that reads the CloudTrail log files in Amazon S3 and starts the workflow."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "既定のイベントバスのルールで、CloudTrail を通した読み取り専用の管理イベントを受けられる。ただしルールを有効（ENABLED）にしただけでは、読み取り専用の管理イベントは照合されない。状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると、読み取り専用の管理イベントも含めて照合する。",
+    "per_choice": {
+      "A": "正しい。読み取り専用の管理イベントも照合するようになる。",
+      "B": "パートナーのイベントバスは AWS のイベントを受けない。",
+      "C": "ただの有効の状態は、読み取り専用の管理イベントを照合しない。",
+      "D": "自分でコードを書くことになり、要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+      "source_id": "S2",
+      "quote": "You can set up rules on your default event bus to receive read-only management events from AWS services via CloudTrail."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+      "source_id": "S2",
+      "quote": "Enable the rule so that EventBridge matches events against the rule, except for read-only AWS management events delivered through CloudTrail."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+      "source_id": "S2",
+      "quote": "Partner event buses do not receive AWS events."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

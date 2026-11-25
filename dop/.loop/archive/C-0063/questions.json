@@ -1,0 +1,253 @@
+{
+  "item": "C-0063",
+  "questions": [
+    {
+      "id": "q-5.1-0001",
+      "task": "5.1",
+      "services": [
+        "Amazon EventBridge",
+        "AWS CloudTrail"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team wants an Amazon EventBridge rule on the default event bus to start an investigation workflow whenever anyone calls read-only management APIs such as Describe* on sensitive resources. CloudTrail is enabled in the account. The rule is enabled, but it never matches these read-only calls, although it matches write calls. The team wants to fix this without writing code. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the rule state to ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS."
+        },
+        {
+          "key": "B",
+          "text": "Move the rule to a partner event bus so that it receives all AWS management events."
+        },
+        {
+          "key": "C",
+          "text": "Disable and enable the rule again so that EventBridge rebuilds its event pattern."
+        },
+        {
+          "key": "D",
+          "text": "Create an AWS Lambda function that reads the CloudTrail log files in Amazon S3 and starts the workflow."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定のイベントバスのルールで、CloudTrail を通した読み取り専用の管理イベントを受けられる。ただしルールを有効（ENABLED）にしただけでは、読み取り専用の管理イベントは照合されない。状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると、読み取り専用の管理イベントも含めて照合する。",
+        "per_choice": {
+          "A": "正しい。読み取り専用の管理イベントも照合するようになる。",
+          "B": "パートナーのイベントバスは AWS のイベントを受けない。",
+          "C": "ただの有効の状態は、読み取り専用の管理イベントを照合しない。",
+          "D": "自分でコードを書くことになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "source_id": "S2",
+          "quote": "You can set up rules on your default event bus to receive read-only management events from AWS services via CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "source_id": "S2",
+          "quote": "Enable the rule so that EventBridge matches events against the rule, except for read-only AWS management events delivered through CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "source_id": "S2",
+          "quote": "Partner event buses do not receive AWS events."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-5.1-0002",
+      "task": "5.1",
+      "services": [
+        "AWS Health",
+        "Amazon EventBridge",
+        "AWS IAM"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company runs workloads in many AWS Regions in the standard partition. The operations team must be notified of account-specific AWS Health events from every Region, and of AWS Health events for AWS Identity and Access Management (IAM), which are not Region-specific. The team wants as few Amazon EventBridge rules as possible. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one central rule in US West (Oregon) to receive account-specific AWS Health events from all standard partition Regions."
+        },
+        {
+          "key": "B",
+          "text": "Create a rule in US East (N. Virginia) to receive global AWS Health events, such as events for IAM."
+        },
+        {
+          "key": "C",
+          "text": "Create a rule in each Region where the workloads run, and rely on those rules to receive IAM events."
+        },
+        {
+          "key": "D",
+          "text": "Use the simplified integration to also receive the public events that appear in the AWS Health Dashboard."
+        },
+        {
+          "key": "E",
+          "text": "Create a rule only in the Region where the company's main workload runs; it receives events from all Regions."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "標準のパーティションの全てのリージョンのアカウント別の Health のイベントは、米国西部（オレゴン）に置いた 1 つの中央のルールで集められる。IAM のようにリージョンに属さないグローバルなイベントを受けるには、米国東部（バージニア北部）にルールを作る必要がある。",
+        "per_choice": {
+          "A": "正しい。1 つのルールで全てのリージョンのアカウント別のイベントを集める。",
+          "B": "正しい。グローバルなイベントはバージニア北部のルールで受ける。",
+          "C": "ルールの数が増え、グローバルなイベントはバージニア北部のルールが無いと受けられない。",
+          "D": "簡単な統合（simplified integration）では、Health Dashboard に出る公開のイベントは受けられない。",
+          "E": "ふつうのリージョンのルールはそのリージョンの分だけ。全てのリージョンをまとめるのはオレゴンの中央のルール。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "source_id": "S4",
+          "quote": "To receive account-specific AWS Health events from all Regions in the standard AWS partition, you can set up a central rule in the US West (Oregon) Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "source_id": "S4",
+          "quote": "To receive global events, you must create a rule for the US East (N. Virginia) Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "source_id": "S4",
+          "quote": "Simplified integration doesn't allow you to receive public events that are shown in the AWS Health Dashboard."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "source_id": "S4",
+          "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for."
+        }
+      ],
+      "difficulty": 3,
+      "status": "draft",
+      "created": "2026-11-25",
+      "low_confidence": true
+    },
+    {
+      "id": "q-5.1-0003",
+      "task": "5.1",
+      "services": [
+        "AWS Health",
+        "Amazon EventBridge",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. The central operations team created an Amazon EventBridge rule for AWS Health events in its operations account, but the rule receives events only for the operations account. The team must receive AWS Health events for all accounts in the organization in one place, without deploying rules to every account. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the current rule, because EventBridge rules for AWS Health receive events for every account in the organization."
+        },
+        {
+          "key": "B",
+          "text": "Use the AWS Health organizational view with delegated administrator access for the operations account to aggregate events from all accounts."
+        },
+        {
+          "key": "C",
+          "text": "Deploy the same EventBridge rule to every member account with StackSets, and have each rule send email to the team."
+        },
+        {
+          "key": "D",
+          "text": "Ask each account owner to check the AWS Health Dashboard every day and forward important events."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Health のイベントの EventBridge のルールは、自分のアカウントの通知しか受けない。組織の他のアカウントのイベントを受けるには、組織のビュー（organizational view）と委任管理者のアクセスで Health のイベントを集約する。",
+        "per_choice": {
+          "A": "ルールが受けるのは自分のアカウントの通知だけ。",
+          "B": "正しい。組織のビューと委任管理者で、全アカウントのイベントを 1 か所に集められる。",
+          "C": "全アカウントにルールを置くことになり、要件に反する。",
+          "D": "人の作業に頼ることになり、手間が大きく漏れも出る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+          "source_id": "S3",
+          "quote": "Any EventBridge rules that you create can only receive notifications for your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+          "source_id": "S3",
+          "quote": "To receive organizational events for other accounts within your AWS Organizations, see Aggregating AWS Health events using organizational view and delegated administrator access."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-5.1-0004",
+      "task": "5.1",
+      "services": [
+        "Amazon EventBridge",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A web store account (111122223333) must send newOrderCreated events with the source com.exampleCorp.webStore to a central event bus named central-event-bus in a separate account (123456789012). The central account must accept only these events from the web store account, following least privilege. Which solution meets these requirements with the LEAST privilege?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach a resource-based policy to the event bus in the web store account that allows account 123456789012 to read the events."
+        },
+        {
+          "key": "B",
+          "text": "Attach a resource-based policy to central-event-bus in account 123456789012 that allows account 111122223333 to publish only events with that source and detail-type."
+        },
+        {
+          "key": "C",
+          "text": "Attach a resource-based policy to central-event-bus that allows every account in the organization to publish any event."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user in account 123456789012 and store its access keys in the web store application to call PutEvents."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "別アカウントのイベントバスへ送るには、受け取る側（バスの持ち主）のアカウントのイベントバスにリソースベースのポリシーを付け、送る側のアカウントに発行を許す。条件で source と detail-type を絞れば、決めたイベントだけを受け付けられる。",
+        "per_choice": {
+          "A": "ポリシーは受け取る側のバスに付ける。送る側のバスに付けても、中央のバスへの発行は許されない。",
+          "B": "正しい。受け取る側のバスで、送る側のアカウントに、決めたイベントだけの発行を許す。",
+          "C": "全てのアカウントの全てのイベントを許すことになり、最小権限に反する。",
+          "D": "長く使う認証情報をアプリに持たせることになり、最小権限の考え方にも合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+          "source_id": "S6",
+          "quote": "but only for events with a source value set to com.exampleCorp.webStore and a detail-type set to newOrderCreated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+          "source_id": "S6",
+          "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

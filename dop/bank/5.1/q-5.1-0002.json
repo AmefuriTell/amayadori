@@ -1,0 +1,75 @@
+{
+  "id": "q-5.1-0002",
+  "task": "5.1",
+  "services": [
+    "AWS Health",
+    "Amazon EventBridge",
+    "AWS IAM"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company runs workloads in many AWS Regions in the standard partition. The operations team must be notified of account-specific AWS Health events from every Region, and of AWS Health events for AWS Identity and Access Management (IAM), which are not Region-specific. The team wants as few Amazon EventBridge rules as possible. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create one central rule in US West (Oregon) to receive account-specific AWS Health events from all standard partition Regions."
+    },
+    {
+      "key": "B",
+      "text": "Create a rule in US East (N. Virginia) to receive global AWS Health events, such as events for IAM."
+    },
+    {
+      "key": "C",
+      "text": "Create a rule in each Region where the workloads run, and rely on those rules to receive IAM events."
+    },
+    {
+      "key": "D",
+      "text": "Use the simplified integration to also receive the public events that appear in the AWS Health Dashboard."
+    },
+    {
+      "key": "E",
+      "text": "Create a rule only in the Region where the company's main workload runs; it receives events from all Regions."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "標準のパーティションの全てのリージョンのアカウント別の Health のイベントは、米国西部（オレゴン）に置いた 1 つの中央のルールで集められる。IAM のようにリージョンに属さないグローバルなイベントを受けるには、米国東部（バージニア北部）にルールを作る必要がある。",
+    "per_choice": {
+      "A": "正しい。1 つのルールで全てのリージョンのアカウント別のイベントを集める。",
+      "B": "正しい。グローバルなイベントはバージニア北部のルールで受ける。",
+      "C": "ルールの数が増え、グローバルなイベントはバージニア北部のルールが無いと受けられない。",
+      "D": "簡単な統合（simplified integration）では、Health Dashboard に出る公開のイベントは受けられない。",
+      "E": "ふつうのリージョンのルールはそのリージョンの分だけ。全てのリージョンをまとめるのはオレゴンの中央のルール。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+      "source_id": "S4",
+      "quote": "To receive account-specific AWS Health events from all Regions in the standard AWS partition, you can set up a central rule in the US West (Oregon) Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+      "source_id": "S4",
+      "quote": "To receive global events, you must create a rule for the US East (N. Virginia) Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+      "source_id": "S4",
+      "quote": "Simplified integration doesn't allow you to receive public events that are shown in the AWS Health Dashboard."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+      "source_id": "S4",
+      "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "low_confidence": true,
+  "last_checked": "2026-11-25"
+}
