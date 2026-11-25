@@ -1,0 +1,549 @@
+{
+  "item": "T-0019",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company uses AWS Organizations and is a new AWS CloudTrail customer. The security team works from a dedicated security account and must record events for the management account and every member account, including accounts that join later. The security team must manage the logging configuration without signing in to the management account. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Use CloudFormation StackSets to create a separate trail in every member account, and add the stack to new accounts when they join."
+        },
+        {
+          "key": "B",
+          "text": "Create an organization trail in the management account, and give the security team an IAM role in the management account to manage it."
+        },
+        {
+          "key": "C",
+          "text": "Create a CloudTrail Lake event data store for the organization in the security account, and query events from there."
+        },
+        {
+          "key": "D",
+          "text": "From the management account, make the security account a CloudTrail delegated administrator, and create an organization trail from the security account."
+        }
+      ],
+      "explanation": {
+        "summary": "組織の証跡（organization trail）は、管理アカウントと全メンバーアカウントのイベントを記録する。管理アカウントは委任管理者を決められ、委任管理者は組織の証跡を作って管理できるので、セキュリティのチームは管理アカウントに入らずに済む。",
+        "per_choice": {
+          "A": "アカウントごとに証跡を持つことになり、新しいアカウントへの追加の作業も要る。",
+          "B": "記録はできるが、セキュリティのチームが管理アカウントに入ることになり、要件に反する。",
+          "C": "CloudTrail Lake は 2026 年 5 月 31 日から新しい利用者の受付を止めており、新しく使い始める会社には選べない。",
+          "D": "正しい。委任管理者として組織の証跡を作り、管理アカウントにも入らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+          "source_id": "S2",
+          "quote": "The management account for the organization can assign a delegated administrator to create new organization trails or manage existing organization trails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+          "source_id": "S2",
+          "quote": "Organization trails log events for the management account and all member accounts in the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html",
+          "source_id": "S0",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An auditor requires the company to prove that AWS CloudTrail log files in Amazon S3 were not modified or deleted after delivery. The auditor also wants proof that no log files were delivered during a specific period when no activity occurred. The company wants to rely on a built-in CloudTrail capability instead of building its own process. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn on CloudTrail log file integrity validation, and validate the log files with the hourly files that CloudTrail delivers."
+        },
+        {
+          "key": "B",
+          "text": "Turn on S3 Versioning for the log bucket so that every change to a log file keeps an earlier version."
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that stores a hash of each new log file in Amazon DynamoDB, and compare the hashes during audits."
+        },
+        {
+          "key": "D",
+          "text": "Send the trail to Amazon CloudWatch Logs as well, and compare the events in both places during audits."
+        }
+      ],
+      "explanation": {
+        "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けた全てのログファイルのハッシュを作り、1 時間ごとにその時間のログファイルとハッシュを並べたファイルも届ける。これで、届けた後の変更・削除・偽造を見つけられ、ある期間にログファイルが届けられなかったことも言える。",
+        "per_choice": {
+          "A": "正しい。CloudTrail の機能だけで、変更・削除の有無と、届けられなかった期間を示せる。",
+          "B": "変更の前の版は残るが、どれが CloudTrail の届けたままのファイルかや、ある期間に届けられた物が無いことは示せない。",
+          "C": "自分で仕組みを作ることになり、要件に反する。",
+          "D": "比べる手間がかかり、届けた後に変えられていないことの証明にはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "assert positively that no log files were delivered to your account during a given period of time."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "answer": [
+        "A",
+        "C"
+      ],
+      "stem_en": "A company stores audit logs in an Amazon S3 bucket with S3 Object Lock enabled. No user, including the root user, may overwrite or delete any log object for 7 years. Some log objects are part of a legal investigation and must be kept beyond 7 years, for as long as the investigation lasts. The investigation team must be able to release those objects when the investigation ends. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set a default retention period of 7 years in compliance mode for the bucket."
+        },
+        {
+          "key": "B",
+          "text": "Set a default retention period of 7 years in governance mode for the bucket."
+        },
+        {
+          "key": "C",
+          "text": "Place a legal hold on the investigation objects, and give the investigation team the s3:PutObjectLegalHold permission."
+        },
+        {
+          "key": "D",
+          "text": "Place a legal hold with a fixed period of 10 years on the investigation objects."
+        },
+        {
+          "key": "E",
+          "text": "Give the investigation team permission to bypass governance mode so that they can extend retention when needed."
+        }
+      ],
+      "explanation": {
+        "summary": "compliance モードでは、保持期間の間、ルートユーザーを含め誰もオブジェクトの版を上書きも削除もできない。法的保持（legal hold）は期間を持たず、外されるまで続き、s3:PutObjectLegalHold の権限を持つ人が付け外しできる。",
+        "per_choice": {
+          "A": "正しい。ルートユーザーも含めて 7 年間は上書きも削除もできない。",
+          "B": "governance モードは、特別な権限を持つ人なら削除や設定の変更ができるので、「誰も」の要件に合わない。",
+          "C": "正しい。調査が続く間は残り、調査のチームが外せる。",
+          "D": "法的保持には決まった期間が無い。外されるまで続く。",
+          "E": "governance モードでは誰も消せないことにならない。期間を延ばすのは法的保持で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S5",
+          "quote": "In compliance mode, a protected object version can't be overwritten or deleted by any user, including the root user in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S5",
+          "quote": "In governance mode, users can't overwrite or delete an object version or alter its lock settings unless they have special permissions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S6",
+          "quote": "However, a legal hold doesn't have an associated fixed amount of time and remains in effect until removed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S6",
+          "quote": "Legal holds can be freely placed and removed by any user who has the s3:PutObjectLegalHold permission."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company uses AWS Organizations with 40 accounts in four Regions, and AWS Config records resources in every account. The security team needs one view of configuration and compliance data for all accounts and Regions from its security account. The security account must not be able to change anything in the source accounts, and the team does not want to approve access in each account one by one. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config aggregator in the security account that uses the organization as its source."
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Config aggregator in the security account that lists each account, and authorize it in every source account."
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM role with AWS Config write permissions in every account, and switch to each role to review the data."
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that copies configuration snapshots from every account to the security account each day."
+        }
+      ],
+      "explanation": {
+        "summary": "アグリゲーターは、許された元のアカウントとリージョンのデータを集約アカウントへ写し、読むだけの見え方を作る。元のアカウントやリージョンを変える権限は持たない。AWS Organizations の一部のアカウントを集める時は、承認が要らない。",
+        "per_choice": {
+          "A": "正しい。組織を元にすれば各アカウントでの承認が要らず、読むだけで変えられない。",
+          "B": "読むだけの見え方は作れるが、アカウントごとに承認する作業が要り、要件に反する。",
+          "C": "書き込みの権限を与えることになり、変えられない要件に反する。1 つの見え方にもならない。",
+          "D": "自分で仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Aggregators provide a read-only view into the source accounts and Regions that the aggregator is authorized to view by replicating data from the source accounts into the aggregator account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Aggregators do not provide mutating access into a source account or region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0005",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A security team wants to be alerted when the rate of API calls that create resources suddenly rises far above the account's normal pattern, without defining fixed thresholds. The account has a trail that logs only read management events. The team enabled CloudTrail Insights for API call rate on the trail a week ago, but no Insights events have appeared, although unusual activity occurred. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a CloudWatch alarm with a static threshold on the number of CreateInstance calls in the trail's log group."
+        },
+        {
+          "key": "B",
+          "text": "Configure the trail to also log write management events, keep Insights enabled, and allow up to 36 hours for Insights events to start."
+        },
+        {
+          "key": "C",
+          "text": "Create a new event data store with Insights for data events, because Insights does not work on trails."
+        },
+        {
+          "key": "D",
+          "text": "Move the trail to us-east-1, because Insights events are generated only in that Region."
+        }
+      ],
+      "explanation": {
+        "summary": "CloudTrail Insights は、過去のイベントから API の呼び出しの率と誤りの率のふつうの形（基準）を作り、それから大きく外れた時に Insights のイベントを出す。管理イベントの呼び出しの率で Insights のイベントを出すには、証跡が書き込みの管理イベントを記録している必要がある。初めて有効にした後、出し始めるまで最大 36 時間かかることがある。",
+        "per_choice": {
+          "A": "決まったしきい値を決めることになり、要件に反する。",
+          "B": "正しい。書き込みの管理イベントを記録しないと、管理イベントの呼び出しの率の Insights は出ない。",
+          "C": "データイベントの Insights は証跡でしか使えない。今回の問題は書き込みの管理イベントを記録していないこと。",
+          "D": "Insights のイベントは、元になる管理イベントやデータイベントと同じリージョンで出る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "To log Insights events on the API call rate for management events, the trail or event data store must enable Insights and log write management events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html",
+          "source_id": "S2",
+          "quote": "After you enable CloudTrail Insights for the first time on a trail, CloudTrail may take up to 36 hours to begin delivering Insights events"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "Insights events on data events are only supported on trails and not on event data stores."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0006",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A custom metric counts failed sign-in attempts. Its normal value changes strongly by hour of day and day of week, so static thresholds either miss attacks at night or raise false alarms during business hours. The security team wants an alarm only when failures are unusually high for that time, not when they are unusually low. Which alarm BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "A static threshold alarm set to the highest value seen during business hours."
+        },
+        {
+          "key": "B",
+          "text": "An anomaly detection alarm that triggers when the metric is either above or below the band."
+        },
+        {
+          "key": "C",
+          "text": "An anomaly detection alarm that triggers when the metric is above the band of expected values."
+        },
+        {
+          "key": "D",
+          "text": "An anomaly detection alarm that triggers when the metric is below the band of expected values."
+        }
+      ],
+      "explanation": {
+        "summary": "異常検知（anomaly detection）では、統計と機械学習で過去のデータから期待される値の範囲（バンド）を作る。異常検知のアラームは決まったしきい値を持たず、その時の期待値と比べる。バンドより上・下・どちらでも、のどれで鳴らすかを選べる。",
+        "per_choice": {
+          "A": "決まったしきい値で、夜の攻撃を見逃し、時間帯による変化に合わない。",
+          "B": "少なすぎる時にも鳴り、要件に反する。",
+          "C": "正しい。その時間帯にしては多すぎる時だけ鳴る。",
+          "D": "少なすぎる時に鳴り、多すぎる時には鳴らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "source_id": "S3",
+          "quote": "These types of alarms don't have a static threshold for determining alarm state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "source_id": "S3",
+          "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0007",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company uses GuardDuty with a delegated administrator account. The security team wants an email for each new finding and wants repeated occurrences of an existing finding to be reported every 15 minutes instead of every 6 hours. Which actions should the team take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an EventBridge rule for GuardDuty findings with an Amazon SNS topic that has an email subscription as the target."
+        },
+        {
+          "key": "B",
+          "text": "In the GuardDuty administrator account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+        },
+        {
+          "key": "C",
+          "text": "In each member account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+        },
+        {
+          "key": "D",
+          "text": "Change the notification frequency for newly generated findings from 6 hours to 15 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Turn on email notifications in GuardDuty, which sends findings by email without an EventBridge rule."
+        }
+      ],
+      "explanation": {
+        "summary": "GuardDuty は検出結果を EventBridge へ自動で送る。通知を受けるには EventBridge のルールとターゲット（例えば SNS のトピック）を作る。新しい検出結果はほぼリアルタイムに送られ、その頻度は変えられない。同じ検出結果のその後の発生は既定で 6 時間ごとにまとめられ、管理者アカウントだけが 15 分・1 時間・6 時間から変えられる。",
+        "per_choice": {
+          "A": "正しい。ルールのターゲットに SNS のトピックを置き、メールで受ける。",
+          "B": "正しい。その後の発生の頻度は管理者アカウントが 15 分にできる。",
+          "C": "頻度を変えられるのは管理者アカウントだけ。",
+          "D": "新しい検出結果はほぼリアルタイムで送られ、この頻度は変えられない。",
+          "E": "通知を受けるには EventBridge のルールとターゲットを作る必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S5",
+          "quote": "In order to receive notifications about GuardDuty findings based on events, you must create an EventBridge rule and a target for GuardDuty."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "Only an administrator account can update the EventBridge notification frequency for subsequent finding occurrences."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "Possible values are 15 minutes, 1 hour, or the default 6 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "The notification frequency for newly generated findings is in near real-time."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0008",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "Auditors must see who downloaded objects from one sensitive Amazon S3 bucket. The account's trail logs only management events, and the account has hundreds of other busy buckets. The company wants to capture the needed activity while keeping CloudTrail costs as low as possible. Which solution meets these requirements MOST cost-effectively?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Enable data events on the trail with advanced event selectors that match only that bucket and the GetObject operation."
+        },
+        {
+          "key": "B",
+          "text": "Enable data events on the trail for all S3 buckets in the account."
+        },
+        {
+          "key": "C",
+          "text": "Keep the current trail, because management events already record GetObject calls on objects."
+        },
+        {
+          "key": "D",
+          "text": "Enable CloudTrail Insights on the trail so that unusual download activity is recorded."
+        }
+      ],
+      "explanation": {
+        "summary": "証跡は既定ではデータイベントを記録しない。データイベントは S3 のオブジェクトへの GetObject などのリソースの操作で、量が多く追加の料金がかかる。高度なイベントセレクター（advanced event selectors）で細かく絞れば、必要なイベントだけを記録して費用を抑えられる。",
+        "per_choice": {
+          "A": "正しい。必要なバケットと操作だけに絞って記録する。",
+          "B": "忙しい他のバケットのイベントも記録し、費用が増える。",
+          "C": "GetObject のようなオブジェクトの操作はデータイベントで、既定では記録されない。",
+          "D": "Insights は API の呼び出しの率の異常を見る物で、誰がオブジェクトを取ったかの記録にはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "By default, trails and event data stores do not log data events. Additional charges apply for data events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "Amazon S3 object-level API activity (for example, GetObject, DeleteObject, and PutObject API operations) on objects in S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "You can use advanced event selectors to create fine-grained selectors, which help you control costs by only logging the specific events of interest for your use cases."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0009",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A security team wants records of every rejected connection attempt to the network interfaces in one subnet, stored in Amazon S3 for later queries. The records should be aggregated at the shortest interval that VPC Flow Logs supports. Accepted traffic should not be recorded. Which actions should the team take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a flow log for the subnet that captures rejected traffic and publishes to Amazon S3."
+        },
+        {
+          "key": "B",
+          "text": "Set the flow log's maximum aggregation interval to 1 minute."
+        },
+        {
+          "key": "C",
+          "text": "Set the flow log's maximum aggregation interval to 30 seconds."
+        },
+        {
+          "key": "D",
+          "text": "Create a flow log that captures all traffic and publishes directly to Amazon OpenSearch Service."
+        },
+        {
+          "key": "E",
+          "text": "Keep the default maximum aggregation interval, which is the shortest interval available."
+        }
+      ],
+      "explanation": {
+        "summary": "フローログは VPC・サブネット・ネットワークインターフェイスに作れ、記録する通信の種類（受け入れ・拒否・全て）と送り先を決める。送り先は CloudWatch Logs・S3・Data Firehose。集計の最大の間隔は既定で 10 分で、作る時に 1 分にできる。",
+        "per_choice": {
+          "A": "正しい。サブネットの拒否された通信だけを S3 に送る。",
+          "B": "正しい。1 分が選べる最も短い間隔。",
+          "C": "選べるのは既定の 10 分か 1 分。",
+          "D": "送り先は CloudWatch Logs・S3・Data Firehose で、受け入れた通信も記録してしまう。",
+          "E": "既定は 10 分で、最も短い間隔ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html",
+          "source_id": "S4",
+          "quote": "The type of traffic to capture (accepted traffic, rejected traffic, or all traffic)"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+          "source_id": "S3",
+          "quote": "Flow log data can be published to the following locations: Amazon CloudWatch Logs, Amazon S3, or Amazon Data Firehose."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-log-records.html",
+          "source_id": "S5",
+          "quote": "By default, the maximum aggregation interval is 10 minutes. When you create a flow log, you can optionally specify a maximum aggregation interval of 1 minute."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0010",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "During a security review, a company finds that it has no record of the HTTP requests that reached its Application Load Balancer, and no central copy of the application log files that are written to local disks on its Amazon EC2 instances. The company wants both kinds of logs collected with managed features. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Enable access logs on the Application Load Balancer and specify an Amazon S3 bucket for them."
+        },
+        {
+          "key": "B",
+          "text": "Install the CloudWatch agent on the instances and configure it to send the application log files to CloudWatch Logs."
+        },
+        {
+          "key": "C",
+          "text": "Find the existing access logs in the load balancer's console, because access logs are always on."
+        },
+        {
+          "key": "D",
+          "text": "Enable VPC Flow Logs, which record the HTTP request paths that reach the load balancer."
+        },
+        {
+          "key": "E",
+          "text": "Enable CloudTrail management events, which copy the application log files from the instances."
+        }
+      ],
+      "explanation": {
+        "summary": "Elastic Load Balancing のアクセスログは既定で無効の任意の機能で、有効にすると指定した S3 バケットに圧縮したファイルで置かれる。CloudWatch エージェントは、EC2 のインスタンスやオンプレミスのサーバーからログを集めて CloudWatch Logs に送る。VPC フローログはネットワークインターフェイスの IP の通信の情報を記録する物。",
+        "per_choice": {
+          "A": "正しい。既定で無効なので、有効にして S3 に置く。",
+          "B": "正しい。エージェントがインスタンスのログを CloudWatch Logs に集める。",
+          "C": "アクセスログは既定で無効。",
+          "D": "フローログは IP の通信の情報で、HTTP のリクエストの中身は記録しない。",
+          "E": "CloudTrail の管理イベントは AWS の操作の記録で、インスタンスのログファイルは集めない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html",
+          "source_id": "S6",
+          "quote": "Access logs is an optional feature of Elastic Load Balancing that is disabled by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html",
+          "source_id": "S7",
+          "quote": "In all three models, the agent collects logs from Amazon EC2 instances and on-premises servers into Amazon CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+          "source_id": "S3",
+          "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
+        }
+      ]
+    }
+  ]
+}
