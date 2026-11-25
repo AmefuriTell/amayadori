@@ -1,0 +1,328 @@
+{
+  "item": "T-0009",
+  "questions": [
+    {
+      "id": "q-3.2-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company runs a payment AWS Lambda function and a batch Lambda function in the same account and Region. When the batch function receives a large burst, the payment function is throttled. The payment function must always have 200 concurrent executions available, and requests to it must not wait for execution environments to initialize at peak times. The batch function must not be limited. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Configure reserved concurrency of 200 on the payment function."
+        },
+        {
+          "key": "B",
+          "text": "Configure provisioned concurrency on the payment function for the peak periods."
+        },
+        {
+          "key": "C",
+          "text": "Configure reserved concurrency on the batch function so that it cannot use more than a fixed amount."
+        },
+        {
+          "key": "D",
+          "text": "Configure provisioned concurrency on the batch function so that its bursts start faster."
+        },
+        {
+          "key": "E",
+          "text": "Increase the memory of the payment function so that it can handle more requests at the same time."
+        }
+      ],
+      "explanation": {
+        "summary": "予約された同時実行（reserved concurrency）を関数に割り当てると、その分は他の関数が使えないので、他の関数の急増で使い切られない。ただし予約した実行環境は事前に初期化されていないので、コールドスタートを避けるには、事前に初期化した実行環境を用意する provisioned concurrency を使う。",
+        "per_choice": {
+          "A": "正しい。200 を予約すれば、他の関数がその分を使えない。",
+          "B": "正しい。事前に初期化した実行環境が、すぐにリクエストに応える。",
+          "C": "支払いの関数は守れるが、バッチの関数を制限しない要件に反する。",
+          "D": "バッチの関数を速くするだけで、支払いの関数が使い切られる問題は残る。",
+          "E": "メモリを増やしても、アカウントの同時実行を他の関数に使い切られる問題は解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S2",
+          "quote": "When you dedicate reserved concurrency to an Event Function, no other Event Function can use that concurrency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S3",
+          "quote": "However, none of these environments come pre-initialized."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S3",
+          "quote": "Lambda initializes that number of execution environments so that they are prepared to respond immediately to Event Function requests."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company runs an application on Amazon EC2 instances in an Auto Scaling group. Each new instance must write a large amount of data to disk before it can serve requests, which takes about 15 minutes. Traffic spikes are unpredictable. To keep latency low, the company keeps the group at a much higher minimum capacity than normal traffic needs. The company wants to reduce cost while keeping latency low during spikes. Which solution meets these requirements MOST cost-effectively?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add a warm pool to the Auto Scaling group, and lower the minimum capacity to match normal traffic."
+        },
+        {
+          "key": "B",
+          "text": "Increase the minimum capacity further so that more instances are always ready for spikes."
+        },
+        {
+          "key": "C",
+          "text": "Shorten the instance warmup time in the scaling policy so that new instances are counted sooner."
+        },
+        {
+          "key": "D",
+          "text": "Replace the instances with larger instance types, and keep the current minimum capacity."
+        }
+      ],
+      "explanation": {
+        "summary": "warm pool は、起動にとても時間がかかる（例えば大量のデータをディスクに書く）アプリの遅れを減らす。warm pool を使えば、遅れを抑えるために Auto Scaling グループを過剰に用意しなくてよい。",
+        "per_choice": {
+          "A": "正しい。起動の遅れを warm pool で減らし、過剰な最小の数をやめられる。",
+          "B": "遅れは抑えられるが、過剰に用意する費用がさらに増える。",
+          "C": "ウォームアップの時間は、メトリクスに数え始める時を決めるだけで、起動そのものは速くならない。",
+          "D": "費用が増え、過剰に用意していることも変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+          "source_id": "S4",
+          "quote": "A warm pool gives you the ability to decrease latency for your applications that have exceptionally long boot times, for example, because instances need to write massive amounts of data to disk."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+          "source_id": "S4",
+          "quote": "With warm pools, you no longer have to over-provision your Auto Scaling groups to manage latency in order to improve application performance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0003",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "An Auto Scaling group uses a target tracking scaling policy with a target of 50% average CPU utilization. New instances run CPU-heavy initialization for about 5 minutes after launch. During that time, the group's average CPU rises and the policy launches more instances than needed. The company must keep the 50% target for normal operation and must not change the application. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Raise the target value to 80% so that the initialization load does not trigger scale-out."
+        },
+        {
+          "key": "B",
+          "text": "Lower the target value to 30% so that capacity is added earlier and the average CPU stays low."
+        },
+        {
+          "key": "C",
+          "text": "Set an instance warmup time of about 5 minutes in the target tracking scaling policy."
+        },
+        {
+          "key": "D",
+          "text": "Disable scale-in on the scaling policy so that the extra instances are not terminated."
+        }
+      ],
+      "explanation": {
+        "summary": "新しいインスタンスのウォームアップの時間を決めると、その時間が過ぎるまで、そのインスタンスは Auto Scaling グループのメトリクスの集計に入らない。ウォームアップ中は、ウォームアップしていないインスタンスの値が目標を超えた時だけ増やす。",
+        "per_choice": {
+          "A": "50% の目標を保つ要件に反する。",
+          "B": "目標を変えることになり、増やしすぎもさらにひどくなる。",
+          "C": "正しい。初期化の間の CPU が集計に入らないので、余計に増えない。",
+          "D": "余計なインスタンスが残り続けるだけで、増やしすぎは止まらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "While instances are in the warmup period, your scaling policies only scale out if the metric value from instances that are not warming up is greater than the policy's target utilization."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An application's traffic follows a daily pattern that shifts slowly over the months, and new instances need about 10 minutes before they can serve traffic. The team created a predictive scaling policy two weeks ago, and the forecasts look accurate, but the Auto Scaling group still does not add capacity before the morning peak. The team wants capacity to be ready ahead of the peak without maintaining fixed schedules. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Change the policy from forecast only to forecast and scale, and set pre-launch instances to about 10 minutes."
+        },
+        {
+          "key": "B",
+          "text": "Keep the policy in forecast only mode, and wait for it to learn more of the pattern."
+        },
+        {
+          "key": "C",
+          "text": "Replace the policy with recurring scheduled actions that use cron expressions for the morning peak."
+        },
+        {
+          "key": "D",
+          "text": "Delete the policy and create it again so that it starts scaling from the first day."
+        }
+      ],
+      "explanation": {
+        "summary": "予測スケーリングは、過去最大 14 日のメトリクスから 48 時間先までの必要な容量を予測する。最初に有効にした時は forecast only のモードで、予測は作るが実際には増やさない。予測に合わせて増やすには forecast and scale にする。既定では毎時の始めに増やし、pre-launch instances（SchedulingBufferTime）で、起動に時間がかかるインスタンスを前もって起こせる。",
+        "per_choice": {
+          "A": "正しい。予測に合わせて増やし、起動の時間の分だけ前もって起こす。",
+          "B": "forecast only では予測を作るだけで、待っても増やさない。",
+          "C": "決まった予定を持ち続けることになり、形が変わるたびに直す必要がある。",
+          "D": "作り直しても最初は forecast only のまま。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "In this mode, it generates capacity forecasts but does not actually scale your Auto Scaling group based on those forecasts."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "This causes Amazon EC2 Auto Scaling to launch new instances ahead of the forecasted demand, giving them time to boot and become ready to handle traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "When you first enable predictive scaling, it runs in forecast only mode."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0005",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company exposes a TCP-based service to a partner. The partner's firewall allows outbound traffic only to a fixed list of IP addresses, one per Availability Zone that the company uses. Each TCP connection must stay with a single backend target for its lifetime. The company does not need any HTTP-level routing. Which solution BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "An Application Load Balancer with listener rules that route requests by path to a target group."
+        },
+        {
+          "key": "B",
+          "text": "A Network Load Balancer whose DNS name the partner adds to its firewall instead of IP addresses."
+        },
+        {
+          "key": "C",
+          "text": "A Network Load Balancer with one Elastic IP address associated with the network interface in each enabled Availability Zone."
+        },
+        {
+          "key": "D",
+          "text": "One Amazon EC2 instance with an Elastic IP address that forwards connections to the backend targets."
+        }
+      ],
+      "explanation": {
+        "summary": "Network Load Balancer は、有効にした各アベイラビリティーゾーンにネットワークインターフェイスを作って固定の IP アドレスを持ち、それぞれに Elastic IP アドレスを 1 つ結び付けられる。接続を受けたノードは、各 TCP の接続をその間ずっと 1 つのターゲットに送る。Application Load Balancer はリスナーのルールを優先度の順に評価して振り分ける。",
+        "per_choice": {
+          "A": "パスでの振り分けは要らず、ゾーンごとの固定の IP という要件も満たさない。",
+          "B": "相手のファイアウォールは IP アドレスの一覧しか受け付けない。",
+          "C": "正しい。ゾーンごとの固定の IP を相手のファイアウォールに登録でき、接続は 1 つのターゲットに留まる。",
+          "D": "1 台のインスタンスが単一の障害点になる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S3",
+          "quote": "With Network Load Balancers, Elastic Load Balancing creates a network interface for each Availability Zone that you enable, and uses it to get a static IP address."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S3",
+          "quote": "You can optionally associate one Elastic IP address with each network interface when you create the Network Load Balancer."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "Routes each individual TCP connection to a single target for the life of the connection."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0006",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A product catalog service reads from Amazon ElastiCache in front of a database. After products are updated in the database, users sometimes see old prices from the cache. The company wants cached data to stay current after writes, wants new cache nodes added during scale-out to fill in missing data, and wants to avoid filling the cache with data that is never read. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Update the cache every time the application writes to the database (write-through)."
+        },
+        {
+          "key": "B",
+          "text": "Also load data into the cache on a cache miss (lazy loading), and set a TTL on cached items."
+        },
+        {
+          "key": "C",
+          "text": "Keep only lazy loading, because it never returns stale data."
+        },
+        {
+          "key": "D",
+          "text": "Use write-through without any TTL so that every written item stays in the cache permanently."
+        },
+        {
+          "key": "E",
+          "text": "Disable the cache whenever a node fails, because node failures are fatal with lazy loading."
+        }
+      ],
+      "explanation": {
+        "summary": "write-through ではデータベースに書くたびにキャッシュも更新するので、キャッシュのデータは古くならない。ただし新しいノードには、書かれるまでデータが無く、読まれないデータも入る。lazy loading を組み合わせれば足りないデータを読む時に入れられ、TTL を付ければ無駄な場所を減らせる。lazy loading だけだと、データベースの変更がキャッシュに反映されず古くなることがある。",
+        "per_choice": {
+          "A": "正しい。書くたびに更新するので、古い値が出ない。",
+          "B": "正しい。新しいノードの足りないデータを埋め、TTL で読まれないデータを減らす。",
+          "C": "lazy loading だけでは、データベースの変更がキャッシュに届かず古くなる。",
+          "D": "読まれないデータが残り続け、無駄が増える。",
+          "E": "lazy loading ではノードの障害は致命的ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "Because the data in the cache is updated every time it's written to the database, the data in the cache is always current."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "You can minimize this by implementing lazy loading with write-through."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "By adding a time to live (TTL) value, you can minimize wasted space."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S5",
+          "quote": "This result occurs because there are no updates to the cache when data is changed in the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S5",
+          "quote": "Node failures aren't fatal for your application."
+        }
+      ]
+    }
+  ]
+}

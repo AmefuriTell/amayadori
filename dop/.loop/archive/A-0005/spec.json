@@ -1,0 +1,14 @@
+{
+  "item": "A-0005",
+  "goal": "「記録」の画面から、解いた記録と誤りの報告を 1 つの JSON のファイルとして書き出す（L1 の learn weak の入力）",
+  "acceptance": [
+    { "id": "AC1", "check": "unit", "text": "書き出しの中身は { v: 1, exported_at（ISO の日時）, exam: 'DOP-C02', answers: [...], reports: [...] } で、ファイル名は dop-record-YYYYMMDD-HHMM.json" },
+    { "id": "AC2", "check": "e2e", "text": "「記録」の画面の「記録を書き出す」でファイルを保存でき、中に今までの答えと報告がそのまま入っている" },
+    { "id": "AC3", "check": "e2e", "text": "答えも報告も無い時は「記録を書き出す」を押せず、その理由を出す" },
+    { "id": "AC4", "check": "e2e", "text": "書き出しの説明（ファイルを Claude に渡すと苦手の分析に使われる）を出し、幅 375px と 1280px で横に溢れない（写真を撮る）" }
+  ],
+  "out_of_scope": ["端末をまたいだ同期", "書き出したファイルの読み込み"],
+  "options": [],
+  "aws_change": false,
+  "decisions": ["ブラウザの保存（Blob と a[download]）で書き出す。外へは送らない"]
+}

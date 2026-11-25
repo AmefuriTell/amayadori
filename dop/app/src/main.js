@@ -2,7 +2,9 @@
 import { grade, canSubmit } from './logic/grade.js';
 import { addAnswer, domainStats } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports } from './storage.js';
+import { buildExport, exportFileName } from './logic/export.js';
+import { display } from './logic/lang.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -14,6 +16,7 @@ const state = {
   answers: stored.answers, storageOk: stored.ok,
   reports: storedReports.reports,
   report: null, // 報告の欄を開いている間 { kind, comment, status }
+  lang: loadLang(), // 問題文と選択肢の言葉（P-012）
 };
 
 for (const tab of document.querySelectorAll('.tab')) {
@@ -56,6 +59,7 @@ function render() {
   if (state.index >= state.questions.length) return renderResult();
   const q = state.questions[state.index];
   const multi = q.type === 'multi';
+  const view = display(q, state.lang);
   progress.textContent = `${state.index + 1} / ${state.questions.length}`;
 
   const meta = el('div', { class: 'meta' },
@@ -63,10 +67,16 @@ function render() {
     el('span', { text: q.services.join('・') }),
     q.low_confidence ? el('span', { class: 'badge warn', 'data-testid': 'low-confidence', title: '検証役の AI が迷った問題です。解説と出典を確かめてください', text: 'AI の確信が低い' }) : null,
     state.reports.some((r) => r.id === q.id) ? el('span', { class: 'badge warn', 'data-testid': 'reported', text: '報告済み' }) : null,
+    view.ja ? null : el('span', { class: 'badge', 'data-testid': 'no-ja', text: '日本語版はまだありません' }),
+    el('button', {
+      type: 'button', class: 'lang secondary', 'data-testid': 'lang', lang: state.lang === 'ja' ? 'en' : 'ja',
+      onclick: () => { state.lang = state.lang === 'ja' ? 'en' : 'ja'; saveLang(state.lang); render(); },
+      text: state.lang === 'ja' ? 'English' : '日本語',
+    }),
   );
 
   const list = el('ul', { class: 'choices', role: multi ? 'group' : 'radiogroup', 'aria-label': '選択肢' });
-  for (const c of q.choices) {
+  for (const c of view.choices) {
     const input = el('input', {
       type: multi ? 'checkbox' : 'radio', name: 'choice', value: c.key,
       checked: state.selected.includes(c.key),
@@ -79,12 +89,12 @@ function render() {
     });
     let mark = '';
     if (state.answered) mark = q.answer.includes(c.key) ? ' is-correct' : state.selected.includes(c.key) ? ' is-wrong' : '';
-    list.append(el('li', {}, el('label', { class: `choice${mark}`, 'data-testid': 'choice' }, input, el('span', { class: 'key', text: `${c.key}.` }), el('span', { text: c.text }))));
+    list.append(el('li', {}, el('label', { class: `choice${mark}`, 'data-testid': 'choice' }, input, el('span', { class: 'key', text: `${c.key}.` }), el('span', { lang: view.lang, text: c.text }))));
   }
 
   const card = el('section', { class: 'card', 'aria-labelledby': 'stem' },
     meta,
-    el('p', { class: 'stem', id: 'stem', 'data-testid': 'stem', text: q.stem }),
+    el('p', { class: 'stem', id: 'stem', 'data-testid': 'stem', lang: view.lang, text: view.stem }),
     multi ? el('p', { class: 'hint', 'data-testid': 'select-hint', text: `${q.select_count} つ選ぶ` }) : null,
     list,
   );
@@ -107,6 +117,7 @@ function renderAnswer(q) {
     el('ul', { class: 'explain' }, q.choices.map((c) => el('li', {
       class: q.answer.includes(c.key) ? 'is-correct' : '', 'data-testid': 'explain-item',
     }, el('strong', { text: `${c.key}. ` }), q.explanation.per_choice[c.key] ?? ''))),
+    q.note ? el('aside', { class: 'note', 'data-testid': 'note' }, el('strong', { text: '補足' }), el('p', { text: q.note })) : null,
     el('div', { class: 'refs' }, q.references.map((r) => el('figure', { class: 'ref', 'data-testid': 'reference' },
       el('blockquote', { lang: 'en', text: r.quote }),
       el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' }))))),
@@ -197,8 +208,31 @@ function renderStats() {
         el('td', { class: 'num', text: `${r.answered} / ${r.total}` }),
         el('td', { class: 'num', text: pct(r.rate) })))),
     ),
+    renderExport(),
     el('div', { class: 'actions' }, el('button', { type: 'button', class: 'secondary', onclick: onClear, text: '記録を消す' })),
   ));
+}
+
+// 記録の書き出し（A-0005）。ブラウザの保存だけで、外へは送らない
+function renderExport() {
+  const empty = !state.answers.length && !state.reports.length;
+  return el('div', { class: 'export' },
+    el('h3', { class: 'title', text: '記録を書き出す' }),
+    el('p', { class: 'muted small', 'data-testid': 'export-help', text: '解いた記録と誤りの報告を 1 つのファイルに保存します。このファイルを Claude に渡すと、苦手な範囲の問題づくりと、誤りが疑わしい問題の見直しに使われます。' }),
+    empty ? el('p', { class: 'muted small', 'data-testid': 'export-hint', text: 'まだ記録がありません。問題を解くと書き出せます。' }) : null,
+    el('div', { class: 'actions' }, el('button', { type: 'button', disabled: empty, onclick: onExport, text: '記録を書き出す' })),
+  );
+}
+
+function onExport() {
+  const now = new Date();
+  const blob = new Blob([JSON.stringify(buildExport(state.answers, state.reports, now), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = el('a', { href: url, download: exportFileName(now) });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function onClear() {

@@ -10,7 +10,7 @@ test.after(async () => { await browser?.close(); await server?.close(); });
 
 test('A-0001 AC1 1 問目と「1 / n」を出し、エラーが無い', async () => {
   const { page, errors } = await openPage(browser, server.url, { data: DATA });
-  await page.getByText('First question stem.', { exact: false }).waitFor();
+  await page.getByText('1 問目の問題文', { exact: false }).waitFor();
   assert.match(await page.locator('[data-testid=progress]').textContent(), /1\s*\/\s*3/);
   assert.equal(await page.locator('[data-testid=choice]').count(), 4);
   assert.deepEqual(errors, []);

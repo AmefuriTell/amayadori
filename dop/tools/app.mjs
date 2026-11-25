@@ -10,13 +10,19 @@ import { loadBank, exam } from './lib/bank.mjs';
 // 試験では DOP_APP で別のアプリの置き場を渡す
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
+/** bank の 1 問 → 配信用の 1 問（作り方の情報は出さない） */
+export function toAppQuestion(q) {
+  return {
+    id: q.id, task: q.task, domain: Number(q.task.split('.')[0]), services: q.services, type: q.type, select_count: q.select_count,
+    stem: q.stem, ...(q.stem_ja ? { stem_ja: q.stem_ja } : {}), choices: q.choices, answer: q.answer, explanation: q.explanation,
+    references: q.references.map(({ url, quote }) => ({ url, quote })), low_confidence: !!q.low_confidence,
+    ...(q.note ? { note: q.note } : {}),
+  };
+}
+
 export function buildData() {
   const domains = Object.fromEntries(exam().domains.map((d) => [d.id, { name: d.name, weight: d.weight }]));
-  const questions = loadBank().filter((q) => q.status === 'verified').map((q) => ({
-    id: q.id, task: q.task, domain: Number(q.task.split('.')[0]), services: q.services, type: q.type, select_count: q.select_count,
-    stem: q.stem, choices: q.choices, answer: q.answer, explanation: q.explanation,
-    references: q.references.map(({ url, quote }) => ({ url, quote })), low_confidence: !!q.low_confidence,
-  }));
+  const questions = loadBank().filter((q) => q.status === 'verified').map(toAppQuestion);
   const out = { exam: exam().code, domains, count: questions.length, questions };
   const file = path.join(APP, 'public', 'questions.json');
   writeJSON(file, out);

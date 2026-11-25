@@ -1,0 +1,585 @@
+{
+  "item": "T-0007",
+  "recheck": true,
+  "translate": true,
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs Amazon EC2 managed nodes in 20 AWS accounts across three Regions, all in AWS Organizations. The nodes must be scanned for missing patches every day and patched every Sunday. The operations team wants to manage this from a single configuration and does not want to create resources in each account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a maintenance window in each account and Region that runs a patch task every Sunday, and a second window for daily scans.",
+          "text_ja": "アカウントとリージョンごとに、毎週日曜日にパッチのタスクを実行するメンテナンスウィンドウと、毎日のスキャン用の 2 つ目のウィンドウを作成する。"
+        },
+        {
+          "key": "B",
+          "text": "Use the Patch now option from the console every Sunday, and review the compliance report each morning.",
+          "text_ja": "毎週日曜日にコンソールから [今すぐパッチ適用] を使い、毎朝コンプライアンスのレポートを確認する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a Patch Manager patch policy that targets the organization, with a daily scan schedule and a weekly install schedule.",
+          "text_ja": "組織を対象とし、毎日のスキャンと毎週のインストールのスケジュールを持つ Patch Manager のパッチポリシーを作成する。"
+        },
+        {
+          "key": "D",
+          "text": "Create a State Manager association in each account and Region that runs the patching document on a weekly schedule.",
+          "text_ja": "アカウントとリージョンごとに、パッチ適用のドキュメントを毎週実行する State Manager の関連付けを作成する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "パッチポリシーは AWS Organizations と連携し、1 つのポリシーで複数のアカウントとリージョンのパッチを構成できる。スキャンとインストールに別々のスケジュールを設定できる。",
+        "per_choice": {
+          "A": "スケジュールは満たすが、アカウントとリージョンごとに作ることになり、1 つの設定で管理する要件に反する。",
+          "B": "Patch now はその場で行う操作で、毎週人が押すことになり、毎日のスキャンも自動にならない。",
+          "C": "正しい。組織全体に 1 つのポリシーで、毎日のスキャンと毎週のインストールを分けて設定できる。",
+          "D": "アカウントとリージョンごとに作ることになり、毎日のスキャンも別に要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Scheduling flexibility – Set different schedules for scanning and installing patches using custom CRON or Rate expressions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業は、AWS Organizations に属する 20 個の AWS アカウントの 3 つのリージョンで、Amazon EC2 のマネージドノードを動かしています。ノードは毎日、不足しているパッチをスキャンし、毎週日曜日にパッチを適用する必要があります。運用チームは、これを 1 つの設定から管理したく、アカウントとリージョンごとにリソースを作成したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。"
+    },
+    {
+      "id": "q-2.3-0002",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company patches Linux managed nodes with Patch Manager. The custom patch baseline auto-approves security patches 7 days after release, and a weekly Scan and install operation runs. A critical security patch was released yesterday. All nodes show as compliant, but the patch is not installed. The security team needs the patch installed in the next weekly run, without changing how other patches are approved. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add the patch to the approved patches list of the custom patch baseline.",
+          "text_ja": "そのパッチを、カスタムのパッチベースラインの承認済みパッチの一覧に追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Do nothing, because nodes that are compliant with the patch baseline are already secure.",
+          "text_ja": "パッチベースラインに準拠しているノードはすでに安全なので、何もしない。"
+        },
+        {
+          "key": "C",
+          "text": "Change the weekly operation from Scan and install to Scan so that the missing patch is reported.",
+          "text_ja": "不足しているパッチが報告されるように、毎週の操作を Scan and install から Scan に変える。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on Systems Manager Inventory so that the missing patch is collected and installed on the nodes.",
+          "text_ja": "不足しているパッチが収集されノードにインストールされるように、Systems Manager Inventory を有効にする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "準拠（compliant）とは、パッチベースラインで承認され、使えるパッチが入っていること。まだ自動承認の日数に達していないパッチは承認されていないので、入っていなくても準拠と出る。カスタムのパッチベースラインの承認するパッチの一覧に足せば、他の承認の決まりを変えずに次の Scan and install で入る。",
+        "per_choice": {
+          "A": "正しい。承認の一覧に足すと、次のインストールの対象になる。",
+          "B": "準拠していることは安全であることを意味しない。このパッチは承認されていないので入っていない。",
+          "C": "Scan は足りないパッチを報告するだけで入れない。そもそも承認されていないパッチは足りない物として扱われない。",
+          "D": "Inventory はメタデータを集めるだけで、パッチを入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S2",
+          "quote": "Note that being compliant with a patch baseline doesn't mean that a managed node is necessarily secure."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S2",
+          "quote": "Compliant means that the patches defined by the patch baseline that are both available and approved have been installed on the node."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Custom patch baselines – Define rules for auto-approving patches within days of their release, along with approved and rejected patch lists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業は、Patch Manager で Linux のマネージドノードにパッチを適用しています。カスタムのパッチベースラインは、セキュリティパッチをリリースの 7 日後に自動承認し、毎週 Scan and install の操作が動きます。重大なセキュリティパッチが昨日リリースされました。すべてのノードは準拠と表示されていますが、そのパッチはインストールされていません。セキュリティチームは、ほかのパッチの承認の仕方を変えずに、次の毎週の実行でそのパッチをインストールする必要があります。企業は最も少ない運用の手間で何をすべきですか。"
+    },
+    {
+      "id": "q-2.3-0003",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company requires a monitoring agent on every managed node tagged Env=Prod. If the agent is removed, it must be installed again within one day. The compliance team also needs to query, from a central location, which nodes run the required software versions. The company wants to use managed AWS features instead of custom scripts. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a State Manager association that targets the Env=Prod tag and installs the agent on a daily schedule.",
+          "text_ja": "Env=Prod のタグを対象とし、毎日のスケジュールでエージェントをインストールする State Manager の関連付けを作成する。"
+        },
+        {
+          "key": "B",
+          "text": "Configure Systems Manager Inventory to collect metadata from the nodes and store it in a central S3 bucket.",
+          "text_ja": "ノードからメタデータを収集し、中央の S3 バケットに保存するように Systems Manager Inventory を設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Configure Systems Manager Inventory to install the agent on nodes where the agent is missing.",
+          "text_ja": "エージェントが無いノードにエージェントをインストールするように Systems Manager Inventory を設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Run an AWS Lambda function every day that connects to each node over SSH and reinstalls the agent.",
+          "text_ja": "毎日 AWS Lambda 関数を実行し、SSH で各ノードに接続してエージェントを入れ直す。"
+        },
+        {
+          "key": "E",
+          "text": "Use the Patch Manager Patch now option every day on the Env=Prod nodes to reinstall the agent and report software versions.",
+          "text_ja": "毎日 Env=Prod のノードで Patch Manager の [今すぐパッチ適用] を使い、エージェントを入れ直してソフトウェアのバージョンを報告させる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "State Manager の関連付けは、保ちたい状態とスケジュールと対象を決め、タグでも対象を選べる。ソフトが入っていなければ入れるよう指示できる。Inventory は管理ノードからメタデータを集め、中央の S3 バケットに置いて問い合わせできる。",
+        "per_choice": {
+          "A": "正しい。Env=Prod のタグで選び、毎日望む状態に戻す。",
+          "B": "正しい。メタデータを中央の S3 に集め、必要なソフトや設定のノードを調べられる。",
+          "C": "Inventory はメタデータを集めるだけで、ソフトを入れない。",
+          "D": "動くかもしれないが、自分のコードを持つことになり、要件に反する。",
+          "E": "Patch now はその場で行うパッチの操作で、毎日人が行うことになる。ソフトの入っている状態を保つ仕組みでも、メタデータを中央に集めて問い合わせる仕組みでもない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "If the software isn't installed on a node, then the association could instruct State Manager to install it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業は、Env=Prod のタグが付いたすべてのマネージドノードに監視エージェントを入れることを求めています。エージェントが削除された場合は、1 日以内に再びインストールする必要があります。コンプライアンスチームは、どのノードが必要なソフトウェアのバージョンを動かしているかを、1 か所から照会する必要もあります。企業は、独自のスクリプトではなく AWS のマネージドの機能を使いたいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）"
+    },
+    {
+      "id": "q-2.3-0004",
+      "task": "2.3",
+      "services": [
+        "AWS Config",
+        "AWS Systems Manager",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company must detect any Amazon S3 bucket whose configuration violates the company's access rules as soon as the bucket is created or changed. Noncompliant buckets must be fixed by a defined, repeatable action, and the company prefers actions that AWS already provides over writing code. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config rule that evaluates the buckets, and attach a remediation action that uses a managed Systems Manager Automation document.",
+          "text_ja": "バケットを評価する AWS Config ルールを作成し、マネージドの Systems Manager Automation のドキュメントを使う修復アクションを付ける。"
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Config rule that evaluates the buckets and sends a notification to the security team for manual fixes.",
+          "text_ja": "バケットを評価し、手作業での修正のためにセキュリティチームへ通知を送る AWS Config ルールを作成する。"
+        },
+        {
+          "key": "C",
+          "text": "Create an Amazon EventBridge rule for bucket changes that invokes a custom AWS Lambda function to change the bucket settings.",
+          "text_ja": "バケットの変更で、バケットの設定を変える独自の AWS Lambda 関数を呼び出す Amazon EventBridge ルールを作成する。"
+        },
+        {
+          "key": "D",
+          "text": "Use Systems Manager Inventory to collect bucket settings every day and fix the buckets that appear in the report.",
+          "text_ja": "Systems Manager Inventory で毎日バケットの設定を収集し、レポートに出たバケットを修正する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS Config のルールは、リソースが作られた・変わった・消された時に設定を評価し続け、決まりに反するリソースを noncompliant にする。修復は Systems Manager Automation のドキュメントで行い、AWS Config は修復の操作を持つマネージドの Automation ドキュメントも用意している。",
+        "per_choice": {
+          "A": "正しい。作成や変更の時に評価し、マネージドの Automation ドキュメントで直す。",
+          "B": "検出はできるが、直すのが人の手で、決まった繰り返せる操作にならない。",
+          "C": "動くが、自分で Lambda のコードを書いて保守することになり、要件に反する。",
+          "D": "Inventory は管理ノードのメタデータを集める機能で、S3 バケットの設定を評価して直すものではない。毎日では作成や変更の直後にも気づけない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html",
+          "source_id": "S5",
+          "quote": "AWS Config continuously evaluates your resources as they are created, changed, or deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "source_id": "S6",
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "source_id": "S6",
+          "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業は、設定が企業のアクセスのルールに違反する Amazon S3 バケットを、バケットの作成や変更の直後に検出する必要があります。準拠していないバケットは、決められた繰り返し可能なアクションで修正する必要があり、企業はコードを書くより AWS がすでに提供しているアクションを好みます。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。"
+    },
+    {
+      "id": "q-2.3-0005",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company automates account offboarding with AWS Step Functions. One step sends a request to an external approval system, and the workflow must pause until a manager responds, which can take up to three days. Each step must run exactly once, and the team wants to avoid polling code. Which design meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "An Express workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess.",
+          "text_ja": ".waitForTaskToken で承認システムを呼び出し、SendTaskSuccess で再開する Express ワークフロー。"
+        },
+        {
+          "key": "B",
+          "text": "A Standard workflow with a loop that calls a Lambda function every minute to check whether the approval exists.",
+          "text_ja": "承認があるかを確かめる Lambda 関数を毎分呼び出すループを持つ Standard ワークフロー。"
+        },
+        {
+          "key": "C",
+          "text": "A Standard workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess.",
+          "text_ja": ".waitForTaskToken で承認システムを呼び出し、SendTaskSuccess で再開する Standard ワークフロー。"
+        },
+        {
+          "key": "D",
+          "text": "An Express workflow with a loop that calls a Lambda function every minute to check whether the approval exists.",
+          "text_ja": "承認があるかを確かめる Lambda 関数を毎分呼び出すループを持つ Express ワークフロー。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Standard のワークフローは実行が正確に 1 回で、最長 1 年動ける。コールバックのタスク（task token）は、SendTaskSuccess か SendTaskFailure でトークンが返るまでワークフローを止める。Express は最長 5 分で、少なくとも 1 回の実行、使える統合のパターンは Request Response だけ。",
+        "per_choice": {
+          "A": "Express は Request Response の統合だけで、最長 5 分なので 3 日待てない。",
+          "B": "動くが、待つ間ずっと問い合わせる仕組みを持つことになり、要件に反する。",
+          "C": "正しい。正確に 1 回の実行で、トークンが返るまで止まる。",
+          "D": "Express は最長 5 分で、少なくとも 1 回の実行なので、要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S1",
+          "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S1",
+          "quote": "Express workflows have at-least-once workflow execution and can run for up to five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S2",
+          "quote": "Express Workflows only support Request Response integrations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html",
+          "source_id": "S3",
+          "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "ある企業は、AWS Step Functions でアカウントの利用終了の手続きを自動化しています。ある手順は外部の承認システムに依頼を送り、ワークフローはマネージャーが応答するまで一時停止する必要があり、応答には最大 3 日かかります。各手順は必ず 1 回だけ実行する必要があり、チームはポーリングのコードを避けたいと考えています。最も少ない運用の手間でこれらの要件を満たす設計はどれですか。"
+    },
+    {
+      "id": "q-2.3-0006",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Task state in a Step Functions workflow calls an API that sometimes throttles. Throttling errors must be retried up to 5 times, starting 2 seconds after the error and doubling the wait each time. If the state still fails, or fails with any other error, including a timeout, the workflow must move to a NotifyOps state. Which configurations meet these requirements? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 5, and BackoffRate 2.",
+          "text_ja": "スロットリングのエラーに対する Retry のエントリで、IntervalSeconds 2、MaxAttempts 5、BackoffRate 2 にする。"
+        },
+        {
+          "key": "B",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed alone as the last catcher, with Next set to NotifyOps.",
+          "text_ja": "ErrorEquals が States.ALL の Catch のエントリを最後のキャッチャーとして単独で置き、Next を NotifyOps にする。"
+        },
+        {
+          "key": "C",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 0, and BackoffRate 2.",
+          "text_ja": "スロットリングのエラーに対する Retry のエントリで、IntervalSeconds 2、MaxAttempts 0、BackoffRate 2 にする。"
+        },
+        {
+          "key": "D",
+          "text": "A Catch entry whose ErrorEquals is States.TaskFailed, as the only catcher, with Next set to NotifyOps.",
+          "text_ja": "ErrorEquals が States.TaskFailed の Catch のエントリを唯一のキャッチャーとし、Next を NotifyOps にする。"
+        },
+        {
+          "key": "E",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed first, followed by a catcher for the throttling error.",
+          "text_ja": "ErrorEquals が States.ALL の Catch のエントリを最初に置き、その後にスロットリングのエラーのキャッチャーを置く。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Retry は IntervalSeconds（最初のやり直しまでの秒）・MaxAttempts（やり直しの最大の回数。0 はやり直さない）・BackoffRate（間隔を何倍にするか）で決める。やり直しが尽きるか、Retry に合わない時は Catch を順に調べる。States.ALL は全てのエラーに合い、配列にそれだけで、最後の catcher に置く。States.TaskFailed は States.Timeout 以外に合う。",
+        "per_choice": {
+          "A": "正しい。2 秒から倍にしながら 5 回までやり直す。",
+          "B": "正しい。タイムアウトも含め、全てのエラーで NotifyOps へ進む。",
+          "C": "MaxAttempts 0 はやり直さない。",
+          "D": "States.TaskFailed はタイムアウト（States.Timeout）に合わない。",
+          "E": "States.ALL は最後の catcher に置く必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "source_id": "S4",
+          "quote": "A value of 0 specifies that the error is never retried."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "source_id": "S4",
+          "quote": "The multiplier by which the retry interval denoted by IntervalSeconds increases after each retry attempt."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "source_id": "S5",
+          "quote": "It must appear alone in the ErrorEquals array and must appear in the last catcher in the Catch array."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "source_id": "S5",
+          "quote": "The name States.TaskFailed also acts a wildcard and matches any error except for States.Timeout."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "Step Functions のワークフローの Task ステートが呼び出す API は、ときどきスロットリングします。スロットリングのエラーは、エラーの 2 秒後から始めて毎回待ち時間を倍にしながら、最大 5 回再試行する必要があります。それでも失敗した場合や、タイムアウトを含むほかのエラーで失敗した場合は、ワークフローを NotifyOps ステートに移す必要があります。これらの要件を満たす設定はどれですか。（2 つ選択してください。）"
+    },
+    {
+      "id": "q-2.3-0007",
+      "task": "2.3",
+      "services": [
+        "AWS Lambda",
+        "Amazon SQS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS Lambda function is invoked asynchronously to process orders. When the function keeps failing, some events disappear after the retries are used up. The team must keep a record of every invocation that fails after all retries, keep a separate record of successful invocations, and avoid adding error-handling code to the function. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Wrap the handler in try/catch blocks that write failed and successful events to Amazon S3.",
+          "text_ja": "ハンドラーを try/catch ブロックで囲み、失敗したイベントと成功したイベントを Amazon S3 に書く。"
+        },
+        {
+          "key": "B",
+          "text": "Configure an on-failure destination and an on-success destination for the function, and give the execution role the needed permissions.",
+          "text_ja": "関数に失敗時の送信先と成功時の送信先を設定し、実行ロールに必要なアクセス許可を与える。"
+        },
+        {
+          "key": "C",
+          "text": "Keep the default settings, because Lambda keeps failed events in its queue until they succeed.",
+          "text_ja": "Lambda は成功するまで失敗したイベントをキューに残すので、既定の設定のままにする。"
+        },
+        {
+          "key": "D",
+          "text": "Invoke the function synchronously instead, and have each caller store the failed requests.",
+          "text_ja": "代わりに関数を同期で呼び出し、呼び出し元ごとに失敗したリクエストを保存させる。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "非同期の呼び出しが失敗すると、Lambda は既定であと 2 回やり直し、期限切れか全てのやり直しに失敗したイベントは捨てる。失敗した呼び出しの記録を残すには on-failure の宛先を作る。成功と失敗で別々の宛先を設定でき、送るには関数の実行ロールに権限が要る。",
+        "per_choice": {
+          "A": "関数にエラー処理のコードを足すことになり、要件に反する。",
+          "B": "正しい。コードを変えずに、失敗と成功の記録を別々に残せる。",
+          "C": "全てのやり直しに失敗したイベントは捨てられる。",
+          "D": "呼び出し側にエラー処理を持つことになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "source_id": "S6",
+          "quote": "When an event expires or fails all processing attempts, Lambda discards it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "source_id": "S6",
+          "quote": "To capture records of failed invocations (such as timeouts or runtime errors), create an on-failure destination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "source_id": "S7",
+          "quote": "Each function can have multiple destinations, so you can configure separate destinations for successful and failed events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "source_id": "S7",
+          "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "注文を処理する AWS Lambda 関数は非同期で呼び出されます。関数が失敗し続けると、再試行を使い切った後に一部のイベントが消えます。チームは、すべての再試行の後に失敗したすべての呼び出しの記録と、成功した呼び出しの別の記録を残す必要があり、関数にエラー処理のコードを足したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。"
+    },
+    {
+      "id": "q-2.3-0008",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A high-volume IoT ingestion workflow in AWS Step Functions finishes each execution in a few seconds. Each step only needs an HTTP response from the called service before continuing. The team accepts that a step might run more than once and has made the steps idempotent. The team wants the workflow type designed for high event rates. Which choice BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Standard workflow, because it supports every integration pattern and runs each step exactly once.",
+          "text_ja": "すべての統合パターンに対応し、各手順を必ず 1 回だけ実行する Standard ワークフロー。"
+        },
+        {
+          "key": "B",
+          "text": "An Express workflow that uses .waitForTaskToken integrations so that each step waits for a callback.",
+          "text_ja": "各手順がコールバックを待つように .waitForTaskToken の統合を使う Express ワークフロー。"
+        },
+        {
+          "key": "C",
+          "text": "A Standard workflow that uses .waitForTaskToken integrations to limit duplicate executions.",
+          "text_ja": "重複した実行を抑えるために .waitForTaskToken の統合を使う Standard ワークフロー。"
+        },
+        {
+          "key": "D",
+          "text": "An Express workflow that uses Request Response service integrations.",
+          "text_ja": "リクエスト・レスポンスのサービス統合を使う Express ワークフロー。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "Express のワークフローは、ストリームの処理や IoT のデータの取り込みのような、イベントの多い処理に向く。実行は少なくとも 1 回で、手順が 2 回以上動くことがある。最長 5 分で、使える統合のパターンは Request Response だけ。",
+        "per_choice": {
+          "A": "Standard は長く動く、監査の要る処理に向く。今回の要件は高い頻度の処理。",
+          "B": "Express は Request Response の統合しか使えない。",
+          "C": "コールバックを待つ必要は無く、高い頻度の処理に向く型でもない。",
+          "D": "正しい。高い頻度に向き、HTTP の応答を受けて次へ進む統合で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S1",
+          "quote": "Express workflows are ideal for high-event-rate workloads, such as streaming data processing and IoT data ingestion."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S1",
+          "quote": "Standard workflows are ideal for long-running, auditable workflows, as they show execution history and visual debugging."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "source_id": "S2",
+          "quote": "Express Workflows only support Request Response integrations."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "AWS Step Functions の大量の IoT データの取り込みのワークフローは、各実行が数秒で終わります。各手順は、呼び出したサービスからの HTTP の応答さえあれば次に進めます。チームは、手順が 2 回以上実行されることがあると受け入れており、手順を冪等にしています。チームは、高いイベントレート向けに設計されたワークフローの種類を使いたいと考えています。これらの要件を最もよく満たす選択はどれですか。"
+    }
+  ]
+}

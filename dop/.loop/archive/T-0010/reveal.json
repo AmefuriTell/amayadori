@@ -1,0 +1,456 @@
+{
+  "item": "T-0010",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company runs a production database on an Amazon RDS Multi-AZ DB instance. Before a major launch, the DevOps team must verify that the application reconnects correctly when the database fails over to the standby in another Availability Zone. The test must use the existing DB instance, must not lose data, and must not require restoring backups. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Restore the latest automated snapshot to a new DB instance in another Availability Zone, and point the application to it."
+        },
+        {
+          "key": "B",
+          "text": "Create a read replica in another Availability Zone, and promote it to a standalone DB instance during the test."
+        },
+        {
+          "key": "C",
+          "text": "Reboot the DB instance and choose the Reboot with failover option during a planned test window."
+        },
+        {
+          "key": "D",
+          "text": "Turn off Multi-AZ, and then turn it on again so that a new standby is created in another Availability Zone."
+        }
+      ],
+      "explanation": {
+        "summary": "Multi-AZ の DB インスタンスは、障害の時に別のアベイラビリティーゾーンのスタンバイへ自動で切り替わる（多くは 60〜120 秒）。再起動の時に Reboot with failover を選ぶと、利用者の求めでこの切り替えを起こせるので、今のインスタンスのまま試せる。",
+        "per_choice": {
+          "A": "別のインスタンスを作ることになり、今のインスタンスで試す要件にも、バックアップを戻さない要件にも反する。",
+          "B": "別のインスタンスに切り替える試験になり、Multi-AZ のスタンバイへの切り替えを試すことにならない。",
+          "C": "正しい。今のインスタンスで、スタンバイへの切り替えを起こせる。",
+          "D": "スタンバイを作り直すだけで、切り替えそのものは起きない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S1",
+          "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S2",
+          "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. All clusters are healthy. The company plans a maintenance event in us-east-1 and must move the primary role to us-west-2 beforehand. No committed data may be lost, and the company wants to use the built-in capability instead of rebuilding clusters. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Perform a switchover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "B",
+          "text": "Perform a failover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "C",
+          "text": "Copy the latest snapshot to us-west-2 and restore it as a new primary cluster."
+        },
+        {
+          "key": "D",
+          "text": "Perform a failover to us-west-2 now, and fail back with another failover after the maintenance."
+        }
+      ],
+      "explanation": {
+        "summary": "switchover（以前の managed planned failover）は、全てのクラスターが健全な時の計画した切り替えに使う。切り替えの前に副のクラスターを主と同期するので、RPO は 0（データの損失なし）。failover は計画外の障害から戻るための方法で、RPO は秒単位の 0 でない値になる。",
+        "per_choice": {
+          "A": "正しい。同期してから切り替えるので、データを失わない。",
+          "B": "failover の RPO は秒単位で 0 にならず、データを失う可能性がある。",
+          "C": "クラスターを作り直すことになり、スナップショットの後のデータも失う。",
+          "D": "failover を 2 回行うことになり、どちらでもデータを失う可能性がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0003",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company uses an Amazon Aurora global database with the primary cluster in eu-west-1 and a secondary cluster in eu-central-1. An unplanned outage makes the primary cluster in eu-west-1 unavailable. The business requires the database to accept writes again as quickly as possible and accepts losing a few seconds of recent data. Which action meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Perform a switchover to the secondary cluster in eu-central-1 so that no data is lost."
+        },
+        {
+          "key": "B",
+          "text": "Perform a cross-Region failover to the secondary cluster in eu-central-1."
+        },
+        {
+          "key": "C",
+          "text": "Wait until eu-west-1 recovers, because global databases cannot change the primary Region during an outage."
+        },
+        {
+          "key": "D",
+          "text": "Restore the latest snapshot in eu-central-1 as a new cluster, and point the application to it."
+        }
+      ],
+      "explanation": {
+        "summary": "計画外の障害から戻るには、副のクラスターへのリージョンをまたぐ failover を使う。RPO は秒単位の 0 でない値になるので、数秒のデータの損失を許すという要件に合う。switchover は全てのクラスターが健全な時の計画した操作。",
+        "per_choice": {
+          "A": "switchover は、全てのクラスターと関わるサービスが健全な時の計画した操作に使う。主のクラスターが使えない今は合わない。",
+          "B": "正しい。計画外の障害から戻る方法で、失うのは秒単位。",
+          "C": "failover で副のクラスターに切り替えられる。待つと書き込みが戻るのが遅れる。",
+          "D": "クラスターを作り直すので時間がかかり、スナップショットの後のデータも失う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "Failover – Use this approach to recover from an unplanned outage. With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0004",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company serves a web application through Amazon CloudFront with an origin group that has a primary and a secondary origin. During a test, the primary origin returns HTTP 503 errors. Page loads succeed from the secondary origin, but form submissions that use POST still fail. Which statements explain this behavior? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "CloudFront fails over to the secondary origin only for viewer requests that use GET, HEAD, or OPTIONS."
+        },
+        {
+          "key": "B",
+          "text": "CloudFront fails over when the primary origin returns one of the status codes chosen as failover criteria, such as 503."
+        },
+        {
+          "key": "C",
+          "text": "CloudFront fails over only when the primary origin returns a 4xx status code, not a 5xx status code."
+        },
+        {
+          "key": "D",
+          "text": "CloudFront fails over for every HTTP method, so the POST failures must come from the secondary origin."
+        },
+        {
+          "key": "E",
+          "text": "Origin groups fail over only after a Route 53 health check marks the primary origin as unhealthy."
+        }
+      ],
+      "explanation": {
+        "summary": "オリジンフェイルオーバーは、選んだ HTTP のステータスコード（400・403・404・416・429・500・502・503・504 の組み合わせ）の応答を受けた時に副のオリジンへ切り替える。ただし切り替えるのは、利用者のリクエストが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+        "per_choice": {
+          "A": "正しい。POST は切り替えないので、主のオリジンの 503 がそのまま返る。",
+          "B": "正しい。503 を条件に選んでいれば、GET のページの読み込みは副のオリジンへ切り替わる。",
+          "C": "条件には 500・502・503・504 なども選べる。",
+          "D": "GET・HEAD・OPTIONS 以外では切り替えない。",
+          "E": "オリジングループは、選んだステータスコードの応答で切り替える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "When CloudFront receives a response with one of the status codes that you specify, it fails over to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0005",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company uses Amazon Route 53 DNS failover between two web servers. The DevOps team wants to prove that traffic moves to the healthy server when the other server fails, by injecting real failures with AWS Fault Injection Service (AWS FIS). Production risk must be kept as low as possible, and the tests should be repeatable. Which approach BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Run the AWS FIS experiment directly in production during peak hours so that the results reflect real traffic."
+        },
+        {
+          "key": "B",
+          "text": "Skip AWS FIS and test by editing the DNS records by hand to point to the second server."
+        },
+        {
+          "key": "C",
+          "text": "Run the AWS FIS experiment only in documentation reviews, because AWS FIS simulates failures without affecting resources."
+        },
+        {
+          "key": "D",
+          "text": "Plan the experiment, run it in a pre-production environment first, and use the results before any production run."
+        }
+      ],
+      "explanation": {
+        "summary": "AWS FIS は本物のリソースに本物の操作を行う。本番で試す前に、計画の段階を終え、本番前の環境で実験を行うことが強く勧められている。DNS failover は、同じ役割の資源のうち健全でない物から健全な物へ Route 53 が通信を向ける仕組み。",
+        "per_choice": {
+          "A": "本番で、しかも混む時間に試すのは、本番への危険を最も小さくする要件に反する。",
+          "B": "手で DNS を書き換えるのは、障害を検知して自動で切り替わることの試験にならない。",
+          "C": "AWS FIS は本物のリソースに本物の操作を行う。",
+          "D": "正しい。計画してから本番前の環境で試す。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "AWS FIS carries out real actions on real AWS resources in your system."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+          "source_id": "S5",
+          "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0006",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company must back up every Amazon EBS volume and Amazon RDS database that has the tag backup=daily, once per day, and keep a copy of each backup in a second AWS Region. Teams create new tagged resources every week, and the operations team does not want to update the configuration when resources are added. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an AWS Backup plan with a daily rule that copies to the second Region, and add each resource ARN to the plan as it is created."
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Backup plan with a daily rule that copies to the second Region, and assign resources by the tag backup=daily."
+        },
+        {
+          "key": "C",
+          "text": "Run a scheduled AWS Lambda function that snapshots tagged resources and copies the snapshots to the second Region."
+        },
+        {
+          "key": "D",
+          "text": "Create an AWS Backup plan with a daily rule in each Region, and assign resources by the tag backup=daily in both."
+        }
+      ],
+      "explanation": {
+        "summary": "バックアッププランのルールでは、頻度や期間を決め、Copy to destination で別のリージョンへのコピーを決められる。リソースの割り当てはタグで含める・外すことができるので、タグの付いた新しいリソースも設定を変えずに対象になる。",
+        "per_choice": {
+          "A": "リソースが増えるたびに設定を変えることになり、要件に反する。",
+          "B": "正しい。毎日のルールで別リージョンへ写し、タグで対象を決める。",
+          "C": "自分でコードを持つことになり、手間が大きい。",
+          "D": "各リージョンで別々にバックアップを取るだけで、同じバックアップの写しを別リージョンに置くことにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "source_id": "S1",
+          "quote": "You can use a scheduled backup plan to copy backups across AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "source_id": "S1",
+          "quote": "For Copy to destination, Choose the destination AWS Region for your backup copy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/assigning-resources.html",
+          "source_id": "S3",
+          "quote": "Use tags to include or exclude resources"
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0007",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An AWS Backup rule copies backups to another Region. To reduce cost, the copies must move to cold storage, and the company wants the copies to be deleted as early as the cold storage rules allow. Which pair of settings for the copy is valid and deletes the copy SOONEST, i.e. is the MOST cost-effective valid choice?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Transition to cold storage after 30 days, and retention period of 180 days."
+        },
+        {
+          "key": "B",
+          "text": "Transition to cold storage after 30 days, and retention period of 100 days."
+        },
+        {
+          "key": "C",
+          "text": "Transition to cold storage after 60 days, and retention period of 120 days."
+        },
+        {
+          "key": "D",
+          "text": "Transition to cold storage after 90 days, and retention period of 150 days."
+        }
+      ],
+      "explanation": {
+        "summary": "コールドストレージに移したバックアップは、そこに少なくとも 90 日置く必要がある。保持期間（作ってから消すまでの日数）は、コールドストレージへ移す日数より 90 日を超えて長くする。30 日で移すなら保持期間は 120 日より長くする必要があり、選択肢の中で条件を満たすのは 180 日だけ。",
+        "per_choice": {
+          "A": "正しい。30 + 90 = 120 日より長い。",
+          "B": "30 + 90 = 120 日より短い。",
+          "C": "60 + 90 = 150 日より短い。",
+          "D": "90 + 90 = 180 日より短い。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "source_id": "S2",
+          "quote": "Backups transitioned to cold storage must be stored there for a minimum of 90 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "source_id": "S2",
+          "quote": "This value must be greater than 90 days beyond the Transition to cold storage value."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0008",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "To protect against ransomware and insider threats, a company's backups in an AWS Backup vault must never be deleted or altered by any user, including administrators, until their retention period ends. The security team wants a period to test the configuration before it becomes permanent. Which solution BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Lock the vault with AWS Backup Vault Lock in governance mode, and limit who has the IAM permissions to manage it."
+        },
+        {
+          "key": "B",
+          "text": "Add an IAM policy that denies backup deletion to every role, and review the policy every month."
+        },
+        {
+          "key": "C",
+          "text": "Lock the vault with AWS Backup Vault Lock in compliance mode, with no grace time, so that it is immutable immediately."
+        },
+        {
+          "key": "D",
+          "text": "Lock the vault with AWS Backup Vault Lock in compliance mode, with a grace time before the lock becomes immutable."
+        }
+      ],
+      "explanation": {
+        "summary": "compliance モードの Vault Lock は、保持期間が終わるまで保管庫と中身が消されたり変えられたりしないための物で、ロックされると誰も（AWS も）変えたり消したりできない。ロックされて変えられなくなる前に、決めた猶予の時間がある。governance モードは、十分な IAM の権限を持つ人なら管理や削除ができる。",
+        "per_choice": {
+          "A": "governance モードは、権限のある人なら消せる。",
+          "B": "管理者が IAM のポリシーを変えれば消せる。",
+          "C": "試す時間が無く、要件に反する。",
+          "D": "正しい。誰も消せず、変えられなくなる前に試す時間がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "source_id": "S4",
+          "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "source_id": "S4",
+          "quote": "A vault lock in compliance mode has a grace time period you set before it locks and the contents and vault lock become immutable."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "source_id": "S4",
+          "quote": "A vault locked in Governance mode can be managed or deleted by users who have the appropriate IAM permissions."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0009",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company adds an S3 Cross-Region Replication configuration to a bucket that already contains millions of objects. Compliance requires that all existing objects also exist in the destination Region, and that most new objects are replicated within seconds with 99.9 percent of them within 15 minutes, with visibility into replication times. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Run an S3 Batch Replication job to replicate the objects that existed before the replication configuration."
+        },
+        {
+          "key": "B",
+          "text": "Enable S3 Replication Time Control on the replication rule."
+        },
+        {
+          "key": "C",
+          "text": "Do nothing for existing objects, because live replication copies them automatically after the configuration is added."
+        },
+        {
+          "key": "D",
+          "text": "Switch to Same-Region Replication, because it replicates existing objects within 15 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Enable S3 Replication Time Control, which replicates every object within 1 minute."
+        }
+      ],
+      "explanation": {
+        "summary": "ライブのレプリケーションは新しいオブジェクトを続けて複製する。設定の前からあるオブジェクトは、S3 Batch Replication で必要な時に Batch Operations のジョブで複製する。S3 Replication Time Control は、ほとんどのオブジェクトを数秒で、99.9% を 15 分以内に複製し、複製の時間も見えるようにする。",
+        "per_choice": {
+          "A": "正しい。設定の前からあるオブジェクトを複製する。",
+          "B": "正しい。99.9% を 15 分以内に複製し、時間も見える。",
+          "C": "ライブのレプリケーションは新しいオブジェクトだけ。",
+          "D": "別のリージョンに置く要件に反する。",
+          "E": "15 分以内に 99.9% で、全てを 1 分以内ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+          "source_id": "S6",
+          "quote": "S3 Batch Replication differs from live replication, which continuously and automatically replicates new objects across Amazon S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+          "source_id": "S6",
+          "quote": "Objects that existed before a replication configuration was in place"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-time-control.html",
+          "source_id": "S7",
+          "quote": "S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.9 percent of those objects within 15 minutes."
+        }
+      ]
+    }
+  ]
+}

@@ -31,12 +31,13 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `L close` | S9 | なし | outcome, repeated_issues, human_needed | runs.jsonl・archive への移動 | 済 |
 | `L add --json '<項目か配列>'` / `--file` | 人・L1 | backlog の項目 | added | ID の振り方・重複の確認 | 済 |
 | `L seed [--task 1.1] [--dry]` | 人（初め・試験ガイドの更新時） | config/exam.json | 足した項目数・タスク別の問題数 | 試験ガイドの skills の一覧 | 済 |
+| `L seed --translate [--size 10] [--dry]` | 人（P-012） | bank | 足した訳の項目（T-）の数 | 日本語版の無い問題の一覧 | 済 |
 | `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
 | `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
 | `L pause` | 人に止められた時 | なし | state | | 済 |
 | `D fetch <url> --item <ID>` | C1 | 許可した URL（200 以外・別ページへの転送・本文 50 語未満は失敗） | 見出しと語数、file、links（本文の中のリンク） | HTML・ナビ・不要な部分 | 済 |
 | `D check <ID>` | C1 | work/<ID>/sources.md と raw/*.md | 誤り（原文の控えに無い文も） | | 済 |
-| `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由） | スキーマの細部 | 済 |
+| `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由。日本語版の条件の語・数字・名前も） | スキーマの細部 | 済 |
 | `Q blind <ID>` / `Q reveal <ID>` | C3 | questions.json | file（blind.json / reveal.json） | 答え（先に見ないように） | 済 |
 | `Q verdict <ID>` | C3 | verify.json | result, 問ごとの verdict | 判定の決まり・drop の移動 | 済 |
 | `Q gate <ID> [--net]` | C4 | work/<ID>/ | 落ちた検査 | C4 の検査の全部 | 済 |
@@ -49,7 +50,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
 | `node dop/tools/app.mjs data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 済 |
 | `node dop/tools/app.mjs check <ID>` | A3 | spec.json・app/test・app/e2e | AC ごとの合否・画面写真 | 試験・e2e のログ全文 | 済 |
-| `learn:weak` | L1 | .loop/answers/*.json | 足した項目 | 解答の記録の全部 | 未（記録の書き出しの後） |
+| `node dop/tools/learn.mjs weak [--dry]` | L1 | .loop/answers/*.json（記録の書き出しと issues.json） | 足した項目・直近の正答率・受けてよい頃か | 解答の記録と issue の本文 | 済 |
 | `aws:cost` | 週 1 | なし | 今月の費用 | Cost Explorer の応答 | 未（AWS へ移す時） |
 
 ## ハーネス（Claude Code）に入れたもの
@@ -82,7 +83,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
   "C3_verify":   { "pass|fix|drop": "Q verdict（fix で言い回しだけなら count: false）" },
   "C4_gate":     { "pass": "Q publish が ok", "fail": "Q gate か Q publish が落ちた" },
   "A3_check":    { "pass|fail": "app.mjs check" },
-  "L1_learn":    { "ok": "learn:weak（未）" }
+  "L1_learn":    { "ok": "learn.mjs weak" }
 }
 ```
 

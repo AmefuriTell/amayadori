@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel } from './lib/io.mjs';
 import { validate } from './lib/schema.mjs';
-import { coverage, exam } from './lib/bank.mjs';
+import { coverage, exam, loadBank } from './lib/bank.mjs';
 
 export function loadMachine() {
   const md = fs.readFileSync(path.join(CODE, 'loop', 'LOOP.md'), 'utf8');
@@ -28,8 +28,8 @@ const GUARDED = {
 const BACK = new Set(['fix', 'fail']);
 // S9 へ行く時の項目の終わり方
 const OUTCOME = { pass: 'done', ok: 'done', no_source: 'dropped', drop: 'dropped' };
-const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R' };
-const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', app: 'A1_spec', learn: 'L1_learn' };
+const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T' };
+const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', app: 'A1_spec', learn: 'L1_learn' };
 
 function loadState() {
   return readJSON(paths.state(), { state: 'S0_pick', item: null, prev: null, session: { active: false, started: null, closed: 0 } });
@@ -87,7 +87,7 @@ const commands = {
     saveBacklog(backlog);
     fs.mkdirSync(paths.work(item.id), { recursive: true });
     writeJSON(paths.work(item.id, 'item.json'), { ...item, task_info: taskInfo(item.task) });
-    if (item.kind === 'recheck') copyForRecheck(item);
+    if (item.kind === 'recheck' || item.kind === 'translate') copyForRecheck(item);
 
     s.state = FIRST_STATE[item.kind];
     s.item = item.id;
@@ -256,6 +256,7 @@ const commands = {
 
   // 試験ガイドの「Skills in」の 1 行を 1 項目にする。既にある（状態を問わず）物は足さない
   seed(args) {
+    if (args.translate) return seedTranslate(args);
     const ex = exam();
     if (!ex.verified) throw new ToolError('config/exam.json がまだ試験ガイドと照らされていない（verified: false）');
     const backlog = loadBacklog();
@@ -343,6 +344,31 @@ export function pickNext(backlog) {
   return ready[0];
 }
 
+// P-012: 日本語版の無い bank の問題を、タスクごとに size 問ずつの訳の項目にする
+function seedTranslate(args) {
+  const size = Number(args.size ?? 10);
+  const backlog = loadBacklog();
+  const pending = new Set(backlog.filter((b) => b.kind === 'translate' && b.status !== 'done').flatMap((b) => b.question_ids ?? []));
+  const byTask = {};
+  for (const q of loadBank()) {
+    if (q.status !== 'verified' || q.stem_ja || pending.has(q.id)) continue;
+    (byTask[q.task] ??= []).push(q.id);
+  }
+  const add = [];
+  for (const task of Object.keys(byTask).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
+    const ids = byTask[task].sort();
+    for (let i = 0; i < ids.length; i += size) {
+      const part = ids.slice(i, i + size);
+      add.push({ kind: 'translate', task, question_ids: part, priority: 1, source: 'translate', title: `日本語版（タスク ${task}、${part.length} 問）` });
+    }
+  }
+  if (!args.dry) {
+    for (const item of add) { item.id = nextId(backlog, 'translate'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
+    saveBacklog(backlog);
+  }
+  emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}訳の項目 ${add.length} 個、${add.reduce((n, a) => n + a.question_ids.length, 0)} 問ぶんを足した` });
+}
+
 function copyForRecheck(item) {
   const qs = [];
   for (const qid of item.question_ids ?? []) {
@@ -350,7 +376,7 @@ function copyForRecheck(item) {
     const file = paths.bank(task ?? '_', `${qid}.json`);
     if (fs.existsSync(file)) qs.push(readJSON(file));
   }
-  writeJSON(paths.work(item.id, 'questions.json'), { item: item.id, recheck: true, questions: qs });
+  writeJSON(paths.work(item.id, 'questions.json'), { item: item.id, recheck: true, ...(item.kind === 'translate' ? { translate: true } : {}), questions: qs });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main(commands);

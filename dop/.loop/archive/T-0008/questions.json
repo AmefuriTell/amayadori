@@ -1,0 +1,425 @@
+{
+  "item": "T-0008",
+  "recheck": true,
+  "translate": true,
+  "questions": [
+    {
+      "id": "q-3.1-0001",
+      "task": "3.1",
+      "services": [
+        "AWS Regions"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs an order system in one AWS Region and needs a disaster recovery plan for a Regional outage. During normal operations, only the primary Region may serve users. If the primary Region fails, the recovery Region must be able to handle traffic immediately, even at reduced capacity, and then scale up. Which disaster recovery strategy is the MOST cost-effective way to meet these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Backup and restore, with backups copied to the recovery Region and infrastructure redeployed from IaC during failover.",
+          "text_ja": "バックアップと復元。バックアップを復旧先のリージョンにコピーし、フェイルオーバーの時に IaC からインフラストラクチャを再デプロイする。"
+        },
+        {
+          "key": "B",
+          "text": "Pilot light, with data replicated to the recovery Region and application servers deployed but switched off.",
+          "text_ja": "パイロットライト。データを復旧先のリージョンにレプリケートし、アプリケーションサーバーはデプロイしたうえで停止しておく。"
+        },
+        {
+          "key": "C",
+          "text": "Multi-site active/active, with users served from both Regions at all times.",
+          "text_ja": "マルチサイトのアクティブ/アクティブ。常に両方のリージョンからユーザーに応答する。"
+        },
+        {
+          "key": "D",
+          "text": "Warm standby, with a scaled-down but fully functional copy of production running in the recovery Region.",
+          "text_ja": "ウォームスタンバイ。縮小したが完全に機能する本番の複製を、復旧先のリージョンで動かしておく。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "warm standby は、別のリージョンに縮小した、しかし完全に動く本番の写しを置く。縮小した量ならすぐに通信を処理でき、あとは拡張するだけ。普段は 1 つのリージョンだけで利用者に応えるなら、active/active より安く簡単。",
+        "per_choice": {
+          "A": "障害の時にインフラと設定とコードを作り直し、データも戻す必要があり、すぐには処理できない。",
+          "B": "pilot light は、先にサーバーを起こすなどの作業をしないとリクエストを処理できない。",
+          "C": "両方のリージョンで利用者に応えるので、普段は主のリージョンだけの要件に反し、最も費用がかかる。",
+          "D": "正しい。縮小した量ですぐに通信を処理でき、拡張するだけでよい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S12",
+          "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S13",
+          "quote": "Alternatively, if you do not want to use both Regions to handle user traffic, then Warm Standby offers a more economical and operationally less complex approach."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S7",
+          "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業は 1 つの AWS リージョンで受注システムを動かしており、リージョンの障害に備えたディザスタリカバリの計画が必要です。通常の運用中は、プライマリリージョンだけがユーザーに応答してよいものとします。プライマリリージョンが障害を起こした場合、復旧先のリージョンは、容量を減らした状態でもすぐにトラフィックを処理でき、その後スケールアップできる必要があります。これらの要件を満たす最も費用対効果の高いディザスタリカバリの戦略はどれですか。"
+    },
+    {
+      "id": "q-3.1-0002",
+      "task": "3.1",
+      "services": [
+        "AWS Regions",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company needs a disaster recovery plan in a second AWS Region. The business accepts that recovery may take some time while servers are started and scaled out. Data loss must be very small, so database changes must reach the recovery Region continuously instead of through periodic backups. The company wants to keep the ongoing cost of the recovery Region as low as possible. Which disaster recovery strategy meets these requirements MOST cost-effectively?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Backup and restore, with nightly database snapshots copied to the recovery Region.",
+          "text_ja": "バックアップと復元。毎晩のデータベースのスナップショットを復旧先のリージョンにコピーする。"
+        },
+        {
+          "key": "B",
+          "text": "Pilot light, with continuous replication to a live database and application servers kept switched off.",
+          "text_ja": "パイロットライト。動いているデータベースへ継続的にレプリケートし、アプリケーションサーバーは停止しておく。"
+        },
+        {
+          "key": "C",
+          "text": "Warm standby, with a scaled-down production environment always running in the recovery Region.",
+          "text_ja": "ウォームスタンバイ。縮小した本番の環境を、復旧先のリージョンで常に動かしておく。"
+        },
+        {
+          "key": "D",
+          "text": "Multi-site active/active, with users served from both Regions and asynchronous data replication.",
+          "text_ja": "マルチサイトのアクティブ/アクティブ。両方のリージョンからユーザーに応答し、データは非同期でレプリケートする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "pilot light は、データを別のリージョンへ写し、データベースなどデータを保つ物は常に動かすが、アプリのサーバーは止めておき、障害の時に起こして拡張する。動かしておく物が少ないので費用を抑えられ、データベースへの継続的な複製で RPO を小さくできる。",
+        "per_choice": {
+          "A": "達成できる復旧時点はバックアップの頻度で決まる。夜ごとの取得では、継続的に届ける要件に合わない。",
+          "B": "正しい。データは継続的に写し、サーバーは止めておくので、要件を満たすうちで最も安い。",
+          "C": "要件は満たすが、縮小した本番を常に動かすので pilot light より費用がかかる。",
+          "D": "最も複雑で費用のかかる方法。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S9",
+          "quote": "A pilot light approach minimizes the ongoing cost of disaster recovery by minimizing the active resources"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S10",
+          "quote": "For pilot light, continuous data replication to live databases and data stores in the DR region is the best approach for low RPO"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S8",
+          "quote": "How often you run your backup will determine your achievable recovery point (which should align to meet your RPO)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S13",
+          "quote": "This approach is the most complex and costly approach to disaster recovery"
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業には、2 つ目の AWS リージョンでのディザスタリカバリの計画が必要です。ビジネス側は、サーバーの起動とスケールアウトの間、復旧にある程度の時間がかかることを受け入れています。データの損失はごく小さくする必要があるため、データベースの変更は定期的なバックアップではなく、継続的に復旧先のリージョンに届く必要があります。企業は、復旧先のリージョンの継続的な費用をできるだけ低く抑えたいと考えています。これらの要件を満たす最も費用対効果の高いディザスタリカバリの戦略はどれですか。"
+    },
+    {
+      "id": "q-3.1-0003",
+      "task": "3.1",
+      "services": [
+        "AWS Resilience Hub"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company's business owners state two requirements for an application: the application can be unavailable for at most 1 hour after an outage, and at most 5 minutes of data can be lost. The DevOps team must record these targets for Availability Zone and Region disruptions and check whether the current architecture meets them with the LEAST manual effort, without building its own assessment tool. Which statements or actions are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The 1-hour limit is the RTO, and the 5-minute limit is the RPO.",
+          "text_ja": "1 時間の上限は RTO で、5 分の上限は RPO である。"
+        },
+        {
+          "key": "B",
+          "text": "The 1-hour limit is the RPO, and the 5-minute limit is the RTO.",
+          "text_ja": "1 時間の上限は RPO で、5 分の上限は RTO である。"
+        },
+        {
+          "key": "C",
+          "text": "Define an AWS Resilience Hub resilience policy with these RTO and RPO targets, and use it to assess the application.",
+          "text_ja": "この RTO と RPO を目標とする AWS Resilience Hub のポリシーを定義し、評価に使う。"
+        },
+        {
+          "key": "D",
+          "text": "Treat an Availability Zone outage as an event that can be resolved only by switching to another Region.",
+          "text_ja": "アベイラビリティーゾーンの障害は、別のリージョンに切り替えることでしか解決できない事象として扱う。"
+        },
+        {
+          "key": "E",
+          "text": "Record the targets in a spreadsheet and compare them with the architecture by hand after each release.",
+          "text_ja": "目標をスプレッドシートに記録し、リリースのたびに手作業でアーキテクチャと比べる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "RTO はサービスが止まってから戻るまでに許せる最大の遅れ、RPO は最後の復旧時点から許せる最大の時間（失ってよいデータの量）。AWS Resilience Hub では、アプリ・インフラ・アベイラビリティーゾーン・リージョンの障害ごとの RTO と RPO の目標を耐障害性の方針（resilience policy）に決め、アプリがそれを満たすかを見積もる。",
+        "per_choice": {
+          "A": "正しい。止まってよい時間が RTO、失ってよいデータの時間が RPO。",
+          "B": "RTO と RPO が逆。",
+          "C": "正しい。方針に目標を決め、満たすかを評価できる。",
+          "D": "アベイラビリティーゾーンの障害は、別のアベイラビリティーゾーンへ切り替えて解決できる種類として扱われる。",
+          "E": "リリースのたびに人が見比べることになり、手作業を最も少なくする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S3",
+          "quote": "The maximum acceptable delay between the interruption of service and restoration of service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S2",
+          "quote": "The maximum acceptable amount of time since the last data recovery point."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/arh-mgmt.html",
+          "source_id": "S5",
+          "quote": "These policies include RTO and RPO targets for applications, infrastructure, Availability Zone, and Region disruptions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S4",
+          "quote": "This type of outage can be resolved by switching to a different Availability Zone."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-25",
+      "stem_ja": "ある企業のビジネスオーナーは、アプリケーションに 2 つの要件を示しています。障害の後にアプリケーションが使えない時間は最大 1 時間、失ってよいデータは最大 5 分ぶんです。DevOps チームは、アベイラビリティーゾーンとリージョンの障害についてこれらの目標を記録し、独自の評価ツールを作らずに、最も少ない手作業で今のアーキテクチャが目標を満たすかを確認する必要があります。正しい説明またはアクションはどれですか。（2 つ選択してください。）"
+    },
+    {
+      "id": "q-3.1-0004",
+      "task": "3.1",
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Application servers run in private subnets in three Availability Zones. All private subnets route internet traffic through a single NAT gateway in AZ-a. During an outage of AZ-a, the servers in the other two Availability Zones also lost internet access. The company wants internet access to keep working in the remaining zones during a single-AZ outage. Which solution BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a second NAT gateway in AZ-a, and split the private subnets between the two NAT gateways.",
+          "text_ja": "AZ-a に 2 つ目の NAT ゲートウェイを作成し、プライベートサブネットを 2 つの NAT ゲートウェイに分ける。"
+        },
+        {
+          "key": "B",
+          "text": "Move the NAT gateway to AZ-b, and route all private subnets to it.",
+          "text_ja": "NAT ゲートウェイを AZ-b に移し、すべてのプライベートサブネットをそこへルーティングする。"
+        },
+        {
+          "key": "C",
+          "text": "Replace the NAT gateway with one that has more bandwidth, and keep the current routing.",
+          "text_ja": "NAT ゲートウェイを帯域幅の大きいものに置き換え、今のルーティングはそのままにする。"
+        },
+        {
+          "key": "D",
+          "text": "Create a NAT gateway in each Availability Zone, and route each private subnet to the NAT gateway in its own Availability Zone.",
+          "text_ja": "アベイラビリティーゾーンごとに NAT ゲートウェイを作成し、各プライベートサブネットを同じゾーンの NAT ゲートウェイへルーティングする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "NAT ゲートウェイは特定のアベイラビリティーゾーンに作られ、そのゾーンの中で冗長になっている。複数のゾーンの資源が 1 つの NAT ゲートウェイを共有すると、そのゾーンが落ちた時に他のゾーンの資源もインターネットに出られなくなる。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの NAT ゲートウェイを使うように経路を決める。",
+        "per_choice": {
+          "A": "2 つとも AZ-a にあるので、AZ-a が落ちると両方使えない。",
+          "B": "単一の障害点が AZ-b に移るだけ。",
+          "C": "ゾーンの障害に対する弱さは変わらない。",
+          "D": "正しい。1 つのゾーンが落ちても、他のゾーンは自分のゾーンの NAT ゲートウェイを使い続けられる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "source_id": "S1",
+          "quote": "If you have resources in multiple Availability Zones and they share one NAT gateway, and if the NAT gateway's Availability Zone is down, resources in the other Availability Zones lose internet access."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "source_id": "S1",
+          "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-26",
+      "note": "P-009: 最新のドキュメントには、AZ をまたいで自動で高可用になる regional NAT gateway もある（S2）。試験は AZ ごとの NAT ゲートウェイの形を想定しているので、選択肢には入れていない",
+      "last_checked": "2026-11-26",
+      "stem_ja": "アプリケーションサーバーは、3 つのアベイラビリティーゾーンのプライベートサブネットで動いています。すべてのプライベートサブネットは、インターネットへの通信を AZ-a にある 1 つの NAT ゲートウェイ経由でルーティングしています。AZ-a の障害の間、ほかの 2 つのアベイラビリティーゾーンのサーバーもインターネットに接続できなくなりました。企業は、1 つの AZ の障害の間も、残りのゾーンでインターネットへの接続が使えるようにしたいと考えています。この要件を最もよく満たすソリューションはどれですか。"
+    },
+    {
+      "id": "q-3.1-0005",
+      "task": "3.1",
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones and has cross-zone load balancing disabled. Its targets come from an Auto Scaling group. After several scaling events, AZ-a has five instances and AZ-b has one. The single instance in AZ-b is overloaded, and if AZ-a fails, too little capacity remains. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing so that each load balancer node distributes traffic across targets in all enabled Availability Zones.",
+          "text_ja": "各ロードバランサーノードが、有効なすべてのアベイラビリティーゾーンのターゲットにトラフィックを分散するように、クロスゾーン負荷分散を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Configure the Auto Scaling group to use subnets in both Availability Zones with balanced Availability Zone distribution.",
+          "text_ja": "Auto Scaling グループが両方のアベイラビリティーゾーンのサブネットを使い、ゾーン間で均等に配置するように設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Disable AZ-b on the load balancer so that all traffic goes to the instances in AZ-a.",
+          "text_ja": "すべてのトラフィックが AZ-a のインスタンスに行くように、ロードバランサーで AZ-b を無効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Move all instances into AZ-a so that the targets are in one place.",
+          "text_ja": "ターゲットが 1 か所にまとまるように、すべてのインスタンスを AZ-a に移す。"
+        },
+        {
+          "key": "E",
+          "text": "Keep cross-zone load balancing disabled, because each node already sends traffic to targets in every zone.",
+          "text_ja": "各ノードはすでにすべてのゾーンのターゲットにトラフィックを送っているので、クロスゾーン負荷分散は無効のままにする。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ゾーン間の負荷分散（cross-zone load balancing）を有効にすると、各ゾーンのロードバランサーのノードが、有効な全てのゾーンのターゲットに通信を配る。無効なら、各ノードは自分のゾーンのターゲットにだけ配る。Auto Scaling は、有効なゾーンに同じ数のインスタンスを保つように動く（balanced best effort）。",
+        "per_choice": {
+          "A": "正しい。AZ-b のノードも全てのターゲットに配るので、1 台に集中しない。",
+          "B": "正しい。インスタンスをゾーンに均等に置き、1 つのゾーンが落ちても容量が残る。",
+          "C": "1 つのゾーンだけに頼ることになり、単一の障害点が残る。",
+          "D": "全てのインスタンスが 1 つのゾーンに集まり、そのゾーンの障害で止まる。",
+          "E": "無効の時は、各ノードは自分のゾーンのターゲットにしか配らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-availability-zone-balanced.html",
+          "source_id": "S6",
+          "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "Network Load Balancer は 2 つのアベイラビリティーゾーンで有効になっており、クロスゾーン負荷分散は無効です。ターゲットは Auto Scaling グループから来ます。何度かスケーリングが起きた後、AZ-a には 5 台、AZ-b には 1 台のインスタンスがあります。AZ-b の 1 台のインスタンスは過負荷で、AZ-a が障害を起こすと残る容量が少なすぎます。企業はどのアクションを実行すべきですか。（2 つ選択してください。）"
+    },
+    {
+      "id": "q-3.1-0006",
+      "task": "3.1",
+      "services": [
+        "Amazon ElastiCache"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An ElastiCache (Redis OSS) replication group has one primary and one replica, with Multi-AZ disabled. When the primary node failed, ElastiCache took it offline and provisioned a new primary, and the application had a long outage. The company wants a replica in another Availability Zone to be promoted automatically if the primary fails. Which change BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable automatic failover only, and keep Multi-AZ disabled.",
+          "text_ja": "自動フェイルオーバーだけを有効にし、マルチ AZ は無効のままにする。"
+        },
+        {
+          "key": "B",
+          "text": "Enable Multi-AZ, with at least one replica in a different Availability Zone from the primary.",
+          "text_ja": "マルチ AZ を有効にし、プライマリと別のアベイラビリティーゾーンにレプリカを 1 つ以上置く。"
+        },
+        {
+          "key": "C",
+          "text": "Move to a larger node type so that the primary is less likely to fail.",
+          "text_ja": "プライマリが障害を起こしにくいように、より大きいノードタイプに移す。"
+        },
+        {
+          "key": "D",
+          "text": "Take snapshots every hour so that a new primary can be restored quickly.",
+          "text_ja": "新しいプライマリをすぐに復元できるように、1 時間ごとにスナップショットを取る。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ を有効にすると、ElastiCache はレプリカを別々のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にする。主ノードが落ちると、複製の遅れが最も少ないレプリカを自動で主に上げる。Multi-AZ には、主と別のゾーンに少なくとも 1 つのレプリカが要る。Multi-AZ なしで自動フェイルオーバーだけを有効にすると、レプリカが別のゾーンにある保証は無い。",
+        "per_choice": {
+          "A": "レプリカが別のゾーンにある保証が無い。",
+          "B": "正しい。別のゾーンのレプリカを自動で主に上げる。",
+          "C": "落ちにくくなるだけで、落ちた時の切り替えは変わらない。",
+          "D": "戻すのに時間がかかり、自動の昇格にもならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-26",
+      "last_checked": "2026-11-26",
+      "stem_ja": "ElastiCache (Redis OSS) のレプリケーショングループには、プライマリが 1 つとレプリカが 1 つあり、マルチ AZ は無効です。プライマリノードが障害を起こした時、ElastiCache はそれをオフラインにして新しいプライマリをプロビジョニングし、アプリケーションは長く停止しました。企業は、プライマリが障害を起こした場合に、別のアベイラビリティーゾーンのレプリカが自動で昇格するようにしたいと考えています。この要件を最もよく満たす変更はどれですか。"
+    }
+  ]
+}

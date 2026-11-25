@@ -1,0 +1,349 @@
+{
+  "item": "T-0011",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A security policy requires an existing Amazon CloudWatch Logs log group in eu-west-1 to be encrypted with a customer managed AWS KMS key. A DevOps engineer creates a symmetric KMS key in eu-west-1 and tries to associate it with the log group, but the operation fails because CloudWatch Logs cannot use the key. The key must be usable only for this log group. What should the engineer do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an asymmetric KMS key instead, because CloudWatch Logs encrypts log data with public keys."
+        },
+        {
+          "key": "B",
+          "text": "Give the engineer's IAM role kms:Encrypt and kms:Decrypt permissions on the key, and keep the default key policy."
+        },
+        {
+          "key": "C",
+          "text": "Create the KMS key in us-east-1 and allow the CloudWatch Logs service principal from that Region to use it."
+        },
+        {
+          "key": "D",
+          "text": "Add a key policy statement that allows the CloudWatch Logs service principal in eu-west-1 to use the key, with a condition for the log group ARN."
+        }
+      ],
+      "explanation": {
+        "summary": "KMS キーは既定では持ち主しか使えないので、キーポリシーで CloudWatch Logs のサービスプリンシパル（キーと同じリージョンの物）に使う権限を与える。使える範囲は、条件で特定のロググループの ARN に絞るのがよいとされている。",
+        "per_choice": {
+          "A": "CloudWatch Logs は対称キーしか使えない。非対称キーを使ってはいけない。",
+          "B": "CloudWatch Logs のサービスプリンシパルに権限が無いままで、キーを使えない。",
+          "C": "サービスプリンシパルはキーと同じリージョンでなければならず、ロググループのリージョンとも合わない。",
+          "D": "正しい。サービスプリンシパルに許し、条件で 1 つのロググループに絞る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "source_id": "S2",
+          "quote": "With this step, you give the CloudWatch Logs service principal and the caller role permission to use the key. This service principal must be in the same AWS Region where the KMS key is stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "source_id": "S2",
+          "quote": "The Condition section in this example restricts the key to a single log group ARN."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "source_id": "S1",
+          "quote": "CloudWatch Logs supports only symmetric KMS keys. Do not use an asymmetric key to encrypt the data in your log groups."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "An application writes logs to an Amazon CloudWatch Logs log group, and some log events contain credit card numbers. Operators who view the logs must not see the card numbers. Log events must be removed automatically after 90 days so that storage costs stay under control. The company does not want to write or run custom code. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a data protection policy for the log group that uses a data identifier for credit card numbers and masks them."
+        },
+        {
+          "key": "B",
+          "text": "Set the retention setting of the log group to 90 days."
+        },
+        {
+          "key": "C",
+          "text": "Encrypt the log group with a customer managed AWS KMS key so that operators cannot read the card numbers."
+        },
+        {
+          "key": "D",
+          "text": "Keep the default retention setting, and run a scheduled AWS Lambda function that deletes log events older than 90 days."
+        },
+        {
+          "key": "E",
+          "text": "Export the log group to Amazon S3 every day so that CloudWatch Logs no longer stores the log events."
+        }
+      ],
+      "explanation": {
+        "summary": "データ保護のポリシーは、データ識別子で機微なデータを選び、見つけた物をログイベントの表示の時にマスクできる。ロググループの保持期間を決めると、それより古いデータは消され、消す印が付いた後は保存の費用もかからない。",
+        "per_choice": {
+          "A": "正しい。カード番号を見つけて、表示の時にマスクする。",
+          "B": "正しい。既定では無期限に残るので、90 日を設定すれば自動で消える。",
+          "C": "KMS で暗号化しても、データを求められた時に CloudWatch Logs が復号するので、表示を隠すことにはならない。",
+          "D": "自分のコードを動かすことになり、要件に反する。保持期間の設定で足りる。",
+          "E": "書き出しても CloudWatch Logs の保持はそのままで、日々の書き出しの仕組みも要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/cloudwatch-logs-data-protection-policies.html",
+          "source_id": "S4",
+          "quote": "These operations let you log the sensitive data that is found (or not found), and to mask the sensitive data when the log events are viewed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+          "source_id": "S3",
+          "quote": "By default, log data is stored in CloudWatch Logs indefinitely. However, you can configure how long to store log data in a log group. Any data older than the current retention setting is deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+          "source_id": "S3",
+          "quote": "After they are marked for deletion, they do not add to your archival storage costs anymore, even if they are not actually deleted until later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "source_id": "S1",
+          "quote": "CloudWatch Logs decrypts this data whenever it is requested."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A team creates a metric filter today on a Standard log group to count log events that contain ERROR, and creates an alarm on the metric. The graph shows no data for the past week, although the logs from last week contain errors. During quiet hours with no errors, the alarm shows INSUFFICIENT_DATA instead of OK. The metric has no dimensions. Which statements or actions are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "The metric filter publishes data points only for log events that arrive after the filter was created."
+        },
+        {
+          "key": "B",
+          "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match."
+        },
+        {
+          "key": "C",
+          "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours."
+        },
+        {
+          "key": "D",
+          "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once."
+        },
+        {
+          "key": "E",
+          "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour."
+        }
+      ],
+      "explanation": {
+        "summary": "メトリクスフィルターは過去のデータには効かず、作った後に届いたイベントの値だけを出す。既定の値を決めないと、合うログが無い時は何も報告しないので、0 でも既定の値を決めるのが勧められている。ディメンションを付けたメトリクスには既定の値を決められない。メトリクスフィルターが使えるのは Standard のロググループだけ。",
+        "per_choice": {
+          "A": "正しい。過去のログはさかのぼって数えない。",
+          "B": "正しい。合うログが無い時に既定の値 0 が報告される。",
+          "C": "ディメンションを付けると既定の値を決められない。",
+          "D": "フィルターは過去のデータをさかのぼって調べない。",
+          "E": "メトリクスフィルターは Standard のロググループだけで使える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "source_id": "S1",
+          "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "source_id": "S3",
+          "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "source_id": "S3",
+          "quote": "If you assign dimensions to metrics that metric filters generate, you can't specify default values for those metrics."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "source_id": "S1",
+          "quote": "Metric filters are supported only for log groups in the Standard log class."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A Lambda function must emit several custom business metrics, such as order totals per payment type. The team does not want the function to make extra synchronous API calls to CloudWatch, does not want to grant the cloudwatch:PutMetricData permission, and does not want to create a separate metric filter for each new metric. Which approach meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Write the metrics as log entries in the CloudWatch embedded metric format, using the function's existing logs:PutLogEvents permission."
+        },
+        {
+          "key": "B",
+          "text": "Call PutMetricData from the function for each metric, and add cloudwatch:PutMetricData to the execution role."
+        },
+        {
+          "key": "C",
+          "text": "Create a metric filter on the log group for each new business metric as it is added."
+        },
+        {
+          "key": "D",
+          "text": "Write the values to an Amazon S3 bucket and run a scheduled job that calls PutMetricData for them."
+        }
+      ],
+      "explanation": {
+        "summary": "埋め込みメトリクス形式（embedded metric format）では、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作れ、設定も要らない。必要なのは logs:PutLogEvents の権限だけで、cloudwatch:PutMetricData の権限は要らない。",
+        "per_choice": {
+          "A": "正しい。ログを書くだけで非同期にメトリクスができ、PutMetricData の権限は要らない。",
+          "B": "同期の API 呼び出しと PutMetricData の権限が要り、要件に反する。",
+          "C": "メトリクスを足すたびにフィルターを作ることになり、要件に反する。",
+          "D": "仕組みを作ることになり、PutMetricData の権限も要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "No setup is required to use the embedded metric format."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0005",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A data team wants all CloudWatch metrics from the AWS/EC2 and AWS/RDS namespaces delivered continuously to an Amazon S3 data lake in Apache Parquet format. Metrics that are added to these namespaces later must be included automatically. The team does not want to write code that polls CloudWatch. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a metric stream with the Quick S3 setup and choose Parquet as the output format of the stream."
+        },
+        {
+          "key": "B",
+          "text": "Create a metric stream with an include filter for AWS/EC2 and an exclude filter for every namespace except AWS/RDS."
+        },
+        {
+          "key": "C",
+          "text": "Run an AWS Lambda function every minute that calls GetMetricData and writes Parquet files to Amazon S3."
+        },
+        {
+          "key": "D",
+          "text": "Create a metric stream with include filters for the two namespaces, sent to a Firehose delivery stream that converts the data to Parquet."
+        }
+      ],
+      "explanation": {
+        "summary": "メトリクスストリームは CloudWatch のメトリクスをほぼリアルタイムに送り続ける。Firehose を使う形では、JSON と OpenTelemetry の形式を直接扱い、Parquet などへは Firehose の変換で変える。名前空間で絞る filter は include か exclude のどちらかだけで、作った後に条件に合う新しいメトリクスも自動で入る。",
+        "per_choice": {
+          "A": "ストリームが直接選べる形式は JSON と OpenTelemetry だけ。",
+          "B": "1 つのストリームに include と exclude の両方の filter は置けない。",
+          "C": "自分で問い合わせるコードを持つことになり、要件に反する。",
+          "D": "正しい。2 つの名前空間を含めて送り、Firehose で Parquet に変える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "or you can configure transformations in your Firehose delivery stream to convert the data to a different format such as Parquet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "A single metric stream can have only include or exclude filters, but not both."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "the new metrics are automatically included in the stream."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "source_id": "S1",
+          "quote": "Each stream can use either JSON format, OpenTelemetry 1.0.0, or OpenTelemetry 0.7.0 format."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0006",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A team adds a CloudWatch Logs subscription filter that sends matching log events from a log group to an AWS Lambda function for real-time processing. Before the code is written, the team asks what the function will receive and what delivery guarantees it can rely on. Which statements are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "The function receives the log data gzip-compressed and base64 encoded in the awslogs.data field."
+        },
+        {
+          "key": "B",
+          "text": "Events are delivered at least once, so the function should handle occasional duplicate events."
+        },
+        {
+          "key": "C",
+          "text": "Events are delivered exactly once, so the function does not need to handle duplicates."
+        },
+        {
+          "key": "D",
+          "text": "The function receives plain-text log events, because compression applies only to Kinesis destinations."
+        },
+        {
+          "key": "E",
+          "text": "The log group can have up to 10 subscription filters, so each team can add its own."
+        }
+      ],
+      "explanation": {
+        "summary": "サブスクリプションフィルターで送るログは gzip で圧縮され、Lambda は awslogs.data のフィールドに base64 で符号化されたデータを受け取る。配信は少なくとも 1 回で、まれに重複がある。ロググループに付けられるサブスクリプションフィルターは 5 つまで。",
+        "per_choice": {
+          "A": "正しい。gzip で圧縮され、base64 で awslogs.data に入る。",
+          "B": "正しい。少なくとも 1 回の配信で、重複があり得る。",
+          "C": "少なくとも 1 回で、重複は起こり得る。",
+          "D": "送り先が何でも gzip で圧縮される。",
+          "E": "ロググループごとに 5 つまで。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda receives the data base64 encoded in the awslogs.data field."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "Subscription filters ensure at least one time delivery of events, while duplicate events may occasionally occur."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "When log events are sent to the receiving service, they are compressed with the gzip format."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "source_id": "S3",
+          "quote": "Each log group can have up to five subscription filters associated with it."
+        }
+      ]
+    }
+  ]
+}
