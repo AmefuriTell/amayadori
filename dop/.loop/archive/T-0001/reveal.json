@@ -1,0 +1,405 @@
+{
+  "item": "T-0001",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company stores container images in Amazon ECR private repositories. The security team found that images pushed months ago are never re-evaluated after new vulnerabilities are disclosed. The team wants every repository to be checked automatically on an ongoing basis without any person or pipeline starting the checks. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Configure basic scanning with scan on push for every repository in the registry."
+        },
+        {
+          "key": "B",
+          "text": "Create a scheduled AWS Lambda function that starts a manual basic scan of each image every day."
+        },
+        {
+          "key": "C",
+          "text": "Turn on enhanced scanning for the registry so that Amazon Inspector evaluates the images."
+        },
+        {
+          "key": "D",
+          "text": "Add an AWS CodeBuild stage that runs an open-source image scanner before each image push."
+        }
+      ],
+      "explanation": {
+        "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+        "per_choice": {
+          "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+          "B": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+          "C": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+          "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company uses AWS CodeArtifact. Each development team has its own repository, and all repositories are in one domain. Builds must resolve both the company's internal npm packages and open-source npm packages through the team's own repository. A central team wants to control how open-source packages are brought in, instead of each team configuring this separately. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a shared repository that has an external connection to the public npmjs registry."
+        },
+        {
+          "key": "B",
+          "text": "Configure the shared repository as an upstream repository of each team repository."
+        },
+        {
+          "key": "C",
+          "text": "Move each team repository into its own domain and point it to the shared repository."
+        },
+        {
+          "key": "D",
+          "text": "Make the shared repository public so that builds can download packages without credentials."
+        },
+        {
+          "key": "E",
+          "text": "Add an external connection to npmjs on every team repository and remove the shared one."
+        }
+      ],
+      "explanation": {
+        "summary": "外部接続（external connection）を持つ共有のリポジトリを中央のチームが持ち、それを各チームのリポジトリの upstream にする。upstream は同じドメインの中で設定でき、各チームのリポジトリから社内のパッケージと公開のパッケージの両方を取れる。",
+        "per_choice": {
+          "A": "正しい。公開の npmjs から取り込む入口を 1 か所にまとめられる。",
+          "B": "正しい。同じドメインの中なら、あるリポジトリのパッケージを別のリポジトリで使えるようにできる。",
+          "C": "あるリポジトリのパッケージを別のリポジトリで使えるようにできるのは、同じドメインの中だけ。ドメインを分ける構成はこの要件に合わない。",
+          "D": "CodeArtifact のリポジトリのパッケージは公開できない。",
+          "E": "各チームが別々に外部接続を持つことになり、中央のチームがまとめて管理する要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can make packages in one repository available to another repository in the same domain."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A DevOps engineer uses AWS CloudFormation to create a connection to GitHub and an AWS CodePipeline pipeline that uses it as the source. The stack deploys successfully, but the pipeline cannot access the repository, and the connection status is PENDING. The engineer wants to keep the connection that the stack created and avoid storing personal tokens. What should the engineer do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Wait for the connection to change to AVAILABLE automatically after the first pipeline run."
+        },
+        {
+          "key": "B",
+          "text": "Delete the connection and create it again with the AWS CLI so that it becomes AVAILABLE."
+        },
+        {
+          "key": "C",
+          "text": "Store a GitHub personal access token in AWS Secrets Manager and point the source action to it."
+        },
+        {
+          "key": "D",
+          "text": "Edit the connection in the console to complete its setup so that its status becomes AVAILABLE."
+        }
+      ],
+      "explanation": {
+        "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+        "per_choice": {
+          "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+          "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+          "C": "個人のトークンを持たない要件に反する。",
+          "D": "正しい。コンソールで編集すれば AVAILABLE になる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An AWS CodePipeline pipeline uses a GitHub source action through a connection, followed by an AWS CodeBuild action. The build script runs git commands that read the commit history to compute a version number, but the commands fail because no Git metadata is present. A later AWS CodeDeploy action must keep receiving the build output. The team does not want to store Git credentials in the build. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Configure the source action to output a full clone, and pass the source artifact directly to the CodeDeploy action."
+        },
+        {
+          "key": "B",
+          "text": "Configure the source action to output a full clone, and keep CodeBuild as the action that uses the source artifact."
+        },
+        {
+          "key": "C",
+          "text": "Keep the default ZIP output and add a git clone command that uses a personal access token to the buildspec."
+        },
+        {
+          "key": "D",
+          "text": "Keep the default ZIP output and run git init in the build before the version script runs."
+        }
+      ],
+      "explanation": {
+        "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+        "per_choice": {
+          "A": "full clone の参照は CodeBuild のアクションしか使えない。",
+          "B": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+          "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+          "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0005",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company's AWS CodePipeline pipeline uses a GitHub source through a connection and currently starts on every push. The company wants the pipeline to start only when a Git tag whose name starts with \"release\" is created. Pushes without such a tag must not start the pipeline, and the company does not want to write custom code. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Keep the push trigger and add a branch filter for the main branch, where release tags are created."
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge rule for GitHub tag events that invokes a Lambda function to start the pipeline."
+        },
+        {
+          "key": "C",
+          "text": "Configure the pipeline trigger with the Tags filter type and the pattern release*."
+        },
+        {
+          "key": "D",
+          "text": "Disable automatic starts and choose Release change in the console after each release tag is created."
+        }
+      ],
+      "explanation": {
+        "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+        "per_choice": {
+          "A": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+          "B": "自分でコードを書くことになり、要件に反する。",
+          "C": "正しい。release で始まるタグが作られた時だけ始まる。",
+          "D": "毎回人が始めることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "This example shows you how to create a pipeline that allows filtering for tags based on the syntax of the tag name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0006",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A CodeBuild project uses AWS Lambda compute for fast start-up. In the build phase, the first command runs unit tests and the next command uploads the test logs. When the tests fail, CodeBuild skips the upload command, so the logs are lost. The logs must be uploaded even when the tests fail, and the phase must still fail when the tests fail. Which buildspec change meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Move the upload command into a finally block of the build phase."
+        },
+        {
+          "key": "B",
+          "text": "Set on-failure: CONTINUE on the build phase, and move the upload command to the post_build phase."
+        },
+        {
+          "key": "C",
+          "text": "Move the upload command before the test command in the commands block."
+        },
+        {
+          "key": "D",
+          "text": "Create a second CodeBuild project that runs after every build and uploads the logs."
+        }
+      ],
+      "explanation": {
+        "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+        "per_choice": {
+          "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+          "B": "on-failure は Lambda の計算では使えない。",
+          "C": "試験の前に上げると、試験のログがまだ無い。",
+          "D": "プロジェクトを足すことになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S1",
+          "quote": "The commands in a finally block are run even if a command in the commands block fails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S1",
+          "quote": "The phase is successful when all commands in the commands and the finally blocks run successfully."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0007",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A team moved a CodeBuild project to AWS Lambda compute to shorten start-up time. The project builds Docker images and pushes them to Amazon ECR, and now every build fails when it runs docker build. The team needs the Docker builds to work again with the fewest changes to the buildspec. Which actions should the team take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Change the project back to EC2 compute."
+        },
+        {
+          "key": "B",
+          "text": "Set privilegedMode to true in the project's environment."
+        },
+        {
+          "key": "C",
+          "text": "Keep Lambda compute and set privilegedMode to true."
+        },
+        {
+          "key": "D",
+          "text": "Keep Lambda compute and raise the build timeout to 60 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Keep Lambda compute and switch to a reserved capacity fleet for Docker."
+        }
+      ],
+      "explanation": {
+        "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+        "per_choice": {
+          "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+          "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+          "C": "Lambda の計算は privileged モードに対応しない。",
+          "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+          "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support Docker builds or runs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "source_id": "S6",
+          "quote": "Set to true only if you plan to use this build project to build Docker images. Otherwise, all associated builds that attempt to interact with the Docker daemon fail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html",
+          "source_id": "S3",
+          "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0008",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A CodeBuild project on EC2 compute runs a full integration suite that takes about 3 hours. Every build stops after 60 minutes and is marked as failed, although the tests are still running. The project's timeout setting has never been changed. The team wants the suite to finish in one build with the LEAST operational effort. What should the team do?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Move the project to AWS Lambda compute so that it runs faster."
+        },
+        {
+          "key": "B",
+          "text": "Set timeoutInMinutes on the project to 4320."
+        },
+        {
+          "key": "C",
+          "text": "Set timeoutInMinutes on the project to 240."
+        },
+        {
+          "key": "D",
+          "text": "Split the suite into three projects that each run for less than 60 minutes."
+        }
+      ],
+      "explanation": {
+        "summary": "timeoutInMinutes は、終わらないビルドを止めるまでの分数で、5 から 2160（36 時間）まで決められる。指定しないと既定の 60 分になる。Lambda の計算は 15 分を超える実行に対応しない。",
+        "per_choice": {
+          "A": "Lambda の計算は 15 分を超える実行に対応しない。",
+          "B": "決められるのは 2160 分（36 時間）まで。",
+          "C": "正しい。既定の 60 分を、3 時間の試験が終わる長さに延ばす。",
+          "D": "プロジェクトを分けることになり、1 つのビルドで終える要件にも反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "source_id": "S5",
+          "quote": "The number of minutes, between 5 to 2160 (36 hours), after which CodeBuild stops the build if it is not complete. If not specified, the default of 60 is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        }
+      ]
+    }
+  ]
+}
