@@ -1,0 +1,74 @@
+{
+  "id": "q-6.2-0007",
+  "task": "6.2",
+  "services": [
+    "Amazon GuardDuty",
+    "Amazon Detective",
+    "AWS Organizations"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company uses AWS Organizations. The security team works from a dedicated security account and must detect communication with known malicious IP addresses and unusual API activity in every member account. The team does not want to create VPC flow logs in each account. When a threat finding appears, analysts must be able to investigate the root cause. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "From the management account, designate the security account as the delegated GuardDuty administrator, and enable GuardDuty for the member accounts."
+    },
+    {
+      "key": "B",
+      "text": "Use Amazon Detective to investigate GuardDuty findings and identify their root cause."
+    },
+    {
+      "key": "C",
+      "text": "Create VPC flow logs in every account first, because GuardDuty cannot analyze network traffic without them."
+    },
+    {
+      "key": "D",
+      "text": "Use Amazon Detective to detect threats in each account, instead of GuardDuty."
+    },
+    {
+      "key": "E",
+      "text": "Enable GuardDuty only in the security account, because it automatically monitors every account in the organization."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "GuardDuty は既知の悪いドメインや IP との通信、怪しい動きを検出し、CloudTrail の管理イベントや EC2 の VPC フローログのデータを分析する。フローログを自分で作る必要は無い。管理アカウントが委任管理者を決めると、そのアカウントがリージョンの全メンバーの GuardDuty を有効にして管理できる。Detective は、検出結果などから根本の原因を調べるのに使う。",
+    "per_choice": {
+      "A": "正しい。委任管理者がメンバーの GuardDuty を有効にして管理する。",
+      "B": "正しい。GuardDuty の検出結果から調査を始められる。",
+      "C": "フローログを自分で作らなくても、GuardDuty はデータを分析できる。",
+      "D": "Detective は調べるための物で、検出は GuardDuty などの結果から始まる。",
+      "E": "委任管理者を決めて、メンバーのアカウントで有効にする必要がある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_data-sources.html",
+      "source_id": "S5",
+      "quote": "You don't need to create or configure VPC flow logs in your account for GuardDuty to access this data."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html",
+      "source_id": "S6",
+      "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+      "source_id": "S7",
+      "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+      "source_id": "S7",
+      "quote": "For example, you are assigned to look into findings or alerts uncovered by services such as Amazon GuardDuty and Amazon Inspector."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

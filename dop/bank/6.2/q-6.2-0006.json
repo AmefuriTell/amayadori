@@ -1,0 +1,62 @@
+{
+  "id": "q-6.2-0006",
+  "task": "6.2",
+  "services": [
+    "AWS WAF",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A login API runs behind an Application Load Balancer. Attackers send floods of login requests from a changing set of IP addresses. The company must automatically limit any source that sends requests too fast, without blocking normal users and without writing code or updating IP lists by hand. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add deny rules for the attacking IP addresses to the subnet's network ACL whenever the attacks are noticed."
+    },
+    {
+      "key": "B",
+      "text": "Add deny rules for the attacking IP addresses to the load balancer's security group."
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that reads the access logs every minute and updates an IP block list."
+    },
+    {
+      "key": "D",
+      "text": "Associate an AWS WAF web ACL with a rate-based rule with the Application Load Balancer."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "AWS WAF は Application Load Balancer・CloudFront・API Gateway の REST API を守れる。rate-based rule は入ってくるリクエストを数え、速すぎる時に制限する。決めた条件でまとめて数えるので、送り元の IP が変わっても手でリストを直す必要が無い。",
+    "per_choice": {
+      "A": "見つけるたびに人が足すことになり、IP が変わると追い付かない。",
+      "B": "セキュリティグループには拒否のルールは書けない。",
+      "C": "自分でコードを書くことになり、要件に反する。",
+      "D": "正しい。速すぎる送り元を自動で制限する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html",
+      "source_id": "S4",
+      "quote": "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+      "source_id": "S3",
+      "quote": "Application Load Balancer"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+      "source_id": "S1",
+      "quote": "Allow rules only"
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

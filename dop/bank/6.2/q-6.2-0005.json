@@ -1,0 +1,61 @@
+{
+  "id": "q-6.2-0005",
+  "task": "6.2",
+  "services": [
+    "Amazon VPC"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A team replaced the default network ACL of a subnet with a custom network ACL. The custom ACL has an inbound rule that allows HTTPS from the internet and no outbound rules except the default deny. The instance's security group allows inbound HTTPS. Clients can reach the servers, but they never receive responses. Which change will fix the problem with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add an outbound rule to the custom network ACL that allows the return traffic to the clients."
+    },
+    {
+      "key": "B",
+      "text": "Add an outbound rule to the security group that allows responses to the clients."
+    },
+    {
+      "key": "C",
+      "text": "Add a second inbound HTTPS rule to the custom network ACL with a lower rule number."
+    },
+    {
+      "key": "D",
+      "text": "Replace the security group with one that has deny rules for all other traffic."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ネットワーク ACL はステートレスで、前に送受信した通信を覚えていない。入ってくる通信を許すルールを作っても、その応答は自動では許されないので、戻りの通信を出ていく方向のルールで許す必要がある。セキュリティグループはステートフルで、戻りの通信は自動で許される。",
+    "per_choice": {
+      "A": "正しい。ネットワーク ACL は戻りの通信を明示して許す必要がある。",
+      "B": "セキュリティグループはステートフルなので、許した通信の応答は既に通る。止めているのはネットワーク ACL。",
+      "C": "入ってくる通信は既に許されている。応答が出ていけないのが問題。",
+      "D": "セキュリティグループには拒否のルールは書けず、問題もネットワーク ACL の側にある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+      "source_id": "S2",
+      "quote": "If, for example, you create a NACL rule to allow specific inbound traffic to a subnet, responses to that traffic are not automatically allowed."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+      "source_id": "S1",
+      "quote": "Automatically allowed (stateful)"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+      "source_id": "S1",
+      "quote": "Must be explicitly allowed (stateless)"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

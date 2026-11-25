@@ -1,0 +1,124 @@
+{
+  "item": "C-0075",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "task": "6.2",
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Web servers in a public subnet accept HTTPS from the internet through a security group. The security team must block one malicious IP address range from reaching any instance in the subnet, while all other HTTPS traffic continues to be allowed. The team wants a network-level control and does not want to change each instance. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a deny rule for the IP address range to the security group of the web servers."
+        },
+        {
+          "key": "B",
+          "text": "Add a deny rule for the IP address range to the subnet's network ACL with a lower rule number than the rule that allows HTTPS."
+        },
+        {
+          "key": "C",
+          "text": "Add a deny rule for the IP address range to the subnet's network ACL with a higher rule number than the rule that allows HTTPS."
+        },
+        {
+          "key": "D",
+          "text": "Remove the HTTPS rule from the security group, and add allow rules for every IP address range except the malicious one."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0002",
+      "task": "6.2",
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team replaced the default network ACL of a subnet with a custom network ACL. The custom ACL has an inbound rule that allows HTTPS from the internet and no outbound rules except the default deny. The instance's security group allows inbound HTTPS. Clients can reach the servers, but they never receive responses. Which change will fix the problem with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add an outbound rule to the security group that allows responses to the clients."
+        },
+        {
+          "key": "B",
+          "text": "Add an outbound rule to the custom network ACL that allows the return traffic to the clients."
+        },
+        {
+          "key": "C",
+          "text": "Add a second inbound HTTPS rule to the custom network ACL with a lower rule number."
+        },
+        {
+          "key": "D",
+          "text": "Replace the security group with one that has deny rules for all other traffic."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0003",
+      "task": "6.2",
+      "services": [
+        "AWS WAF",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A login API runs behind an Application Load Balancer. Attackers send floods of login requests from a changing set of IP addresses. The company must automatically limit any source that sends requests too fast, without blocking normal users and without writing code or updating IP lists by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add deny rules for the attacking IP addresses to the subnet's network ACL whenever the attacks are noticed."
+        },
+        {
+          "key": "B",
+          "text": "Associate an AWS WAF web ACL with a rate-based rule with the Application Load Balancer."
+        },
+        {
+          "key": "C",
+          "text": "Add deny rules for the attacking IP addresses to the load balancer's security group."
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that reads the access logs every minute and updates an IP block list."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0004",
+      "task": "6.2",
+      "services": [
+        "Amazon GuardDuty",
+        "Amazon Detective",
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS Organizations. The security team works from a dedicated security account and must detect communication with known malicious IP addresses and unusual API activity in every member account. The team does not want to create VPC flow logs in each account. When a threat finding appears, analysts must be able to investigate the root cause. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "From the management account, designate the security account as the delegated GuardDuty administrator, and enable GuardDuty for the member accounts."
+        },
+        {
+          "key": "B",
+          "text": "Use Amazon Detective to investigate GuardDuty findings and identify their root cause."
+        },
+        {
+          "key": "C",
+          "text": "Create VPC flow logs in every account first, because GuardDuty cannot analyze network traffic without them."
+        },
+        {
+          "key": "D",
+          "text": "Use Amazon Detective to detect threats in each account, instead of GuardDuty."
+        },
+        {
+          "key": "E",
+          "text": "Enable GuardDuty only in the security account, because it automatically monitors every account in the organization."
+        }
+      ]
+    }
+  ]
+}

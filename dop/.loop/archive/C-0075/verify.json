@@ -1,0 +1,72 @@
+{
+ "item": "C-0075",
+ "questions": [
+  {
+   "qid": "q-6.2-0001",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "SGは拒否ルールを持てない。NACLは番号の小さい順に評価されるので許可より小さい番号で拒否。"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-6.2-0002",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "NACLはステートレス。戻りのエフェメラルポートの許可がアウトバウンドに要る。SGはステートフル。"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-6.2-0003",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "WAFのレートベースルールをALBに関連付ける。"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "explanation summary",
+     "detail": "「IPが変わっても手でリストを直す必要が無い」は、S4の「決めた条件でまとめて数える」からの推論。既定で送り元IP単位に集計する点はsources.mdに無い（事実としては正しい）。",
+     "source": "S4"
+    }
+   ],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-6.2-0004",
+   "blind": {
+    "answer": [
+     "A",
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "GuardDuty委任管理者でOrganizations全体を有効化、Detectiveで根本原因調査。GuardDutyはフローログ不要。"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "explanation per_choice D",
+     "detail": "「Detectiveは調べるための物」はS7で支えられるが、Detectiveが脅威検出をしない点はsources.mdに明記が無い（事実としては正しい）。",
+     "source": "S7"
+    }
+   ],
+   "verdict": "ok"
+  }
+ ]
+}

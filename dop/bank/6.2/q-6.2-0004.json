@@ -1,0 +1,61 @@
+{
+  "id": "q-6.2-0004",
+  "task": "6.2",
+  "services": [
+    "Amazon VPC"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Web servers in a public subnet accept HTTPS from the internet through a security group. The security team must block one malicious IP address range from reaching any instance in the subnet, while all other HTTPS traffic continues to be allowed. The team wants a network-level control and does not want to change each instance. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a deny rule for the IP address range to the security group of the web servers."
+    },
+    {
+      "key": "B",
+      "text": "Add a deny rule for the IP address range to the subnet's network ACL with a lower rule number than the rule that allows HTTPS."
+    },
+    {
+      "key": "C",
+      "text": "Add a deny rule for the IP address range to the subnet's network ACL with a higher rule number than the rule that allows HTTPS."
+    },
+    {
+      "key": "D",
+      "text": "Remove the HTTPS rule from the security group, and add allow rules for every IP address range except the malicious one."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "セキュリティグループは許可のルールだけで、拒否は書けない。ネットワーク ACL は許可と拒否の両方を書け、番号の小さい順に評価し、合ったルールを当てて残りは見ない。拒否のルールは、HTTPS を許すルールより小さい番号にする。",
+    "per_choice": {
+      "A": "セキュリティグループには許可のルールしか書けない。",
+      "B": "正しい。小さい番号の拒否が先に合うので、その範囲だけを止められる。",
+      "C": "番号の小さい HTTPS の許可が先に合い、拒否のルールは評価されない。",
+      "D": "許可のルールをたくさん持つことになり、手間が大きく、範囲の管理も難しい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+      "source_id": "S1",
+      "quote": "Allow rules only"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+      "source_id": "S2",
+      "quote": "We evaluate the rules in order, starting with the lowest numbered rule, when deciding whether allow or deny traffic."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+      "source_id": "S2",
+      "quote": "If the traffic matches a rule, the rule is applied and we do not evaluate any additional rules."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}
