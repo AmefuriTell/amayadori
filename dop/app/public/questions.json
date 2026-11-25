@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 82,
+  "count": 98,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -1629,6 +1629,241 @@
       "low_confidence": false
     },
     {
+      "id": "q-2.1-0005",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation StackSets"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company updates a StackSet that has stack instances in 100 accounts across four Regions. To limit the impact of a bad change, the update must process 10 accounts at a time, must finish one Region before starting the next, and must stop before moving to another Region if more than 2 accounts fail in a Region. Which operation preferences BEST meet these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Parallel."
+        },
+        {
+          "key": "B",
+          "text": "Maximum concurrent accounts 100, failure tolerance 2, Region concurrency Sequential."
+        },
+        {
+          "key": "C",
+          "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Sequential."
+        },
+        {
+          "key": "D",
+          "text": "Maximum concurrent accounts 10, failure tolerance 10, Region concurrency Sequential."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Maximum concurrent accounts は同時に処理するアカウントの数、Failure tolerance はリージョンごとに許すアカウントの失敗の数で、これに達すると他のリージョンへ進まずに止まる。Region concurrency は Sequential（1 リージョンずつ）か Parallel（複数のリージョンを同時に）を選ぶ。",
+        "per_choice": {
+          "A": "Parallel では複数のリージョンを同時に処理し、1 リージョンずつの要件に反する。",
+          "B": "100 アカウントを同時に処理し、10 ずつの要件に反する。",
+          "C": "正しい。10 アカウントずつ、1 リージョンずつ、失敗が許す数を超えたら止まる。",
+          "D": "10 アカウントの失敗まで許すので、2 を超えたら止める要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Maximum concurrent accounts, specify how many accounts are processed concurrently."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Failure tolerance, specify the maximum number of account failures allowed per Region. The operation will stop and won't proceed to other Regions once this limit is reached."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Region concurrency, choose how to process Regions: Sequential (one Region at a time) or Parallel (multiple Regions concurrently)."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0006",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation StackSets"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer sets Maximum concurrent accounts to 20 and Failure tolerance to 0 for a StackSet update that targets 200 accounts, using the default concurrency mode. The update processes only one account at a time and takes many hours. The engineer wants the operation to run 20 accounts at a time regardless of failures. What should the engineer do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the concurrency mode to SOFT_FAILURE_TOLERANCE in the operation preferences."
+        },
+        {
+          "key": "B",
+          "text": "Set Region concurrency to Parallel so that more accounts are processed at the same time."
+        },
+        {
+          "key": "C",
+          "text": "Split the accounts into 10 StackSets and run their updates at the same time."
+        },
+        {
+          "key": "D",
+          "text": "Increase Maximum concurrent accounts to 200, and keep the default concurrency mode."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定の Strict Failure Tolerance では、実際の同時の数は「Maximum concurrent accounts」と「Failure tolerance + 1」の小さい方から始まる。Failure tolerance が 0 なら 1 アカウントずつになる。Soft Failure Tolerance は Failure tolerance と同時の数を切り離し、失敗の数にかかわらず Maximum concurrent accounts の数で動かす。",
+        "per_choice": {
+          "A": "正しい。失敗の数にかかわらず 20 アカウントずつ動く。",
+          "B": "リージョンを同時に処理するだけで、各リージョンの中のアカウントは 1 つずつのまま。",
+          "C": "StackSet を分けることになり、管理の手間が大きい。",
+          "D": "既定のままでは同時の数は Failure tolerance + 1 の 1 のまま。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "The initial actual concurrency is set to the lower of either the value of the Maximum concurrent accounts, or the value of Failure tolerance +1. This is the default behavior."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "This allows StackSet operations to run at the concurrency level set by the Maximum concurrent accounts value, regardless of the number of failures."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0007",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation StackSets"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A StackSet deploys a template with an InstanceType parameter to 30 accounts. The production accounts in eu-west-1 need a larger InstanceType value than the StackSet default. The value must stay in place when the StackSet is updated later, drift detection must not report these stacks as drifted because of the different value, and the company wants to keep a single StackSet. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the StackSet's InstanceType parameter value, so that every stack uses the larger value."
+        },
+        {
+          "key": "B",
+          "text": "Override the InstanceType parameter value for the stack instances in the production accounts in eu-west-1."
+        },
+        {
+          "key": "C",
+          "text": "Create a second StackSet with the larger value for the production accounts in eu-west-1."
+        },
+        {
+          "key": "D",
+          "text": "Override a new ProdInstanceType parameter only for the production stack instances, without changing the template."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "パラメータの値の上書きは、選んだアカウントとリージョンのスタックに当たる。StackSet を更新しても、上書きした値は更新されずに残る。ドリフトの検出は各スタックの上書きした値を考えに入れる。上書きできるのは StackSet にあるパラメータだけで、パラメータを足すにはテンプレートを更新する。",
+        "per_choice": {
+          "A": "全てのスタックの値が変わり、本番だけ大きくする要件に反する。",
+          "B": "正しい。そのスタックだけ値が変わり、更新でも残り、ドリフトにもならない。",
+          "C": "StackSet を 1 つにする要件に反する。",
+          "D": "StackSet に無いパラメータは上書きできない。足すにはテンプレートの更新が要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "quote": "During StackSet updates, any parameter values overridden for a stack aren't updated, but retain their overridden value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "quote": "You can only override parameter values that are specified in the StackSet; to add or delete a parameter itself, you need to update the StackSet template."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-drift.html",
+          "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0008",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation StackSets",
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A platform team works from a member account in AWS Organizations and must create and manage StackSets with service-managed permissions for the organization, without signing in to the management account. The security team asks how this delegation works before approving it. Which statements are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The platform team's account can be registered as a delegated administrator for StackSets."
+        },
+        {
+          "key": "B",
+          "text": "StackSets with service-managed permissions that a delegated administrator creates are created in the management account."
+        },
+        {
+          "key": "C",
+          "text": "The management account can limit the delegated administrator to deploy only to specific OUs."
+        },
+        {
+          "key": "D",
+          "text": "An organization can register up to 10 delegated administrators for StackSets at one time."
+        },
+        {
+          "key": "E",
+          "text": "A delegated administrator can create StackSets only with self-managed permissions."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "管理アカウントのほかに、委任管理者の権限を持つメンバーアカウントも、組織の service-managed の StackSet を作って管理できる。委任管理者が作った物も含め、service-managed の StackSet は管理アカウントに作られる。委任管理者は同時に 5 つまでで、組織のアカウントへ展開する全ての権限を持ち、管理アカウントは特定の OU や操作に絞れない。",
+        "per_choice": {
+          "A": "正しい。メンバーアカウントを委任管理者として登録できる。",
+          "B": "正しい。委任管理者が作った物も管理アカウントに作られる。",
+          "C": "管理アカウントは、委任管理者の展開を特定の OU や操作に絞れない。",
+          "D": "同時に登録できる委任管理者は 5 つまで。",
+          "E": "委任管理者は service-managed の StackSet を作って管理できる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "member accounts with delegated administrator permissions can create and manage StackSets with service-managed permissions for the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "StackSets with service-managed permissions are created in the management account, including StackSets created by delegated administrators."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "The management account can't limit delegated administrator permissions to deploy to specific OUs or to perform specific StackSet operations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "Your organization can have up to five registered delegated administrators at one time."
+        }
+      ],
+      "low_confidence": true
+    },
+    {
       "id": "q-2.2-0001",
       "task": "2.2",
       "domain": 2,
@@ -1846,6 +2081,250 @@
         {
           "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
           "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0005",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "After a merger, a company must move a member account that was invited into organization A into organization B. The account must not run as a standalone account at any point, because consolidated billing must continue. Organization B was created a month ago. Which statements about the migration are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The management account of organization B sends the invitation, and the migrating account accepts it."
+        },
+        {
+          "key": "B",
+          "text": "The account does not need to leave organization A or operate as a standalone account before it joins organization B."
+        },
+        {
+          "key": "C",
+          "text": "The management account of organization A sends the invitation to organization B on behalf of the account."
+        },
+        {
+          "key": "D",
+          "text": "The account must wait four days after it joined organization A, because invited accounts have a waiting period."
+        },
+        {
+          "key": "E",
+          "text": "The account belongs to both organizations until organization A removes it."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "組織の間でアカウントを移すには、新しい組織の管理アカウントから招待を送り、移るアカウントで受け入れる。移るアカウントは、今の組織を先に抜けたり、単独のアカウントとして動いたりする必要は無い。組織で作ったアカウントは作ってから 4 日待つ必要があるが、招待で入ったアカウントにはこの待ちは無い。アカウントは 1 つの組織にしか入れない。",
+        "per_choice": {
+          "A": "正しい。新しい組織の管理アカウントが招待し、移るアカウントが受け入れる。",
+          "B": "正しい。先に抜ける必要は無い。",
+          "C": "招待は新しい組織の管理アカウントから送る。",
+          "D": "4 日の待ちは組織で作ったアカウントの物で、招待で入ったアカウントには無い。",
+          "E": "アカウントは 1 つの組織にしか入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "The migrating account doesn't need to leave its current organization or operate as a standalone account first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "Invited accounts are not subject to this waiting period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "An account can only join one organization."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0006",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company invited 20 existing AWS accounts into its organization. Administrators in the management account try to switch to the OrganizationAccountAccessRole role in these accounts, as they do for accounts that were created in the organization, but the role does not exist. The administrators need this cross-account access in every invited account. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Remove the accounts from the organization and invite them again so that the role is created on acceptance."
+        },
+        {
+          "key": "B",
+          "text": "Wait 15 days, because AWS Organizations creates the role when the invitation period ends."
+        },
+        {
+          "key": "C",
+          "text": "Turn on consolidated billing so that the management account gains access to the member accounts."
+        },
+        {
+          "key": "D",
+          "text": "Create the OrganizationAccountAccessRole role in each invited account, with a trust policy for the management account."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+        "per_choice": {
+          "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+          "B": "15 日は招待に返事をする期限で、ロールは作られない。",
+          "C": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。",
+          "D": "正しい。招待されたアカウントには自分で作る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "Each invitation must be responded to within 15 days, or it expires."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0007",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations",
+        "Amazon EC2"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company with all features enabled in AWS Organizations wants the CostCenter tag key to use one consistent case, and wants tagging requests that set an invalid CostCenter value on Amazon EC2 instances to be blocked. The FinOps team also asks whether a tag policy will flag EC2 instances that have no CostCenter tag at all. Which statements are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A tag policy enforced for the EC2 instance resource type blocks noncompliant tagging requests."
+        },
+        {
+          "key": "B",
+          "text": "Resources that have no CostCenter tag are not evaluated for compliance with the tag policy."
+        },
+        {
+          "key": "C",
+          "text": "A tag policy evaluates untagged EC2 instances and reports them as noncompliant."
+        },
+        {
+          "key": "D",
+          "text": "Tag policies are available in organizations that have only consolidated billing features enabled."
+        },
+        {
+          "key": "E",
+          "text": "A tag policy blocks noncompliant tagging requests on every resource type, even without specifying resource types for enforcement."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+        "per_choice": {
+          "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+          "B": "正しい。タグの無いリソースは評価されない。",
+          "C": "タグの無いリソースは評価されない。",
+          "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+          "E": "強制されるのは、指定したリソースの種類だけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "Tag policies are available only in an organization that has all features enabled."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0008",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Control Tower",
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company set up AWS Control Tower a year ago. A team now wants to bring an existing account, which is in an unregistered OU of the same organization, under Control Tower governance by enrolling it into a governed OU. The enrollment fails because the account already has an AWS Config configuration recorder and delivery channel. The company also asks whether this account could replace the current log archive account. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enroll the account as the new log archive account, because existing Config resources are allowed for that role."
+        },
+        {
+          "key": "B",
+          "text": "Move the account to a different organization first, and then enroll it into the governed OU."
+        },
+        {
+          "key": "C",
+          "text": "Remove the existing AWS Config resources from the account, and enroll it into the governed OU again."
+        },
+        {
+          "key": "D",
+          "text": "Keep the AWS Config resources and register the unregistered OU instead, so the account does not need to meet any conditions."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+        "per_choice": {
+          "A": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+          "B": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+          "C": "正しい。Config のリソースを外してから登録し直す。",
+          "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "The account to be enrolled must not have existing AWS Config resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
         }
       ],
       "low_confidence": false
@@ -2092,6 +2571,250 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
           "quote": "You can use Inventory to collect metadata from your managed nodes."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0005",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company automates account offboarding with AWS Step Functions. One step sends a request to an external approval system, and the workflow must pause until a manager responds, which can take up to three days. Each step must run exactly once, and the team wants to avoid polling code. Which design meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "An Express workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+        },
+        {
+          "key": "B",
+          "text": "A Standard workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+        },
+        {
+          "key": "C",
+          "text": "A Standard workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+        },
+        {
+          "key": "D",
+          "text": "An Express workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Standard のワークフローは実行が正確に 1 回で、最長 1 年動ける。コールバックのタスク（task token）は、SendTaskSuccess か SendTaskFailure でトークンが返るまでワークフローを止める。Express は最長 5 分で、少なくとも 1 回の実行、使える統合のパターンは Request Response だけ。",
+        "per_choice": {
+          "A": "Express は Request Response の統合だけで、最長 5 分なので 3 日待てない。",
+          "B": "動くが、待つ間ずっと問い合わせる仕組みを持つことになり、要件に反する。",
+          "C": "正しい。正確に 1 回の実行で、トークンが返るまで止まる。",
+          "D": "Express は最長 5 分で、少なくとも 1 回の実行なので、要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express workflows have at-least-once workflow execution and can run for up to five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express Workflows only support Request Response integrations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html",
+          "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0006",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Task state in a Step Functions workflow calls an API that sometimes throttles. Throttling errors must be retried up to 5 times, starting 2 seconds after the error and doubling the wait each time. If the state still fails, or fails with any other error, including a timeout, the workflow must move to a NotifyOps state. Which configurations meet these requirements? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 5, and BackoffRate 2."
+        },
+        {
+          "key": "B",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed alone as the last catcher, with Next set to NotifyOps."
+        },
+        {
+          "key": "C",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 0, and BackoffRate 2."
+        },
+        {
+          "key": "D",
+          "text": "A Catch entry whose ErrorEquals is States.TaskFailed, as the only catcher, with Next set to NotifyOps."
+        },
+        {
+          "key": "E",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed first, followed by a catcher for the throttling error."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Retry は IntervalSeconds（最初のやり直しまでの秒）・MaxAttempts（やり直しの最大の回数。0 はやり直さない）・BackoffRate（間隔を何倍にするか）で決める。やり直しが尽きるか、Retry に合わない時は Catch を順に調べる。States.ALL は全てのエラーに合い、配列にそれだけで、最後の catcher に置く。States.TaskFailed は States.Timeout 以外に合う。",
+        "per_choice": {
+          "A": "正しい。2 秒から倍にしながら 5 回までやり直す。",
+          "B": "正しい。タイムアウトも含め、全てのエラーで NotifyOps へ進む。",
+          "C": "MaxAttempts 0 はやり直さない。",
+          "D": "States.TaskFailed はタイムアウト（States.Timeout）に合わない。",
+          "E": "States.ALL は最後の catcher に置く必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "A value of 0 specifies that the error is never retried."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "The multiplier by which the retry interval denoted by IntervalSeconds increases after each retry attempt."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "It must appear alone in the ErrorEquals array and must appear in the last catcher in the Catch array."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "The name States.TaskFailed also acts a wildcard and matches any error except for States.Timeout."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0007",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Lambda",
+        "Amazon SQS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS Lambda function is invoked asynchronously to process orders. When the function keeps failing, some events disappear after the retries are used up. The team must keep a record of every invocation that fails after all retries, keep a separate record of successful invocations, and avoid adding error-handling code to the function. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Wrap the handler in try/catch blocks that write failed and successful events to Amazon S3."
+        },
+        {
+          "key": "B",
+          "text": "Configure an on-failure destination and an on-success destination for the function, and give the execution role the needed permissions."
+        },
+        {
+          "key": "C",
+          "text": "Keep the default settings, because Lambda keeps failed events in its queue until they succeed."
+        },
+        {
+          "key": "D",
+          "text": "Invoke the function synchronously instead, and have each caller store the failed requests."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "非同期の呼び出しが失敗すると、Lambda は既定であと 2 回やり直し、期限切れか全てのやり直しに失敗したイベントは捨てる。失敗した呼び出しの記録を残すには on-failure の宛先を作る。成功と失敗で別々の宛先を設定でき、送るには関数の実行ロールに権限が要る。",
+        "per_choice": {
+          "A": "関数にエラー処理のコードを足すことになり、要件に反する。",
+          "B": "正しい。コードを変えずに、失敗と成功の記録を別々に残せる。",
+          "C": "全てのやり直しに失敗したイベントは捨てられる。",
+          "D": "呼び出し側にエラー処理を持つことになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "quote": "When an event expires or fails all processing attempts, Lambda discards it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "quote": "To capture records of failed invocations (such as timeouts or runtime errors), create an on-failure destination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "quote": "Each function can have multiple destinations, so you can configure separate destinations for successful and failed events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0008",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Step Functions",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A high-volume IoT ingestion workflow in AWS Step Functions finishes each execution in a few seconds. Each step only needs an HTTP response from the called service before continuing. The team accepts that a step might run more than once and has made the steps idempotent. The team wants the workflow type designed for high event rates. Which choice BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Standard workflow, because it supports every integration pattern and runs each step exactly once."
+        },
+        {
+          "key": "B",
+          "text": "An Express workflow that uses .waitForTaskToken integrations so that each step waits for a callback."
+        },
+        {
+          "key": "C",
+          "text": "A Standard workflow that uses .waitForTaskToken integrations to limit duplicate executions."
+        },
+        {
+          "key": "D",
+          "text": "An Express workflow that uses Request Response service integrations."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "Express のワークフローは、ストリームの処理や IoT のデータの取り込みのような、イベントの多い処理に向く。実行は少なくとも 1 回で、手順が 2 回以上動くことがある。最長 5 分で、使える統合のパターンは Request Response だけ。",
+        "per_choice": {
+          "A": "Standard は長く動く、監査の要る処理に向く。今回の要件は高い頻度の処理。",
+          "B": "Express は Request Response の統合しか使えない。",
+          "C": "コールバックを待つ必要は無く、高い頻度の処理に向く型でもない。",
+          "D": "正しい。高い頻度に向き、HTTP の応答を受けて次へ進む統合で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express workflows are ideal for high-event-rate workloads, such as streaming data processing and IoT data ingestion."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Standard workflows are ideal for long-running, auditable workflows, as they show execution history and visual debugging."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express Workflows only support Request Response integrations."
         }
       ],
       "low_confidence": false
@@ -2850,6 +3573,131 @@
       "low_confidence": false
     },
     {
+      "id": "q-4.1-0003",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team creates a metric filter today on a Standard log group to count log events that contain ERROR, and creates an alarm on the metric. The graph shows no data for the past week, although the logs from last week contain errors. During quiet hours with no errors, the alarm shows INSUFFICIENT_DATA instead of OK. The metric has no dimensions. Which statements or actions are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The metric filter publishes data points only for log events that arrive after the filter was created."
+        },
+        {
+          "key": "B",
+          "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match."
+        },
+        {
+          "key": "C",
+          "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours."
+        },
+        {
+          "key": "D",
+          "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once."
+        },
+        {
+          "key": "E",
+          "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "メトリクスフィルターは過去のデータには効かず、作った後に届いたイベントの値だけを出す。既定の値を決めないと、合うログが無い時は何も報告しないので、0 でも既定の値を決めるのが勧められている。ディメンションを付けたメトリクスには既定の値を決められない。メトリクスフィルターが使えるのは Standard のロググループだけ。",
+        "per_choice": {
+          "A": "正しい。過去のログはさかのぼって数えない。",
+          "B": "正しい。合うログが無い時に既定の値 0 が報告される。",
+          "C": "ディメンションを付けると既定の値を決められない。",
+          "D": "フィルターは過去のデータをさかのぼって調べない。",
+          "E": "メトリクスフィルターは Standard のロググループだけで使える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "quote": "If you assign dimensions to metrics that metric filters generate, you can't specify default values for those metrics."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "quote": "Metric filters are supported only for log groups in the Standard log class."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0004",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon CloudWatch Logs",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function must emit several custom business metrics, such as order totals per payment type. The team does not want the function to make extra synchronous API calls to CloudWatch, does not want to grant the cloudwatch:PutMetricData permission, and does not want to create a separate metric filter for each new metric. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Write the metrics as log entries in the CloudWatch embedded metric format, using the function's existing logs:PutLogEvents permission."
+        },
+        {
+          "key": "B",
+          "text": "Call PutMetricData from the function for each metric, and add cloudwatch:PutMetricData to the execution role."
+        },
+        {
+          "key": "C",
+          "text": "Create a metric filter on the log group for each new business metric as it is added."
+        },
+        {
+          "key": "D",
+          "text": "Write the values to an Amazon S3 bucket and run a scheduled job that calls PutMetricData for them."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "埋め込みメトリクス形式（embedded metric format）では、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作れ、設定も要らない。必要なのは logs:PutLogEvents の権限だけで、cloudwatch:PutMetricData の権限は要らない。",
+        "per_choice": {
+          "A": "正しい。ログを書くだけで非同期にメトリクスができ、PutMetricData の権限は要らない。",
+          "B": "同期の API 呼び出しと PutMetricData の権限が要り、要件に反する。",
+          "C": "メトリクスを足すたびにフィルターを作ることになり、要件に反する。",
+          "D": "仕組みを作ることになり、PutMetricData の権限も要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "No setup is required to use the embedded metric format."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-4.2-0001",
       "task": "4.2",
       "domain": 4,
@@ -3147,6 +3995,129 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
           "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0003",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon DynamoDB"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team creates a CloudWatch alarm on the Amazon DynamoDB ThrottledRequests metric, which reports data points only when throttling occurs. The alarm must go to ALARM only when throttling happens in at least 3 of the last 5 one-minute periods. During quiet periods with no throttling, the alarm must show OK instead of INSUFFICIENT_DATA. Which alarm configuration BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as notBreaching."
+        },
+        {
+          "key": "B",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as breaching."
+        },
+        {
+          "key": "C",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and keep the default treatment of missing data."
+        },
+        {
+          "key": "D",
+          "text": "Period 5 minutes, 3 out of 3 datapoints to alarm, and treat missing data as notBreaching."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Evaluation Periods（N）と Datapoints to Alarm（M）を違う値にすると「N のうち M」のアラームになる。DynamoDB の ThrottledRequests のようにエラーの時だけ値が出るメトリクスでは、欠けたデータを notBreaching（良い・しきい値の内）として扱う。既定は missing で、評価の範囲のデータが全て欠けると INSUFFICIENT_DATA になる。",
+        "per_choice": {
+          "A": "正しい。5 分のうち 3 回の絞り込みで ALARM、静かな時は OK になる。",
+          "B": "欠けたデータを悪いとみなすので、絞り込みが無い時に ALARM になる。",
+          "C": "既定の missing では、データが全て欠けると INSUFFICIENT_DATA になる。",
+          "D": "評価の範囲は 15 分になり、直近の 5 つの 1 分の期間で見る要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "quote": "When you configure Evaluation Periods and Datapoints to Alarm as different values, you're setting an \"M out of N\" alarm."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "quote": "But for a metric that generates data points only when an error occurs, such as ThrottledRequests in Amazon DynamoDB, you would want to treat missing data as notBreaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "quote": "missing – If all data points in the alarm evaluation range are missing, the alarm transitions to INSUFFICIENT_DATA."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "quote": "If you configure 3 out of 3 data points with a period of 10 minutes, the evaluation interval is 30 minutes."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0004",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon SNS",
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "When the primary database fails, about 20 CloudWatch alarms for application health go into ALARM at the same time, and the on-call team receives 20 notifications. The team wants a single notification to an Amazon SNS topic and an OpsItem in Systems Manager OpsCenter only when the database alarm is in ALARM and at least half of the application health alarms are in ALARM. All alarms are in one account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a composite alarm with the rule ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "B",
+          "text": "Create a composite alarm with the same AND rule, and set an EC2 reboot action on it to restart the database host."
+        },
+        {
+          "key": "C",
+          "text": "Create a composite alarm with the rule ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "D",
+          "text": "Subscribe a Lambda function to all 21 alarms that counts their states and publishes one message when the conditions are met."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "複合アラームはルールの式で他のアラームの状態をまとめる。AND は全ての条件が真の時、OR はどれか 1 つが真の時に真。AT_LEAST は決めた数か割合のアラームが指定の状態の時に真になる。複合アラームが取れるアクションは、SNS への通知・Lambda の呼び出し・OpsCenter の OpsItem・Incident Manager のインシデントだけ。",
+        "per_choice": {
+          "A": "OR ではどちらか片方の条件だけでも通知が出る。",
+          "B": "複合アラームは EC2 のアクションを取れない。",
+          "C": "正しい。両方の条件がそろった時だけ、1 つの通知と OpsItem を出す。",
+          "D": "自分で数える仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Logical AND operator. Returns TRUE when all specified conditions are TRUE."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Function that returns TRUE when a minimum number or percentage of specified alarms are in the required state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Composite alarms can take only the following actions:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Create OpsItems in Systems Manager Ops Center"
         }
       ],
       "low_confidence": false

@@ -1,0 +1,138 @@
+{
+  "item": "C-0057",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "task": "4.3",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon DynamoDB"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team creates a CloudWatch alarm on the Amazon DynamoDB ThrottledRequests metric, which reports data points only when throttling occurs. The alarm must go to ALARM only when throttling happens in at least 3 of the last 5 one-minute periods. During quiet periods with no throttling, the alarm must show OK instead of INSUFFICIENT_DATA. Which alarm configuration BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as notBreaching."
+        },
+        {
+          "key": "B",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as breaching."
+        },
+        {
+          "key": "C",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and keep the default treatment of missing data."
+        },
+        {
+          "key": "D",
+          "text": "Period 5 minutes, 3 out of 3 datapoints to alarm, and treat missing data as notBreaching."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Evaluation Periods（N）と Datapoints to Alarm（M）を違う値にすると「N のうち M」のアラームになる。DynamoDB の ThrottledRequests のようにエラーの時だけ値が出るメトリクスでは、欠けたデータを notBreaching（良い・しきい値の内）として扱う。既定は missing で、評価の範囲のデータが全て欠けると INSUFFICIENT_DATA になる。",
+        "per_choice": {
+          "A": "正しい。5 分のうち 3 回の絞り込みで ALARM、静かな時は OK になる。",
+          "B": "欠けたデータを悪いとみなすので、絞り込みが無い時に ALARM になる。",
+          "C": "既定の missing では、データが全て欠けると INSUFFICIENT_DATA になる。",
+          "D": "評価の範囲は 15 分になり、直近の 5 つの 1 分の期間で見る要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "source_id": "S1",
+          "quote": "When you configure Evaluation Periods and Datapoints to Alarm as different values, you're setting an \"M out of N\" alarm."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "source_id": "S2",
+          "quote": "But for a metric that generates data points only when an error occurs, such as ThrottledRequests in Amazon DynamoDB, you would want to treat missing data as notBreaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "source_id": "S2",
+          "quote": "missing – If all data points in the alarm evaluation range are missing, the alarm transitions to INSUFFICIENT_DATA."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "source_id": "S1",
+          "quote": "If you configure 3 out of 3 data points with a period of 10 minutes, the evaluation interval is 30 minutes."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-4.3-0002",
+      "task": "4.3",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon SNS",
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "When the primary database fails, about 20 CloudWatch alarms for application health go into ALARM at the same time, and the on-call team receives 20 notifications. The team wants a single notification to an Amazon SNS topic and an OpsItem in Systems Manager OpsCenter only when the database alarm is in ALARM and at least half of the application health alarms are in ALARM. All alarms are in one account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a composite alarm with the rule ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "B",
+          "text": "Create a composite alarm with the rule ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "C",
+          "text": "Create a composite alarm with the same AND rule, and set an EC2 reboot action on it to restart the database host."
+        },
+        {
+          "key": "D",
+          "text": "Subscribe a Lambda function to all 21 alarms that counts their states and publishes one message when the conditions are met."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "複合アラームはルールの式で他のアラームの状態をまとめる。AND は全ての条件が真の時、OR はどれか 1 つが真の時に真。AT_LEAST は決めた数か割合のアラームが指定の状態の時に真になる。複合アラームが取れるアクションは、SNS への通知・Lambda の呼び出し・OpsCenter の OpsItem・Incident Manager のインシデントだけ。",
+        "per_choice": {
+          "A": "正しい。両方の条件がそろった時だけ、1 つの通知と OpsItem を出す。",
+          "B": "OR ではどちらか片方の条件だけでも通知が出る。",
+          "C": "複合アラームは EC2 のアクションを取れない。",
+          "D": "自分で数える仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S4",
+          "quote": "Logical AND operator. Returns TRUE when all specified conditions are TRUE."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S4",
+          "quote": "Function that returns TRUE when a minimum number or percentage of specified alarms are in the required state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S3",
+          "quote": "Composite alarms can take only the following actions:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S3",
+          "quote": "Create OpsItems in Systems Manager Ops Center"
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}
