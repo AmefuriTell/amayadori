@@ -1,0 +1,523 @@
+{
+  "item": "T-0018",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company uses AWS Security Hub CSPM in us-east-1 and eu-west-1. The company sets us-east-1 as the home Region for cross-Region aggregation and links all other Regions. Workloads were recently deployed in ap-south-1, but no findings from ap-south-1 appear in us-east-1. The company wants these findings in the home Region and wants to keep a single place to review them. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Wait for cross-Region aggregation to enable Security Hub CSPM in ap-south-1 for each account."
+        },
+        {
+          "key": "B",
+          "text": "Enable Security Hub CSPM in ap-south-1 for the accounts that have workloads there."
+        },
+        {
+          "key": "C",
+          "text": "Change the home Region to ap-south-1 so that findings from that Region are collected."
+        },
+        {
+          "key": "D",
+          "text": "Export findings from ap-south-1 to Amazon S3 each day and import them into us-east-1."
+        }
+      ],
+      "explanation": {
+        "summary": "リージョンをまたぐ集約は、Security Hub CSPM を有効にしているリージョンのデータだけを集める。集約の設定で Security Hub CSPM が有効になることは無いので、ap-south-1 で有効にする必要がある。",
+        "per_choice": {
+          "A": "集約の設定によって Security Hub CSPM が自動で有効になることは無い。",
+          "B": "正しい。有効にすれば、リンクしたリージョンとしてホームリージョンに集まる。",
+          "C": "ホームリージョンを変えても、ap-south-1 で有効になっていなければデータは集まらない。見る場所も変わってしまう。",
+          "D": "毎日の書き出しと取り込みの仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "source_id": "S4",
+          "quote": "Security Hub CSPM only aggregates data from Regions where an account has Security Hub CSPM enabled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "source_id": "S4",
+          "quote": "Security Hub CSPM is not automatically enabled for an account based on the cross-Region aggregation configuration."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company uses AWS Organizations. The security team works from a dedicated security account and must manage AWS Security Hub CSPM for every account in the organization. Accounts that join the organization later must be enabled and configured without extra work. The company wants to follow the currently recommended way to manage Security Hub CSPM across an organization. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "From the Organizations management account, designate the security account as the Security Hub CSPM delegated administrator."
+        },
+        {
+          "key": "B",
+          "text": "Attach a Security Hub CSPM declarative policy to the organization root."
+        },
+        {
+          "key": "C",
+          "text": "Sign in to each member account and enable Security Hub CSPM in every Region."
+        },
+        {
+          "key": "D",
+          "text": "Send an invitation from the security account to each new account when it joins the organization."
+        },
+        {
+          "key": "E",
+          "text": "Make the security account the Organizations management account so that it controls all accounts."
+        }
+      ],
+      "explanation": {
+        "summary": "Organizations と連携すると、管理アカウントが Security Hub CSPM の委任管理者を決める。宣言型ポリシー（declarative policy）は組織のアカウントで Security Hub CSPM をまとめて有効にして設定でき、組織に入ったアカウントや OU に移ったアカウントも引き継ぐ。宣言型ポリシーは、組織全体で管理する推奨の方法として、レガシーになった central configuration に置き換わっている。",
+        "per_choice": {
+          "A": "正しい。委任管理者を決めると、そのアカウントで Security Hub CSPM が自動で有効になり、組織を管理できる。",
+          "B": "正しい。ルートに付けると、後から入るアカウントも引き継ぐ。",
+          "C": "アカウントごとの作業になり、後から入るアカウントにも同じ作業が要る。",
+          "D": "アカウントが入るたびに作業が要り、要件に反する。",
+          "E": "管理アカウントを入れ替えることになり、要件に関係無い大きな変更になる。委任管理者を決めれば足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-accounts.html",
+          "source_id": "S1",
+          "quote": "When you integrate Security Hub CSPM and AWS Organizations, the Organizations management account designates a Security Hub CSPM delegated administrator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "source_id": "S3",
+          "quote": "Accounts that join the organization, or move into an OU that has an attached declarative policy, inherit the declarative policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "source_id": "S3",
+          "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0003",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company uses AWS Control Tower. A detective control is enabled on the Workloads OU. One account in the Workloads OU runs a legacy system that cannot meet the control yet. The company must keep the control for every other account in the OU, must not report this account as noncompliant, and wants to avoid writing custom rules. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Disable the control for only the legacy account and keep it enabled for the rest of the Workloads OU."
+        },
+        {
+          "key": "B",
+          "text": "Disable the control on the Workloads OU and create a custom AWS Config rule for the other accounts."
+        },
+        {
+          "key": "C",
+          "text": "Move the legacy account to a separate OU where the control is not enabled."
+        },
+        {
+          "key": "D",
+          "text": "Keep the account in the Workloads OU and suppress the noncompliant results each week."
+        }
+      ],
+      "explanation": {
+        "summary": "Control Tower のコントロールは OU 全体に当たり、OU の中の全てのアカウントが影響を受ける。1 つのアカウントだけを外すには、そのコントロールを有効にしていない別の OU へ移す。",
+        "per_choice": {
+          "A": "コントロールは OU の単位で当たり、OU の中の 1 つのアカウントだけを外すことはできない。",
+          "B": "自分でルールを作ることになり、要件に反する。",
+          "C": "正しい。別の OU に移せば、そのコントロールは当たらない。",
+          "D": "毎週の手作業になり、noncompliant と出さない要件にも合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html",
+          "source_id": "S5",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "Web servers in a public subnet accept HTTPS from the internet through a security group. The security team must block one malicious IP address range from reaching any instance in the subnet, while all other HTTPS traffic continues to be allowed. The team wants a network-level control and does not want to change each instance. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add a deny rule for the IP address range to the security group of the web servers."
+        },
+        {
+          "key": "B",
+          "text": "Add a deny rule for the IP address range to the subnet's network ACL with a lower rule number than the rule that allows HTTPS."
+        },
+        {
+          "key": "C",
+          "text": "Add a deny rule for the IP address range to the subnet's network ACL with a higher rule number than the rule that allows HTTPS."
+        },
+        {
+          "key": "D",
+          "text": "Remove the HTTPS rule from the security group, and add allow rules for every IP address range except the malicious one."
+        }
+      ],
+      "explanation": {
+        "summary": "セキュリティグループは許可のルールだけで、拒否は書けない。ネットワーク ACL は許可と拒否の両方を書け、番号の小さい順に評価し、合ったルールを当てて残りは見ない。拒否のルールは、HTTPS を許すルールより小さい番号にする。",
+        "per_choice": {
+          "A": "セキュリティグループには許可のルールしか書けない。",
+          "B": "正しい。小さい番号の拒否が先に合うので、その範囲だけを止められる。",
+          "C": "番号の小さい HTTPS の許可が先に合い、拒否のルールは評価されない。",
+          "D": "許可のルールをたくさん持つことになり、手間が大きく、範囲の管理も難しい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "source_id": "S1",
+          "quote": "Allow rules only"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "source_id": "S2",
+          "quote": "We evaluate the rules in order, starting with the lowest numbered rule, when deciding whether allow or deny traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "source_id": "S2",
+          "quote": "If the traffic matches a rule, the rule is applied and we do not evaluate any additional rules."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0005",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A team replaced the default network ACL of a subnet with a custom network ACL. The custom ACL has an inbound rule that allows HTTPS from the internet and no outbound rules except the default deny. The instance's security group allows inbound HTTPS. Clients can reach the servers, but they never receive responses. Which change will fix the problem with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add an outbound rule to the custom network ACL that allows the return traffic to the clients."
+        },
+        {
+          "key": "B",
+          "text": "Add an outbound rule to the security group that allows responses to the clients."
+        },
+        {
+          "key": "C",
+          "text": "Add a second inbound HTTPS rule to the custom network ACL with a lower rule number."
+        },
+        {
+          "key": "D",
+          "text": "Replace the security group with one that has deny rules for all other traffic."
+        }
+      ],
+      "explanation": {
+        "summary": "ネットワーク ACL はステートレスで、前に送受信した通信を覚えていない。入ってくる通信を許すルールを作っても、その応答は自動では許されないので、戻りの通信を出ていく方向のルールで許す必要がある。セキュリティグループはステートフルで、戻りの通信は自動で許される。",
+        "per_choice": {
+          "A": "正しい。ネットワーク ACL は戻りの通信を明示して許す必要がある。",
+          "B": "セキュリティグループはステートフルなので、許した通信の応答は既に通る。止めているのはネットワーク ACL。",
+          "C": "入ってくる通信は既に許されている。応答が出ていけないのが問題。",
+          "D": "セキュリティグループには拒否のルールは書けず、問題もネットワーク ACL の側にある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "source_id": "S2",
+          "quote": "If, for example, you create a NACL rule to allow specific inbound traffic to a subnet, responses to that traffic are not automatically allowed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "source_id": "S1",
+          "quote": "Automatically allowed (stateful)"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "source_id": "S1",
+          "quote": "Must be explicitly allowed (stateless)"
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0006",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A login API runs behind an Application Load Balancer. Attackers send floods of login requests from a changing set of IP addresses. The company must automatically limit any source that sends requests too fast, without blocking normal users and without writing code or updating IP lists by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add deny rules for the attacking IP addresses to the subnet's network ACL whenever the attacks are noticed."
+        },
+        {
+          "key": "B",
+          "text": "Add deny rules for the attacking IP addresses to the load balancer's security group."
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that reads the access logs every minute and updates an IP block list."
+        },
+        {
+          "key": "D",
+          "text": "Associate an AWS WAF web ACL with a rate-based rule with the Application Load Balancer."
+        }
+      ],
+      "explanation": {
+        "summary": "AWS WAF は Application Load Balancer・CloudFront・API Gateway の REST API を守れる。rate-based rule は入ってくるリクエストを数え、速すぎる時に制限する。決めた条件でまとめて数えるので、送り元の IP が変わっても手でリストを直す必要が無い。",
+        "per_choice": {
+          "A": "見つけるたびに人が足すことになり、IP が変わると追い付かない。",
+          "B": "セキュリティグループには拒否のルールは書けない。",
+          "C": "自分でコードを書くことになり、要件に反する。",
+          "D": "正しい。速すぎる送り元を自動で制限する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html",
+          "source_id": "S4",
+          "quote": "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+          "source_id": "S3",
+          "quote": "Application Load Balancer"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "source_id": "S1",
+          "quote": "Allow rules only"
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0007",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company uses AWS Organizations. The security team works from a dedicated security account and must detect communication with known malicious IP addresses and unusual API activity in every member account. The team does not want to create VPC flow logs in each account. When a threat finding appears, analysts must be able to investigate the root cause. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "From the management account, designate the security account as the delegated GuardDuty administrator, and enable GuardDuty for the member accounts."
+        },
+        {
+          "key": "B",
+          "text": "Use Amazon Detective to investigate GuardDuty findings and identify their root cause."
+        },
+        {
+          "key": "C",
+          "text": "Create VPC flow logs in every account first, because GuardDuty cannot analyze network traffic without them."
+        },
+        {
+          "key": "D",
+          "text": "Use Amazon Detective to detect threats in each account, instead of GuardDuty."
+        },
+        {
+          "key": "E",
+          "text": "Enable GuardDuty only in the security account, because it automatically monitors every account in the organization."
+        }
+      ],
+      "explanation": {
+        "summary": "GuardDuty は既知の悪いドメインや IP との通信、怪しい動きを検出し、CloudTrail の管理イベントや EC2 の VPC フローログのデータを分析する。フローログを自分で作る必要は無い。管理アカウントが委任管理者を決めると、そのアカウントがリージョンの全メンバーの GuardDuty を有効にして管理できる。Detective は、検出結果などから根本の原因を調べるのに使う。",
+        "per_choice": {
+          "A": "正しい。委任管理者がメンバーの GuardDuty を有効にして管理する。",
+          "B": "正しい。GuardDuty の検出結果から調査を始められる。",
+          "C": "フローログを自分で作らなくても、GuardDuty はデータを分析できる。",
+          "D": "Detective は調べるための物で、検出は GuardDuty などの結果から始まる。",
+          "E": "委任管理者を決めて、メンバーのアカウントで有効にする必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_data-sources.html",
+          "source_id": "S5",
+          "quote": "You don't need to create or configure VPC flow logs in your account for GuardDuty to access this data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html",
+          "source_id": "S6",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+          "source_id": "S7",
+          "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+          "source_id": "S7",
+          "quote": "For example, you are assigned to look into findings or alerts uncovered by services such as Amazon GuardDuty and Amazon Inspector."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0008",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company has thousands of Amazon S3 buckets. The security team wants ongoing, broad visibility into where sensitive data might be across all buckets without configuring each analysis. The team also needs a deeper, targeted analysis of three regulated buckets every month, with custom criteria on object properties. Which actions should the team take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn on Macie automated sensitive data discovery for the account."
+        },
+        {
+          "key": "B",
+          "text": "Create a recurring Macie sensitive data discovery job that targets the three regulated buckets with custom criteria."
+        },
+        {
+          "key": "C",
+          "text": "Create a one-time sensitive data discovery job over all buckets, because it keeps monitoring new objects afterward."
+        },
+        {
+          "key": "D",
+          "text": "Rely on automated sensitive data discovery to analyze every object in the three regulated buckets in full depth."
+        },
+        {
+          "key": "E",
+          "text": "Create a custom data identifier for each bucket so that Macie monitors the bucket continually."
+        }
+      ],
+      "explanation": {
+        "summary": "Macie は 2 つの方法で機密データを見つける。自動の機密データの発見は、S3 のバケットの一覧を続けて評価し、サンプリングで代表のオブジェクトを選んで、広く見える化する。機密データの発見ジョブは、対象のバケット・サンプリングの深さ・オブジェクトの性質の条件を決める、より深く絞った分析で、一度だけか定期で動かせる。",
+        "per_choice": {
+          "A": "正しい。設定を作り込まずに、全てのバケットを続けて広く見る。",
+          "B": "正しい。3 つのバケットを、条件を決めて毎月深く調べる。",
+          "C": "一度だけのジョブはその時の分析で、その後の監視はしない。",
+          "D": "自動の発見はサンプリングで代表のオブジェクトを選ぶ物で、全てを深く調べる物ではない。",
+          "E": "カスタムデータ識別子は見つける条件の定義で、バケットを監視する仕組みではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "source_id": "S1",
+          "quote": "With this option, Macie continually evaluates your S3 bucket inventory and uses sampling techniques to identify and select representative S3 objects from your buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "source_id": "S1",
+          "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html",
+          "source_id": "S2",
+          "quote": "You can configure a job to run only once for on-demand analysis and assessment, or on a recurring basis for periodic analysis, assessment, and monitoring."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0009",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company's internal employee IDs follow the pattern EMP- followed by six digits and must be reported by Amazon Macie as sensitive data. Test files in the same buckets contain well-known sample credit card numbers that the team does not want reported, while real credit card numbers must still be reported. Which configuration meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Use only the managed data identifiers, because they already detect employee IDs and ignore sample card numbers."
+        },
+        {
+          "key": "B",
+          "text": "Create an allow list for the employee ID pattern, and a custom data identifier for the sample card numbers."
+        },
+        {
+          "key": "C",
+          "text": "Create a custom data identifier with a regex for the employee IDs, and an allow list that contains the sample card numbers."
+        },
+        {
+          "key": "D",
+          "text": "Turn off the managed data identifier for credit card numbers, and create a custom data identifier for the employee IDs."
+        }
+      ],
+      "explanation": {
+        "summary": "カスタムデータ識別子は、正規表現などで会社独自の機密データを見つける条件を決め、マネージドデータ識別子を補う。許可リスト（allow list）に入れた文字や形は、マネージドやカスタムの識別子の条件に合っても報告されない。",
+        "per_choice": {
+          "A": "マネージドデータ識別子は決まった種類の機密データを見つける物で、会社独自の社員 ID の形は知らない。",
+          "B": "逆になっている。許可リストに入れた物は報告されなくなる。",
+          "C": "正しい。社員 ID は独自の条件で見つけ、サンプルの番号だけを許可リストで外す。",
+          "D": "本物のカード番号も報告されなくなる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/custom-data-identifiers.html",
+          "source_id": "S4",
+          "quote": "The criteria consist of a regular expression (regex) that defines a text pattern to match and, optionally, character sequences and a proximity rule that refine the results."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "source_id": "S5",
+          "quote": "If data matches text or a text pattern in an allow list, Macie doesn’t report the data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "source_id": "S5",
+          "quote": "This is the case even if the data matches the criteria of a managed data identifier or a custom data identifier."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0010",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company uses AWS Organizations with 50 member accounts. The security team must manage Amazon Macie centrally from a security account, review S3 bucket information for member accounts, and enable Macie for member accounts without signing in to each one. Which approach BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Send Macie membership invitations from the security account to all 50 accounts, and have each account owner accept them."
+        },
+        {
+          "key": "B",
+          "text": "Sign in to each member account to enable Macie, and share the findings with the security team by email."
+        },
+        {
+          "key": "C",
+          "text": "Enable Macie only in the security account, because it automatically scans buckets in every member account."
+        },
+        {
+          "key": "D",
+          "text": "Integrate Macie with AWS Organizations, designate the security account as the Macie administrator, and enable Macie for the member accounts from it."
+        }
+      ],
+      "explanation": {
+        "summary": "Macie の組織は、指定した Macie の管理者アカウントとメンバーアカウントでできる。つなぎ方は AWS Organizations との連携か、Macie の招待で、Organizations との連携が勧められている。Organizations でつないだ場合、Macie の管理者はメンバーアカウントで Macie を有効にでき、メンバーの S3 バケットの情報も見られる。",
+        "per_choice": {
+          "A": "動くが、各アカウントで受け入れる作業が要り、勧められている方法でもない。",
+          "B": "各アカウントに入る必要があり、要件に反する。",
+          "C": "管理者とメンバーの関係を作らないと、他のアカウントのバケットは見られない。",
+          "D": "正しい。勧められている Organizations との連携で、管理者が各メンバーで有効にできる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "We recommend that you integrate Macie with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "If the accounts are associated through AWS Organizations, the Macie administrator can also enable Macie for member accounts in the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
+        }
+      ]
+    }
+  ]
+}
