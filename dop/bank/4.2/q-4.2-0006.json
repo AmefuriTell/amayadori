@@ -1,0 +1,57 @@
+{
+  "id": "q-4.2-0006",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A single Amazon EC2 instance runs a legacy license server that cannot be placed in an Auto Scaling group. When the underlying AWS hardware has a problem, the instance must be recovered automatically and keep running as the same instance. The instance type supports recovery. Which configuration BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A CloudWatch alarm on StatusCheckFailed_System with the recover action."
+    },
+    {
+      "key": "B",
+      "text": "A CloudWatch alarm on StatusCheckFailed_Instance with the recover action."
+    },
+    {
+      "key": "C",
+      "text": "A CloudWatch alarm on StatusCheckFailed_System with the terminate action."
+    },
+    {
+      "key": "D",
+      "text": "A CloudWatch alarm on StatusCheckFailed_System with the stop action, and a person who starts the instance again."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "EC2 のインスタンスごとのメトリクスのアラームには、停止・終了・再起動・復旧のアクションを付けられる。復旧（recover）のアクションは StatusCheckFailed_System でだけ使え、StatusCheckFailed_Instance では使えない。対応するのは一部のインスタンスの種類だけ。",
+    "per_choice": {
+      "A": "正しい。システムの状態の確認の失敗で、自動で復旧する。",
+      "B": "復旧のアクションは StatusCheckFailed_Instance では使えない。",
+      "C": "インスタンスが終了してしまい、同じインスタンスとして動き続ける要件に反する。",
+      "D": "人が起こし直すことになり、自動で戻す要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+      "source_id": "S6",
+      "quote": "The recover action can be used only with StatusCheckFailed_System, not with StatusCheckFailed_Instance."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+      "source_id": "S5",
+      "quote": "The main difference between using the stop and the terminate alarm actions is that you can easily restart a stopped instance if you need to run it again later."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
