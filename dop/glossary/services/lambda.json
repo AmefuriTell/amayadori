@@ -1,0 +1,56 @@
+{
+  "id": "lambda",
+  "name": "AWS Lambda",
+  "aliases": [
+    "AWS Lambda"
+  ],
+  "reading": "ラムダ",
+  "summary": "サーバーを用意・管理せずにプログラムを動かせるサービス（サーバーレス）。サーバーの保守・容量の準備・スケーリング・パッチは Lambda が受け持つ。",
+  "features": [
+    {
+      "title": "イベントで動く",
+      "text": "ハンドラー関数を書き、トリガー（API Gateway・Amazon S3・Amazon SQS・EventBridge など 200 以上のサービス）につなぐと、イベントが来るたびに動く。",
+      "source_id": "S14"
+    },
+    {
+      "title": "自動のスケーリング",
+      "text": "呼び出しはそれぞれ独立して動き、要求が増えると実行環境を自動で増やす。",
+      "source_id": "S14"
+    },
+    {
+      "title": "同時実行数",
+      "text": "同時に処理している要求の数を同時実行数という。既定では、リージョンごとにアカウント全体で 1,000 まで。大事な関数がスロットリング（受け付けを断られること）されないよう、関数ごとに同時実行数を設定できる。",
+      "source_id": "S15"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "ある関数が同時実行数を使い切って、ほかの大事な関数がスロットリングされる場面では、関数ごとの同時実行数の設定を考える。",
+      "source_id": "S15"
+    },
+    {
+      "text": "S3 や SQS、EventBridge のイベントで処理を始める形として、Lambda をトリガーにつなぐ構成がよく出る。",
+      "source_id": "S14"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html#welcome",
+      "source_id": "S13",
+      "quote": "With Lambda, you can run code without provisioning or managing servers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html#welcome",
+      "source_id": "S14",
+      "quote": "You write a handler function, connect it to a trigger (API Gateway, Amazon S3, Amazon SQS, EventBridge, and 200+ other AWS services), and Lambda executes it."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#lambda-concurrency",
+      "source_id": "S15",
+      "quote": "configure function-level concurrency controls so that your critical Event Functions don't experience throttling."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

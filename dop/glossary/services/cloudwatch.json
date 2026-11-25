@@ -1,0 +1,56 @@
+{
+  "id": "cloudwatch",
+  "name": "Amazon CloudWatch",
+  "aliases": [
+    "Amazon CloudWatch"
+  ],
+  "reading": "クラウドウォッチ",
+  "summary": "AWS のリソースや、AWS 上で動くアプリケーションの状態をリアルタイムで見守る（監視する）サービス。性能・健全性・使われ具合を、システム全体で見えるようにする。",
+  "features": [
+    {
+      "title": "メトリクス",
+      "text": "大事な性能の数値を、決めた間隔で集めて記録する。多くの AWS サービスは自動で数値を送り、自分のアプリの数値（カスタムメトリクス）も PutMetricData API などで送れる。",
+      "source_id": "S5"
+    },
+    {
+      "title": "ログの保存と検索",
+      "text": "AWS のサービスや自分のアプリのログを、ロググループとログストリームに分けて保存する。CloudWatch Logs Insights で、すばやく検索・集計できる。",
+      "source_id": "S6"
+    },
+    {
+      "title": "ログから数値・転送",
+      "text": "メトリクスフィルターでログから数値を取り出してメトリクスにし、通知やダッシュボードに使える。サブスクリプションフィルターでログをリアルタイムに別のサービス（S3 や Firehose など）へ送れる。",
+      "source_id": "S6"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "アプリ独自の数値で監視したい時は、カスタムメトリクスを送る方法（PutMetricData API など）を考える。",
+      "source_id": "S5"
+    },
+    {
+      "text": "ログの中の数値を通知やダッシュボードに使いたい時は、メトリクスフィルターでログからメトリクスを作る形になる。",
+      "source_id": "S6"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#WhatIsCloudWatch",
+      "source_id": "S4",
+      "quote": "Amazon CloudWatch monitors your Amazon Web Services (AWS) resources and the applications you run on AWS in real time"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-monitoring-overview",
+      "source_id": "S5",
+      "quote": "Many AWS services automatically report metrics into CloudWatch, and you can also publish your own custom metrics, either with OpenTelemetry (OTLP) or with the PutMetricData API."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-logs-overview",
+      "source_id": "S6",
+      "quote": "Create metric filters to extract numerical values from logs and generate CloudWatch metrics, which you can use for alerting and dashboards."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
