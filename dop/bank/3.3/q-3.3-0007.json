@@ -1,0 +1,56 @@
+{
+  "id": "q-3.3-0007",
+  "task": "3.3",
+  "services": [
+    "AWS Backup"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS Backup rule copies backups to another Region. To reduce cost, the copies must move to cold storage, and the company wants the copies to be deleted as early as the cold storage rules allow. Which pair of settings for the copy is valid and deletes the copy SOONEST, i.e. is the MOST cost-effective valid choice?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Transition to cold storage after 30 days, and retention period of 180 days."
+    },
+    {
+      "key": "B",
+      "text": "Transition to cold storage after 30 days, and retention period of 100 days."
+    },
+    {
+      "key": "C",
+      "text": "Transition to cold storage after 60 days, and retention period of 120 days."
+    },
+    {
+      "key": "D",
+      "text": "Transition to cold storage after 90 days, and retention period of 150 days."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "コールドストレージに移したバックアップは、そこに少なくとも 90 日置く必要がある。保持期間（作ってから消すまでの日数）は、コールドストレージへ移す日数より 90 日を超えて長くする。30 日で移すなら保持期間は 120 日より長くする必要があり、選択肢の中で条件を満たすのは 180 日だけ。",
+    "per_choice": {
+      "A": "正しい。30 + 90 = 120 日より長い。",
+      "B": "30 + 90 = 120 日より短い。",
+      "C": "60 + 90 = 150 日より短い。",
+      "D": "90 + 90 = 180 日より短い。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+      "source_id": "S2",
+      "quote": "Backups transitioned to cold storage must be stored there for a minimum of 90 days."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+      "source_id": "S2",
+      "quote": "This value must be greater than 90 days beyond the Transition to cold storage value."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

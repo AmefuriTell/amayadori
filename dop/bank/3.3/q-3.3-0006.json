@@ -1,0 +1,63 @@
+{
+  "id": "q-3.3-0006",
+  "task": "3.3",
+  "services": [
+    "AWS Backup",
+    "Amazon EBS",
+    "Amazon RDS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company must back up every Amazon EBS volume and Amazon RDS database that has the tag backup=daily, once per day, and keep a copy of each backup in a second AWS Region. Teams create new tagged resources every week, and the operations team does not want to update the configuration when resources are added. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an AWS Backup plan with a daily rule that copies to the second Region, and add each resource ARN to the plan as it is created."
+    },
+    {
+      "key": "B",
+      "text": "Create an AWS Backup plan with a daily rule that copies to the second Region, and assign resources by the tag backup=daily."
+    },
+    {
+      "key": "C",
+      "text": "Run a scheduled AWS Lambda function that snapshots tagged resources and copies the snapshots to the second Region."
+    },
+    {
+      "key": "D",
+      "text": "Create an AWS Backup plan with a daily rule in each Region, and assign resources by the tag backup=daily in both."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "バックアッププランのルールでは、頻度や期間を決め、Copy to destination で別のリージョンへのコピーを決められる。リソースの割り当てはタグで含める・外すことができるので、タグの付いた新しいリソースも設定を変えずに対象になる。",
+    "per_choice": {
+      "A": "リソースが増えるたびに設定を変えることになり、要件に反する。",
+      "B": "正しい。毎日のルールで別リージョンへ写し、タグで対象を決める。",
+      "C": "自分でコードを持つことになり、手間が大きい。",
+      "D": "各リージョンで別々にバックアップを取るだけで、同じバックアップの写しを別リージョンに置くことにならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+      "source_id": "S1",
+      "quote": "You can use a scheduled backup plan to copy backups across AWS Regions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+      "source_id": "S1",
+      "quote": "For Copy to destination, Choose the destination AWS Region for your backup copy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/assigning-resources.html",
+      "source_id": "S3",
+      "quote": "Use tags to include or exclude resources"
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
