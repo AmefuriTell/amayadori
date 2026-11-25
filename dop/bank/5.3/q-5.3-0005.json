@@ -1,0 +1,56 @@
+{
+  "id": "q-5.3-0005",
+  "task": "5.3",
+  "services": [
+    "Amazon CloudWatch Synthetics"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Shortly after a new application version is deployed, a CloudWatch Synthetics canary that tests the checkout flow starts to fail. Customers are affected. The team must restore service quickly and must still be able to find the root cause afterward. Which approach BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the new version, compare the failed run's screenshots and logs with a successful run, and roll back only if the cause is unclear."
+    },
+    {
+      "key": "B",
+      "text": "Check the SuccessPercent metric over the next hour to see whether failures are intermittent, and then decide whether to roll back."
+    },
+    {
+      "key": "C",
+      "text": "Roll back the recent deployment, and delete the failed canary runs' artifacts so that the next runs start from a clean state."
+    },
+    {
+      "key": "D",
+      "text": "Roll back the recent deployment, and then compare the failed run's screenshots, logs, and step reports with a successful run."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "canary が失敗した時は、詳細のページの SuccessPercent で続く問題か時々の問題かを見て、失敗した回のスクリーンショット・ログ・ステップの報告を成功した回と比べて原因を絞る。直前にアプリをデプロイしていたなら、まず戻してから後で調べる。",
+    "per_choice": {
+      "A": "原因は調べられるが、新しい版のまま利用者への影響が続き、早く戻す要件に反する。",
+      "B": "続く問題か時々の問題かは分かるが、判断まで利用者への影響が続き、早く戻す要件に反する。",
+      "C": "早く戻せるが、失敗した回の記録を消すので、後から成功した回と比べて原因を調べられなくなる。",
+      "D": "正しい。まず戻して利用者への影響を止め、canary の記録で後から原因を調べる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries_Troubleshoot.html",
+      "source_id": "S7",
+      "quote": "If you had a recent deployment to your application, roll it back and then debug later."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries_Troubleshoot.html",
+      "source_id": "S7",
+      "quote": "Finally, you can compare these artifacts with the artifacts from a successful canary run to pinpoint the issue."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

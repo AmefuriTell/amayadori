@@ -1,0 +1,56 @@
+{
+  "id": "q-5.3-0004",
+  "task": "5.3",
+  "services": [
+    "AWS CodePipeline"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A DevOps engineer creates a new AWS CodePipeline pipeline and configures automatic rollback on failure for the Deploy stage. The very first execution of the pipeline fails in the Deploy stage, but no rollback happens. The engineer wants to understand the behavior before changing anything. Which statement BEST explains why the stage did not roll back?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Automatic rollback is supported only for stages that contain AWS CodeDeploy actions."
+    },
+    {
+      "key": "B",
+      "text": "Automatic rollback must also be configured on the source stage before it can work on the Deploy stage."
+    },
+    {
+      "key": "C",
+      "text": "Automatic rollback works only after the stage has had at least one successful execution to roll back to."
+    },
+    {
+      "key": "D",
+      "text": "Automatic rollback runs only when the stage is retried by hand after the failure."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "段階が失敗すると、その段階は最も新しい成功した実行に戻される。自動のロールバックはパイプラインの定義の一部なので、その段階で成功した実行が 1 回あった後にしか戻せない。また、戻せるのは今のパイプラインの構造の版で始まった実行だけ。",
+    "per_choice": {
+      "A": "この条件は無い。戻らない理由は、成功した実行が無いこと。",
+      "B": "ソースの段階の設定は関係ない。戻らない理由は、成功した実行が無いこと。",
+      "C": "正しい。最初の実行では、戻る先の成功した実行が無い。",
+      "D": "段階が失敗した時に自動で戻す仕組みで、手でやり直すことは条件ではない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html",
+      "source_id": "S6",
+      "quote": "When the stage fails, the stage is rolled back to the most recent successful execution."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html",
+      "source_id": "S6",
+      "quote": "your pipeline stage will auto-rollback only after there is a successful pipeline execution in the pipeline stage."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

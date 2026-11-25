@@ -1,0 +1,57 @@
+{
+  "id": "q-5.3-0002",
+  "task": "5.3",
+  "services": [
+    "AWS CloudFormation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS CloudFormation stack update failed, and the rollback also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because a dependent resource could not return to its original state. The team found and manually fixed the cause of the failure. The team wants to return the stack to a working state and then apply the update again, without deleting the stack. What should the team do next with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run a new stack update with the original template, because updates are allowed in the UPDATE_ROLLBACK_FAILED state."
+    },
+    {
+      "key": "B",
+      "text": "Wait for CloudFormation to retry the rollback automatically after the resource is fixed."
+    },
+    {
+      "key": "C",
+      "text": "Continue the update rollback so that the stack reaches UPDATE_ROLLBACK_COMPLETE, and then update the stack again."
+    },
+    {
+      "key": "D",
+      "text": "Delete the stack and create it again from the new template."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "依存するリソースが元の状態に戻れないとロールバックが失敗し、UPDATE_ROLLBACK_FAILED になる。原因を手で直したら、ロールバックを続ける（continue update rollback）と UPDATE_ROLLBACK_COMPLETE の動く状態に戻り、そこからもう一度更新できる。それでも戻せないリソースは飛ばせる。",
+    "per_choice": {
+      "A": "まずロールバックを続けて動く状態に戻す必要がある。",
+      "B": "ロールバックを続けるのは、コンソールか CLI で行う操作。",
+      "C": "正しい。ロールバックを続けて UPDATE_ROLLBACK_COMPLETE にしてから、もう一度更新する。",
+      "D": "スタックを消さない要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html",
+      "source_id": "S3",
+      "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html",
+      "source_id": "S3",
+      "quote": "To continue rolling back an update, you can use the CloudFormation console or AWS command line interface (AWS CLI)."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "note": "選択肢 A・C の「できない」は、S3 の手順（まずロールバックを続ける）から言える範囲で書いた",
+  "last_checked": "2026-11-26"
+}

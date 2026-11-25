@@ -1,0 +1,7 @@
+{"item":"C-0068","questions":[
+{"qid":"q-5.3-0001","blind":{"answer":["B"],"confidence":"high","reason":"ApplicationStop runs from the last successful deployment's AppSpec, so redeploying fails; --ignore-application-stop-failures skips it."},"match":true,"issues":[{"kind":"style","where":"per_choice C","detail":"ロールバックも ApplicationStop を前の成功したデプロイのスクリプトで動かす、という推論は S1 から導ける範囲。S1 に ロールバック への直接の記述は無い。","source":"S1"}],"verdict":"ok"},
+{"qid":"q-5.3-0002","blind":{"answer":["B"],"confidence":"high","reason":"Continue update rollback to reach UPDATE_ROLLBACK_COMPLETE, then update again."},"match":true,"issues":[{"kind":"style","where":"per_choice A, C","detail":"A と C の「誤り」の理由は S3 に直接の記述が無く（S3 は continue rollback で戻せると書くのみ）、説明がやや弱い。正解は 1 つに決まる。","source":"S3"}],"verdict":"ok"},
+{"qid":"q-5.3-0003","blind":{"answer":["A","B"],"confidence":"mid","reason":"Retry failed actions reruns only failed actions; automatic retry is one attempt max, so E is out; retry failed stage reruns all."},"match":true,"issues":[],"verdict":"ok"},
+{"qid":"q-5.3-0004","blind":{"answer":["A"],"confidence":"high","reason":"Auto rollback needs a prior successful execution."},"match":true,"issues":[],"verdict":"ok"},
+{"qid":"q-5.3-0005","blind":{"answer":["B"],"confidence":"high","reason":"Roll back first, keep canary artifacts for later RCA."},"match":true,"issues":[{"kind":"style","where":"choice D","detail":"前回の giveaway は直っている。A（新版のまま調べる）・C（SuccessPercent を待つ）は S7 の手順に基づく紛らわしい誤り。D は成果物削除で RCA 要件に反する点がやや見え見えだが、正解は 1 つに決まる。","source":"S7"}],"verdict":"ok"}
+]}
