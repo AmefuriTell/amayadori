@@ -1,0 +1,91 @@
+{
+  "item": "C-0006",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "task": "1.2",
+      "services": [
+        "AWS CodeBuild",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team hosts its code in GitHub and uses an AWS CodeBuild project with a webhook to run unit tests. The tests must run when a pull request is opened and every time new commits are added to it. The tests must run only for pull requests that target the main branch. Pull requests that target other branches must not start any build. Which webhook configuration meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "B",
+          "text": "Two filter groups: one with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and one with BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "C",
+          "text": "One filter group with EVENT set to PUSH, PULL_REQUEST_CREATED and BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "D",
+          "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_MERGED and BASE_REF set to refs/heads/main."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "task": "1.2",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds a .NET application with AWS CodeBuild. The test framework writes its results as NUnit 3 XML files to the test-results directory. The developers want the results to appear as a test report in CodeBuild for each build. The company does not want to add steps that convert or upload files. Which change meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a reports section to the buildspec that lists the test-results files and leaves file-format unset."
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the buildspec that lists the test-results files and sets file-format to NUNIT3XML."
+        },
+        {
+          "key": "C",
+          "text": "Add a build command that converts the results to JUnit XML, and list the converted files in a reports section."
+        },
+        {
+          "key": "D",
+          "text": "Add the test-results files to the artifacts section so that they are stored in Amazon S3 after each build."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "task": "1.2",
+      "services": [
+        "AWS CodePipeline",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an AWS CodePipeline V2 pipeline with a GitHub source action that uses a connection. The pipeline must start when a pull request that targets the main branch is opened, and again whenever a new revision is published to that pull request. The pipeline must also start for every push to main. The company wants to use one pipeline and no custom code. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a trigger with a pullRequest filter for main with the Open and Closed events, and a push filter for main."
+        },
+        {
+          "key": "B",
+          "text": "Add a trigger with a pullRequest filter for main with the Open and Update events, and a push filter for main."
+        },
+        {
+          "key": "C",
+          "text": "Add a trigger with only a push filter for main, and add a CodeBuild webhook that runs tests for pull requests."
+        },
+        {
+          "key": "D",
+          "text": "Create a second pipeline for pull request events, and keep the first pipeline for pushes to main."
+        }
+      ]
+    }
+  ]
+}
