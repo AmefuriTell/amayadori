@@ -1,0 +1,125 @@
+{
+  "item": "C-0026",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs Amazon EC2 managed nodes in 20 AWS accounts across three Regions, all in AWS Organizations. The nodes must be scanned for missing patches every day and patched every Sunday. The operations team wants to manage this from a single configuration and does not want to create resources in each account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a maintenance window in each account and Region that runs a patch task every Sunday, and a second window for daily scans."
+        },
+        {
+          "key": "B",
+          "text": "Create a Patch Manager patch policy that targets the organization, with a daily scan schedule and a weekly install schedule."
+        },
+        {
+          "key": "C",
+          "text": "Use the Patch now option from the console every Sunday, and review the compliance report each morning."
+        },
+        {
+          "key": "D",
+          "text": "Create a State Manager association in each account and Region that runs the patching document on a weekly schedule."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company patches Linux managed nodes with Patch Manager. The custom patch baseline auto-approves security patches 7 days after release, and a weekly Scan and install operation runs. A critical security patch was released yesterday. All nodes show as compliant, but the patch is not installed. The security team needs the patch installed in the next weekly run, without changing how other patches are approved. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Do nothing, because nodes that are compliant with the patch baseline are already secure."
+        },
+        {
+          "key": "B",
+          "text": "Add the patch to the approved patches list of the custom patch baseline."
+        },
+        {
+          "key": "C",
+          "text": "Change the weekly operation from Scan and install to Scan so that the missing patch is reported."
+        },
+        {
+          "key": "D",
+          "text": "Turn on Systems Manager Inventory so that the missing patch is collected and installed on the nodes."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company requires a monitoring agent on every managed node tagged Env=Prod. If the agent is removed, it must be installed again within one day. The compliance team also needs to query, from a central location, which nodes run the required software versions. The company wants to use managed AWS features instead of custom scripts. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a State Manager association that targets the Env=Prod tag and installs the agent on a daily schedule."
+        },
+        {
+          "key": "B",
+          "text": "Configure Systems Manager Inventory to collect metadata from the nodes and store it in a central S3 bucket."
+        },
+        {
+          "key": "C",
+          "text": "Configure Systems Manager Inventory to install the agent on nodes where the agent is missing."
+        },
+        {
+          "key": "D",
+          "text": "Run an AWS Lambda function every day that connects to each node over SSH and reinstalls the agent."
+        },
+        {
+          "key": "E",
+          "text": "Use the Patch Manager Patch now option every day on the Env=Prod nodes to reinstall the agent and report software versions."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "task": "2.3",
+      "services": [
+        "AWS Config",
+        "AWS Systems Manager",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company must detect any Amazon S3 bucket whose configuration violates the company's access rules as soon as the bucket is created or changed. Noncompliant buckets must be fixed by a defined, repeatable action, and the company prefers actions that AWS already provides over writing code. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config rule that evaluates the buckets and sends a notification to the security team for manual fixes."
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Config rule that evaluates the buckets, and attach a remediation action that uses a managed Systems Manager Automation document."
+        },
+        {
+          "key": "C",
+          "text": "Create an Amazon EventBridge rule for bucket changes that invokes a custom AWS Lambda function to change the bucket settings."
+        },
+        {
+          "key": "D",
+          "text": "Use Systems Manager Inventory to collect bucket settings every day and fix the buckets that appear in the report."
+        }
+      ]
+    }
+  ]
+}

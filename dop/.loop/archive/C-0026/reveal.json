@@ -1,0 +1,150 @@
+{
+  "item": "C-0026",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "パッチポリシーは AWS Organizations と連携し、1 つのポリシーで複数のアカウントとリージョンのパッチを構成できる。スキャンとインストールに別々のスケジュールを設定できる。",
+        "per_choice": {
+          "A": "スケジュールは満たすが、アカウントとリージョンごとに作ることになり、1 つの設定で管理する要件に反する。",
+          "B": "正しい。組織全体に 1 つのポリシーで、毎日のスキャンと毎週のインストールを分けて設定できる。",
+          "C": "Patch now はその場で行う操作で、毎週人が押すことになり、毎日のスキャンも自動にならない。",
+          "D": "アカウントとリージョンごとに作ることになり、毎日のスキャンも別に要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Scheduling flexibility – Set different schedules for scanning and installing patches using custom CRON or Rate expressions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "準拠（compliant）とは、パッチベースラインで承認され、使えるパッチが入っていること。まだ自動承認の日数に達していないパッチは承認されていないので、入っていなくても準拠と出る。カスタムのパッチベースラインの承認するパッチの一覧に足せば、他の承認の決まりを変えずに次の Scan and install で入る。",
+        "per_choice": {
+          "A": "準拠していることは安全であることを意味しない。このパッチは承認されていないので入っていない。",
+          "B": "正しい。承認の一覧に足すと、次のインストールの対象になる。",
+          "C": "Scan は足りないパッチを報告するだけで入れない。そもそも承認されていないパッチは足りない物として扱われない。",
+          "D": "Inventory はメタデータを集めるだけで、パッチを入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S2",
+          "quote": "Note that being compliant with a patch baseline doesn't mean that a managed node is necessarily secure."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S2",
+          "quote": "Compliant means that the patches defined by the patch baseline that are both available and approved have been installed on the node."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "source_id": "S1",
+          "quote": "Custom patch baselines – Define rules for auto-approving patches within days of their release, along with approved and rejected patch lists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "State Manager の関連付けは、保ちたい状態とスケジュールと対象を決め、タグでも対象を選べる。ソフトが入っていなければ入れるよう指示できる。Inventory は管理ノードからメタデータを集め、中央の S3 バケットに置いて問い合わせできる。",
+        "per_choice": {
+          "A": "正しい。Env=Prod のタグで選び、毎日望む状態に戻す。",
+          "B": "正しい。メタデータを中央の S3 に集め、必要なソフトや設定のノードを調べられる。",
+          "C": "Inventory はメタデータを集めるだけで、ソフトを入れない。",
+          "D": "動くかもしれないが、自分のコードを持つことになり、要件に反する。",
+          "E": "Patch now はその場で行うパッチの操作で、毎日人が行うことになる。ソフトの入っている状態を保つ仕組みでも、メタデータを中央に集めて問い合わせる仕組みでもない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "If the software isn't installed on a node, then the association could instruct State Manager to install it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "source_id": "S3",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS Config のルールは、リソースが作られた・変わった・消された時に設定を評価し続け、決まりに反するリソースを noncompliant にする。修復は Systems Manager Automation のドキュメントで行い、AWS Config は修復の操作を持つマネージドの Automation ドキュメントも用意している。",
+        "per_choice": {
+          "A": "検出はできるが、直すのが人の手で、決まった繰り返せる操作にならない。",
+          "B": "正しい。作成や変更の時に評価し、マネージドの Automation ドキュメントで直す。",
+          "C": "動くが、自分で Lambda のコードを書いて保守することになり、要件に反する。",
+          "D": "Inventory は管理ノードのメタデータを集める機能で、S3 バケットの設定を評価して直すものではない。毎日では作成や変更の直後にも気づけない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html",
+          "source_id": "S5",
+          "quote": "AWS Config continuously evaluates your resources as they are created, changed, or deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "source_id": "S6",
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "source_id": "S6",
+          "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "source_id": "S4",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "q-2.3-0002",
+  "task": "2.3",
+  "services": [
+    "AWS Systems Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company patches Linux managed nodes with Patch Manager. The custom patch baseline auto-approves security patches 7 days after release, and a weekly Scan and install operation runs. A critical security patch was released yesterday. All nodes show as compliant, but the patch is not installed. The security team needs the patch installed in the next weekly run, without changing how other patches are approved. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add the patch to the approved patches list of the custom patch baseline."
+    },
+    {
+      "key": "B",
+      "text": "Do nothing, because nodes that are compliant with the patch baseline are already secure."
+    },
+    {
+      "key": "C",
+      "text": "Change the weekly operation from Scan and install to Scan so that the missing patch is reported."
+    },
+    {
+      "key": "D",
+      "text": "Turn on Systems Manager Inventory so that the missing patch is collected and installed on the nodes."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "準拠（compliant）とは、パッチベースラインで承認され、使えるパッチが入っていること。まだ自動承認の日数に達していないパッチは承認されていないので、入っていなくても準拠と出る。カスタムのパッチベースラインの承認するパッチの一覧に足せば、他の承認の決まりを変えずに次の Scan and install で入る。",
+    "per_choice": {
+      "A": "正しい。承認の一覧に足すと、次のインストールの対象になる。",
+      "B": "準拠していることは安全であることを意味しない。このパッチは承認されていないので入っていない。",
+      "C": "Scan は足りないパッチを報告するだけで入れない。そもそも承認されていないパッチは足りない物として扱われない。",
+      "D": "Inventory はメタデータを集めるだけで、パッチを入れない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S2",
+      "quote": "Note that being compliant with a patch baseline doesn't mean that a managed node is necessarily secure."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S2",
+      "quote": "Compliant means that the patches defined by the patch baseline that are both available and approved have been installed on the node."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S1",
+      "quote": "Custom patch baselines – Define rules for auto-approving patches within days of their release, along with approved and rejected patch lists."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+      "source_id": "S4",
+      "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

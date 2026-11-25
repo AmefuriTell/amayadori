@@ -1,0 +1,10 @@
+{
+  "item": "C-0026",
+  "questions": [
+    {"qid":"q-2.3-0001","blind":{"answer":["B"],"confidence":"high","reason":"Patch Manager patch policy via Organizations covers multiple accounts/Regions with separate scan and install schedules."},"match":true,"issues":[],"verdict":"ok"},
+    {"qid":"q-2.3-0002","blind":{"answer":["B"],"confidence":"high","reason":"Patch is not yet approved (7-day delay), so compliant but not installed; adding it to the approved list installs it on the next run."},"match":true,"issues":[],"verdict":"ok"},
+    {"qid":"q-2.3-0003","blind":{"answer":["A","B"],"confidence":"high","reason":"State Manager association by tag re-installs the agent daily; Inventory to central S3 allows querying software versions."},"match":true,"issues":[
+      {"kind":"style","where":"choice E / explanation per_choice E","detail":"The previous fix is correct. E now uses Patch now (an on-demand operation per S1) and the explanation no longer claims E cannot target Env=Prod or that only Inventory collects the list. E is clearly wrong and A+B remain the only pair. The statement that Patch now installs only patches, not arbitrary agents, is true but not in sources.md; it is only supplementary and does not decide the answer.","source":"S1,S3,S4"}],"verdict":"ok"},
+    {"qid":"q-2.3-0004","blind":{"answer":["B"],"confidence":"high","reason":"Config rule evaluates on create/change; remediation via managed SSM Automation document is the least-effort fix."},"match":true,"issues":[],"verdict":"ok"}
+  ]
+}
