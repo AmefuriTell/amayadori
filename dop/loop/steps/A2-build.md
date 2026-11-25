@@ -13,6 +13,7 @@
     <a>e2e では openPage が集めるブラウザのエラーが 0 件であることも確かめ、幅 375 と 1280 で shot を撮る。</a>
     <a>コードを書く。問題のデータは bank/ を直接読まず、node dop/tools/app.mjs data が作る app/public/questions.json を fetch で読む。</a>
     <a>app/SPEC.md の該当する所を今の形に直す（短く）。</a>
+    <a>app/ のファイルを変えたら node dop/tools/app.mjs stamp を呼ぶ（読み込む先に版の番号を付け直す。忘れると npm test が落ちる）。</a>
     <a>feedback.json があれば、そこに出た AC だけ直す。同じ AC が 2 回続けて落ちたら、直し方を変える（前と違う原因を 1 行で書いてから直す）。</a>
   </actions>
   <constraints>

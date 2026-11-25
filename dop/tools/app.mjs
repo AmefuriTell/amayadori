@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-// アプリのツール: data（bank → app/public/questions.json）/ check（A3。受け入れ条件ごとの合否）
+// アプリのツール: data（bank → app/public/questions.json）/ stamp（版の番号を付け直す）/ check（A3。受け入れ条件ごとの合否）
 // 試験の名前の先頭に「<項目 ID> <AC の id>」を付ける決まり（例 "A-0001 AC2 複数選択は…"）。
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { CODE, DATA, paths, readJSON, writeJSON, emit, main, ToolError, ITEM_ID, setResult, writeReport, rel } from './lib/io.mjs';
 import { loadBank, exam } from './lib/bank.mjs';
+import { stamp } from './lib/stamp.mjs';
 
 // 試験では DOP_APP で別のアプリの置き場を渡す
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
@@ -54,6 +55,12 @@ export function parseTap(tap) {
 }
 
 const commands = {
+  // A-0011: 読み込む先に版の番号を付ける（スマホが古いプログラムを使い回さないように）
+  stamp() {
+    const r = stamp(APP);
+    emit({ ok: true, summary: `版 ${r.version}${r.changed ? ' に付け直した' : '（変わらず）'}`, extra: r });
+  },
+
   data() {
     const { file, count } = buildData();
     emit({ ok: true, summary: `${count} 問を ${path.relative(CODE, file)} に書いた` });

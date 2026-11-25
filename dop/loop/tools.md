@@ -49,6 +49,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q export --task 1.4 --out <file.md>` | 人が読む時 | 条件 | 書いた数 | （人向け。AI は読まない） | 済 |
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
 | `node dop/tools/app.mjs data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 済 |
+| `node dop/tools/app.mjs stamp` | A2（app/ を変えたら） | app/src・style.css | 版の番号 | index.html の import map・version.json（忘れると npm test が落ちる） | 済 |
 | `node dop/tools/app.mjs check <ID>` | A3 | spec.json・app/test・app/e2e | AC ごとの合否・画面写真 | 試験・e2e のログ全文 | 済 |
 | （アプリ）読み上げ | 利用者 | 問題と解説 | ブラウザの speechSynthesis で読む（A-0009） | 読み方の表は app/src/logic/speech.js の READINGS | 済 |
 | `node dop/tools/learn.mjs weak [--dry]` | L1 | .loop/answers/*.json（記録の書き出しと issues.json） | 足した項目・直近の正答率・受けてよい頃か | 解答の記録と issue の本文 | 済 |

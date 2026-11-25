@@ -1,0 +1,14 @@
+{
+  "item": "A-0011",
+  "goal": "新しい版を出した後に、スマホのブラウザが前のプログラム（JS・CSS）を使い回して新しい機能が出ない、を防ぐ（利用者のスマホで A-0009 の読み上げボタンが出なかった）",
+  "acceptance": [
+    { "id": "AC1", "check": "unit", "text": "版の番号は src/**/*.js と style.css の中身から決まり、中身が変わると変わる。app.mjs stamp が index.html の印の間（版の meta、CSS、import map、main.js）と public/version.json を書き、今のリポジトリのアプリは印が今のファイルと合っている（stamp を忘れると npm test が落ちる）" },
+    { "id": "AC2", "check": "e2e", "text": "ページが読む JS と CSS は全部、URL に今の版の番号（?v=）が付いている。画面の下に「版 <番号>」を出す" },
+    { "id": "AC3", "check": "e2e", "text": "サーバーの public/version.json の版が今のページの版と違うと「新しい版があります。」と「読み込み直す」を出し、押すと読み込み直す。同じ版なら出さない" },
+    { "id": "AC4", "check": "e2e", "text": "version.json が取れない（404 など）時は何も出さず、エラーも出さずに解ける。お知らせがあっても幅 375px と 1280px で横に溢れない（写真を撮る）" }
+  ],
+  "out_of_scope": ["Service Worker でのオフライン対応", "index.html 自体の使い回し（読み込み直すとブラウザが確かめ直す。開いたままの古い画面は AC3 のお知らせで気付ける）"],
+  "options": [],
+  "aws_change": false,
+  "decisions": ["ビルドしない決まりのまま、import map で各 JS に ?v= を付ける", "版はファイルの中身の sha256 の先頭 10 文字", "A2 の手順に app.mjs stamp を足す。あわせて A-0005〜A-0010 で直し忘れた app/SPEC.md を直す"]
+}
