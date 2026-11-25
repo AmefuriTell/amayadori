@@ -1,10 +1,20 @@
 // 1 問ずつ解く画面。採点などの計算は logic/ に置く。
 import { grade, canSubmit } from './logic/grade.js';
+import { addAnswer, domainStats } from './logic/record.js';
+import { loadAnswers, saveAnswers, clearAnswers } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
 
-const state = { questions: [], index: 0, selected: [], answered: false, correct: 0 };
+const stored = loadAnswers();
+const state = {
+  view: 'solve', questions: [], domains: {}, index: 0, selected: [], answered: false, correct: 0,
+  answers: stored.answers, storageOk: stored.ok,
+};
+
+for (const tab of document.querySelectorAll('.tab')) {
+  tab.addEventListener('click', () => { state.view = tab.dataset.view; render(); });
+}
 
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -26,6 +36,7 @@ async function load() {
     const data = await res.json();
     if (!Array.isArray(data.questions) || !data.questions.length) throw new Error('問題が 0 問');
     state.questions = data.questions;
+    state.domains = data.domains ?? {};
     render();
   } catch (e) {
     progress.textContent = '';
@@ -34,6 +45,10 @@ async function load() {
 }
 
 function render() {
+  for (const tab of document.querySelectorAll('.tab')) {
+    if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
+  }
+  if (state.view === 'stats') return renderStats();
   if (state.index >= state.questions.length) return renderResult();
   const q = state.questions[state.index];
   const multi = q.type === 'multi';
@@ -98,7 +113,10 @@ function submit() {
   const q = state.questions[state.index];
   if (!canSubmit(q, state.selected)) return;
   state.answered = true;
-  if (grade(q, state.selected)) state.correct += 1;
+  const correct = grade(q, state.selected);
+  if (correct) state.correct += 1;
+  state.answers = addAnswer(state.answers, { id: q.id, task: q.task, domain: q.domain, selected: [...state.selected], correct, at: Date.now() });
+  if (!saveAnswers(state.answers)) state.storageOk = false;
   render();
   app.querySelector('[data-testid=verdict]')?.focus?.();
 }
@@ -119,6 +137,32 @@ function renderResult() {
     el('p', { class: 'score', text: `${n} 問中 ${state.correct} 問 正解` }),
     el('div', { class: 'actions', style: 'justify-content:center' }, el('button', { type: 'button', onclick: restart, text: 'もう一度' })),
   ));
+}
+
+function renderStats() {
+  progress.textContent = '';
+  const rows = domainStats(state.answers, state.questions, state.domains);
+  const pct = (r) => (r == null ? '—' : `${Math.round(r * 100)}%`);
+  app.replaceChildren(el('section', { class: 'card', 'aria-labelledby': 'stats-title' },
+    el('h2', { id: 'stats-title', class: 'title', text: 'ドメイン別の正答率' }),
+    el('p', { class: 'muted', text: '問題ごとに一番新しい答えで数えます。記録はこの端末のブラウザにだけ残ります。' }),
+    state.storageOk ? null : el('p', { class: 'note', 'data-testid': 'storage-note', text: 'このブラウザでは記録を残せません（非公開の窓や設定で保存が止まっています）。解くことはできます。' }),
+    el('table', { class: 'stats' },
+      el('thead', {}, el('tr', {}, el('th', { text: 'ドメイン' }), el('th', { class: 'num', text: '解いた数' }), el('th', { class: 'num', text: '正答率' }))),
+      el('tbody', {}, rows.map((r) => el('tr', { 'data-testid': 'stats-row', 'data-domain': String(r.domain) },
+        el('td', { text: `${r.domain}. ${r.name}` }),
+        el('td', { class: 'num', text: `${r.answered} / ${r.total}` }),
+        el('td', { class: 'num', text: pct(r.rate) })))),
+    ),
+    el('div', { class: 'actions' }, el('button', { type: 'button', class: 'secondary', onclick: onClear, text: '記録を消す' })),
+  ));
+}
+
+function onClear() {
+  if (!window.confirm('この端末の記録を全部消します。よろしいですか？')) return;
+  state.answers = [];
+  clearAnswers();
+  render();
 }
 
 function restart() {

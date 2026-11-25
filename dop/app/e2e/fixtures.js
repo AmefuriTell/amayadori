@@ -10,7 +10,7 @@ const per = (n) => Object.fromEntries(['A', 'B', 'C', 'D', 'E'].slice(0, n).map(
 
 export const DATA = {
   exam: 'DOP-C02',
-  domains: { 1: { name: 'SDLC Automation', weight: 0.22 } },
+  domains: { 1: { name: 'SDLC Automation', weight: 0.22 }, 6: { name: 'Security and Compliance', weight: 0.17 } },
   count: 3,
   questions: [
     { ...base, id: 'q-1.4-0001', type: 'single', select_count: 1, stem: 'First question stem. Which solution meets the requirements with the LEAST operational effort?', choices: choices(4), answer: ['B'], explanation: { summary: '要約 1', per_choice: per(4) } },

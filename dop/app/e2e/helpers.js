@@ -36,9 +36,13 @@ export async function launch() {
 /**
  * ページを開く。ブラウザのコンソールのエラーを errors に集める（試験で 0 件を確かめる）。
  * data を渡すと public/questions.json の代わりにそれを返す（null なら 404 にする）。
+ * init はページの前に動かす JavaScript（localStorage を壊すなど）。
  */
-export async function openPage(browser, url, { width = 1280, height = 800, data } = {}) {
-  const page = await browser.newPage({ viewport: { width, height } });
+export async function openPage(browser, url, { width = 1280, height = 800, data, init, context } = {}) {
+  // context を渡すと、その中で開く（localStorage を開き直しの間で残す試験のため）
+  const page = await (context ?? browser).newPage(context ? undefined : { viewport: { width, height } });
+  if (context) await page.setViewportSize({ width, height });
+  if (init) await page.addInitScript(init);
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
