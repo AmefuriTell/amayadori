@@ -66,17 +66,20 @@ test('A-0009 AC3 オフでは読まず、設定は残り、速さと言葉が使
   await page.reload();
   await page.locator('[data-testid=stem]').waitFor();
   assert.equal(await page.getByRole('button', { name: '読み上げ オン' }).getAttribute('aria-pressed'), 'true');
-  // 読み込み直した直後も読もうとする（iPhone はタップ前の読み上げを黙って捨てるので、その時は「もう一度」で読む）
-  assert.match((await texts(page))[0], /First question stem/);
+  // 読み込み直した直後も、続きの段（答えた後なので解説、日本語）を読もうとする（iPhone はタップ前の読み上げを黙って捨てるので、その時は「もう一度」で読む）
+  const resumed = (await spoken(page)).filter((s) => s.text);
+  assert.match(resumed[0].text, /^(正解|不正解)。/);
+  assert.equal(resumed[0].lang, 'ja-JP');
   await clear(page);
-  await page.getByRole('button', { name: 'もう一度' }).click();
+  await page.getByRole('button', { name: '次へ' }).click();
   const after = (await spoken(page)).filter((s) => s.text);
-  assert.match(after[0].text, /First question stem/);
+  assert.match(after[0].text, /Second question stem/);
   assert.equal(after[0].lang, 'en-US');
   assert.equal(after[0].rate, 1.5);
   await page.getByRole('button', { name: '読み上げ オン' }).click(); // オフ
   await clear(page);
   await page.locator('[data-testid=choice] input').nth(0).check();
+  await page.locator('[data-testid=choice] input').nth(3).check();
   await page.getByRole('button', { name: '答える' }).click();
   assert.deepEqual(await texts(page), []);
   await context.close();

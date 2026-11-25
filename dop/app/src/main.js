@@ -5,7 +5,8 @@ import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
 import { RATES, questionScript, answerScript } from './logic/speech.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, saveSpeech } from './storage.js';
+import { resume, snapshot } from './logic/progress.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, saveSpeech, loadProgress, saveProgress } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -47,6 +48,7 @@ async function load() {
     if (!Array.isArray(data.questions) || !data.questions.length) throw new Error('問題が 0 問');
     state.questions = data.questions;
     state.domains = data.domains ?? {};
+    Object.assign(state, resume(state.questions, loadProgress())); // A-0010: 読み込み直しても続きから
     render();
   } catch (e) {
     progress.textContent = '';
@@ -107,6 +109,7 @@ function renderSpeech() {
 }
 
 function render() {
+  if (state.questions.length) saveProgress(snapshot(state));
   if (state.view !== 'solve' || state.index >= state.questions.length) stopSpeech();
   for (const tab of document.querySelectorAll('.tab')) {
     if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
