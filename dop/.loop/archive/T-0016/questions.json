@@ -1,0 +1,326 @@
+{
+  "item": "T-0016",
+  "recheck": true,
+  "translate": true,
+  "questions": [
+    {
+      "id": "q-5.3-0001",
+      "task": "5.3",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An in-place AWS CodeDeploy deployment to Amazon EC2 instances fails in the ApplicationStop lifecycle event. The logs show that the ApplicationStop script has a bug. The team fixed the script in the new revision, but the next deployment fails in ApplicationStop with the same error. The team must deploy the fixed revision as soon as possible without logging in to the instances. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a deployment of the fixed revision with the --ignore-application-stop-failures option.",
+          "text_ja": "--ignore-application-stop-failures のオプションを付けて、修正したリビジョンのデプロイを作成する。"
+        },
+        {
+          "key": "B",
+          "text": "Deploy the same fixed revision again, because CodeDeploy runs ApplicationStop from the revision that is being deployed.",
+          "text_ja": "CodeDeploy はデプロイ中のリビジョンから ApplicationStop を実行するので、同じ修正したリビジョンをもう一度デプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Roll back to the last successful revision, and then deploy the fixed revision again without changes.",
+          "text_ja": "最後に成功したリビジョンにロールバックし、その後修正したリビジョンを変更なしでもう一度デプロイする。"
+        },
+        {
+          "key": "D",
+          "text": "Reinstall the CodeDeploy agent on every instance so that it downloads the new ApplicationStop script.",
+          "text_ja": "新しい ApplicationStop のスクリプトをダウンロードするように、すべてのインスタンスに CodeDeploy エージェントを入れ直す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CodeDeploy のエージェントは、ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトを、前に成功したデプロイの AppSpec から動かす。新しいリビジョンでスクリプトを直しても、前の成功したデプロイのスクリプトが動くので同じ所で失敗する。そのスクリプトが必ず失敗するなら、失敗を無視するデプロイを作る（CLI の --ignore-application-stop-failures）。",
+        "per_choice": {
+          "A": "正しい。前のデプロイの壊れたスクリプトの失敗を無視して、直したリビジョンを配れる。",
+          "B": "ApplicationStop は前に成功したデプロイのスクリプトから動くので、同じ失敗がくり返す。",
+          "C": "前の成功したリビジョンに戻っても、そのリビジョンの壊れたスクリプトが次の ApplicationStop で動き、同じ所で失敗する。",
+          "D": "どのスクリプトを動かすかは前に成功したデプロイで決まるので、エージェントを入れ直しても変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html",
+          "source_id": "S1",
+          "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html",
+          "source_id": "S1",
+          "quote": "Use the AWS CLI to call the create-deployment command and include the --ignore-application-stop-failures option."
+        }
+      ],
+      "difficulty": 3,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-26",
+      "stem_ja": "Amazon EC2 インスタンスへの AWS CodeDeploy のインプレースデプロイが、ApplicationStop のライフサイクルイベントで失敗します。ログから、ApplicationStop のスクリプトにバグがあることがわかりました。チームは新しいリビジョンでスクリプトを直しましたが、次のデプロイも ApplicationStop で同じエラーで失敗します。チームは、インスタンスにログインせずに、修正したリビジョンをできるだけ早くデプロイする必要があります。チームは最も少ない運用の手間で何をすべきですか。"
+    },
+    {
+      "id": "q-5.3-0002",
+      "task": "5.3",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS CloudFormation stack update failed, and the rollback also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because a dependent resource could not return to its original state. The team found and manually fixed the cause of the failure. The team wants to return the stack to a working state and then apply the update again, without deleting the stack. What should the team do next with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run a new stack update with the original template, because updates are allowed in the UPDATE_ROLLBACK_FAILED state.",
+          "text_ja": "UPDATE_ROLLBACK_FAILED の状態では更新ができるので、元のテンプレートで新しいスタックの更新を実行する。"
+        },
+        {
+          "key": "B",
+          "text": "Wait for CloudFormation to retry the rollback automatically after the resource is fixed.",
+          "text_ja": "リソースが直った後に CloudFormation が自動でロールバックを再試行するのを待つ。"
+        },
+        {
+          "key": "C",
+          "text": "Continue the update rollback so that the stack reaches UPDATE_ROLLBACK_COMPLETE, and then update the stack again.",
+          "text_ja": "更新のロールバックを続行してスタックを UPDATE_ROLLBACK_COMPLETE にし、その後もう一度スタックを更新する。"
+        },
+        {
+          "key": "D",
+          "text": "Delete the stack and create it again from the new template.",
+          "text_ja": "スタックを削除し、新しいテンプレートから作り直す。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "依存するリソースが元の状態に戻れないとロールバックが失敗し、UPDATE_ROLLBACK_FAILED になる。原因を手で直したら、ロールバックを続ける（continue update rollback）と UPDATE_ROLLBACK_COMPLETE の動く状態に戻り、そこからもう一度更新できる。それでも戻せないリソースは飛ばせる。",
+        "per_choice": {
+          "A": "まずロールバックを続けて動く状態に戻す必要がある。",
+          "B": "ロールバックを続けるのは、コンソールか CLI で行う操作。",
+          "C": "正しい。ロールバックを続けて UPDATE_ROLLBACK_COMPLETE にしてから、もう一度更新する。",
+          "D": "スタックを消さない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html",
+          "source_id": "S3",
+          "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html",
+          "source_id": "S3",
+          "quote": "To continue rolling back an update, you can use the CloudFormation console or AWS command line interface (AWS CLI)."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-25",
+      "note": "選択肢 A・C の「できない」は、S3 の手順（まずロールバックを続ける）から言える範囲で書いた",
+      "last_checked": "2026-11-26",
+      "stem_ja": "AWS CloudFormation のスタックの更新が失敗し、ロールバックも失敗しました。依存するリソースが元の状態に戻れなかったため、スタックは今 UPDATE_ROLLBACK_FAILED の状態です。チームは失敗の原因を見つけて手で直しました。チームは、スタックを削除せずに、スタックを動く状態に戻してから、もう一度更新を適用したいと考えています。チームは次に、最も少ない運用の手間で何をすべきですか。"
+    },
+    {
+      "id": "q-5.3-0003",
+      "task": "5.3",
+      "services": [
+        "AWS CodePipeline"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A pipeline stage runs three test actions in parallel. Occasionally one action fails because of a short network problem while the other two succeed. The team wants to rerun only the failed action without starting the pipeline from the beginning or rerunning the successful actions. The team also wants the stage to be retried automatically once when it fails. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use Retry failed actions on the stage when an action fails.",
+          "text_ja": "アクションが失敗したら、ステージで [失敗したアクションを再試行] を使う。"
+        },
+        {
+          "key": "B",
+          "text": "Configure automatic retry on stage failure for the stage, with one retry attempt.",
+          "text_ja": "ステージに、再試行 1 回の「ステージの失敗時の自動再試行」を設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Use Retry failed stage, which reruns only the actions that failed.",
+          "text_ja": "失敗したアクションだけを再実行する [失敗したステージを再試行] を使う。"
+        },
+        {
+          "key": "D",
+          "text": "Choose Release change to run the pipeline again from the source stage.",
+          "text_ja": "[変更をリリースする] を選び、ソースのステージからパイプラインを再実行する。"
+        },
+        {
+          "key": "E",
+          "text": "Configure automatic retry on stage failure with three retry attempts to cover longer problems.",
+          "text_ja": "長い問題にも対応できるように、再試行 3 回の「ステージの失敗時の自動再試行」を設定する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "失敗した段階は、パイプラインを最初から動かさずにやり直せる。失敗したアクションをやり直す（retry failed actions）と、失敗したアクションだけが動き直す。失敗した段階をやり直す（retry failed stage）と、段階の最初のアクションから全てが動き直す。段階の失敗の自動のやり直しは、1 回だけ設定できる。",
+        "per_choice": {
+          "A": "正しい。失敗したアクションだけがもう一度動く。",
+          "B": "正しい。自動のやり直しは 1 回だけ設定できる。",
+          "C": "retry failed stage は段階の全てのアクションを最初からやり直す。",
+          "D": "パイプラインを最初から動かすことになり、要件に反する。",
+          "E": "自動のやり直しは 1 回までしか設定できない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html",
+          "source_id": "S5",
+          "quote": "Retrying a failed stage retries all actions in the stage from the first action in the stage, and retrying failed actions retries all failed actions in the stage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html",
+          "source_id": "S5",
+          "quote": "You can only configure automatic retry on stage failure for one retry attempt."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html",
+          "source_id": "S5",
+          "quote": "You can retry a stage that has failed without having to run a pipeline again from the beginning."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-26",
+      "stem_ja": "パイプラインのあるステージは、3 つのテストのアクションを並列で実行します。ときどき、短いネットワークの問題で 1 つのアクションが失敗し、ほかの 2 つは成功します。チームは、パイプラインを最初から始めたり成功したアクションを再実行したりせずに、失敗したアクションだけを再実行したいと考えています。また、ステージが失敗した時に自動で 1 回再試行させたいと考えています。チームはどのアクションを実行すべきですか。（2 つ選択してください。）"
+    },
+    {
+      "id": "q-5.3-0004",
+      "task": "5.3",
+      "services": [
+        "AWS CodePipeline"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer creates a new AWS CodePipeline pipeline and configures automatic rollback on failure for the Deploy stage. The very first execution of the pipeline fails in the Deploy stage, but no rollback happens. The engineer wants to understand the behavior before changing anything. Which statement BEST explains why the stage did not roll back?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Automatic rollback is supported only for stages that contain AWS CodeDeploy actions.",
+          "text_ja": "自動ロールバックは、AWS CodeDeploy のアクションを含むステージでだけサポートされる。"
+        },
+        {
+          "key": "B",
+          "text": "Automatic rollback must also be configured on the source stage before it can work on the Deploy stage.",
+          "text_ja": "Deploy ステージで動かすには、ソースのステージにも自動ロールバックを設定する必要がある。"
+        },
+        {
+          "key": "C",
+          "text": "Automatic rollback works only after the stage has had at least one successful execution to roll back to.",
+          "text_ja": "自動ロールバックは、戻り先となる成功した実行がそのステージに少なくとも 1 回あった後でだけ動く。"
+        },
+        {
+          "key": "D",
+          "text": "Automatic rollback runs only when the stage is retried by hand after the failure.",
+          "text_ja": "自動ロールバックは、失敗の後にステージを手で再試行した時にだけ動く。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "段階が失敗すると、その段階は最も新しい成功した実行に戻される。自動のロールバックはパイプラインの定義の一部なので、その段階で成功した実行が 1 回あった後にしか戻せない。また、戻せるのは今のパイプラインの構造の版で始まった実行だけ。",
+        "per_choice": {
+          "A": "この条件は無い。戻らない理由は、成功した実行が無いこと。",
+          "B": "ソースの段階の設定は関係ない。戻らない理由は、成功した実行が無いこと。",
+          "C": "正しい。最初の実行では、戻る先の成功した実行が無い。",
+          "D": "段階が失敗した時に自動で戻す仕組みで、手でやり直すことは条件ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html",
+          "source_id": "S6",
+          "quote": "When the stage fails, the stage is rolled back to the most recent successful execution."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html",
+          "source_id": "S6",
+          "quote": "your pipeline stage will auto-rollback only after there is a successful pipeline execution in the pipeline stage."
+        }
+      ],
+      "difficulty": 2,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-26",
+      "stem_ja": "DevOps エンジニアは新しい AWS CodePipeline のパイプラインを作成し、Deploy ステージに失敗時の自動ロールバックを設定しました。パイプラインの最初の実行が Deploy ステージで失敗しましたが、ロールバックは起きませんでした。エンジニアは、何かを変える前にこの動作を理解したいと考えています。ステージがロールバックしなかった理由を最もよく説明しているのはどれですか。"
+    },
+    {
+      "id": "q-5.3-0005",
+      "task": "5.3",
+      "services": [
+        "Amazon CloudWatch Synthetics"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Shortly after a new application version is deployed, a CloudWatch Synthetics canary that tests the checkout flow starts to fail. Customers are affected. The team must restore service quickly and must still be able to find the root cause afterward. Which approach BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the new version, compare the failed run's screenshots and logs with a successful run, and roll back only if the cause is unclear.",
+          "text_ja": "新しいバージョンのまま、失敗した実行のスクリーンショットとログを成功した実行と比べ、原因がはっきりしない時だけロールバックする。"
+        },
+        {
+          "key": "B",
+          "text": "Check the SuccessPercent metric over the next hour to see whether failures are intermittent, and then decide whether to roll back.",
+          "text_ja": "失敗が断続的かを見るために次の 1 時間 SuccessPercent のメトリクスを確認し、その後ロールバックするかを決める。"
+        },
+        {
+          "key": "C",
+          "text": "Roll back the recent deployment, and delete the failed canary runs' artifacts so that the next runs start from a clean state.",
+          "text_ja": "直近のデプロイをロールバックし、次の実行がきれいな状態から始まるように、失敗した Canary の実行のアーティファクトを削除する。"
+        },
+        {
+          "key": "D",
+          "text": "Roll back the recent deployment, and then compare the failed run's screenshots, logs, and step reports with a successful run.",
+          "text_ja": "直近のデプロイをロールバックし、その後、失敗した実行のスクリーンショット、ログ、ステップのレポートを成功した実行と比べる。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "canary が失敗した時は、詳細のページの SuccessPercent で続く問題か時々の問題かを見て、失敗した回のスクリーンショット・ログ・ステップの報告を成功した回と比べて原因を絞る。直前にアプリをデプロイしていたなら、まず戻してから後で調べる。",
+        "per_choice": {
+          "A": "原因は調べられるが、新しい版のまま利用者への影響が続き、早く戻す要件に反する。",
+          "B": "続く問題か時々の問題かは分かるが、判断まで利用者への影響が続き、早く戻す要件に反する。",
+          "C": "早く戻せるが、失敗した回の記録を消すので、後から成功した回と比べて原因を調べられなくなる。",
+          "D": "正しい。まず戻して利用者への影響を止め、canary の記録で後から原因を調べる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries_Troubleshoot.html",
+          "source_id": "S7",
+          "quote": "If you had a recent deployment to your application, roll it back and then debug later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries_Troubleshoot.html",
+          "source_id": "S7",
+          "quote": "Finally, you can compare these artifacts with the artifacts from a successful canary run to pinpoint the issue."
+        }
+      ],
+      "difficulty": 1,
+      "status": "verified",
+      "created": "2026-11-25",
+      "last_checked": "2026-11-26",
+      "stem_ja": "新しいバージョンのアプリケーションをデプロイした直後に、チェックアウトの流れをテストする CloudWatch Synthetics の Canary が失敗し始めました。顧客に影響が出ています。チームは、すぐにサービスを回復させ、かつ後で根本原因を見つけられるようにする必要があります。これらの要件を最もよく満たす方法はどれですか。"
+    }
+  ]
+}
