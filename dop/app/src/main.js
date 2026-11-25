@@ -2,6 +2,7 @@
 import { grade, canSubmit } from './logic/grade.js';
 import { addAnswer, domainStats } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
+import { buildExport, exportFileName } from './logic/export.js';
 import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports } from './storage.js';
 
 const app = document.getElementById('app');
@@ -197,8 +198,31 @@ function renderStats() {
         el('td', { class: 'num', text: `${r.answered} / ${r.total}` }),
         el('td', { class: 'num', text: pct(r.rate) })))),
     ),
+    renderExport(),
     el('div', { class: 'actions' }, el('button', { type: 'button', class: 'secondary', onclick: onClear, text: '記録を消す' })),
   ));
+}
+
+// 記録の書き出し（A-0005）。ブラウザの保存だけで、外へは送らない
+function renderExport() {
+  const empty = !state.answers.length && !state.reports.length;
+  return el('div', { class: 'export' },
+    el('h3', { class: 'title', text: '記録を書き出す' }),
+    el('p', { class: 'muted small', 'data-testid': 'export-help', text: '解いた記録と誤りの報告を 1 つのファイルに保存します。このファイルを Claude に渡すと、苦手な範囲の問題づくりと、誤りが疑わしい問題の見直しに使われます。' }),
+    empty ? el('p', { class: 'muted small', 'data-testid': 'export-hint', text: 'まだ記録がありません。問題を解くと書き出せます。' }) : null,
+    el('div', { class: 'actions' }, el('button', { type: 'button', disabled: empty, onclick: onExport, text: '記録を書き出す' })),
+  );
+}
+
+function onExport() {
+  const now = new Date();
+  const blob = new Blob([JSON.stringify(buildExport(state.answers, state.reports, now), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = el('a', { href: url, download: exportFileName(now) });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function onClear() {
