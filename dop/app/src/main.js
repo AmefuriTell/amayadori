@@ -40,7 +40,31 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
+// ---- 版（A-0011）: 読み込む先に版の番号が付いている。開いた時に最新の版を確かめ、古ければ知らせる ----
+const APP_VERSION = document.querySelector('meta[name=app-version]')?.content ?? '';
+
+function showVersion() {
+  const foot = document.querySelector('[data-testid=version]');
+  if (foot && APP_VERSION) foot.textContent = `版 ${APP_VERSION}`;
+}
+
+async function checkVersion() {
+  try {
+    const res = await fetch('public/version.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const latest = (await res.json())?.version;
+    if (!latest || !APP_VERSION || latest === APP_VERSION || document.querySelector('[data-testid=update]')) return;
+    document.body.prepend(el('div', { class: 'update', role: 'status', 'data-testid': 'update' },
+      el('span', { text: '新しい版があります。' }),
+      el('button', { type: 'button', onclick: () => window.location.reload(), text: '読み込み直す' })));
+  } catch {
+    // 確かめられない時は何もしない（今の版のまま解ける）
+  }
+}
+
 async function load() {
+  showVersion();
+  checkVersion();
   try {
     const res = await fetch('public/questions.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
