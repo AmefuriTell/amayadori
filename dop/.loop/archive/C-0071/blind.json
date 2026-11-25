@@ -1,0 +1,125 @@
+{
+  "item": "C-0071",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "task": "6.1",
+      "services": [
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has 40 project teams, and each team uses an IAM role. Teams create new Amazon S3 buckets and DynamoDB tables every week. Today the security team writes a separate policy for each team that lists the ARNs of the team's resources, and must update the policies whenever a resource is added. The company wants least privilege with fewer policies and no policy updates when resources are added. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag."
+        },
+        {
+          "key": "B",
+          "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night."
+        },
+        {
+          "key": "C",
+          "text": "Use the AWS managed job function policies for each team so that new resources are included automatically."
+        },
+        {
+          "key": "D",
+          "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0002",
+      "task": "6.1",
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "Employees sign in to AWS through IAM Identity Center, and the identity source stores each user's department. Each department's Amazon S3 buckets are tagged with a department tag. Employees must access only their own department's buckets, and the company does not want to create one permission set per department or IAM users. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute."
+        },
+        {
+          "key": "B",
+          "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag."
+        },
+        {
+          "key": "C",
+          "text": "Create a separate permission set for each department that lists that department's bucket ARNs."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user for each employee and tag the user with the department."
+        },
+        {
+          "key": "E",
+          "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0003",
+      "task": "6.1",
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses IAM Identity Center with AWS Organizations. Fifteen database administrators need the same RDS, DynamoDB, and Aurora administration permissions in 25 accounts. Staff join and leave the DBA team every month, and the security team wants policy changes to reach all accounts automatically. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts."
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change."
+        },
+        {
+          "key": "D",
+          "text": "Create 25 permission sets, one for each account, and assign each to the DBA group."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0004",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company gives a third-party monitoring vendor access to its AWS account through an IAM role that the vendor assumes. The vendor serves many customers from one AWS account. The company must prevent another customer of the vendor from tricking the vendor into accessing the company's resources by supplying the company's role ARN. Which configuration BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company."
+        },
+        {
+          "key": "B",
+          "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret."
+        },
+        {
+          "key": "C",
+          "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days."
+        }
+      ]
+    }
+  ]
+}

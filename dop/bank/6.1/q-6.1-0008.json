@@ -1,0 +1,62 @@
+{
+  "id": "q-6.1-0008",
+  "task": "6.1",
+  "services": [
+    "AWS IAM",
+    "AWS STS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company gives a third-party monitoring vendor access to its AWS account through an IAM role that the vendor assumes. The vendor serves many customers from one AWS account. The company must prevent another customer of the vendor from tricking the vendor into accessing the company's resources by supplying the company's role ARN. Which configuration BEST meets this requirement?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret."
+    },
+    {
+      "key": "B",
+      "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role."
+    },
+    {
+      "key": "C",
+      "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days."
+    },
+    {
+      "key": "D",
+      "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "混乱した代理（confused deputy）は、権限の無い者がより権限のある者に操作をさせる問題。外部 ID をロールの信頼ポリシーの条件で求めると防げる。外部 ID は業者が顧客ごとに一意に作って管理する値で、顧客が自分で決めるものではない。別の顧客が ARN を渡しても、業者が要求に入れる外部 ID は操れない。",
+    "per_choice": {
+      "A": "外部 ID は業者が作って管理する値で、顧客が自分で決めるものではない。",
+      "B": "業者のアカウントは他の顧客のためにも動くので、別の顧客が ARN を渡すと業者が代わりに入れてしまう。",
+      "C": "長く使う認証情報を外部に渡すことになり、混乱した代理の問題も解決しない。",
+      "D": "正しい。業者が顧客ごとに決めた外部 ID を条件にする。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+      "source_id": "S7",
+      "quote": "The primary function of the external ID is to address and prevent the confused deputy problem."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+      "source_id": "S7",
+      "quote": "The ExternalId value must be unique among Example Corp's customers and controlled by Example Corp, not its customers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+      "source_id": "S7",
+      "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
