@@ -48,3 +48,22 @@
   { "id": "A-0006", "title": "問題ごとの「誤りを報告」（端末に残し、記録の書き出しに入れる）", "priority": 2, "depends_on": ["A-0001"] }
 ]
 ```
+
+## リファクタリングの項目（F-。P-016）の仕様
+
+item.findings（refactor.mjs scan が見つけた直す所）を、振る舞いを変えずに直す計画にする。spec.json の形:
+
+```json
+{
+  "item": "F-0001",
+  "goal": "g.mjs と dg.mjs の、検証の結論を出す処理の写しを 1 つにまとめる",
+  "findings": ["dup:tools/dg.mjs|tools/g.mjs"],
+  "plan": ["tools/lib/verdict.mjs に共通の関数を作り、g・dg・q から使う"],
+  "invariants": ["ツールの出力（JSON）と札の書き方は変えない", "試験のファイルは変えない"],
+  "allow_test_changes": []
+}
+```
+
+- findings の周り（同じ写しの別の所・同じ役の関数）も一緒に見て、まとめられる物はまとめる。測った物だけを機械的に割らない。
+- 試験を変えないと直せない時だけ allow_test_changes にファイルと理由を書く（例: 試験が内部の関数を直接読んでいて、その関数の置き場所を移す）。試験の中身（確かめる事）は変えない。
+- options・aws_change は無い。書けたら loop advance --result ok。

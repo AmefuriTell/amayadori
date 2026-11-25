@@ -25,7 +25,7 @@ export const paths = {
   schema: (name) => path.join(CODE, 'schemas', name),
 };
 
-export const ITEM_ID = /^[CALRTGD]-[0-9]{4}$/;
+export const ITEM_ID = /^[CALRTGDF]-[0-9]{4}$/;
 
 export function readJSON(file, fallback) {
   if (!fs.existsSync(file)) {
