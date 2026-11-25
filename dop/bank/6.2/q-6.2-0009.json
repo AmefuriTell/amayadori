@@ -1,0 +1,61 @@
+{
+  "id": "q-6.2-0009",
+  "task": "6.2",
+  "services": [
+    "Amazon Macie"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company's internal employee IDs follow the pattern EMP- followed by six digits and must be reported by Amazon Macie as sensitive data. Test files in the same buckets contain well-known sample credit card numbers that the team does not want reported, while real credit card numbers must still be reported. Which configuration meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use only the managed data identifiers, because they already detect employee IDs and ignore sample card numbers."
+    },
+    {
+      "key": "B",
+      "text": "Create an allow list for the employee ID pattern, and a custom data identifier for the sample card numbers."
+    },
+    {
+      "key": "C",
+      "text": "Create a custom data identifier with a regex for the employee IDs, and an allow list that contains the sample card numbers."
+    },
+    {
+      "key": "D",
+      "text": "Turn off the managed data identifier for credit card numbers, and create a custom data identifier for the employee IDs."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "カスタムデータ識別子は、正規表現などで会社独自の機密データを見つける条件を決め、マネージドデータ識別子を補う。許可リスト（allow list）に入れた文字や形は、マネージドやカスタムの識別子の条件に合っても報告されない。",
+    "per_choice": {
+      "A": "マネージドデータ識別子は決まった種類の機密データを見つける物で、会社独自の社員 ID の形は知らない。",
+      "B": "逆になっている。許可リストに入れた物は報告されなくなる。",
+      "C": "正しい。社員 ID は独自の条件で見つけ、サンプルの番号だけを許可リストで外す。",
+      "D": "本物のカード番号も報告されなくなる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/custom-data-identifiers.html",
+      "source_id": "S4",
+      "quote": "The criteria consist of a regular expression (regex) that defines a text pattern to match and, optionally, character sequences and a proximity rule that refine the results."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+      "source_id": "S5",
+      "quote": "If data matches text or a text pattern in an allow list, Macie doesn’t report the data."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+      "source_id": "S5",
+      "quote": "This is the case even if the data matches the criteria of a managed data identifier or a custom data identifier."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

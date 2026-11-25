@@ -1,0 +1,103 @@
+{
+  "item": "C-0076",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Macie は 2 つの方法で機密データを見つける。自動の機密データの発見は、S3 のバケットの一覧を続けて評価し、サンプリングで代表のオブジェクトを選んで、広く見える化する。機密データの発見ジョブは、対象のバケット・サンプリングの深さ・オブジェクトの性質の条件を決める、より深く絞った分析で、一度だけか定期で動かせる。",
+        "per_choice": {
+          "A": "正しい。設定を作り込まずに、全てのバケットを続けて広く見る。",
+          "B": "正しい。3 つのバケットを、条件を決めて毎月深く調べる。",
+          "C": "一度だけのジョブはその時の分析で、その後の監視はしない。",
+          "D": "自動の発見はサンプリングで代表のオブジェクトを選ぶ物で、全てを深く調べる物ではない。",
+          "E": "カスタムデータ識別子は見つける条件の定義で、バケットを監視する仕組みではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "source_id": "S1",
+          "quote": "With this option, Macie continually evaluates your S3 bucket inventory and uses sampling techniques to identify and select representative S3 objects from your buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "source_id": "S1",
+          "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html",
+          "source_id": "S2",
+          "quote": "You can configure a job to run only once for on-demand analysis and assessment, or on a recurring basis for periodic analysis, assessment, and monitoring."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "カスタムデータ識別子は、正規表現などで会社独自の機密データを見つける条件を決め、マネージドデータ識別子を補う。許可リスト（allow list）に入れた文字や形は、マネージドやカスタムの識別子の条件に合っても報告されない。",
+        "per_choice": {
+          "A": "正しい。社員 ID は独自の条件で見つけ、サンプルの番号だけを許可リストで外す。",
+          "B": "マネージドデータ識別子は決まった種類の機密データを見つける物で、会社独自の社員 ID の形は知らない。",
+          "C": "逆になっている。許可リストに入れた物は報告されなくなる。",
+          "D": "本物のカード番号も報告されなくなる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/custom-data-identifiers.html",
+          "source_id": "S4",
+          "quote": "The criteria consist of a regular expression (regex) that defines a text pattern to match and, optionally, character sequences and a proximity rule that refine the results."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "source_id": "S5",
+          "quote": "If data matches text or a text pattern in an allow list, Macie doesn’t report the data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "source_id": "S5",
+          "quote": "This is the case even if the data matches the criteria of a managed data identifier or a custom data identifier."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Macie の組織は、指定した Macie の管理者アカウントとメンバーアカウントでできる。つなぎ方は AWS Organizations との連携か、Macie の招待で、Organizations との連携が勧められている。Organizations でつないだ場合、Macie の管理者はメンバーアカウントで Macie を有効にでき、メンバーの S3 バケットの情報も見られる。",
+        "per_choice": {
+          "A": "正しい。勧められている Organizations との連携で、管理者が各メンバーで有効にできる。",
+          "B": "動くが、各アカウントで受け入れる作業が要り、勧められている方法でもない。",
+          "C": "各アカウントに入る必要があり、要件に反する。",
+          "D": "管理者とメンバーの関係を作らないと、他のアカウントのバケットは見られない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "We recommend that you integrate Macie with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "If the accounts are associated through AWS Organizations, the Macie administrator can also enable Macie for member accounts in the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "source_id": "S6",
+          "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
+        }
+      ]
+    }
+  ]
+}

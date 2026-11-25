@@ -1,0 +1,68 @@
+{
+  "id": "q-6.2-0008",
+  "task": "6.2",
+  "services": [
+    "Amazon Macie",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company has thousands of Amazon S3 buckets. The security team wants ongoing, broad visibility into where sensitive data might be across all buckets without configuring each analysis. The team also needs a deeper, targeted analysis of three regulated buckets every month, with custom criteria on object properties. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on Macie automated sensitive data discovery for the account."
+    },
+    {
+      "key": "B",
+      "text": "Create a recurring Macie sensitive data discovery job that targets the three regulated buckets with custom criteria."
+    },
+    {
+      "key": "C",
+      "text": "Create a one-time sensitive data discovery job over all buckets, because it keeps monitoring new objects afterward."
+    },
+    {
+      "key": "D",
+      "text": "Rely on automated sensitive data discovery to analyze every object in the three regulated buckets in full depth."
+    },
+    {
+      "key": "E",
+      "text": "Create a custom data identifier for each bucket so that Macie monitors the bucket continually."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "Macie は 2 つの方法で機密データを見つける。自動の機密データの発見は、S3 のバケットの一覧を続けて評価し、サンプリングで代表のオブジェクトを選んで、広く見える化する。機密データの発見ジョブは、対象のバケット・サンプリングの深さ・オブジェクトの性質の条件を決める、より深く絞った分析で、一度だけか定期で動かせる。",
+    "per_choice": {
+      "A": "正しい。設定を作り込まずに、全てのバケットを続けて広く見る。",
+      "B": "正しい。3 つのバケットを、条件を決めて毎月深く調べる。",
+      "C": "一度だけのジョブはその時の分析で、その後の監視はしない。",
+      "D": "自動の発見はサンプリングで代表のオブジェクトを選ぶ物で、全てを深く調べる物ではない。",
+      "E": "カスタムデータ識別子は見つける条件の定義で、バケットを監視する仕組みではない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+      "source_id": "S1",
+      "quote": "With this option, Macie continually evaluates your S3 bucket inventory and uses sampling techniques to identify and select representative S3 objects from your buckets."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+      "source_id": "S1",
+      "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html",
+      "source_id": "S2",
+      "quote": "You can configure a job to run only once for on-demand analysis and assessment, or on a recurring basis for periodic analysis, assessment, and monitoring."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
