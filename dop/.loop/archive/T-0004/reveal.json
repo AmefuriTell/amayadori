@@ -1,0 +1,436 @@
+{
+  "item": "T-0004",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company deploys new versions of an AWS Lambda function by using AWS CodeDeploy. The operations team wants each release to first receive a small portion of production traffic. If no problems are found, all remaining traffic must move to the new version five minutes later. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaCanary10Percent5Minutes deployment configuration."
+        },
+        {
+          "key": "B",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaLinear10PercentEvery1Minute deployment configuration."
+        },
+        {
+          "key": "C",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaAllAtOnce configuration and monitor errors after release."
+        },
+        {
+          "key": "D",
+          "text": "Run a scheduled script that calls update-alias to change the alias routing weights every five minutes."
+        }
+      ],
+      "explanation": {
+        "summary": "LambdaCanary10Percent5Minutes は、最初に 10% の通信を新しい版へ移し、残りの 90% を 5 分後に移す決まった設定。要件の「少しだけ先に流し、5 分後に残り全部」にそのまま合い、作る物も無い。",
+        "per_choice": {
+          "A": "正しい。最初に 10%、5 分後に残りの 90% を移す canary の設定。",
+          "B": "linear は 1 分ごとに 10% ずつ移すので、全部移るまで約 10 分かかり、「5 分後に残り全部」と合わない。",
+          "C": "全部を一度に移すので、先に一部だけ流す要件に合わない。",
+          "D": "エイリアスの重みを自分で変えれば動くが、スクリプトを作って保守する手間がかかる。CodeDeploy の決まった設定で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html",
+          "source_id": "S1",
+          "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company runs an Amazon ECS service behind a Network Load Balancer and deploys it with AWS CodeDeploy blue/green deployments. The company now wants to send 10% of production traffic to each new version for 5 minutes before shifting the rest. Which solution will meet this requirement with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a custom canary deployment configuration in CodeDeploy and keep the Network Load Balancer."
+        },
+        {
+          "key": "B",
+          "text": "Switch the deployment group to CodeDeployDefault.ECSLinear10PercentEvery1Minutes and keep the Network Load Balancer."
+        },
+        {
+          "key": "C",
+          "text": "Keep CodeDeployDefault.ECSAllAtOnce and add a manual approval before each production deployment."
+        },
+        {
+          "key": "D",
+          "text": "Move the service to an Application Load Balancer and use CodeDeployDefault.ECSCanary10Percent5Minutes."
+        }
+      ],
+      "explanation": {
+        "summary": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと、使える設定は ECSAllAtOnce だけ。canary で一部だけ流すには Application Load Balancer に替え、ECSCanary10Percent5Minutes を使う。",
+        "per_choice": {
+          "A": "Network Load Balancer では ECSAllAtOnce しか使えないので、独自の canary 設定も使えない。",
+          "B": "linear の設定も Network Load Balancer では使えない。また 1 分ごとに 10% ずつで、要件の形とも違う。",
+          "C": "承認を挟んでも一度に全部を移すことは変わらず、一部だけ先に流す要件に合わない。",
+          "D": "正しい。Application Load Balancer なら canary の決まった設定が使え、10% を 5 分流してから残りを移せる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "source_id": "S3",
+          "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "source_id": "S3",
+          "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "answer": [
+        "B",
+        "D"
+      ],
+      "stem_en": "A company uses AWS CodeDeploy blue/green deployments for an application on Amazon EC2 instances behind an Application Load Balancer. The QA team must test the replacement instances before they receive any production traffic, and the team will decide when to switch. After the switch, the original instances must stay running until the operations team decides to remove them. Which deployment group settings meet these requirements? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Select the traffic rerouting option \"Reroute traffic immediately.\""
+        },
+        {
+          "key": "B",
+          "text": "Select the traffic rerouting option \"I will choose whether to reroute traffic.\""
+        },
+        {
+          "key": "C",
+          "text": "Select \"Terminate the original instances in the deployment group\" with a one-hour wait period."
+        },
+        {
+          "key": "D",
+          "text": "Select \"Keep the original instances in the deployment group running.\""
+        },
+        {
+          "key": "E",
+          "text": "Use an in-place deployment with the CodeDeployDefault.OneAtATime configuration."
+        }
+      ],
+      "explanation": {
+        "summary": "「I will choose whether to reroute traffic」にすると、置き換え先のインスタンスは手で切り替えるまでロードバランサーに登録されないので、本番の通信を受けずに試験できる。「Keep the original instances … running」にすると、切り替えた後も元のインスタンスが動き続ける。",
+        "per_choice": {
+          "A": "用意ができしだい自動で登録されて本番の通信が流れるので、先に試験する要件に合わない。",
+          "B": "正しい。手で切り替えるまで置き換え先は登録されない。",
+          "C": "待つ時間の後に元のインスタンスが自動で終了する。運用チームが決めるまで残す要件に合わない。",
+          "D": "正しい。切り替えた後も元のインスタンスを動かしたままにする。",
+          "E": "in-place は同じインスタンスを更新するので、置き換え先を先に試験できず、元の環境も残らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "source_id": "S2",
+          "quote": "Instances in the replacement environment are not registered with the specified load balancers and target groups unless you manually reroute traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "source_id": "S2",
+          "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company runs a web application in an AWS Elastic Beanstalk environment. For each release, the company wants 10% of incoming traffic to go to the new version for 30 minutes. If the new instances stay healthy, all traffic must move to the new version and the old instances must be removed automatically. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the deployment policy to Immutable and set the health check wait time to 30 minutes."
+        },
+        {
+          "key": "B",
+          "text": "Set the deployment policy to TrafficSplitting with a 10% traffic split and a 30-minute evaluation time."
+        },
+        {
+          "key": "C",
+          "text": "Set the deployment policy to Rolling with additional batch and set the batch size to 10%."
+        },
+        {
+          "key": "D",
+          "text": "Create a second environment and use Amazon Route 53 weighted records to move traffic by hand."
+        }
+      ],
+      "explanation": {
+        "summary": "Traffic splitting は、新しいインスタンス一式を立ち上げ、決めた割合の通信を決めた時間だけ新しい版へ流し、問題が無ければ全部を移して古いインスタンスを終了する。割合（Traffic split）と時間（evaluation time）を設定するだけでよい。",
+        "per_choice": {
+          "A": "Immutable は新しいインスタンス一式を別の Auto Scaling グループで立ち上げるが、一部の通信だけを一定時間流す仕組みではない。",
+          "B": "正しい。割合と評価の時間を決めるだけで canary の形になり、古いインスタンスも自動で終了する。",
+          "C": "バッチごとに順にインスタンスを入れ替える方式で、通信の 10% を 30 分流してから判断する形にはならない。",
+          "D": "動くが、環境を 2 つ持ち、重みを手で変える手間がかかる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "source_id": "S5",
+          "quote": "It then forwards a specified percentage of incoming client traffic to the new application version for a specified evaluation period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "source_id": "S5",
+          "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0005",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company updates an application in an AWS Elastic Beanstalk environment by using in-place updates, and users see brief outages during releases. The company wants to test each new version at its own URL before release, switch users to it instantly, and be able to switch back quickly. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Change the deployment policy to Rolling and reduce the batch size to one instance."
+        },
+        {
+          "key": "B",
+          "text": "Change the deployment policy to Immutable for all future application releases."
+        },
+        {
+          "key": "C",
+          "text": "Deploy the new version to a separate environment and use Swap environment URLs."
+        },
+        {
+          "key": "D",
+          "text": "Deploy to a separate environment and terminate the old environment right after switching DNS."
+        }
+      ],
+      "explanation": {
+        "summary": "Elastic Beanstalk の blue/green は、新しい版を別の環境に置き、2 つの環境の CNAME を入れ替える（Swap environment URLs）。入れ替える前に新しい環境の URL で試験でき、入れ替えはすぐ効き、もう一度入れ替えれば戻せる。",
+        "per_choice": {
+          "A": "同じ環境の中でインスタンスを順に更新するので、新しい版を別の URL で先に試験できない。",
+          "B": "Immutable は止まらずに更新できるが、同じ環境の中の更新なので、別の URL で先に試験して入れ替える形にはならない。",
+          "C": "正しい。別の環境で試験してから CNAME を入れ替え、戻すときも入れ替えるだけ。",
+          "D": "DNS の変更が行き渡り古い記録が切れるまで、古い環境は終了してはいけない。すぐ終了すると戻せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "source_id": "S6",
+          "quote": "deploy the new version to a separate environment, and then swap the CNAMEs of the two environments to redirect traffic to the new version instantly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "source_id": "S6",
+          "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0006",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A CodeBuild project's service role has an IAM policy that allows codeartifact:GetAuthorizationToken and codeartifact:ReadFromRepository for the company's domain and repository. The build's login step to CodeArtifact fails with an access denied error, and npm cannot install packages. Which change will fix the problem with the LEAST privilege?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add sts:GetServiceBearerToken to the service role's policy."
+        },
+        {
+          "key": "B",
+          "text": "Attach the AWSCodeArtifactAdminAccess managed policy to the service role."
+        },
+        {
+          "key": "C",
+          "text": "Run the login step with the account's root user credentials stored in Secrets Manager."
+        },
+        {
+          "key": "D",
+          "text": "Set the authorization token lifetime to 24 hours so that the token does not expire during the build."
+        }
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の GetAuthorizationToken を呼ぶには、sts:GetServiceBearerToken と codeartifact:GetAuthorizationToken の両方の権限が要る。パッケージマネージャーで CodeArtifact のリポジトリを使うには、ユーザーかロールが sts:GetServiceBearerToken を許している必要がある。",
+        "per_choice": {
+          "A": "正しい。足りないのは sts:GetServiceBearerToken だけ。",
+          "B": "管理の権限まで与えることになり、最小権限に反する。",
+          "C": "ルートユーザーは GetAuthorizationToken を呼べない。",
+          "D": "トークンの寿命は 15 分から 12 時間まで。そもそもトークンを取れないのが問題。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S2",
+          "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S2",
+          "quote": "Root users cannot call GetAuthorizationToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0007",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A nightly data job runs for about 14 hours and downloads Python packages from AWS CodeArtifact at several points during the run. It gets a CodeArtifact authorization token once at the start with the default settings. The job always fails late in the run with authentication errors. Which change BEST fixes the problem?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Request the token with a lifetime of 24 hours at the start of the job."
+        },
+        {
+          "key": "B",
+          "text": "Attach the AWSCodeArtifactReadOnlyAccess managed policy so that the token never expires."
+        },
+        {
+          "key": "C",
+          "text": "Keep one token for the whole run, because CodeArtifact renews the token automatically while it is in use."
+        },
+        {
+          "key": "D",
+          "text": "Fetch a new authorization token before the current one expires, for example before each download step."
+        }
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の認可トークンの寿命は既定で 12 時間で、15 分から 12 時間の間で決められる。寿命が切れたら、新しいトークンを取る必要がある。14 時間の処理では、途中で取り直す。",
+        "per_choice": {
+          "A": "寿命は 12 時間までしか決められない。",
+          "B": "権限を足してもトークンの寿命は変わらない。",
+          "C": "寿命が切れたら新しいトークンを取る必要がある。自動では延びない。",
+          "D": "正しい。切れる前に取り直せば、最後まで認証できる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "When the lifetime expires, you must fetch another token."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0008",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A new Amazon ECS service on AWS Fargate fails to start because the image cannot be pulled from a private Amazon ECR repository in the same account. After it starts, the application code in the container must write objects to an Amazon S3 bucket. The security team requires each permission to be granted to the right role. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Attach the AmazonECSTaskExecutionRolePolicy managed policy to the task execution role."
+        },
+        {
+          "key": "B",
+          "text": "Grant the S3 write permissions to the task IAM role."
+        },
+        {
+          "key": "C",
+          "text": "Grant the ECR pull permissions to the task IAM role instead of the task execution role."
+        },
+        {
+          "key": "D",
+          "text": "Grant the S3 write permissions to the task execution role so that the container can use them."
+        },
+        {
+          "key": "E",
+          "text": "Make the ECR repository public so that no role needs pull permissions."
+        }
+      ],
+      "explanation": {
+        "summary": "タスク実行ロールは、ECS のコンテナや Fargate のエージェントが代わりに AWS の API を呼ぶための物で、ECR からイメージを取る権限はここに付ける（マネージドポリシー AmazonECSTaskExecutionRolePolicy に含まれる）。その権限はタスクのコンテナからは直接使えないので、コンテナの中のアプリが使う権限はタスクロールに付ける。",
+        "per_choice": {
+          "A": "正しい。イメージを取る権限はタスク実行ロールに付ける。",
+          "B": "正しい。アプリのコードが使う権限はタスクロールに付ける。",
+          "C": "イメージを取るのはエージェントで、権限はタスク実行ロールに付ける。",
+          "D": "タスク実行ロールの権限はコンテナから直接使えない。",
+          "E": "非公開のリポジトリを公開することになり、権限の問題の答えにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S6",
+          "quote": "For basic ECS implementations, these permissions should be added to the task execution role rather than the task IAM role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S6",
+          "quote": "The Amazon ECS task execution role managed policy (AmazonECSTaskExecutionRolePolicy) includes the necessary permissions for pulling images from Amazon ECR."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S5",
+          "quote": "but they aren't directly accessible by the containers in the task."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0009",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "AWS CodeDeploy deployments to Amazon EC2 instances fail because the CodeDeploy agent cannot download the application revision from the S3 bucket deploy-artifacts. The instances have no instance profile. The security team requires least privilege and does not allow public buckets. Which solution meets these requirements with the LEAST privilege?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Attach an instance profile whose role allows all S3 actions on all buckets."
+        },
+        {
+          "key": "B",
+          "text": "Attach an instance profile whose role allows reading objects only from the deploy-artifacts bucket."
+        },
+        {
+          "key": "C",
+          "text": "Add S3 read permissions to the CodeDeploy service role, and keep the instances without an instance profile."
+        },
+        {
+          "key": "D",
+          "text": "Make the deploy-artifacts bucket public so that the agent can download revisions without credentials."
+        }
+      ],
+      "explanation": {
+        "summary": "EC2 のインスタンスには、アプリが置かれた S3 のバケットや GitHub に入る権限が要り、その権限はインスタンスプロファイルのロールで CodeDeploy のエージェントに与える。ポリシーは、インスタンスが入る必要のあるバケットだけに絞るのが勧められている。",
+        "per_choice": {
+          "A": "全てのバケットへの全ての操作を許すことになり、最小権限に反する。",
+          "B": "正しい。エージェントが使うインスタンスプロファイルで、必要なバケットだけを読ませる。",
+          "C": "S3 からリビジョンを取るのはインスタンスの上のエージェントで、インスタンスプロファイルの権限を使う。",
+          "D": "公開のバケットは許されていない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "source_id": "S7",
+          "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "source_id": "S7",
+          "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+{
+  "item": "T-0004",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある企業は、AWS CodeDeploy を使用して AWS Lambda 関数の新しいバージョンをデプロイしています。運用チームは、各リリースでまず本番のトラフィックのごく一部を新しいバージョンに送りたいと考えています。問題が見つからなければ、5 分後に残りのすべてのトラフィックを新しいバージョンに移す必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "デプロイグループで CodeDeployDefault.LambdaCanary10Percent5Minutes のデプロイ設定を使う。"
+        },
+        {
+          "key": "B",
+          "text": "デプロイグループで CodeDeployDefault.LambdaLinear10PercentEvery1Minute のデプロイ設定を使う。"
+        },
+        {
+          "key": "C",
+          "text": "デプロイグループで CodeDeployDefault.LambdaAllAtOnce の設定を使い、リリース後にエラーを監視する。"
+        },
+        {
+          "key": "D",
+          "text": "5 分ごとに update-alias を呼び出してエイリアスのルーティングの重みを変える、スケジュールされたスクリプトを実行する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "task": "1.4",
+      "services": [
+        "Amazon ECS",
+        "AWS CodeDeploy",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある企業は、Network Load Balancer の背後で Amazon ECS サービスを実行し、AWS CodeDeploy の Blue/Green デプロイでデプロイしています。企業は、残りを移す前に、新しいバージョンごとに本番のトラフィックの 10% を 5 分間送るようにしたいと考えています。最も少ない運用の手間でこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CodeDeploy でカスタムの Canary のデプロイ設定を作成し、Network Load Balancer はそのまま使う。"
+        },
+        {
+          "key": "B",
+          "text": "デプロイグループを CodeDeployDefault.ECSLinear10PercentEvery1Minutes に切り替え、Network Load Balancer はそのまま使う。"
+        },
+        {
+          "key": "C",
+          "text": "CodeDeployDefault.ECSAllAtOnce のまま、本番の各デプロイの前に手動の承認を追加する。"
+        },
+        {
+          "key": "D",
+          "text": "サービスを Application Load Balancer に移し、CodeDeployDefault.ECSCanary10Percent5Minutes を使う。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Elastic Load Balancing"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "ある企業は、Application Load Balancer の背後の Amazon EC2 インスタンスで動くアプリケーションに、AWS CodeDeploy の Blue/Green デプロイを使用しています。QA チームは、置き換え先のインスタンスが本番のトラフィックを受け取る前にテストする必要があり、切り替えの時期はチームが決めます。切り替えの後、運用チームが削除を決めるまで、元のインスタンスは動かし続ける必要があります。これらの要件を満たすデプロイグループの設定はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "トラフィックの再ルーティングのオプションで「すぐにトラフィックを再ルーティングする」を選ぶ。"
+        },
+        {
+          "key": "B",
+          "text": "トラフィックの再ルーティングのオプションで「トラフィックを再ルーティングするかどうかを選択する」を選ぶ。"
+        },
+        {
+          "key": "C",
+          "text": "待機時間を 1 時間にして「デプロイグループの元のインスタンスを終了する」を選ぶ。"
+        },
+        {
+          "key": "D",
+          "text": "「デプロイグループの元のインスタンスを実行したままにする」を選ぶ。"
+        },
+        {
+          "key": "E",
+          "text": "CodeDeployDefault.OneAtATime の設定で、インプレースデプロイを使う。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある企業は、AWS Elastic Beanstalk の環境で Web アプリケーションを実行しています。企業は、リリースのたびに、受信トラフィックの 10% を 30 分間新しいバージョンに送りたいと考えています。新しいインスタンスが正常なままであれば、すべてのトラフィックを新しいバージョンに移し、古いインスタンスを自動で削除する必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "デプロイポリシーを Immutable にし、ヘルスチェックの待機時間を 30 分にする。"
+        },
+        {
+          "key": "B",
+          "text": "デプロイポリシーを TrafficSplitting にし、トラフィックの分割を 10%、評価時間を 30 分にする。"
+        },
+        {
+          "key": "C",
+          "text": "デプロイポリシーを追加バッチによるローリングにし、バッチサイズを 10% にする。"
+        },
+        {
+          "key": "D",
+          "text": "2 つ目の環境を作成し、Amazon Route 53 の加重レコードでトラフィックを手作業で移す。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0005",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある企業は、AWS Elastic Beanstalk の環境のアプリケーションをインプレースの更新で更新しており、リリースのたびにユーザーが短い停止を経験しています。企業は、新しいバージョンをリリース前に専用の URL でテストし、ユーザーを即座に切り替え、すぐに元に戻せるようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "デプロイポリシーを Rolling に変更し、バッチサイズを 1 インスタンスに減らす。"
+        },
+        {
+          "key": "B",
+          "text": "今後のすべてのアプリケーションのリリースで、デプロイポリシーを Immutable に変更する。"
+        },
+        {
+          "key": "C",
+          "text": "新しいバージョンを別の環境にデプロイし、環境 URL のスワップを使う。"
+        },
+        {
+          "key": "D",
+          "text": "別の環境にデプロイし、DNS を切り替えた直後に古い環境を終了する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0006",
+      "task": "1.4",
+      "services": [
+        "AWS CodeArtifact",
+        "AWS CodeBuild",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある CodeBuild プロジェクトのサービスロールには、企業のドメインとリポジトリに対する codeartifact:GetAuthorizationToken と codeartifact:ReadFromRepository を許可する IAM ポリシーがあります。ビルドの CodeArtifact へのログインの手順がアクセス拒否のエラーで失敗し、npm がパッケージをインストールできません。最小権限で問題を解決する変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "サービスロールのポリシーに sts:GetServiceBearerToken を追加する。"
+        },
+        {
+          "key": "B",
+          "text": "サービスロールに AWSCodeArtifactAdminAccess マネージドポリシーをアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "Secrets Manager に保存したアカウントのルートユーザーの認証情報で、ログインの手順を実行する。"
+        },
+        {
+          "key": "D",
+          "text": "ビルド中に期限が切れないように、認可トークンの有効期間を 24 時間にする。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0007",
+      "task": "1.4",
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "毎晩のデータのジョブは約 14 時間かかり、実行中の何か所かで AWS CodeArtifact から Python のパッケージをダウンロードします。ジョブは開始時に既定の設定で CodeArtifact の認可トークンを 1 回だけ取得しています。ジョブは、いつも実行の終盤に認証のエラーで失敗します。問題を解決するための最適な変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "ジョブの開始時に、有効期間 24 時間のトークンを要求する。"
+        },
+        {
+          "key": "B",
+          "text": "トークンが期限切れにならないように、AWSCodeArtifactReadOnlyAccess マネージドポリシーをアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "使用中は CodeArtifact がトークンを自動で更新するので、実行全体で 1 つのトークンを使い続ける。"
+        },
+        {
+          "key": "D",
+          "text": "今のトークンの期限が切れる前に、たとえば各ダウンロードの手順の前に、新しい認可トークンを取得する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0008",
+      "task": "1.4",
+      "services": [
+        "Amazon ECS",
+        "AWS Fargate",
+        "Amazon ECR",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "AWS Fargate 上の新しい Amazon ECS サービスが、同じアカウントのプライベートの Amazon ECR リポジトリからイメージを取得できず、起動に失敗します。起動した後は、コンテナ内のアプリケーションのコードが Amazon S3 バケットにオブジェクトを書き込む必要があります。セキュリティチームは、それぞれの権限を正しいロールに付与することを求めています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "タスク実行ロールに管理ポリシー AmazonECSTaskExecutionRolePolicy を付ける。"
+        },
+        {
+          "key": "B",
+          "text": "S3 への書き込みの権限をタスクの IAM ロールに付与する。"
+        },
+        {
+          "key": "C",
+          "text": "ECR からの取得の権限を、タスク実行ロールではなくタスクの IAM ロールに付与する。"
+        },
+        {
+          "key": "D",
+          "text": "コンテナが使えるように、S3 への書き込みの権限をタスク実行ロールに付与する。"
+        },
+        {
+          "key": "E",
+          "text": "どのロールにも取得の権限が要らないように、ECR リポジトリを公開する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0009",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Amazon S3",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Amazon EC2 インスタンスへの AWS CodeDeploy のデプロイが、CodeDeploy エージェントが S3 バケット deploy-artifacts からアプリケーションのリビジョンをダウンロードできないために失敗します。インスタンスにはインスタンスプロファイルがありません。セキュリティチームは最小権限を求めており、公開のバケットを認めていません。最小権限でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "すべてのバケットですべての S3 のアクションを許可するロールのインスタンスプロファイルをアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "deploy-artifacts バケットからのオブジェクトの読み取りだけを許可するロールのインスタンスプロファイルをアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "CodeDeploy のサービスロールに S3 の読み取りの権限を追加し、インスタンスはインスタンスプロファイルなしのままにする。"
+        },
+        {
+          "key": "D",
+          "text": "エージェントが認証情報なしでリビジョンをダウンロードできるように、deploy-artifacts バケットを公開する。"
+        }
+      ]
+    }
+  ]
+}
