@@ -275,6 +275,11 @@ const commands = {
     writeJSON(paths.work(id, 'qhistory.json'), qhist);
     writeJSON(paths.work(id, 'questions.json'), { ...batch, questions: kept });
 
+    // P-004: 全問を迷わず解けた束は易しすぎの疑い（結果は変えず、記録だけ）
+    const entries = batch.questions.map((q) => v.questions.find((x) => x.qid === q.id));
+    const tooEasy = batch.questions.length >= 3 && entries.every((e, i) => e.blind.confidence === 'high'
+      && [...e.blind.answer].sort().join() === [...batch.questions[i].answer].sort().join());
+    if (tooEasy) kinds.add('too_easy');
     const fixes = Object.keys(feedback);
     let result;
     if (fixes.length) result = 'fix';
@@ -290,7 +295,7 @@ const commands = {
       ok: true,
       summary: `ok ${Object.values(results).filter((r) => r === 'ok').length} / fix ${fixes.length} / drop ${dropped.length} → loop advance --result ${result}`,
       items: Object.entries(results).map(([qid, r]) => ({ qid, verdict: r })),
-      extra: { result, feedback: result === 'fix' ? `work/${id}/feedback.json` : null },
+      extra: { result, too_easy: tooEasy, feedback: result === 'fix' ? `work/${id}/feedback.json` : null },
     });
   },
 

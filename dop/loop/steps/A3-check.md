@@ -4,8 +4,8 @@
 <step id="A3_check" actor="tool">
   <purpose>acceptance を全部、機械で確かめる。</purpose>
   <actions>
-    <a>app:check work/&lt;ID&gt; を呼ぶ。中で unit → build → e2e（Playwright、幅 375 と 1280）→ size を行い、AC の id ごとの合否を返す。</a>
-    <a>ok なら e2e の画面写真（app:check が .loop/reports/&lt;ID&gt;/ に置く）を 1 枚だけ見て、見た目の崩れが無いかを確かめる。</a>
+    <a>node dop/tools/app.mjs check &lt;ID&gt; を呼ぶ。中で app data → unit → e2e を行い、AC の id ごとの合否を返す。ほかの項目の試験が落ちても失敗（前の機能を壊した）。</a>
+    <a>ok なら出力の screenshots から幅 375 の写真を 1 枚だけ見て、見た目の崩れが無いかを確かめる。崩れていれば loop block で人に回さず、A2 へ戻す（loop advance --result fail は札が要るので、崩れを直す AC を spec.json に足して app check をもう一度呼ぶ）。</a>
   </actions>
   <outputs>
     <json>{ "ok": false, "summary": "AC1 失敗 / AC2・AC3 合格", "items": [{ "ac": "AC1", "error": "解説の欄が見つからない (selector: .explain)", "log": ".loop/reports/A-0003/e2e.txt#L40-60" }], "repeat": false }</json>

@@ -9,14 +9,17 @@
     <file>app/SPEC.md</file>
   </inputs>
   <actions>
-    <a>先に acceptance ごとの試験を書く（unit は app/test/、e2e は app/e2e/）。試験の名前の先頭に AC の id を付ける（例 "AC2 複数選択は…"）。</a>
-    <a>コードを書く。問題のデータは bank/ を直接読まず、ビルドの時に tools が作る app/public/questions.json を使う。</a>
+    <a>先に acceptance ごとの試験を書く。unit は app/test/*.test.js、e2e は app/e2e/*.e2e.js（Playwright。app/e2e/helpers.js の startServer・launch・openPage・shot・overflowX を使う）。試験の名前の先頭は「&lt;項目 ID&gt; &lt;AC の id&gt; 」（例 "A-0001 AC2 複数選択は…"）。app check がこの名前で合否を数える。</a>
+    <a>e2e では openPage が集めるブラウザのエラーが 0 件であることも確かめ、幅 375 と 1280 で shot を撮る。</a>
+    <a>コードを書く。問題のデータは bank/ を直接読まず、node dop/tools/app.mjs data が作る app/public/questions.json を fetch で読む。</a>
     <a>app/SPEC.md の該当する所を今の形に直す（短く）。</a>
     <a>feedback.json があれば、そこに出た AC だけ直す。同じ AC が 2 回続けて落ちたら、直し方を変える（前と違う原因を 1 行で書いてから直す）。</a>
   </actions>
   <constraints>
-    <c>外の CDN から読み込まない。依存は npm で入れて同梱する（meteor/ と同じ決まり）。</c>
-    <c>画面のロジックと画面に頼らない計算（採点・出題の並べ方・記録の集計）を分け、後者は unit で試す。</c>
+    <c>ビルドしない。素の HTML・CSS・JS（ES modules）で書き、GitHub Pages にそのまま置ける形にする（入口は app/index.html）。外の CDN・フォントは読み込まない。</c>
+    <c>パスは全部相対にする（/amayadori/dop/app/ の下に置かれる。e2e のサーバーも同じ深さで配る）。</c>
+    <c>画面のロジックと画面に頼らない計算（採点・出題の並べ方・記録の集計）を分け、後者は app/src/logic/ に置いて unit で試す。</c>
+    <c>localStorage の読み書きは try/catch で包む（使えない時も画面は動く）。</c>
   </constraints>
   <exit>書けた → loop advance --result ok</exit>
 </step>

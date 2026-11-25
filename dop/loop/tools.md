@@ -47,8 +47,8 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q stats` | 週 1 | なし | 正解の位置・ドメイン別の数 | | 済 |
 | `Q export --task 1.4 --out <file.md>` | 人が読む時 | 条件 | 書いた数 | （人向け。AI は読まない） | 済 |
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
-| `app:data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 未（アプリと一緒に） |
-| `app:check <ID>` | A3 | spec.json | AC ごとの合否 | 試験・ビルド・e2e のログ全文 | 未（アプリと一緒に） |
+| `node dop/tools/app.mjs data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 済 |
+| `node dop/tools/app.mjs check <ID>` | A3 | spec.json・app/test・app/e2e | AC ごとの合否・画面写真 | 試験・e2e のログ全文 | 済 |
 | `learn:weak` | L1 | .loop/answers/*.json | 足した項目 | 解答の記録の全部 | 未（記録の書き出しの後） |
 | `aws:cost` | 週 1 | なし | 今月の費用 | Cost Explorer の応答 | 未（AWS へ移す時） |
 
@@ -81,7 +81,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
   "C2_author":   { "ok": "Q validate が ok" },
   "C3_verify":   { "pass|fix|drop": "Q verdict（fix で言い回しだけなら count: false）" },
   "C4_gate":     { "pass": "Q publish が ok", "fail": "Q gate か Q publish が落ちた" },
-  "A3_check":    { "pass|fail": "app:check（未）" },
+  "A3_check":    { "pass|fail": "app.mjs check" },
   "L1_learn":    { "ok": "learn:weak（未）" }
 }
 ```

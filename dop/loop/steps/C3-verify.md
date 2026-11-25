@@ -11,8 +11,8 @@
   </inputs>
   <actions>
     <a by="orchestrator">dop-verifier のエージェントを起こす。author のやり取りは渡さない。渡すのは項目 ID だけ。</a>
-    <a by="verifier">1 周目: 各問を解き、答えと確信度（high/mid/low）と理由を書く（答えはまだ見ない）。</a>
-    <a by="verifier">2 周目: q reveal で答えと解説を受け取り、照らす（blind が全問そろうまで reveal は断る）。</a>
+    <a by="verifier">1 周目: sources.md も答えも見ずに、自分の知識だけで各問を解き、答えと確信度（high/mid/low）と理由を書く（P-004。根拠を探せば解ける問題かではなく、本番のように解けるかを見る）。</a>
+    <a by="verifier">2 周目: q reveal で答えと解説を受け取り、sources.md と一緒に照らす（blind が全問そろうまで reveal は断る）。</a>
     <a by="verifier">verify.json を書く（下の形）。</a>
     <a by="orchestrator">q verdict を呼ぶ。束としての結論（result）をツールが出す。その result で advance する。</a>
   </actions>
@@ -50,4 +50,5 @@
 - issues に `fact`・`two_correct`・`no_correct`・`unsupported`・`deprecated` → fix。
 - 同じ問題が 2 回 fix（言い回しだけの fix は数えない）→ drop。
 - `style`・`giveaway`（答えが見え見え）だけ → fix だが attempts を数えない。
+- 3 問以上の束で、全問が match かつ `confidence: high` → 結果は変えず、`too_easy: true` を出して history に too_easy を残す（S9 の repeated_issues で、続けば書き方を見直す）。
 - blind で `confidence: low` かつ match → ok。問題に `low_confidence: true` を付け、アプリで印を出す（人は事前に読まないため）。
