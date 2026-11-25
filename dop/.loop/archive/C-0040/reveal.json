@@ -1,0 +1,152 @@
+{
+  "item": "C-0040",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ の DB インスタンスは、障害の時に別のアベイラビリティーゾーンのスタンバイへ自動で切り替わる（多くは 60〜120 秒）。再起動の時に Reboot with failover を選ぶと、利用者の求めでこの切り替えを起こせるので、今のインスタンスのまま試せる。",
+        "per_choice": {
+          "A": "別のインスタンスを作ることになり、今のインスタンスで試す要件にも、バックアップを戻さない要件にも反する。",
+          "B": "正しい。今のインスタンスで、スタンバイへの切り替えを起こせる。",
+          "C": "別のインスタンスに切り替える試験になり、Multi-AZ のスタンバイへの切り替えを試すことにならない。",
+          "D": "スタンバイを作り直すだけで、切り替えそのものは起きない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S1",
+          "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S2",
+          "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "switchover（以前の managed planned failover）は、全てのクラスターが健全な時の計画した切り替えに使う。切り替えの前に副のクラスターを主と同期するので、RPO は 0（データの損失なし）。failover は計画外の障害から戻るための方法で、RPO は秒単位の 0 でない値になる。",
+        "per_choice": {
+          "A": "failover の RPO は秒単位で 0 にならず、データを失う可能性がある。",
+          "B": "正しい。同期してから切り替えるので、データを失わない。",
+          "C": "クラスターを作り直すことになり、スナップショットの後のデータも失う。",
+          "D": "failover を 2 回行うことになり、どちらでもデータを失う可能性がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0003",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "計画外の障害から戻るには、副のクラスターへのリージョンをまたぐ failover を使う。RPO は秒単位の 0 でない値になるので、数秒のデータの損失を許すという要件に合う。switchover は全てのクラスターが健全な時の計画した操作。",
+        "per_choice": {
+          "A": "switchover は、全てのクラスターと関わるサービスが健全な時の計画した操作に使う。主のクラスターが使えない今は合わない。",
+          "B": "failover で副のクラスターに切り替えられる。待つと書き込みが戻るのが遅れる。",
+          "C": "正しい。計画外の障害から戻る方法で、失うのは秒単位。",
+          "D": "クラスターを作り直すので時間がかかり、スナップショットの後のデータも失う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "Failover – Use this approach to recover from an unplanned outage. With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0004",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "オリジンフェイルオーバーは、選んだ HTTP のステータスコード（400・403・404・416・429・500・502・503・504 の組み合わせ）の応答を受けた時に副のオリジンへ切り替える。ただし切り替えるのは、利用者のリクエストが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+        "per_choice": {
+          "A": "正しい。POST は切り替えないので、主のオリジンの 503 がそのまま返る。",
+          "B": "正しい。503 を条件に選んでいれば、GET のページの読み込みは副のオリジンへ切り替わる。",
+          "C": "条件には 500・502・503・504 なども選べる。",
+          "D": "GET・HEAD・OPTIONS 以外では切り替えない。",
+          "E": "オリジングループは、選んだステータスコードの応答で切り替える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "When CloudFront receives a response with one of the status codes that you specify, it fails over to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0005",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS FIS は本物のリソースに本物の操作を行う。本番で試す前に、計画の段階を終え、本番前の環境で実験を行うことが強く勧められている。DNS failover は、同じ役割の資源のうち健全でない物から健全な物へ Route 53 が通信を向ける仕組み。",
+        "per_choice": {
+          "A": "本番で、しかも混む時間に試すのは、本番への危険を最も小さくする要件に反する。",
+          "B": "正しい。計画してから本番前の環境で試す。",
+          "C": "手で DNS を書き換えるのは、障害を検知して自動で切り替わることの試験にならない。",
+          "D": "AWS FIS は本物のリソースに本物の操作を行う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "AWS FIS carries out real actions on real AWS resources in your system."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+          "source_id": "S5",
+          "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
+        }
+      ]
+    }
+  ]
+}

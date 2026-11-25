@@ -1,0 +1,99 @@
+{
+ "item": "C-0040",
+ "questions": [
+  {
+   "qid": "q-3.3-0001",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "Reboot with failover tests Multi-AZ failover"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "per_choice D",
+     "detail": "Multi-AZを切って入れ直すと切り替えは起きない、という説明は sources.md に無い（事実としては正しく問題の正しさに関わらない）",
+     "source": "S1"
+    }
+   ],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-3.3-0002",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "Switchover for planned, no data loss"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "per_choice C",
+     "detail": "スナップショットの後のデータを失う、は sources.md に無い補足（事実として正しい）",
+     "source": "S3"
+    }
+   ],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-3.3-0003",
+   "blind": {
+    "answer": [
+     "C"
+    ],
+    "confidence": "high",
+    "reason": "Unplanned outage uses failover, switchover needs healthy"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-3.3-0004",
+   "blind": {
+    "answer": [
+     "A",
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "Origin group failover only GET/HEAD/OPTIONS and chosen status codes"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "services",
+     "detail": "services に Amazon S3 があるが問題文に S3 は出てこない",
+     "source": "S6"
+    }
+   ],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-3.3-0005",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "mid",
+    "reason": "Pre-prod first, planned experiment"
+   },
+   "match": true,
+   "issues": [
+    {
+     "kind": "giveaway",
+     "where": "choice A/C/D vs B",
+     "detail": "A,C,D は明らかに不適切で B が見え見え。繰り返し可能の要件に答える選択肢も無い。D の説明は S7 の逆で誤りが分かりやすい",
+     "source": "S7"
+    }
+   ],
+   "verdict": "ok"
+  }
+ ]
+}

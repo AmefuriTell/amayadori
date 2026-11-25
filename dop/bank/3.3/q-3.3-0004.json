@@ -1,0 +1,68 @@
+{
+  "id": "q-3.3-0004",
+  "task": "3.3",
+  "services": [
+    "Amazon CloudFront",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company serves a web application through Amazon CloudFront with an origin group that has a primary and a secondary origin. During a test, the primary origin returns HTTP 503 errors. Page loads succeed from the secondary origin, but form submissions that use POST still fail. Which statements explain this behavior? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "CloudFront fails over to the secondary origin only for viewer requests that use GET, HEAD, or OPTIONS."
+    },
+    {
+      "key": "B",
+      "text": "CloudFront fails over when the primary origin returns one of the status codes chosen as failover criteria, such as 503."
+    },
+    {
+      "key": "C",
+      "text": "CloudFront fails over only when the primary origin returns a 4xx status code, not a 5xx status code."
+    },
+    {
+      "key": "D",
+      "text": "CloudFront fails over for every HTTP method, so the POST failures must come from the secondary origin."
+    },
+    {
+      "key": "E",
+      "text": "Origin groups fail over only after a Route 53 health check marks the primary origin as unhealthy."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "オリジンフェイルオーバーは、選んだ HTTP のステータスコード（400・403・404・416・429・500・502・503・504 の組み合わせ）の応答を受けた時に副のオリジンへ切り替える。ただし切り替えるのは、利用者のリクエストが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+    "per_choice": {
+      "A": "正しい。POST は切り替えないので、主のオリジンの 503 がそのまま返る。",
+      "B": "正しい。503 を条件に選んでいれば、GET のページの読み込みは副のオリジンへ切り替わる。",
+      "C": "条件には 500・502・503・504 なども選べる。",
+      "D": "GET・HEAD・OPTIONS 以外では切り替えない。",
+      "E": "オリジングループは、選んだステータスコードの応答で切り替える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+      "source_id": "S6",
+      "quote": "When CloudFront receives a response with one of the status codes that you specify, it fails over to the secondary origin."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+      "source_id": "S6",
+      "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+      "source_id": "S6",
+      "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

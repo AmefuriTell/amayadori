@@ -1,0 +1,298 @@
+{
+  "item": "C-0040",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "task": "3.3",
+      "services": [
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a production database on an Amazon RDS Multi-AZ DB instance. Before a major launch, the DevOps team must verify that the application reconnects correctly when the database fails over to the standby in another Availability Zone. The test must use the existing DB instance, must not lose data, and must not require restoring backups. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Restore the latest automated snapshot to a new DB instance in another Availability Zone, and point the application to it."
+        },
+        {
+          "key": "B",
+          "text": "Reboot the DB instance and choose the Reboot with failover option during a planned test window."
+        },
+        {
+          "key": "C",
+          "text": "Create a read replica in another Availability Zone, and promote it to a standalone DB instance during the test."
+        },
+        {
+          "key": "D",
+          "text": "Turn off Multi-AZ, and then turn it on again so that a new standby is created in another Availability Zone."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ の DB インスタンスは、障害の時に別のアベイラビリティーゾーンのスタンバイへ自動で切り替わる（多くは 60〜120 秒）。再起動の時に Reboot with failover を選ぶと、利用者の求めでこの切り替えを起こせるので、今のインスタンスのまま試せる。",
+        "per_choice": {
+          "A": "別のインスタンスを作ることになり、今のインスタンスで試す要件にも、バックアップを戻さない要件にも反する。",
+          "B": "正しい。今のインスタンスで、スタンバイへの切り替えを起こせる。",
+          "C": "別のインスタンスに切り替える試験になり、Multi-AZ のスタンバイへの切り替えを試すことにならない。",
+          "D": "スタンバイを作り直すだけで、切り替えそのものは起きない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S1",
+          "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "source_id": "S2",
+          "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-3.3-0002",
+      "task": "3.3",
+      "services": [
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. All clusters are healthy. The company plans a maintenance event in us-east-1 and must move the primary role to us-west-2 beforehand. No committed data may be lost, and the company wants to use the built-in capability instead of rebuilding clusters. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Perform a failover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "B",
+          "text": "Perform a switchover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "C",
+          "text": "Copy the latest snapshot to us-west-2 and restore it as a new primary cluster."
+        },
+        {
+          "key": "D",
+          "text": "Perform a failover to us-west-2 now, and fail back with another failover after the maintenance."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "switchover（以前の managed planned failover）は、全てのクラスターが健全な時の計画した切り替えに使う。切り替えの前に副のクラスターを主と同期するので、RPO は 0（データの損失なし）。failover は計画外の障害から戻るための方法で、RPO は秒単位の 0 でない値になる。",
+        "per_choice": {
+          "A": "failover の RPO は秒単位で 0 にならず、データを失う可能性がある。",
+          "B": "正しい。同期してから切り替えるので、データを失わない。",
+          "C": "クラスターを作り直すことになり、スナップショットの後のデータも失う。",
+          "D": "failover を 2 回行うことになり、どちらでもデータを失う可能性がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-3.3-0003",
+      "task": "3.3",
+      "services": [
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an Amazon Aurora global database with the primary cluster in eu-west-1 and a secondary cluster in eu-central-1. An unplanned outage makes the primary cluster in eu-west-1 unavailable. The business requires the database to accept writes again as quickly as possible and accepts losing a few seconds of recent data. Which action meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Perform a switchover to the secondary cluster in eu-central-1 so that no data is lost."
+        },
+        {
+          "key": "B",
+          "text": "Wait until eu-west-1 recovers, because global databases cannot change the primary Region during an outage."
+        },
+        {
+          "key": "C",
+          "text": "Perform a cross-Region failover to the secondary cluster in eu-central-1."
+        },
+        {
+          "key": "D",
+          "text": "Restore the latest snapshot in eu-central-1 as a new cluster, and point the application to it."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "計画外の障害から戻るには、副のクラスターへのリージョンをまたぐ failover を使う。RPO は秒単位の 0 でない値になるので、数秒のデータの損失を許すという要件に合う。switchover は全てのクラスターが健全な時の計画した操作。",
+        "per_choice": {
+          "A": "switchover は、全てのクラスターと関わるサービスが健全な時の計画した操作に使う。主のクラスターが使えない今は合わない。",
+          "B": "failover で副のクラスターに切り替えられる。待つと書き込みが戻るのが遅れる。",
+          "C": "正しい。計画外の障害から戻る方法で、失うのは秒単位。",
+          "D": "クラスターを作り直すので時間がかかり、スナップショットの後のデータも失う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S4",
+          "quote": "Failover – Use this approach to recover from an unplanned outage. With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "source_id": "S3",
+          "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-3.3-0004",
+      "task": "3.3",
+      "services": [
+        "Amazon CloudFront",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company serves a web application through Amazon CloudFront with an origin group that has a primary and a secondary origin. During a test, the primary origin returns HTTP 503 errors. Page loads succeed from the secondary origin, but form submissions that use POST still fail. Which statements explain this behavior? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CloudFront fails over to the secondary origin only for viewer requests that use GET, HEAD, or OPTIONS."
+        },
+        {
+          "key": "B",
+          "text": "CloudFront fails over when the primary origin returns one of the status codes chosen as failover criteria, such as 503."
+        },
+        {
+          "key": "C",
+          "text": "CloudFront fails over only when the primary origin returns a 4xx status code, not a 5xx status code."
+        },
+        {
+          "key": "D",
+          "text": "CloudFront fails over for every HTTP method, so the POST failures must come from the secondary origin."
+        },
+        {
+          "key": "E",
+          "text": "Origin groups fail over only after a Route 53 health check marks the primary origin as unhealthy."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "オリジンフェイルオーバーは、選んだ HTTP のステータスコード（400・403・404・416・429・500・502・503・504 の組み合わせ）の応答を受けた時に副のオリジンへ切り替える。ただし切り替えるのは、利用者のリクエストが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+        "per_choice": {
+          "A": "正しい。POST は切り替えないので、主のオリジンの 503 がそのまま返る。",
+          "B": "正しい。503 を条件に選んでいれば、GET のページの読み込みは副のオリジンへ切り替わる。",
+          "C": "条件には 500・502・503・504 なども選べる。",
+          "D": "GET・HEAD・OPTIONS 以外では切り替えない。",
+          "E": "オリジングループは、選んだステータスコードの応答で切り替える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "When CloudFront receives a response with one of the status codes that you specify, it fails over to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "source_id": "S6",
+          "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-3.3-0005",
+      "task": "3.3",
+      "services": [
+        "AWS Fault Injection Service",
+        "Amazon Route 53"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses Amazon Route 53 DNS failover between two web servers. The DevOps team wants to prove that traffic moves to the healthy server when the other server fails, by injecting real failures with AWS Fault Injection Service (AWS FIS). Production risk must be kept as low as possible, and the tests should be repeatable. Which approach BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run the AWS FIS experiment directly in production during peak hours so that the results reflect real traffic."
+        },
+        {
+          "key": "B",
+          "text": "Plan the experiment, run it in a pre-production environment first, and use the results before any production run."
+        },
+        {
+          "key": "C",
+          "text": "Skip AWS FIS and test by editing the DNS records by hand to point to the second server."
+        },
+        {
+          "key": "D",
+          "text": "Run the AWS FIS experiment only in documentation reviews, because AWS FIS simulates failures without affecting resources."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS FIS は本物のリソースに本物の操作を行う。本番で試す前に、計画の段階を終え、本番前の環境で実験を行うことが強く勧められている。DNS failover は、同じ役割の資源のうち健全でない物から健全な物へ Route 53 が通信を向ける仕組み。",
+        "per_choice": {
+          "A": "本番で、しかも混む時間に試すのは、本番への危険を最も小さくする要件に反する。",
+          "B": "正しい。計画してから本番前の環境で試す。",
+          "C": "手で DNS を書き換えるのは、障害を検知して自動で切り替わることの試験にならない。",
+          "D": "AWS FIS は本物のリソースに本物の操作を行う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "AWS FIS carries out real actions on real AWS resources in your system."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "source_id": "S7",
+          "quote": "we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+          "source_id": "S5",
+          "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}
