@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 98,
+  "count": 115,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -301,6 +301,181 @@
         {
           "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
           "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0006",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project uses AWS Lambda compute for fast start-up. In the build phase, the first command runs unit tests and the next command uploads the test logs. When the tests fail, CodeBuild skips the upload command, so the logs are lost. The logs must be uploaded even when the tests fail, and the phase must still fail when the tests fail. Which buildspec change meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Move the upload command into a finally block of the build phase."
+        },
+        {
+          "key": "B",
+          "text": "Set on-failure: CONTINUE on the build phase, and move the upload command to the post_build phase."
+        },
+        {
+          "key": "C",
+          "text": "Move the upload command before the test command in the commands block."
+        },
+        {
+          "key": "D",
+          "text": "Create a second CodeBuild project that runs after every build and uploads the logs."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+        "per_choice": {
+          "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+          "B": "on-failure は Lambda の計算では使えない。",
+          "C": "試験の前に上げると、試験のログがまだ無い。",
+          "D": "プロジェクトを足すことになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The commands in a finally block are run even if a command in the commands block fails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The phase is successful when all commands in the commands and the finally blocks run successfully."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0007",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "Amazon ECR"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team moved a CodeBuild project to AWS Lambda compute to shorten start-up time. The project builds Docker images and pushes them to Amazon ECR, and now every build fails when it runs docker build. The team needs the Docker builds to work again with the fewest changes to the buildspec. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the project back to EC2 compute."
+        },
+        {
+          "key": "B",
+          "text": "Set privilegedMode to true in the project's environment."
+        },
+        {
+          "key": "C",
+          "text": "Keep Lambda compute and set privilegedMode to true."
+        },
+        {
+          "key": "D",
+          "text": "Keep Lambda compute and raise the build timeout to 60 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Keep Lambda compute and switch to a reserved capacity fleet for Docker."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+        "per_choice": {
+          "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+          "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+          "C": "Lambda の計算は privileged モードに対応しない。",
+          "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+          "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support Docker builds or runs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "quote": "Set to true only if you plan to use this build project to build Docker images. Otherwise, all associated builds that attempt to interact with the Docker daemon fail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html",
+          "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0008",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project on EC2 compute runs a full integration suite that takes about 3 hours. Every build stops after 60 minutes and is marked as failed, although the tests are still running. The project's timeout setting has never been changed. The team wants the suite to finish in one build with the LEAST operational effort. What should the team do?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Move the project to AWS Lambda compute so that it runs faster."
+        },
+        {
+          "key": "B",
+          "text": "Set timeoutInMinutes on the project to 4320."
+        },
+        {
+          "key": "C",
+          "text": "Set timeoutInMinutes on the project to 240."
+        },
+        {
+          "key": "D",
+          "text": "Split the suite into three projects that each run for less than 60 minutes."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "timeoutInMinutes は、終わらないビルドを止めるまでの分数で、5 から 2160（36 時間）まで決められる。指定しないと既定の 60 分になる。Lambda の計算は 15 分を超える実行に対応しない。",
+        "per_choice": {
+          "A": "Lambda の計算は 15 分を超える実行に対応しない。",
+          "B": "決められるのは 2160 分（36 時間）まで。",
+          "C": "正しい。既定の 60 分を、3 時間の試験が終わる長さに延ばす。",
+          "D": "プロジェクトを分けることになり、1 つのビルドで終える要件にも反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "quote": "The number of minutes, between 5 to 2160 (36 hours), after which CodeBuild stops the build if it is not complete. If not specified, the default of 60 is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
         }
       ],
       "low_confidence": false
@@ -1387,6 +1562,237 @@
         {
           "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
           "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0006",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeArtifact",
+        "AWS CodeBuild",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project's service role has an IAM policy that allows codeartifact:GetAuthorizationToken and codeartifact:ReadFromRepository for the company's domain and repository. The build's login step to CodeArtifact fails with an access denied error, and npm cannot install packages. Which change will fix the problem with the LEAST privilege?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add sts:GetServiceBearerToken to the service role's policy."
+        },
+        {
+          "key": "B",
+          "text": "Attach the AWSCodeArtifactAdminAccess managed policy to the service role."
+        },
+        {
+          "key": "C",
+          "text": "Run the login step with the account's root user credentials stored in Secrets Manager."
+        },
+        {
+          "key": "D",
+          "text": "Set the authorization token lifetime to 24 hours so that the token does not expire during the build."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の GetAuthorizationToken を呼ぶには、sts:GetServiceBearerToken と codeartifact:GetAuthorizationToken の両方の権限が要る。パッケージマネージャーで CodeArtifact のリポジトリを使うには、ユーザーかロールが sts:GetServiceBearerToken を許している必要がある。",
+        "per_choice": {
+          "A": "正しい。足りないのは sts:GetServiceBearerToken だけ。",
+          "B": "管理の権限まで与えることになり、最小権限に反する。",
+          "C": "ルートユーザーは GetAuthorizationToken を呼べない。",
+          "D": "トークンの寿命は 15 分から 12 時間まで。そもそもトークンを取れないのが問題。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Root users cannot call GetAuthorizationToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0007",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A nightly data job runs for about 14 hours and downloads Python packages from AWS CodeArtifact at several points during the run. It gets a CodeArtifact authorization token once at the start with the default settings. The job always fails late in the run with authentication errors. Which change BEST fixes the problem?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Request the token with a lifetime of 24 hours at the start of the job."
+        },
+        {
+          "key": "B",
+          "text": "Attach the AWSCodeArtifactReadOnlyAccess managed policy so that the token never expires."
+        },
+        {
+          "key": "C",
+          "text": "Keep one token for the whole run, because CodeArtifact renews the token automatically while it is in use."
+        },
+        {
+          "key": "D",
+          "text": "Fetch a new authorization token before the current one expires, for example before each download step."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の認可トークンの寿命は既定で 12 時間で、15 分から 12 時間の間で決められる。寿命が切れたら、新しいトークンを取る必要がある。14 時間の処理では、途中で取り直す。",
+        "per_choice": {
+          "A": "寿命は 12 時間までしか決められない。",
+          "B": "権限を足してもトークンの寿命は変わらない。",
+          "C": "寿命が切れたら新しいトークンを取る必要がある。自動では延びない。",
+          "D": "正しい。切れる前に取り直せば、最後まで認証できる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "When the lifetime expires, you must fetch another token."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0008",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "Amazon ECS",
+        "AWS Fargate",
+        "Amazon ECR",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A new Amazon ECS service on AWS Fargate fails to start because the image cannot be pulled from a private Amazon ECR repository in the same account. After it starts, the application code in the container must write objects to an Amazon S3 bucket. The security team requires each permission to be granted to the right role. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach the AmazonECSTaskExecutionRolePolicy managed policy to the task execution role."
+        },
+        {
+          "key": "B",
+          "text": "Grant the S3 write permissions to the task IAM role."
+        },
+        {
+          "key": "C",
+          "text": "Grant the ECR pull permissions to the task IAM role instead of the task execution role."
+        },
+        {
+          "key": "D",
+          "text": "Grant the S3 write permissions to the task execution role so that the container can use them."
+        },
+        {
+          "key": "E",
+          "text": "Make the ECR repository public so that no role needs pull permissions."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "タスク実行ロールは、ECS のコンテナや Fargate のエージェントが代わりに AWS の API を呼ぶための物で、ECR からイメージを取る権限はここに付ける（マネージドポリシー AmazonECSTaskExecutionRolePolicy に含まれる）。その権限はタスクのコンテナからは直接使えないので、コンテナの中のアプリが使う権限はタスクロールに付ける。",
+        "per_choice": {
+          "A": "正しい。イメージを取る権限はタスク実行ロールに付ける。",
+          "B": "正しい。アプリのコードが使う権限はタスクロールに付ける。",
+          "C": "イメージを取るのはエージェントで、権限はタスク実行ロールに付ける。",
+          "D": "タスク実行ロールの権限はコンテナから直接使えない。",
+          "E": "非公開のリポジトリを公開することになり、権限の問題の答えにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "For basic ECS implementations, these permissions should be added to the task execution role rather than the task IAM role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "The Amazon ECS task execution role managed policy (AmazonECSTaskExecutionRolePolicy) includes the necessary permissions for pulling images from Amazon ECR."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "but they aren't directly accessible by the containers in the task."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0009",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Amazon S3",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "AWS CodeDeploy deployments to Amazon EC2 instances fail because the CodeDeploy agent cannot download the application revision from the S3 bucket deploy-artifacts. The instances have no instance profile. The security team requires least privilege and does not allow public buckets. Which solution meets these requirements with the LEAST privilege?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an instance profile whose role allows all S3 actions on all buckets."
+        },
+        {
+          "key": "B",
+          "text": "Attach an instance profile whose role allows reading objects only from the deploy-artifacts bucket."
+        },
+        {
+          "key": "C",
+          "text": "Add S3 read permissions to the CodeDeploy service role, and keep the instances without an instance profile."
+        },
+        {
+          "key": "D",
+          "text": "Make the deploy-artifacts bucket public so that the agent can download revisions without credentials."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "EC2 のインスタンスには、アプリが置かれた S3 のバケットや GitHub に入る権限が要り、その権限はインスタンスプロファイルのロールで CodeDeploy のエージェントに与える。ポリシーは、インスタンスが入る必要のあるバケットだけに絞るのが勧められている。",
+        "per_choice": {
+          "A": "全てのバケットへの全ての操作を許すことになり、最小権限に反する。",
+          "B": "正しい。エージェントが使うインスタンスプロファイルで、必要なバケットだけを読ませる。",
+          "C": "S3 からリビジョンを取るのはインスタンスの上のエージェントで、インスタンスプロファイルの権限を使う。",
+          "D": "公開のバケットは許されていない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
         }
       ],
       "low_confidence": false
@@ -2998,6 +3404,177 @@
         {
           "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
           "quote": "This type of outage can be resolved by switching to a different Availability Zone."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0004",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Application servers run in private subnets in three Availability Zones. All private subnets route internet traffic through a single NAT gateway in AZ-a. During an outage of AZ-a, the servers in the other two Availability Zones also lost internet access. The company wants internet access to keep working in the remaining zones during a single-AZ outage. Which solution BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a second NAT gateway in AZ-a, and split the private subnets between the two NAT gateways."
+        },
+        {
+          "key": "B",
+          "text": "Move the NAT gateway to AZ-b, and route all private subnets to it."
+        },
+        {
+          "key": "C",
+          "text": "Replace the NAT gateway with one that has more bandwidth, and keep the current routing."
+        },
+        {
+          "key": "D",
+          "text": "Create a NAT gateway in each Availability Zone, and route each private subnet to the NAT gateway in its own Availability Zone."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "NAT ゲートウェイは特定のアベイラビリティーゾーンに作られ、そのゾーンの中で冗長になっている。複数のゾーンの資源が 1 つの NAT ゲートウェイを共有すると、そのゾーンが落ちた時に他のゾーンの資源もインターネットに出られなくなる。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの NAT ゲートウェイを使うように経路を決める。",
+        "per_choice": {
+          "A": "2 つとも AZ-a にあるので、AZ-a が落ちると両方使えない。",
+          "B": "単一の障害点が AZ-b に移るだけ。",
+          "C": "ゾーンの障害に対する弱さは変わらない。",
+          "D": "正しい。1 つのゾーンが落ちても、他のゾーンは自分のゾーンの NAT ゲートウェイを使い続けられる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "quote": "If you have resources in multiple Availability Zones and they share one NAT gateway, and if the NAT gateway's Availability Zone is down, resources in the other Availability Zones lose internet access."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0005",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones and has cross-zone load balancing disabled. Its targets come from an Auto Scaling group. After several scaling events, AZ-a has five instances and AZ-b has one. The single instance in AZ-b is overloaded, and if AZ-a fails, too little capacity remains. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing so that each load balancer node distributes traffic across targets in all enabled Availability Zones."
+        },
+        {
+          "key": "B",
+          "text": "Configure the Auto Scaling group to use subnets in both Availability Zones with balanced Availability Zone distribution."
+        },
+        {
+          "key": "C",
+          "text": "Disable AZ-b on the load balancer so that all traffic goes to the instances in AZ-a."
+        },
+        {
+          "key": "D",
+          "text": "Move all instances into AZ-a so that the targets are in one place."
+        },
+        {
+          "key": "E",
+          "text": "Keep cross-zone load balancing disabled, because each node already sends traffic to targets in every zone."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ゾーン間の負荷分散（cross-zone load balancing）を有効にすると、各ゾーンのロードバランサーのノードが、有効な全てのゾーンのターゲットに通信を配る。無効なら、各ノードは自分のゾーンのターゲットにだけ配る。Auto Scaling は、有効なゾーンに同じ数のインスタンスを保つように動く（balanced best effort）。",
+        "per_choice": {
+          "A": "正しい。AZ-b のノードも全てのターゲットに配るので、1 台に集中しない。",
+          "B": "正しい。インスタンスをゾーンに均等に置き、1 つのゾーンが落ちても容量が残る。",
+          "C": "1 つのゾーンだけに頼ることになり、単一の障害点が残る。",
+          "D": "全てのインスタンスが 1 つのゾーンに集まり、そのゾーンの障害で止まる。",
+          "E": "無効の時は、各ノードは自分のゾーンのターゲットにしか配らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "quote": "When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "quote": "When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-availability-zone-balanced.html",
+          "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0006",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon ElastiCache"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An ElastiCache (Redis OSS) replication group has one primary and one replica, with Multi-AZ disabled. When the primary node failed, ElastiCache took it offline and provisioned a new primary, and the application had a long outage. The company wants a replica in another Availability Zone to be promoted automatically if the primary fails. Which change BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable automatic failover only, and keep Multi-AZ disabled."
+        },
+        {
+          "key": "B",
+          "text": "Enable Multi-AZ, with at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "key": "C",
+          "text": "Move to a larger node type so that the primary is less likely to fail."
+        },
+        {
+          "key": "D",
+          "text": "Take snapshots every hour so that a new primary can be restored quickly."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ を有効にすると、ElastiCache はレプリカを別々のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にする。主ノードが落ちると、複製の遅れが最も少ないレプリカを自動で主に上げる。Multi-AZ には、主と別のゾーンに少なくとも 1 つのレプリカが要る。Multi-AZ なしで自動フェイルオーバーだけを有効にすると、レプリカが別のゾーンにある保証は無い。",
+        "per_choice": {
+          "A": "レプリカが別のゾーンにある保証が無い。",
+          "B": "正しい。別のゾーンのレプリカを自動で主に上げる。",
+          "C": "落ちにくくなるだけで、落ちた時の切り替えは変わらない。",
+          "D": "戻すのに時間がかかり、自動の昇格にもならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
         }
       ],
       "low_confidence": false
@@ -5085,6 +5662,240 @@
       "low_confidence": false
     },
     {
+      "id": "q-6.1-0005",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has 40 project teams, and each team uses an IAM role. Teams create new Amazon S3 buckets and DynamoDB tables every week. Today the security team writes a separate policy for each team that lists the ARNs of the team's resources, and must update the policies whenever a resource is added. The company wants least privilege with fewer policies and no policy updates when resources are added. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night."
+        },
+        {
+          "key": "B",
+          "text": "Use the AWS managed job function policies for each team so that new resources are included automatically."
+        },
+        {
+          "key": "C",
+          "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month."
+        },
+        {
+          "key": "D",
+          "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "属性ベースのアクセス制御（ABAC）は、タグという属性で権限を決める。主体のタグとリソースのタグが一致する時に操作を許す 1 つのポリシーで済み、新しいリソースを足してもポリシーを変えなくてよい。従来の役割ベース（RBAC）は職務ごとにポリシーを作り、リソースが増えるたびにポリシーの更新が要る。",
+        "per_choice": {
+          "A": "ポリシーの数は減らず、更新をスクリプトで続けることになる。",
+          "B": "職務別のマネージドポリシーは RBAC の考え方で、プロジェクトごとのリソースに絞れない。",
+          "C": "最小権限に反する。",
+          "D": "正しい。1 つのポリシーで、タグが一致するリソースだけに許す。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "You can design ABAC policies that allow operations when the principal's tag matches the resource tag."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "The disadvantage to using the traditional RBAC model is that when you or your users add new resources to your environment, you have to update the policies to allow access to those resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "ABAC requires fewer policies."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0006",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "Employees sign in to AWS through IAM Identity Center, and the identity source stores each user's department. Each department's Amazon S3 buckets are tagged with a department tag. Employees must access only their own department's buckets, and the company does not want to create one permission set per department or IAM users. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute."
+        },
+        {
+          "key": "B",
+          "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag."
+        },
+        {
+          "key": "C",
+          "text": "Create a separate permission set for each department that lists that department's bucket ARNs."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user for each employee and tag the user with the department."
+        },
+        {
+          "key": "E",
+          "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "IAM Identity Center の Attributes for access control で、ポリシーで使うユーザーの属性（例 Department）を選ぶ。IAM Identity Center はその属性を、入る先のアカウントへセッションタグとして渡し、ポリシーでは aws:PrincipalTag/タグのキー の条件で参照できる。属性がバケットのタグと一致する時だけ許すポリシーを権限セットに書く。",
+        "per_choice": {
+          "A": "正しい。Department の属性をセッションタグとして渡すようにする。",
+          "B": "正しい。1 つの権限セットで、部署が一致するバケットだけに許す。",
+          "C": "部署ごとの権限セットを作ることになり、要件に反する。",
+          "D": "IAM ユーザーを作らない要件に反する。",
+          "E": "バケットごとに書き足すことになり、属性で決める仕組みにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "While on the Attributes for access control page, you select the Department user attribute for use with attribute-based access control (ABAC)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "they are sent as session tags that you can reference using the aws:PrincipalTag/tag-key condition key in all relevant AWS IAM policy types."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0007",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses IAM Identity Center with AWS Organizations. Fifteen database administrators need the same RDS, DynamoDB, and Aurora administration permissions in 25 accounts. Staff join and leave the DBA team every month, and the security team wants policy changes to reach all accounts automatically. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts."
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change."
+        },
+        {
+          "key": "D",
+          "text": "Create 25 permission sets, one for each account, and assign each to the DBA group."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "権限セットは 1 つ以上の IAM ポリシーをまとめたテンプレートで、1 つの権限セットで複数のアカウントへのアクセスを与えられる。割り当てると IAM Identity Center が各アカウントにロールを作り、権限セットを変えるとロールとポリシーも更新される。割り当ては個人よりグループにするのが勧められ、1 回に選べるアカウントは 10 まで。",
+        "per_choice": {
+          "A": "人が入れ替わるたびに割り当てを直すことになる。グループに割り当てるのが勧められている。",
+          "B": "正しい。グループに割り当てれば人の出入りはグループの変更だけで済み、権限セットを変えれば全アカウントに反映される。",
+          "C": "25 個のロールを自分で保つことになり、手間が大きい。",
+          "D": "同じ権限を 25 個の権限セットで保つことになり、変更の手間が増える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html",
+          "quote": "As you modify the permission set, IAM Identity Center ensures that the corresponding IAM policies and roles are updated accordingly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "quote": "we recommended that you assign access directly to groups rather than to individual users."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0008",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company gives a third-party monitoring vendor access to its AWS account through an IAM role that the vendor assumes. The vendor serves many customers from one AWS account. The company must prevent another customer of the vendor from tricking the vendor into accessing the company's resources by supplying the company's role ARN. Which configuration BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret."
+        },
+        {
+          "key": "B",
+          "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role."
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days."
+        },
+        {
+          "key": "D",
+          "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "混乱した代理（confused deputy）は、権限の無い者がより権限のある者に操作をさせる問題。外部 ID をロールの信頼ポリシーの条件で求めると防げる。外部 ID は業者が顧客ごとに一意に作って管理する値で、顧客が自分で決めるものではない。別の顧客が ARN を渡しても、業者が要求に入れる外部 ID は操れない。",
+        "per_choice": {
+          "A": "外部 ID は業者が作って管理する値で、顧客が自分で決めるものではない。",
+          "B": "業者のアカウントは他の顧客のためにも動くので、別の顧客が ARN を渡すと業者が代わりに入れてしまう。",
+          "C": "長く使う認証情報を外部に渡すことになり、混乱した代理の問題も解決しない。",
+          "D": "正しい。業者が顧客ごとに決めた外部 ID を条件にする。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "The primary function of the external ID is to address and prevent the confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "The ExternalId value must be unique among Example Corp's customers and controlled by Example Corp, not its customers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-6.2-0001",
       "task": "6.2",
       "domain": 6,
@@ -5718,6 +6529,187 @@
         {
           "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
           "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0005",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "AWS CloudTrail",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team wants to be alerted when the rate of API calls that create resources suddenly rises far above the account's normal pattern, without defining fixed thresholds. The account has a trail that logs only read management events. The team enabled CloudTrail Insights for API call rate on the trail a week ago, but no Insights events have appeared, although unusual activity occurred. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a CloudWatch alarm with a static threshold on the number of CreateInstance calls in the trail's log group."
+        },
+        {
+          "key": "B",
+          "text": "Configure the trail to also log write management events, keep Insights enabled, and allow up to 36 hours for Insights events to start."
+        },
+        {
+          "key": "C",
+          "text": "Create a new event data store with Insights for data events, because Insights does not work on trails."
+        },
+        {
+          "key": "D",
+          "text": "Move the trail to us-east-1, because Insights events are generated only in that Region."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudTrail Insights は、過去のイベントから API の呼び出しの率と誤りの率のふつうの形（基準）を作り、それから大きく外れた時に Insights のイベントを出す。管理イベントの呼び出しの率で Insights のイベントを出すには、証跡が書き込みの管理イベントを記録している必要がある。初めて有効にした後、出し始めるまで最大 36 時間かかることがある。",
+        "per_choice": {
+          "A": "決まったしきい値を決めることになり、要件に反する。",
+          "B": "正しい。書き込みの管理イベントを記録しないと、管理イベントの呼び出しの率の Insights は出ない。",
+          "C": "データイベントの Insights は証跡でしか使えない。今回の問題は書き込みの管理イベントを記録していないこと。",
+          "D": "Insights のイベントは、元になる管理イベントやデータイベントと同じリージョンで出る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "quote": "To log Insights events on the API call rate for management events, the trail or event data store must enable Insights and log write management events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html",
+          "quote": "After you enable CloudTrail Insights for the first time on a trail, CloudTrail may take up to 36 hours to begin delivering Insights events"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "quote": "Insights events on data events are only supported on trails and not on event data stores."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0006",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "Amazon CloudWatch"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A custom metric counts failed sign-in attempts. Its normal value changes strongly by hour of day and day of week, so static thresholds either miss attacks at night or raise false alarms during business hours. The security team wants an alarm only when failures are unusually high for that time, not when they are unusually low. Which alarm BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A static threshold alarm set to the highest value seen during business hours."
+        },
+        {
+          "key": "B",
+          "text": "An anomaly detection alarm that triggers when the metric is either above or below the band."
+        },
+        {
+          "key": "C",
+          "text": "An anomaly detection alarm that triggers when the metric is above the band of expected values."
+        },
+        {
+          "key": "D",
+          "text": "An anomaly detection alarm that triggers when the metric is below the band of expected values."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "異常検知（anomaly detection）では、統計と機械学習で過去のデータから期待される値の範囲（バンド）を作る。異常検知のアラームは決まったしきい値を持たず、その時の期待値と比べる。バンドより上・下・どちらでも、のどれで鳴らすかを選べる。",
+        "per_choice": {
+          "A": "決まったしきい値で、夜の攻撃を見逃し、時間帯による変化に合わない。",
+          "B": "少なすぎる時にも鳴り、要件に反する。",
+          "C": "正しい。その時間帯にしては多すぎる時だけ鳴る。",
+          "D": "少なすぎる時に鳴り、多すぎる時には鳴らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "quote": "These types of alarms don't have a static threshold for determining alarm state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0007",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "Amazon GuardDuty",
+        "Amazon EventBridge",
+        "Amazon SNS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses GuardDuty with a delegated administrator account. The security team wants an email for each new finding and wants repeated occurrences of an existing finding to be reported every 15 minutes instead of every 6 hours. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an EventBridge rule for GuardDuty findings with an Amazon SNS topic that has an email subscription as the target."
+        },
+        {
+          "key": "B",
+          "text": "In the GuardDuty administrator account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+        },
+        {
+          "key": "C",
+          "text": "In each member account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+        },
+        {
+          "key": "D",
+          "text": "Change the notification frequency for newly generated findings from 6 hours to 15 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Turn on email notifications in GuardDuty, which sends findings by email without an EventBridge rule."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "GuardDuty は検出結果を EventBridge へ自動で送る。通知を受けるには EventBridge のルールとターゲット（例えば SNS のトピック）を作る。新しい検出結果はほぼリアルタイムに送られ、その頻度は変えられない。同じ検出結果のその後の発生は既定で 6 時間ごとにまとめられ、管理者アカウントだけが 15 分・1 時間・6 時間から変えられる。",
+        "per_choice": {
+          "A": "正しい。ルールのターゲットに SNS のトピックを置き、メールで受ける。",
+          "B": "正しい。その後の発生の頻度は管理者アカウントが 15 分にできる。",
+          "C": "頻度を変えられるのは管理者アカウントだけ。",
+          "D": "新しい検出結果はほぼリアルタイムで送られ、この頻度は変えられない。",
+          "E": "通知を受けるには EventBridge のルールとターゲットを作る必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "quote": "In order to receive notifications about GuardDuty findings based on events, you must create an EventBridge rule and a target for GuardDuty."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "quote": "Only an administrator account can update the EventBridge notification frequency for subsequent finding occurrences."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "quote": "Possible values are 15 minutes, 1 hour, or the default 6 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "quote": "The notification frequency for newly generated findings is in near real-time."
         }
       ],
       "low_confidence": false
