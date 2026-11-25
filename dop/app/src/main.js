@@ -6,6 +6,7 @@ import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
 import { RATES, questionScript, answerScript } from './logic/speech.js';
 import { resume, snapshot } from './logic/progress.js';
+import { lookup, pageList } from './logic/glossary.js';
 import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, saveSpeech, loadProgress, saveProgress } from './storage.js';
 
 const app = document.getElementById('app');
@@ -19,6 +20,7 @@ const state = {
   reports: storedReports.reports,
   report: null, // 報告の欄を開いている間 { kind, comment, status }
   lang: loadLang(), // 問題文と選択肢の言葉（P-012）
+  glossary: null, // サービス事典（A-0013）。取れなければ null のまま
   speech: loadSpeech(), // 読み上げ（A-0009）{ on, rate }
   spokenKey: null, // 最後に読んだ段（"問題の番号:答えたか"）。同じ段は読み直さない
 };
@@ -62,9 +64,66 @@ async function checkVersion() {
   }
 }
 
+// ---- サービス事典（A-0013、P-014）: 問題とは別のファイル。問題のサービス名から引く ----
+const dialog = el('dialog', { class: 'gloss', 'data-testid': 'glossary-dialog', 'aria-label': 'サービス事典' });
+document.body.append(dialog);
+
+async function loadGlossary() {
+  try {
+    const res = await fetch('public/glossary.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    state.glossary = await res.json();
+    if (state.questions.length) render(); // 問題が読めていない時（エラーの表示中）は描き直さない
+  } catch {
+    // 事典が無くても解ける
+  }
+}
+
+function renderGlossaryPage(p) {
+  return el('article', { class: 'gloss-page', 'data-testid': 'glossary-page' },
+    el('h2', { class: 'gloss-name', text: p.name }),
+    p.reading ? el('p', { class: 'muted small', text: p.reading }) : null,
+    el('p', { text: p.summary }),
+    el('h3', { text: '主な機能' }),
+    el('ul', {}, p.features.map((f) => el('li', {}, el('strong', { text: `${f.title}: ` }), f.text))),
+    el('h3', { text: '試験のポイント' }),
+    el('ul', {}, p.exam_points.map((t) => el('li', { text: t }))),
+    p.compare?.length ? [el('h3', { text: '似たサービスとの違い' }), el('ul', {}, p.compare.map((c) => el('li', {}, el('strong', { text: `${c.with}: ` }), c.text)))] : null,
+    el('div', { class: 'refs' }, p.references.map((r) => el('figure', { class: 'ref' },
+      el('blockquote', { lang: 'en', text: r.quote }),
+      el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' }))))),
+  );
+}
+
+function openGlossary(p) {
+  dialog.replaceChildren(renderGlossaryPage(p),
+    el('div', { class: 'actions' }, el('button', { type: 'button', onclick: () => dialog.close(), text: '閉じる' })));
+  if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+  dialog.scrollTop = 0;
+}
+
+function serviceLabel(name) {
+  const p = lookup(state.glossary, name);
+  return p ? el('button', { type: 'button', class: 'svc', 'data-testid': 'service', onclick: () => openGlossary(p), text: name }) : el('span', { text: name });
+}
+
+function renderGlossaryList() {
+  progress.textContent = '';
+  const list = pageList(state.glossary);
+  app.replaceChildren(el('section', { class: 'card', 'data-testid': 'glossary' },
+    el('h2', { class: 'title', text: 'サービス事典' }),
+    list.length
+      ? el('ul', { class: 'gloss-list' }, list.map((p) => el('li', {},
+        el('button', { type: 'button', class: 'svc', onclick: () => openGlossary(p), text: p.name }),
+        el('span', { class: 'muted small', text: ` ${p.reading ?? ''}` }))))
+      : el('p', { class: 'muted', 'data-testid': 'glossary-empty', text: '事典はまだありません。' }),
+  ));
+}
+
 async function load() {
   showVersion();
   checkVersion();
+  loadGlossary();
   try {
     const res = await fetch('public/questions.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -139,6 +198,7 @@ function render() {
     if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
   }
   if (state.view === 'stats') return renderStats();
+  if (state.view === 'glossary') return renderGlossaryList();
   if (state.index >= state.questions.length) return renderResult();
   const q = state.questions[state.index];
   const multi = q.type === 'multi';
@@ -147,7 +207,7 @@ function render() {
 
   const meta = el('div', { class: 'meta' },
     el('span', { text: `タスク ${q.task}` }),
-    el('span', { text: q.services.join('・') }),
+    el('span', { class: 'svcs' }, q.services.flatMap((s, i) => (i ? ['・', serviceLabel(s)] : [serviceLabel(s)]))),
     q.low_confidence ? el('span', { class: 'badge warn', 'data-testid': 'low-confidence', title: '検証役の AI が迷った問題です。解説と出典を確かめてください', text: 'AI の確信が低い' }) : null,
     state.reports.some((r) => r.id === q.id) ? el('span', { class: 'badge warn', 'data-testid': 'reported', text: '報告済み' }) : null,
     view.ja ? null : el('span', { class: 'badge', 'data-testid': 'no-ja', text: '日本語版はまだありません' }),

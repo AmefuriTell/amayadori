@@ -38,7 +38,7 @@ export async function launch() {
  * data を渡すと public/questions.json の代わりにそれを返す（null なら 404 にする）。
  * init はページの前に動かす JavaScript（localStorage を壊すなど）。
  */
-export async function openPage(browser, url, { width = 1280, height = 800, data, init, context } = {}) {
+export async function openPage(browser, url, { width = 1280, height = 800, data, glossary, init, context } = {}) {
   // context を渡すと、その中で開く（localStorage を開き直しの間で残す試験のため）
   const page = await (context ?? browser).newPage(context ? undefined : { viewport: { width, height } });
   if (context) await page.setViewportSize({ width, height });
@@ -50,6 +50,11 @@ export async function openPage(browser, url, { width = 1280, height = 800, data,
     await page.route('**/public/questions.json', (route) => (data === null
       ? route.fulfill({ status: 404, body: 'not found' })
       : route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })));
+  }
+  if (glossary !== undefined) {
+    await page.route('**/public/glossary.json', (route) => (glossary === null
+      ? route.fulfill({ status: 404, body: 'not found' })
+      : route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(glossary) })));
   }
   await page.goto(url);
   return { page, errors };
