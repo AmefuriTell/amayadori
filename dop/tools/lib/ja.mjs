@@ -30,7 +30,7 @@ export function jaErrors(q) {
     for (const [en, ja, msg] of QUAL) if (en.test(q.stem ?? '') && !ja.test(q.stem_ja)) out.push(`問題文の条件の語が日本語に無い（${msg}）`);
   }
   // 正解だけ長い（日本語の文字数で）
-  const len = (c) => String(c.text_ja ?? '').length;
+  const len = (c) => String(c.text_ja ?? '').replace(/[A-Za-z0-9_.:/*-]+/g, 'xx').length; // 英語の名前は長さを数えない（英語の検査が 1 語と数えるのに合わせ、2 字とみなす）
   const right = (q.choices ?? []).filter((c) => q.answer?.includes(c.key));
   const wrong = (q.choices ?? []).filter((c) => !q.answer?.includes(c.key));
   const avg = wrong.reduce((n, c) => n + len(c), 0) / Math.max(1, wrong.length);
