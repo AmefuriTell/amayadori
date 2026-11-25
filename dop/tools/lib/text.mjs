@@ -54,7 +54,9 @@ export function htmlSections(html) {
   const title = decode((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').trim());
   let body = html
     .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<(script|style|noscript|svg|nav|header|footer|awsdocs-[a-z-]+)[\s\S]*?<\/\1>/gi, '');
+    .replace(/<(script|style|noscript|svg|nav|header|footer)\b[\s\S]*?<\/\1>/gi, '')
+    // AWS のドキュメントの部品（awsdocs-*）は本文を包むことがあるので、印だけ消して中身は残す
+    .replace(/<\/?awsdocs-[^>]*>/gi, '');
   const main = body.search(/<div[^>]+id="main-col-body"/i);
   if (main >= 0) body = body.slice(main);
   else {

@@ -8,7 +8,7 @@
   </inputs>
   <actions>
     <a>loop next を呼ぶ。</a>
-    <a>出力の kind に対応する工程へ進む（loop next が state も進める）。</a>
+    <a>出力の kind に対応する工程へ進む（loop next が state も進め、work/&lt;ID&gt;/item.json を書く）。</a>
   </actions>
   <outputs>
     <json>{ "ok": true, "item": { "id": "C-0012", "kind": "content", "task": "1.2", "topic": "...", "count": 5, "attempts": 0 }, "state": "C1_research", "doc": "steps/C1-research.md" }</json>

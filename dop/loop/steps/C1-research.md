@@ -5,7 +5,8 @@
   <purpose>問題の根拠になる公式ドキュメントの抜き出しを作る。進行役は Web の本文を読まない。</purpose>
   <inputs>
     <item_fields>task（試験ガイドのタスク番号）, topic, services</item_fields>
-    <config>config/exam.json の該当タスクの説明, config/service-status.json</config>
+    <file>work/&lt;ID&gt;/item.json（loop next が書く。task_info に試験ガイドのタスクの題・knowledge・skills・URL）</file>
+    <config>config/service-status.json</config>
   </inputs>
   <actions>
     <a by="orchestrator">dop-researcher のエージェントを起こし、項目 ID・topic・services を渡す（下の指示はエージェントの定義が読む）。</a>

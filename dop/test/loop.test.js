@@ -108,3 +108,14 @@ test('hooks: 途中で止まらせない・工程の文書を守る・questions.
   sb.run('loop', 'pause');
   assert.equal(sb.hook('stop', {}).code, 0);
 });
+
+test('seed: 試験ガイドの skills から項目を作り、2 回目は足さない', () => {
+  const sb = sandbox();
+  const a = sb.run('loop', 'seed', '--task', '1.1');
+  assert.match(a.summary, /^5 項目/);
+  assert.equal(sb.run('loop', 'seed', '--task', '1.1').summary.startsWith('0 項目'), true);
+  sb.run('loop', 'start');
+  sb.run('loop', 'next');
+  const item = sb.read('work/C-0001/item.json');
+  assert.equal(item.task_info.title, 'Implement CI/CD pipelines');
+});

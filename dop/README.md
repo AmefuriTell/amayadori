@@ -3,7 +3,7 @@
 AWS Certified DevOps Engineer – Professional（DOP-C02）の合格に向けた Web の問題集。
 問題づくりとアプリづくりを、AI が回すループ（ループエンジニアリング）で進める。
 
-ループのツール（`tools/`）はできた。アプリ（`app/`）はまだ無い。試験は `npm test`（Node 22、依存なし）。
+ループのツール（`tools/`）はできた。試験の範囲（`config/exam.json`）は公式の試験ガイドと照らし済み（2026-11-25）。アプリ（`app/`）はまだ無い。試験は `npm test`（Node 22、依存なし）。
 
 ## 読む順番
 

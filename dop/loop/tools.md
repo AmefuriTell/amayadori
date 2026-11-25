@@ -30,6 +30,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `L advance --result <key>` | 各工程の終わり | 結果の key | state, doc, item, stop | 状態の移り方・attempts・札の照合 | 済 |
 | `L close` | S9 | なし | outcome, repeated_issues, human_needed | runs.jsonl・archive への移動 | 済 |
 | `L add --json '<項目か配列>'` / `--file` | 人・L1 | backlog の項目 | added | ID の振り方・重複の確認 | 済 |
+| `L seed [--task 1.1] [--dry]` | 人（初め・試験ガイドの更新時） | config/exam.json | 足した項目数・タスク別の問題数 | 試験ガイドの skills の一覧 | 済 |
 | `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
 | `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
 | `L pause` | 人に止められた時 | なし | state | | 済 |

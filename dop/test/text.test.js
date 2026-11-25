@@ -16,6 +16,12 @@ test('htmlSections: 本文だけを見出しで切る', () => {
   assert.equal(sections[1].text, '- Linear\n- Canary');
 });
 
+test('htmlSections: awsdocs-view に包まれた本文も取れる', () => {
+  const html = '<awsdocs-view><div id="main-col-body"><awsdocs-language-banner x="1"></awsdocs-language-banner><h1 id="a">Title</h1><p>Body text here.</p></div></awsdocs-view>';
+  const { sections } = htmlSections(html);
+  assert.deepEqual(sections.map((s) => s.text), ['Body text here.']);
+});
+
 test('sources.md: 読める・数と URL と語数を確かめる', () => {
   const list = parseSources(SOURCES);
   assert.equal(list.length, 2);

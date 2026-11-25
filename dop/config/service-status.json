@@ -1,10 +1,38 @@
 {
-  "$comment": "廃止・新規受付の停止のサービス。C1 で告知を見つけたら researcher が S0 に書き、人が確かめてからここに足す。下は記憶からの候補で、全部 verified=false（正しいとは限らない。状態が戻ったものもありうる）",
+  "$comment": "廃止・新規受付の停止のサービス。q gate は verified: true の物だけで判定する。C1 で告知を見つけたら researcher が sources.md の S0 に書き、人が確かめてからここに足す",
   "statuses": ["active", "closed_to_new", "retired"],
   "services": [
-    { "name": "AWS OpsWorks", "status": "retired", "verified": false, "source": null },
-    { "name": "AWS CodeStar", "status": "retired", "verified": false, "source": null },
-    { "name": "AWS Cloud9", "status": "closed_to_new", "verified": false, "source": null },
-    { "name": "AWS CodeCommit", "status": "unknown", "verified": false, "source": null, "note": "新規受付の停止のあと方針が変わったという話がある。必ず公式で確かめる" }
+    {
+      "name": "AWS Cloud9",
+      "status": "closed_to_new",
+      "verified": true,
+      "checked": "2026-11-25",
+      "source": "https://docs.aws.amazon.com/cloud9/latest/user-guide/welcome.html",
+      "quote": "AWS Cloud9 is no longer available to new customers. Existing customers of AWS Cloud9 can continue to use the service as normal."
+    },
+    {
+      "name": "AWS CodeCommit",
+      "status": "active",
+      "verified": true,
+      "checked": "2026-11-25",
+      "source": "https://docs.aws.amazon.com/codecommit/latest/userguide/welcome.html",
+      "note": "ユーザーガイドの先頭に、新規受付の停止の告知が無い。試験ガイドの In-Scope AWS Services には載っていない"
+    },
+    {
+      "name": "AWS CodeStar",
+      "status": "retired",
+      "verified": false,
+      "checked": "2026-11-25",
+      "source": null,
+      "note": "ユーザーガイド（codestar/latest/userguide/welcome.html）が 404、aws.amazon.com/codestar/ は AWS のトップへ転送。廃止の公式の告知はまだ見ていない。なお試験ガイドの In-Scope AWS Services には載っている（CodeStar Connections を指している可能性）"
+    },
+    {
+      "name": "AWS OpsWorks",
+      "status": "retired",
+      "verified": false,
+      "checked": "2026-11-25",
+      "source": null,
+      "note": "ユーザーガイド（opsworks/latest/userguide/welcome.html）が 404、aws.amazon.com/opsworks/ は AWS のトップへ転送。廃止の公式の告知はまだ見ていない"
+    }
   ]
 }

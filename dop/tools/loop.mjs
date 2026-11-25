@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // ループを進めるツール。状態の移り方は loop/LOOP.md 2 章の JSON をそのまま読む（決まりを 1 か所に置くため）。
-// コマンド: start / status / next / advance / close / add / block / pause / resume
+// コマンド: start / status / next / advance / close / add / seed / block / pause / resume
 import fs from 'node:fs';
 import path from 'node:path';
 import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel } from './lib/io.mjs';
 import { validate } from './lib/schema.mjs';
-import { coverage } from './lib/bank.mjs';
+import { coverage, exam } from './lib/bank.mjs';
 
 export function loadMachine() {
   const md = fs.readFileSync(path.join(CODE, 'loop', 'LOOP.md'), 'utf8');
@@ -86,7 +86,7 @@ const commands = {
     item.status = 'doing';
     saveBacklog(backlog);
     fs.mkdirSync(paths.work(item.id), { recursive: true });
-    writeJSON(paths.work(item.id, 'item.json'), item);
+    writeJSON(paths.work(item.id, 'item.json'), { ...item, task_info: taskInfo(item.task) });
     if (item.kind === 'recheck') copyForRecheck(item);
 
     s.state = FIRST_STATE[item.kind];
@@ -220,6 +220,37 @@ const commands = {
     emit({ ok: true, summary: `${added.length} 項目を足した${skipped.length ? `、${skipped.length} 項目は足さなかった` : ''}`, items: skipped, extra: { added } });
   },
 
+  // 試験ガイドの「Skills in」の 1 行を 1 項目にする。既にある（状態を問わず）物は足さない
+  seed(args) {
+    const ex = exam();
+    if (!ex.verified) throw new ToolError('config/exam.json がまだ試験ガイドと照らされていない（verified: false）');
+    const backlog = loadBacklog();
+    const have = new Set(backlog.filter((b) => b.kind === 'content').map((b) => `${b.task}|${b.topic}`));
+    const add = [];
+    for (const d of ex.domains) {
+      for (const task of d.tasks) {
+        if (typeof args.task === 'string' && task.id !== args.task && d.id !== Number(args.task)) continue;
+        const target = (d.weight * ex.target_total_questions) / d.tasks.length;
+        const count = Math.max(2, Math.min(5, Math.round(target / Math.max(1, task.skills.length))));
+        for (const skill of task.skills) {
+          if (have.has(`${task.id}|${skill}`)) continue;
+          add.push({ kind: 'content', task: task.id, topic: skill, count, priority: 3, source: 'coverage' });
+        }
+      }
+    }
+    if (!args.dry) {
+      for (const item of add) { item.id = nextId(backlog, 'content'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
+      saveBacklog(backlog);
+    }
+    const byTask = {};
+    for (const a of add) byTask[a.task] = (byTask[a.task] ?? 0) + a.count;
+    emit({
+      ok: true,
+      summary: `${args.dry ? '（試しに）' : ''}${add.length} 項目、${add.reduce((n, a) => n + a.count, 0)} 問ぶんを足した`,
+      extra: { questions_by_task: byTask },
+    });
+  },
+
   block(args) {
     const s = loadState();
     if (typeof args.reason !== 'string') throw new ToolError('--reason "<人に伝える理由>" が要る');
@@ -247,6 +278,15 @@ const commands = {
     emit({ ok: true, summary: `${to} から続ける`, extra: { state: to, doc: docOf(machine, to) } });
   },
 };
+
+function taskInfo(taskId) {
+  if (!taskId) return undefined;
+  for (const d of exam().domains) {
+    const t = d.tasks.find((x) => x.id === taskId);
+    if (t) return { domain: `${d.id} ${d.name}`, title: t.title, url: t.url, knowledge: t.knowledge, skills: t.skills };
+  }
+  return undefined;
+}
 
 function nextId(backlog, kind) {
   const prefix = KIND_PREFIX[kind];
