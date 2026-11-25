@@ -1,0 +1,446 @@
+{
+  "item": "T-0003",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company stores application images in an Amazon ECR repository. Images that carry a tag starting with \"release\" must never be removed. Every other image must be removed automatically 90 days after it was pushed. Storage costs must be controlled without running custom code. Which lifecycle policy meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+        },
+        {
+          "key": "B",
+          "text": "Rule priority 1: tagStatus any, countType sinceImagePushed 90 days. Rule priority 2: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000."
+        },
+        {
+          "key": "C",
+          "text": "Rule priority 1: tagStatus untagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+        },
+        {
+          "key": "D",
+          "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"] and tagPatternList [\"*\"], countType sinceImagePushed 90 days."
+        }
+      ],
+      "explanation": {
+        "summary": "ある規則の条件に合ったイメージは、それより優先度の低い規則では消されない。優先度 1 の規則で release のタグのイメージを選び、数の上限を大きくして実際には消さないようにすると、優先度 2 の「90 日より古いものを消す」規則から守れる。",
+        "per_choice": {
+          "A": "正しい。release のイメージは優先度 1 の規則に合うので、優先度 2 の規則では消されない。imageCountMoreThan は上限を超えた分だけを消すので、上限を大きくすれば残る。",
+          "B": "優先度の高い規則が全てのイメージを 90 日で消すので、release のイメージも消える。",
+          "C": "tagPrefixList は tagStatus が tagged の時しか使えない。",
+          "D": "1 つの規則に tagPrefixList と tagPatternList は両方は書けない。また release のイメージも 90 日で消える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "An image that matches the tagging requirements of a rule cannot be expired or archived by a rule with a lower priority."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S7",
+          "quote": "With countType = imageCountMoreThan, images are sorted from youngest to oldest based on pushed_at_time and then all images greater than the specified count are expired or archived."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "The tagPatternList or tagPrefixList parameters may only used if the tagStatus is tagged."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "A lifecycle policy rule may specify either tagPatternList or tagPrefixList, but not both."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company manages an AWS CodePipeline pipeline in us-east-1 by using the AWS CLI. The company adds an action that deploys an AWS CloudFormation stack in ap-northeast-1, and the update fails. The company wants to keep a single pipeline, keep managing it with the AWS CLI, and avoid adding copy jobs between Regions. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the existing S3 source bucket in us-east-1 as the artifact store for the ap-northeast-1 action."
+        },
+        {
+          "key": "B",
+          "text": "Turn on S3 Cross-Region Replication from the us-east-1 artifact bucket to a bucket in ap-northeast-1."
+        },
+        {
+          "key": "C",
+          "text": "Create an S3 bucket in ap-northeast-1 and add it to the pipeline as the artifact store for that Region."
+        },
+        {
+          "key": "D",
+          "text": "Create a second pipeline in ap-northeast-1 that deploys the stack, and start it at the end of the first pipeline."
+        }
+      ],
+      "explanation": {
+        "summary": "アクションを動かすリージョンごとに 1 つのアーティファクトバケットが要る。コンソールなら自動で作られるが、AWS CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを自分で指定する。",
+        "per_choice": {
+          "A": "アーティファクトバケットは、S3 のソースアクションで使うソースのバケットとは別の物。また別リージョンのアクションにはそのリージョンのバケットが要る。",
+          "B": "リージョンの間でコピーする仕組みを足すことになり、要件に反する。リージョンごとのアーティファクトバケットの指定も無いまま。",
+          "C": "正しい。CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを指定する。",
+          "D": "パイプラインを 1 つにする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "you must have one artifact bucket per Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "you must provide an artifact bucket for each additional Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "The artifact bucket is not the same bucket as the bucket used as the source file location for a pipeline where the chosen source action is S3."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "A company with many AWS accounts is adopting AWS CodeArtifact. Each development team must keep its own repository. A central team must control, in one place, which AWS accounts can use the repositories and which public repositories can be used as package sources. All stored packages must be encrypted with one customer managed AWS KMS key. Which design meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create one domain per team, each encrypted with the same KMS key, and apply the same policy to every domain."
+        },
+        {
+          "key": "B",
+          "text": "Create one domain with the KMS key, put one shared repository in it for all teams, and add a repository policy."
+        },
+        {
+          "key": "C",
+          "text": "Create a repository for each team in each team's account, and restrict access with SCPs in AWS Organizations."
+        },
+        {
+          "key": "D",
+          "text": "Create one domain with the KMS key, create a repository for each team in it, and manage access with a domain policy."
+        }
+      ],
+      "explanation": {
+        "summary": "ドメインは複数のリポジトリをまとめる単位で、中の全ての資産は同じ KMS キーで暗号化される。ドメインを使うと、どのアカウントがリポジトリに入れるか、どの公開リポジトリをパッケージの元にするかを、複数のリポジトリにまとめて決められる。AWS も本番用には 1 つのドメインを勧めている。",
+        "per_choice": {
+          "A": "暗号化はそろうが、ドメインごとにポリシーを持つことになり、1 か所で管理する要件に合わない。",
+          "B": "1 か所で管理でき暗号化もそろうが、チームごとのリポジトリを持つ要件に合わない。",
+          "C": "チームごとのリポジトリは持てるが、ドメインを使わないので、どのアカウントが入れるかやどの公開リポジトリを使うかを 1 か所でまとめて決められない。",
+          "D": "正しい。1 つのドメインの中にチームごとのリポジトリを置き、ドメインでまとめて管理する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "All of the assets and metadata in a domain are encrypted with the same AWS KMS key (KMS key) stored in AWS Key Management Service (AWS KMS)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain, and which public repositories can be used as the sources of packages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "we recommend a single production domain that contains all published artifacts."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company runs AWS CodeBuild projects in account B. The builds must pull container images from an Amazon ECR repository in account A and npm packages from an AWS CodeArtifact domain in account A. The security team requires least privilege and does not allow long-lived credentials or public access to either service. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add a repository policy to the ECR repository in account A that allows the CodeBuild service role in account B to pull images."
+        },
+        {
+          "key": "B",
+          "text": "Add a CodeArtifact domain policy in account A for account B, and have the build get an authorization token with its role credentials."
+        },
+        {
+          "key": "C",
+          "text": "Make the CodeArtifact repository in account A public so that builds can download npm packages without signing in."
+        },
+        {
+          "key": "D",
+          "text": "Store the access key of an IAM user from account A as an environment variable in the CodeBuild project."
+        },
+        {
+          "key": "E",
+          "text": "Move the CodeArtifact repository from the domain in account A into a new domain in account B."
+        }
+      ],
+      "explanation": {
+        "summary": "ECR のプライベートリポジトリは、IAM を使ったリソースベースの権限（リポジトリポリシー）で別アカウントに pull を許せる。CodeArtifact は、ドメインでどのアカウントが入れるかを決め、使う側は自分の AWS の認証情報で認可トークンを作って認証する。",
+        "per_choice": {
+          "A": "正しい。リポジトリポリシーで、必要なロールにだけ pull を許す。",
+          "B": "正しい。ドメインでアカウント B を許し、ビルドはロールの認証情報からトークンを作るので、長く使う認証情報が要らない。",
+          "C": "CodeArtifact のリポジトリのパッケージは公開できない。公開も禁止されている。",
+          "D": "IAM ユーザーのアクセスキーは長く使う認証情報で、要件に反する。",
+          "E": "リポジトリは 1 つのドメインに属し、別のドメインへ移せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S3",
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S2",
+          "quote": "You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "Each repository is a member of a single domain and can't be moved to a different domain."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0005",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A CodeBuild project writes its build output to a dist directory, with subdirectories such as dist/assets and dist/views. The deployment step requires the output artifact to contain the contents of dist at its top level, without a dist folder, while keeping the subdirectory structure. Which artifacts configuration in the buildspec meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "files: '**/*' and base-directory: dist"
+        },
+        {
+          "key": "B",
+          "text": "files: 'dist/**/*' with no base-directory"
+        },
+        {
+          "key": "C",
+          "text": "files: 'dist/**/*' and discard-paths: yes"
+        },
+        {
+          "key": "D",
+          "text": "files: '**/*', base-directory: dist, and discard-paths: yes"
+        }
+      ],
+      "explanation": {
+        "summary": "base-directory に合う最上位のディレクトリ自体は成果物に入らず、その中のファイルとサブディレクトリだけが入る。files の '**/*' は全てのファイルを再帰的に表す。discard-paths を yes にすると、全てのファイルが同じディレクトリに置かれ、構造が平らになる。",
+        "per_choice": {
+          "A": "正しい。dist の中身が最上位に入り、サブディレクトリの構造は残る。",
+          "B": "dist のフォルダーごと成果物に入り、最上位に中身が来ない。",
+          "C": "discard-paths で構造が平らになり、assets や views のサブディレクトリが無くなる。",
+          "D": "dist は外れるが、discard-paths で構造が平らになる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "Matching top-level directories are not included in the build output artifact, only their files and subdirectories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "If this contains yes, all of the build artifacts are placed in the same output directory."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S1",
+          "quote": "'**/*' represents all files recursively."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0006",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A build needs a database password that is stored under the JSON key password in the AWS Secrets Manager secret prod/db, and an API endpoint that is stored in Systems Manager Parameter Store. The password must not be visible in plain text in the CodeBuild console or the AWS CLI, and only the password value should be read from the secret. Which actions should the DevOps engineer take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "In the buildspec env section, use a secrets-manager mapping such as DB_PASSWORD: prod/db:password."
+        },
+        {
+          "key": "B",
+          "text": "In the buildspec env section, use a parameter-store mapping for the endpoint, and add ssm:GetParameters to the CodeBuild service role."
+        },
+        {
+          "key": "C",
+          "text": "Store the password as a plaintext environment variable in the CodeBuild project settings."
+        },
+        {
+          "key": "D",
+          "text": "Use a secrets-manager mapping of prod/db without a json-key, because CodeBuild then returns only the password."
+        },
+        {
+          "key": "E",
+          "text": "Write the password into the buildspec file in the repository so that every build can read it."
+        }
+      ],
+      "explanation": {
+        "summary": "環境変数は CodeBuild のコンソールや AWS CLI で平文として見えるので、機微な値は parameter-store か secrets-manager のマッピングで渡す。secrets-manager は <secret-id>:<json-key> の形で、json-key を書けばその値だけを取り、書かなければ秘密の全文を取る。Parameter Store から取るには、サービスロールに ssm:GetParameters が要る。",
+        "per_choice": {
+          "A": "正しい。json-key の password で、パスワードの値だけを取る。",
+          "B": "正しい。Parameter Store のマッピングと、サービスロールの ssm:GetParameters の両方が要る。",
+          "C": "環境変数はコンソールや CLI で平文として見える。",
+          "D": "json-key を書かないと、秘密の全文を取る。",
+          "E": "リポジトリに平文で置くことになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S3",
+          "quote": "Environment variables can be displayed in plain text using tools such as the CodeBuild console and the AWS CLI."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S3",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S3",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0007",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A CodeBuild project must run integration tests against an Amazon RDS database in private subnets of a VPC. The same build must also download packages from public repositories on the internet. The database must not be exposed to the internet. Which configuration meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Make the RDS database publicly accessible, and run the build without VPC settings."
+        },
+        {
+          "key": "B",
+          "text": "Add the VPC ID, private subnets, and a security group to the project, and route the private subnets through a NAT gateway."
+        },
+        {
+          "key": "C",
+          "text": "Add the VPC ID, private subnets, and a security group to the project, and do not add any route to the internet."
+        },
+        {
+          "key": "D",
+          "text": "Run the build without VPC settings, and add the CodeBuild service to the database security group by name."
+        }
+      ],
+      "explanation": {
+        "summary": "CodeBuild はふつう VPC の中のリソースに届かない。VPC の ID・サブネット・セキュリティグループをプロジェクトに設定すると、VPC の中のリソースに届く。VPC の中で公開のエンドポイントにも届くには、NAT ゲートウェイか NAT インスタンスが要る。",
+        "per_choice": {
+          "A": "データベースをインターネットに出すことになり、要件に反する。",
+          "B": "正しい。VPC の中の RDS に届き、NAT ゲートウェイでインターネットにも出られる。",
+          "C": "RDS には届くが、公開のリポジトリからパッケージを取れない。",
+          "D": "VPC の設定が無いと、CodeBuild は VPC の中のリソースに届かない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "source_id": "S5",
+          "quote": "Typically, AWS CodeBuild cannot access resources in a VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "source_id": "S5",
+          "quote": "This includes the VPC ID, the VPC subnet IDs, and the VPC security group IDs. VPC-enabled builds can then access resources inside your VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "source_id": "S5",
+          "quote": "You need a NAT gateway or NAT instance to use CodeBuild with your VPC so that CodeBuild can reach public endpoints"
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0008",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company has five AWS Lambda functions deployed as .zip file archives that all bundle the same set of libraries. The company wants to stop duplicating these libraries in every package. The company also wants one of the functions, payments, to run from a container image built by its pipeline. Which actions should the company take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Bundle the shared libraries into a .zip file archive and publish it as a Lambda layer for the .zip functions."
+        },
+        {
+          "key": "B",
+          "text": "Create a new Lambda function from the container image for payments, because an existing .zip function cannot be converted."
+        },
+        {
+          "key": "C",
+          "text": "Change the package type of the existing payments function from .zip to container image in its configuration."
+        },
+        {
+          "key": "D",
+          "text": "Publish the shared libraries as a container image layer and attach it to the .zip functions."
+        },
+        {
+          "key": "E",
+          "text": "Upload the shared libraries to Lambda-managed storage once so that every function can read them."
+        }
+      ],
+      "explanation": {
+        "summary": "Lambda のデプロイパッケージはコンテナイメージと .zip の 2 種類で、今ある関数の種類は変えられない。コンテナイメージで動かすには新しい関数を作る。レイヤーは追加のコードやデータを入れた .zip で、ライブラリの依存などを入れて共有できる。",
+        "per_choice": {
+          "A": "正しい。共有のライブラリをレイヤーにまとめる。",
+          "B": "正しい。.zip の関数をコンテナイメージに変えることはできないので、新しく作る。",
+          "C": "今ある関数のパッケージの種類は変えられない。",
+          "D": "レイヤーは .zip のファイルで作る。",
+          "E": "Lambda が管理する保存先に置かれるのは、各関数のソースコードの写し。関数どうしで共有する仕組みはレイヤー。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html",
+          "source_id": "S6",
+          "quote": "You cannot change the deployment package type (.zip or container image) for an existing function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html",
+          "source_id": "S6",
+          "quote": "You must create a new function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html",
+          "source_id": "S7",
+          "quote": "A Lambda layer is a .zip file archive that contains supplementary code or data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html",
+          "source_id": "S7",
+          "quote": "Layers usually contain library dependencies, a custom runtime, or configuration files."
+        }
+      ]
+    }
+  ]
+}
