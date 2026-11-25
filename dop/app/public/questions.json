@@ -5051,22 +5051,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A security policy requires an existing Amazon CloudWatch Logs log group in eu-west-1 to be encrypted with a customer managed AWS KMS key. A DevOps engineer creates a symmetric KMS key in eu-west-1 and tries to associate it with the log group, but the operation fails because CloudWatch Logs cannot use the key. The key must be usable only for this log group. What should the engineer do with the LEAST operational effort?",
+      "stem_ja": "セキュリティのポリシーでは、eu-west-1 にある既存の Amazon CloudWatch Logs のロググループを、カスタマーマネージドの AWS KMS キーで暗号化することが求められています。DevOps エンジニアは eu-west-1 に対称の KMS キーを作成し、ロググループに関連付けようとしましたが、CloudWatch Logs がキーを使えないため操作が失敗します。キーはこのロググループだけで使えるようにする必要があります。エンジニアは最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Create an asymmetric KMS key instead, because CloudWatch Logs encrypts log data with public keys."
+          "text": "Create an asymmetric KMS key instead, because CloudWatch Logs encrypts log data with public keys.",
+          "text_ja": "CloudWatch Logs は公開鍵でログのデータを暗号化するので、代わりに非対称の KMS キーを作成する。"
         },
         {
           "key": "B",
-          "text": "Give the engineer's IAM role kms:Encrypt and kms:Decrypt permissions on the key, and keep the default key policy."
+          "text": "Give the engineer's IAM role kms:Encrypt and kms:Decrypt permissions on the key, and keep the default key policy.",
+          "text_ja": "エンジニアの IAM ロールにキーに対する kms:Encrypt と kms:Decrypt のアクセス許可を与え、既定のキーポリシーはそのままにする。"
         },
         {
           "key": "C",
-          "text": "Create the KMS key in us-east-1 and allow the CloudWatch Logs service principal from that Region to use it."
+          "text": "Create the KMS key in us-east-1 and allow the CloudWatch Logs service principal from that Region to use it.",
+          "text_ja": "us-east-1 に KMS キーを作成し、そのリージョンの CloudWatch Logs のサービスプリンシパルにキーの使用を許可する。"
         },
         {
           "key": "D",
-          "text": "Add a key policy statement that allows the CloudWatch Logs service principal in eu-west-1 to use the key, with a condition for the log group ARN."
+          "text": "Add a key policy statement that allows the CloudWatch Logs service principal in eu-west-1 to use the key, with a condition for the log group ARN.",
+          "text_ja": "eu-west-1 の CloudWatch Logs のサービスプリンシパルにキーの使用を許可する文を、ロググループの ARN の条件付きでキーポリシーに追加する。"
         }
       ],
       "answer": [
@@ -5107,26 +5112,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "An application writes logs to an Amazon CloudWatch Logs log group, and some log events contain credit card numbers. Operators who view the logs must not see the card numbers. Log events must be removed automatically after 90 days so that storage costs stay under control. The company does not want to write or run custom code. Which actions should the company take? (Choose TWO.)",
+      "stem_ja": "あるアプリケーションは Amazon CloudWatch Logs のロググループにログを書き込んでおり、一部のログイベントにはクレジットカード番号が含まれています。ログを見るオペレーターにカード番号が見えてはなりません。ストレージの費用を抑えるため、ログイベントは 90 日後に自動で削除する必要があります。企業は独自のコードを書いたり動かしたりしたくありません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "Create a data protection policy for the log group that uses a data identifier for credit card numbers and masks them."
+          "text": "Create a data protection policy for the log group that uses a data identifier for credit card numbers and masks them.",
+          "text_ja": "クレジットカード番号のデータ識別子を使ってマスクする、ロググループのデータ保護ポリシーを作成する。"
         },
         {
           "key": "B",
-          "text": "Set the retention setting of the log group to 90 days."
+          "text": "Set the retention setting of the log group to 90 days.",
+          "text_ja": "ロググループの保持期間の設定を 90 日にする。"
         },
         {
           "key": "C",
-          "text": "Encrypt the log group with a customer managed AWS KMS key so that operators cannot read the card numbers."
+          "text": "Encrypt the log group with a customer managed AWS KMS key so that operators cannot read the card numbers.",
+          "text_ja": "オペレーターがカード番号を読めないように、カスタマーマネージドの AWS KMS キーでロググループを暗号化する。"
         },
         {
           "key": "D",
-          "text": "Keep the default retention setting, and run a scheduled AWS Lambda function that deletes log events older than 90 days."
+          "text": "Keep the default retention setting, and run a scheduled AWS Lambda function that deletes log events older than 90 days.",
+          "text_ja": "既定の保持期間の設定のままにし、90 日より古いログイベントを削除するスケジュールされた AWS Lambda 関数を実行する。"
         },
         {
           "key": "E",
-          "text": "Export the log group to Amazon S3 every day so that CloudWatch Logs no longer stores the log events."
+          "text": "Export the log group to Amazon S3 every day so that CloudWatch Logs no longer stores the log events.",
+          "text_ja": "CloudWatch Logs にログイベントが残らないように、毎日ロググループを Amazon S3 にエクスポートする。"
         }
       ],
       "answer": [
@@ -5174,26 +5185,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A team creates a metric filter today on a Standard log group to count log events that contain ERROR, and creates an alarm on the metric. The graph shows no data for the past week, although the logs from last week contain errors. During quiet hours with no errors, the alarm shows INSUFFICIENT_DATA instead of OK. The metric has no dimensions. Which statements or actions are correct? (Choose TWO.)",
+      "stem_ja": "あるチームは今日、Standard のロググループに ERROR を含むログイベントを数えるメトリクスフィルターを作成し、そのメトリクスにアラームを作成しました。先週のログにはエラーが含まれているのに、グラフには過去 1 週間のデータがありません。エラーの無い静かな時間帯には、アラームは OK ではなく INSUFFICIENT_DATA になります。メトリクスにはディメンションがありません。正しい説明またはアクションはどれですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "The metric filter publishes data points only for log events that arrive after the filter was created."
+          "text": "The metric filter publishes data points only for log events that arrive after the filter was created.",
+          "text_ja": "メトリクスフィルターは、フィルターを作成した後に届いたログイベントについてだけデータポイントを発行する。"
         },
         {
           "key": "B",
-          "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match."
+          "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match.",
+          "text_ja": "メトリクスフィルターに既定値 0 を設定すると、ログは届いたが 1 つも一致しない時に CloudWatch が 0 を報告する。"
         },
         {
           "key": "C",
-          "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours."
+          "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours.",
+          "text_ja": "サービス名のディメンションを既定値 0 と一緒に追加すると、静かな時間帯もアラームが OK のままになる。"
         },
         {
           "key": "D",
-          "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once."
+          "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once.",
+          "text_ja": "メトリクスフィルターを削除して作り直すと、CloudWatch Logs が過去 1 週間のログを 1 回スキャンする。"
         },
         {
           "key": "E",
-          "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour."
+          "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour.",
+          "text_ja": "ロググループを Infrequent Access のログクラスに移すと、メトリクスフィルターが 1 時間ごとに報告するようになる。"
         }
       ],
       "answer": [
@@ -5242,22 +5259,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A Lambda function must emit several custom business metrics, such as order totals per payment type. The team does not want the function to make extra synchronous API calls to CloudWatch, does not want to grant the cloudwatch:PutMetricData permission, and does not want to create a separate metric filter for each new metric. Which approach meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある Lambda 関数は、支払いの種類ごとの注文の合計など、いくつかの独自のビジネスのメトリクスを出す必要があります。チームは、関数が CloudWatch へ同期の API 呼び出しを余分に行うことも、cloudwatch:PutMetricData のアクセス許可を与えることも、新しいメトリクスごとに別のメトリクスフィルターを作成することも望んでいません。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Write the metrics as log entries in the CloudWatch embedded metric format, using the function's existing logs:PutLogEvents permission."
+          "text": "Write the metrics as log entries in the CloudWatch embedded metric format, using the function's existing logs:PutLogEvents permission.",
+          "text_ja": "関数の既存の logs:PutLogEvents のアクセス許可を使い、CloudWatch の埋め込みメトリクス形式でメトリクスをログエントリとして書く。"
         },
         {
           "key": "B",
-          "text": "Call PutMetricData from the function for each metric, and add cloudwatch:PutMetricData to the execution role."
+          "text": "Call PutMetricData from the function for each metric, and add cloudwatch:PutMetricData to the execution role.",
+          "text_ja": "関数からメトリクスごとに PutMetricData を呼び出し、実行ロールに cloudwatch:PutMetricData を追加する。"
         },
         {
           "key": "C",
-          "text": "Create a metric filter on the log group for each new business metric as it is added."
+          "text": "Create a metric filter on the log group for each new business metric as it is added.",
+          "text_ja": "新しいビジネスのメトリクスを追加するたびに、ロググループにメトリクスフィルターを作成する。"
         },
         {
           "key": "D",
-          "text": "Write the values to an Amazon S3 bucket and run a scheduled job that calls PutMetricData for them."
+          "text": "Write the values to an Amazon S3 bucket and run a scheduled job that calls PutMetricData for them.",
+          "text_ja": "値を Amazon S3 バケットに書き、それらに対して PutMetricData を呼び出すスケジュールされたジョブを実行する。"
         }
       ],
       "answer": [
@@ -5300,22 +5322,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A data team wants all CloudWatch metrics from the AWS/EC2 and AWS/RDS namespaces delivered continuously to an Amazon S3 data lake in Apache Parquet format. Metrics that are added to these namespaces later must be included automatically. The team does not want to write code that polls CloudWatch. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "データチームは、AWS/EC2 と AWS/RDS の名前空間のすべての CloudWatch のメトリクスを、Apache Parquet 形式で Amazon S3 のデータレイクに継続的に届けたいと考えています。これらの名前空間に後から追加されるメトリクスも自動で含める必要があります。チームは CloudWatch をポーリングするコードを書きたくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Create a metric stream with the Quick S3 setup and choose Parquet as the output format of the stream."
+          "text": "Create a metric stream with the Quick S3 setup and choose Parquet as the output format of the stream.",
+          "text_ja": "Quick S3 のセットアップでメトリクスストリームを作成し、ストリームの出力形式に Parquet を選ぶ。"
         },
         {
           "key": "B",
-          "text": "Create a metric stream with an include filter for AWS/EC2 and an exclude filter for every namespace except AWS/RDS."
+          "text": "Create a metric stream with an include filter for AWS/EC2 and an exclude filter for every namespace except AWS/RDS.",
+          "text_ja": "AWS/EC2 の包含フィルターと、AWS/RDS 以外のすべての名前空間の除外フィルターを持つメトリクスストリームを作成する。"
         },
         {
           "key": "C",
-          "text": "Run an AWS Lambda function every minute that calls GetMetricData and writes Parquet files to Amazon S3."
+          "text": "Run an AWS Lambda function every minute that calls GetMetricData and writes Parquet files to Amazon S3.",
+          "text_ja": "毎分 GetMetricData を呼び出して Parquet ファイルを Amazon S3 に書く AWS Lambda 関数を実行する。"
         },
         {
           "key": "D",
-          "text": "Create a metric stream with include filters for the two namespaces, sent to a Firehose delivery stream that converts the data to Parquet."
+          "text": "Create a metric stream with include filters for the two namespaces, sent to a Firehose delivery stream that converts the data to Parquet.",
+          "text_ja": "2 つの名前空間の包含フィルターを持ち、データを Parquet に変換する Firehose の配信ストリームに送るメトリクスストリームを作成する。"
         }
       ],
       "answer": [
@@ -5361,26 +5388,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A team adds a CloudWatch Logs subscription filter that sends matching log events from a log group to an AWS Lambda function for real-time processing. Before the code is written, the team asks what the function will receive and what delivery guarantees it can rely on. Which statements are correct? (Choose TWO.)",
+      "stem_ja": "あるチームは、ロググループの一致するログイベントをリアルタイムの処理のために AWS Lambda 関数へ送る、CloudWatch Logs のサブスクリプションフィルターを追加します。コードを書く前に、チームは関数が何を受け取り、どのような配信の保証を前提にできるかを尋ねています。正しい説明はどれですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "The function receives the log data gzip-compressed and base64 encoded in the awslogs.data field."
+          "text": "The function receives the log data gzip-compressed and base64 encoded in the awslogs.data field.",
+          "text_ja": "関数は、gzip で圧縮され base64 でエンコードされたログのデータを awslogs.data フィールドで受け取る。"
         },
         {
           "key": "B",
-          "text": "Events are delivered at least once, so the function should handle occasional duplicate events."
+          "text": "Events are delivered at least once, so the function should handle occasional duplicate events.",
+          "text_ja": "イベントは少なくとも 1 回配信されるので、関数はときどき重複するイベントを処理できるようにすべきである。"
         },
         {
           "key": "C",
-          "text": "Events are delivered exactly once, so the function does not need to handle duplicates."
+          "text": "Events are delivered exactly once, so the function does not need to handle duplicates.",
+          "text_ja": "イベントは必ず 1 回だけ配信されるので、関数は重複を処理する必要がない。"
         },
         {
           "key": "D",
-          "text": "The function receives plain-text log events, because compression applies only to Kinesis destinations."
+          "text": "The function receives plain-text log events, because compression applies only to Kinesis destinations.",
+          "text_ja": "圧縮は Kinesis の送信先だけに適用されるので、関数はプレーンテキストのログイベントを受け取る。"
         },
         {
           "key": "E",
-          "text": "The log group can have up to 10 subscription filters, so each team can add its own."
+          "text": "The log group can have up to 10 subscription filters, so each team can add its own.",
+          "text_ja": "ロググループには最大 10 個のサブスクリプションフィルターを設定できるので、チームごとに自分のフィルターを追加できる。"
         }
       ],
       "answer": [
