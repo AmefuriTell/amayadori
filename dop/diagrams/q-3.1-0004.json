@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0004",
+  "source": "flowchart TB\n  NET([\"インターネット\"])\n  subgraph AZA[\"AZ-a\"]\n    SA[\"サーバー（AZ-a）\"]\n    NA@{ svc: \"Amazon VPC\", label: \"NAT ゲートウェイ（AZ-a）\" }\n  end\n  subgraph AZB[\"AZ-b\"]\n    SB[\"サーバー（AZ-b）\"]\n    NB@{ svc: \"Amazon VPC\", label: \"✔ D: NAT ゲートウェイ（AZ-b）\" }\n  end\n  subgraph AZC[\"AZ-c\"]\n    SC[\"サーバー（AZ-c）\"]\n    NC@{ svc: \"Amazon VPC\", label: \"✔ D: NAT ゲートウェイ（AZ-c）\" }\n  end\n  SA --> NA --> NET\n  SB -. \"⚠ 今: AZ-a の NAT を共有。AZ-a が落ちると出られない\" .-> NA\n  SB == \"✔ D: 同じゾーンの NAT へ\" ==> NB --> NET\n  SC == \"✔ D: 同じゾーンの NAT へ\" ==> NC --> NET\n",
+  "alt": "3 つのアベイラビリティーゾーンのサーバーが、AZ-a の 1 つの NAT ゲートウェイを共有していると、AZ-a が落ちた時に全部インターネットに出られない。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの物を使う（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

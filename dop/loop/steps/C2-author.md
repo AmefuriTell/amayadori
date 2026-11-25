@@ -14,6 +14,7 @@
     <a>recheck の項目では questions.json に bank の問題が入っている（"recheck": true）。feedback か item.note の指摘の所だけ直し、id は変えない。</a>
     <a>translate の項目（"translate": true）では、bank の問題に日本語版（stem_ja と choices[].text_ja）を足すだけ。英語・答え・解説・出典・選択肢の順は変えない（q validate が bank と比べて止める）。sources.md は要らない。</a>
     <a>事典の項目（G-、P-014）では問題ではなく、下の「事典の書き方」で item.services の各サービスの 1 ページを work/&lt;ID&gt;/glossary.json に { "item", "entries": [ … ] } の形で書き、q validate の代わりに g validate を呼ぶ。</a>
+    <a>図の項目（D-、P-015）では、work/&lt;ID&gt;/context.json（問題・答え・解説）だけを読み、下の「図の書き方」で 1 問 1 枚を work/&lt;ID&gt;/diagrams.json に書き、q validate の代わりに dg validate を呼ぶ（描いた絵は work/&lt;ID&gt;/preview/ に出る。1 枚は自分の目で見る）。</a>
     <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/questions.json（status は draft）</file></outputs>
@@ -72,4 +73,17 @@
   <r>references に使った S 番号ごとに url と 200 字までの原文（quote）を写す。</r>
   <r>config/service-status.json で retired / closed_to_new のサービスは、その事を summary に書く。</r>
 </glossary_rules>
+```
+
+## 図の書き方（D- の項目。P-015）
+
+```xml
+<diagram_rules>
+  <r>目的: 大学生が「何を作ろうとしているか」と「選択肢がどこで問題になるか」を 1 枚で分かる。答えた後に出す図なので、正解を示してよい。</r>
+  <r>形: { "id": "&lt;問題 ID&gt;", "source": "&lt;Mermaid&gt;", "alt": "&lt;図の説明。日本語 20 字以上。読み上げと画像が出ない時に使う&gt;" }。source は flowchart TB（スマホの縦の画面）で始める。</r>
+  <r>サービスの箱は X@{ svc: "&lt;問題の services の名前&gt;", label: "&lt;短い役割&gt;" } と書く。道具が公式のアイコンを付け、押すと事典が開く。人・外のシステムは普通の箱 X["…"]。リージョン・アカウント・VPC・AZ は subgraph で囲む。</r>
+  <r>線には何が流れるかを短く書く（"成果物" "イベント" "ログ" など）。選択肢の問題点は、その場所の線か箱に「⚠ A: …」、正解は「✔ C: …」と書く（全選択肢でなくてよい。大事な 2〜3 個）。</r>
+  <r>context.json の問題文・選択肢・解説に無い構成や事実を足さない（図は解説を絵にする物で、新しい知識の置き場ではない）。</r>
+  <r>1 枚の箱は 8 個まで、線の文字は 20 字くらいまで。重なって読めない時は箱を減らすか分ける。</r>
+</diagram_rules>
 ```

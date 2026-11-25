@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { sandbox, question } from './helpers.js';
+import { preprocess, cleanIcon } from '../tools/lib/diagram.mjs';
+
+test('P-015 図の元: サービスの箱はアイコン付きに、アイコンの無い物は四角に、名前を覚える', () => {
+  const src = 'flowchart TB\n  P@{ svc: "AWS CodePipeline", label: "パイプライン" }\n  X@{ svc: "GitHub" }\n  P --> X';
+  const r = preprocess(src, { 'AWS CodePipeline': 'AWS-CodePipeline' }, (f) => f === 'AWS-CodePipeline');
+  assert.match(r.mermaid, /P@\{ icon: "aws:aws-codepipeline", form: "rounded", label: "パイプライン"/);
+  assert.match(r.mermaid, /X\["GitHub"\]:::svcbox/);
+  assert.match(r.mermaid, /classDef svcbox/);
+  assert.deepEqual(r.nodes, { P: 'AWS CodePipeline', X: 'GitHub' });
+  assert.deepEqual(r.unknown, ['GitHub']);
+});
+
+test('P-015 アイコンの掃除: title・id を外し、rect を path に直す', () => {
+  const svg = '<?xml version="1.0"?><svg viewBox="0 0 64 64" xmlns:xlink="x"><title>t</title><g id="a" fill="#C925D1"><rect id="r" x="0" y="0" width="64" height="64"></rect></g><path d="M1"/></svg>';
+  const out = cleanIcon(svg);
+  assert.doesNotMatch(out, /<title>|id=|<rect|xmlns:xlink/);
+  assert.match(out, /<path fill="#C925D1"|<g fill="#C925D1"><path d="M0,0 h64 v64 h-64 Z"\/>/);
+});
+
+test('P-015 図の項目: seed --ids で作り、C2 から始め、問題の中身を context に写す。形の誤りを返す', () => {
+  const sb = sandbox();
+  sb.write('bank/1.1/q-1.1-0001.json', question({ status: 'verified' }));
+  assert.match(sb.run('loop', 'seed', '--diagram', '--ids', 'q-1.1-0001').summary, /1 個、1 問/);
+  assert.equal(sb.run('loop', 'seed', '--diagram', '--ids', 'q-9.9-9999').ok, false);
+  sb.run('loop', 'start');
+  const next = sb.run('loop', 'next');
+  assert.equal(next.state, 'C2_author');
+  const id = next.item.id;
+  assert.match(id, /^D-/);
+  const ctx = sb.read(`work/${id}/context.json`).questions[0];
+  assert.equal(ctx.id, 'q-1.1-0001');
+  assert.match(ctx.stem, /最も運用の手間/); // 日本語版を写す
+  assert.deepEqual(ctx.answer, ['A']);
+  sb.write(`work/${id}/diagrams.json`, { item: id, diagrams: [{ id: 'q-1.1-0002', source: 'graph LR\n A-->B', alt: 'short' }] });
+  const bad = sb.run('dg', 'validate', id);
+  assert.equal(bad.ok, false);
+  const all = bad.items.join('\n');
+  assert.match(all, /項目の問題/);
+  assert.match(all, /flowchart TB/);
+  assert.match(all, /サービスの箱/);
+  assert.match(all, /alt/);
+  assert.match(all, /図の無い問題: q-1.1-0001/);
+});

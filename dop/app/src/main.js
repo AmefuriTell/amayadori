@@ -254,6 +254,36 @@ function render() {
   autoSpeak(q, view);
 }
 
+// ---- 構成図（A-0014、P-015）: 答えた後に出す。箱を押すと事典を開く ----
+const diagrams = {}; // 問題 ID → SVG の文字列（null は取れなかった）
+
+function renderDiagram(q) {
+  if (!q.diagram) return null;
+  if (!(q.id in diagrams)) {
+    diagrams[q.id] = undefined;
+    fetch(`public/diagrams/${encodeURIComponent(q.id)}.svg`, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.text() : null)).catch(() => null)
+      .then((svg) => { diagrams[q.id] = svg && svg.trim().startsWith('<svg') ? svg : null; if (state.questions[state.index]?.id === q.id && state.answered) render(); });
+    return null;
+  }
+  const svg = diagrams[q.id];
+  if (!svg) return null;
+  const box = el('div', { class: 'diagram-box', role: 'img', 'aria-label': q.diagram.alt });
+  box.innerHTML = svg; // 自分たちが作って検証した図だけ（app/public/diagrams/）
+  const open = (ev) => {
+    const node = ev.target.closest?.('[data-service]');
+    if (!node) return;
+    const p = lookup(state.glossary, node.getAttribute('data-service'));
+    if (p) openGlossary(p);
+  };
+  box.addEventListener('click', open);
+  box.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') open(ev); });
+  return el('figure', { class: 'diagram', 'data-testid': 'diagram' },
+    el('h3', { class: 'small', text: '構成図' }),
+    box,
+    el('figcaption', { class: 'muted small', text: '図のサービスを押すと、事典の説明が開きます。' }));
+}
+
 function renderAnswer(q) {
   const ok = grade(q, state.selected);
   const last = state.index === state.questions.length - 1;
@@ -263,6 +293,7 @@ function renderAnswer(q) {
     el('ul', { class: 'explain' }, q.choices.map((c) => el('li', {
       class: q.answer.includes(c.key) ? 'is-correct' : '', 'data-testid': 'explain-item',
     }, el('strong', { text: `${c.key}. ` }), q.explanation.per_choice[c.key] ?? ''))),
+    renderDiagram(q),
     q.note ? el('aside', { class: 'note', 'data-testid': 'note' }, el('strong', { text: '補足' }), el('p', { text: q.note })) : null,
     el('div', { class: 'refs' }, q.references.map((r) => el('figure', { class: 'ref', 'data-testid': 'reference' },
       el('blockquote', { lang: 'en', text: r.quote }),

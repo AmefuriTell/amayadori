@@ -38,3 +38,7 @@ export const GLOSSARY = {
     },
   },
 };
+
+// 構成図（A-0014）。1 問目にだけ付ける
+export const DIAGRAM_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120" width="300"><g data-service="AWS CodeDeploy" role="button" tabindex="0"><rect x="10" y="10" width="120" height="50" fill="#eef3fb"/><svg width="24" height="24" viewBox="0 0 64 64" x="14" y="14" data-testid="icon"><path d="M0,0 h64 v64 h-64 Z" fill="#C925D1"/></svg><text x="20" y="40">CodeDeploy</text></g><g data-service="AWS Unknown" role="button" tabindex="0"><rect x="160" y="10" width="120" height="50" fill="#eef3fb"/><text x="170" y="40">Unknown</text></g></svg>';
+export const DATA_WITH_DIAGRAM = { ...DATA, questions: DATA.questions.map((q, i) => (i === 0 ? { ...q, diagram: { alt: '1 問目の構成図の説明。CodeDeploy で配る。' } } : q)) };
