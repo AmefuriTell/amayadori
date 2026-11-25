@@ -1,0 +1,135 @@
+{
+  "item": "C-0065",
+  "questions": [
+    {
+      "id": "q-5.2-0001",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "AWS AppConfig は、コードを配り直さずに本番のアプリの動きを変え、機能を少しずつ広げられる。デプロイ戦略と CloudWatch のアラームによる自動ロールバックを組み合わせると、配信の間にアラームが鳴った時に前の版へ戻す。bake time は、100% に配った後もアラームを見る時間で、その間に鳴っても戻す。",
+        "per_choice": {
+          "A": "関数の新しい版を配ることになり、コードを配り直さない要件に反する。",
+          "B": "戻すのが人の作業になり、自動で戻す要件に合わない。少しずつ広げることもできない。",
+          "C": "正しい。少しずつ配り、配信中と bake time の間にアラームが鳴れば自動で戻る。",
+          "D": "コードを作り直して配ることになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html",
+          "source_id": "S1",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "source_id": "S2",
+          "quote": "If an alarm is triggered during this time, AWS AppConfig rolls back the deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+          "source_id": "S3",
+          "quote": "using a combination of AWS AppConfig deployment strategies and automatic rollbacks based on Amazon CloudWatch alarms."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "配信の間に見張るアラームが ALARM か INSUFFICIENT_DATA になると、AppConfig は設定のデータを前の版へ自動で戻す。CloudWatch のアラームで戻すには、AppConfig に権限を設定しておく必要がある。100% に配った後も bake time の間はアラームを見続ける。",
+        "per_choice": {
+          "A": "正しい。ALARM と INSUFFICIENT_DATA の両方で戻す。",
+          "B": "正しい。戻すための権限を設定する必要がある。",
+          "C": "自動で戻る。人の承認は要らない。",
+          "D": "戻すのは設定のデータで、アプリのコードではない。",
+          "E": "100% に配った後も、bake time の間はアラームを見る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+          "source_id": "S3",
+          "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "source_id": "S2",
+          "quote": "You must configure permissions for AWS AppConfig to roll back based on CloudWatch alarms."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "source_id": "S2",
+          "quote": "This setting specifies the amount of time AWS AppConfig monitors for Amazon CloudWatch alarms after the configuration has been deployed to 100% of its targets"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Parameter Store のパラメータの作成・更新・削除を EventBridge で受け、ルールのターゲットに Automation のランブックを指定すれば、イベントに応じて自動化を始められる。aws:approve のアクションは、決めた人が承認か拒否をするまで自動化を一時停止する。",
+        "per_choice": {
+          "A": "正しい。更新を受けてランブックを始め、承認を待ってから再起動する。",
+          "B": "自分でコードを書いて動かすことになり、要件に反する。",
+          "C": "承認の手順が無く、承認してから再起動する要件に反する。",
+          "D": "人が毎朝確かめることになり、手間が大きく、反映も遅れる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-cwe.html",
+          "source_id": "S7",
+          "quote": "Notify you when a parameter or a parameter label version is created, updated, or deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html",
+          "source_id": "S4",
+          "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-require-approvals.html",
+          "source_id": "S5",
+          "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "rate control の concurrency は、同時に自動化を動かしてよいリソースの数を決める。error threshold は、他のリソースへ送るのを止めるまでに失敗してよい自動化の数を決める。adaptive concurrency は、同時の数を 100 から 500 まで自動で増やす物。",
+        "per_choice": {
+          "A": "正しい。concurrency で同時に動かす数を 20 にし、error threshold で止めるまでに許す失敗の数を 5 にする。",
+          "B": "同時の数を自動で増やす物で、同時に 20 までに抑える要件に反する。",
+          "C": "自分でスクリプトを作ることになり、手間が大きい。",
+          "D": "1 台ずつの手作業になり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "source_id": "S6",
+          "quote": "The concurrency value determines how many resources are allowed to run the automation simultaneously."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "source_id": "S6",
+          "quote": "An error threshold determines how many automations are allowed to fail before Systems Manager stops sending the automation to other resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "source_id": "S6",
+          "quote": "Adaptive concurrency automatically scales your automation quota from 100 concurrently running automations up to 500."
+        }
+      ]
+    }
+  ]
+}
