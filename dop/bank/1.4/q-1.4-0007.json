@@ -1,0 +1,56 @@
+{
+  "id": "q-1.4-0007",
+  "task": "1.4",
+  "services": [
+    "AWS CodeArtifact"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A nightly data job runs for about 14 hours and downloads Python packages from AWS CodeArtifact at several points during the run. It gets a CodeArtifact authorization token once at the start with the default settings. The job always fails late in the run with authentication errors. Which change BEST fixes the problem?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Request the token with a lifetime of 24 hours at the start of the job."
+    },
+    {
+      "key": "B",
+      "text": "Attach the AWSCodeArtifactReadOnlyAccess managed policy so that the token never expires."
+    },
+    {
+      "key": "C",
+      "text": "Keep one token for the whole run, because CodeArtifact renews the token automatically while it is in use."
+    },
+    {
+      "key": "D",
+      "text": "Fetch a new authorization token before the current one expires, for example before each download step."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CodeArtifact の認可トークンの寿命は既定で 12 時間で、15 分から 12 時間の間で決められる。寿命が切れたら、新しいトークンを取る必要がある。14 時間の処理では、途中で取り直す。",
+    "per_choice": {
+      "A": "寿命は 12 時間までしか決められない。",
+      "B": "権限を足してもトークンの寿命は変わらない。",
+      "C": "寿命が切れたら新しいトークンを取る必要がある。自動では延びない。",
+      "D": "正しい。切れる前に取り直せば、最後まで認証できる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+      "source_id": "S1",
+      "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+      "source_id": "S1",
+      "quote": "When the lifetime expires, you must fetch another token."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

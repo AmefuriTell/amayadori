@@ -1,0 +1,59 @@
+{
+  "id": "q-1.4-0009",
+  "task": "1.4",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2",
+    "Amazon S3",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "AWS CodeDeploy deployments to Amazon EC2 instances fail because the CodeDeploy agent cannot download the application revision from the S3 bucket deploy-artifacts. The instances have no instance profile. The security team requires least privilege and does not allow public buckets. Which solution meets these requirements with the LEAST privilege?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach an instance profile whose role allows all S3 actions on all buckets."
+    },
+    {
+      "key": "B",
+      "text": "Attach an instance profile whose role allows reading objects only from the deploy-artifacts bucket."
+    },
+    {
+      "key": "C",
+      "text": "Add S3 read permissions to the CodeDeploy service role, and keep the instances without an instance profile."
+    },
+    {
+      "key": "D",
+      "text": "Make the deploy-artifacts bucket public so that the agent can download revisions without credentials."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "EC2 のインスタンスには、アプリが置かれた S3 のバケットや GitHub に入る権限が要り、その権限はインスタンスプロファイルのロールで CodeDeploy のエージェントに与える。ポリシーは、インスタンスが入る必要のあるバケットだけに絞るのが勧められている。",
+    "per_choice": {
+      "A": "全てのバケットへの全ての操作を許すことになり、最小権限に反する。",
+      "B": "正しい。エージェントが使うインスタンスプロファイルで、必要なバケットだけを読ませる。",
+      "C": "S3 からリビジョンを取るのはインスタンスの上のエージェントで、インスタンスプロファイルの権限を使う。",
+      "D": "公開のバケットは許されていない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+      "source_id": "S7",
+      "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+      "source_id": "S7",
+      "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
