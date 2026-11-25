@@ -1,0 +1,176 @@
+{
+  "item": "C-0002",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "task": "1.1",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeConnections",
+        "AWS CloudFormation",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer uses AWS CloudFormation to create a connection to GitHub and an AWS CodePipeline pipeline that uses it as the source. The stack deploys successfully, but the pipeline cannot access the repository, and the connection status is PENDING. The engineer wants to keep the connection that the stack created and avoid storing personal tokens. What should the engineer do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Wait for the connection to change to AVAILABLE automatically after the first pipeline run."
+        },
+        {
+          "key": "B",
+          "text": "Delete the connection and create it again with the AWS CLI so that it becomes AVAILABLE."
+        },
+        {
+          "key": "C",
+          "text": "Edit the connection in the console to complete its setup so that its status becomes AVAILABLE."
+        },
+        {
+          "key": "D",
+          "text": "Store a GitHub personal access token in AWS Secrets Manager and point the source action to it."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+        "per_choice": {
+          "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+          "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+          "C": "正しい。コンソールで編集すれば AVAILABLE になる。",
+          "D": "個人のトークンを持たない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.1-0002",
+      "task": "1.1",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeBuild",
+        "AWS CodeConnections"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS CodePipeline pipeline uses a GitHub source action through a connection, followed by an AWS CodeBuild action. The build script runs git commands that read the commit history to compute a version number, but the commands fail because no Git metadata is present. A later AWS CodeDeploy action must keep receiving the build output. The team does not want to store Git credentials in the build. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure the source action to output a full clone, and keep CodeBuild as the action that uses the source artifact."
+        },
+        {
+          "key": "B",
+          "text": "Configure the source action to output a full clone, and pass the source artifact directly to the CodeDeploy action."
+        },
+        {
+          "key": "C",
+          "text": "Keep the default ZIP output and add a git clone command that uses a personal access token to the buildspec."
+        },
+        {
+          "key": "D",
+          "text": "Keep the default ZIP output and run git init in the build before the version script runs."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+        "per_choice": {
+          "A": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+          "B": "full clone の参照は CodeBuild のアクションしか使えない。",
+          "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+          "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.1-0003",
+      "task": "1.1",
+      "services": [
+        "AWS CodePipeline",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company's AWS CodePipeline pipeline uses a GitHub source through a connection and currently starts on every push. The company wants the pipeline to start only when a Git tag whose name starts with \"release\" is created. Pushes without such a tag must not start the pipeline, and the company does not want to write custom code. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure the pipeline trigger with the Tags filter type and the pattern release*."
+        },
+        {
+          "key": "B",
+          "text": "Keep the push trigger and add a branch filter for the main branch, where release tags are created."
+        },
+        {
+          "key": "C",
+          "text": "Create an Amazon EventBridge rule for GitHub tag events that invokes a Lambda function to start the pipeline."
+        },
+        {
+          "key": "D",
+          "text": "Disable automatic starts and choose Release change in the console after each release tag is created."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+        "per_choice": {
+          "A": "正しい。release で始まるタグが作られた時だけ始まる。",
+          "B": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+          "C": "自分でコードを書くことになり、要件に反する。",
+          "D": "毎回人が始めることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "This example shows you how to create a pipeline that allows filtering for tags based on the syntax of the tag name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}
