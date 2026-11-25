@@ -4112,26 +4112,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A company runs a payment AWS Lambda function and a batch Lambda function in the same account and Region. When the batch function receives a large burst, the payment function is throttled. The payment function must always have 200 concurrent executions available, and requests to it must not wait for execution environments to initialize at peak times. The batch function must not be limited. Which actions should the company take? (Choose TWO.)",
+      "stem_ja": "ある企業は、同じアカウントとリージョンで、決済用の AWS Lambda 関数とバッチ用の Lambda 関数を動かしています。バッチ用の関数に大量のリクエストが一度に来ると、決済用の関数がスロットリングされます。決済用の関数は、常に 200 の同時実行を使える必要があり、ピーク時にリクエストが実行環境の初期化を待ってはなりません。バッチ用の関数を制限してはなりません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "Configure reserved concurrency of 200 on the payment function."
+          "text": "Configure reserved concurrency of 200 on the payment function.",
+          "text_ja": "決済用の関数に、200 の予約された同時実行を設定する。"
         },
         {
           "key": "B",
-          "text": "Configure provisioned concurrency on the payment function for the peak periods."
+          "text": "Configure provisioned concurrency on the payment function for the peak periods.",
+          "text_ja": "ピークの時間帯に向けて、決済用の関数にプロビジョニングされた同時実行を設定する。"
         },
         {
           "key": "C",
-          "text": "Configure reserved concurrency on the batch function so that it cannot use more than a fixed amount."
+          "text": "Configure reserved concurrency on the batch function so that it cannot use more than a fixed amount.",
+          "text_ja": "一定の量を超えて使えないように、バッチ用の関数に予約された同時実行を設定する。"
         },
         {
           "key": "D",
-          "text": "Configure provisioned concurrency on the batch function so that its bursts start faster."
+          "text": "Configure provisioned concurrency on the batch function so that its bursts start faster.",
+          "text_ja": "一度に来るリクエストの開始が速くなるように、バッチ用の関数にプロビジョニングされた同時実行を設定する。"
         },
         {
           "key": "E",
-          "text": "Increase the memory of the payment function so that it can handle more requests at the same time."
+          "text": "Increase the memory of the payment function so that it can handle more requests at the same time.",
+          "text_ja": "同時に多くのリクエストを処理できるように、決済用の関数のメモリを増やす。"
         }
       ],
       "answer": [
@@ -4174,22 +4180,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company runs an application on Amazon EC2 instances in an Auto Scaling group. Each new instance must write a large amount of data to disk before it can serve requests, which takes about 15 minutes. Traffic spikes are unpredictable. To keep latency low, the company keeps the group at a much higher minimum capacity than normal traffic needs. The company wants to reduce cost while keeping latency low during spikes. Which solution meets these requirements MOST cost-effectively?",
+      "stem_ja": "ある企業は、Auto Scaling グループの Amazon EC2 インスタンスでアプリケーションを動かしています。新しいインスタンスは、リクエストに応答できるようになる前に大量のデータをディスクに書き込む必要があり、それに約 15 分かかります。トラフィックの急増は予測できません。レイテンシーを低く保つため、企業はグループの最小容量を、通常のトラフィックに必要な量よりかなり高くしています。企業は、急増の時のレイテンシーを低く保ちながら費用を減らしたいと考えています。これらの要件を満たす最も費用対効果の高いソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Add a warm pool to the Auto Scaling group, and lower the minimum capacity to match normal traffic."
+          "text": "Add a warm pool to the Auto Scaling group, and lower the minimum capacity to match normal traffic.",
+          "text_ja": "Auto Scaling グループにウォームプールを追加し、最小容量を通常のトラフィックに合わせて下げる。"
         },
         {
           "key": "B",
-          "text": "Increase the minimum capacity further so that more instances are always ready for spikes."
+          "text": "Increase the minimum capacity further so that more instances are always ready for spikes.",
+          "text_ja": "急増に備えて常により多くのインスタンスが準備できているように、最小容量をさらに上げる。"
         },
         {
           "key": "C",
-          "text": "Shorten the instance warmup time in the scaling policy so that new instances are counted sooner."
+          "text": "Shorten the instance warmup time in the scaling policy so that new instances are counted sooner.",
+          "text_ja": "新しいインスタンスが早く数に入るように、スケーリングポリシーのインスタンスのウォームアップ時間を短くする。"
         },
         {
           "key": "D",
-          "text": "Replace the instances with larger instance types, and keep the current minimum capacity."
+          "text": "Replace the instances with larger instance types, and keep the current minimum capacity.",
+          "text_ja": "インスタンスをより大きいインスタンスタイプに置き換え、今の最小容量はそのままにする。"
         }
       ],
       "answer": [
@@ -4231,22 +4242,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "An Auto Scaling group uses a target tracking scaling policy with a target of 50% average CPU utilization. New instances run CPU-heavy initialization for about 5 minutes after launch. During that time, the group's average CPU rises and the policy launches more instances than needed. The company must keep the 50% target for normal operation and must not change the application. What should the company do with the LEAST operational effort?",
+      "stem_ja": "ある Auto Scaling グループは、平均 CPU 使用率 50% を目標とするターゲット追跡スケーリングポリシーを使っています。新しいインスタンスは、起動後の約 5 分間、CPU を多く使う初期化を行います。その間にグループの平均 CPU が上がり、ポリシーが必要以上にインスタンスを起動します。企業は、通常の運用では 50% の目標を保つ必要があり、アプリケーションを変えてはなりません。企業は最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Raise the target value to 80% so that the initialization load does not trigger scale-out."
+          "text": "Raise the target value to 80% so that the initialization load does not trigger scale-out.",
+          "text_ja": "初期化の負荷でスケールアウトしないように、目標値を 80% に上げる。"
         },
         {
           "key": "B",
-          "text": "Lower the target value to 30% so that capacity is added earlier and the average CPU stays low."
+          "text": "Lower the target value to 30% so that capacity is added earlier and the average CPU stays low.",
+          "text_ja": "早めに容量が増えて平均 CPU が低く保たれるように、目標値を 30% に下げる。"
         },
         {
           "key": "C",
-          "text": "Set an instance warmup time of about 5 minutes in the target tracking scaling policy."
+          "text": "Set an instance warmup time of about 5 minutes in the target tracking scaling policy.",
+          "text_ja": "ターゲット追跡スケーリングポリシーで、インスタンスのウォームアップ時間を約 5 分に設定する。"
         },
         {
           "key": "D",
-          "text": "Disable scale-in on the scaling policy so that the extra instances are not terminated."
+          "text": "Disable scale-in on the scaling policy so that the extra instances are not terminated.",
+          "text_ja": "余分なインスタンスが終了されないように、スケーリングポリシーのスケールインを無効にする。"
         }
       ],
       "answer": [
@@ -4284,22 +4300,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "An application's traffic follows a daily pattern that shifts slowly over the months, and new instances need about 10 minutes before they can serve traffic. The team created a predictive scaling policy two weeks ago, and the forecasts look accurate, but the Auto Scaling group still does not add capacity before the morning peak. The team wants capacity to be ready ahead of the peak without maintaining fixed schedules. What should the team do with the LEAST operational effort?",
+      "stem_ja": "あるアプリケーションのトラフィックは、数か月かけてゆっくり変わる毎日のパターンに従っており、新しいインスタンスはトラフィックに応答できるまで約 10 分かかります。チームは 2 週間前に予測スケーリングポリシーを作成し、予測は正確に見えますが、Auto Scaling グループは朝のピークの前に容量を追加しません。チームは、固定のスケジュールを保守せずに、ピークの前に容量が準備されるようにしたいと考えています。チームは最も少ない運用の手間で何をすべきですか。",
       "choices": [
         {
           "key": "A",
-          "text": "Change the policy from forecast only to forecast and scale, and set pre-launch instances to about 10 minutes."
+          "text": "Change the policy from forecast only to forecast and scale, and set pre-launch instances to about 10 minutes.",
+          "text_ja": "ポリシーを「予測のみ」から「予測とスケール」に変え、インスタンスの事前起動を約 10 分に設定する。"
         },
         {
           "key": "B",
-          "text": "Keep the policy in forecast only mode, and wait for it to learn more of the pattern."
+          "text": "Keep the policy in forecast only mode, and wait for it to learn more of the pattern.",
+          "text_ja": "ポリシーは「予測のみ」のモードのままにし、パターンをさらに学習するのを待つ。"
         },
         {
           "key": "C",
-          "text": "Replace the policy with recurring scheduled actions that use cron expressions for the morning peak."
+          "text": "Replace the policy with recurring scheduled actions that use cron expressions for the morning peak.",
+          "text_ja": "ポリシーを、朝のピーク向けに cron 式を使う繰り返しのスケジュールされたアクションに置き換える。"
         },
         {
           "key": "D",
-          "text": "Delete the policy and create it again so that it starts scaling from the first day."
+          "text": "Delete the policy and create it again so that it starts scaling from the first day.",
+          "text_ja": "初日からスケーリングを始めるように、ポリシーを削除して作り直す。"
         }
       ],
       "answer": [
@@ -4341,22 +4362,27 @@
       "type": "single",
       "select_count": 1,
       "stem": "A company exposes a TCP-based service to a partner. The partner's firewall allows outbound traffic only to a fixed list of IP addresses, one per Availability Zone that the company uses. Each TCP connection must stay with a single backend target for its lifetime. The company does not need any HTTP-level routing. Which solution BEST meets these requirements?",
+      "stem_ja": "ある企業は、TCP ベースのサービスをパートナーに公開しています。パートナーのファイアウォールは、企業が使うアベイラビリティーゾーンごとに 1 つずつの、固定の IP アドレスの一覧への送信だけを許可しています。各 TCP 接続は、接続している間ずっと 1 つのバックエンドのターゲットにとどまる必要があります。企業は HTTP のレベルのルーティングを必要としません。これらの要件を最もよく満たすソリューションはどれですか。",
       "choices": [
         {
           "key": "A",
-          "text": "An Application Load Balancer with listener rules that route requests by path to a target group."
+          "text": "An Application Load Balancer with listener rules that route requests by path to a target group.",
+          "text_ja": "パスでリクエストをターゲットグループにルーティングするリスナールールを持つ Application Load Balancer。"
         },
         {
           "key": "B",
-          "text": "A Network Load Balancer whose DNS name the partner adds to its firewall instead of IP addresses."
+          "text": "A Network Load Balancer whose DNS name the partner adds to its firewall instead of IP addresses.",
+          "text_ja": "パートナーが IP アドレスの代わりに DNS 名をファイアウォールに追加する Network Load Balancer。"
         },
         {
           "key": "C",
-          "text": "A Network Load Balancer with one Elastic IP address associated with the network interface in each enabled Availability Zone."
+          "text": "A Network Load Balancer with one Elastic IP address associated with the network interface in each enabled Availability Zone.",
+          "text_ja": "有効な各アベイラビリティーゾーンのネットワークインターフェイスに Elastic IP アドレスを 1 つずつ関連付けた Network Load Balancer。"
         },
         {
           "key": "D",
-          "text": "One Amazon EC2 instance with an Elastic IP address that forwards connections to the backend targets."
+          "text": "One Amazon EC2 instance with an Elastic IP address that forwards connections to the backend targets.",
+          "text_ja": "バックエンドのターゲットに接続を転送する、Elastic IP アドレスを持つ 1 台の Amazon EC2 インスタンス。"
         }
       ],
       "answer": [
@@ -4397,26 +4423,32 @@
       "type": "multi",
       "select_count": 2,
       "stem": "A product catalog service reads from Amazon ElastiCache in front of a database. After products are updated in the database, users sometimes see old prices from the cache. The company wants cached data to stay current after writes, wants new cache nodes added during scale-out to fill in missing data, and wants to avoid filling the cache with data that is never read. Which actions should the company take? (Choose TWO.)",
+      "stem_ja": "ある商品カタログのサービスは、データベースの前に置いた Amazon ElastiCache から読み込んでいます。データベースで商品が更新された後、ユーザーがキャッシュから古い価格を見ることがあります。企業は、書き込みの後もキャッシュのデータを最新に保ち、スケールアウトで追加した新しいキャッシュノードが足りないデータを埋め、読まれないデータでキャッシュを埋めないようにしたいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
       "choices": [
         {
           "key": "A",
-          "text": "Update the cache every time the application writes to the database (write-through)."
+          "text": "Update the cache every time the application writes to the database (write-through).",
+          "text_ja": "アプリケーションがデータベースに書き込むたびにキャッシュも更新する（書き込みスルー）。"
         },
         {
           "key": "B",
-          "text": "Also load data into the cache on a cache miss (lazy loading), and set a TTL on cached items."
+          "text": "Also load data into the cache on a cache miss (lazy loading), and set a TTL on cached items.",
+          "text_ja": "キャッシュミスの時にもデータをキャッシュに読み込み（遅延読み込み）、キャッシュの項目に TTL を設定する。"
         },
         {
           "key": "C",
-          "text": "Keep only lazy loading, because it never returns stale data."
+          "text": "Keep only lazy loading, because it never returns stale data.",
+          "text_ja": "遅延読み込みは古いデータを返さないので、遅延読み込みだけにする。"
         },
         {
           "key": "D",
-          "text": "Use write-through without any TTL so that every written item stays in the cache permanently."
+          "text": "Use write-through without any TTL so that every written item stays in the cache permanently.",
+          "text_ja": "書き込んだ項目がすべてキャッシュに永久に残るように、TTL なしの書き込みスルーを使う。"
         },
         {
           "key": "E",
-          "text": "Disable the cache whenever a node fails, because node failures are fatal with lazy loading."
+          "text": "Disable the cache whenever a node fails, because node failures are fatal with lazy loading.",
+          "text_ja": "遅延読み込みではノードの障害が致命的なので、ノードが障害を起こすたびにキャッシュを無効にする。"
         }
       ],
       "answer": [
