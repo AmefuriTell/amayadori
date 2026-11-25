@@ -1,0 +1,73 @@
+{
+  "id": "q-4.1-0003",
+  "task": "4.1",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "Amazon CloudWatch"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A team creates a metric filter today on a Standard log group to count log events that contain ERROR, and creates an alarm on the metric. The graph shows no data for the past week, although the logs from last week contain errors. During quiet hours with no errors, the alarm shows INSUFFICIENT_DATA instead of OK. The metric has no dimensions. Which statements or actions are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The metric filter publishes data points only for log events that arrive after the filter was created."
+    },
+    {
+      "key": "B",
+      "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match."
+    },
+    {
+      "key": "C",
+      "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours."
+    },
+    {
+      "key": "D",
+      "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once."
+    },
+    {
+      "key": "E",
+      "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "メトリクスフィルターは過去のデータには効かず、作った後に届いたイベントの値だけを出す。既定の値を決めないと、合うログが無い時は何も報告しないので、0 でも既定の値を決めるのが勧められている。ディメンションを付けたメトリクスには既定の値を決められない。メトリクスフィルターが使えるのは Standard のロググループだけ。",
+    "per_choice": {
+      "A": "正しい。過去のログはさかのぼって数えない。",
+      "B": "正しい。合うログが無い時に既定の値 0 が報告される。",
+      "C": "ディメンションを付けると既定の値を決められない。",
+      "D": "フィルターは過去のデータをさかのぼって調べない。",
+      "E": "メトリクスフィルターは Standard のロググループだけで使える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+      "source_id": "S1",
+      "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+      "source_id": "S3",
+      "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+      "source_id": "S3",
+      "quote": "If you assign dimensions to metrics that metric filters generate, you can't specify default values for those metrics."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+      "source_id": "S1",
+      "quote": "Metric filters are supported only for log groups in the Standard log class."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

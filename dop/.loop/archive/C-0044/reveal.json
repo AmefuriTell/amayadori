@@ -1,0 +1,76 @@
+{
+  "item": "C-0044",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "メトリクスフィルターは過去のデータには効かず、作った後に届いたイベントの値だけを出す。既定の値を決めないと、合うログが無い時は何も報告しないので、0 でも既定の値を決めるのが勧められている。ディメンションを付けたメトリクスには既定の値を決められない。メトリクスフィルターが使えるのは Standard のロググループだけ。",
+        "per_choice": {
+          "A": "正しい。過去のログはさかのぼって数えない。",
+          "B": "正しい。合うログが無い時に既定の値 0 が報告される。",
+          "C": "ディメンションを付けると既定の値を決められない。",
+          "D": "フィルターは過去のデータをさかのぼって調べない。",
+          "E": "メトリクスフィルターは Standard のロググループだけで使える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "source_id": "S1",
+          "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "source_id": "S3",
+          "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "source_id": "S3",
+          "quote": "If you assign dimensions to metrics that metric filters generate, you can't specify default values for those metrics."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "source_id": "S1",
+          "quote": "Metric filters are supported only for log groups in the Standard log class."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "埋め込みメトリクス形式（embedded metric format）では、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作れ、設定も要らない。必要なのは logs:PutLogEvents の権限だけで、cloudwatch:PutMetricData の権限は要らない。",
+        "per_choice": {
+          "A": "同期の API 呼び出しと PutMetricData の権限が要り、要件に反する。",
+          "B": "正しい。ログを書くだけで非同期にメトリクスができ、PutMetricData の権限は要らない。",
+          "C": "メトリクスを足すたびにフィルターを作ることになり、要件に反する。",
+          "D": "仕組みを作ることになり、PutMetricData の権限も要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "source_id": "S4",
+          "quote": "No setup is required to use the embedded metric format."
+        }
+      ]
+    }
+  ]
+}

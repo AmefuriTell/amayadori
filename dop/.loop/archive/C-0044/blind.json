@@ -1,0 +1,68 @@
+{
+  "item": "C-0044",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team creates a metric filter today on a Standard log group to count log events that contain ERROR, and creates an alarm on the metric. The graph shows no data for the past week, although the logs from last week contain errors. During quiet hours with no errors, the alarm shows INSUFFICIENT_DATA instead of OK. The metric has no dimensions. Which statements or actions are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The metric filter publishes data points only for log events that arrive after the filter was created."
+        },
+        {
+          "key": "B",
+          "text": "Setting a default value of 0 on the metric filter makes CloudWatch report 0 when logs arrive but none of them match."
+        },
+        {
+          "key": "C",
+          "text": "Adding a dimension for the service name, together with a default value of 0, keeps the alarm in OK during quiet hours."
+        },
+        {
+          "key": "D",
+          "text": "Deleting and recreating the metric filter makes CloudWatch Logs scan the past week of logs once."
+        },
+        {
+          "key": "E",
+          "text": "Moving the log group to the Infrequent Access log class makes the metric filter report every hour."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon CloudWatch Logs",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function must emit several custom business metrics, such as order totals per payment type. The team does not want the function to make extra synchronous API calls to CloudWatch, does not want to grant the cloudwatch:PutMetricData permission, and does not want to create a separate metric filter for each new metric. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Call PutMetricData from the function for each metric, and add cloudwatch:PutMetricData to the execution role."
+        },
+        {
+          "key": "B",
+          "text": "Write the metrics as log entries in the CloudWatch embedded metric format, using the function's existing logs:PutLogEvents permission."
+        },
+        {
+          "key": "C",
+          "text": "Create a metric filter on the log group for each new business metric as it is added."
+        },
+        {
+          "key": "D",
+          "text": "Write the values to an Amazon S3 bucket and run a scheduled job that calls PutMetricData for them."
+        }
+      ]
+    }
+  ]
+}
