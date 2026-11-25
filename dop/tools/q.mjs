@@ -19,7 +19,7 @@ const DUP_FAIL = 0.6;
 const DUP_WARN = 0.4;
 
 function itemIdOf(arg) {
-  const id = typeof arg === 'string' ? (arg.match(/[CALRTG]-[0-9]{4}/)?.[0] ?? arg) : null;
+  const id = typeof arg === 'string' ? (arg.match(/[CALRTGD]-[0-9]{4}/)?.[0] ?? arg) : null;
   if (!id || !ITEM_ID.test(id)) throw new ToolError('項目 ID（例 C-0012）か work/<ID>/questions.json を渡す');
   return id;
 }

@@ -126,3 +126,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>サービス事典 glossary/services/&lt;id&gt;.json（1 サービス 1 ページ、schemas/glossary.schema.json）を作る。問題の services の名前から aliases で引く。作り方は問題と同じ C1〜C4（事典の項目 G-、loop seed --glossary で 5 サービスずつ）で、C2〜C4 は g validate / verdict / gate / publish。検証役は各文を sources.md と照らす。アプリでの表示は別の app の項目。構成図はその後</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-015" from="user" status="adopted">
+  <issue>文字だけの解説には限界がある。draw.io のような描画で構成図を作れないか（利用者）。方法は Mermaid（利用者の回答）</issue>
+  <kind>tool + doc + app</kind>
+  <change>問題ごとの図の元 diagrams/&lt;問題 ID&gt;.json（Mermaid の flowchart。サービスは X@{ svc: "…" } と名前で書く）を、dg.mjs がこの環境のブラウザで SVG にし app/public/diagrams/ に置く。アイコンは AWS 公式のアイコン集（aws.amazon.com/architecture/icons。構成図に使うことが認められている）から config/icon-map.json の分だけ assets/aws-icons/ に写す（共通）。図の箱を押すと事典（共通）を開く。作り方はループの図の項目（D-）: C2 で描き、C3 で検証役が問題・解説と絵を照らし、C4 で描けることを確かめて入れる。まず 3 問で試作してアプリで見てもらう</change>
+</proposal>
+```

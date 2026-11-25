@@ -70,3 +70,14 @@
 
 - `fact`（出典と違う）・`unsupported`（出典に無い）・`deprecated`（廃止の機能を今の物として書いた）→ fix。同じページが 2 回 fix → drop。
 - `unclear`（大学生に伝わらない言い方）・`style` だけ → 検証役が fix なら fix（attempts を数えない）、ok なら記録だけ。
+
+## 図の項目（D-。P-015）の検証
+
+答えを見ずに解く段は無い。検証役は context.json（問題・答え・解説）と diagrams.json の図の元、work/&lt;ID&gt;/preview/&lt;問題 ID&gt;.png（描いた絵）を見比べて verify.json を書く。進行役は g・q の代わりに dg verdict を呼ぶ。
+
+```json
+{ "item": "D-0001", "diagrams": [ { "id": "q-1.3-0002", "issues": [ { "kind": "fact|unsupported|unreadable|unclear|style", "where": "…", "detail": "…" } ], "verdict": "ok|fix|drop" } ] }
+```
+
+- `fact`（問題・解説と食い違う。⚠・✔ の付け所の誤りも）・`unsupported`（問題・解説に無い構成や事実）・`unreadable`（絵で文字や線が重なって読めない）→ fix。同じ図が 2 回 fix → drop。
+- `unclear`・`style` だけ → 検証役が fix なら fix（attempts を数えない）、ok なら記録だけ。

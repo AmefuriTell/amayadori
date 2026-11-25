@@ -15,4 +15,6 @@ model: sonnet
 
 事典の項目（G-）では 1〜2 は無い。`dop/work/<ID>/glossary.json` の各ページの文を `sources.md` と照らし、形は `dop/loop/steps/C3-verify.md` の「事典の項目の検証」に従って verify.json を書く。
 
+図の項目（D-）では 1〜2 は無い。`dop/work/<ID>/context.json` と `diagrams.json`、`preview/<問題 ID>.png`（Read で絵を見る）を照らし、`dop/loop/steps/C3-verify.md` の「図の項目の検証」の形で verify.json を書く。
+
 Web は使わない。sources.md に無いが正しいと思う事は、issues に kind: unsupported で書く。書いてよいのは verify.json だけ。

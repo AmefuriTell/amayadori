@@ -28,8 +28,8 @@ const GUARDED = {
 const BACK = new Set(['fix', 'fail']);
 // S9 へ行く時の項目の終わり方
 const OUTCOME = { pass: 'done', ok: 'done', no_source: 'dropped', drop: 'dropped' };
-const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T', glossary: 'G' };
-const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', app: 'A1_spec', learn: 'L1_learn' };
+const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T', glossary: 'G', diagram: 'D' };
+const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', diagram: 'C2_author', app: 'A1_spec', learn: 'L1_learn' };
 
 function loadState() {
   return readJSON(paths.state(), { state: 'S0_pick', item: null, prev: null, session: { active: false, started: null, closed: 0 } });
@@ -88,6 +88,7 @@ const commands = {
     fs.mkdirSync(paths.work(item.id), { recursive: true });
     writeJSON(paths.work(item.id, 'item.json'), { ...item, task_info: taskInfo(item.task) });
     if (item.kind === 'recheck' || item.kind === 'translate') copyForRecheck(item);
+    if (item.kind === 'diagram') copyContext(item);
 
     s.state = FIRST_STATE[item.kind];
     s.item = item.id;
@@ -258,6 +259,7 @@ const commands = {
   seed(args) {
     if (args.translate) return seedTranslate(args);
     if (args.glossary) return seedGlossary(args);
+    if (args.diagram) return seedDiagram(args);
     const ex = exam();
     if (!ex.verified) throw new ToolError('config/exam.json がまだ試験ガイドと照らされていない（verified: false）');
     const backlog = loadBacklog();
@@ -392,6 +394,47 @@ function seedGlossary(args) {
     saveBacklog(backlog);
   }
   emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}事典の項目 ${add.length} 個、${todo.length} サービスぶんを足した`, items: add.map((a) => a.services.join(', ')) });
+}
+
+// P-015: 構成図の項目。--ids q-…,q-… で問題を選ぶ（無ければ図の無い問題をタスクごとに size 問ずつ）
+function seedDiagram(args) {
+  const size = Number(args.size ?? 5);
+  const backlog = loadBacklog();
+  const done = new Set(fs.existsSync(paths.diagrams()) ? fs.readdirSync(paths.diagrams()).map((f) => f.replace(/\.json$/, '')) : []);
+  const pending = new Set(backlog.filter((b) => b.kind === 'diagram' && b.status !== 'done').flatMap((b) => b.question_ids ?? []));
+  const bank = loadBank().filter((q) => q.status === 'verified');
+  const groups = [];
+  if (typeof args.ids === 'string') {
+    const ids = args.ids.split(',').map((s) => s.trim()).filter(Boolean);
+    const missing = ids.filter((i) => !bank.some((q) => q.id === i));
+    if (missing.length) throw new ToolError(`bank に無い: ${missing.join(', ')}`);
+    groups.push(ids);
+  } else {
+    const byTask = {};
+    for (const q of bank) if (!done.has(q.id) && !pending.has(q.id)) (byTask[q.task] ??= []).push(q.id);
+    for (const t of Object.keys(byTask).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
+      const ids = byTask[t].sort();
+      for (let i = 0; i < ids.length; i += size) groups.push(ids.slice(i, i + size));
+    }
+  }
+  const add = groups.map((ids) => ({ kind: 'diagram', task: ids[0].match(/^q-([1-6]\.[0-9]+)-/)[1], question_ids: ids, priority: Number(args.priority ?? 2), source: 'diagram', title: `構成図（${ids.join(', ')}）` }));
+  if (!args.dry) {
+    for (const item of add) { item.id = nextId(backlog, 'diagram'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
+    saveBacklog(backlog);
+  }
+  emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}図の項目 ${add.length} 個、${add.reduce((n, a) => n + a.question_ids.length, 0)} 問ぶんを足した`, extra: { added: add.map((a) => a.id) } });
+}
+
+// 図を描く人が読む問題の中身（日本語の問題文・選択肢・答え・解説・補足）。bank は読ませない
+function copyContext(item) {
+  const qs = [];
+  for (const qid of item.question_ids ?? []) {
+    const task = qid.match(/^q-([1-6]\.[0-9]+)-/)?.[1];
+    const q = readJSON(paths.bank(task ?? '_', `${qid}.json`), null);
+    if (!q) continue;
+    qs.push({ id: q.id, services: q.services, type: q.type, stem: q.stem_ja ?? q.stem, choices: q.choices.map((c) => ({ key: c.key, text: c.text_ja ?? c.text })), answer: q.answer, explanation: q.explanation, note: q.note });
+  }
+  writeJSON(paths.work(item.id, 'context.json'), { item: item.id, questions: qs });
 }
 
 function copyForRecheck(item) {

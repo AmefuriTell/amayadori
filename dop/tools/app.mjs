@@ -12,13 +12,20 @@ import { loadGlossary } from './g.mjs';
 // 試験では DOP_APP で別のアプリの置き場を渡す
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
+/** 構成図（P-015）がある問題: diagrams/<id>.json が verified で、絵も app/public/diagrams/ にある */
+export function diagramOf(id, app = APP) {
+  const src = readJSON(paths.diagrams(`${id}.json`), null);
+  return src?.status === 'verified' && fs.existsSync(path.join(app, 'public', 'diagrams', `${id}.svg`)) ? { alt: src.alt } : null;
+}
+
 /** bank の 1 問 → 配信用の 1 問（作り方の情報は出さない） */
-export function toAppQuestion(q) {
+export function toAppQuestion(q, diagram = null) {
   return {
     id: q.id, task: q.task, domain: Number(q.task.split('.')[0]), services: q.services, type: q.type, select_count: q.select_count,
     stem: q.stem, ...(q.stem_ja ? { stem_ja: q.stem_ja } : {}), choices: q.choices, answer: q.answer, explanation: q.explanation,
     references: q.references.map(({ url, quote }) => ({ url, quote })), low_confidence: !!q.low_confidence,
     ...(q.note ? { note: q.note } : {}),
+    ...(diagram ? { diagram } : {}),
   };
 }
 
@@ -41,7 +48,7 @@ export function toAppGlossary(pages) {
 
 export function buildData() {
   const domains = Object.fromEntries(exam().domains.map((d) => [d.id, { name: d.name, weight: d.weight }]));
-  const questions = loadBank().filter((q) => q.status === 'verified').map(toAppQuestion);
+  const questions = loadBank().filter((q) => q.status === 'verified').map((q) => toAppQuestion(q, diagramOf(q.id)));
   const out = { exam: exam().code, domains, count: questions.length, questions };
   const file = path.join(APP, 'public', 'questions.json');
   writeJSON(file, out);

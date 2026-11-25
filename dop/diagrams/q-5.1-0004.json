@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0004",
+  "source": "flowchart TB\n  subgraph WS[\"Web ストアのアカウント（111122223333）\"]\n    APP[\"Web ストアのアプリ\"]\n    WB@{ svc: \"Amazon EventBridge\", label: \"イベントバス（送る側）\" }\n  end\n  subgraph CA[\"中央のアカウント（123456789012）\"]\n    CB@{ svc: \"Amazon EventBridge\", label: \"central-event-bus（受け取る側）\" }\n    POL[\"✔ C: リソースベースのポリシー<br/>111122223333 から、決めた source と<br/>detail-type のイベントだけ発行を許す\"]\n  end\n  WARN[\"⚠ A: 送る側のバスにポリシーを付けても<br/>中央のバスへの発行は許されない\"]\n  APP -- \"newOrderCreated のイベント\" --> WB\n  WB == \"中央のバスへ発行\" ==> CB\n  POL -. \"受け取る側のバスに付ける\" .- CB\n  WARN -.- WB\n",
+  "alt": "Web ストアのアカウントから、別のアカウントの中央のイベントバスへイベントを送る図。受け取る側の central-event-bus に、送る側のアカウントから決めたイベントだけの発行を許すリソースベースのポリシーを付ける（C）。送る側のバスに付けても（A）許されない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
