@@ -1,0 +1,67 @@
+{
+  "id": "q-6.3-0005",
+  "task": "6.3",
+  "services": [
+    "AWS CloudTrail",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security team wants to be alerted when the rate of API calls that create resources suddenly rises far above the account's normal pattern, without defining fixed thresholds. The account has a trail that logs only read management events. The team enabled CloudTrail Insights for API call rate on the trail a week ago, but no Insights events have appeared, although unusual activity occurred. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a CloudWatch alarm with a static threshold on the number of CreateInstance calls in the trail's log group."
+    },
+    {
+      "key": "B",
+      "text": "Configure the trail to also log write management events, keep Insights enabled, and allow up to 36 hours for Insights events to start."
+    },
+    {
+      "key": "C",
+      "text": "Create a new event data store with Insights for data events, because Insights does not work on trails."
+    },
+    {
+      "key": "D",
+      "text": "Move the trail to us-east-1, because Insights events are generated only in that Region."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "CloudTrail Insights は、過去のイベントから API の呼び出しの率と誤りの率のふつうの形（基準）を作り、それから大きく外れた時に Insights のイベントを出す。管理イベントの呼び出しの率で Insights のイベントを出すには、証跡が書き込みの管理イベントを記録している必要がある。初めて有効にした後、出し始めるまで最大 36 時間かかることがある。",
+    "per_choice": {
+      "A": "決まったしきい値を決めることになり、要件に反する。",
+      "B": "正しい。書き込みの管理イベントを記録しないと、管理イベントの呼び出しの率の Insights は出ない。",
+      "C": "データイベントの Insights は証跡でしか使えない。今回の問題は書き込みの管理イベントを記録していないこと。",
+      "D": "Insights のイベントは、元になる管理イベントやデータイベントと同じリージョンで出る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "To log Insights events on the API call rate for management events, the trail or event data store must enable Insights and log write management events."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html",
+      "source_id": "S2",
+      "quote": "After you enable CloudTrail Insights for the first time on a trail, CloudTrail may take up to 36 hours to begin delivering Insights events"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "Insights events on data events are only supported on trails and not on event data stores."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+      "source_id": "S1",
+      "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

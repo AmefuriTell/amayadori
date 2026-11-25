@@ -1,0 +1,74 @@
+{
+  "id": "q-6.3-0007",
+  "task": "6.3",
+  "services": [
+    "Amazon GuardDuty",
+    "Amazon EventBridge",
+    "Amazon SNS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company uses GuardDuty with a delegated administrator account. The security team wants an email for each new finding and wants repeated occurrences of an existing finding to be reported every 15 minutes instead of every 6 hours. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an EventBridge rule for GuardDuty findings with an Amazon SNS topic that has an email subscription as the target."
+    },
+    {
+      "key": "B",
+      "text": "In the GuardDuty administrator account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+    },
+    {
+      "key": "C",
+      "text": "In each member account, set the notification frequency for subsequent finding occurrences to 15 minutes."
+    },
+    {
+      "key": "D",
+      "text": "Change the notification frequency for newly generated findings from 6 hours to 15 minutes."
+    },
+    {
+      "key": "E",
+      "text": "Turn on email notifications in GuardDuty, which sends findings by email without an EventBridge rule."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "GuardDuty は検出結果を EventBridge へ自動で送る。通知を受けるには EventBridge のルールとターゲット（例えば SNS のトピック）を作る。新しい検出結果はほぼリアルタイムに送られ、その頻度は変えられない。同じ検出結果のその後の発生は既定で 6 時間ごとにまとめられ、管理者アカウントだけが 15 分・1 時間・6 時間から変えられる。",
+    "per_choice": {
+      "A": "正しい。ルールのターゲットに SNS のトピックを置き、メールで受ける。",
+      "B": "正しい。その後の発生の頻度は管理者アカウントが 15 分にできる。",
+      "C": "頻度を変えられるのは管理者アカウントだけ。",
+      "D": "新しい検出結果はほぼリアルタイムで送られ、この頻度は変えられない。",
+      "E": "通知を受けるには EventBridge のルールとターゲットを作る必要がある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+      "source_id": "S5",
+      "quote": "In order to receive notifications about GuardDuty findings based on events, you must create an EventBridge rule and a target for GuardDuty."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+      "source_id": "S6",
+      "quote": "Only an administrator account can update the EventBridge notification frequency for subsequent finding occurrences."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+      "source_id": "S6",
+      "quote": "Possible values are 15 minutes, 1 hour, or the default 6 hours."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+      "source_id": "S6",
+      "quote": "The notification frequency for newly generated findings is in near real-time."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
