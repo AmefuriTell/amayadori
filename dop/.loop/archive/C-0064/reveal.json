@@ -1,0 +1,135 @@
+{
+  "item": "C-0064",
+  "questions": [
+    {
+      "id": "q-5.1-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "キューの可視性タイムアウトは、関数のタイムアウトの少なくとも 6 倍にするのが勧められている（3 分なら 18 分）。関数のタイムアウトは可視性タイムアウト以下でなければならず、超えるとイベントソースマッピングの作成や更新でエラーになる。デッドレターキューへ送る前に数回やり直せるよう、maxReceiveCount は少なくとも 5 にするのが勧められている。",
+        "per_choice": {
+          "A": "正しい。3 分の 6 倍で 18 分。",
+          "B": "正しい。数回やり直してからデッドレターキューへ送る。",
+          "C": "関数のタイムアウトは可視性タイムアウト以下である必要があり、3 分の関数では設定できない。",
+          "D": "やり直さずにすぐデッドレターキューへ送られ、数回やり直す要件に反する。",
+          "E": "関数のタイムアウトは可視性タイムアウト以下である必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "source_id": "S1",
+          "quote": "set the source queue's visibility timeout to at least six times the configuration timeout on your function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "source_id": "S1",
+          "quote": "Your function's timeout must be less than or equal to the queue's visibility timeout."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "source_id": "S1",
+          "quote": "We recommend setting the maxReceiveCount on your source queue's redrive policy to at least 5."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定では、関数がバッチの処理で誤ると、うまく処理したメッセージも含めてバッチの全てのメッセージがキューに見えるようになる。イベントソースマッピングで ReportBatchItemFailures を指定し、応答の batchItemFailures に失敗したメッセージの ID を返すと、失敗した物だけがやり直される。関数が例外を投げると、バッチ全体が失敗とみなされる。",
+        "per_choice": {
+          "A": "正しい。失敗したメッセージだけがやり直される。",
+          "B": "例外を投げるとバッチ全体が失敗とみなされ、今と同じになる。",
+          "C": "やり直すまでの時間が延びるだけで、成功したメッセージもやり直される。",
+          "D": "バッチの大きさ 10 を保つ要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "source_id": "S3",
+          "quote": "To turn on partial batch responses, specify ReportBatchItemFailures for the FunctionResponseTypes action when configuring your event source mapping."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "source_id": "S3",
+          "quote": "If your function throws an exception, the entire batch is considered a complete failure."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "source_id": "S3",
+          "quote": "all messages in that batch become visible in the queue again by default, including messages that Lambda processed successfully."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Lambda は各シャードのレコードを順に処理する。ParallelizationFactor（1〜10、既定 1）を上げると、1 つのシャードから同時に処理するバッチを増やせ、その場合も同じパーティションキーの中では順序が保たれる。シャードを足しても速くできるが、ストリームを変えることになる。",
+        "per_choice": {
+          "A": "正しい。各シャードから同時に 10 バッチまで処理し、キーごとの順序は保たれる。",
+          "B": "ParallelizationFactor は 10 まで。",
+          "C": "ストリームを変えない要件に反する。",
+          "D": "仕組みを作り直すことになり、キーごとの順序も保てない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "source_id": "S4",
+          "quote": "You can specify the number of concurrent batches that Lambda polls from a shard by using a parallelization factor from 1 (default) to 10."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "source_id": "S4",
+          "quote": "When you increase the number of concurrent batches per shard, Lambda still ensures in-order processing at the partition-key level."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "source_id": "S4",
+          "quote": "To increase the speed at which your function processes records, add shards to your data stream."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "SNS のトピックの購読者は、既定では全てのメッセージを受け取る。一部だけを受けるには購読にフィルターポリシーを付ける。範囲（scope）が MessageBody なら、ポリシーの名前はメッセージの本文のプロパティに合わせ、MessageAttributes ならメッセージ属性の名前に合わせる。",
+        "per_choice": {
+          "A": "正しい。本文の region で絞り、他の 2 つの購読はそのまま全て受け取る。",
+          "B": "発行する側はメッセージ属性を付けていないので、合うメッセージが無い。",
+          "C": "全てのメッセージを受けて捨てることになり、手間とむだがある。",
+          "D": "発行する側を変えられない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html",
+          "source_id": "S5",
+          "quote": "To receive only a subset of the messages, a subscriber must assign a filter policy to the topic subscription."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+          "source_id": "S6",
+          "quote": "When the filter policy scope is set to MessageBody, each property name in the filter policy matches a message body property name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+          "source_id": "S6",
+          "quote": "When the filter policy scope is set to MessageAttributes, each property name in the filter policy matches a message attribute name."
+        }
+      ]
+    }
+  ]
+}

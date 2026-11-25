@@ -1,0 +1,63 @@
+{
+  "id": "q-5.1-0007",
+  "task": "5.1",
+  "services": [
+    "Amazon Kinesis Data Streams",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A Lambda function processes a Kinesis data stream that has four shards, and the function is falling behind. Records with the same partition key must still be processed in order. The team does not want to change the stream, and wants the function to process more batches from each shard at the same time. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the event source mapping's ParallelizationFactor to 10."
+    },
+    {
+      "key": "B",
+      "text": "Set the event source mapping's ParallelizationFactor to 20."
+    },
+    {
+      "key": "C",
+      "text": "Add shards to the data stream so that Lambda can process more records at once."
+    },
+    {
+      "key": "D",
+      "text": "Send the records to an Amazon SQS standard queue and process them from the queue instead."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "Lambda は各シャードのレコードを順に処理する。ParallelizationFactor（1〜10、既定 1）を上げると、1 つのシャードから同時に処理するバッチを増やせ、その場合も同じパーティションキーの中では順序が保たれる。シャードを足しても速くできるが、ストリームを変えることになる。",
+    "per_choice": {
+      "A": "正しい。各シャードから同時に 10 バッチまで処理し、キーごとの順序は保たれる。",
+      "B": "ParallelizationFactor は 10 まで。",
+      "C": "ストリームを変えない要件に反する。",
+      "D": "仕組みを作り直すことになり、キーごとの順序も保てない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+      "source_id": "S4",
+      "quote": "You can specify the number of concurrent batches that Lambda polls from a shard by using a parallelization factor from 1 (default) to 10."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+      "source_id": "S4",
+      "quote": "When you increase the number of concurrent batches per shard, Lambda still ensures in-order processing at the partition-key level."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+      "source_id": "S4",
+      "quote": "To increase the speed at which your function processes records, add shards to your data stream."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "選択肢 D の「キーごとの順序を保てない」は SQS standard の性質で、この束の sources には無い",
+  "last_checked": "2026-11-26"
+}
