@@ -1,0 +1,61 @@
+{
+  "id": "q-5.2-0006",
+  "task": "5.2",
+  "services": [
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Auto Scaling group with a desired capacity of 20 instances must move to a new launch template version. During the update, at least 90 percent of the desired capacity must stay in service, the group must not launch extra instances above the desired capacity, and the update should replace 2 instances at a time. Which instance refresh settings BEST meet these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Minimum healthy percentage 100 and maximum healthy percentage 100."
+    },
+    {
+      "key": "B",
+      "text": "Minimum healthy percentage 0 and maximum healthy percentage 100."
+    },
+    {
+      "key": "C",
+      "text": "Minimum healthy percentage 50 and maximum healthy percentage 100."
+    },
+    {
+      "key": "D",
+      "text": "Minimum healthy percentage 90 and maximum healthy percentage 100."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "最小の正常率は、更新の間に動かし続ける希望の容量の割合。最小 90% と最大 100% なら、一度に容量の 10% を入れ替える（20 台なら 2 台）。最小と最大を両方 100% にすると 1 台ずつ、最小 0% にすると全部を一度に入れ替える。",
+    "per_choice": {
+      "A": "1 台ずつの入れ替えになり、2 台ずつの要件に合わない。",
+      "B": "全部を一度に入れ替え、90% を保てない。",
+      "C": "一度に 10 台を入れ替え、90% を保てない。",
+      "D": "正しい。20 台の 10% で 2 台ずつ入れ替え、90% を保つ。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+      "source_id": "S4",
+      "quote": "For example, if the minimum healthy percentage is 90 percent and the maximum healthy percentage is 100 percent, then 10 percent of capacity will be replaced at a time."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+      "source_id": "S4",
+      "quote": "To replace one instance at a time, set both the minimum and maximum healthy percentage to 100 percent."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+      "source_id": "S4",
+      "quote": "To replace all instances at once, set a minimum healthy percentage of 0 percent."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,63 @@
+{
+  "id": "q-5.2-0005",
+  "task": "5.2",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Amazon EventBridge",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Before an Auto Scaling group terminates an instance during scale-in, the company must copy the instance's local logs to Amazon S3. The copy usually takes 20 minutes but can take up to 3 hours for large instances. Termination must wait until the copy finishes. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a termination lifecycle hook, start the copy from an EventBridge rule, record heartbeats while the copy runs, and then complete the lifecycle action."
+    },
+    {
+      "key": "B",
+      "text": "Add a termination lifecycle hook with the default timeout, and start the copy from an EventBridge rule."
+    },
+    {
+      "key": "C",
+      "text": "Add a termination lifecycle hook, start the copy from an EventBridge rule, and complete the action with ABANDON when the copy starts."
+    },
+    {
+      "key": "D",
+      "text": "Run a cron job on each instance that copies the logs every hour, and let scale-in terminate instances normally."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "終了のライフサイクルフックは、縮小の時にインスタンスを終了の前に止め、EventBridge で知らせる。既定の待ち時間は 1 時間（heartbeat timeout）で、時間が足りなければ heartbeat を記録して待ち時間をやり直せる。フックが時間切れになるか abandon にされると、すぐに終了へ進む。",
+    "per_choice": {
+      "A": "正しい。heartbeat で待ち時間を延ばし、コピーが終わってから進める。",
+      "B": "既定の 1 時間を超えると、コピーの途中でも終了へ進む。",
+      "C": "フックを abandon にすると、すぐに終了へ進むので、コピーが終わる前にインスタンスが終了する。",
+      "D": "最後の 1 時間までのログが失われうる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+      "source_id": "S1",
+      "quote": "When a scale-in event occurs, a lifecycle hook pauses the instance before it is terminated and sends you a notification using Amazon EventBridge."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html",
+      "source_id": "S2",
+      "quote": "If you need more time, you can restart the timeout period by recording a heartbeat."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+      "source_id": "S3",
+      "quote": "If a termination lifecycle hook times out, or is abandoned, Amazon EC2 Auto Scaling proceeds with terminating the instance immediately."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

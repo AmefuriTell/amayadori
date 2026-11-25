@@ -1,0 +1,74 @@
+{
+  "id": "q-5.2-0007",
+  "task": "5.2",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Amazon CloudWatch",
+    "Amazon EventBridge"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A team runs an instance refresh for an Auto Scaling group. The team wants to be notified when 20 percent of the instances have been replaced so that it can check the application, and wants every replaced instance to be reverted automatically if a CloudWatch alarm on errors goes into ALARM during the refresh. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set checkpoints at 20 percent and 100 percent, and use an EventBridge rule to send checkpoint events to Amazon SNS."
+    },
+    {
+      "key": "B",
+      "text": "Turn on auto rollback for the instance refresh and specify the CloudWatch alarm."
+    },
+    {
+      "key": "C",
+      "text": "Cancel the instance refresh if the alarm goes off, because canceling restores the replaced instances."
+    },
+    {
+      "key": "D",
+      "text": "Wait until the instance refresh finishes, and then roll it back if the alarm went off."
+    },
+    {
+      "key": "E",
+      "text": "Set a single checkpoint at 20 percent, which also completes the refresh after the team confirms."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "チェックポイントは、新しいインスタンスが何 % になったら止まるかを決め、100% 以外のチェックポイントごとにイベントを出す。EventBridge のルールで SNS などへ送れる。複数のチェックポイントを使う時は、全て入れ替えるために最後を 100% にする。自動のロールバックは、更新が失敗するか指定したアラームが ALARM になった時に元へ戻す。取り消しや失敗で止まっても、入れ替えた物は戻らず、終わった後はロールバックできない。",
+    "per_choice": {
+      "A": "正しい。20% で知らせ、最後は 100% にして全て入れ替える。",
+      "B": "正しい。アラームが ALARM になれば自動で元へ戻す。",
+      "C": "取り消しても、既に入れ替えたインスタンスは元に戻らない。",
+      "D": "終わった後のインスタンスのリフレッシュはロールバックできない。",
+      "E": "複数のチェックポイントでは最後を 100% にする必要がある。20% だけでは全て入れ替わらない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+      "source_id": "S5",
+      "quote": "You can add an EventBridge rule to send the events to a target such as Amazon SNS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+      "source_id": "S5",
+      "quote": "If you cancel the operation or it fails before reaching the last checkpoint, any instances that were already replaced are not rolled back to their previous configuration."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+      "source_id": "S6",
+      "quote": "Auto rollback: Amazon EC2 Auto Scaling automatically reverses what was deployed if the instance refresh fails for some reason or if any CloudWatch alarms you specify go into the ALARM state."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+      "source_id": "S6",
+      "quote": "You can't roll it back after it's finished."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
