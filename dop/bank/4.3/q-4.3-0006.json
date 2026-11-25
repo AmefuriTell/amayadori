@@ -1,0 +1,74 @@
+{
+  "id": "q-4.3-0006",
+  "task": "4.3",
+  "services": [
+    "Amazon S3",
+    "Amazon EventBridge",
+    "Amazon SQS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company wants every new object in an S3 log bucket to trigger three consumers: an Amazon SQS FIFO queue that feeds an ordered processing job, an AWS Step Functions workflow, and a security Lambda function. The company prefers managed routing over custom fan-out code. Which statements or actions are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Enable Amazon EventBridge delivery on the bucket, and use EventBridge rules to route the events to the three targets."
+    },
+    {
+      "key": "B",
+      "text": "Design the consumers to tolerate duplicate notifications, because S3 event notifications are delivered at least once."
+    },
+    {
+      "key": "C",
+      "text": "Configure an S3 event notification that sends directly to the SQS FIFO queue, and a second one for the other targets."
+    },
+    {
+      "key": "D",
+      "text": "Rely on S3 event notifications being delivered exactly once, so the consumers do not need to handle duplicates."
+    },
+    {
+      "key": "E",
+      "text": "Enable EventBridge delivery for only the log prefix, because EventBridge delivery for a bucket can be scoped by prefix."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "S3 のイベント通知は少なくとも 1 回届くように作られている。SQS の FIFO キューは S3 のイベント通知の送り先にできず、FIFO キューへ送るには EventBridge を使う。EventBridge への送信はバケット単位で有効か無効かを選び、有効にすると全てのイベントが送られ、EventBridge のルールで他の送り先へ振り分けられる。",
+    "per_choice": {
+      "A": "正しい。EventBridge のルールで 3 つの送り先に振り分けられ、FIFO キューにも送れる。",
+      "B": "正しい。少なくとも 1 回の配信なので、重複に耐えるようにする。",
+      "C": "SQS の FIFO キューは S3 のイベント通知の送り先にできない。",
+      "D": "少なくとも 1 回の配信で、重複はあり得る。",
+      "E": "EventBridge への送信はバケット単位で有効にし、全てのイベントが送られる。絞るのは EventBridge のルールで行う。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+      "source_id": "S1",
+      "quote": "Amazon S3 event notifications are designed to be delivered at least once."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+      "source_id": "S2",
+      "quote": "Amazon Simple Queue Service FIFO (First-In-First-Out) queues aren't supported as an Amazon S3 event notification destination."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+      "source_id": "S2",
+      "quote": "To send a notification for an Amazon S3 event to an Amazon SQS FIFO queue, you can use Amazon EventBridge."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html",
+      "source_id": "S3",
+      "quote": "If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

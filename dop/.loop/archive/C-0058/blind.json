@@ -1,0 +1,68 @@
+{
+  "item": "C-0058",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "task": "4.3",
+      "services": [
+        "Amazon S3",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Application servers upload raw log files to the bucket app-logs under the prefix raw/. An S3 event notification on all new objects invokes a Lambda function that parses each file and writes the result back to app-logs. After release, the function's invocations and costs grow without limit. The company wants to keep one bucket and keep processing every new raw file. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Limit the notification to the prefix raw/, and have the function write its results under a different prefix such as processed/."
+        },
+        {
+          "key": "B",
+          "text": "Set the function's reserved concurrency to 0 until the backlog clears, and then remove the setting."
+        },
+        {
+          "key": "C",
+          "text": "Raise the account's Lambda concurrency limit so that the function can keep up with the growing number of events."
+        },
+        {
+          "key": "D",
+          "text": "Keep the notification on all objects, and add a suffix filter for .log while the function also writes .log files."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0002",
+      "task": "4.3",
+      "services": [
+        "Amazon S3",
+        "Amazon EventBridge",
+        "Amazon SQS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company wants every new object in an S3 log bucket to trigger three consumers: an Amazon SQS FIFO queue that feeds an ordered processing job, an AWS Step Functions workflow, and a security Lambda function. The company prefers managed routing over custom fan-out code. Which statements or actions are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable Amazon EventBridge delivery on the bucket, and use EventBridge rules to route the events to the three targets."
+        },
+        {
+          "key": "B",
+          "text": "Design the consumers to tolerate duplicate notifications, because S3 event notifications are delivered at least once."
+        },
+        {
+          "key": "C",
+          "text": "Configure an S3 event notification that sends directly to the SQS FIFO queue, and a second one for the other targets."
+        },
+        {
+          "key": "D",
+          "text": "Rely on S3 event notifications being delivered exactly once, so the consumers do not need to handle duplicates."
+        },
+        {
+          "key": "E",
+          "text": "Enable EventBridge delivery for only the log prefix, because EventBridge delivery for a bucket can be scoped by prefix."
+        }
+      ]
+    }
+  ]
+}
