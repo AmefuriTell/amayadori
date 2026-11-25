@@ -1,0 +1,67 @@
+{
+  "id": "q-3.2-0001",
+  "task": "3.2",
+  "services": [
+    "AWS Lambda"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company runs a payment AWS Lambda function and a batch Lambda function in the same account and Region. When the batch function receives a large burst, the payment function is throttled. The payment function must always have 200 concurrent executions available, and requests to it must not wait for execution environments to initialize at peak times. The batch function must not be limited. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure reserved concurrency of 200 on the payment function."
+    },
+    {
+      "key": "B",
+      "text": "Configure provisioned concurrency on the payment function for the peak periods."
+    },
+    {
+      "key": "C",
+      "text": "Configure reserved concurrency on the batch function so that it cannot use more than a fixed amount."
+    },
+    {
+      "key": "D",
+      "text": "Configure provisioned concurrency on the batch function so that its bursts start faster."
+    },
+    {
+      "key": "E",
+      "text": "Increase the memory of the payment function so that it can handle more requests at the same time."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "予約された同時実行（reserved concurrency）を関数に割り当てると、その分は他の関数が使えないので、他の関数の急増で使い切られない。ただし予約した実行環境は事前に初期化されていないので、コールドスタートを避けるには、事前に初期化した実行環境を用意する provisioned concurrency を使う。",
+    "per_choice": {
+      "A": "正しい。200 を予約すれば、他の関数がその分を使えない。",
+      "B": "正しい。事前に初期化した実行環境が、すぐにリクエストに応える。",
+      "C": "支払いの関数は守れるが、バッチの関数を制限しない要件に反する。",
+      "D": "バッチの関数を速くするだけで、支払いの関数が使い切られる問題は残る。",
+      "E": "メモリを増やしても、アカウントの同時実行を他の関数に使い切られる問題は解決しない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+      "source_id": "S2",
+      "quote": "When you dedicate reserved concurrency to an Event Function, no other Event Function can use that concurrency."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+      "source_id": "S3",
+      "quote": "However, none of these environments come pre-initialized."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+      "source_id": "S3",
+      "quote": "Lambda initializes that number of execution environments so that they are prepared to respond immediately to Event Function requests."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
