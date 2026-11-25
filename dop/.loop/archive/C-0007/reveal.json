@@ -1,0 +1,106 @@
+{
+  "item": "C-0007",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Distributed Load Testing on AWS は、サーバーを用意せずに何千もの利用者のリクエストを流し、リリースの前にボトルネックを見つける。JMeter などのスクリプトを使え、すぐ・決めた日時・くり返しの予定で動かせる。CI/CD のパイプラインに入れる使い方も想定されている。",
+        "per_choice": {
+          "A": "負荷を出すサーバーを持って管理することになり、要件に反する。",
+          "B": "正しい。今の JMeter のスクリプトのまま、くり返しの予定とパイプラインの両方で使える。",
+          "C": "書き直す必要は無く、手元で動かすのでは自動にならない。",
+          "D": "リリースの前の試験の要件に反し、1 台では何千もの利用者を再現しにくい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html",
+          "source_id": "S1",
+          "quote": "This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html",
+          "source_id": "S1",
+          "quote": "Customize your application tests using JMeter, k6, Locust test scripts, or simple HTTP endpoint configuration."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/use-cases.html",
+          "source_id": "S2",
+          "quote": "Integrate automated performance testing into continuous integration and deployment pipelines to catch performance issues early in the development cycle."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html",
+          "source_id": "S3",
+          "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "build fanout は、1 つの作業をバッチの中の複数のビルドに分け、試験を並べて動かすのに使える。parallelism の値に合わせて、試験のケースを分けた塊ごとに別のビルドを作る。build matrix は、違う設定の組み合わせごとにビルドを作る物。",
+        "per_choice": {
+          "A": "build matrix は違う設定の組み合わせごとにビルドを作る物で、同じ試験を分けて動かす物ではない。",
+          "B": "正しい。試験を 10 に分け、並べて動かす。",
+          "C": "試験のファイルを手で分け、10 個のプロジェクトを持つことになり、要件に反する。",
+          "D": "同じ試験の全部を 10 回動かすだけで、試験は分かれない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S5",
+          "quote": "A build fanout defines a task that will be split into multiple builds in the batch. This can be used for running tests in parallel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S5",
+          "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S4",
+          "quote": "A build matrix defines tasks with different configurations that run in parallel."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "build matrix は違う設定の作業を並べて動かす物で、CodeBuild は設定の組み合わせごとに別のビルドを作り、並べて動かす。build fanout は同じ作業の試験を塊に分ける物。",
+        "per_choice": {
+          "A": "正しい。組み合わせごとにビルドが作られ、並べて動く。",
+          "B": "build fanout は同じ設定のまま試験を分ける物で、違う設定の組み合わせを作らない。",
+          "C": "動くが、6 つのプロジェクトを持つことになり、要件に反する。",
+          "D": "1 つのビルドで順に動かすので、並べて動かす要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S4",
+          "quote": "CodeBuild creates a separate build for each possible configuration combination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S4",
+          "quote": "These builds run in parallel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "source_id": "S5",
+          "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+        }
+      ]
+    }
+  ]
+}
