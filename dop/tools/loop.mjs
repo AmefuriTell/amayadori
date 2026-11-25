@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ループを進めるツール。状態の移り方は loop/LOOP.md 2 章の JSON をそのまま読む（決まりを 1 か所に置くため）。
-// コマンド: start / status / next / advance / close / add / seed / block / pause / resume
+// コマンド: start / status / next / advance / close / add / seed / list / set / block / pause / resume
 import fs from 'node:fs';
 import path from 'node:path';
 import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel } from './lib/io.mjs';
@@ -218,6 +218,40 @@ const commands = {
     }
     saveBacklog(backlog);
     emit({ ok: true, summary: `${added.length} 項目を足した${skipped.length ? `、${skipped.length} 項目は足さなかった` : ''}`, items: skipped, extra: { added } });
+  },
+
+  // backlog を絞って見る（AI は backlog.json を直接読まない）
+  list(args) {
+    let b = loadBacklog();
+    for (const k of ['kind', 'task', 'status', 'id']) if (typeof args[k] === 'string') b = b.filter((i) => i[k] === args[k]);
+    if (!args.status) b = b.filter((i) => i.status === 'todo' || i.status === 'doing');
+    emit({
+      ok: true,
+      summary: `${b.length} 項目`,
+      items: b.map((i) => `${i.id} [${i.status} p${i.priority}] ${i.task ? `${i.task} ` : ''}${i.title ?? i.topic ?? ''}${i.count ? `（${i.count} 問）` : ''}`),
+    });
+  },
+
+  // 人の指示で優先度などを変える（priority・count・status=todo|dropped だけ）
+  set(args) {
+    const id = args._[0];
+    const backlog = loadBacklog();
+    const item = backlog.find((i) => i.id === id);
+    if (!item) throw new ToolError(`項目 ${id} が無い`);
+    const changed = {};
+    if (args.priority !== undefined) changed.priority = Number(args.priority);
+    if (args.count !== undefined) changed.count = Number(args.count);
+    if (args.status !== undefined) {
+      if (!['todo', 'dropped'].includes(args.status)) throw new ToolError('status は todo か dropped だけ変えられる');
+      if (item.status === 'doing') throw new ToolError('進めている項目の status は変えない（loop block を使う）');
+      changed.status = args.status;
+    }
+    const next = { ...item, ...changed };
+    const errs = validate(readJSON(paths.schema('backlog-item.schema.json')), next);
+    if (errs.length) throw new ToolError(`値が違う: ${errs.map((e) => `${e.pointer} ${e.message}`).join(' / ')}`);
+    Object.assign(item, changed);
+    saveBacklog(backlog);
+    emit({ ok: true, summary: `${id} を変えた: ${JSON.stringify(changed)}` });
   },
 
   // 試験ガイドの「Skills in」の 1 行を 1 項目にする。既にある（状態を問わず）物は足さない

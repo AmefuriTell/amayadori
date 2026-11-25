@@ -119,3 +119,15 @@ test('seed: 試験ガイドの skills から項目を作り、2 回目は足さ�
   const item = sb.read('work/C-0001/item.json');
   assert.equal(item.task_info.title, 'Implement CI/CD pipelines');
 });
+
+test('list と set: 絞って見る・優先度を変える', () => {
+  const sb = sandbox();
+  sb.run('loop', 'seed', '--task', '1.4');
+  const l = sb.run('loop', 'list', '--task', '1.4');
+  assert.match(l.summary, /^\d+ 項目/);
+  const id = l.items[0].split(' ')[0];
+  assert.equal(sb.run('loop', 'set', id, '--priority', '1').ok, true);
+  assert.match(sb.run('loop', 'list', '--id', id).items[0], /p1/);
+  assert.equal(sb.run('loop', 'set', id, '--priority', '9').code, 2);
+  assert.equal(sb.run('loop', 'set', id, '--status', 'done').code, 2);
+});

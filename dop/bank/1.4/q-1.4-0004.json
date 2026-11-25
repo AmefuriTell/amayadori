@@ -1,0 +1,56 @@
+{
+  "id": "q-1.4-0004",
+  "task": "1.4",
+  "services": [
+    "AWS Elastic Beanstalk"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs a web application in an AWS Elastic Beanstalk environment. For each release, the company wants 10% of incoming traffic to go to the new version for 30 minutes. If the new instances stay healthy, all traffic must move to the new version and the old instances must be removed automatically. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the deployment policy to Immutable and set the health check wait time to 30 minutes."
+    },
+    {
+      "key": "B",
+      "text": "Set the deployment policy to TrafficSplitting with a 10% traffic split and a 30-minute evaluation time."
+    },
+    {
+      "key": "C",
+      "text": "Set the deployment policy to Rolling with additional batch and set the batch size to 10%."
+    },
+    {
+      "key": "D",
+      "text": "Create a second environment and use Amazon Route 53 weighted records to move traffic by hand."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Traffic splitting は、新しいインスタンス一式を立ち上げ、決めた割合の通信を決めた時間だけ新しい版へ流し、問題が無ければ全部を移して古いインスタンスを終了する。割合（Traffic split）と時間（evaluation time）を設定するだけでよい。",
+    "per_choice": {
+      "A": "Immutable は新しいインスタンス一式を別の Auto Scaling グループで立ち上げるが、一部の通信だけを一定時間流す仕組みではない。",
+      "B": "正しい。割合と評価の時間を決めるだけで canary の形になり、古いインスタンスも自動で終了する。",
+      "C": "バッチごとに順にインスタンスを入れ替える方式で、通信の 10% を 30 分流してから判断する形にはならない。",
+      "D": "動くが、環境を 2 つ持ち、重みを手で変える手間がかかる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+      "source_id": "S5",
+      "quote": "It then forwards a specified percentage of incoming client traffic to the new application version for a specified evaluation period."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+      "source_id": "S5",
+      "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

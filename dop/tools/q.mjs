@@ -390,6 +390,24 @@ const commands = {
     });
   },
 
+  // 人が読むための書き出し（Markdown）。AI は読まない
+  export(args) {
+    let qs = loadBank();
+    if (typeof args.task === 'string') qs = qs.filter((q) => q.task === args.task || q.task.startsWith(`${args.task}.`));
+    if (typeof args.ids === 'string') { const ids = args.ids.split(','); qs = qs.filter((q) => ids.includes(q.id)); }
+    if (typeof args.out !== 'string') throw new ToolError('--out <file.md> が要る');
+    const md = qs.map((q) => [
+      `## ${q.id}（${q.type === 'multi' ? `${q.select_count} つ選ぶ` : '1 つ選ぶ'}${q.low_confidence ? '・AI の確信が低い' : ''}）`,
+      '', q.stem, '', ...q.choices.map((c) => `- **${c.key}.** ${c.text}`), '',
+      '<details><summary>答えと解説</summary>', '',
+      `**答え: ${q.answer.join(', ')}**`, '', q.explanation.summary, '',
+      ...q.choices.map((c) => `- ${c.key}: ${q.explanation.per_choice[c.key]}`), '',
+      ...q.references.map((r) => `> ${r.quote}\n>\n> — ${r.url}`), '', '</details>', '',
+    ].join('\n')).join('\n');
+    fs.writeFileSync(args.out, `# 問題（${qs.length} 問）\n\n${md}`);
+    emit({ ok: true, summary: `${qs.length} 問を ${args.out} に書いた` });
+  },
+
   linkcheck() {
     const bank = loadBank();
     const fails = linkFailures(bank);

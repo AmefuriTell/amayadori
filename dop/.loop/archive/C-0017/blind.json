@@ -1,0 +1,154 @@
+{
+  "item": "C-0017",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company deploys new versions of an AWS Lambda function by using AWS CodeDeploy. The operations team wants each release to first receive a small portion of production traffic. If no problems are found, all remaining traffic must move to the new version five minutes later. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaCanary10Percent5Minutes deployment configuration."
+        },
+        {
+          "key": "B",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaLinear10PercentEvery1Minute deployment configuration."
+        },
+        {
+          "key": "C",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaAllAtOnce configuration and monitor errors after release."
+        },
+        {
+          "key": "D",
+          "text": "Run a scheduled script that calls update-alias to change the alias routing weights every five minutes."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "task": "1.4",
+      "services": [
+        "Amazon ECS",
+        "AWS CodeDeploy",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs an Amazon ECS service behind a Network Load Balancer and deploys it with AWS CodeDeploy blue/green deployments. The company now wants to send 10% of production traffic to each new version for 5 minutes before shifting the rest. Which solution will meet this requirement with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a custom canary deployment configuration in CodeDeploy and keep the Network Load Balancer."
+        },
+        {
+          "key": "B",
+          "text": "Switch the deployment group to CodeDeployDefault.ECSLinear10PercentEvery1Minutes and keep the Network Load Balancer."
+        },
+        {
+          "key": "C",
+          "text": "Move the service to an Application Load Balancer and use CodeDeployDefault.ECSCanary10Percent5Minutes."
+        },
+        {
+          "key": "D",
+          "text": "Keep CodeDeployDefault.ECSAllAtOnce and add a manual approval before each production deployment."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Elastic Load Balancing"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS CodeDeploy blue/green deployments for an application on Amazon EC2 instances behind an Application Load Balancer. The QA team must test the replacement instances before they receive any production traffic, and the team will decide when to switch. After the switch, the original instances must stay running until the operations team decides to remove them. Which deployment group settings meet these requirements? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Select the traffic rerouting option \"Reroute traffic immediately.\""
+        },
+        {
+          "key": "B",
+          "text": "Select the traffic rerouting option \"I will choose whether to reroute traffic.\""
+        },
+        {
+          "key": "C",
+          "text": "Select \"Terminate the original instances in the deployment group\" with a one-hour wait period."
+        },
+        {
+          "key": "D",
+          "text": "Select \"Keep the original instances in the deployment group running.\""
+        },
+        {
+          "key": "E",
+          "text": "Use an in-place deployment with the CodeDeployDefault.OneAtATime configuration."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a web application in an AWS Elastic Beanstalk environment. For each release, the company wants 10% of incoming traffic to go to the new version for 30 minutes. If the new instances stay healthy, all traffic must move to the new version and the old instances must be removed automatically. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the deployment policy to Immutable and set the health check wait time to 30 minutes."
+        },
+        {
+          "key": "B",
+          "text": "Set the deployment policy to Rolling with additional batch and set the batch size to 10%."
+        },
+        {
+          "key": "C",
+          "text": "Set the deployment policy to TrafficSplitting with a 10% traffic split and a 30-minute evaluation time."
+        },
+        {
+          "key": "D",
+          "text": "Create a second environment and use Amazon Route 53 weighted records to move traffic by hand."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0005",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company updates an application in an AWS Elastic Beanstalk environment by using in-place updates, and users see brief outages during releases. The company wants to test each new version at its own URL before release, switch users to it instantly, and be able to switch back quickly. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the deployment policy to Rolling and reduce the batch size to one instance."
+        },
+        {
+          "key": "B",
+          "text": "Deploy the new version to a separate environment and use Swap environment URLs."
+        },
+        {
+          "key": "C",
+          "text": "Change the deployment policy to Immutable for all future application releases."
+        },
+        {
+          "key": "D",
+          "text": "Deploy to a separate environment and terminate the old environment right after switching DNS."
+        }
+      ]
+    }
+  ]
+}

@@ -34,8 +34,8 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
 | `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
 | `L pause` | 人に止められた時 | なし | state | | 済 |
-| `D fetch <url> --item <ID>` | C1 | 許可した URL | 見出しと語数、file | HTML・ナビ・不要な部分 | 済 |
-| `D check <ID>` | C1 | work/<ID>/sources.md | 誤り | | 済 |
+| `D fetch <url> --item <ID>` | C1 | 許可した URL（200 以外・別ページへの転送・本文 50 語未満は失敗） | 見出しと語数、file、links（本文の中のリンク） | HTML・ナビ・不要な部分 | 済 |
+| `D check <ID>` | C1 | work/<ID>/sources.md と raw/*.md | 誤り（原文の控えに無い文も） | | 済 |
 | `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由） | スキーマの細部 | 済 |
 | `Q blind <ID>` / `Q reveal <ID>` | C3 | questions.json | file（blind.json / reveal.json） | 答え（先に見ないように） | 済 |
 | `Q verdict <ID>` | C3 | verify.json | result, 問ごとの verdict | 判定の決まり・drop の移動 | 済 |
@@ -45,6 +45,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q coverage` | いつでも | なし | タスク（ドメイン）ごとの数・目標・不足 | bank の全体 | 済 |
 | `Q dedupe <ID>` | いつでも | questions.json | 似ている bank の問題と率 | bank の全体 | 済 |
 | `Q stats` | 週 1 | なし | 正解の位置・ドメイン別の数 | | 済 |
+| `Q export --task 1.4 --out <file.md>` | 人が読む時 | 条件 | 書いた数 | （人向け。AI は読まない） | 済 |
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
 | `app:data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 未（アプリと一緒に） |
 | `app:check <ID>` | A3 | spec.json | AC ごとの合否 | 試験・ビルド・e2e のログ全文 | 未（アプリと一緒に） |

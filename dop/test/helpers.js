@@ -78,7 +78,9 @@ export function toAuthor(sb, item = {}) {
   const n = sb.run('loop', 'next');
   const id = n.item.id;
   sb.write(`work/${id}/sources.md`, SOURCES);
-  sb.run('docs', 'check', id);
+  sb.write(`work/${id}/raw/page.md`, SOURCES);
+  const c = sb.run('docs', 'check', id);
+  if (!c.ok) throw new Error(JSON.stringify(c));
   sb.run('loop', 'advance', '--result', 'ok');
   return id;
 }

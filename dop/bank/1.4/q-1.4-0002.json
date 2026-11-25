@@ -1,0 +1,58 @@
+{
+  "id": "q-1.4-0002",
+  "task": "1.4",
+  "services": [
+    "Amazon ECS",
+    "AWS CodeDeploy",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs an Amazon ECS service behind a Network Load Balancer and deploys it with AWS CodeDeploy blue/green deployments. The company now wants to send 10% of production traffic to each new version for 5 minutes before shifting the rest. Which solution will meet this requirement with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a custom canary deployment configuration in CodeDeploy and keep the Network Load Balancer."
+    },
+    {
+      "key": "B",
+      "text": "Switch the deployment group to CodeDeployDefault.ECSLinear10PercentEvery1Minutes and keep the Network Load Balancer."
+    },
+    {
+      "key": "C",
+      "text": "Keep CodeDeployDefault.ECSAllAtOnce and add a manual approval before each production deployment."
+    },
+    {
+      "key": "D",
+      "text": "Move the service to an Application Load Balancer and use CodeDeployDefault.ECSCanary10Percent5Minutes."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと、使える設定は ECSAllAtOnce だけ。canary で一部だけ流すには Application Load Balancer に替え、ECSCanary10Percent5Minutes を使う。",
+    "per_choice": {
+      "A": "Network Load Balancer では ECSAllAtOnce しか使えないので、独自の canary 設定も使えない。",
+      "B": "linear の設定も Network Load Balancer では使えない。また 1 分ごとに 10% ずつで、要件の形とも違う。",
+      "C": "承認を挟んでも一度に全部を移すことは変わらず、一部だけ先に流す要件に合わない。",
+      "D": "正しい。Application Load Balancer なら canary の決まった設定が使え、10% を 5 分流してから残りを移せる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+      "source_id": "S3",
+      "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+      "source_id": "S3",
+      "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

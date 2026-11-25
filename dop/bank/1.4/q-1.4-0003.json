@@ -1,0 +1,64 @@
+{
+  "id": "q-1.4-0003",
+  "task": "1.4",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2",
+    "Elastic Load Balancing"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company uses AWS CodeDeploy blue/green deployments for an application on Amazon EC2 instances behind an Application Load Balancer. The QA team must test the replacement instances before they receive any production traffic, and the team will decide when to switch. After the switch, the original instances must stay running until the operations team decides to remove them. Which deployment group settings meet these requirements? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Select the traffic rerouting option \"Reroute traffic immediately.\""
+    },
+    {
+      "key": "B",
+      "text": "Select the traffic rerouting option \"I will choose whether to reroute traffic.\""
+    },
+    {
+      "key": "C",
+      "text": "Select \"Terminate the original instances in the deployment group\" with a one-hour wait period."
+    },
+    {
+      "key": "D",
+      "text": "Select \"Keep the original instances in the deployment group running.\""
+    },
+    {
+      "key": "E",
+      "text": "Use an in-place deployment with the CodeDeployDefault.OneAtATime configuration."
+    }
+  ],
+  "answer": [
+    "B",
+    "D"
+  ],
+  "explanation": {
+    "summary": "「I will choose whether to reroute traffic」にすると、置き換え先のインスタンスは手で切り替えるまでロードバランサーに登録されないので、本番の通信を受けずに試験できる。「Keep the original instances … running」にすると、切り替えた後も元のインスタンスが動き続ける。",
+    "per_choice": {
+      "A": "用意ができしだい自動で登録されて本番の通信が流れるので、先に試験する要件に合わない。",
+      "B": "正しい。手で切り替えるまで置き換え先は登録されない。",
+      "C": "待つ時間の後に元のインスタンスが自動で終了する。運用チームが決めるまで残す要件に合わない。",
+      "D": "正しい。切り替えた後も元のインスタンスを動かしたままにする。",
+      "E": "in-place は同じインスタンスを更新するので、置き換え先を先に試験できず、元の環境も残らない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+      "source_id": "S2",
+      "quote": "Instances in the replacement environment are not registered with the specified load balancers and target groups unless you manually reroute traffic."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+      "source_id": "S2",
+      "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
