@@ -36,13 +36,13 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ## C-0001（2026-11-25）から
 
 ```xml
-<proposal id="P-005" from="C-0001" status="open">
+<proposal id="P-005" from="C-0001" status="adopted">
   <issue>検証役が「事実として正しいが sources.md に無い補足」を style で書くと、q verdict が fix にして C2 へ戻す。直す中身が無いのに 1 往復増える</issue>
   <kind>tool + doc</kind>
   <change>検証役が verdict を ok にした問題の style は、記録だけにして戻さない（giveaway は今のまま戻す）。C3 の判定の決まりも合わせる</change>
 </proposal>
 
-<proposal id="P-006" from="C-0017,C-0001" status="open">
+<proposal id="P-006" from="C-0017,C-0001" status="adopted">
   <issue>P-003 の書き方にした C-0001 でも、検証役は 3 問とも確信度 high で正解した（too_easy が 2 束続いた）。出典なしで解いても易しい</issue>
   <kind>doc</kind>
   <change>Professional の難しさに寄せる案: 1 問に要件を 3 つ以上（止まる時間・費用・手間・権限など）入れ、どの誤りの選択肢も少なくとも 1 つは満たす。2 つのサービスを組み合わせる問題を 1 束に 1 問以上</change>
@@ -50,9 +50,21 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ```
 
 ```xml
-<proposal id="P-007" from="C-0001" status="open">
+<proposal id="P-007" from="C-0001" status="adopted">
   <issue>直した後の検証役が、前の検証役の求めた直し（「これから push する分だけ」）を「sources.md に無い」として fix にし、問題が drop になった（q-1.1-0002）。検証役どうしの判断が食い違う</issue>
   <kind>doc</kind>
   <change>fix で足す事実は、C2 で researcher に根拠を sources.md へ足してもらってから書く（根拠なしに足さない）。検証役には、前の回の指摘（feedback.json）だけを渡し、その直しが根拠に基づくかを見てもらう</change>
+</proposal>
+```
+
+## 1 回目の実行の後（2026-11-25）
+
+- 利用者が P-005〜P-008 を採った。利用者が寝ている間は、判断が要る時に推奨の案で進めてよいと言われた（2026-11-25）。
+
+```xml
+<proposal id="P-008" from="C-0017,C-0001,C-0006" status="adopted">
+  <issue>too_easy が 3 束続いた。ただし検証役の AI は AWS に詳しく、人に難しい問題でも確信度 high になりうる。AI の確信度は人の難しさの目安として弱い</issue>
+  <kind>doc</kind>
+  <change>too_easy は記録だけにし、書き方を変える理由にしない。難しさは利用者の正答率（L1）で見る</change>
 </proposal>
 ```

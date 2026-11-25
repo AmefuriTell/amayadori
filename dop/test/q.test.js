@@ -156,3 +156,11 @@ test('verdict: 3 問以上を全部 high で正解したら too_easy', () => {
   assert.equal(r.result, 'pass');
   assert.equal(r.too_easy, true);
 });
+
+test('verdict: 検証役が ok にした言い回しの指摘は戻さない（P-005）', () => {
+  const sb = sandbox();
+  const id = authored(sb, [question()]);
+  toVerify(sb, id);
+  verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['A'], confidence: 'mid' }, issues: [{ kind: 'style', detail: '補足は根拠に無いが正しい' }], verdict: 'ok' }]);
+  assert.equal(sb.run('q', 'verdict', id).result, 'pass');
+});

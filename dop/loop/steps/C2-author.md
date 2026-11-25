@@ -9,7 +9,7 @@
     <schema>schemas/question.schema.json（形はツールが確かめるので、項目名だけ見ればよい）</schema>
   </inputs>
   <actions>
-    <a>feedback.json があれば、指摘された問題だけ直す。ほかは触らない。</a>
+    <a>feedback.json があれば、指摘された問題だけ直す。ほかは触らない。直しで新しい事実を足す時は、先に dop-researcher に根拠を sources.md へ足してもらい（docs check を通す）、その S 番号を references に入れる。根拠の無い事実は足さず、言い回しを外す方で直す（P-007）。</a>
     <a>無ければ下の「書き方」で count 問書き、work/&lt;ID&gt;/questions.json に { "item": "&lt;ID&gt;", "questions": [ … ] } の形で置く。id は q-&lt;task&gt;-0001 から仮に振る（q publish が振り直す）。</a>
     <a>recheck の項目では questions.json に bank の問題が入っている（"recheck": true）。feedback か item.note の指摘の所だけ直し、id は変えない。</a>
     <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
@@ -34,6 +34,7 @@
     <r>誤りの選択肢は「動くが条件に合わない」もの（手作業が多い・止まる時間がある・費用が高い・権限が広すぎる）。</r>
     <r>正解だけ長い・詳しい、にしない（q gate が長さの偏りを見る）。</r>
     <r>正解が問題文の数字・語をそのまま言い換えた形にしない（例: 問題文「10% を 5 分」→ 正解 Canary10Percent5Minutes は見え見え）。数字は誤りの選択肢にも入れるか、問題文では要件を言い換えて書く（P-003）。</r>
+    <r>1 問に要件を 3 つ以上入れ（止まる時間・費用・手間・権限・既存の物を変えない など）、どの誤りの選択肢も少なくとも 1 つは満たすようにする（P-006）。1 束に 1 問以上は、2 つ以上のサービスを組み合わせて答える問題にする。</r>
     <r>要件の一部だけを満たす選択肢を 2 つ以上入れる（例: 止まらないが手作業が多い、自動だが一部の通信だけを流せない）。設定名を 1 つ当てるより、構成の組み合わせで答えさせる。</r>
     <r>"All of the above" / "None of the above" は使わない。</r>
   </choices>

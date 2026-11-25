@@ -254,7 +254,8 @@ const commands = {
       const mildOnly = issues.length > 0 && issues.every((i) => MILD.has(i.kind));
       const severe = !match || issues.some((i) => SEVERE.has(i.kind)) || (e.verdict === 'fix' && !mildOnly);
       const mild = issues.some((i) => MILD.has(i.kind));
-      if (severe || mild) verdict = 'fix';
+      // P-005: 検証役が ok にした問題の言い回しの指摘は記録だけ（戻さない）
+      if (severe || (mild && e.verdict === 'fix')) verdict = 'fix';
       if (e.verdict === 'drop') verdict = 'drop';
       if (verdict === 'fix' && severe) {
         qhist[q.id] = (qhist[q.id] ?? 0) + 1;
