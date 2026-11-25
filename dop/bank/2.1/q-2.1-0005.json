@@ -1,0 +1,62 @@
+{
+  "id": "q-2.1-0005",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation StackSets"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company updates a StackSet that has stack instances in 100 accounts across four Regions. To limit the impact of a bad change, the update must process 10 accounts at a time, must finish one Region before starting the next, and must stop before moving to another Region if more than 2 accounts fail in a Region. Which operation preferences BEST meet these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Parallel."
+    },
+    {
+      "key": "B",
+      "text": "Maximum concurrent accounts 100, failure tolerance 2, Region concurrency Sequential."
+    },
+    {
+      "key": "C",
+      "text": "Maximum concurrent accounts 10, failure tolerance 2, Region concurrency Sequential."
+    },
+    {
+      "key": "D",
+      "text": "Maximum concurrent accounts 10, failure tolerance 10, Region concurrency Sequential."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Maximum concurrent accounts は同時に処理するアカウントの数、Failure tolerance はリージョンごとに許すアカウントの失敗の数で、これに達すると他のリージョンへ進まずに止まる。Region concurrency は Sequential（1 リージョンずつ）か Parallel（複数のリージョンを同時に）を選ぶ。",
+    "per_choice": {
+      "A": "Parallel では複数のリージョンを同時に処理し、1 リージョンずつの要件に反する。",
+      "B": "100 アカウントを同時に処理し、10 ずつの要件に反する。",
+      "C": "正しい。10 アカウントずつ、1 リージョンずつ、失敗が許す数を超えたら止まる。",
+      "D": "10 アカウントの失敗まで許すので、2 を超えたら止める要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+      "source_id": "S2",
+      "quote": "For Maximum concurrent accounts, specify how many accounts are processed concurrently."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+      "source_id": "S2",
+      "quote": "For Failure tolerance, specify the maximum number of account failures allowed per Region. The operation will stop and won't proceed to other Regions once this limit is reached."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+      "source_id": "S2",
+      "quote": "For Region concurrency, choose how to process Regions: Sequential (one Region at a time) or Parallel (multiple Regions concurrently)."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "要件の「2 を超えたら止める」は、failure tolerance を「許す失敗の数」とする S2 の言い方に合わせた",
+  "last_checked": "2026-11-26"
+}

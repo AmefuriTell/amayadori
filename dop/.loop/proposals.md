@@ -88,3 +88,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>q validate（書くたびの hook）でも同じ検査をする。利用者の不在中に、任された判断として入れた</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-011" from="C-0019" status="adopted">
+  <issue>検証役が答えを見ずに解いて外した（q-2.1-0004）。reveal の後に根拠で正解が 1 組に決まると確かめ、事実の誤りも無かったが、決まりでは外れは必ず fix で、2 回で drop になる。難しい良い問題ほど捨てられる</issue>
+  <kind>tool + doc</kind>
+  <change>外れても、検証役が ok にし重い指摘が無ければ ok にして「AI の確信が低い」の印を付ける。利用者の不在中に、任された判断として入れた（ループを pause してから文書を変えた）</change>
+</proposal>
+```

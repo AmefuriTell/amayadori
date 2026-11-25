@@ -60,7 +60,7 @@ test('reveal は答えを見ずに解いた後だけ。verdict は答えが割�
 
   verify(sb, id, [
     { qid: 'q-1.1-0001', blind: { answer: ['A'], confidence: 'low' }, issues: [], verdict: 'ok' },
-    { qid: 'q-1.1-0002', blind: { answer: ['B'], confidence: 'high' }, issues: [], verdict: 'ok' },
+    { qid: 'q-1.1-0002', blind: { answer: ['B'], confidence: 'high' }, issues: [{ kind: 'ambiguous', detail: 'B も成り立つ' }], verdict: 'fix' },
   ]);
   assert.equal(sb.run('q', 'reveal', id).ok, true);
   const v1 = sb.run('q', 'verdict', id);
@@ -171,4 +171,16 @@ test('validate: 正解だけ長いと書く時点で落とす（P-010）', () =>
   long.choices[0].text = 'Use CodeDeploy blue/green deployments with a linear configuration that shifts traffic in equal increments and rolls back automatically when alarms fire.';
   const id = authored(sb, [long]);
   assert.match(sb.run('q', 'validate', id).items.join('\n'), /正解 A が長すぎる/);
+});
+
+test('verdict: 外れても検証役が根拠で確かめて ok なら通し、印を付ける（P-011）', () => {
+  const sb = sandbox();
+  const id = authored(sb, [question()]);
+  toVerify(sb, id);
+  verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['C'], confidence: 'mid' }, issues: [{ kind: 'style', detail: '知識の穴' }], verdict: 'ok' }]);
+  assert.equal(sb.run('q', 'verdict', id).result, 'pass');
+  assert.equal(sb.read(`work/${id}/questions.json`).questions[0].low_confidence, true);
+  // 外れて検証役も fix にした時は今までどおり fix
+  verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['C'], confidence: 'mid' }, issues: [], verdict: 'fix' }]);
+  assert.equal(sb.run('q', 'verdict', id).result, 'fix');
 });

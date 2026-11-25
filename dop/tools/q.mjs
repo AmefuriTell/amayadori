@@ -259,7 +259,10 @@ const commands = {
       issues.forEach((i) => kinds.add(i.kind));
       let verdict = 'ok';
       const mildOnly = issues.length > 0 && issues.every((i) => MILD.has(i.kind));
-      const severe = !match || issues.some((i) => SEVERE.has(i.kind)) || (e.verdict === 'fix' && !mildOnly);
+      // P-011: 答えを見ずに解いて外れても、reveal の後に検証役が根拠と照らして ok とし、重い指摘も無いなら、
+      // 問題の欠陥ではなく難しい問題として通す（low_confidence の印を付ける）
+      const hardButSound = !match && e.verdict === 'ok' && !issues.some((i) => SEVERE.has(i.kind));
+      const severe = (!match && !hardButSound) || issues.some((i) => SEVERE.has(i.kind)) || (e.verdict === 'fix' && !mildOnly);
       const mild = issues.some((i) => MILD.has(i.kind));
       // P-005: 検証役が ok にした問題の言い回しの指摘は記録だけ（戻さない）
       if (severe || (mild && e.verdict === 'fix')) verdict = 'fix';
@@ -274,6 +277,7 @@ const commands = {
       if (verdict === 'fix') feedback[q.id] = { blind: e.blind, match, issues };
       if (verdict === 'drop') dropped.push(q);
       if (verdict === 'ok' && match && e.blind.confidence === 'low') q.low_confidence = true;
+      if (verdict === 'ok' && hardButSound) q.low_confidence = true;
     }
     const kept = batch.questions.filter((q) => results[q.id] !== 'drop');
     if (dropped.length) {

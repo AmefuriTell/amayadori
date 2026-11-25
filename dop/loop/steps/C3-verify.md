@@ -46,7 +46,7 @@
 
 ## 判定の決まり（q:verdict の中。人の確認用）
 
-- `match: false` → 少なくとも fix（答えが割れる問題は、本番の形として悪いか、正解が違う）。
+- `match: false` → 少なくとも fix（答えが割れる問題は、本番の形として悪いか、正解が違う）。ただし検証役が reveal の後に sources.md と照らして verdict を ok にし、fact・two_correct などの重い指摘も無い時は、知識の穴による外れとして ok にし、`low_confidence: true` を付ける（P-011。難しい問題を捨てないため）。
 - issues に `fact`・`two_correct`・`no_correct`・`unsupported`・`deprecated` → fix。
 - 同じ問題が 2 回 fix（言い回しだけの fix は数えない）→ drop。
 - `style`・`giveaway`（答えが見え見え）だけ → 検証役の verdict が fix なら fix（attempts を数えない）、ok なら記録だけで ok（P-005）。

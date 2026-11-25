@@ -1,0 +1,140 @@
+{
+  "item": "C-0019",
+  "questions": [
+    {
+      "id": "q-2.1-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Maximum concurrent accounts は同時に処理するアカウントの数、Failure tolerance はリージョンごとに許すアカウントの失敗の数で、これに達すると他のリージョンへ進まずに止まる。Region concurrency は Sequential（1 リージョンずつ）か Parallel（複数のリージョンを同時に）を選ぶ。",
+        "per_choice": {
+          "A": "Parallel では複数のリージョンを同時に処理し、1 リージョンずつの要件に反する。",
+          "B": "正しい。10 アカウントずつ、1 リージョンずつ、失敗が許す数を超えたら止まる。",
+          "C": "100 アカウントを同時に処理し、10 ずつの要件に反する。",
+          "D": "10 アカウントの失敗まで許すので、2 を超えたら止める要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Maximum concurrent accounts, specify how many accounts are processed concurrently."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Failure tolerance, specify the maximum number of account failures allowed per Region. The operation will stop and won't proceed to other Regions once this limit is reached."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "source_id": "S2",
+          "quote": "For Region concurrency, choose how to process Regions: Sequential (one Region at a time) or Parallel (multiple Regions concurrently)."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定の Strict Failure Tolerance では、実際の同時の数は「Maximum concurrent accounts」と「Failure tolerance + 1」の小さい方から始まる。Failure tolerance が 0 なら 1 アカウントずつになる。Soft Failure Tolerance は Failure tolerance と同時の数を切り離し、失敗の数にかかわらず Maximum concurrent accounts の数で動かす。",
+        "per_choice": {
+          "A": "正しい。失敗の数にかかわらず 20 アカウントずつ動く。",
+          "B": "リージョンを同時に処理するだけで、各リージョンの中のアカウントは 1 つずつのまま。",
+          "C": "StackSet を分けることになり、管理の手間が大きい。",
+          "D": "既定のままでは同時の数は Failure tolerance + 1 の 1 のまま。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S3",
+          "quote": "The initial actual concurrency is set to the lower of either the value of the Maximum concurrent accounts, or the value of Failure tolerance +1. This is the default behavior."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S3",
+          "quote": "This allows StackSet operations to run at the concurrency level set by the Maximum concurrent accounts value, regardless of the number of failures."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "source_id": "S4",
+          "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0003",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "パラメータの値の上書きは、選んだアカウントとリージョンのスタックに当たる。StackSet を更新しても、上書きした値は更新されずに残る。ドリフトの検出は各スタックの上書きした値を考えに入れる。上書きできるのは StackSet にあるパラメータだけで、パラメータを足すにはテンプレートを更新する。",
+        "per_choice": {
+          "A": "全てのスタックの値が変わり、本番だけ大きくする要件に反する。",
+          "B": "正しい。そのスタックだけ値が変わり、更新でも残り、ドリフトにもならない。",
+          "C": "StackSet を 1 つにする要件に反する。",
+          "D": "StackSet に無いパラメータは上書きできない。足すにはテンプレートの更新が要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "source_id": "S5",
+          "quote": "During StackSet updates, any parameter values overridden for a stack aren't updated, but retain their overridden value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "source_id": "S5",
+          "quote": "You can only override parameter values that are specified in the StackSet; to add or delete a parameter itself, you need to update the StackSet template."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-drift.html",
+          "source_id": "S6",
+          "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0004",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "管理アカウントのほかに、委任管理者の権限を持つメンバーアカウントも、組織の service-managed の StackSet を作って管理できる。委任管理者が作った物も含め、service-managed の StackSet は管理アカウントに作られる。委任管理者は同時に 5 つまでで、組織のアカウントへ展開する全ての権限を持ち、管理アカウントは特定の OU や操作に絞れない。",
+        "per_choice": {
+          "A": "正しい。メンバーアカウントを委任管理者として登録できる。",
+          "B": "正しい。委任管理者が作った物も管理アカウントに作られる。",
+          "C": "管理アカウントは、委任管理者の展開を特定の OU や操作に絞れない。",
+          "D": "同時に登録できる委任管理者は 5 つまで。",
+          "E": "委任管理者は service-managed の StackSet を作って管理できる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "member accounts with delegated administrator permissions can create and manage StackSets with service-managed permissions for the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "StackSets with service-managed permissions are created in the management account, including StackSets created by delegated administrators."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "The management account can't limit delegated administrator permissions to deploy to specific OUs or to perform specific StackSet operations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "source_id": "S7",
+          "quote": "Your organization can have up to five registered delegated administrators at one time."
+        }
+      ]
+    }
+  ]
+}
