@@ -3,6 +3,7 @@ import { RECORD_KEY, parseRecord, serializeRecord } from './logic/record.js';
 import { REPORT_KEY, parseReports, serializeReports } from './logic/report.js';
 import { LANG_KEY, parseLang } from './logic/lang.js';
 import { SPEECH_KEY, parseSpeech } from './logic/speech.js';
+import { PROGRESS_KEY, parseProgress } from './logic/progress.js';
 
 export function loadAnswers() {
   try {
@@ -75,6 +76,23 @@ export function loadSpeech() {
 export function saveSpeech(speech) {
   try {
     window.localStorage.setItem(SPEECH_KEY, JSON.stringify(speech));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadProgress() {
+  try {
+    return parseProgress(window.localStorage.getItem(PROGRESS_KEY));
+  } catch {
+    return null;
+  }
+}
+
+export function saveProgress(progress) {
+  try {
+    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
     return true;
   } catch {
     return false;
