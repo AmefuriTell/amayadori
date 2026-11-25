@@ -33,12 +33,20 @@ export async function launch() {
   return chromium.launch();
 }
 
-/** ページを開く。ブラウザのコンソールのエラーを errors に集める（試験で 0 件を確かめる） */
-export async function openPage(browser, url, { width = 1280, height = 800 } = {}) {
+/**
+ * ページを開く。ブラウザのコンソールのエラーを errors に集める（試験で 0 件を確かめる）。
+ * data を渡すと public/questions.json の代わりにそれを返す（null なら 404 にする）。
+ */
+export async function openPage(browser, url, { width = 1280, height = 800, data } = {}) {
   const page = await browser.newPage({ viewport: { width, height } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  if (data !== undefined) {
+    await page.route('**/public/questions.json', (route) => (data === null
+      ? route.fulfill({ status: 404, body: 'not found' })
+      : route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })));
+  }
   await page.goto(url);
   return { page, errors };
 }
