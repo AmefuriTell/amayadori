@@ -1,6 +1,6 @@
 # DOP 問題集（設計中）
 
-AWS Certified DevOps Engineer – Professional（DOP-C02 の想定。要確認）の合格に向けた Web の問題集。
+AWS Certified DevOps Engineer – Professional（DOP-C02）の合格に向けた Web の問題集。
 問題づくりとアプリづくりを、AI が回すループ（ループエンジニアリング）で進める。
 
 いまは **ループの設計だけ**。ツール（`tools/`）とアプリ（`app/`）はまだ無い。
@@ -15,16 +15,17 @@ AWS Certified DevOps Engineer – Professional（DOP-C02 の想定。要確認�
 | 人 | [docs/aws-hosting-cost.md](docs/aws-hosting-cost.md) | AWS で動かす時の案と料金の目安（相談用） |
 | ツール | `schemas/*.json`・`config/*.json` | 問題・作業の項目の形と、試験の範囲・割合 |
 
-## 決まっていないこと（人が決める）
+## 決めたこと（2026-11-25）
 
 ```xml
-<open_questions>
-  <q id="Q1" blocking="yes">試験は DOP-C02（Professional）で合っているか。「DevOps Association」という名前の試験は無い。</q>
-  <q id="Q2" blocking="yes">動かす場所と料金の上限（docs/aws-hosting-cost.md の案 A / B / C）。</q>
-  <q id="Q3" blocking="no">使う人は自分だけか、公開するか。公開するなら問題の誤りへの備え（報告ボタン・免責）が要る。</q>
-  <q id="Q4" blocking="no">置き場所はこのリポジトリの dop/ でよいか、別リポジトリにするか（AWS へデプロイするなら別の方が分けやすい）。</q>
-  <q id="Q5" blocking="no">1 回のループで作る問題の数と、人が抜き取りで読む割合（初めは 1 束 5 問・全部読む を提案）。</q>
-</open_questions>
+<decisions>
+  <d id="Q1">試験は DOP-C02（AWS Certified DevOps Engineer – Professional）。</d>
+  <d id="Q2">初めはこのリポジトリの GitHub Pages（0 円）。アプリが固まったら S3＋CloudFront へ移す。</d>
+  <d id="Q3">AWS へ移した後の月の上限は 10 USD。AWS Budgets のアラートは 5 USD と 10 USD。</d>
+  <d id="Q4">使うのは自分だけ。トップのページからはリンクしない（公開リポジトリなので URL を知っていれば開ける）。</d>
+  <d id="Q5">置き場所はこのリポジトリの dop/。AWS へ移す時に分けるかを改めて決める。</d>
+  <d id="Q6">1 束 5 問。人は事前に問題を読まない。誤りは解きながら見つけて報告する（備えは loop/LOOP.md 6 章）。</d>
+</decisions>
 ```
 
 ## 守ること（変えない）

@@ -50,4 +50,4 @@
 - issues に `fact`・`two_correct`・`no_correct`・`unsupported`・`deprecated` → fix。
 - 同じ問題が 2 回 fix → drop。
 - `style`・`giveaway`（答えが見え見え）だけ → fix だが attempts を数えない。
-- blind で `confidence: low` かつ match → ok だが、人の抜き取りに優先して回す。
+- blind で `confidence: low` かつ match → ok。問題に `low_confidence: true` を付け、アプリで印を出す（人は事前に読まないため）。
