@@ -1,0 +1,72 @@
+{
+  "id": "q-4.1-0002",
+  "task": "4.1",
+  "services": [
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An application writes logs to an Amazon CloudWatch Logs log group, and some log events contain credit card numbers. Operators who view the logs must not see the card numbers. Log events must be removed automatically after 90 days so that storage costs stay under control. The company does not want to write or run custom code. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a data protection policy for the log group that uses a data identifier for credit card numbers and masks them."
+    },
+    {
+      "key": "B",
+      "text": "Set the retention setting of the log group to 90 days."
+    },
+    {
+      "key": "C",
+      "text": "Encrypt the log group with a customer managed AWS KMS key so that operators cannot read the card numbers."
+    },
+    {
+      "key": "D",
+      "text": "Keep the default retention setting, and run a scheduled AWS Lambda function that deletes log events older than 90 days."
+    },
+    {
+      "key": "E",
+      "text": "Export the log group to Amazon S3 every day so that CloudWatch Logs no longer stores the log events."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "データ保護のポリシーは、データ識別子で機微なデータを選び、見つけた物をログイベントの表示の時にマスクできる。ロググループの保持期間を決めると、それより古いデータは消され、消す印が付いた後は保存の費用もかからない。",
+    "per_choice": {
+      "A": "正しい。カード番号を見つけて、表示の時にマスクする。",
+      "B": "正しい。既定では無期限に残るので、90 日を設定すれば自動で消える。",
+      "C": "KMS で暗号化しても、データを求められた時に CloudWatch Logs が復号するので、表示を隠すことにはならない。",
+      "D": "自分のコードを動かすことになり、要件に反する。保持期間の設定で足りる。",
+      "E": "書き出しても CloudWatch Logs の保持はそのままで、日々の書き出しの仕組みも要る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/cloudwatch-logs-data-protection-policies.html",
+      "source_id": "S4",
+      "quote": "These operations let you log the sensitive data that is found (or not found), and to mask the sensitive data when the log events are viewed."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+      "source_id": "S3",
+      "quote": "By default, log data is stored in CloudWatch Logs indefinitely. However, you can configure how long to store log data in a log group. Any data older than the current retention setting is deleted."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+      "source_id": "S3",
+      "quote": "After they are marked for deletion, they do not add to your archival storage costs anymore, even if they are not actually deleted until later."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+      "source_id": "S1",
+      "quote": "CloudWatch Logs decrypts this data whenever it is requested."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
