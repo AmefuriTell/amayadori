@@ -1,0 +1,127 @@
+{
+  "item": "C-0011",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "task": "1.3",
+      "services": [
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company stores application images in an Amazon ECR repository. Images that carry a tag starting with \"release\" must never be removed. Every other image must be removed automatically 90 days after it was pushed. Storage costs must be controlled without running custom code. Which lifecycle policy meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+        },
+        {
+          "key": "B",
+          "text": "Rule priority 1: tagStatus any, countType sinceImagePushed 90 days. Rule priority 2: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000."
+        },
+        {
+          "key": "C",
+          "text": "Rule priority 1: tagStatus untagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+        },
+        {
+          "key": "D",
+          "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"] and tagPatternList [\"*\"], countType sinceImagePushed 90 days."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "task": "1.3",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CloudFormation",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company manages an AWS CodePipeline pipeline in us-east-1 by using the AWS CLI. The company adds an action that deploys an AWS CloudFormation stack in ap-northeast-1, and the update fails. The company wants to keep a single pipeline, keep managing it with the AWS CLI, and avoid adding copy jobs between Regions. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the existing S3 source bucket in us-east-1 as the artifact store for the ap-northeast-1 action."
+        },
+        {
+          "key": "B",
+          "text": "Create an S3 bucket in ap-northeast-1 and add it to the pipeline as the artifact store for that Region."
+        },
+        {
+          "key": "C",
+          "text": "Turn on S3 Cross-Region Replication from the us-east-1 artifact bucket to a bucket in ap-northeast-1."
+        },
+        {
+          "key": "D",
+          "text": "Create a second pipeline in ap-northeast-1 that deploys the stack, and start it at the end of the first pipeline."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "task": "1.3",
+      "services": [
+        "AWS CodeArtifact",
+        "AWS KMS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company with many AWS accounts is adopting AWS CodeArtifact. Each development team must keep its own repository. A central team must control, in one place, which AWS accounts can use the repositories and which public repositories can be used as package sources. All stored packages must be encrypted with one customer managed AWS KMS key. Which design meets these requirements with the LEAST operational overhead?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one domain per team, each encrypted with the same KMS key, and apply the same policy to every domain."
+        },
+        {
+          "key": "B",
+          "text": "Create one domain with the KMS key, put one shared repository in it for all teams, and add a repository policy."
+        },
+        {
+          "key": "C",
+          "text": "Create one domain with the KMS key, create a repository for each team in it, and manage access with a domain policy."
+        },
+        {
+          "key": "D",
+          "text": "Create a repository for each team in each team's account, and restrict access with SCPs in AWS Organizations."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "task": "1.3",
+      "services": [
+        "AWS CodeBuild",
+        "Amazon ECR",
+        "AWS CodeArtifact",
+        "AWS IAM"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company runs AWS CodeBuild projects in account B. The builds must pull container images from an Amazon ECR repository in account A and npm packages from an AWS CodeArtifact domain in account A. The security team requires least privilege and does not allow long-lived credentials or public access to either service. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a repository policy to the ECR repository in account A that allows the CodeBuild service role in account B to pull images."
+        },
+        {
+          "key": "B",
+          "text": "Add a CodeArtifact domain policy in account A for account B, and have the build get an authorization token with its role credentials."
+        },
+        {
+          "key": "C",
+          "text": "Make the CodeArtifact repository in account A public so that builds can download npm packages without signing in."
+        },
+        {
+          "key": "D",
+          "text": "Store the access key of an IAM user from account A as an environment variable in the CodeBuild project."
+        },
+        {
+          "key": "E",
+          "text": "Move the CodeArtifact repository from the domain in account A into a new domain in account B."
+        }
+      ]
+    }
+  ]
+}

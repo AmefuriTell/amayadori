@@ -1,0 +1,62 @@
+{
+  "id": "q-1.3-0003",
+  "task": "1.3",
+  "services": [
+    "AWS CodeArtifact",
+    "AWS KMS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company with many AWS accounts is adopting AWS CodeArtifact. Each development team must keep its own repository. A central team must control, in one place, which AWS accounts can use the repositories and which public repositories can be used as package sources. All stored packages must be encrypted with one customer managed AWS KMS key. Which design meets these requirements with the LEAST operational overhead?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create one domain per team, each encrypted with the same KMS key, and apply the same policy to every domain."
+    },
+    {
+      "key": "B",
+      "text": "Create one domain with the KMS key, put one shared repository in it for all teams, and add a repository policy."
+    },
+    {
+      "key": "C",
+      "text": "Create a repository for each team in each team's account, and restrict access with SCPs in AWS Organizations."
+    },
+    {
+      "key": "D",
+      "text": "Create one domain with the KMS key, create a repository for each team in it, and manage access with a domain policy."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "ドメインは複数のリポジトリをまとめる単位で、中の全ての資産は同じ KMS キーで暗号化される。ドメインを使うと、どのアカウントがリポジトリに入れるか、どの公開リポジトリをパッケージの元にするかを、複数のリポジトリにまとめて決められる。AWS も本番用には 1 つのドメインを勧めている。",
+    "per_choice": {
+      "A": "暗号化はそろうが、ドメインごとにポリシーを持つことになり、1 か所で管理する要件に合わない。",
+      "B": "1 か所で管理でき暗号化もそろうが、チームごとのリポジトリを持つ要件に合わない。",
+      "C": "チームごとのリポジトリは持てるが、ドメインを使わないので、どのアカウントが入れるかやどの公開リポジトリを使うかを 1 か所でまとめて決められない。",
+      "D": "正しい。1 つのドメインの中にチームごとのリポジトリを置き、ドメインでまとめて管理する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+      "source_id": "S1",
+      "quote": "All of the assets and metadata in a domain are encrypted with the same AWS KMS key (KMS key) stored in AWS Key Management Service (AWS KMS)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+      "source_id": "S1",
+      "quote": "With this approach, you determine which accounts can access repositories in the domain, and which public repositories can be used as the sources of packages."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+      "source_id": "S1",
+      "quote": "we recommend a single production domain that contains all published artifacts."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

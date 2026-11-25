@@ -1,0 +1,63 @@
+{
+  "id": "q-1.3-0002",
+  "task": "1.3",
+  "services": [
+    "AWS CodePipeline",
+    "AWS CloudFormation",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company manages an AWS CodePipeline pipeline in us-east-1 by using the AWS CLI. The company adds an action that deploys an AWS CloudFormation stack in ap-northeast-1, and the update fails. The company wants to keep a single pipeline, keep managing it with the AWS CLI, and avoid adding copy jobs between Regions. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the existing S3 source bucket in us-east-1 as the artifact store for the ap-northeast-1 action."
+    },
+    {
+      "key": "B",
+      "text": "Turn on S3 Cross-Region Replication from the us-east-1 artifact bucket to a bucket in ap-northeast-1."
+    },
+    {
+      "key": "C",
+      "text": "Create an S3 bucket in ap-northeast-1 and add it to the pipeline as the artifact store for that Region."
+    },
+    {
+      "key": "D",
+      "text": "Create a second pipeline in ap-northeast-1 that deploys the stack, and start it at the end of the first pipeline."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "アクションを動かすリージョンごとに 1 つのアーティファクトバケットが要る。コンソールなら自動で作られるが、AWS CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを自分で指定する。",
+    "per_choice": {
+      "A": "アーティファクトバケットは、S3 のソースアクションで使うソースのバケットとは別の物。また別リージョンのアクションにはそのリージョンのバケットが要る。",
+      "B": "リージョンの間でコピーする仕組みを足すことになり、要件に反する。リージョンごとのアーティファクトバケットの指定も無いまま。",
+      "C": "正しい。CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを指定する。",
+      "D": "パイプラインを 1 つにする要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+      "source_id": "S6",
+      "quote": "you must have one artifact bucket per Region where you plan to execute an action."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+      "source_id": "S6",
+      "quote": "you must provide an artifact bucket for each additional Region where you plan to execute an action."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+      "source_id": "S6",
+      "quote": "The artifact bucket is not the same bucket as the bucket used as the source file location for a pipeline where the chosen source action is S3."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
