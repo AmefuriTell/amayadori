@@ -1,0 +1,337 @@
+{
+  "item": "T-0013",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An Amazon RDS DB instance has storage autoscaling enabled. The allocated storage is 950 GiB, and the maximum storage threshold is 1,000 GiB. Free storage space has been at 4% of the allocated storage for the last hour, no storage modifications have occurred in the last 24 hours, and the storage has not grown. The company wants storage to keep growing automatically as data increases. What should the DevOps engineer do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Raise the maximum storage threshold well above the current allocated storage so that the next increment fits."
+        },
+        {
+          "key": "B",
+          "text": "Wait at least another hour, because autoscaling starts only after the low-storage condition lasts several hours."
+        },
+        {
+          "key": "C",
+          "text": "Create a CloudWatch alarm on FreeStorageSpace that invokes an AWS Lambda function to modify the allocated storage."
+        },
+        {
+          "key": "D",
+          "text": "Lower the maximum storage threshold to 950 GiB so that autoscaling treats the instance as full and scales immediately."
+        }
+      ],
+      "explanation": {
+        "summary": "空きが割り当ての 10% 以下の状態が 5 分以上続くと自動拡張が始まり、増える量は 10 GiB・割り当ての 10%・予測の増加のうち大きい方。950 GiB の 10% は 95 GiB なので、増やすと最大のしきい値 1,000 GiB を超え、超える時は自動拡張は起きない。しきい値は今の割り当てより少なくとも 10% 多くし、26% 以上多くするのが勧められている。",
+        "per_choice": {
+          "A": "正しい。次の増加分が収まるように、最大のしきい値を上げる。",
+          "B": "低い空きが 5 分続けば始まる条件はもう満たしている。止まっている原因は最大のしきい値。",
+          "C": "自分で仕組みを作ることになり、手間が大きい。最大のしきい値を上げれば足りる。",
+          "D": "最大のしきい値は今の割り当てより少なくとも 10% 多くする必要があり、下げても拡張は起きない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S1",
+          "quote": "- Free available space is less than or equal to 10 percent of the allocated storage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S1",
+          "quote": "- 10 percent of currently allocated storage"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S2",
+          "quote": "Autoscaling doesn't occur if the maximum storage threshold would be exceeded by the storage increment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S2",
+          "quote": "You must set the maximum storage threshold to at least 10% more than the current allocated storage."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0002",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An Amazon ECS cluster uses an Auto Scaling group capacity provider with managed scaling turned on and a targetCapacity of 90%. The operations team also added its own CPU-based target tracking policy to the same Auto Scaling group. The group now launches and terminates instances unpredictably, and tasks sometimes wait for capacity. The team wants ECS to size the cluster for its tasks automatically. What should the team do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Keep both policies and add a step scaling policy that adds instances when tasks are waiting."
+        },
+        {
+          "key": "B",
+          "text": "Remove the team's own scaling policy, and let the ECS managed target tracking policy control the group's desired capacity."
+        },
+        {
+          "key": "C",
+          "text": "Set MaximumCapacity of the group to 0 so that only Amazon ECS decides how many instances to launch."
+        },
+        {
+          "key": "D",
+          "text": "Turn off managed scaling and set the desired capacity by hand before each release."
+        }
+      ],
+      "explanation": {
+        "summary": "managed scaling では、ECS が目標の使用率（targetCapacity）に合わせて Auto Scaling グループの target tracking のポリシーを作り、タスクの使う資源に合わせて増減する。キャパシティプロバイダーに結び付いたグループの希望の数は、ECS が管理するポリシー以外で変えたり管理したりしてはいけない。",
+        "per_choice": {
+          "A": "ECS が管理するポリシー以外のポリシーをさらに足すことになり、ぶつかり合いが増える。",
+          "B": "正しい。ECS が管理するポリシーだけにすれば、タスクに合わせて増減する。",
+          "C": "グループが増えるには MaximumCapacity が 0 より大きい必要がある。0 では増えない。",
+          "D": "自動で増減させる要件に反し、手の作業が増える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "Amazon ECS creates two custom CloudWatch metrics and a target tracking scaling policy for your Auto Scaling group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "Don't change or manage the desired capacity for the Auto Scaling group that's associated with a capacity provider with any scaling policies other than the one Amazon ECS manages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0003",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A team creates a CloudWatch alarm on the Amazon DynamoDB ThrottledRequests metric, which reports data points only when throttling occurs. The alarm must go to ALARM only when throttling happens in at least 3 of the last 5 one-minute periods. During quiet periods with no throttling, the alarm must show OK instead of INSUFFICIENT_DATA. Which alarm configuration BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as notBreaching."
+        },
+        {
+          "key": "B",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as breaching."
+        },
+        {
+          "key": "C",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and keep the default treatment of missing data."
+        },
+        {
+          "key": "D",
+          "text": "Period 5 minutes, 3 out of 3 datapoints to alarm, and treat missing data as notBreaching."
+        }
+      ],
+      "explanation": {
+        "summary": "Evaluation Periods（N）と Datapoints to Alarm（M）を違う値にすると「N のうち M」のアラームになる。DynamoDB の ThrottledRequests のようにエラーの時だけ値が出るメトリクスでは、欠けたデータを notBreaching（良い・しきい値の内）として扱う。既定は missing で、評価の範囲のデータが全て欠けると INSUFFICIENT_DATA になる。",
+        "per_choice": {
+          "A": "正しい。5 分のうち 3 回の絞り込みで ALARM、静かな時は OK になる。",
+          "B": "欠けたデータを悪いとみなすので、絞り込みが無い時に ALARM になる。",
+          "C": "既定の missing では、データが全て欠けると INSUFFICIENT_DATA になる。",
+          "D": "評価の範囲は 15 分になり、直近の 5 つの 1 分の期間で見る要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "source_id": "S1",
+          "quote": "When you configure Evaluation Periods and Datapoints to Alarm as different values, you're setting an \"M out of N\" alarm."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "source_id": "S2",
+          "quote": "But for a metric that generates data points only when an error occurs, such as ThrottledRequests in Amazon DynamoDB, you would want to treat missing data as notBreaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "source_id": "S2",
+          "quote": "missing – If all data points in the alarm evaluation range are missing, the alarm transitions to INSUFFICIENT_DATA."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "source_id": "S1",
+          "quote": "If you configure 3 out of 3 data points with a period of 10 minutes, the evaluation interval is 30 minutes."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0004",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "When the primary database fails, about 20 CloudWatch alarms for application health go into ALARM at the same time, and the on-call team receives 20 notifications. The team wants a single notification to an Amazon SNS topic and an OpsItem in Systems Manager OpsCenter only when the database alarm is in ALARM and at least half of the application health alarms are in ALARM. All alarms are in one account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a composite alarm with the rule ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "B",
+          "text": "Create a composite alarm with the same AND rule, and set an EC2 reboot action on it to restart the database host."
+        },
+        {
+          "key": "C",
+          "text": "Create a composite alarm with the rule ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "D",
+          "text": "Subscribe a Lambda function to all 21 alarms that counts their states and publishes one message when the conditions are met."
+        }
+      ],
+      "explanation": {
+        "summary": "複合アラームはルールの式で他のアラームの状態をまとめる。AND は全ての条件が真の時、OR はどれか 1 つが真の時に真。AT_LEAST は決めた数か割合のアラームが指定の状態の時に真になる。複合アラームが取れるアクションは、SNS への通知・Lambda の呼び出し・OpsCenter の OpsItem・Incident Manager のインシデントだけ。",
+        "per_choice": {
+          "A": "OR ではどちらか片方の条件だけでも通知が出る。",
+          "B": "複合アラームは EC2 のアクションを取れない。",
+          "C": "正しい。両方の条件がそろった時だけ、1 つの通知と OpsItem を出す。",
+          "D": "自分で数える仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S4",
+          "quote": "Logical AND operator. Returns TRUE when all specified conditions are TRUE."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S4",
+          "quote": "Function that returns TRUE when a minimum number or percentage of specified alarms are in the required state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S3",
+          "quote": "Composite alarms can take only the following actions:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "source_id": "S3",
+          "quote": "Create OpsItems in Systems Manager Ops Center"
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0005",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "Application servers upload raw log files to the bucket app-logs under the prefix raw/. An S3 event notification on all new objects invokes a Lambda function that parses each file and writes the result back to app-logs. After release, the function's invocations and costs grow without limit. The company wants to keep one bucket and keep processing every new raw file. What should the company do with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the function's reserved concurrency to 0 until the backlog clears, and then remove the setting."
+        },
+        {
+          "key": "B",
+          "text": "Raise the account's Lambda concurrency limit so that the function can keep up with the growing number of events."
+        },
+        {
+          "key": "C",
+          "text": "Limit the notification to the prefix raw/, and have the function write its results under a different prefix such as processed/."
+        },
+        {
+          "key": "D",
+          "text": "Keep the notification on all objects, and add a suffix filter for .log while the function also writes .log files."
+        }
+      ],
+      "explanation": {
+        "summary": "S3 は、オブジェクトが作られた時に Lambda の関数を非同期で呼べる。関数が自分を呼んだのと同じバケットに書くと、呼び出しがくり返し続く。避けるには、バケットを 2 つにするか、入ってくるオブジェクトの prefix にだけトリガーを当てる。通知は key の prefix と suffix で絞れる。",
+        "per_choice": {
+          "A": "処理そのものが止まり、全ての新しいファイルを処理する要件に反する。",
+          "B": "くり返しは止まらず、費用がさらに増える。",
+          "C": "正しい。raw/ にだけ反応し、結果は別の prefix に書くので、くり返しが止まる。",
+          "D": "結果も .log なので、書いた結果でまた関数が呼ばれる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+          "source_id": "S5",
+          "quote": "If your Lambda Event Function uses the same bucket that triggers it, it could cause the function to run in a loop."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+          "source_id": "S5",
+          "quote": "To avoid this, use two buckets, or configure the trigger to only apply to a prefix used for incoming objects."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-filtering.html",
+          "source_id": "S4",
+          "quote": "You can configure notifications to be filtered by the prefix and suffix of the key name of objects."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0006",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A company wants every new object in an S3 log bucket to trigger three consumers: an Amazon SQS FIFO queue that feeds an ordered processing job, an AWS Step Functions workflow, and a security Lambda function. The company prefers managed routing over custom fan-out code. Which statements or actions are correct? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Enable Amazon EventBridge delivery on the bucket, and use EventBridge rules to route the events to the three targets."
+        },
+        {
+          "key": "B",
+          "text": "Design the consumers to tolerate duplicate notifications, because S3 event notifications are delivered at least once."
+        },
+        {
+          "key": "C",
+          "text": "Configure an S3 event notification that sends directly to the SQS FIFO queue, and a second one for the other targets."
+        },
+        {
+          "key": "D",
+          "text": "Rely on S3 event notifications being delivered exactly once, so the consumers do not need to handle duplicates."
+        },
+        {
+          "key": "E",
+          "text": "Enable EventBridge delivery for only the log prefix, because EventBridge delivery for a bucket can be scoped by prefix."
+        }
+      ],
+      "explanation": {
+        "summary": "S3 のイベント通知は少なくとも 1 回届くように作られている。SQS の FIFO キューは S3 のイベント通知の送り先にできず、FIFO キューへ送るには EventBridge を使う。EventBridge への送信はバケット単位で有効か無効かを選び、有効にすると全てのイベントが送られ、EventBridge のルールで他の送り先へ振り分けられる。",
+        "per_choice": {
+          "A": "正しい。EventBridge のルールで 3 つの送り先に振り分けられ、FIFO キューにも送れる。",
+          "B": "正しい。少なくとも 1 回の配信なので、重複に耐えるようにする。",
+          "C": "SQS の FIFO キューは S3 のイベント通知の送り先にできない。",
+          "D": "少なくとも 1 回の配信で、重複はあり得る。",
+          "E": "EventBridge への送信はバケット単位で有効にし、全てのイベントが送られる。絞るのは EventBridge のルールで行う。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "source_id": "S1",
+          "quote": "Amazon S3 event notifications are designed to be delivered at least once."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "source_id": "S2",
+          "quote": "Amazon Simple Queue Service FIFO (First-In-First-Out) queues aren't supported as an Amazon S3 event notification destination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "source_id": "S2",
+          "quote": "To send a notification for an Amazon S3 event to an Amazon SQS FIFO queue, you can use Amazon EventBridge."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html",
+          "source_id": "S3",
+          "quote": "If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets."
+        }
+      ]
+    }
+  ]
+}
