@@ -1,0 +1,57 @@
+{
+  "id": "q-2.2-0004",
+  "task": "2.2",
+  "services": [
+    "AWS Control Tower",
+    "AWS Service Catalog"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company has set up AWS Control Tower. Teams request new AWS accounts several times each week. Each new account must start from a pre-approved configuration, be enrolled in the governed environment, and have the company's controls applied automatically. The platform team wants to stop running its own scripts. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create each account with the AWS Organizations CreateAccount API, and apply the controls with a script afterward."
+    },
+    {
+      "key": "B",
+      "text": "Create each account in the AWS Organizations console, and enroll it in AWS Control Tower later by hand."
+    },
+    {
+      "key": "C",
+      "text": "Copy an existing account's IAM roles and settings to each new account with an AWS Lambda function."
+    },
+    {
+      "key": "D",
+      "text": "Use AWS Control Tower Account Factory to create and enroll each account from the approved template."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Account Factory は、承認済みの設定で新しいアカウントの作成をそろえる、設定できるアカウントのテンプレート。アカウントを作って登録し、コントロールやポリシーを当てるところまで自動で行う。AWS Service Catalog のプロビジョニングされた製品の上に作られている。",
+    "per_choice": {
+      "A": "アカウントは作れるが、コントロールを当てるスクリプトを持ち続けることになり、要件に反する。",
+      "B": "登録を人が行うので、自動で当てる要件に合わず、手間も大きい。",
+      "C": "自分のコードを持つことになり、要件に反する。登録やコントロールの適用もされない。",
+      "D": "正しい。作成・登録・コントロールの適用を Account Factory が自動で行う。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+      "source_id": "S1",
+      "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+      "source_id": "S2",
+      "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,63 @@
+{
+  "id": "q-2.2-0003",
+  "task": "2.2",
+  "services": [
+    "AWS Organizations",
+    "AWS CloudTrail",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations. Administrators in member accounts have broad IAM permissions. The security team must make sure that no IAM user or role in any member account can stop the organization's CloudTrail logging, even administrators. Automation in the management account must still be able to manage the trail. Developers' existing permissions must not change. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add an IAM policy that denies cloudtrail:StopLogging to every role in each member account."
+    },
+    {
+      "key": "B",
+      "text": "Attach an SCP that denies cloudtrail:StopLogging and cloudtrail:DeleteTrail to the OUs that contain the member accounts."
+    },
+    {
+      "key": "C",
+      "text": "Attach an SCP that grants CloudTrail permissions only to the security team's role, and remove CloudTrail permissions from IAM policies."
+    },
+    {
+      "key": "D",
+      "text": "Move the trail's management to the management account and remove all IAM permissions for CloudTrail in member accounts."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "SCP は、組織の IAM ユーザーとロールができる操作に上限（ガードレール）を設ける。権限を与えることはしない。管理アカウントのユーザーやロールには効かないので、管理アカウントの自動化はそのまま動く。",
+    "per_choice": {
+      "A": "各アカウントの管理者が IAM のポリシーを外せるので守れず、全アカウントで作業する手間も大きい。",
+      "B": "正しい。管理者を含むメンバーアカウントの全員に上限を設け、管理アカウントには効かず、開発者の IAM のポリシーも変えない。",
+      "C": "SCP は権限を与えない。IAM のポリシーから権限を外すと、開発者の権限が変わる要件違反にもなる。",
+      "D": "メンバーアカウントの IAM の権限を広く外すことになり、開発者の権限を変えない要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+      "source_id": "S6",
+      "quote": "An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+      "source_id": "S6",
+      "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+      "source_id": "S6",
+      "quote": "SCPs don't affect users or roles in the management account."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,63 @@
+{
+  "id": "q-2.2-0002",
+  "task": "2.2",
+  "services": [
+    "AWS CloudFormation StackSets",
+    "AWS Organizations",
+    "AWS Control Tower"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company creates accounts with AWS Control Tower Account Factory and places them in a Prod OU. A StackSet with service-managed permissions and automatic deployments targets the Prod OU and uses an account-level filter to exclude sandbox accounts. A new sandbox account placed in the Prod OU still received the stack. The company must keep automatic deployments for production accounts and must keep the baseline out of sandbox accounts. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add the new sandbox account ID to the account-level exclusion filter of the StackSet."
+    },
+    {
+      "key": "B",
+      "text": "Place sandbox accounts in a separate OU that the StackSet does not target."
+    },
+    {
+      "key": "C",
+      "text": "Turn off automatic deployments and add stack instances for each new production account by hand."
+    },
+    {
+      "key": "D",
+      "text": "Turn off automatic deployments only for the sandbox account, and keep them for the other accounts."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "自動デプロイは、アカウント単位の絞り込み（account level targeting filters）を考えない。また自動デプロイは StackSet の単位で有効にする。対象の OU に入ったアカウントには展開されるので、外したいアカウントは対象でない OU に置く。",
+    "per_choice": {
+      "A": "自動デプロイはアカウント単位の絞り込みを考えないので、足しても新しいアカウントには展開される。",
+      "B": "正しい。対象の OU に入らなければ展開されない。",
+      "C": "外せるが、本番のアカウントの自動デプロイを続ける要件に反し、手の作業が増える。",
+      "D": "自動デプロイは StackSet の単位で有効にするもので、アカウントごとには切り替えられない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+      "source_id": "S5",
+      "quote": "Automatic deployments do not consider account level targeting filters."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+      "source_id": "S5",
+      "quote": "The automatic deployments feature is enabled at the StackSet level."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+      "source_id": "S4",
+      "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,241 @@
+{
+  "item": "C-0022",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "task": "2.2",
+      "services": [
+        "AWS CloudFormation StackSets",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. The security team maintains an AWS CloudFormation template with baseline resources. Every account that is placed in the Workloads OU, now or in the future, must receive the baseline in two Regions without anyone taking action. The team does not want to create IAM roles in each account. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a StackSet with self-managed permissions that targets the Workloads OU, and add the execution role to new accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, with automatic deployments enabled."
+        },
+        {
+          "key": "C",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, and add stack instances when accounts arrive."
+        },
+        {
+          "key": "D",
+          "text": "Create an Amazon EventBridge rule for new accounts that invokes an AWS Lambda function to create the stack in each Region."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "service-managed のアクセス許可なら、CloudFormation が各アカウントとリージョンの IAM ロールを作るので、自分で作らなくてよい。自動デプロイを有効にすると、対象の組織や OU にアカウントが入った時に自動でスタックを足す。",
+        "per_choice": {
+          "A": "self-managed では各アカウントに実行用のロールを用意する必要があり、要件に反する。",
+          "B": "正しい。ロールは CloudFormation が作り、新しいアカウントにも自動で展開される。",
+          "C": "アカウントが入るたびに人が作業することになり、「誰も作業しない」要件に反する。",
+          "D": "動くが、Lambda の作成と保守が要り、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-associate-stackset-with-org.html",
+          "source_id": "S3",
+          "quote": "With this model, you don't need to create IAM roles in each target account and AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S4",
+          "quote": "CloudFormation can automatically deploy additional stacks to new AWS Organizations accounts when they're added to your target organization or organizational units (OUs)."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.2-0002",
+      "task": "2.2",
+      "services": [
+        "AWS CloudFormation StackSets",
+        "AWS Organizations",
+        "AWS Control Tower"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company creates accounts with AWS Control Tower Account Factory and places them in a Prod OU. A StackSet with service-managed permissions and automatic deployments targets the Prod OU and uses an account-level filter to exclude sandbox accounts. A new sandbox account placed in the Prod OU still received the stack. The company must keep automatic deployments for production accounts and must keep the baseline out of sandbox accounts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add the new sandbox account ID to the account-level exclusion filter of the StackSet."
+        },
+        {
+          "key": "B",
+          "text": "Turn off automatic deployments and add stack instances for each new production account by hand."
+        },
+        {
+          "key": "C",
+          "text": "Turn off automatic deployments only for the sandbox account, and keep them for the other accounts."
+        },
+        {
+          "key": "D",
+          "text": "Place sandbox accounts in a separate OU that the StackSet does not target."
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "自動デプロイは、アカウント単位の絞り込み（account level targeting filters）を考えない。また自動デプロイは StackSet の単位で有効にする。対象の OU に入ったアカウントには展開されるので、外したいアカウントは対象でない OU に置く。",
+        "per_choice": {
+          "A": "自動デプロイはアカウント単位の絞り込みを考えないので、足しても新しいアカウントには展開される。",
+          "B": "外せるが、本番のアカウントの自動デプロイを続ける要件に反し、手の作業が増える。",
+          "C": "自動デプロイは StackSet の単位で有効にするもので、アカウントごとには切り替えられない。",
+          "D": "正しい。対象の OU に入らなければ展開されない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S5",
+          "quote": "Automatic deployments do not consider account level targeting filters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S5",
+          "quote": "The automatic deployments feature is enabled at the StackSet level."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "source_id": "S4",
+          "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs."
+        }
+      ],
+      "difficulty": 3,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.2-0003",
+      "task": "2.2",
+      "services": [
+        "AWS Organizations",
+        "AWS CloudTrail",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. Administrators in member accounts have broad IAM permissions. The security team must make sure that no IAM user or role in any member account can stop the organization's CloudTrail logging, even administrators. Automation in the management account must still be able to manage the trail. Developers' existing permissions must not change. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an SCP that denies cloudtrail:StopLogging and cloudtrail:DeleteTrail to the OUs that contain the member accounts."
+        },
+        {
+          "key": "B",
+          "text": "Add an IAM policy that denies cloudtrail:StopLogging to every role in each member account."
+        },
+        {
+          "key": "C",
+          "text": "Attach an SCP that grants CloudTrail permissions only to the security team's role, and remove CloudTrail permissions from IAM policies."
+        },
+        {
+          "key": "D",
+          "text": "Move the trail's management to the management account and remove all IAM permissions for CloudTrail in member accounts."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "SCP は、組織の IAM ユーザーとロールができる操作に上限（ガードレール）を設ける。権限を与えることはしない。管理アカウントのユーザーやロールには効かないので、管理アカウントの自動化はそのまま動く。",
+        "per_choice": {
+          "A": "正しい。管理者を含むメンバーアカウントの全員に上限を設け、管理アカウントには効かず、開発者の IAM のポリシーも変えない。",
+          "B": "各アカウントの管理者が IAM のポリシーを外せるので守れず、全アカウントで作業する手間も大きい。",
+          "C": "SCP は権限を与えない。IAM のポリシーから権限を外すと、開発者の権限が変わる要件違反にもなる。",
+          "D": "メンバーアカウントの IAM の権限を広く外すことになり、開発者の権限を変えない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "source_id": "S6",
+          "quote": "SCPs don't affect users or roles in the management account."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.2-0004",
+      "task": "2.2",
+      "services": [
+        "AWS Control Tower",
+        "AWS Service Catalog"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has set up AWS Control Tower. Teams request new AWS accounts several times each week. Each new account must start from a pre-approved configuration, be enrolled in the governed environment, and have the company's controls applied automatically. The platform team wants to stop running its own scripts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create each account with the AWS Organizations CreateAccount API, and apply the controls with a script afterward."
+        },
+        {
+          "key": "B",
+          "text": "Create each account in the AWS Organizations console, and enroll it in AWS Control Tower later by hand."
+        },
+        {
+          "key": "C",
+          "text": "Use AWS Control Tower Account Factory to create and enroll each account from the approved template."
+        },
+        {
+          "key": "D",
+          "text": "Copy an existing account's IAM roles and settings to each new account with an AWS Lambda function."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Account Factory は、承認済みの設定で新しいアカウントの作成をそろえる、設定できるアカウントのテンプレート。アカウントを作って登録し、コントロールやポリシーを当てるところまで自動で行う。AWS Service Catalog のプロビジョニングされた製品の上に作られている。",
+        "per_choice": {
+          "A": "アカウントは作れるが、コントロールを当てるスクリプトを持ち続けることになり、要件に反する。",
+          "B": "登録を人が行うので、自動で当てる要件に合わず、手間も大きい。",
+          "C": "正しい。作成・登録・コントロールの適用を Account Factory が自動で行う。",
+          "D": "自分のコードを持つことになり、要件に反する。登録やコントロールの適用もされない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "source_id": "S1",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "source_id": "S2",
+          "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}
