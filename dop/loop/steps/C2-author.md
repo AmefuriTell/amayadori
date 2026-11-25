@@ -13,6 +13,7 @@
     <a>無ければ下の「書き方」で count 問書き、work/&lt;ID&gt;/questions.json に { "item": "&lt;ID&gt;", "questions": [ … ] } の形で置く。id は q-&lt;task&gt;-0001 から仮に振る（q publish が振り直す）。</a>
     <a>recheck の項目では questions.json に bank の問題が入っている（"recheck": true）。feedback か item.note の指摘の所だけ直し、id は変えない。</a>
     <a>translate の項目（"translate": true）では、bank の問題に日本語版（stem_ja と choices[].text_ja）を足すだけ。英語・答え・解説・出典・選択肢の順は変えない（q validate が bank と比べて止める）。sources.md は要らない。</a>
+    <a>事典の項目（G-、P-014）では問題ではなく、下の「事典の書き方」で item.services の各サービスの 1 ページを work/&lt;ID&gt;/glossary.json に { "item", "entries": [ … ] } の形で書き、q validate の代わりに g validate を呼ぶ。</a>
     <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/questions.json（status は draft）</file></outputs>
@@ -58,4 +59,17 @@
   </explanation>
   <originality>本物の試験問題や問題集の文を思い出して書かない。場面は自分で作る。</originality>
 </authoring_rules>
+```
+
+## 事典の書き方（G- の項目。P-014）
+
+```xml
+<glossary_rules>
+  <r>1 サービス 1 ページ。形は schemas/glossary.schema.json。id はファイル名（例 codedeploy）。aliases に item.services の名前と name を入れる。</r>
+  <r>読む人は大学生。summary は「何をするサービスか」を日本語 1〜2 文で、専門用語には言い換えを添える。</r>
+  <r>features は 2〜6 個、exam_points は 1〜4 個、compare（似たサービスとの違い）は 0〜3 個。どれも sources.md の S 番号を source_id に付け、その出典に書いてある事だけを書く。</r>
+  <r>exam_points は DOP-C02 の試験ガイドのタスクに関係する使い方（自動化・監視・復旧・権限など）を選ぶ。本物の試験問題や問題集の文を思い出して書かない。</r>
+  <r>references に使った S 番号ごとに url と 200 字までの原文（quote）を写す。</r>
+  <r>config/service-status.json で retired / closed_to_new のサービスは、その事を summary に書く。</r>
+</glossary_rules>
 ```

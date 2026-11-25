@@ -108,3 +108,21 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>問題に stem_ja・choices[].text_ja を足す。英語は根拠と照らす元として残す。q validate が日本語の有無・条件の語・数字・英語の名前・正解の長さを見る。C3 は日本語版で答えを見ずに解き、reveal で英語と照らして kind: translation を書く。今の bank は訳の項目（T-、loop seed --translate、10 問ずつ）で日本語を足す（英語を変えさせない。答えの位置も変えない）。アプリは日本語を先に出し、英語に切り替えられるようにする（A-0008）。利用者が方向を選び、推奨の形で入れた</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-013" from="A-0012" status="adopted">
+  <issue>アプリに「分からない」（無回答の不正解）を足した。これを L1 の「誤りが疑わしい問題」（正答率 20% 未満）に数えると、知らないだけの問題が見直しに回る</issue>
+  <kind>tool + doc</kind>
+  <change>learn weak は「分からない」を苦手のタスクの判定には数え、誤りが疑わしい問題の判定には数えない。利用者の依頼（分からないボタン）に伴う細部として入れた（ループの実行中はツールだけ直し、pause してから L1 の文書を直した）</change>
+</proposal>
+```
+
+## 利用者の依頼（2026-11-26）から
+
+```xml
+<proposal id="P-014" from="user" status="adopted">
+  <issue>解説が足りない。構成図と、各サービスが何をするかを参照できるようにしたい。共通の部分は別のファイルにし、個別から参照したい（利用者）。進め方は「サービス事典だけ先に」（利用者の回答）</issue>
+  <kind>tool + doc + app</kind>
+  <change>サービス事典 glossary/services/&lt;id&gt;.json（1 サービス 1 ページ、schemas/glossary.schema.json）を作る。問題の services の名前から aliases で引く。作り方は問題と同じ C1〜C4（事典の項目 G-、loop seed --glossary で 5 サービスずつ）で、C2〜C4 は g validate / verdict / gate / publish。検証役は各文を sources.md と照らす。アプリでの表示は別の app の項目。構成図はその後</change>
+</proposal>
+```

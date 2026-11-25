@@ -1,6 +1,6 @@
 // 1 問ずつ解く画面。採点などの計算は logic/ に置く。
 import { grade, canSubmit } from './logic/grade.js';
-import { addAnswer, domainStats } from './logic/record.js';
+import { addAnswer, domainStats, skipEntry } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
@@ -107,7 +107,7 @@ function autoSpeak(q, view) {
   const key = `${state.index}:${state.answered}`;
   if (!synth || !state.speech.on || key === state.spokenKey) return;
   state.spokenKey = key;
-  speak(state.answered ? answerScript(q, grade(q, state.selected)) : questionScript(view));
+  speak(state.answered ? answerScript(q, grade(q, state.selected), state.skipped) : questionScript(view));
 }
 
 function setSpeech(change) {
@@ -185,6 +185,7 @@ function render() {
 
   if (!state.answered) {
     card.append(el('div', { class: 'actions' },
+      el('button', { type: 'button', class: 'secondary', 'data-testid': 'skip', onclick: skip, text: '分からない' }),
       el('button', { type: 'button', disabled: !canSubmit(q, state.selected), onclick: submit, text: '答える' })));
   } else {
     card.append(renderAnswer(q));
@@ -197,7 +198,7 @@ function renderAnswer(q) {
   const ok = grade(q, state.selected);
   const last = state.index === state.questions.length - 1;
   return el('div', {},
-    el('p', { class: `verdict ${ok ? 'ok' : 'ng'}`, 'data-testid': 'verdict', role: 'status', text: ok ? `正解（${q.answer.join(', ')}）` : `不正解（正解は ${q.answer.join(', ')}）` }),
+    el('p', { class: `verdict ${ok ? 'ok' : 'ng'}`, 'data-testid': 'verdict', role: 'status', text: state.skipped ? `分からない（正解は ${q.answer.join(', ')}）` : ok ? `正解（${q.answer.join(', ')}）` : `不正解（正解は ${q.answer.join(', ')}）` }),
     el('p', { text: q.explanation.summary }),
     el('ul', { class: 'explain' }, q.choices.map((c) => el('li', {
       class: q.answer.includes(c.key) ? 'is-correct' : '', 'data-testid': 'explain-item',
@@ -259,8 +260,21 @@ function submit() {
   app.querySelector('[data-testid=verdict]')?.focus?.();
 }
 
+// 「分からない」（A-0012）: 選んだ物は捨て、無回答の不正解として記録する
+function skip() {
+  const q = state.questions[state.index];
+  state.selected = [];
+  state.answered = true;
+  state.skipped = true;
+  state.answers = addAnswer(state.answers, skipEntry(q));
+  if (!saveAnswers(state.answers)) state.storageOk = false;
+  render();
+  app.querySelector('[data-testid=verdict]')?.focus?.();
+}
+
 function next() {
   state.report = null;
+  state.skipped = false;
   state.index += 1;
   state.selected = [];
   state.answered = false;
@@ -328,7 +342,7 @@ function onClear() {
 }
 
 function restart() {
-  Object.assign(state, { index: 0, selected: [], answered: false, correct: 0 });
+  Object.assign(state, { index: 0, selected: [], answered: false, skipped: false, correct: 0 });
   render();
 }
 

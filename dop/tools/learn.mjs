@@ -69,7 +69,8 @@ export function analyze({ answers, reports }, bank = loadBank(), ex = exam()) {
 
   // 問題ごと: 全ての答えで数える
   const perQ = {};
-  for (const a of answers) { const q = (perQ[a.id] ??= { id: a.id, n: 0, ok: 0 }); q.n++; if (a.correct) q.ok++; }
+  // 「分からない」（skipped）は知識の穴で、問題の誤りの証拠にならないので数えない（苦手の判定には数える）
+  for (const a of answers) { if (a.skipped) continue; const q = (perQ[a.id] ??= { id: a.id, n: 0, ok: 0 }); q.n++; if (a.correct) q.ok++; }
   const suspect = new Map();
   for (const q of Object.values(perQ)) {
     if (q.n >= RULES.suspectMin && q.ok / q.n < RULES.suspectRate) suspect.set(q.id, [`正答率 ${Math.round((q.ok / q.n) * 100)}%（${q.n} 回）`]);

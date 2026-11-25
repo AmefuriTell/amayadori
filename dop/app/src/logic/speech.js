@@ -51,6 +51,6 @@ export function questionScript(view) {
 }
 
 /** 答えた後の段（解説は日本語） */
-export function answerScript(q, ok) {
-  return [{ text: toSpoken(`${ok ? '正解' : '不正解'}。正解は ${q.answer.join(' と ')}。${q.explanation.summary}`, 'ja'), lang: 'ja' }];
+export function answerScript(q, ok, skipped = false) {
+  return [{ text: toSpoken(`${skipped ? '分からない' : ok ? '正解' : '不正解'}。正解は ${q.answer.join(' と ')}。${q.explanation.summary}`, 'ja'), lang: 'ja' }];
 }

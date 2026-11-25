@@ -28,8 +28,8 @@ const GUARDED = {
 const BACK = new Set(['fix', 'fail']);
 // S9 へ行く時の項目の終わり方
 const OUTCOME = { pass: 'done', ok: 'done', no_source: 'dropped', drop: 'dropped' };
-const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T' };
-const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', app: 'A1_spec', learn: 'L1_learn' };
+const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T', glossary: 'G' };
+const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', app: 'A1_spec', learn: 'L1_learn' };
 
 function loadState() {
   return readJSON(paths.state(), { state: 'S0_pick', item: null, prev: null, session: { active: false, started: null, closed: 0 } });
@@ -257,6 +257,7 @@ const commands = {
   // 試験ガイドの「Skills in」の 1 行を 1 項目にする。既にある（状態を問わず）物は足さない
   seed(args) {
     if (args.translate) return seedTranslate(args);
+    if (args.glossary) return seedGlossary(args);
     const ex = exam();
     if (!ex.verified) throw new ToolError('config/exam.json がまだ試験ガイドと照らされていない（verified: false）');
     const backlog = loadBacklog();
@@ -367,6 +368,30 @@ function seedTranslate(args) {
     saveBacklog(backlog);
   }
   emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}訳の項目 ${add.length} 個、${add.reduce((n, a) => n + a.question_ids.length, 0)} 問ぶんを足した` });
+}
+
+// P-014: 問題の services に出るのに事典に無いサービスを、多く出る順に size 個ずつの事典の項目にする
+const NOT_AWS = new Set(['GitHub']);
+function seedGlossary(args) {
+  const size = Number(args.size ?? 5);
+  const backlog = loadBacklog();
+  const dir = paths.glossary('services');
+  const have = new Set(fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).flatMap((f) => readJSON(path.join(dir, f))?.aliases ?? []) : []);
+  const pending = new Set(backlog.filter((b) => b.kind === 'glossary' && b.status !== 'done').flatMap((b) => b.services ?? []));
+  const count = {};
+  for (const q of loadBank()) if (q.status === 'verified') for (const s of q.services ?? []) count[s] = (count[s] ?? 0) + 1;
+  const todo = Object.entries(count).filter(([s]) => !have.has(s) && !pending.has(s) && !NOT_AWS.has(s))
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([s]) => s);
+  const add = [];
+  for (let i = 0; i < todo.length; i += size) {
+    const part = todo.slice(i, i + size);
+    add.push({ kind: 'glossary', services: part, priority: 1, source: 'glossary', title: `サービス事典: ${part.join('、')}` });
+  }
+  if (!args.dry) {
+    for (const item of add) { item.id = nextId(backlog, 'glossary'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
+    saveBacklog(backlog);
+  }
+  emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}事典の項目 ${add.length} 個、${todo.length} サービスぶんを足した`, items: add.map((a) => a.services.join(', ')) });
 }
 
 function copyForRecheck(item) {

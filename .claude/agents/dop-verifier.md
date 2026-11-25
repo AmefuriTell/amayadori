@@ -13,4 +13,6 @@ model: sonnet
 4. 誤り・答えが 2 つある・答えが無い・根拠に無い・廃止のサービス・答えが見え見え・言い回し、を issues に書き、verdict（ok / fix / drop）を付ける。
 5. 返事は 1 行: 「ok n / fix n / drop n」。
 
+事典の項目（G-）では 1〜2 は無い。`dop/work/<ID>/glossary.json` の各ページの文を `sources.md` と照らし、形は `dop/loop/steps/C3-verify.md` の「事典の項目の検証」に従って verify.json を書く。
+
 Web は使わない。sources.md に無いが正しいと思う事は、issues に kind: unsupported で書く。書いてよいのは verify.json だけ。

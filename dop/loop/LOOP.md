@@ -32,7 +32,7 @@ AI はこのファイルと、今いる工程の 1 枚（`steps/<id>.md`）だ�
 ```json
 {
   "states": {
-    "S0_pick":      { "doc": "steps/S0-pick.md",      "actor": "tool",         "next": { "content": "C1_research", "recheck": "C1_research", "translate": "C2_author", "app": "A1_spec", "learn": "L1_learn", "empty": "STOP" } },
+    "S0_pick":      { "doc": "steps/S0-pick.md",      "actor": "tool",         "next": { "content": "C1_research", "recheck": "C1_research", "translate": "C2_author", "glossary": "C1_research", "app": "A1_spec", "learn": "L1_learn", "empty": "STOP" } },
     "C1_research":  { "doc": "steps/C1-research.md",  "actor": "researcher",   "next": { "ok": "C2_author", "no_source": "S9_close" } },
     "C2_author":    { "doc": "steps/C2-author.md",    "actor": "author",       "next": { "ok": "C3_verify" } },
     "C3_verify":    { "doc": "steps/C3-verify.md",    "actor": "verifier",     "next": { "pass": "C4_gate", "fix": "C2_author", "drop": "S9_close" } },
