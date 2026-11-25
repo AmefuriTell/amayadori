@@ -1,0 +1,94 @@
+{
+  "item": "C-0003",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "task": "1.1",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project uses AWS Lambda compute for fast start-up. In the build phase, the first command runs unit tests and the next command uploads the test logs. When the tests fail, CodeBuild skips the upload command, so the logs are lost. The logs must be uploaded even when the tests fail, and the phase must still fail when the tests fail. Which buildspec change meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Move the upload command into a finally block of the build phase."
+        },
+        {
+          "key": "B",
+          "text": "Set on-failure: CONTINUE on the build phase, and move the upload command to the post_build phase."
+        },
+        {
+          "key": "C",
+          "text": "Move the upload command before the test command in the commands block."
+        },
+        {
+          "key": "D",
+          "text": "Create a second CodeBuild project that runs after every build and uploads the logs."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "task": "1.1",
+      "services": [
+        "AWS CodeBuild",
+        "Amazon ECR"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team moved a CodeBuild project to AWS Lambda compute to shorten start-up time. The project builds Docker images and pushes them to Amazon ECR, and now every build fails when it runs docker build. The team needs the Docker builds to work again with the fewest changes to the buildspec. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the project back to EC2 compute."
+        },
+        {
+          "key": "B",
+          "text": "Set privilegedMode to true in the project's environment."
+        },
+        {
+          "key": "C",
+          "text": "Keep Lambda compute and set privilegedMode to true."
+        },
+        {
+          "key": "D",
+          "text": "Keep Lambda compute and raise the build timeout to 60 minutes."
+        },
+        {
+          "key": "E",
+          "text": "Keep Lambda compute and switch to a reserved capacity fleet for Docker."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "task": "1.1",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project on EC2 compute runs a full integration suite that takes about 3 hours. Every build stops after 60 minutes and is marked as failed, although the tests are still running. The project's timeout setting has never been changed. The team wants the suite to finish in one build with the LEAST operational effort. What should the team do?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set timeoutInMinutes on the project to 240."
+        },
+        {
+          "key": "B",
+          "text": "Move the project to AWS Lambda compute so that it runs faster."
+        },
+        {
+          "key": "C",
+          "text": "Set timeoutInMinutes on the project to 4320."
+        },
+        {
+          "key": "D",
+          "text": "Split the suite into three projects that each run for less than 60 minutes."
+        }
+      ]
+    }
+  ]
+}
