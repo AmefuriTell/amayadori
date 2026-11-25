@@ -1,15 +1,19 @@
 // 1 問ずつ解く画面。採点などの計算は logic/ に置く。
 import { grade, canSubmit } from './logic/grade.js';
 import { addAnswer, domainStats } from './logic/record.js';
-import { loadAnswers, saveAnswers, clearAnswers } from './storage.js';
+import { KINDS, addReport, issueUrl } from './logic/report.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
 
 const stored = loadAnswers();
+const storedReports = loadReports();
 const state = {
   view: 'solve', questions: [], domains: {}, index: 0, selected: [], answered: false, correct: 0,
   answers: stored.answers, storageOk: stored.ok,
+  reports: storedReports.reports,
+  report: null, // 報告の欄を開いている間 { kind, comment, status }
 };
 
 for (const tab of document.querySelectorAll('.tab')) {
@@ -58,6 +62,7 @@ function render() {
     el('span', { text: `タスク ${q.task}` }),
     el('span', { text: q.services.join('・') }),
     q.low_confidence ? el('span', { class: 'badge warn', 'data-testid': 'low-confidence', title: '検証役の AI が迷った問題です。解説と出典を確かめてください', text: 'AI の確信が低い' }) : null,
+    state.reports.some((r) => r.id === q.id) ? el('span', { class: 'badge warn', 'data-testid': 'reported', text: '報告済み' }) : null,
   );
 
   const list = el('ul', { class: 'choices', role: multi ? 'group' : 'radiogroup', 'aria-label': '選択肢' });
@@ -105,8 +110,45 @@ function renderAnswer(q) {
     el('div', { class: 'refs' }, q.references.map((r) => el('figure', { class: 'ref', 'data-testid': 'reference' },
       el('blockquote', { lang: 'en', text: r.quote }),
       el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' }))))),
-    el('div', { class: 'actions' }, el('button', { type: 'button', onclick: next, text: last ? '結果を見る' : '次へ' })),
+    state.report ? renderReport(q) : null,
+    el('div', { class: 'actions' },
+      state.report ? null : el('button', { type: 'button', class: 'secondary', onclick: () => { state.report = { kind: 'answer', comment: '', status: '' }; render(); app.querySelector('#report-comment')?.focus(); }, text: '誤りを報告' }),
+      el('button', { type: 'button', onclick: next, text: last ? '結果を見る' : '次へ' })),
   );
+}
+
+// 誤りの報告の欄。打っている間は描き直さず、送り先のリンクだけを更新する（入力の位置が飛ばないように）
+function renderReport(q) {
+  const r = state.report;
+  const draft = () => ({ id: q.id, kind: r.kind, comment: r.comment, selected: state.selected });
+  const link = el('a', { class: 'button-link', href: issueUrl(draft()), target: '_blank', rel: 'noopener noreferrer', text: 'GitHub に送る' });
+  const refresh = () => { link.href = issueUrl(draft()); };
+  const kinds = el('fieldset', { class: 'kinds' }, el('legend', { text: '種類' }),
+    Object.entries(KINDS).map(([k, label]) => el('label', { class: 'kind' },
+      el('input', { type: 'radio', name: 'report-kind', value: k, checked: r.kind === k, onchange: () => { r.kind = k; refresh(); } }), label)));
+  const comment = el('textarea', { id: 'report-comment', rows: '3', maxlength: '1000', oninput: (ev) => { r.comment = ev.target.value; refresh(); } });
+  comment.value = r.comment;
+  return el('form', { class: 'report', 'data-testid': 'report', onsubmit: (ev) => { ev.preventDefault(); saveReport(q); } },
+    el('h3', { class: 'title', text: '誤りを報告' }),
+    kinds,
+    el('label', { for: 'report-comment', text: 'コメント' }),
+    comment,
+    r.status ? el('p', { class: r.status.startsWith('報告を保存') ? 'muted' : 'note', 'data-testid': 'report-status', role: 'status', text: r.status }) : null,
+    el('div', { class: 'actions' },
+      el('button', { type: 'button', class: 'secondary', onclick: () => { state.report = null; render(); }, text: '閉じる' }),
+      el('button', { type: 'submit', class: 'secondary', text: '保存' }),
+      link),
+    el('p', { class: 'muted small', text: '「GitHub に送る」は、この問題の報告を issue の下書きとして開きます。送ると、問題を作るループが拾って直します。' }),
+  );
+}
+
+function saveReport(q) {
+  const r = state.report;
+  state.reports = addReport(state.reports, { id: q.id, kind: r.kind, comment: r.comment, at: Date.now() });
+  r.status = saveReports(state.reports)
+    ? '報告を保存しました。直してほしい時は「GitHub に送る」も押してください。'
+    : 'このブラウザでは端末に残せません。「GitHub に送る」で送ってください。';
+  render();
 }
 
 function submit() {
@@ -122,6 +164,7 @@ function submit() {
 }
 
 function next() {
+  state.report = null;
   state.index += 1;
   state.selected = [];
   state.answered = false;
