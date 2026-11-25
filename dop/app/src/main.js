@@ -3,7 +3,8 @@ import { grade, canSubmit } from './logic/grade.js';
 import { addAnswer, domainStats } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports } from './storage.js';
+import { display } from './logic/lang.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang } from './storage.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -15,6 +16,7 @@ const state = {
   answers: stored.answers, storageOk: stored.ok,
   reports: storedReports.reports,
   report: null, // 報告の欄を開いている間 { kind, comment, status }
+  lang: loadLang(), // 問題文と選択肢の言葉（P-012）
 };
 
 for (const tab of document.querySelectorAll('.tab')) {
@@ -57,6 +59,7 @@ function render() {
   if (state.index >= state.questions.length) return renderResult();
   const q = state.questions[state.index];
   const multi = q.type === 'multi';
+  const view = display(q, state.lang);
   progress.textContent = `${state.index + 1} / ${state.questions.length}`;
 
   const meta = el('div', { class: 'meta' },
@@ -64,10 +67,16 @@ function render() {
     el('span', { text: q.services.join('・') }),
     q.low_confidence ? el('span', { class: 'badge warn', 'data-testid': 'low-confidence', title: '検証役の AI が迷った問題です。解説と出典を確かめてください', text: 'AI の確信が低い' }) : null,
     state.reports.some((r) => r.id === q.id) ? el('span', { class: 'badge warn', 'data-testid': 'reported', text: '報告済み' }) : null,
+    view.ja ? null : el('span', { class: 'badge', 'data-testid': 'no-ja', text: '日本語版はまだありません' }),
+    el('button', {
+      type: 'button', class: 'lang secondary', 'data-testid': 'lang', lang: state.lang === 'ja' ? 'en' : 'ja',
+      onclick: () => { state.lang = state.lang === 'ja' ? 'en' : 'ja'; saveLang(state.lang); render(); },
+      text: state.lang === 'ja' ? 'English' : '日本語',
+    }),
   );
 
   const list = el('ul', { class: 'choices', role: multi ? 'group' : 'radiogroup', 'aria-label': '選択肢' });
-  for (const c of q.choices) {
+  for (const c of view.choices) {
     const input = el('input', {
       type: multi ? 'checkbox' : 'radio', name: 'choice', value: c.key,
       checked: state.selected.includes(c.key),
@@ -80,12 +89,12 @@ function render() {
     });
     let mark = '';
     if (state.answered) mark = q.answer.includes(c.key) ? ' is-correct' : state.selected.includes(c.key) ? ' is-wrong' : '';
-    list.append(el('li', {}, el('label', { class: `choice${mark}`, 'data-testid': 'choice' }, input, el('span', { class: 'key', text: `${c.key}.` }), el('span', { text: c.text }))));
+    list.append(el('li', {}, el('label', { class: `choice${mark}`, 'data-testid': 'choice' }, input, el('span', { class: 'key', text: `${c.key}.` }), el('span', { lang: view.lang, text: c.text }))));
   }
 
   const card = el('section', { class: 'card', 'aria-labelledby': 'stem' },
     meta,
-    el('p', { class: 'stem', id: 'stem', 'data-testid': 'stem', text: q.stem }),
+    el('p', { class: 'stem', id: 'stem', 'data-testid': 'stem', lang: view.lang, text: view.stem }),
     multi ? el('p', { class: 'hint', 'data-testid': 'select-hint', text: `${q.select_count} つ選ぶ` }) : null,
     list,
   );

@@ -14,7 +14,7 @@ const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(
 export function toAppQuestion(q) {
   return {
     id: q.id, task: q.task, domain: Number(q.task.split('.')[0]), services: q.services, type: q.type, select_count: q.select_count,
-    stem: q.stem, choices: q.choices, answer: q.answer, explanation: q.explanation,
+    stem: q.stem, ...(q.stem_ja ? { stem_ja: q.stem_ja } : {}), choices: q.choices, answer: q.answer, explanation: q.explanation,
     references: q.references.map(({ url, quote }) => ({ url, quote })), low_confidence: !!q.low_confidence,
     ...(q.note ? { note: q.note } : {}),
   };
