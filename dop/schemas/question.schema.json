@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dop/question.schema.json",
+  "title": "DOP 問題 1 問",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "task", "services", "type", "select_count", "stem", "choices", "answer", "explanation", "references", "difficulty", "status", "created"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^q-[1-6]\\.[0-9]+-[0-9]{4}$", "description": "q-<タスク番号>-<連番>。q:publish が付け直す" },
+    "task": { "type": "string", "pattern": "^[1-6]\\.[0-9]+$", "description": "試験ガイドのタスク番号（config/exam.json にあるもの）" },
+    "services": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "type": { "enum": ["single", "multi"] },
+    "select_count": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "stem": { "type": "string", "minLength": 80, "description": "英語。場面＋問い。条件の語（MOST / LEAST など）を含む" },
+    "choices": {
+      "type": "array", "minItems": 4, "maxItems": 6,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["key", "text"],
+        "properties": { "key": { "enum": ["A", "B", "C", "D", "E", "F"] }, "text": { "type": "string", "minLength": 10 } }
+      }
+    },
+    "answer": { "type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": { "enum": ["A", "B", "C", "D", "E", "F"] } },
+    "explanation": {
+      "type": "object", "additionalProperties": false, "required": ["summary", "per_choice"],
+      "properties": {
+        "summary": { "type": "string", "description": "日本語 2〜3 文" },
+        "per_choice": { "type": "object", "propertyNames": { "enum": ["A", "B", "C", "D", "E", "F"] }, "additionalProperties": { "type": "string" } }
+      }
+    },
+    "references": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["url", "source_id", "quote"],
+        "properties": {
+          "url": { "type": "string", "pattern": "^https://(docs\\.aws\\.amazon\\.com|aws\\.amazon\\.com|d1\\.awsstatic\\.com)/" },
+          "source_id": { "type": "string", "pattern": "^S[0-9]+$", "description": "sources.md の番号" },
+          "quote": { "type": "string", "maxLength": 200, "description": "原文のまま" }
+        }
+      }
+    },
+    "difficulty": { "enum": [1, 2, 3] },
+    "status": { "enum": ["draft", "verified", "retired"] },
+    "created": { "type": "string", "format": "date" },
+    "last_checked": { "type": "string", "format": "date" },
+    "note": { "type": "string" }
+  },
+  "$comment": "answer の数 = select_count、type=single なら select_count=1、per_choice が全 choices の key を持つ、は JSON Schema で書きにくいので q:validate が追加で確かめる"
+}

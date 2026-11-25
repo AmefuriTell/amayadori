@@ -1,0 +1,25 @@
+# S9 閉じる
+
+```xml
+<step id="S9_close" actor="orchestrator">
+  <purpose>項目を閉じ、次のループに効く学びだけを残す。</purpose>
+  <actions>
+    <a>loop close を呼ぶ。ツールが runs.jsonl に 1 行足し（項目・結果・attempts・かかった回数）、work/&lt;ID&gt;/ を .loop/archive/ へ移す。</a>
+    <a>この項目で、同じ種類の指摘が 2 回以上出たか確かめる（loop close の出力の repeated_issues）。</a>
+    <a>出ていれば、その再発を防ぐ決まりを 1 行、該当する工程の文書に足す案を .loop/proposals.md に書く。<b>工程の文書は直接書き換えない</b>（人が週に 1 回まとめて採否を決める）。</a>
+    <a>機械で確かめられる指摘なら、文書でなくツールの検査を足す案にする（AI が覚えるより確実）。</a>
+    <a>人の関門（H2 の全数確認など）に当たるなら、読む物の場所を 3 行で人に伝えて止まる。</a>
+  </actions>
+  <exit>loop advance --result ok</exit>
+</step>
+```
+
+## proposals.md の 1 件の形
+
+```xml
+<proposal id="P-007" from="C-0012,C-0015">
+  <issue>誤りの選択肢に、存在しない CodeDeploy の設定名が 2 回出た</issue>
+  <kind>tool</kind>
+  <change>q:lint に「選択肢の設定名が sources.md か config/known-terms.json にあるか」の検査を足す</change>
+</proposal>
+```
