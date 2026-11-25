@@ -1,0 +1,243 @@
+{
+  "item": "C-0070",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company lets developers create IAM roles for their AWS Lambda functions in a shared account. Any role that a developer creates must never be able to do more than read and write one Amazon S3 bucket and one Amazon DynamoDB table. Other teams in the same account need broader permissions. The security team does not want to review each role by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a managed policy that allows only the S3 and DynamoDB access, and allow developers to create roles only when that policy is attached as the permissions boundary."
+        },
+        {
+          "key": "B",
+          "text": "Attach a permissions boundary to each developer that allows the S3 and DynamoDB access, and give the Lambda roles no other policies."
+        },
+        {
+          "key": "C",
+          "text": "Apply an SCP to the account that denies every action except the S3 and DynamoDB access."
+        },
+        {
+          "key": "D",
+          "text": "Give developers full IAM permissions and have the security team remove extra permissions from new roles every week."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "アクセス許可の境界（permissions boundary）は、マネージドポリシーで ID ベースのポリシーが与えられる権限の上限を決める。開発者にロールの作成を任せる時は、境界で任せる権限の上限を決める。境界はそれだけでは権限を与えない。",
+        "per_choice": {
+          "A": "正しい。開発者が作るロールに必ず境界が付くので、どんなポリシーを付けても S3 と DynamoDB の範囲を超えない。",
+          "B": "境界は権限を与えないので、他にポリシーの無いロールは何もできない。また開発者自身の境界では、開発者が作るロールの上限にならない。",
+          "C": "アカウント全体の上限になり、広い権限が要る他のチームも止まる。",
+          "D": "人が毎週見直すことになり、要件に反する。見直すまでの間は上限を超えられる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "source_id": "S1",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "source_id": "S3",
+          "quote": "When you delegate permissions to others, use permissions boundaries to set the maximum permissions that you delegate. A permissions boundary does not grant permissions on its own."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-6.1-0002",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "IAM Access Analyzer",
+        "AWS CloudTrail"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application's IAM role has the AdministratorAccess policy. AWS CloudTrail has recorded the role's activity for the last 90 days. The security team must replace the policy with a fine-grained policy that allows only the actions that the application actually uses. The new policy must be tested in a staging environment before production, and the team wants to avoid writing the policy by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Remove permissions from AdministratorAccess one service at a time in production until the application fails, and keep the last working version."
+        },
+        {
+          "key": "B",
+          "text": "Use IAM Access Analyzer to generate a policy from the role's CloudTrail activity, test it in staging, and then deploy it to production."
+        },
+        {
+          "key": "C",
+          "text": "Attach a permissions boundary that allows only the services the team expects, and keep AdministratorAccess on the role."
+        },
+        {
+          "key": "D",
+          "text": "Read the application's source code to list the API calls, and write a new policy for those actions by hand."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "IAM Access Analyzer は、CloudTrail に残ったアクセスの記録から、ロールが使ったサービスと操作を分析して細かいポリシーを作る。作ったポリシーを試してから本番に出せば、必要な権限だけを与えられる。",
+        "per_choice": {
+          "A": "本番で止まるまで外す方法で、試してから出す要件にも反する。",
+          "B": "正しい。記録からポリシーを作り、試してから本番に出す。",
+          "C": "境界は上限を決めるだけで、使った操作だけの細かいポリシーにはならない。予想で決めた上限では、要る操作が抜けたり余分が残ったりする。",
+          "D": "手で書くことになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "source_id": "S4",
+          "quote": "IAM Access Analyzer analyzes the services and actions that your IAM roles use, and then generates a fine-grained policy that you can use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "source_id": "S4",
+          "quote": "After you test each generated policy, you can deploy the policy to your production environment."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-6.1-0003",
+      "task": "6.1",
+      "services": [
+        "IAM Access Analyzer",
+        "Amazon S3",
+        "AWS IAM",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. The security team must find Amazon S3 buckets and IAM roles in any account whose resource-based policies allow access from principals outside the organization. The team wants a finding for each such resource and does not want to maintain scripts that parse policies. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use IAM last accessed information in each account to find resources that were used by external principals."
+        },
+        {
+          "key": "B",
+          "text": "Attach a permissions boundary to every IAM role so that external principals cannot use the roles."
+        },
+        {
+          "key": "C",
+          "text": "Use IAM Access Analyzer with the organization as the zone of trust, and review its findings."
+        },
+        {
+          "key": "D",
+          "text": "Run a scheduled script that reads every bucket policy and role trust policy and reports external principals."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "IAM Access Analyzer は、組織やアカウントのリソース（S3 バケットや IAM ロールなど）のうち、外部と共有されているものを見つける。リソースベースのポリシーを論理的に分析し、外部と共有されたリソースごとに検出結果（finding）を作る。",
+        "per_choice": {
+          "A": "最終アクセスの情報は、使っていないユーザー・ロール・権限を見つけて外すためのもので、外部との共有を見つけるものではない。",
+          "B": "境界は ID ベースのポリシーの上限を決めるもので、外部と共有されているリソースを見つけない。",
+          "C": "正しい。リソースベースのポリシーを分析し、外部と共有されたリソースごとに検出結果を作る。",
+          "D": "動くが、スクリプトを保守することになり、要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+          "source_id": "S6",
+          "quote": "IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, shared with an external entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+          "source_id": "S6",
+          "quote": "For each instance of a resource shared outside of your account, IAM Access Analyzer generates a finding."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "source_id": "S5",
+          "quote": "IAM provides last accessed information to help you identify the users, roles, permissions, policies, and credentials that you no longer need so that you can remove them."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-6.1-0004",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An IAM role has an identity-based policy that allows s3:* on a bucket and explicitly denies s3:DeleteObject on the same bucket. The role also has a permissions boundary that allows only s3:GetObject and s3:PutObject on that bucket. No other policies apply. Which requests made by the role to the bucket will be allowed? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "s3:GetObject"
+        },
+        {
+          "key": "B",
+          "text": "s3:ListBucket"
+        },
+        {
+          "key": "C",
+          "text": "s3:PutObject"
+        },
+        {
+          "key": "D",
+          "text": "s3:DeleteObject"
+        },
+        {
+          "key": "E",
+          "text": "s3:PutBucketPolicy"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "実際の権限は、ID ベースのポリシーと境界の両方が許す操作（重なり）だけ。どちらかに明示的な拒否があれば、その操作は拒否される。",
+        "per_choice": {
+          "A": "正しい。ID ベースのポリシー（s3:*）と境界の両方が許す。",
+          "B": "ID ベースのポリシーは許すが、境界が許していない。",
+          "C": "正しい。ID ベースのポリシーと境界の両方が許す。",
+          "D": "ID ベースのポリシーの明示的な拒否が勝つ。境界も許していない。",
+          "E": "ID ベースのポリシーは許すが、境界が許していない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "source_id": "S1",
+          "quote": "An entity's permissions boundary allows it to perform only the actions that are allowed by both its identity-based policies and its permissions boundaries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "source_id": "S2",
+          "quote": "An explicit deny in either of these policies overrides the allow."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

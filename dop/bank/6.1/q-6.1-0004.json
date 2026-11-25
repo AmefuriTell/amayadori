@@ -1,0 +1,63 @@
+{
+  "id": "q-6.1-0004",
+  "task": "6.1",
+  "services": [
+    "AWS IAM",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An IAM role has an identity-based policy that allows s3:* on a bucket and explicitly denies s3:DeleteObject on the same bucket. The role also has a permissions boundary that allows only s3:GetObject and s3:PutObject on that bucket. No other policies apply. Which requests made by the role to the bucket will be allowed? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "s3:GetObject"
+    },
+    {
+      "key": "B",
+      "text": "s3:ListBucket"
+    },
+    {
+      "key": "C",
+      "text": "s3:PutObject"
+    },
+    {
+      "key": "D",
+      "text": "s3:DeleteObject"
+    },
+    {
+      "key": "E",
+      "text": "s3:PutBucketPolicy"
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "実際の権限は、ID ベースのポリシーと境界の両方が許す操作（重なり）だけ。どちらかに明示的な拒否があれば、その操作は拒否される。",
+    "per_choice": {
+      "A": "正しい。ID ベースのポリシー（s3:*）と境界の両方が許す。",
+      "B": "ID ベースのポリシーは許すが、境界が許していない。",
+      "C": "正しい。ID ベースのポリシーと境界の両方が許す。",
+      "D": "ID ベースのポリシーの明示的な拒否が勝つ。境界も許していない。",
+      "E": "ID ベースのポリシーは許すが、境界が許していない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+      "source_id": "S1",
+      "quote": "An entity's permissions boundary allows it to perform only the actions that are allowed by both its identity-based policies and its permissions boundaries."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+      "source_id": "S2",
+      "quote": "An explicit deny in either of these policies overrides the allow."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

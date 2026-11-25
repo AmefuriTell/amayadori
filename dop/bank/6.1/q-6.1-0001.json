@@ -1,0 +1,57 @@
+{
+  "id": "q-6.1-0001",
+  "task": "6.1",
+  "services": [
+    "AWS IAM",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company lets developers create IAM roles for their AWS Lambda functions in a shared account. Any role that a developer creates must never be able to do more than read and write one Amazon S3 bucket and one Amazon DynamoDB table. Other teams in the same account need broader permissions. The security team does not want to review each role by hand. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach a permissions boundary to each developer that allows the S3 and DynamoDB access, and give the Lambda roles no other policies."
+    },
+    {
+      "key": "B",
+      "text": "Apply an SCP to the account that denies every action except the S3 and DynamoDB access."
+    },
+    {
+      "key": "C",
+      "text": "Create a managed policy that allows only the S3 and DynamoDB access, and allow developers to create roles only when that policy is attached as the permissions boundary."
+    },
+    {
+      "key": "D",
+      "text": "Give developers full IAM permissions and have the security team remove extra permissions from new roles every week."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "アクセス許可の境界（permissions boundary）は、マネージドポリシーで ID ベースのポリシーが与えられる権限の上限を決める。開発者にロールの作成を任せる時は、境界で任せる権限の上限を決める。境界はそれだけでは権限を与えない。",
+    "per_choice": {
+      "A": "境界は権限を与えないので、他にポリシーの無いロールは何もできない。また開発者自身の境界では、開発者が作るロールの上限にならない。",
+      "B": "アカウント全体の上限になり、広い権限が要る他のチームも止まる。",
+      "C": "正しい。開発者が作るロールに必ず境界が付くので、どんなポリシーを付けても S3 と DynamoDB の範囲を超えない。",
+      "D": "人が毎週見直すことになり、要件に反する。見直すまでの間は上限を超えられる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+      "source_id": "S1",
+      "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+      "source_id": "S3",
+      "quote": "When you delegate permissions to others, use permissions boundaries to set the maximum permissions that you delegate. A permissions boundary does not grant permissions on its own."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

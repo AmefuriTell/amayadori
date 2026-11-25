@@ -1,0 +1,128 @@
+{
+  "item": "C-0070",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company lets developers create IAM roles for their AWS Lambda functions in a shared account. Any role that a developer creates must never be able to do more than read and write one Amazon S3 bucket and one Amazon DynamoDB table. Other teams in the same account need broader permissions. The security team does not want to review each role by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a managed policy that allows only the S3 and DynamoDB access, and allow developers to create roles only when that policy is attached as the permissions boundary."
+        },
+        {
+          "key": "B",
+          "text": "Attach a permissions boundary to each developer that allows the S3 and DynamoDB access, and give the Lambda roles no other policies."
+        },
+        {
+          "key": "C",
+          "text": "Apply an SCP to the account that denies every action except the S3 and DynamoDB access."
+        },
+        {
+          "key": "D",
+          "text": "Give developers full IAM permissions and have the security team remove extra permissions from new roles every week."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0002",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "IAM Access Analyzer",
+        "AWS CloudTrail"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application's IAM role has the AdministratorAccess policy. AWS CloudTrail has recorded the role's activity for the last 90 days. The security team must replace the policy with a fine-grained policy that allows only the actions that the application actually uses. The new policy must be tested in a staging environment before production, and the team wants to avoid writing the policy by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Remove permissions from AdministratorAccess one service at a time in production until the application fails, and keep the last working version."
+        },
+        {
+          "key": "B",
+          "text": "Use IAM Access Analyzer to generate a policy from the role's CloudTrail activity, test it in staging, and then deploy it to production."
+        },
+        {
+          "key": "C",
+          "text": "Attach a permissions boundary that allows only the services the team expects, and keep AdministratorAccess on the role."
+        },
+        {
+          "key": "D",
+          "text": "Read the application's source code to list the API calls, and write a new policy for those actions by hand."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0003",
+      "task": "6.1",
+      "services": [
+        "IAM Access Analyzer",
+        "Amazon S3",
+        "AWS IAM",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. The security team must find Amazon S3 buckets and IAM roles in any account whose resource-based policies allow access from principals outside the organization. The team wants a finding for each such resource and does not want to maintain scripts that parse policies. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use IAM last accessed information in each account to find resources that were used by external principals."
+        },
+        {
+          "key": "B",
+          "text": "Attach a permissions boundary to every IAM role so that external principals cannot use the roles."
+        },
+        {
+          "key": "C",
+          "text": "Use IAM Access Analyzer with the organization as the zone of trust, and review its findings."
+        },
+        {
+          "key": "D",
+          "text": "Run a scheduled script that reads every bucket policy and role trust policy and reports external principals."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0004",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An IAM role has an identity-based policy that allows s3:* on a bucket and explicitly denies s3:DeleteObject on the same bucket. The role also has a permissions boundary that allows only s3:GetObject and s3:PutObject on that bucket. No other policies apply. Which requests made by the role to the bucket will be allowed? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "s3:GetObject"
+        },
+        {
+          "key": "B",
+          "text": "s3:ListBucket"
+        },
+        {
+          "key": "C",
+          "text": "s3:PutObject"
+        },
+        {
+          "key": "D",
+          "text": "s3:DeleteObject"
+        },
+        {
+          "key": "E",
+          "text": "s3:PutBucketPolicy"
+        }
+      ]
+    }
+  ]
+}
