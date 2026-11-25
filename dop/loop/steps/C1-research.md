@@ -12,6 +12,7 @@
     <a by="orchestrator">dop-researcher のエージェントを起こし、項目 ID・topic・services を渡す（下の指示はエージェントの定義が読む）。</a>
     <a by="researcher">docs fetch &lt;url&gt; --item &lt;ID&gt; で公式ページを取る（1 項目 3〜6 ページ）。ツールが本文を見出しごとに切って work/&lt;ID&gt;/raw/ に置き、見出しと語数だけを返す。</a>
     <a by="researcher">raw から、topic に関係する段落だけを sources.md に写す（1 出典 300 語まで、原文のまま、URL と見出しを付ける）。</a>
+    <a by="researcher">事典の項目（G-、P-014）では topic の代わりに item.services の各サービスについて、そのサービスの「What is」のページ（と主な機能のページ）から、サービスの役割と主な機能を説明する段落を写す。見出しにサービス名を入れ、サービスごとに 1〜3 出典。</a>
     <a by="orchestrator">docs check &lt;ID&gt; を呼ぶ（出典の数・URL の許可・語数）。</a>
   </actions>
   <outputs>

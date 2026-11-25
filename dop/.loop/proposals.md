@@ -116,3 +116,13 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>learn weak は「分からない」を苦手のタスクの判定には数え、誤りが疑わしい問題の判定には数えない。利用者の依頼（分からないボタン）に伴う細部として入れた（ループの実行中はツールだけ直し、pause してから L1 の文書を直した）</change>
 </proposal>
 ```
+
+## 利用者の依頼（2026-11-26）から
+
+```xml
+<proposal id="P-014" from="user" status="adopted">
+  <issue>解説が足りない。構成図と、各サービスが何をするかを参照できるようにしたい。共通の部分は別のファイルにし、個別から参照したい（利用者）。進め方は「サービス事典だけ先に」（利用者の回答）</issue>
+  <kind>tool + doc + app</kind>
+  <change>サービス事典 glossary/services/&lt;id&gt;.json（1 サービス 1 ページ、schemas/glossary.schema.json）を作る。問題の services の名前から aliases で引く。作り方は問題と同じ C1〜C4（事典の項目 G-、loop seed --glossary で 5 サービスずつ）で、C2〜C4 は g validate / verdict / gate / publish。検証役は各文を sources.md と照らす。アプリでの表示は別の app の項目。構成図はその後</change>
+</proposal>
+```

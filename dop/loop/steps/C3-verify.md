@@ -54,3 +54,19 @@
 - `style`・`giveaway`（答えが見え見え）だけ → 検証役の verdict が fix なら fix（attempts を数えない）、ok なら記録だけで ok（P-005）。
 - 3 問以上の束で、全問が match かつ `confidence: high` → 結果は変えず、`too_easy: true` を出して history に too_easy を残す。AI の確信度は人の難しさの目安として弱いので、これだけで書き方を変えない（P-008。難しさは人の正答率で見る）。
 - blind で `confidence: low` かつ match → ok。問題に `low_confidence: true` を付け、アプリで印を出す（人は事前に読まないため）。
+
+## 事典の項目（G-。P-014）の検証
+
+答えを見ずに解く段は無い。検証役は glossary.json の各ページの文を 1 つずつ sources.md と照らし、verify.json を書く。進行役は q verdict の代わりに g verdict を呼ぶ。
+
+```json
+{
+  "item": "G-0001",
+  "entries": [
+    { "id": "codedeploy", "issues": [ { "kind": "fact|unsupported|deprecated|unclear|style", "where": "features[1]", "detail": "..." } ], "verdict": "ok|fix|drop" }
+  ]
+}
+```
+
+- `fact`（出典と違う）・`unsupported`（出典に無い）・`deprecated`（廃止の機能を今の物として書いた）→ fix。同じページが 2 回 fix → drop。
+- `unclear`（大学生に伝わらない言い方）・`style` だけ → 検証役が fix なら fix（attempts を数えない）、ok なら記録だけ。

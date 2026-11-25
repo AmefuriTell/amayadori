@@ -22,12 +22,20 @@ const ev = input();
 const file = String(ev.tool_input?.file_path ?? ev.tool_input?.notebook_path ?? '').replace(/\\/g, '/');
 
 if (mode === 'post-write') {
-  const m = file.match(/(?:^|\/)dop\/work\/([CALRT]-[0-9]{4})\/questions\.json$/);
+  const m = file.match(/(?:^|\/)dop\/work\/([CALRTG]-[0-9]{4})\/questions\.json$/);
   if (m) {
     let errors;
     try { errors = checkBatch(m[1]); } catch (e) { block(`questions.json を読めない: ${e.message}`); }
     if (errors.length) {
       block(`questions.json の形の誤り ${errors.length} 件（直してから進める）:\n` + errors.slice(0, 10).map((e) => `- ${e.qid} ${e.pointer}: ${e.message}`).join('\n'));
+    }
+  }
+  const g = file.match(/(?:^|\/)dop\/work\/(G-[0-9]{4})\/glossary\.json$/);
+  if (g) {
+    let errors;
+    try { errors = (await import('./g.mjs')).checkGlossary(g[1]); } catch (e) { block(`glossary.json を読めない: ${e.message}`); }
+    if (errors.length) {
+      block(`glossary.json の誤り ${errors.length} 件（直してから進める）:\n` + errors.slice(0, 10).map((e) => `- ${e.id} ${e.pointer}: ${e.message}`).join('\n'));
     }
   }
 } else if (mode === 'pre-write') {

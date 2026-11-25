@@ -17,6 +17,8 @@ AI の判断を使わず、ツールだけで確かめる。AI は結果を見�
 </step>
 ```
 
+事典の項目（G-、P-014）では q gate / q publish の代わりに g gate / g publish を呼ぶ（形・根拠の原文・検証が ok・同じ名前が別のページに無い、を見て glossary/services/ に入れる）。
+
 ## q gate の検査
 
 ```json
