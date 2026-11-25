@@ -1,0 +1,113 @@
+{
+  "item": "C-0030",
+  "questions": [
+    {
+      "id": "q-3.1-0001",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "warm standby は、別のリージョンに縮小した、しかし完全に動く本番の写しを置く。縮小した量ならすぐに通信を処理でき、あとは拡張するだけ。普段は 1 つのリージョンだけで利用者に応えるなら、active/active より安く簡単。",
+        "per_choice": {
+          "A": "障害の時にインフラと設定とコードを作り直し、データも戻す必要があり、すぐには処理できない。",
+          "B": "pilot light は、先にサーバーを起こすなどの作業をしないとリクエストを処理できない。",
+          "C": "正しい。縮小した量ですぐに通信を処理でき、拡張するだけでよい。",
+          "D": "両方のリージョンで利用者に応えるので、普段は主のリージョンだけの要件に反し、最も費用がかかる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S12",
+          "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S13",
+          "quote": "Alternatively, if you do not want to use both Regions to handle user traffic, then Warm Standby offers a more economical and operationally less complex approach."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S7",
+          "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "pilot light は、データを別のリージョンへ写し、データベースなどデータを保つ物は常に動かすが、アプリのサーバーは止めておき、障害の時に起こして拡張する。動かしておく物が少ないので費用を抑えられ、データベースへの継続的な複製で RPO を小さくできる。",
+        "per_choice": {
+          "A": "達成できる復旧時点はバックアップの頻度で決まる。夜ごとの取得では、継続的に届ける要件に合わない。",
+          "B": "正しい。データは継続的に写し、サーバーは止めておくので、要件を満たすうちで最も安い。",
+          "C": "要件は満たすが、縮小した本番を常に動かすので pilot light より費用がかかる。",
+          "D": "最も複雑で費用のかかる方法。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S9",
+          "quote": "A pilot light approach minimizes the ongoing cost of disaster recovery by minimizing the active resources"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S10",
+          "quote": "For pilot light, continuous data replication to live databases and data stores in the DR region is the best approach for low RPO"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S8",
+          "quote": "How often you run your backup will determine your achievable recovery point (which should align to meet your RPO)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "source_id": "S13",
+          "quote": "This approach is the most complex and costly approach to disaster recovery"
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0003",
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "RTO はサービスが止まってから戻るまでに許せる最大の遅れ、RPO は最後の復旧時点から許せる最大の時間（失ってよいデータの量）。AWS Resilience Hub では、アプリ・インフラ・アベイラビリティーゾーン・リージョンの障害ごとの RTO と RPO の目標を耐障害性の方針（resilience policy）に決め、アプリがそれを満たすかを見積もる。",
+        "per_choice": {
+          "A": "正しい。止まってよい時間が RTO、失ってよいデータの時間が RPO。",
+          "B": "RTO と RPO が逆。",
+          "C": "正しい。方針に目標を決め、満たすかを評価できる。",
+          "D": "アベイラビリティーゾーンの障害は、別のアベイラビリティーゾーンへ切り替えて解決できる種類として扱われる。",
+          "E": "リリースのたびに人が見比べることになり、手作業を最も少なくする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S3",
+          "quote": "The maximum acceptable delay between the interruption of service and restoration of service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S2",
+          "quote": "The maximum acceptable amount of time since the last data recovery point."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/arh-mgmt.html",
+          "source_id": "S5",
+          "quote": "These policies include RTO and RPO targets for applications, infrastructure, Availability Zone, and Region disruptions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "source_id": "S4",
+          "quote": "This type of outage can be resolved by switching to a different Availability Zone."
+        }
+      ]
+    }
+  ]
+}

@@ -27,6 +27,20 @@ export function notInRaw(quote, rawText) {
     .filter((x) => loose(x).split(' ').length >= 5 && !raw.includes(loose(x)));
 }
 
+/** ガイドの目次（toc-contents.json）の各ページ。「URL\t（目次）題」の形。取れなければ空 */
+export function tocLinks(url) {
+  if (!/^https:\/\/docs\.aws\.amazon\.com\//.test(url)) return [];
+  const base = url.replace(/[#?].*$/, '').replace(/[^/]*$/, '');
+  let text;
+  try {
+    text = execFileSync('curl', ['-sS', '-L', '--max-time', '20', '-f', base + 'toc-contents.json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  } catch { return []; }
+  const out = [];
+  const walk = (list) => { for (const c of list ?? []) { if (c.href && !/^https?:/.test(c.href)) out.push(`${base}${c.href}\t（目次）${c.title}`); walk(c.contents); } };
+  try { walk(JSON.parse(text).contents); } catch { return []; }
+  return out;
+}
+
 /** sources.md の検査（C1 の終わり）。rawText を渡すと原文のままかも確かめる。[{ id, message }] */
 export function checkSources(md, rawText) {
   const list = parseSources(md);
@@ -95,7 +109,9 @@ const commands = {
     const links = [...new Set([...main.matchAll(/<a[^>]+href="([^"#][^"]*)"[^>]*>([\s\S]*?)<\/a>/gi)]
       .map(([, href, text]) => { try { return `${new URL(href, url).href.split('#')[0]}\t${text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()}`; } catch { return null; } })
       .filter((l) => l && ALLOWED_URL.test(l)))];
-    fs.writeFileSync(paths.work(id, 'raw', `${name}.links.txt`), links.join('\n') + '\n');
+    // AWS のドキュメントは目次を toc-contents.json に分けて持つ（本文のリンクに無い章がある）。あれば目次の行も足す
+    const toc = tocLinks(url).filter((l) => !links.some((x) => x.startsWith(l.split('\t')[0] + '\t')));
+    fs.writeFileSync(paths.work(id, 'raw', `${name}.links.txt`), [...links, ...toc].join('\n') + '\n');
     writeJSON(paths.work(id, 'raw', `${name}.json`), { url, title, fetched: today(), sections: sections.map(({ heading, anchor, words }) => ({ heading, anchor, words })) });
     emit({
       ok: true,

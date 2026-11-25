@@ -1,0 +1,67 @@
+{
+  "id": "q-3.1-0002",
+  "task": "3.1",
+  "services": [
+    "AWS Regions",
+    "Amazon RDS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company needs a disaster recovery plan in a second AWS Region. The business accepts that recovery may take some time while servers are started and scaled out. Data loss must be very small, so database changes must reach the recovery Region continuously instead of through periodic backups. The company wants to keep the ongoing cost of the recovery Region as low as possible. Which disaster recovery strategy meets these requirements MOST cost-effectively?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Backup and restore, with nightly database snapshots copied to the recovery Region."
+    },
+    {
+      "key": "B",
+      "text": "Pilot light, with continuous replication to a live database and application servers kept switched off."
+    },
+    {
+      "key": "C",
+      "text": "Warm standby, with a scaled-down production environment always running in the recovery Region."
+    },
+    {
+      "key": "D",
+      "text": "Multi-site active/active, with users served from both Regions and asynchronous data replication."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "pilot light は、データを別のリージョンへ写し、データベースなどデータを保つ物は常に動かすが、アプリのサーバーは止めておき、障害の時に起こして拡張する。動かしておく物が少ないので費用を抑えられ、データベースへの継続的な複製で RPO を小さくできる。",
+    "per_choice": {
+      "A": "達成できる復旧時点はバックアップの頻度で決まる。夜ごとの取得では、継続的に届ける要件に合わない。",
+      "B": "正しい。データは継続的に写し、サーバーは止めておくので、要件を満たすうちで最も安い。",
+      "C": "要件は満たすが、縮小した本番を常に動かすので pilot light より費用がかかる。",
+      "D": "最も複雑で費用のかかる方法。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S9",
+      "quote": "A pilot light approach minimizes the ongoing cost of disaster recovery by minimizing the active resources"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S10",
+      "quote": "For pilot light, continuous data replication to live databases and data stores in the DR region is the best approach for low RPO"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S8",
+      "quote": "How often you run your backup will determine your achievable recovery point (which should align to meet your RPO)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S13",
+      "quote": "This approach is the most complex and costly approach to disaster recovery"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

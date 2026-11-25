@@ -1,0 +1,61 @@
+{
+  "id": "q-3.1-0001",
+  "task": "3.1",
+  "services": [
+    "AWS Regions"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs an order system in one AWS Region and needs a disaster recovery plan for a Regional outage. During normal operations, only the primary Region may serve users. If the primary Region fails, the recovery Region must be able to handle traffic immediately, even at reduced capacity, and then scale up. Which disaster recovery strategy is the MOST cost-effective way to meet these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Backup and restore, with backups copied to the recovery Region and infrastructure redeployed from IaC during failover."
+    },
+    {
+      "key": "B",
+      "text": "Pilot light, with data replicated to the recovery Region and application servers deployed but switched off."
+    },
+    {
+      "key": "C",
+      "text": "Multi-site active/active, with users served from both Regions at all times."
+    },
+    {
+      "key": "D",
+      "text": "Warm standby, with a scaled-down but fully functional copy of production running in the recovery Region."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "warm standby は、別のリージョンに縮小した、しかし完全に動く本番の写しを置く。縮小した量ならすぐに通信を処理でき、あとは拡張するだけ。普段は 1 つのリージョンだけで利用者に応えるなら、active/active より安く簡単。",
+    "per_choice": {
+      "A": "障害の時にインフラと設定とコードを作り直し、データも戻す必要があり、すぐには処理できない。",
+      "B": "pilot light は、先にサーバーを起こすなどの作業をしないとリクエストを処理できない。",
+      "C": "両方のリージョンで利用者に応えるので、普段は主のリージョンだけの要件に反し、最も費用がかかる。",
+      "D": "正しい。縮小した量ですぐに通信を処理でき、拡張するだけでよい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S12",
+      "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S13",
+      "quote": "Alternatively, if you do not want to use both Regions to handle user traffic, then Warm Standby offers a more economical and operationally less complex approach."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+      "source_id": "S7",
+      "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
