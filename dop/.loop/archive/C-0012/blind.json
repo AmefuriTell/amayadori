@@ -1,0 +1,129 @@
+{
+  "item": "C-0012",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "task": "1.3",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project writes its build output to a dist directory, with subdirectories such as dist/assets and dist/views. The deployment step requires the output artifact to contain the contents of dist at its top level, without a dist folder, while keeping the subdirectory structure. Which artifacts configuration in the buildspec meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "files: '**/*' and base-directory: dist"
+        },
+        {
+          "key": "B",
+          "text": "files: 'dist/**/*' with no base-directory"
+        },
+        {
+          "key": "C",
+          "text": "files: 'dist/**/*' and discard-paths: yes"
+        },
+        {
+          "key": "D",
+          "text": "files: '**/*', base-directory: dist, and discard-paths: yes"
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "task": "1.3",
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A build needs a database password that is stored under the JSON key password in the AWS Secrets Manager secret prod/db, and an API endpoint that is stored in Systems Manager Parameter Store. The password must not be visible in plain text in the CodeBuild console or the AWS CLI, and only the password value should be read from the secret. Which actions should the DevOps engineer take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "In the buildspec env section, use a secrets-manager mapping such as DB_PASSWORD: prod/db:password."
+        },
+        {
+          "key": "B",
+          "text": "In the buildspec env section, use a parameter-store mapping for the endpoint, and add ssm:GetParameters to the CodeBuild service role."
+        },
+        {
+          "key": "C",
+          "text": "Store the password as a plaintext environment variable in the CodeBuild project settings."
+        },
+        {
+          "key": "D",
+          "text": "Use a secrets-manager mapping of prod/db without a json-key, because CodeBuild then returns only the password."
+        },
+        {
+          "key": "E",
+          "text": "Write the password into the buildspec file in the repository so that every build can read it."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "task": "1.3",
+      "services": [
+        "AWS CodeBuild",
+        "Amazon VPC",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project must run integration tests against an Amazon RDS database in private subnets of a VPC. The same build must also download packages from public repositories on the internet. The database must not be exposed to the internet. Which configuration meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Make the RDS database publicly accessible, and run the build without VPC settings."
+        },
+        {
+          "key": "B",
+          "text": "Add the VPC ID, private subnets, and a security group to the project, and route the private subnets through a NAT gateway."
+        },
+        {
+          "key": "C",
+          "text": "Add the VPC ID, private subnets, and a security group to the project, and do not add any route to the internet."
+        },
+        {
+          "key": "D",
+          "text": "Run the build without VPC settings, and add the CodeBuild service to the database security group by name."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "task": "1.3",
+      "services": [
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company has five AWS Lambda functions deployed as .zip file archives that all bundle the same set of libraries. The company wants to stop duplicating these libraries in every package. The company also wants one of the functions, payments, to run from a container image built by its pipeline. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Bundle the shared libraries into a .zip file archive and publish it as a Lambda layer for the .zip functions."
+        },
+        {
+          "key": "B",
+          "text": "Create a new Lambda function from the container image for payments, because an existing .zip function cannot be converted."
+        },
+        {
+          "key": "C",
+          "text": "Change the package type of the existing payments function from .zip to container image in its configuration."
+        },
+        {
+          "key": "D",
+          "text": "Publish the shared libraries as a container image layer and attach it to the .zip functions."
+        },
+        {
+          "key": "E",
+          "text": "Upload the shared libraries to Lambda-managed storage once so that every function can read them."
+        }
+      ]
+    }
+  ]
+}
