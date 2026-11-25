@@ -19,3 +19,22 @@ export const DATA = {
     { ...base, id: 'q-1.4-0003', type: 'single', select_count: 1, stem: 'Third question stem. Which option is the MOST cost-effective?', choices: choices(4), answer: ['C'], explanation: { summary: '要約 3', per_choice: per(4) }, low_confidence: true },
   ],
 };
+
+// 事典（A-0013）。fixtures の問題の services は 'AWS CodeDeploy' だけ
+export const GLOSSARY = {
+  names: { 'AWS CodeDeploy': 'codedeploy', 'Amazon S3': 's3' },
+  pages: {
+    codedeploy: {
+      id: 'codedeploy', name: 'AWS CodeDeploy', reading: 'コードデプロイ', summary: 'アプリの新しい版をサーバーへ自動で配るサービス。',
+      features: [{ title: 'Blue/Green', text: '新しい版を横に用意してから切り替える。スマートフォンの画面で折り返すくらいの長さにしておく。' }],
+      exam_points: ['止まる時間を減らすデプロイの方法を選ぶ問題で使う。'],
+      compare: [{ with: 'AWS CodePipeline', text: 'CodePipeline は流れ全体、CodeDeploy は配る所。' }],
+      references: [{ url: 'https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html', quote: 'CodeDeploy is a deployment service.' }],
+    },
+    s3: {
+      id: 's3', name: 'Amazon S3', reading: 'エススリー', summary: 'データを保存するサービス。',
+      features: [{ title: '保存', text: 'どんな量でも保存できる。' }], exam_points: ['複製の問題で出る。'], compare: [],
+      references: [{ url: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html', quote: 'Amazon S3 is an object storage service.' }],
+    },
+  },
+};

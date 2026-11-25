@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { CODE, DATA, paths, readJSON, writeJSON, emit, main, ToolError, ITEM_ID, setResult, writeReport, rel } from './lib/io.mjs';
 import { loadBank, exam } from './lib/bank.mjs';
 import { stamp } from './lib/stamp.mjs';
+import { loadGlossary } from './g.mjs';
 
 // 試験では DOP_APP で別のアプリの置き場を渡す
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
@@ -21,13 +22,32 @@ export function toAppQuestion(q) {
   };
 }
 
+/** 事典（P-014）→ 配信用。名前 → id の表と、ページ（作り方の情報は出さない） */
+export function toAppGlossary(pages) {
+  const names = {};
+  const out = {};
+  for (const p of pages) {
+    for (const a of p.aliases) names[a] = p.id;
+    out[p.id] = {
+      id: p.id, name: p.name, reading: p.reading, summary: p.summary,
+      features: p.features.map(({ title, text }) => ({ title, text })),
+      exam_points: p.exam_points.map(({ text }) => text),
+      compare: (p.compare ?? []).map(({ with: w, text }) => ({ with: w, text })),
+      references: p.references.map(({ url, quote }) => ({ url, quote })),
+    };
+  }
+  return { names, pages: out };
+}
+
 export function buildData() {
   const domains = Object.fromEntries(exam().domains.map((d) => [d.id, { name: d.name, weight: d.weight }]));
   const questions = loadBank().filter((q) => q.status === 'verified').map(toAppQuestion);
   const out = { exam: exam().code, domains, count: questions.length, questions };
   const file = path.join(APP, 'public', 'questions.json');
   writeJSON(file, out);
-  return { file, count: questions.length };
+  const glossary = toAppGlossary(loadGlossary());
+  writeJSON(path.join(APP, 'public', 'glossary.json'), glossary);
+  return { file, count: questions.length, pages: Object.keys(glossary.pages).length };
 }
 
 // 試験の中から呼ばれても、子の node --test が TAP を出すように NODE_TEST_CONTEXT を消す
@@ -62,8 +82,8 @@ const commands = {
   },
 
   data() {
-    const { file, count } = buildData();
-    emit({ ok: true, summary: `${count} 問を ${path.relative(CODE, file)} に書いた` });
+    const { file, count, pages } = buildData();
+    emit({ ok: true, summary: `${count} 問を ${path.relative(CODE, file)} に、事典 ${pages} ページを glossary.json に書いた` });
   },
 
   check(args) {

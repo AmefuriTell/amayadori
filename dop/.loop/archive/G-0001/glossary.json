@@ -1,0 +1,277 @@
+{
+  "item": "G-0001",
+  "entries": [
+    {
+      "id": "s3",
+      "name": "Amazon S3",
+      "aliases": [
+        "Amazon S3"
+      ],
+      "reading": "エススリー",
+      "summary": "データを「オブジェクト」（ファイルとその情報のまとまり）として、ほぼ量の制限なく保存できるストレージのサービス。バックアップ、Web サイト、データ分析の置き場など、いろいろな用途に使われる。",
+      "features": [
+        {
+          "title": "オブジェクトストレージ",
+          "text": "どんな量のデータでも保存して守れる。データの置き方やアクセスの許し方を、業務やコンプライアンスの要件に合わせて設定できる。",
+          "source_id": "S1"
+        },
+        {
+          "title": "レプリケーション（複製）",
+          "text": "オブジェクトとそのメタデータ・タグを、同じリージョンや別のリージョンの別のバケットへ自動で複製できる。遅延を減らしたり、規制に対応したりするのに使う。",
+          "source_id": "S2"
+        },
+        {
+          "title": "イベント通知",
+          "text": "S3 のリソースに変更があった時に、Amazon SNS・Amazon SQS・AWS Lambda を使った処理の流れを起動できる。",
+          "source_id": "S3"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "別のリージョンにデータの写しを置く仕組みとして、S3 のレプリケーションが選択肢に出る。",
+          "source_id": "S2"
+        },
+        {
+          "text": "ファイルが置かれたら自動で処理を始めたい時は、イベント通知で SNS・SQS・Lambda を使った処理を起動する形を考える。",
+          "source_id": "S3"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#Welcome",
+          "source_id": "S1",
+          "quote": "Amazon Simple Storage Service (Amazon S3) is an object storage service that offers industry-leading scalability, data availability, security, and performance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#features-storage-management",
+          "source_id": "S2",
+          "quote": "S3 Replication – Replicate objects and their respective metadata and object tags to one or more destination buckets in the same or different AWS Regions"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#features-data-processing",
+          "source_id": "S3",
+          "quote": "Event notifications – Trigger workflows that use Amazon Simple Notification Service (Amazon SNS), Amazon Simple Queue Service (Amazon SQS), and AWS Lambda when a change is made to your S3 resources."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "cloudwatch",
+      "name": "Amazon CloudWatch",
+      "aliases": [
+        "Amazon CloudWatch"
+      ],
+      "reading": "クラウドウォッチ",
+      "summary": "AWS のリソースや、AWS 上で動くアプリケーションの状態をリアルタイムで見守る（監視する）サービス。性能・健全性・使われ具合を、システム全体で見えるようにする。",
+      "features": [
+        {
+          "title": "メトリクス",
+          "text": "大事な性能の数値を、決めた間隔で集めて記録する。多くの AWS サービスは自動で数値を送り、自分のアプリの数値（カスタムメトリクス）も PutMetricData API などで送れる。",
+          "source_id": "S5"
+        },
+        {
+          "title": "ログの保存と検索",
+          "text": "AWS のサービスや自分のアプリのログを、ロググループとログストリームに分けて保存する。CloudWatch Logs Insights で、すばやく検索・集計できる。",
+          "source_id": "S6"
+        },
+        {
+          "title": "ログから数値・転送",
+          "text": "メトリクスフィルターでログから数値を取り出してメトリクスにし、通知やダッシュボードに使える。サブスクリプションフィルターでログをリアルタイムに別のサービス（S3 や Firehose など）へ送れる。",
+          "source_id": "S6"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "アプリ独自の数値で監視したい時は、カスタムメトリクスを送る方法（PutMetricData API など）を考える。",
+          "source_id": "S5"
+        },
+        {
+          "text": "ログの中の数値を通知やダッシュボードに使いたい時は、メトリクスフィルターでログからメトリクスを作る形になる。",
+          "source_id": "S6"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#WhatIsCloudWatch",
+          "source_id": "S4",
+          "quote": "Amazon CloudWatch monitors your Amazon Web Services (AWS) resources and the applications you run on AWS in real time"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-monitoring-overview",
+          "source_id": "S5",
+          "quote": "Many AWS services automatically report metrics into CloudWatch, and you can also publish your own custom metrics, either with OpenTelemetry (OTLP) or with the PutMetricData API."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-logs-overview",
+          "source_id": "S6",
+          "quote": "Create metric filters to extract numerical values from logs and generate CloudWatch metrics, which you can use for alerting and dashboards."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "organizations",
+      "name": "AWS Organizations",
+      "aliases": [
+        "AWS Organizations"
+      ],
+      "reading": "オーガニゼーションズ",
+      "summary": "たくさんの AWS アカウントを 1 か所でまとめて管理するサービス。アカウントを作ってグループに分け、全体に決まり（ポリシー）をかけ、支払いを 1 つにまとめられる。",
+      "features": [
+        {
+          "title": "OU（組織単位）",
+          "text": "アカウントを、同じアプリやサービスのためのグループ（OU）に分けて整理できる。",
+          "source_id": "S8"
+        },
+        {
+          "title": "管理の委任",
+          "text": "対応する AWS サービスの管理を、組織の中の別のアカウントに任せられる（委任管理者）。",
+          "source_id": "S8"
+        },
+        {
+          "title": "SCP（サービスコントロールポリシー）",
+          "text": "組織のポリシーをユーザー・アカウント・OU にかけられる。SCP を使うと、組織の中で使えるリソース・サービス・リージョンを制限できる。",
+          "source_id": "S9"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "組織のアカウントで使えるサービスやリージョンを制限したい時は、SCP を OU やアカウントにかける形を考える。",
+          "source_id": "S9"
+        },
+        {
+          "text": "対応する AWS サービスの管理を、組織の中の特定のアカウントに任せたい時は、委任管理者を使う。",
+          "source_id": "S8"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html#orgs_introduction",
+          "source_id": "S7",
+          "quote": "AWS Organizations helps you centrally manage and govern your environment as you grow and scale your AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html#features",
+          "source_id": "S8",
+          "quote": "In addition, you can delegate responsibility for supported AWS services to accounts so users can manage them on behalf of your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html#features",
+          "source_id": "S9",
+          "quote": "For example, service control policies (SCPs) enable you to control access to AWS resources, services, and Regions within your organization."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "iam",
+      "name": "AWS Identity and Access Management (IAM)",
+      "aliases": [
+        "AWS IAM",
+        "AWS Identity and Access Management (IAM)"
+      ],
+      "reading": "アイアム",
+      "summary": "AWS のリソースに「誰が」「何を」できるかを安全に決めるサービス。本人かどうかの確認（認証）と、操作してよいかの判断（認可）を受け持つ。",
+      "features": [
+        {
+          "title": "認証と認可",
+          "text": "サインインした人やアプリが誰か（IAM ユーザー・IAM ロールなどのプリンシパル）を確かめ、そのプリンシパルにリソースへのアクセス許可がある時だけ操作を許す。",
+          "source_id": "S11"
+        },
+        {
+          "title": "アクセス許可の管理",
+          "text": "どの AWS リソースにアクセスできるかを決めるアクセス許可を管理する。",
+          "source_id": "S10"
+        },
+        {
+          "title": "結果整合性",
+          "text": "ユーザー・ロール・ポリシーの作成や変更は、成功してもすぐ全体に反映されるとは限らない（反映に少し時間がかかる）。",
+          "source_id": "S12"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "IAM の変更はすぐ反映されないことがあるので、止まってはいけない処理の途中でロールやポリシーを作り変える設計は避ける。",
+          "source_id": "S12"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html#introduction",
+          "source_id": "S10",
+          "quote": "AWS Identity and Access Management (IAM) is a web service that helps you securely control access to AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html#introduction",
+          "source_id": "S11",
+          "quote": "Access is granted in response to an authorization request if the user has been given permission to the resource."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html#introduction",
+          "source_id": "S12",
+          "quote": "We recommend that you do not include such IAM changes in the critical, high-availability code paths of your application."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "lambda",
+      "name": "AWS Lambda",
+      "aliases": [
+        "AWS Lambda"
+      ],
+      "reading": "ラムダ",
+      "summary": "サーバーを用意・管理せずにプログラムを動かせるサービス（サーバーレス）。サーバーの保守・容量の準備・スケーリング・パッチは Lambda が受け持つ。",
+      "features": [
+        {
+          "title": "イベントで動く",
+          "text": "ハンドラー関数を書き、トリガー（API Gateway・Amazon S3・Amazon SQS・EventBridge など 200 以上のサービス）につなぐと、イベントが来るたびに動く。",
+          "source_id": "S14"
+        },
+        {
+          "title": "自動のスケーリング",
+          "text": "呼び出しはそれぞれ独立して動き、要求が増えると実行環境を自動で増やす。",
+          "source_id": "S14"
+        },
+        {
+          "title": "同時実行数",
+          "text": "同時に処理している要求の数を同時実行数という。既定では、リージョンごとにアカウント全体で 1,000 まで。大事な関数がスロットリング（受け付けを断られること）されないよう、関数ごとに同時実行数を設定できる。",
+          "source_id": "S15"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "ある関数が同時実行数を使い切って、ほかの大事な関数がスロットリングされる場面では、関数ごとの同時実行数の設定を考える。",
+          "source_id": "S15"
+        },
+        {
+          "text": "S3 や SQS、EventBridge のイベントで処理を始める形として、Lambda をトリガーにつなぐ構成がよく出る。",
+          "source_id": "S14"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html#welcome",
+          "source_id": "S13",
+          "quote": "With Lambda, you can run code without provisioning or managing servers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html#welcome",
+          "source_id": "S14",
+          "quote": "You write a handler function, connect it to a trigger (API Gateway, Amazon S3, Amazon SQS, EventBridge, and 200+ other AWS services), and Lambda executes it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#lambda-concurrency",
+          "source_id": "S15",
+          "quote": "configure function-level concurrency controls so that your critical Event Functions don't experience throttling."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}
