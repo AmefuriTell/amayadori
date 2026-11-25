@@ -1,0 +1,94 @@
+{
+  "item": "C-0008",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "task": "1.2",
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Amazon ECS service runs a container whose health check command returns a non-zero exit code until the application finishes loading, which takes about 90 seconds. The health check uses the default interval, timeout, and retries. New tasks are marked unhealthy and replaced before they finish starting. The team wants failed checks during startup to be ignored without weakening checks afterward. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set startPeriod in the container health check to 120 seconds."
+        },
+        {
+          "key": "B",
+          "text": "Set retries in the container health check to 20."
+        },
+        {
+          "key": "C",
+          "text": "Set interval in the container health check to 400 seconds."
+        },
+        {
+          "key": "D",
+          "text": "Set timeout in the container health check to 90 seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "task": "1.2",
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An Amazon ECS task has an application container and a log-forwarding sidecar container. The essential parameter is omitted for both. When the sidecar crashes, the whole task stops. The team wants the sidecar's failure to leave the application running, and wants the task's health to reflect only whether the application is healthy. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set essential to false for the sidecar container."
+        },
+        {
+          "key": "B",
+          "text": "Define a health check command for the application container, and keep it essential."
+        },
+        {
+          "key": "C",
+          "text": "Set essential to false for both containers."
+        },
+        {
+          "key": "D",
+          "text": "Add a health check command to the sidecar and keep it essential so that its health is reported too."
+        },
+        {
+          "key": "E",
+          "text": "Keep the essential parameter omitted for the sidecar, because omitted means non-essential."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "task": "1.2",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS CodeDeploy deployment to Amazon EC2 instances runs a script in the ValidateService hook that polls the application until it returns healthy responses, which can take up to 4 minutes. The hook's timeout is set to 60 seconds, and deployments fail at ValidateService even when the application becomes healthy. The team must keep verifying the deployment before it is marked successful. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Increase the timeout of the ValidateService hook to 300 seconds."
+        },
+        {
+          "key": "B",
+          "text": "Increase the timeout of the ValidateService hook to 7200 seconds."
+        },
+        {
+          "key": "C",
+          "text": "Move the polling script to the BeforeInstall hook."
+        },
+        {
+          "key": "D",
+          "text": "Remove the ValidateService hook so that deployments complete without the check."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "q-1.2-0009",
+  "task": "1.2",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS CodeDeploy deployment to Amazon EC2 instances runs a script in the ValidateService hook that polls the application until it returns healthy responses, which can take up to 4 minutes. The hook's timeout is set to 60 seconds, and deployments fail at ValidateService even when the application becomes healthy. The team must keep verifying the deployment before it is marked successful. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Increase the timeout of the ValidateService hook to 7200 seconds."
+    },
+    {
+      "key": "B",
+      "text": "Move the polling script to the BeforeInstall hook."
+    },
+    {
+      "key": "C",
+      "text": "Remove the ValidateService hook so that deployments complete without the check."
+    },
+    {
+      "key": "D",
+      "text": "Increase the timeout of the ValidateService hook to 300 seconds."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "hooks の timeout は、スクリプトが失敗とみなされるまでの秒数で、既定と最大は 3600 秒（1 時間）。超えるとデプロイが止まり、そのインスタンスへのデプロイは失敗する。ValidateService は最後のライフサイクルイベントで、デプロイがうまく終わったかを確かめるのに使う。",
+    "per_choice": {
+      "A": "1 つのライフサイクルイベントのスクリプトに許されるのは最大 3600 秒。",
+      "B": "BeforeInstall はアプリを入れる前で、入れた後の確かめにならない。",
+      "C": "成功とする前に確かめる要件に反する。",
+      "D": "正しい。4 分の確かめが収まる長さにする。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+      "source_id": "S4",
+      "quote": "The number of seconds to allow the script to execute before it is considered to have failed. The default is 3600 seconds (1 hour)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+      "source_id": "S4",
+      "quote": "3600 seconds (1 hour) is the maximum amount of time allowed for script execution for each deployment lifecycle event."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+      "source_id": "S5",
+      "quote": "ValidateService – This is the last deployment lifecycle event. It is used to verify the deployment was completed successfully."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い",
+  "last_checked": "2026-11-26"
+}
