@@ -1,0 +1,58 @@
+{
+  "id": "q-5.1-0003",
+  "task": "5.1",
+  "services": [
+    "AWS Health",
+    "Amazon EventBridge",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations. The central operations team created an Amazon EventBridge rule for AWS Health events in its operations account, but the rule receives events only for the operations account. The team must receive AWS Health events for all accounts in the organization in one place, without deploying rules to every account. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the current rule, because EventBridge rules for AWS Health receive events for every account in the organization."
+    },
+    {
+      "key": "B",
+      "text": "Deploy the same EventBridge rule to every member account with StackSets, and have each rule send email to the team."
+    },
+    {
+      "key": "C",
+      "text": "Ask each account owner to check the AWS Health Dashboard every day and forward important events."
+    },
+    {
+      "key": "D",
+      "text": "Use the AWS Health organizational view with delegated administrator access for the operations account to aggregate events from all accounts."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Health のイベントの EventBridge のルールは、自分のアカウントの通知しか受けない。組織の他のアカウントのイベントを受けるには、組織のビュー（organizational view）と委任管理者のアクセスで Health のイベントを集約する。",
+    "per_choice": {
+      "A": "ルールが受けるのは自分のアカウントの通知だけ。",
+      "B": "全アカウントにルールを置くことになり、要件に反する。",
+      "C": "人の作業に頼ることになり、手間が大きく漏れも出る。",
+      "D": "正しい。組織のビューと委任管理者で、全アカウントのイベントを 1 か所に集められる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+      "source_id": "S3",
+      "quote": "Any EventBridge rules that you create can only receive notifications for your AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+      "source_id": "S3",
+      "quote": "To receive organizational events for other accounts within your AWS Organizations, see Aggregating AWS Health events using organizational view and delegated administrator access."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

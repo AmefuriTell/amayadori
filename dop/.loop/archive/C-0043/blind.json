@@ -1,0 +1,66 @@
+{
+  "item": "C-0043",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "AWS KMS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security policy requires an existing Amazon CloudWatch Logs log group in eu-west-1 to be encrypted with a customer managed AWS KMS key. A DevOps engineer creates a symmetric KMS key in eu-west-1 and tries to associate it with the log group, but the operation fails because CloudWatch Logs cannot use the key. The key must be usable only for this log group. What should the engineer do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an asymmetric KMS key instead, because CloudWatch Logs encrypts log data with public keys."
+        },
+        {
+          "key": "B",
+          "text": "Add a key policy statement that allows the CloudWatch Logs service principal in eu-west-1 to use the key, with a condition for the log group ARN."
+        },
+        {
+          "key": "C",
+          "text": "Give the engineer's IAM role kms:Encrypt and kms:Decrypt permissions on the key, and keep the default key policy."
+        },
+        {
+          "key": "D",
+          "text": "Create the KMS key in us-east-1 and allow the CloudWatch Logs service principal from that Region to use it."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application writes logs to an Amazon CloudWatch Logs log group, and some log events contain credit card numbers. Operators who view the logs must not see the card numbers. Log events must be removed automatically after 90 days so that storage costs stay under control. The company does not want to write or run custom code. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a data protection policy for the log group that uses a data identifier for credit card numbers and masks them."
+        },
+        {
+          "key": "B",
+          "text": "Set the retention setting of the log group to 90 days."
+        },
+        {
+          "key": "C",
+          "text": "Encrypt the log group with a customer managed AWS KMS key so that operators cannot read the card numbers."
+        },
+        {
+          "key": "D",
+          "text": "Keep the default retention setting, and run a scheduled AWS Lambda function that deletes log events older than 90 days."
+        },
+        {
+          "key": "E",
+          "text": "Export the log group to Amazon S3 every day so that CloudWatch Logs no longer stores the log events."
+        }
+      ]
+    }
+  ]
+}

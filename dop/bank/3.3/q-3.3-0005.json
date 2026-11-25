@@ -1,0 +1,62 @@
+{
+  "id": "q-3.3-0005",
+  "task": "3.3",
+  "services": [
+    "AWS Fault Injection Service",
+    "Amazon Route 53"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses Amazon Route 53 DNS failover between two web servers. The DevOps team wants to prove that traffic moves to the healthy server when the other server fails, by injecting real failures with AWS Fault Injection Service (AWS FIS). Production risk must be kept as low as possible, and the tests should be repeatable. Which approach BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run the AWS FIS experiment directly in production during peak hours so that the results reflect real traffic."
+    },
+    {
+      "key": "B",
+      "text": "Skip AWS FIS and test by editing the DNS records by hand to point to the second server."
+    },
+    {
+      "key": "C",
+      "text": "Run the AWS FIS experiment only in documentation reviews, because AWS FIS simulates failures without affecting resources."
+    },
+    {
+      "key": "D",
+      "text": "Plan the experiment, run it in a pre-production environment first, and use the results before any production run."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "AWS FIS は本物のリソースに本物の操作を行う。本番で試す前に、計画の段階を終え、本番前の環境で実験を行うことが強く勧められている。DNS failover は、同じ役割の資源のうち健全でない物から健全な物へ Route 53 が通信を向ける仕組み。",
+    "per_choice": {
+      "A": "本番で、しかも混む時間に試すのは、本番への危険を最も小さくする要件に反する。",
+      "B": "手で DNS を書き換えるのは、障害を検知して自動で切り替わることの試験にならない。",
+      "C": "AWS FIS は本物のリソースに本物の操作を行う。",
+      "D": "正しい。計画してから本番前の環境で試す。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+      "source_id": "S7",
+      "quote": "AWS FIS carries out real actions on real AWS resources in your system."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+      "source_id": "S7",
+      "quote": "we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+      "source_id": "S5",
+      "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

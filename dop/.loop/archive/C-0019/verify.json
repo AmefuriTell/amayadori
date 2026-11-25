@@ -1,0 +1,65 @@
+{
+ "item": "C-0019",
+ "questions": [
+  {
+   "qid": "q-2.1-0001",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "high",
+    "reason": "10 concurrent, tolerance 2, sequential regions"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-2.1-0002",
+   "blind": {
+    "answer": [
+     "A"
+    ],
+    "confidence": "high",
+    "reason": "SOFT_FAILURE_TOLERANCE makes max concurrent a ceiling regardless of failures"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-2.1-0003",
+   "blind": {
+    "answer": [
+     "B"
+    ],
+    "confidence": "mid",
+    "reason": "parameter override on stack instances persists and is not drift"
+   },
+   "match": true,
+   "issues": [],
+   "verdict": "ok"
+  },
+  {
+   "qid": "q-2.1-0004",
+   "blind": {
+    "answer": [
+     "A",
+     "C"
+    ],
+    "confidence": "mid",
+    "reason": "B false (created in delegated admin acct), D limit is 100, E false; C by elimination"
+   },
+   "match": false,
+   "issues": [
+    {
+     "kind": "style",
+     "where": "choice B / C",
+     "detail": "blind では B（作成先が管理アカウント）を知らず C を選んだ。B は S7 に明記があり C は S7 の 'can't limit' で誤りと確定するので、正解は A,B の 1 通りで事実の誤りは無い。知識の穴による不一致で、問題の欠陥ではないと判断。",
+     "source": "S7"
+    }
+   ],
+   "verdict": "ok"
+  }
+ ]
+}

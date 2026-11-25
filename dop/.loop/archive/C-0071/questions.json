@@ -1,0 +1,255 @@
+{
+  "item": "C-0071",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "task": "6.1",
+      "services": [
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has 40 project teams, and each team uses an IAM role. Teams create new Amazon S3 buckets and DynamoDB tables every week. Today the security team writes a separate policy for each team that lists the ARNs of the team's resources, and must update the policies whenever a resource is added. The company wants least privilege with fewer policies and no policy updates when resources are added. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag."
+        },
+        {
+          "key": "B",
+          "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night."
+        },
+        {
+          "key": "C",
+          "text": "Use the AWS managed job function policies for each team so that new resources are included automatically."
+        },
+        {
+          "key": "D",
+          "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "属性ベースのアクセス制御（ABAC）は、タグという属性で権限を決める。主体のタグとリソースのタグが一致する時に操作を許す 1 つのポリシーで済み、新しいリソースを足してもポリシーを変えなくてよい。従来の役割ベース（RBAC）は職務ごとにポリシーを作り、リソースが増えるたびにポリシーの更新が要る。",
+        "per_choice": {
+          "A": "正しい。1 つのポリシーで、タグが一致するリソースだけに許す。",
+          "B": "ポリシーの数は減らず、更新をスクリプトで続けることになる。",
+          "C": "職務別のマネージドポリシーは RBAC の考え方で、プロジェクトごとのリソースに絞れない。",
+          "D": "最小権限に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S1",
+          "quote": "You can design ABAC policies that allow operations when the principal's tag matches the resource tag."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S2",
+          "quote": "The disadvantage to using the traditional RBAC model is that when you or your users add new resources to your environment, you have to update the policies to allow access to those resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S2",
+          "quote": "ABAC requires fewer policies."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-6.1-0002",
+      "task": "6.1",
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "Employees sign in to AWS through IAM Identity Center, and the identity source stores each user's department. Each department's Amazon S3 buckets are tagged with a department tag. Employees must access only their own department's buckets, and the company does not want to create one permission set per department or IAM users. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute."
+        },
+        {
+          "key": "B",
+          "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag."
+        },
+        {
+          "key": "C",
+          "text": "Create a separate permission set for each department that lists that department's bucket ARNs."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user for each employee and tag the user with the department."
+        },
+        {
+          "key": "E",
+          "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "IAM Identity Center の Attributes for access control で、ポリシーで使うユーザーの属性（例 Department）を選ぶ。IAM Identity Center はその属性を、入る先のアカウントへセッションタグとして渡し、ポリシーでは aws:PrincipalTag/タグのキー の条件で参照できる。属性がバケットのタグと一致する時だけ許すポリシーを権限セットに書く。",
+        "per_choice": {
+          "A": "正しい。Department の属性をセッションタグとして渡すようにする。",
+          "B": "正しい。1 つの権限セットで、部署が一致するバケットだけに許す。",
+          "C": "部署ごとの権限セットを作ることになり、要件に反する。",
+          "D": "IAM ユーザーを作らない要件に反する。",
+          "E": "バケットごとに書き足すことになり、属性で決める仕組みにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "While on the Attributes for access control page, you select the Department user attribute for use with attribute-based access control (ABAC)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "they are sent as session tags that you can reference using the aws:PrincipalTag/tag-key condition key in all relevant AWS IAM policy types."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-6.1-0003",
+      "task": "6.1",
+      "services": [
+        "AWS IAM Identity Center",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses IAM Identity Center with AWS Organizations. Fifteen database administrators need the same RDS, DynamoDB, and Aurora administration permissions in 25 accounts. Staff join and leave the DBA team every month, and the security team wants policy changes to reach all accounts automatically. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts."
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change."
+        },
+        {
+          "key": "D",
+          "text": "Create 25 permission sets, one for each account, and assign each to the DBA group."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "権限セットは 1 つ以上の IAM ポリシーをまとめたテンプレートで、1 つの権限セットで複数のアカウントへのアクセスを与えられる。割り当てると IAM Identity Center が各アカウントにロールを作り、権限セットを変えるとロールとポリシーも更新される。割り当ては個人よりグループにするのが勧められ、1 回に選べるアカウントは 10 まで。",
+        "per_choice": {
+          "A": "正しい。グループに割り当てれば人の出入りはグループの変更だけで済み、権限セットを変えれば全アカウントに反映される。",
+          "B": "人が入れ替わるたびに割り当てを直すことになる。グループに割り当てるのが勧められている。",
+          "C": "25 個のロールを自分で保つことになり、手間が大きい。",
+          "D": "同じ権限を 25 個の権限セットで保つことになり、変更の手間が増える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html",
+          "source_id": "S5",
+          "quote": "As you modify the permission set, IAM Identity Center ensures that the corresponding IAM policies and roles are updated accordingly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "source_id": "S6",
+          "quote": "we recommended that you assign access directly to groups rather than to individual users."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "source_id": "S6",
+          "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-6.1-0004",
+      "task": "6.1",
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company gives a third-party monitoring vendor access to its AWS account through an IAM role that the vendor assumes. The vendor serves many customers from one AWS account. The company must prevent another customer of the vendor from tricking the vendor into accessing the company's resources by supplying the company's role ARN. Which configuration BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "In the role's trust policy, allow only the vendor's account, and require the ExternalId condition with the unique value that the vendor provides for the company."
+        },
+        {
+          "key": "B",
+          "text": "In the role's trust policy, allow only the vendor's account, and require an ExternalId value that the company creates and keeps secret."
+        },
+        {
+          "key": "C",
+          "text": "In the role's trust policy, allow only the vendor's account, without any condition, because only the vendor can assume the role."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user with an access key for the vendor instead of a role, and rotate the key every 90 days."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "混乱した代理（confused deputy）は、権限の無い者がより権限のある者に操作をさせる問題。外部 ID をロールの信頼ポリシーの条件で求めると防げる。外部 ID は業者が顧客ごとに一意に作って管理する値で、顧客が自分で決めるものではない。別の顧客が ARN を渡しても、業者が要求に入れる外部 ID は操れない。",
+        "per_choice": {
+          "A": "正しい。業者が顧客ごとに決めた外部 ID を条件にする。",
+          "B": "外部 ID は業者が作って管理する値で、顧客が自分で決めるものではない。",
+          "C": "業者のアカウントは他の顧客のためにも動くので、別の顧客が ARN を渡すと業者が代わりに入れてしまう。",
+          "D": "長く使う認証情報を外部に渡すことになり、混乱した代理の問題も解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "The primary function of the external ID is to address and prevent the confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "The ExternalId value must be unique among Example Corp's customers and controlled by Example Corp, not its customers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}

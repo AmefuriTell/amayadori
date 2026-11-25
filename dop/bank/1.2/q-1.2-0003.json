@@ -1,0 +1,57 @@
+{
+  "id": "q-1.2-0003",
+  "task": "1.2",
+  "services": [
+    "AWS CodePipeline",
+    "GitHub"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses an AWS CodePipeline V2 pipeline with a GitHub source action that uses a connection. The pipeline must start when a pull request that targets the main branch is opened, and again whenever a new revision is published to that pull request. The pipeline must also start for every push to main. The company wants to use one pipeline and no custom code. Which solution meets these requirements with the LEAST operational overhead?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a trigger with a pullRequest filter for main with the Open and Closed events, and a push filter for main."
+    },
+    {
+      "key": "B",
+      "text": "Add a trigger with only a push filter for main, and add a CodeBuild webhook that runs tests for pull requests."
+    },
+    {
+      "key": "C",
+      "text": "Create a second pipeline for pull request events, and keep the first pipeline for pushes to main."
+    },
+    {
+      "key": "D",
+      "text": "Add a trigger with a pullRequest filter for main with the Open and Update events, and a push filter for main."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "V2 パイプラインのトリガーは、git の設定で push と pull request のイベントを絞り込める。pull request の Open は PR が作られた時、Update は PR に新しいリビジョンが出た時に動くので、main への push のフィルターと合わせると 1 つのパイプラインで要件を満たす。",
+    "per_choice": {
+      "A": "Closed は PR が閉じられた時。新しいリビジョンが出た時（Update）に動かない。",
+      "B": "PR の時に動くのは CodeBuild だけで、パイプラインは始まらない。",
+      "C": "動くが、パイプラインを 1 つにする要件に反する。",
+      "D": "正しい。Open と Update の pull request のフィルターと、main の push のフィルターを 1 つのパイプラインに入れる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-triggers.html",
+      "source_id": "S3",
+      "quote": "Update - This option triggers the pipeline when a pull request revision is published for the branch/file path."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-requirements.html",
+      "source_id": "S4",
+      "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,68 @@
+{
+  "id": "q-2.1-0001",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation",
+    "Amazon S3",
+    "Amazon RDS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company manages a production stack in AWS CloudFormation that contains an Amazon RDS DB instance and an Amazon S3 bucket that stores audit logs. Before any update is applied, the operations team must see whether any resource will be replaced or deleted. If a future template change removes the S3 bucket from the stack, the bucket must not be deleted. The team does not want to add manual backup steps. Which approach meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging."
+    },
+    {
+      "key": "B",
+      "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket."
+    },
+    {
+      "key": "C",
+      "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy."
+    },
+    {
+      "key": "D",
+      "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "change set を作ると、実行する前に、どのリソースが足される・変わる・消されるかを見られ、実行を決めた時だけ変更される。DeletionPolicy の Retain を付けたリソースは、スタックの削除や、更新でスタックから外れる時にも消されずに残る。",
+    "per_choice": {
+      "A": "バケットは残るが、本番に当てる前に何が変わるかを見る手段が無い。",
+      "B": "正しい。change set で事前に確かめ、Retain でバケットを残す。",
+      "C": "何も指定しないと CloudFormation はリソースを消すので、テンプレートから外した時にバケットが消える。",
+      "D": "既定の動きはリソースを消すこと。既定が Snapshot なのは RDS の一部のリソースだけ。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html",
+      "source_id": "S1",
+      "quote": "For example, you can see which resources CloudFormation will add, modify, or delete."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+      "source_id": "S2",
+      "quote": "If a resource has no DeletionPolicy attribute, CloudFormation deletes the resource by default."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+      "source_id": "S2",
+      "quote": "This capability also applies to stack update operations that lead to resources being deleted from stacks."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+      "source_id": "S2",
+      "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

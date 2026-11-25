@@ -1,0 +1,62 @@
+{
+  "id": "q-6.1-0007",
+  "task": "6.1",
+  "services": [
+    "AWS IAM Identity Center",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses IAM Identity Center with AWS Organizations. Fifteen database administrators need the same RDS, DynamoDB, and Aurora administration permissions in 25 accounts. Staff join and leave the DBA team every month, and the security team wants policy changes to reach all accounts automatically. Which approach meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create one Database Admin permission set and assign it to each of the 15 administrators individually in all 25 accounts."
+    },
+    {
+      "key": "B",
+      "text": "Create one Database Admin permission set and assign it to a DBA group in all 25 accounts, repeating the assignment for each batch of up to 10 accounts."
+    },
+    {
+      "key": "C",
+      "text": "Create an IAM role with the same policies in each of the 25 accounts, and update the 25 roles whenever the policies change."
+    },
+    {
+      "key": "D",
+      "text": "Create 25 permission sets, one for each account, and assign each to the DBA group."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "権限セットは 1 つ以上の IAM ポリシーをまとめたテンプレートで、1 つの権限セットで複数のアカウントへのアクセスを与えられる。割り当てると IAM Identity Center が各アカウントにロールを作り、権限セットを変えるとロールとポリシーも更新される。割り当ては個人よりグループにするのが勧められ、1 回に選べるアカウントは 10 まで。",
+    "per_choice": {
+      "A": "人が入れ替わるたびに割り当てを直すことになる。グループに割り当てるのが勧められている。",
+      "B": "正しい。グループに割り当てれば人の出入りはグループの変更だけで済み、権限セットを変えれば全アカウントに反映される。",
+      "C": "25 個のロールを自分で保つことになり、手間が大きい。",
+      "D": "同じ権限を 25 個の権限セットで保つことになり、変更の手間が増える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html",
+      "source_id": "S5",
+      "quote": "As you modify the permission set, IAM Identity Center ensures that the corresponding IAM policies and roles are updated accordingly."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+      "source_id": "S6",
+      "quote": "we recommended that you assign access directly to groups rather than to individual users."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+      "source_id": "S6",
+      "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

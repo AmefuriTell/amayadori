@@ -1,0 +1,108 @@
+{
+  "item": "C-0079",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CloudTrail Insights は、過去のイベントから API の呼び出しの率と誤りの率のふつうの形（基準）を作り、それから大きく外れた時に Insights のイベントを出す。管理イベントの呼び出しの率で Insights のイベントを出すには、証跡が書き込みの管理イベントを記録している必要がある。初めて有効にした後、出し始めるまで最大 36 時間かかることがある。",
+        "per_choice": {
+          "A": "正しい。書き込みの管理イベントを記録しないと、管理イベントの呼び出しの率の Insights は出ない。",
+          "B": "決まったしきい値を決めることになり、要件に反する。",
+          "C": "データイベントの Insights は証跡でしか使えない。今回の問題は書き込みの管理イベントを記録していないこと。",
+          "D": "Insights のイベントは、元になる管理イベントやデータイベントと同じリージョンで出る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "To log Insights events on the API call rate for management events, the trail or event data store must enable Insights and log write management events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html",
+          "source_id": "S2",
+          "quote": "After you enable CloudTrail Insights for the first time on a trail, CloudTrail may take up to 36 hours to begin delivering Insights events"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "Insights events on data events are only supported on trails and not on event data stores."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-insights-events-with-cloudtrail.html",
+          "source_id": "S1",
+          "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "異常検知（anomaly detection）では、統計と機械学習で過去のデータから期待される値の範囲（バンド）を作る。異常検知のアラームは決まったしきい値を持たず、その時の期待値と比べる。バンドより上・下・どちらでも、のどれで鳴らすかを選べる。",
+        "per_choice": {
+          "A": "決まったしきい値で、夜の攻撃を見逃し、時間帯による変化に合わない。",
+          "B": "正しい。その時間帯にしては多すぎる時だけ鳴る。",
+          "C": "少なすぎる時にも鳴り、要件に反する。",
+          "D": "少なすぎる時に鳴り、多すぎる時には鳴らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "source_id": "S3",
+          "quote": "These types of alarms don't have a static threshold for determining alarm state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+          "source_id": "S3",
+          "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "GuardDuty は検出結果を EventBridge へ自動で送る。通知を受けるには EventBridge のルールとターゲット（例えば SNS のトピック）を作る。新しい検出結果はほぼリアルタイムに送られ、その頻度は変えられない。同じ検出結果のその後の発生は既定で 6 時間ごとにまとめられ、管理者アカウントだけが 15 分・1 時間・6 時間から変えられる。",
+        "per_choice": {
+          "A": "正しい。ルールのターゲットに SNS のトピックを置き、メールで受ける。",
+          "B": "正しい。その後の発生の頻度は管理者アカウントが 15 分にできる。",
+          "C": "頻度を変えられるのは管理者アカウントだけ。",
+          "D": "新しい検出結果はほぼリアルタイムで送られ、この頻度は変えられない。",
+          "E": "通知を受けるには EventBridge のルールとターゲットを作る必要がある。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S5",
+          "quote": "In order to receive notifications about GuardDuty findings based on events, you must create an EventBridge rule and a target for GuardDuty."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "Only an administrator account can update the EventBridge notification frequency for subsequent finding occurrences."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "Possible values are 15 minutes, 1 hour, or the default 6 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html",
+          "source_id": "S6",
+          "quote": "The notification frequency for newly generated findings is in near real-time."
+        }
+      ]
+    }
+  ]
+}

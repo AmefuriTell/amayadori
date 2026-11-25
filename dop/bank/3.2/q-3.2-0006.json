@@ -1,0 +1,77 @@
+{
+  "id": "q-3.2-0006",
+  "task": "3.2",
+  "services": [
+    "Amazon ElastiCache"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A product catalog service reads from Amazon ElastiCache in front of a database. After products are updated in the database, users sometimes see old prices from the cache. The company wants cached data to stay current after writes, wants new cache nodes added during scale-out to fill in missing data, and wants to avoid filling the cache with data that is never read. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Update the cache every time the application writes to the database (write-through)."
+    },
+    {
+      "key": "B",
+      "text": "Also load data into the cache on a cache miss (lazy loading), and set a TTL on cached items."
+    },
+    {
+      "key": "C",
+      "text": "Keep only lazy loading, because it never returns stale data."
+    },
+    {
+      "key": "D",
+      "text": "Use write-through without any TTL so that every written item stays in the cache permanently."
+    },
+    {
+      "key": "E",
+      "text": "Disable the cache whenever a node fails, because node failures are fatal with lazy loading."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "write-through ではデータベースに書くたびにキャッシュも更新するので、キャッシュのデータは古くならない。ただし新しいノードには、書かれるまでデータが無く、読まれないデータも入る。lazy loading を組み合わせれば足りないデータを読む時に入れられ、TTL を付ければ無駄な場所を減らせる。lazy loading だけだと、データベースの変更がキャッシュに反映されず古くなることがある。",
+    "per_choice": {
+      "A": "正しい。書くたびに更新するので、古い値が出ない。",
+      "B": "正しい。新しいノードの足りないデータを埋め、TTL で読まれないデータを減らす。",
+      "C": "lazy loading だけでは、データベースの変更がキャッシュに届かず古くなる。",
+      "D": "読まれないデータが残り続け、無駄が増える。",
+      "E": "lazy loading ではノードの障害は致命的ではない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+      "source_id": "S6",
+      "quote": "Because the data in the cache is updated every time it's written to the database, the data in the cache is always current."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+      "source_id": "S6",
+      "quote": "You can minimize this by implementing lazy loading with write-through."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+      "source_id": "S6",
+      "quote": "By adding a time to live (TTL) value, you can minimize wasted space."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+      "source_id": "S5",
+      "quote": "This result occurs because there are no updates to the cache when data is changed in the database."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+      "source_id": "S5",
+      "quote": "Node failures aren't fatal for your application."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

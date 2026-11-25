@@ -1,0 +1,69 @@
+{
+  "id": "q-6.2-0002",
+  "task": "6.2",
+  "services": [
+    "AWS Security Hub CSPM",
+    "AWS Organizations"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company uses AWS Organizations. The security team works from a dedicated security account and must manage AWS Security Hub CSPM for every account in the organization. Accounts that join the organization later must be enabled and configured without extra work. The company wants to follow the currently recommended way to manage Security Hub CSPM across an organization. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "From the Organizations management account, designate the security account as the Security Hub CSPM delegated administrator."
+    },
+    {
+      "key": "B",
+      "text": "Attach a Security Hub CSPM declarative policy to the organization root."
+    },
+    {
+      "key": "C",
+      "text": "Sign in to each member account and enable Security Hub CSPM in every Region."
+    },
+    {
+      "key": "D",
+      "text": "Send an invitation from the security account to each new account when it joins the organization."
+    },
+    {
+      "key": "E",
+      "text": "Make the security account the Organizations management account so that it controls all accounts."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "Organizations と連携すると、管理アカウントが Security Hub CSPM の委任管理者を決める。宣言型ポリシー（declarative policy）は組織のアカウントで Security Hub CSPM をまとめて有効にして設定でき、組織に入ったアカウントや OU に移ったアカウントも引き継ぐ。宣言型ポリシーは、組織全体で管理する推奨の方法として、レガシーになった central configuration に置き換わっている。",
+    "per_choice": {
+      "A": "正しい。委任管理者を決めると、そのアカウントで Security Hub CSPM が自動で有効になり、組織を管理できる。",
+      "B": "正しい。ルートに付けると、後から入るアカウントも引き継ぐ。",
+      "C": "アカウントごとの作業になり、後から入るアカウントにも同じ作業が要る。",
+      "D": "アカウントが入るたびに作業が要り、要件に反する。",
+      "E": "管理アカウントを入れ替えることになり、要件に関係無い大きな変更になる。委任管理者を決めれば足りる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-accounts.html",
+      "source_id": "S1",
+      "quote": "When you integrate Security Hub CSPM and AWS Organizations, the Organizations management account designates a Security Hub CSPM delegated administrator."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+      "source_id": "S3",
+      "quote": "Accounts that join the organization, or move into an OU that has an attached declarative policy, inherit the declarative policy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+      "source_id": "S3",
+      "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "note": "central configuration はレガシー（2026-11-25 の公式ドキュメント）。試験が古い形のままなら central configuration の選択肢が出る可能性がある",
+  "last_checked": "2026-11-25"
+}

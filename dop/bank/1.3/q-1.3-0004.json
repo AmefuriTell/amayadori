@@ -1,0 +1,75 @@
+{
+  "id": "q-1.3-0004",
+  "task": "1.3",
+  "services": [
+    "AWS CodeBuild",
+    "Amazon ECR",
+    "AWS CodeArtifact",
+    "AWS IAM"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company runs AWS CodeBuild projects in account B. The builds must pull container images from an Amazon ECR repository in account A and npm packages from an AWS CodeArtifact domain in account A. The security team requires least privilege and does not allow long-lived credentials or public access to either service. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a repository policy to the ECR repository in account A that allows the CodeBuild service role in account B to pull images."
+    },
+    {
+      "key": "B",
+      "text": "Add a CodeArtifact domain policy in account A for account B, and have the build get an authorization token with its role credentials."
+    },
+    {
+      "key": "C",
+      "text": "Make the CodeArtifact repository in account A public so that builds can download npm packages without signing in."
+    },
+    {
+      "key": "D",
+      "text": "Store the access key of an IAM user from account A as an environment variable in the CodeBuild project."
+    },
+    {
+      "key": "E",
+      "text": "Move the CodeArtifact repository from the domain in account A into a new domain in account B."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "ECR のプライベートリポジトリは、IAM を使ったリソースベースの権限（リポジトリポリシー）で別アカウントに pull を許せる。CodeArtifact は、ドメインでどのアカウントが入れるかを決め、使う側は自分の AWS の認証情報で認可トークンを作って認証する。",
+    "per_choice": {
+      "A": "正しい。リポジトリポリシーで、必要なロールにだけ pull を許す。",
+      "B": "正しい。ドメインでアカウント B を許し、ビルドはロールの認証情報からトークンを作るので、長く使う認証情報が要らない。",
+      "C": "CodeArtifact のリポジトリのパッケージは公開できない。公開も禁止されている。",
+      "D": "IAM ユーザーのアクセスキーは長く使う認証情報で、要件に反する。",
+      "E": "リポジトリは 1 つのドメインに属し、別のドメインへ移せない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+      "source_id": "S3",
+      "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+      "source_id": "S2",
+      "quote": "You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+      "source_id": "S1",
+      "quote": "With this approach, you determine which accounts can access repositories in the domain"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+      "source_id": "S1",
+      "quote": "Each repository is a member of a single domain and can't be moved to a different domain."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

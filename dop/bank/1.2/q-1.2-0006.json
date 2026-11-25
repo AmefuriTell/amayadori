@@ -1,0 +1,61 @@
+{
+  "id": "q-1.2-0006",
+  "task": "1.2",
+  "services": [
+    "AWS CodeBuild"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A library must be tested on three runtime versions and two operating system images, which gives six combinations. All six combinations must run in parallel for each pull request, and the team wants to define them in one place instead of maintaining separate projects. Which CodeBuild configuration meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A batch build with a build matrix that lists the runtime versions and the images."
+    },
+    {
+      "key": "B",
+      "text": "A batch build with a build fanout and the parallelism field set to 6."
+    },
+    {
+      "key": "C",
+      "text": "Six CodeBuild projects, one for each combination, started from the same pipeline stage."
+    },
+    {
+      "key": "D",
+      "text": "One build that runs the six combinations one after another in the buildspec."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "build matrix は違う設定の作業を並べて動かす物で、CodeBuild は設定の組み合わせごとに別のビルドを作り、並べて動かす。build fanout は同じ作業の試験を塊に分ける物。",
+    "per_choice": {
+      "A": "正しい。組み合わせごとにビルドが作られ、並べて動く。",
+      "B": "build fanout は同じ設定のまま試験を分ける物で、違う設定の組み合わせを作らない。",
+      "C": "動くが、6 つのプロジェクトを持つことになり、要件に反する。",
+      "D": "1 つのビルドで順に動かすので、並べて動かす要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S4",
+      "quote": "CodeBuild creates a separate build for each possible configuration combination."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S4",
+      "quote": "These builds run in parallel."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S5",
+      "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

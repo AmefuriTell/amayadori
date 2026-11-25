@@ -1,0 +1,103 @@
+{
+  "item": "C-0003",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+        "per_choice": {
+          "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+          "B": "on-failure は Lambda の計算では使えない。",
+          "C": "試験の前に上げると、試験のログがまだ無い。",
+          "D": "プロジェクトを足すことになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S1",
+          "quote": "The commands in a finally block are run even if a command in the commands block fails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S1",
+          "quote": "The phase is successful when all commands in the commands and the finally blocks run successfully."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+        "per_choice": {
+          "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+          "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+          "C": "Lambda の計算は privileged モードに対応しない。",
+          "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+          "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support Docker builds or runs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "source_id": "S6",
+          "quote": "Set to true only if you plan to use this build project to build Docker images. Otherwise, all associated builds that attempt to interact with the Docker daemon fail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html",
+          "source_id": "S3",
+          "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "timeoutInMinutes は、終わらないビルドを止めるまでの分数で、5 から 2160（36 時間）まで決められる。指定しないと既定の 60 分になる。Lambda の計算は 15 分を超える実行に対応しない。",
+        "per_choice": {
+          "A": "正しい。既定の 60 分を、3 時間の試験が終わる長さに延ばす。",
+          "B": "Lambda の計算は 15 分を超える実行に対応しない。",
+          "C": "決められるのは 2160 分（36 時間）まで。",
+          "D": "プロジェクトを分けることになり、1 つのビルドで終える要件にも反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "source_id": "S5",
+          "quote": "The number of minutes, between 5 to 2160 (36 hours), after which CodeBuild stops the build if it is not complete. If not specified, the default of 60 is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "source_id": "S4",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        }
+      ]
+    }
+  ]
+}

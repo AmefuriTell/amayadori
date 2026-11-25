@@ -1,0 +1,61 @@
+{
+  "id": "q-3.2-0002",
+  "task": "3.2",
+  "services": [
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs an application on Amazon EC2 instances in an Auto Scaling group. Each new instance must write a large amount of data to disk before it can serve requests, which takes about 15 minutes. Traffic spikes are unpredictable. To keep latency low, the company keeps the group at a much higher minimum capacity than normal traffic needs. The company wants to reduce cost while keeping latency low during spikes. Which solution meets these requirements MOST cost-effectively?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a warm pool to the Auto Scaling group, and lower the minimum capacity to match normal traffic."
+    },
+    {
+      "key": "B",
+      "text": "Increase the minimum capacity further so that more instances are always ready for spikes."
+    },
+    {
+      "key": "C",
+      "text": "Shorten the instance warmup time in the scaling policy so that new instances are counted sooner."
+    },
+    {
+      "key": "D",
+      "text": "Replace the instances with larger instance types, and keep the current minimum capacity."
+    }
+  ],
+  "explanation": {
+    "summary": "warm pool は、起動にとても時間がかかる（例えば大量のデータをディスクに書く）アプリの遅れを減らす。warm pool を使えば、遅れを抑えるために Auto Scaling グループを過剰に用意しなくてよい。",
+    "per_choice": {
+      "A": "正しい。起動の遅れを warm pool で減らし、過剰な最小の数をやめられる。",
+      "B": "遅れは抑えられるが、過剰に用意する費用がさらに増える。",
+      "C": "ウォームアップの時間は、メトリクスに数え始める時を決めるだけで、起動そのものは速くならない。",
+      "D": "費用が増え、過剰に用意していることも変わらない。"
+    }
+  },
+  "answer": [
+    "A"
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+      "source_id": "S4",
+      "quote": "A warm pool gives you the ability to decrease latency for your applications that have exceptionally long boot times, for example, because instances need to write massive amounts of data to disk."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+      "source_id": "S4",
+      "quote": "With warm pools, you no longer have to over-provision your Auto Scaling groups to manage latency in order to improve application performance."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+      "source_id": "S5",
+      "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,67 @@
+{
+  "id": "q-3.3-0009",
+  "task": "3.3",
+  "services": [
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company adds an S3 Cross-Region Replication configuration to a bucket that already contains millions of objects. Compliance requires that all existing objects also exist in the destination Region, and that most new objects are replicated within seconds with 99.9 percent of them within 15 minutes, with visibility into replication times. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run an S3 Batch Replication job to replicate the objects that existed before the replication configuration."
+    },
+    {
+      "key": "B",
+      "text": "Enable S3 Replication Time Control on the replication rule."
+    },
+    {
+      "key": "C",
+      "text": "Do nothing for existing objects, because live replication copies them automatically after the configuration is added."
+    },
+    {
+      "key": "D",
+      "text": "Switch to Same-Region Replication, because it replicates existing objects within 15 minutes."
+    },
+    {
+      "key": "E",
+      "text": "Enable S3 Replication Time Control, which replicates every object within 1 minute."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "ライブのレプリケーションは新しいオブジェクトを続けて複製する。設定の前からあるオブジェクトは、S3 Batch Replication で必要な時に Batch Operations のジョブで複製する。S3 Replication Time Control は、ほとんどのオブジェクトを数秒で、99.9% を 15 分以内に複製し、複製の時間も見えるようにする。",
+    "per_choice": {
+      "A": "正しい。設定の前からあるオブジェクトを複製する。",
+      "B": "正しい。99.9% を 15 分以内に複製し、時間も見える。",
+      "C": "ライブのレプリケーションは新しいオブジェクトだけ。",
+      "D": "別のリージョンに置く要件に反する。",
+      "E": "15 分以内に 99.9% で、全てを 1 分以内ではない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+      "source_id": "S6",
+      "quote": "S3 Batch Replication differs from live replication, which continuously and automatically replicates new objects across Amazon S3 buckets."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+      "source_id": "S6",
+      "quote": "Objects that existed before a replication configuration was in place"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-time-control.html",
+      "source_id": "S7",
+      "quote": "S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.9 percent of those objects within 15 minutes."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

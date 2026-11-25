@@ -1,0 +1,56 @@
+{
+  "id": "q-3.3-0003",
+  "task": "3.3",
+  "services": [
+    "Amazon Aurora"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses an Amazon Aurora global database with the primary cluster in eu-west-1 and a secondary cluster in eu-central-1. An unplanned outage makes the primary cluster in eu-west-1 unavailable. The business requires the database to accept writes again as quickly as possible and accepts losing a few seconds of recent data. Which action meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Perform a switchover to the secondary cluster in eu-central-1 so that no data is lost."
+    },
+    {
+      "key": "B",
+      "text": "Perform a cross-Region failover to the secondary cluster in eu-central-1."
+    },
+    {
+      "key": "C",
+      "text": "Wait until eu-west-1 recovers, because global databases cannot change the primary Region during an outage."
+    },
+    {
+      "key": "D",
+      "text": "Restore the latest snapshot in eu-central-1 as a new cluster, and point the application to it."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "計画外の障害から戻るには、副のクラスターへのリージョンをまたぐ failover を使う。RPO は秒単位の 0 でない値になるので、数秒のデータの損失を許すという要件に合う。switchover は全てのクラスターが健全な時の計画した操作。",
+    "per_choice": {
+      "A": "switchover は、全てのクラスターと関わるサービスが健全な時の計画した操作に使う。主のクラスターが使えない今は合わない。",
+      "B": "正しい。計画外の障害から戻る方法で、失うのは秒単位。",
+      "C": "failover で副のクラスターに切り替えられる。待つと書き込みが戻るのが遅れる。",
+      "D": "クラスターを作り直すので時間がかかり、スナップショットの後のデータも失う。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+      "source_id": "S4",
+      "quote": "Failover – Use this approach to recover from an unplanned outage. With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+      "source_id": "S3",
+      "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

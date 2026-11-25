@@ -1,0 +1,61 @@
+{
+  "id": "q-2.1-0007",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation StackSets"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A StackSet deploys a template with an InstanceType parameter to 30 accounts. The production accounts in eu-west-1 need a larger InstanceType value than the StackSet default. The value must stay in place when the StackSet is updated later, drift detection must not report these stacks as drifted because of the different value, and the company wants to keep a single StackSet. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Change the StackSet's InstanceType parameter value, so that every stack uses the larger value."
+    },
+    {
+      "key": "B",
+      "text": "Override the InstanceType parameter value for the stack instances in the production accounts in eu-west-1."
+    },
+    {
+      "key": "C",
+      "text": "Create a second StackSet with the larger value for the production accounts in eu-west-1."
+    },
+    {
+      "key": "D",
+      "text": "Override a new ProdInstanceType parameter only for the production stack instances, without changing the template."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "パラメータの値の上書きは、選んだアカウントとリージョンのスタックに当たる。StackSet を更新しても、上書きした値は更新されずに残る。ドリフトの検出は各スタックの上書きした値を考えに入れる。上書きできるのは StackSet にあるパラメータだけで、パラメータを足すにはテンプレートを更新する。",
+    "per_choice": {
+      "A": "全てのスタックの値が変わり、本番だけ大きくする要件に反する。",
+      "B": "正しい。そのスタックだけ値が変わり、更新でも残り、ドリフトにもならない。",
+      "C": "StackSet を 1 つにする要件に反する。",
+      "D": "StackSet に無いパラメータは上書きできない。足すにはテンプレートの更新が要る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+      "source_id": "S5",
+      "quote": "During StackSet updates, any parameter values overridden for a stack aren't updated, but retain their overridden value."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+      "source_id": "S5",
+      "quote": "You can only override parameter values that are specified in the StackSet; to add or delete a parameter itself, you need to update the StackSet template."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-drift.html",
+      "source_id": "S6",
+      "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

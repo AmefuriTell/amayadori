@@ -1,0 +1,258 @@
+{
+  "item": "C-0018",
+  "questions": [
+    {
+      "id": "q-2.1-0001",
+      "task": "2.1",
+      "services": [
+        "AWS CloudFormation",
+        "Amazon S3",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company manages a production stack in AWS CloudFormation that contains an Amazon RDS DB instance and an Amazon S3 bucket that stores audit logs. Before any update is applied, the operations team must see whether any resource will be replaced or deleted. If a future template change removes the S3 bucket from the stack, the bucket must not be deleted. The team does not want to add manual backup steps. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging."
+        },
+        {
+          "key": "B",
+          "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy."
+        },
+        {
+          "key": "C",
+          "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket."
+        },
+        {
+          "key": "D",
+          "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "change set を作ると、実行する前に、どのリソースが足される・変わる・消されるかを見られ、実行を決めた時だけ変更される。DeletionPolicy の Retain を付けたリソースは、スタックの削除や、更新でスタックから外れる時にも消されずに残る。",
+        "per_choice": {
+          "A": "バケットは残るが、本番に当てる前に何が変わるかを見る手段が無い。",
+          "B": "何も指定しないと CloudFormation はリソースを消すので、テンプレートから外した時にバケットが消える。",
+          "C": "正しい。change set で事前に確かめ、Retain でバケットを残す。",
+          "D": "既定の動きはリソースを消すこと。既定が Snapshot なのは RDS の一部のリソースだけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html",
+          "source_id": "S1",
+          "quote": "For example, you can see which resources CloudFormation will add, modify, or delete."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "If a resource has no DeletionPolicy attribute, CloudFormation deletes the resource by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "This capability also applies to stack update operations that lead to resources being deleted from stacks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "source_id": "S2",
+          "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.1-0002",
+      "task": "2.1",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A network team's AWS CloudFormation stack exports a subnet ID, and three application stacks in the same account and Region import it with Fn::ImportValue. The network team must change the exported value. A new application stack in a different AWS account must also read this stack's outputs. Values must not be copied by hand. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Update the three application stacks to stop importing the value, and then change the exported value."
+        },
+        {
+          "key": "B",
+          "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account."
+        },
+        {
+          "key": "C",
+          "text": "Use Fn::ImportValue in the new stack in the other account with the same export name."
+        },
+        {
+          "key": "D",
+          "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically."
+        },
+        {
+          "key": "E",
+          "text": "Delete the network stack and create it again with the new value, and then update the importing stacks."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "別のスタックが出力を import している間は、export しているスタックを消すことも、出力の値を変えることもできない。先に import を外す。Export と Fn::ImportValue は同じアカウントとリージョンの中だけで、別のアカウントやリージョンの出力は Fn::GetStackOutput で読む。",
+        "per_choice": {
+          "A": "正しい。import を全部外してから値を変える。",
+          "B": "正しい。アカウントやリージョンをまたぐ参照には Fn::GetStackOutput を使う。",
+          "C": "Export と Fn::ImportValue による参照は同じアカウントとリージョンの中だけ。",
+          "D": "import されている間は、出力の値を変えられない。",
+          "E": "import されている間は、export しているスタックを消せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "source_id": "S3",
+          "quote": "After another stack imports an output value, you can't delete the stack that is exporting the output value or modify the exported output value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "source_id": "S3",
+          "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.1-0003",
+      "task": "2.1",
+      "services": [
+        "AWS SAM",
+        "AWS Lambda",
+        "AWS CodeDeploy"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team defines an AWS Lambda function with an AWS SAM template. The team wants each new version to receive traffic through an alias, with the traffic shift handled by AWS CodeDeploy. The team does not want to write the CodeDeploy application, deployment group, or IAM role resources by hand, and wants to keep the template short. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add the AutoPublishAlias property to the function and update the alias to the new version after each deployment."
+        },
+        {
+          "key": "B",
+          "text": "Add the AutoPublishAlias and DeploymentPreference properties to the AWS::Serverless::Function resource."
+        },
+        {
+          "key": "C",
+          "text": "Add AWS::CodeDeploy::Application, AWS::CodeDeploy::DeploymentGroup, and an IAM role to the template next to the function."
+        },
+        {
+          "key": "D",
+          "text": "Publish a Lambda version after each deployment and change the weights of a weighted alias with a script."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AutoPublishAlias を指定すると AWS SAM が Lambda のエイリアスとバージョンを作り、DeploymentPreference を指定すると CodeDeploy のアプリケーションとデプロイグループ（Role を指定しなければ IAM ロールも）を作る。両方を書けば、手で書くリソースなしで CodeDeploy が通信を移す。",
+        "per_choice": {
+          "A": "エイリアスとバージョンはできるが、CodeDeploy のリソースは作られず、CodeDeploy が通信を移す形にならない。",
+          "B": "正しい。2 つの性質だけで、必要なリソースを SAM が作る。",
+          "C": "動くが、手で書かないという要件と、テンプレートを短くする要件に反する。",
+          "D": "CodeDeploy を使わず、スクリプトの保守も要る。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "When the AutoPublishAlias property of an AWS::Serverless::Function is specified, AWS SAM generates the following CloudFormation resources: AWS::Lambda::Alias and AWS::Lambda::Version."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "AWS SAM generates the following resources CloudFormation resources: AWS::CodeDeploy::Application and AWS::CodeDeploy::DeploymentGroup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "source_id": "S4",
+          "quote": "if the Role property of the DeploymentPreference object is not specified, AWS SAM also generates an AWS::IAM::Role CloudFormation resource."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-2.1-0004",
+      "task": "2.1",
+      "services": [
+        "AWS CDK",
+        "AWS CloudFormation",
+        "Amazon S3",
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has an AWS CDK app with Lambda function code and a container image as assets. The company will deploy the app for the first time to two new environments: an account in us-east-1 and an account in eu-west-1. The company wants the CDK CLI to handle asset storage, and wants to prepare both environments with as few manual steps as possible. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation."
+        },
+        {
+          "key": "B",
+          "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app."
+        },
+        {
+          "key": "C",
+          "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy."
+        },
+        {
+          "key": "D",
+          "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "cdk bootstrap は、環境に CDKToolkit という CloudFormation スタックを置き、S3 バケットと ECR リポジトリを作る。CDK CLI はデプロイの時にこれらへテンプレートとアセットを置く。環境の引数は 1 回のコマンドに何度でも書けるので、2 つの環境を一度に準備できる。",
+        "per_choice": {
+          "A": "準備（bootstrap）していない環境では、アセットが無く、テンプレートが 51,200 バイト未満のスタックしかデプロイできない。",
+          "B": "正しい。1 回の bootstrap で両方の環境を準備できる。",
+          "C": "CDK CLI に置き場所を任せる要件に反し、手の作業も増える。bootstrap がこれらを作る。",
+          "D": "bootstrap は環境ごとに要る。eu-west-1 の環境が準備されない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "source_id": "S5",
+          "quote": "The bootstrap stack is a CloudFormation stack that provisions an Amazon S3 bucket and Amazon ECR repository in the AWS environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "source_id": "S5",
+          "quote": "This argument can be provided multiple times in a single command to deploy the bootstrap stack to multiple environments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html",
+          "source_id": "S6",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

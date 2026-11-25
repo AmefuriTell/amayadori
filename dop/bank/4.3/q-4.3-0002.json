@@ -1,0 +1,62 @@
+{
+  "id": "q-4.3-0002",
+  "task": "4.3",
+  "services": [
+    "Amazon ECS",
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon ECS cluster uses an Auto Scaling group capacity provider with managed scaling turned on and a targetCapacity of 90%. The operations team also added its own CPU-based target tracking policy to the same Auto Scaling group. The group now launches and terminates instances unpredictably, and tasks sometimes wait for capacity. The team wants ECS to size the cluster for its tasks automatically. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep both policies and add a step scaling policy that adds instances when tasks are waiting."
+    },
+    {
+      "key": "B",
+      "text": "Remove the team's own scaling policy, and let the ECS managed target tracking policy control the group's desired capacity."
+    },
+    {
+      "key": "C",
+      "text": "Set MaximumCapacity of the group to 0 so that only Amazon ECS decides how many instances to launch."
+    },
+    {
+      "key": "D",
+      "text": "Turn off managed scaling and set the desired capacity by hand before each release."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "managed scaling では、ECS が目標の使用率（targetCapacity）に合わせて Auto Scaling グループの target tracking のポリシーを作り、タスクの使う資源に合わせて増減する。キャパシティプロバイダーに結び付いたグループの希望の数は、ECS が管理するポリシー以外で変えたり管理したりしてはいけない。",
+    "per_choice": {
+      "A": "ECS が管理するポリシー以外のポリシーをさらに足すことになり、ぶつかり合いが増える。",
+      "B": "正しい。ECS が管理するポリシーだけにすれば、タスクに合わせて増減する。",
+      "C": "グループが増えるには MaximumCapacity が 0 より大きい必要がある。0 では増えない。",
+      "D": "自動で増減させる要件に反し、手の作業が増える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+      "source_id": "S3",
+      "quote": "Amazon ECS creates two custom CloudWatch metrics and a target tracking scaling policy for your Auto Scaling group."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+      "source_id": "S3",
+      "quote": "Don't change or manage the desired capacity for the Auto Scaling group that's associated with a capacity provider with any scaling policies other than the one Amazon ECS manages."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+      "source_id": "S3",
+      "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

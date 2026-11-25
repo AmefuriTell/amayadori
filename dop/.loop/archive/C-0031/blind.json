@@ -1,0 +1,94 @@
+{
+  "item": "C-0031",
+  "questions": [
+    {
+      "id": "q-3.1-0001",
+      "task": "3.1",
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Application servers run in private subnets in three Availability Zones. All private subnets route internet traffic through a single NAT gateway in AZ-a. During an outage of AZ-a, the servers in the other two Availability Zones also lost internet access. The company wants internet access to keep working in the remaining zones during a single-AZ outage. Which solution BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a NAT gateway in each Availability Zone, and route each private subnet to the NAT gateway in its own Availability Zone."
+        },
+        {
+          "key": "B",
+          "text": "Create a second NAT gateway in AZ-a, and split the private subnets between the two NAT gateways."
+        },
+        {
+          "key": "C",
+          "text": "Move the NAT gateway to AZ-b, and route all private subnets to it."
+        },
+        {
+          "key": "D",
+          "text": "Replace the NAT gateway with one that has more bandwidth, and keep the current routing."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0002",
+      "task": "3.1",
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones and has cross-zone load balancing disabled. Its targets come from an Auto Scaling group. After several scaling events, AZ-a has five instances and AZ-b has one. The single instance in AZ-b is overloaded, and if AZ-a fails, too little capacity remains. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing so that each load balancer node distributes traffic across targets in all enabled Availability Zones."
+        },
+        {
+          "key": "B",
+          "text": "Configure the Auto Scaling group to use subnets in both Availability Zones with balanced Availability Zone distribution."
+        },
+        {
+          "key": "C",
+          "text": "Disable AZ-b on the load balancer so that all traffic goes to the instances in AZ-a."
+        },
+        {
+          "key": "D",
+          "text": "Move all instances into AZ-a so that the targets are in one place."
+        },
+        {
+          "key": "E",
+          "text": "Keep cross-zone load balancing disabled, because each node already sends traffic to targets in every zone."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0003",
+      "task": "3.1",
+      "services": [
+        "Amazon ElastiCache"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An ElastiCache (Redis OSS) replication group has one primary and one replica, with Multi-AZ disabled. When the primary node failed, ElastiCache took it offline and provisioned a new primary, and the application had a long outage. The company wants a replica in another Availability Zone to be promoted automatically if the primary fails. Which change BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable automatic failover only, and keep Multi-AZ disabled."
+        },
+        {
+          "key": "B",
+          "text": "Enable Multi-AZ, with at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "key": "C",
+          "text": "Move to a larger node type so that the primary is less likely to fail."
+        },
+        {
+          "key": "D",
+          "text": "Take snapshots every hour so that a new primary can be restored quickly."
+        }
+      ]
+    }
+  ]
+}

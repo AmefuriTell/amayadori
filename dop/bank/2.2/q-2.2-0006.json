@@ -1,0 +1,58 @@
+{
+  "id": "q-2.2-0006",
+  "task": "2.2",
+  "services": [
+    "AWS Organizations",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company invited 20 existing AWS accounts into its organization. Administrators in the management account try to switch to the OrganizationAccountAccessRole role in these accounts, as they do for accounts that were created in the organization, but the role does not exist. The administrators need this cross-account access in every invited account. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Remove the accounts from the organization and invite them again so that the role is created on acceptance."
+    },
+    {
+      "key": "B",
+      "text": "Wait 15 days, because AWS Organizations creates the role when the invitation period ends."
+    },
+    {
+      "key": "C",
+      "text": "Turn on consolidated billing so that the management account gains access to the member accounts."
+    },
+    {
+      "key": "D",
+      "text": "Create the OrganizationAccountAccessRole role in each invited account, with a trust policy for the management account."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+    "per_choice": {
+      "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+      "B": "15 日は招待に返事をする期限で、ロールは作られない。",
+      "C": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。",
+      "D": "正しい。招待されたアカウントには自分で作る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+      "source_id": "S2",
+      "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+      "source_id": "S2",
+      "quote": "Each invitation must be responded to within 15 days, or it expires."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "解説 D の「一括請求は権限を与えない」は S7 の「管理アカウントが支払う」からの範囲で書いた",
+  "last_checked": "2026-11-26"
+}

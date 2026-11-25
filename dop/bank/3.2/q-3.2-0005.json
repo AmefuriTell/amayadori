@@ -1,0 +1,61 @@
+{
+  "id": "q-3.2-0005",
+  "task": "3.2",
+  "services": [
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company exposes a TCP-based service to a partner. The partner's firewall allows outbound traffic only to a fixed list of IP addresses, one per Availability Zone that the company uses. Each TCP connection must stay with a single backend target for its lifetime. The company does not need any HTTP-level routing. Which solution BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "An Application Load Balancer with listener rules that route requests by path to a target group."
+    },
+    {
+      "key": "B",
+      "text": "A Network Load Balancer whose DNS name the partner adds to its firewall instead of IP addresses."
+    },
+    {
+      "key": "C",
+      "text": "A Network Load Balancer with one Elastic IP address associated with the network interface in each enabled Availability Zone."
+    },
+    {
+      "key": "D",
+      "text": "One Amazon EC2 instance with an Elastic IP address that forwards connections to the backend targets."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Network Load Balancer は、有効にした各アベイラビリティーゾーンにネットワークインターフェイスを作って固定の IP アドレスを持ち、それぞれに Elastic IP アドレスを 1 つ結び付けられる。接続を受けたノードは、各 TCP の接続をその間ずっと 1 つのターゲットに送る。Application Load Balancer はリスナーのルールを優先度の順に評価して振り分ける。",
+    "per_choice": {
+      "A": "パスでの振り分けは要らず、ゾーンごとの固定の IP という要件も満たさない。",
+      "B": "相手のファイアウォールは IP アドレスの一覧しか受け付けない。",
+      "C": "正しい。ゾーンごとの固定の IP を相手のファイアウォールに登録でき、接続は 1 つのターゲットに留まる。",
+      "D": "1 台のインスタンスが単一の障害点になる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "source_id": "S3",
+      "quote": "With Network Load Balancers, Elastic Load Balancing creates a network interface for each Availability Zone that you enable, and uses it to get a static IP address."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "source_id": "S3",
+      "quote": "You can optionally associate one Elastic IP address with each network interface when you create the Network Load Balancer."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "source_id": "S4",
+      "quote": "Routes each individual TCP connection to a single target for the life of the connection."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

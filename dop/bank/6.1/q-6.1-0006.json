@@ -1,0 +1,69 @@
+{
+  "id": "q-6.1-0006",
+  "task": "6.1",
+  "services": [
+    "AWS IAM Identity Center",
+    "AWS IAM",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "Employees sign in to AWS through IAM Identity Center, and the identity source stores each user's department. Each department's Amazon S3 buckets are tagged with a department tag. Employees must access only their own department's buckets, and the company does not want to create one permission set per department or IAM users. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "On the Attributes for access control page in IAM Identity Center, select the Department user attribute."
+    },
+    {
+      "key": "B",
+      "text": "In one permission set, add a policy that allows S3 access only when aws:PrincipalTag/Department matches the bucket's department tag."
+    },
+    {
+      "key": "C",
+      "text": "Create a separate permission set for each department that lists that department's bucket ARNs."
+    },
+    {
+      "key": "D",
+      "text": "Create an IAM user for each employee and tag the user with the department."
+    },
+    {
+      "key": "E",
+      "text": "Write the department into each bucket policy as an allowed IAM Identity Center group name."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "IAM Identity Center の Attributes for access control で、ポリシーで使うユーザーの属性（例 Department）を選ぶ。IAM Identity Center はその属性を、入る先のアカウントへセッションタグとして渡し、ポリシーでは aws:PrincipalTag/タグのキー の条件で参照できる。属性がバケットのタグと一致する時だけ許すポリシーを権限セットに書く。",
+    "per_choice": {
+      "A": "正しい。Department の属性をセッションタグとして渡すようにする。",
+      "B": "正しい。1 つの権限セットで、部署が一致するバケットだけに許す。",
+      "C": "部署ごとの権限セットを作ることになり、要件に反する。",
+      "D": "IAM ユーザーを作らない要件に反する。",
+      "E": "バケットごとに書き足すことになり、属性で決める仕組みにならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+      "source_id": "S4",
+      "quote": "While on the Attributes for access control page, you select the Department user attribute for use with attribute-based access control (ABAC)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+      "source_id": "S4",
+      "quote": "they are sent as session tags that you can reference using the aws:PrincipalTag/tag-key condition key in all relevant AWS IAM policy types."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+      "source_id": "S4",
+      "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

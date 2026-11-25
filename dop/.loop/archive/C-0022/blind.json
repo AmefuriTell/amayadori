@@ -1,0 +1,123 @@
+{
+  "item": "C-0022",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "task": "2.2",
+      "services": [
+        "AWS CloudFormation StackSets",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. The security team maintains an AWS CloudFormation template with baseline resources. Every account that is placed in the Workloads OU, now or in the future, must receive the baseline in two Regions without anyone taking action. The team does not want to create IAM roles in each account. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a StackSet with self-managed permissions that targets the Workloads OU, and add the execution role to new accounts."
+        },
+        {
+          "key": "B",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, with automatic deployments enabled."
+        },
+        {
+          "key": "C",
+          "text": "Create a StackSet with service-managed permissions that targets the Workloads OU, and add stack instances when accounts arrive."
+        },
+        {
+          "key": "D",
+          "text": "Create an Amazon EventBridge rule for new accounts that invokes an AWS Lambda function to create the stack in each Region."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0002",
+      "task": "2.2",
+      "services": [
+        "AWS CloudFormation StackSets",
+        "AWS Organizations",
+        "AWS Control Tower"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company creates accounts with AWS Control Tower Account Factory and places them in a Prod OU. A StackSet with service-managed permissions and automatic deployments targets the Prod OU and uses an account-level filter to exclude sandbox accounts. A new sandbox account placed in the Prod OU still received the stack. The company must keep automatic deployments for production accounts and must keep the baseline out of sandbox accounts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add the new sandbox account ID to the account-level exclusion filter of the StackSet."
+        },
+        {
+          "key": "B",
+          "text": "Turn off automatic deployments and add stack instances for each new production account by hand."
+        },
+        {
+          "key": "C",
+          "text": "Turn off automatic deployments only for the sandbox account, and keep them for the other accounts."
+        },
+        {
+          "key": "D",
+          "text": "Place sandbox accounts in a separate OU that the StackSet does not target."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0003",
+      "task": "2.2",
+      "services": [
+        "AWS Organizations",
+        "AWS CloudTrail",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations. Administrators in member accounts have broad IAM permissions. The security team must make sure that no IAM user or role in any member account can stop the organization's CloudTrail logging, even administrators. Automation in the management account must still be able to manage the trail. Developers' existing permissions must not change. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an SCP that denies cloudtrail:StopLogging and cloudtrail:DeleteTrail to the OUs that contain the member accounts."
+        },
+        {
+          "key": "B",
+          "text": "Add an IAM policy that denies cloudtrail:StopLogging to every role in each member account."
+        },
+        {
+          "key": "C",
+          "text": "Attach an SCP that grants CloudTrail permissions only to the security team's role, and remove CloudTrail permissions from IAM policies."
+        },
+        {
+          "key": "D",
+          "text": "Move the trail's management to the management account and remove all IAM permissions for CloudTrail in member accounts."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0004",
+      "task": "2.2",
+      "services": [
+        "AWS Control Tower",
+        "AWS Service Catalog"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has set up AWS Control Tower. Teams request new AWS accounts several times each week. Each new account must start from a pre-approved configuration, be enrolled in the governed environment, and have the company's controls applied automatically. The platform team wants to stop running its own scripts. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create each account with the AWS Organizations CreateAccount API, and apply the controls with a script afterward."
+        },
+        {
+          "key": "B",
+          "text": "Create each account in the AWS Organizations console, and enroll it in AWS Control Tower later by hand."
+        },
+        {
+          "key": "C",
+          "text": "Use AWS Control Tower Account Factory to create and enroll each account from the approved template."
+        },
+        {
+          "key": "D",
+          "text": "Copy an existing account's IAM roles and settings to each new account with an AWS Lambda function."
+        }
+      ]
+    }
+  ]
+}

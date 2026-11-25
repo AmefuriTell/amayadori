@@ -1,0 +1,61 @@
+{
+  "id": "q-4.2-0004",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An application publishes a custom metric named Latency in the namespace MyApp with two dimensions, Service and InstanceId. A DevOps engineer creates an alarm on Latency in MyApp with only the dimension Service=checkout, but the alarm shows no data. The team wants one alarm per service with the LEAST operational effort. What should the engineer do?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Wait, because CloudWatch automatically combines the InstanceId values into the Service-only metric after a few hours."
+    },
+    {
+      "key": "B",
+      "text": "Also publish Latency with only the Service dimension, and keep the alarm on that dimension combination."
+    },
+    {
+      "key": "C",
+      "text": "Change the alarm to use a different namespace so that CloudWatch searches all dimension combinations."
+    },
+    {
+      "key": "D",
+      "text": "Create the alarm on a SEARCH expression that finds all InstanceId values for the service."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "CloudWatch は、同じ名前のメトリクスでも、ディメンションの組ごとに別のメトリクスとして扱う。取り出せるのは、実際に発行したディメンションの組だけで、名前空間・名前・ディメンションは作った時と同じ値を指定する。Service だけの組で見たいなら、その組でも発行する。SEARCH の式にはアラームを作れない。",
+    "per_choice": {
+      "A": "組ごとに別のメトリクスで、自動ではまとめられない。",
+      "B": "正しい。Service だけの組でも発行すれば、その組にアラームを付けられる。",
+      "C": "名前空間は作った時と同じ値を指定する必要がある。",
+      "D": "SEARCH の式にはアラームを作れない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+      "source_id": "S2",
+      "quote": "CloudWatch treats each unique combination of dimensions as a separate metric, even if the metrics have the same metric name."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+      "source_id": "S2",
+      "quote": "You can only retrieve statistics using combinations of dimensions that you specifically published."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+      "source_id": "S4",
+      "quote": "You can't create an alarm based on the SEARCH expression."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

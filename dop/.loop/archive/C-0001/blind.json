@@ -1,0 +1,94 @@
+{
+  "item": "C-0001",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "task": "1.1",
+      "services": [
+        "Amazon ECR",
+        "Amazon Inspector"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company stores container images in Amazon ECR private repositories. The security team found that images pushed months ago are never re-evaluated after new vulnerabilities are disclosed. The team wants every repository to be checked automatically on an ongoing basis without any person or pipeline starting the checks. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure basic scanning with scan on push for every repository in the registry."
+        },
+        {
+          "key": "B",
+          "text": "Turn on enhanced scanning for the registry so that Amazon Inspector evaluates the images."
+        },
+        {
+          "key": "C",
+          "text": "Create a scheduled AWS Lambda function that starts a manual basic scan of each image every day."
+        },
+        {
+          "key": "D",
+          "text": "Add an AWS CodeBuild stage that runs an open-source image scanner before each image push."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "task": "1.1",
+      "services": [
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds container images in a CI/CD pipeline and pushes them to Amazon ECR in us-east-1 in its production account. For disaster recovery, every image that the pipeline pushes from now on must also be available in eu-west-1 and in a separate backup account, even if us-east-1 is unavailable. The company does not want to change the pipeline. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a repository policy in us-east-1 that allows the backup account to pull the images."
+        },
+        {
+          "key": "B",
+          "text": "Add pipeline steps that tag and push each image to registries in the other Region and account."
+        },
+        {
+          "key": "C",
+          "text": "Add a replication rule to the us-east-1 private registry settings with both destinations."
+        },
+        {
+          "key": "D",
+          "text": "Create a lifecycle policy rule that copies new images to the backup account in eu-west-1."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "task": "1.1",
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS CodeArtifact. Each development team has its own repository, and all repositories are in one domain. Builds must resolve both the company's internal npm packages and open-source npm packages through the team's own repository. A central team wants to control how open-source packages are brought in, instead of each team configuring this separately. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a shared repository that has an external connection to the public npmjs registry."
+        },
+        {
+          "key": "B",
+          "text": "Configure the shared repository as an upstream repository of each team repository."
+        },
+        {
+          "key": "C",
+          "text": "Move each team repository into its own domain and point it to the shared repository."
+        },
+        {
+          "key": "D",
+          "text": "Make the shared repository public so that builds can download packages without credentials."
+        },
+        {
+          "key": "E",
+          "text": "Add an external connection to npmjs on every team repository and remove the shared one."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "q-1.4-0006",
+  "task": "1.4",
+  "services": [
+    "AWS CodeArtifact",
+    "AWS CodeBuild",
+    "AWS STS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A CodeBuild project's service role has an IAM policy that allows codeartifact:GetAuthorizationToken and codeartifact:ReadFromRepository for the company's domain and repository. The build's login step to CodeArtifact fails with an access denied error, and npm cannot install packages. Which change will fix the problem with the LEAST privilege?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add sts:GetServiceBearerToken to the service role's policy."
+    },
+    {
+      "key": "B",
+      "text": "Attach the AWSCodeArtifactAdminAccess managed policy to the service role."
+    },
+    {
+      "key": "C",
+      "text": "Run the login step with the account's root user credentials stored in Secrets Manager."
+    },
+    {
+      "key": "D",
+      "text": "Set the authorization token lifetime to 24 hours so that the token does not expire during the build."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "CodeArtifact の GetAuthorizationToken を呼ぶには、sts:GetServiceBearerToken と codeartifact:GetAuthorizationToken の両方の権限が要る。パッケージマネージャーで CodeArtifact のリポジトリを使うには、ユーザーかロールが sts:GetServiceBearerToken を許している必要がある。",
+    "per_choice": {
+      "A": "正しい。足りないのは sts:GetServiceBearerToken だけ。",
+      "B": "管理の権限まで与えることになり、最小権限に反する。",
+      "C": "ルートユーザーは GetAuthorizationToken を呼べない。",
+      "D": "トークンの寿命は 15 分から 12 時間まで。そもそもトークンを取れないのが問題。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+      "source_id": "S2",
+      "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+      "source_id": "S2",
+      "quote": "Root users cannot call GetAuthorizationToken."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+      "source_id": "S1",
+      "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

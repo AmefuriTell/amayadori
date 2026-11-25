@@ -1,0 +1,61 @@
+{
+  "id": "q-1.1-0006",
+  "task": "1.1",
+  "services": [
+    "AWS CodeBuild"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A CodeBuild project uses AWS Lambda compute for fast start-up. In the build phase, the first command runs unit tests and the next command uploads the test logs. When the tests fail, CodeBuild skips the upload command, so the logs are lost. The logs must be uploaded even when the tests fail, and the phase must still fail when the tests fail. Which buildspec change meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Move the upload command into a finally block of the build phase."
+    },
+    {
+      "key": "B",
+      "text": "Set on-failure: CONTINUE on the build phase, and move the upload command to the post_build phase."
+    },
+    {
+      "key": "C",
+      "text": "Move the upload command before the test command in the commands block."
+    },
+    {
+      "key": "D",
+      "text": "Create a second CodeBuild project that runs after every build and uploads the logs."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+    "per_choice": {
+      "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+      "B": "on-failure は Lambda の計算では使えない。",
+      "C": "試験の前に上げると、試験のログがまだ無い。",
+      "D": "プロジェクトを足すことになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+      "source_id": "S1",
+      "quote": "The commands in a finally block are run even if a command in the commands block fails."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+      "source_id": "S1",
+      "quote": "The phase is successful when all commands in the commands and the finally blocks run successfully."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+      "source_id": "S2",
+      "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

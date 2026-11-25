@@ -1,0 +1,57 @@
+{
+  "id": "q-1.1-0005",
+  "task": "1.1",
+  "services": [
+    "AWS CodePipeline",
+    "GitHub"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company's AWS CodePipeline pipeline uses a GitHub source through a connection and currently starts on every push. The company wants the pipeline to start only when a Git tag whose name starts with \"release\" is created. Pushes without such a tag must not start the pipeline, and the company does not want to write custom code. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the push trigger and add a branch filter for the main branch, where release tags are created."
+    },
+    {
+      "key": "B",
+      "text": "Create an Amazon EventBridge rule for GitHub tag events that invokes a Lambda function to start the pipeline."
+    },
+    {
+      "key": "C",
+      "text": "Configure the pipeline trigger with the Tags filter type and the pattern release*."
+    },
+    {
+      "key": "D",
+      "text": "Disable automatic starts and choose Release change in the console after each release tag is created."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+    "per_choice": {
+      "A": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+      "B": "自分でコードを書くことになり、要件に反する。",
+      "C": "正しい。release で始まるタグが作られた時だけ始まる。",
+      "D": "毎回人が始めることになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+      "source_id": "S5",
+      "quote": "This example shows you how to create a pipeline that allows filtering for tags based on the syntax of the tag name."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+      "source_id": "S5",
+      "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

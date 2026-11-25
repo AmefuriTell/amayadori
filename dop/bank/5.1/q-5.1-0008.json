@@ -1,0 +1,62 @@
+{
+  "id": "q-5.1-0008",
+  "task": "5.1",
+  "services": [
+    "Amazon SNS",
+    "Amazon SQS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An orders topic in Amazon SNS fans out to three Amazon SQS queues. The shipping team's queue must receive only orders whose message body contains \"region\": \"EU\". The publisher does not set any message attributes and cannot be changed. The other two queues must keep receiving every order. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Assign a filter policy with the MessageAttributes scope to the shipping queue's subscription, matching region EU."
+    },
+    {
+      "key": "B",
+      "text": "Assign a filter policy with the MessageBody scope to the shipping queue's subscription, matching region EU."
+    },
+    {
+      "key": "C",
+      "text": "Let the shipping consumer read every message and delete the ones whose region is not EU."
+    },
+    {
+      "key": "D",
+      "text": "Create a separate SNS topic for EU orders and ask the publisher to send EU orders to it."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "SNS のトピックの購読者は、既定では全てのメッセージを受け取る。一部だけを受けるには購読にフィルターポリシーを付ける。範囲（scope）が MessageBody なら、ポリシーの名前はメッセージの本文のプロパティに合わせ、MessageAttributes ならメッセージ属性の名前に合わせる。",
+    "per_choice": {
+      "A": "発行する側はメッセージ属性を付けていないので、合うメッセージが無い。",
+      "B": "正しい。本文の region で絞り、他の 2 つの購読はそのまま全て受け取る。",
+      "C": "全てのメッセージを受けて捨てることになり、手間とむだがある。",
+      "D": "発行する側を変えられない要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html",
+      "source_id": "S5",
+      "quote": "To receive only a subset of the messages, a subscriber must assign a filter policy to the topic subscription."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+      "source_id": "S6",
+      "quote": "When the filter policy scope is set to MessageBody, each property name in the filter policy matches a message body property name."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+      "source_id": "S6",
+      "quote": "When the filter policy scope is set to MessageAttributes, each property name in the filter policy matches a message attribute name."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

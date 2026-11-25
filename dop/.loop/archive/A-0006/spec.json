@@ -1,0 +1,16 @@
+{
+  "item": "A-0006",
+  "goal": "答えた後に、その問題の誤りを報告できる。端末に残し、GitHub の issue として送る下書きも開ける（ループが issue から拾う）",
+  "acceptance": [
+    { "id": "AC1", "check": "e2e", "text": "答えた後の「誤りを報告」で、種類（答えが違う・問題文がおかしい・解説や出典がおかしい・その他）とコメントの欄が開き、「保存」で端末に残して「報告を保存しました」と出す。報告した問題には印が出る" },
+    { "id": "AC2", "check": "unit", "text": "報告の記録: 鍵 dop:v1:reports、形 { v: 1, reports: [{ id, kind, comment, at }] }。壊れていれば空。コメントは 1000 文字まで" },
+    { "id": "AC3", "check": "unit", "text": "GitHub の issue の下書きの URL: https://github.com/AmefuriTell/amayadori/issues/new に、題（[DOP] 誤りの報告 <問題 ID>）と本文（問題 ID・種類・コメント・選んだ答え）とラベル dop-report を付ける" },
+    { "id": "AC4", "check": "e2e", "text": "「GitHub に送る」は AC3 の URL を新しいタブで開くリンク（rel に noopener）" },
+    { "id": "AC5", "check": "e2e", "text": "localStorage が使えない時も報告の欄は開け、端末に残せない旨を出し、「GitHub に送る」は使える" },
+    { "id": "AC6", "check": "e2e", "text": "報告の欄を開いた画面が幅 375px と 1280px で横に溢れない（写真を撮る）" }
+  ],
+  "out_of_scope": ["報告をループで拾う（L1 の learn:weak で issue を読む）", "記録の書き出し（A-0005）"],
+  "options": [],
+  "aws_change": false,
+  "decisions": ["送り先は GitHub の issue の下書き（利用者がボタンを押した時だけ送られる）。アプリから自動で送らない", "ラベルは dop-report"]
+}

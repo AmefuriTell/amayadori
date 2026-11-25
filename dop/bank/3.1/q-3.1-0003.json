@@ -1,0 +1,72 @@
+{
+  "id": "q-3.1-0003",
+  "task": "3.1",
+  "services": [
+    "AWS Resilience Hub"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company's business owners state two requirements for an application: the application can be unavailable for at most 1 hour after an outage, and at most 5 minutes of data can be lost. The DevOps team must record these targets for Availability Zone and Region disruptions and check whether the current architecture meets them with the LEAST manual effort, without building its own assessment tool. Which statements or actions are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The 1-hour limit is the RTO, and the 5-minute limit is the RPO."
+    },
+    {
+      "key": "B",
+      "text": "The 1-hour limit is the RPO, and the 5-minute limit is the RTO."
+    },
+    {
+      "key": "C",
+      "text": "Define an AWS Resilience Hub resilience policy with these RTO and RPO targets, and use it to assess the application."
+    },
+    {
+      "key": "D",
+      "text": "Treat an Availability Zone outage as an event that can be resolved only by switching to another Region."
+    },
+    {
+      "key": "E",
+      "text": "Record the targets in a spreadsheet and compare them with the architecture by hand after each release."
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "RTO はサービスが止まってから戻るまでに許せる最大の遅れ、RPO は最後の復旧時点から許せる最大の時間（失ってよいデータの量）。AWS Resilience Hub では、アプリ・インフラ・アベイラビリティーゾーン・リージョンの障害ごとの RTO と RPO の目標を耐障害性の方針（resilience policy）に決め、アプリがそれを満たすかを見積もる。",
+    "per_choice": {
+      "A": "正しい。止まってよい時間が RTO、失ってよいデータの時間が RPO。",
+      "B": "RTO と RPO が逆。",
+      "C": "正しい。方針に目標を決め、満たすかを評価できる。",
+      "D": "アベイラビリティーゾーンの障害は、別のアベイラビリティーゾーンへ切り替えて解決できる種類として扱われる。",
+      "E": "リリースのたびに人が見比べることになり、手作業を最も少なくする要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+      "source_id": "S3",
+      "quote": "The maximum acceptable delay between the interruption of service and restoration of service."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+      "source_id": "S2",
+      "quote": "The maximum acceptable amount of time since the last data recovery point."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/arh-mgmt.html",
+      "source_id": "S5",
+      "quote": "These policies include RTO and RPO targets for applications, infrastructure, Availability Zone, and Region disruptions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+      "source_id": "S4",
+      "quote": "This type of outage can be resolved by switching to a different Availability Zone."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

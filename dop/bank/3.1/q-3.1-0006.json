@@ -1,0 +1,61 @@
+{
+  "id": "q-3.1-0006",
+  "task": "3.1",
+  "services": [
+    "Amazon ElastiCache"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An ElastiCache (Redis OSS) replication group has one primary and one replica, with Multi-AZ disabled. When the primary node failed, ElastiCache took it offline and provisioned a new primary, and the application had a long outage. The company wants a replica in another Availability Zone to be promoted automatically if the primary fails. Which change BEST meets this requirement?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Enable automatic failover only, and keep Multi-AZ disabled."
+    },
+    {
+      "key": "B",
+      "text": "Enable Multi-AZ, with at least one replica in a different Availability Zone from the primary."
+    },
+    {
+      "key": "C",
+      "text": "Move to a larger node type so that the primary is less likely to fail."
+    },
+    {
+      "key": "D",
+      "text": "Take snapshots every hour so that a new primary can be restored quickly."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Multi-AZ を有効にすると、ElastiCache はレプリカを別々のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にする。主ノードが落ちると、複製の遅れが最も少ないレプリカを自動で主に上げる。Multi-AZ には、主と別のゾーンに少なくとも 1 つのレプリカが要る。Multi-AZ なしで自動フェイルオーバーだけを有効にすると、レプリカが別のゾーンにある保証は無い。",
+    "per_choice": {
+      "A": "レプリカが別のゾーンにある保証が無い。",
+      "B": "正しい。別のゾーンのレプリカを自動で主に上げる。",
+      "C": "落ちにくくなるだけで、落ちた時の切り替えは変わらない。",
+      "D": "戻すのに時間がかかり、自動の昇格にもならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+      "source_id": "S7",
+      "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+      "source_id": "S7",
+      "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+      "source_id": "S7",
+      "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

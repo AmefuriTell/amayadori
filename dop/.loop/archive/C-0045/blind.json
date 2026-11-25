@@ -1,0 +1,68 @@
+{
+  "item": "C-0045",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon Data Firehose",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A data team wants all CloudWatch metrics from the AWS/EC2 and AWS/RDS namespaces delivered continuously to an Amazon S3 data lake in Apache Parquet format. Metrics that are added to these namespaces later must be included automatically. The team does not want to write code that polls CloudWatch. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a metric stream with include filters for the two namespaces, sent to a Firehose delivery stream that converts the data to Parquet."
+        },
+        {
+          "key": "B",
+          "text": "Create a metric stream with the Quick S3 setup and choose Parquet as the output format of the stream."
+        },
+        {
+          "key": "C",
+          "text": "Create a metric stream with an include filter for AWS/EC2 and an exclude filter for every namespace except AWS/RDS."
+        },
+        {
+          "key": "D",
+          "text": "Run an AWS Lambda function every minute that calls GetMetricData and writes Parquet files to Amazon S3."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team adds a CloudWatch Logs subscription filter that sends matching log events from a log group to an AWS Lambda function for real-time processing. Before the code is written, the team asks what the function will receive and what delivery guarantees it can rely on. Which statements are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The function receives the log data gzip-compressed and base64 encoded in the awslogs.data field."
+        },
+        {
+          "key": "B",
+          "text": "Events are delivered at least once, so the function should handle occasional duplicate events."
+        },
+        {
+          "key": "C",
+          "text": "Events are delivered exactly once, so the function does not need to handle duplicates."
+        },
+        {
+          "key": "D",
+          "text": "The function receives plain-text log events, because compression applies only to Kinesis destinations."
+        },
+        {
+          "key": "E",
+          "text": "The log group can have up to 10 subscription filters, so each team can add its own."
+        }
+      ]
+    }
+  ]
+}

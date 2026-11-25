@@ -1,0 +1,74 @@
+{
+  "item": "C-0056",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "空きが割り当ての 10% 以下の状態が 5 分以上続くと自動拡張が始まり、増える量は 10 GiB・割り当ての 10%・予測の増加のうち大きい方。950 GiB の 10% は 95 GiB なので、増やすと最大のしきい値 1,000 GiB を超え、超える時は自動拡張は起きない。しきい値は今の割り当てより少なくとも 10% 多くし、26% 以上多くするのが勧められている。",
+        "per_choice": {
+          "A": "低い空きが 5 分続けば始まる条件はもう満たしている。止まっている原因は最大のしきい値。",
+          "B": "正しい。次の増加分が収まるように、最大のしきい値を上げる。",
+          "C": "自分で仕組みを作ることになり、手間が大きい。最大のしきい値を上げれば足りる。",
+          "D": "最大のしきい値は今の割り当てより少なくとも 10% 多くする必要があり、下げても拡張は起きない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S1",
+          "quote": "- Free available space is less than or equal to 10 percent of the allocated storage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S1",
+          "quote": "- 10 percent of currently allocated storage"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S2",
+          "quote": "Autoscaling doesn't occur if the maximum storage threshold would be exceeded by the storage increment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "source_id": "S2",
+          "quote": "You must set the maximum storage threshold to at least 10% more than the current allocated storage."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "managed scaling では、ECS が目標の使用率（targetCapacity）に合わせて Auto Scaling グループの target tracking のポリシーを作り、タスクの使う資源に合わせて増減する。キャパシティプロバイダーに結び付いたグループの希望の数は、ECS が管理するポリシー以外で変えたり管理したりしてはいけない。",
+        "per_choice": {
+          "A": "正しい。ECS が管理するポリシーだけにすれば、タスクに合わせて増減する。",
+          "B": "ECS が管理するポリシー以外のポリシーをさらに足すことになり、ぶつかり合いが増える。",
+          "C": "グループが増えるには MaximumCapacity が 0 より大きい必要がある。0 では増えない。",
+          "D": "自動で増減させる要件に反し、手の作業が増える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "Amazon ECS creates two custom CloudWatch metrics and a target tracking scaling policy for your Auto Scaling group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "Don't change or manage the desired capacity for the Auto Scaling group that's associated with a capacity provider with any scaling policies other than the one Amazon ECS manages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "source_id": "S3",
+          "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "q-1.3-0001",
+  "task": "1.3",
+  "services": [
+    "Amazon ECR"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company stores application images in an Amazon ECR repository. Images that carry a tag starting with \"release\" must never be removed. Every other image must be removed automatically 90 days after it was pushed. Storage costs must be controlled without running custom code. Which lifecycle policy meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+    },
+    {
+      "key": "B",
+      "text": "Rule priority 1: tagStatus any, countType sinceImagePushed 90 days. Rule priority 2: tagStatus tagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000."
+    },
+    {
+      "key": "C",
+      "text": "Rule priority 1: tagStatus untagged, tagPrefixList [\"release\"], countType imageCountMoreThan 10000. Rule priority 2: tagStatus any, countType sinceImagePushed 90 days."
+    },
+    {
+      "key": "D",
+      "text": "Rule priority 1: tagStatus tagged, tagPrefixList [\"release\"] and tagPatternList [\"*\"], countType sinceImagePushed 90 days."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ある規則の条件に合ったイメージは、それより優先度の低い規則では消されない。優先度 1 の規則で release のタグのイメージを選び、数の上限を大きくして実際には消さないようにすると、優先度 2 の「90 日より古いものを消す」規則から守れる。",
+    "per_choice": {
+      "A": "正しい。release のイメージは優先度 1 の規則に合うので、優先度 2 の規則では消されない。imageCountMoreThan は上限を超えた分だけを消すので、上限を大きくすれば残る。",
+      "B": "優先度の高い規則が全てのイメージを 90 日で消すので、release のイメージも消える。",
+      "C": "tagPrefixList は tagStatus が tagged の時しか使えない。",
+      "D": "1 つの規則に tagPrefixList と tagPatternList は両方は書けない。また release のイメージも 90 日で消える。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+      "source_id": "S4",
+      "quote": "An image that matches the tagging requirements of a rule cannot be expired or archived by a rule with a lower priority."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+      "source_id": "S7",
+      "quote": "With countType = imageCountMoreThan, images are sorted from youngest to oldest based on pushed_at_time and then all images greater than the specified count are expired or archived."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+      "source_id": "S4",
+      "quote": "The tagPatternList or tagPrefixList parameters may only used if the tagStatus is tagged."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+      "source_id": "S4",
+      "quote": "A lifecycle policy rule may specify either tagPatternList or tagPrefixList, but not both."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

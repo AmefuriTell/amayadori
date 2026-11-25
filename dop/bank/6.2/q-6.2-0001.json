@@ -1,0 +1,56 @@
+{
+  "id": "q-6.2-0001",
+  "task": "6.2",
+  "services": [
+    "AWS Security Hub CSPM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Security Hub CSPM in us-east-1 and eu-west-1. The company sets us-east-1 as the home Region for cross-Region aggregation and links all other Regions. Workloads were recently deployed in ap-south-1, but no findings from ap-south-1 appear in us-east-1. The company wants these findings in the home Region and wants to keep a single place to review them. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Wait for cross-Region aggregation to enable Security Hub CSPM in ap-south-1 for each account."
+    },
+    {
+      "key": "B",
+      "text": "Enable Security Hub CSPM in ap-south-1 for the accounts that have workloads there."
+    },
+    {
+      "key": "C",
+      "text": "Change the home Region to ap-south-1 so that findings from that Region are collected."
+    },
+    {
+      "key": "D",
+      "text": "Export findings from ap-south-1 to Amazon S3 each day and import them into us-east-1."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "リージョンをまたぐ集約は、Security Hub CSPM を有効にしているリージョンのデータだけを集める。集約の設定で Security Hub CSPM が有効になることは無いので、ap-south-1 で有効にする必要がある。",
+    "per_choice": {
+      "A": "集約の設定によって Security Hub CSPM が自動で有効になることは無い。",
+      "B": "正しい。有効にすれば、リンクしたリージョンとしてホームリージョンに集まる。",
+      "C": "ホームリージョンを変えても、ap-south-1 で有効になっていなければデータは集まらない。見る場所も変わってしまう。",
+      "D": "毎日の書き出しと取り込みの仕組みを作ることになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+      "source_id": "S4",
+      "quote": "Security Hub CSPM only aggregates data from Regions where an account has Security Hub CSPM enabled."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+      "source_id": "S4",
+      "quote": "Security Hub CSPM is not automatically enabled for an account based on the cross-Region aggregation configuration."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "q-3.3-0008",
+  "task": "3.3",
+  "services": [
+    "AWS Backup"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "To protect against ransomware and insider threats, a company's backups in an AWS Backup vault must never be deleted or altered by any user, including administrators, until their retention period ends. The security team wants a period to test the configuration before it becomes permanent. Which solution BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Lock the vault with AWS Backup Vault Lock in governance mode, and limit who has the IAM permissions to manage it."
+    },
+    {
+      "key": "B",
+      "text": "Add an IAM policy that denies backup deletion to every role, and review the policy every month."
+    },
+    {
+      "key": "C",
+      "text": "Lock the vault with AWS Backup Vault Lock in compliance mode, with no grace time, so that it is immutable immediately."
+    },
+    {
+      "key": "D",
+      "text": "Lock the vault with AWS Backup Vault Lock in compliance mode, with a grace time before the lock becomes immutable."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "compliance モードの Vault Lock は、保持期間が終わるまで保管庫と中身が消されたり変えられたりしないための物で、ロックされると誰も（AWS も）変えたり消したりできない。ロックされて変えられなくなる前に、決めた猶予の時間がある。governance モードは、十分な IAM の権限を持つ人なら管理や削除ができる。",
+    "per_choice": {
+      "A": "governance モードは、権限のある人なら消せる。",
+      "B": "管理者が IAM のポリシーを変えれば消せる。",
+      "C": "試す時間が無く、要件に反する。",
+      "D": "正しい。誰も消せず、変えられなくなる前に試す時間がある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+      "source_id": "S4",
+      "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+      "source_id": "S4",
+      "quote": "A vault lock in compliance mode has a grace time period you set before it locks and the contents and vault lock become immutable."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+      "source_id": "S4",
+      "quote": "A vault locked in Governance mode can be managed or deleted by users who have the appropriate IAM permissions."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

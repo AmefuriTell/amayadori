@@ -1,0 +1,113 @@
+{
+  "item": "C-0008",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "コンテナのヘルスチェックは、コマンドの終了コード 0 で成功、0 以外で失敗とする。startPeriod は、起動の間の失敗を retries の回数に数えない猶予（0〜300 秒、既定は無効）。interval は 5〜300 秒、timeout は 2〜60 秒、retries は 1〜10 回。",
+        "per_choice": {
+          "A": "正しい。起動の間の失敗を数えず、その後は今までどおり確かめる。",
+          "B": "retries は 10 回まで。",
+          "C": "interval は 300 秒まで。起動の後の確かめも弱くなる。",
+          "D": "timeout は 60 秒まで。1 回の確かめの待ち時間で、起動の遅さの問題は解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "The optional grace period to provide containers time to bootstrap in before failed health checks count towards the maximum number of retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 1 and 10 retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 5 and 300 seconds. The default value is 30 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "essential が true のコンテナが止まると、タスクの他のコンテナも全て止まる。false なら他に影響しない。省くと essential とみなされ、タスクには少なくとも 1 つの essential のコンテナが要る。タスクの健全性は、essential でヘルスチェックのコマンドを持つコンテナだけで決まる。",
+        "per_choice": {
+          "A": "正しい。サイドカーが止まってもアプリは動き続ける。",
+          "B": "正しい。essential でヘルスチェックを持つアプリのコンテナだけで、タスクの健全性が決まる。",
+          "C": "タスクには少なくとも 1 つの essential のコンテナが要る。",
+          "D": "サイドカーの状態もタスクの健全性に入り、止まればタスクも止まる。",
+          "E": "省くと essential とみなされる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "If this parameter is omitted, a container is assumed to be essential."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "If the essential parameter of a container is marked as false, then its failure doesn't affect the rest of the containers in a task."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "All tasks must have at least one essential container."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html",
+          "source_id": "S3",
+          "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "hooks の timeout は、スクリプトが失敗とみなされるまでの秒数で、既定と最大は 3600 秒（1 時間）。超えるとデプロイが止まり、そのインスタンスへのデプロイは失敗する。ValidateService は最後のライフサイクルイベントで、デプロイがうまく終わったかを確かめるのに使う。",
+        "per_choice": {
+          "A": "正しい。4 分の確かめが収まる長さにする。",
+          "B": "1 つのライフサイクルイベントのスクリプトに許されるのは最大 3600 秒。",
+          "C": "BeforeInstall はアプリを入れる前で、入れた後の確かめにならない。",
+          "D": "成功とする前に確かめる要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S4",
+          "quote": "The number of seconds to allow the script to execute before it is considered to have failed. The default is 3600 seconds (1 hour)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S4",
+          "quote": "3600 seconds (1 hour) is the maximum amount of time allowed for script execution for each deployment lifecycle event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S5",
+          "quote": "ValidateService – This is the last deployment lifecycle event. It is used to verify the deployment was completed successfully."
+        }
+      ]
+    }
+  ]
+}

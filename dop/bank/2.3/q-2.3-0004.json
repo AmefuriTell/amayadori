@@ -1,0 +1,68 @@
+{
+  "id": "q-2.3-0004",
+  "task": "2.3",
+  "services": [
+    "AWS Config",
+    "AWS Systems Manager",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company must detect any Amazon S3 bucket whose configuration violates the company's access rules as soon as the bucket is created or changed. Noncompliant buckets must be fixed by a defined, repeatable action, and the company prefers actions that AWS already provides over writing code. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an AWS Config rule that evaluates the buckets, and attach a remediation action that uses a managed Systems Manager Automation document."
+    },
+    {
+      "key": "B",
+      "text": "Create an AWS Config rule that evaluates the buckets and sends a notification to the security team for manual fixes."
+    },
+    {
+      "key": "C",
+      "text": "Create an Amazon EventBridge rule for bucket changes that invokes a custom AWS Lambda function to change the bucket settings."
+    },
+    {
+      "key": "D",
+      "text": "Use Systems Manager Inventory to collect bucket settings every day and fix the buckets that appear in the report."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "AWS Config のルールは、リソースが作られた・変わった・消された時に設定を評価し続け、決まりに反するリソースを noncompliant にする。修復は Systems Manager Automation のドキュメントで行い、AWS Config は修復の操作を持つマネージドの Automation ドキュメントも用意している。",
+    "per_choice": {
+      "A": "正しい。作成や変更の時に評価し、マネージドの Automation ドキュメントで直す。",
+      "B": "検出はできるが、直すのが人の手で、決まった繰り返せる操作にならない。",
+      "C": "動くが、自分で Lambda のコードを書いて保守することになり、要件に反する。",
+      "D": "Inventory は管理ノードのメタデータを集める機能で、S3 バケットの設定を評価して直すものではない。毎日では作成や変更の直後にも気づけない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html",
+      "source_id": "S5",
+      "quote": "AWS Config continuously evaluates your resources as they are created, changed, or deleted."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+      "source_id": "S6",
+      "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+      "source_id": "S6",
+      "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+      "source_id": "S4",
+      "quote": "You can use Inventory to collect metadata from your managed nodes."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

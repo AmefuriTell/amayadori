@@ -1,0 +1,151 @@
+{
+  "item": "C-0040",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "task": "3.3",
+      "services": [
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a production database on an Amazon RDS Multi-AZ DB instance. Before a major launch, the DevOps team must verify that the application reconnects correctly when the database fails over to the standby in another Availability Zone. The test must use the existing DB instance, must not lose data, and must not require restoring backups. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Restore the latest automated snapshot to a new DB instance in another Availability Zone, and point the application to it."
+        },
+        {
+          "key": "B",
+          "text": "Reboot the DB instance and choose the Reboot with failover option during a planned test window."
+        },
+        {
+          "key": "C",
+          "text": "Create a read replica in another Availability Zone, and promote it to a standalone DB instance during the test."
+        },
+        {
+          "key": "D",
+          "text": "Turn off Multi-AZ, and then turn it on again so that a new standby is created in another Availability Zone."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0002",
+      "task": "3.3",
+      "services": [
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. All clusters are healthy. The company plans a maintenance event in us-east-1 and must move the primary role to us-west-2 beforehand. No committed data may be lost, and the company wants to use the built-in capability instead of rebuilding clusters. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Perform a failover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "B",
+          "text": "Perform a switchover of the global database to the secondary cluster in us-west-2."
+        },
+        {
+          "key": "C",
+          "text": "Copy the latest snapshot to us-west-2 and restore it as a new primary cluster."
+        },
+        {
+          "key": "D",
+          "text": "Perform a failover to us-west-2 now, and fail back with another failover after the maintenance."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0003",
+      "task": "3.3",
+      "services": [
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an Amazon Aurora global database with the primary cluster in eu-west-1 and a secondary cluster in eu-central-1. An unplanned outage makes the primary cluster in eu-west-1 unavailable. The business requires the database to accept writes again as quickly as possible and accepts losing a few seconds of recent data. Which action meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Perform a switchover to the secondary cluster in eu-central-1 so that no data is lost."
+        },
+        {
+          "key": "B",
+          "text": "Wait until eu-west-1 recovers, because global databases cannot change the primary Region during an outage."
+        },
+        {
+          "key": "C",
+          "text": "Perform a cross-Region failover to the secondary cluster in eu-central-1."
+        },
+        {
+          "key": "D",
+          "text": "Restore the latest snapshot in eu-central-1 as a new cluster, and point the application to it."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0004",
+      "task": "3.3",
+      "services": [
+        "Amazon CloudFront",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company serves a web application through Amazon CloudFront with an origin group that has a primary and a secondary origin. During a test, the primary origin returns HTTP 503 errors. Page loads succeed from the secondary origin, but form submissions that use POST still fail. Which statements explain this behavior? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CloudFront fails over to the secondary origin only for viewer requests that use GET, HEAD, or OPTIONS."
+        },
+        {
+          "key": "B",
+          "text": "CloudFront fails over when the primary origin returns one of the status codes chosen as failover criteria, such as 503."
+        },
+        {
+          "key": "C",
+          "text": "CloudFront fails over only when the primary origin returns a 4xx status code, not a 5xx status code."
+        },
+        {
+          "key": "D",
+          "text": "CloudFront fails over for every HTTP method, so the POST failures must come from the secondary origin."
+        },
+        {
+          "key": "E",
+          "text": "Origin groups fail over only after a Route 53 health check marks the primary origin as unhealthy."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0005",
+      "task": "3.3",
+      "services": [
+        "AWS Fault Injection Service",
+        "Amazon Route 53"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses Amazon Route 53 DNS failover between two web servers. The DevOps team wants to prove that traffic moves to the healthy server when the other server fails, by injecting real failures with AWS Fault Injection Service (AWS FIS). Production risk must be kept as low as possible, and the tests should be repeatable. Which approach BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run the AWS FIS experiment directly in production during peak hours so that the results reflect real traffic."
+        },
+        {
+          "key": "B",
+          "text": "Plan the experiment, run it in a pre-production environment first, and use the results before any production run."
+        },
+        {
+          "key": "C",
+          "text": "Skip AWS FIS and test by editing the DNS records by hand to point to the second server."
+        },
+        {
+          "key": "D",
+          "text": "Run the AWS FIS experiment only in documentation reviews, because AWS FIS simulates failures without affecting resources."
+        }
+      ]
+    }
+  ]
+}

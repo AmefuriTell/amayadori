@@ -1,0 +1,63 @@
+{
+  "id": "q-3.2-0004",
+  "task": "3.2",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An application's traffic follows a daily pattern that shifts slowly over the months, and new instances need about 10 minutes before they can serve traffic. The team created a predictive scaling policy two weeks ago, and the forecasts look accurate, but the Auto Scaling group still does not add capacity before the morning peak. The team wants capacity to be ready ahead of the peak without maintaining fixed schedules. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Change the policy from forecast only to forecast and scale, and set pre-launch instances to about 10 minutes."
+    },
+    {
+      "key": "B",
+      "text": "Keep the policy in forecast only mode, and wait for it to learn more of the pattern."
+    },
+    {
+      "key": "C",
+      "text": "Replace the policy with recurring scheduled actions that use cron expressions for the morning peak."
+    },
+    {
+      "key": "D",
+      "text": "Delete the policy and create it again so that it starts scaling from the first day."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "予測スケーリングは、過去最大 14 日のメトリクスから 48 時間先までの必要な容量を予測する。最初に有効にした時は forecast only のモードで、予測は作るが実際には増やさない。予測に合わせて増やすには forecast and scale にする。既定では毎時の始めに増やし、pre-launch instances（SchedulingBufferTime）で、起動に時間がかかるインスタンスを前もって起こせる。",
+    "per_choice": {
+      "A": "正しい。予測に合わせて増やし、起動の時間の分だけ前もって起こす。",
+      "B": "forecast only では予測を作るだけで、待っても増やさない。",
+      "C": "決まった予定を持ち続けることになり、形が変わるたびに直す必要がある。",
+      "D": "作り直しても最初は forecast only のまま。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+      "source_id": "S1",
+      "quote": "In this mode, it generates capacity forecasts but does not actually scale your Auto Scaling group based on those forecasts."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+      "source_id": "S1",
+      "quote": "This causes Amazon EC2 Auto Scaling to launch new instances ahead of the forecasted demand, giving them time to boot and become ready to handle traffic."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+      "source_id": "S1",
+      "quote": "When you first enable predictive scaling, it runs in forecast only mode."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "「forecast and scale」のモードの名前は sources に無いが、forecast only で増やさないことと、増やすには別のモードにすることは S1 から言える",
+  "last_checked": "2026-11-26"
+}

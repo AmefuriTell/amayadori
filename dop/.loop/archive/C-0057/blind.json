@@ -1,0 +1,64 @@
+{
+  "item": "C-0057",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "task": "4.3",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon DynamoDB"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team creates a CloudWatch alarm on the Amazon DynamoDB ThrottledRequests metric, which reports data points only when throttling occurs. The alarm must go to ALARM only when throttling happens in at least 3 of the last 5 one-minute periods. During quiet periods with no throttling, the alarm must show OK instead of INSUFFICIENT_DATA. Which alarm configuration BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as notBreaching."
+        },
+        {
+          "key": "B",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and treat missing data as breaching."
+        },
+        {
+          "key": "C",
+          "text": "Period 1 minute, 3 out of 5 datapoints to alarm, and keep the default treatment of missing data."
+        },
+        {
+          "key": "D",
+          "text": "Period 5 minutes, 3 out of 3 datapoints to alarm, and treat missing data as notBreaching."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0002",
+      "task": "4.3",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon SNS",
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "When the primary database fails, about 20 CloudWatch alarms for application health go into ALARM at the same time, and the on-call team receives 20 notifications. The team wants a single notification to an Amazon SNS topic and an OpsItem in Systems Manager OpsCenter only when the database alarm is in ALARM and at least half of the application health alarms are in ALARM. All alarms are in one account and Region. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a composite alarm with the rule ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "B",
+          "text": "Create a composite alarm with the rule ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+        },
+        {
+          "key": "C",
+          "text": "Create a composite alarm with the same AND rule, and set an EC2 reboot action on it to restart the database host."
+        },
+        {
+          "key": "D",
+          "text": "Subscribe a Lambda function to all 21 alarms that counts their states and publishes one message when the conditions are met."
+        }
+      ]
+    }
+  ]
+}

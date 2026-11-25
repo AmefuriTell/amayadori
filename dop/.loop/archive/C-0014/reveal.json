@@ -1,0 +1,125 @@
+{
+  "item": "C-0014",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の GetAuthorizationToken を呼ぶには、sts:GetServiceBearerToken と codeartifact:GetAuthorizationToken の両方の権限が要る。パッケージマネージャーで CodeArtifact のリポジトリを使うには、ユーザーかロールが sts:GetServiceBearerToken を許している必要がある。",
+        "per_choice": {
+          "A": "正しい。足りないのは sts:GetServiceBearerToken だけ。",
+          "B": "管理の権限まで与えることになり、最小権限に反する。",
+          "C": "ルートユーザーは GetAuthorizationToken を呼べない。",
+          "D": "トークンの寿命は 15 分から 12 時間まで。そもそもトークンを取れないのが問題。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S2",
+          "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S2",
+          "quote": "Root users cannot call GetAuthorizationToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CodeArtifact の認可トークンの寿命は既定で 12 時間で、15 分から 12 時間の間で決められる。寿命が切れたら、新しいトークンを取る必要がある。14 時間の処理では、途中で取り直す。",
+        "per_choice": {
+          "A": "寿命は 12 時間までしか決められない。",
+          "B": "正しい。切れる前に取り直せば、最後まで認証できる。",
+          "C": "権限を足してもトークンの寿命は変わらない。",
+          "D": "寿命が切れたら新しいトークンを取る必要がある。自動では延びない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "source_id": "S1",
+          "quote": "When the lifetime expires, you must fetch another token."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "タスク実行ロールは、ECS のコンテナや Fargate のエージェントが代わりに AWS の API を呼ぶための物で、ECR からイメージを取る権限はここに付ける（マネージドポリシー AmazonECSTaskExecutionRolePolicy に含まれる）。その権限はタスクのコンテナからは直接使えないので、コンテナの中のアプリが使う権限はタスクロールに付ける。",
+        "per_choice": {
+          "A": "正しい。イメージを取る権限はタスク実行ロールに付ける。",
+          "B": "正しい。アプリのコードが使う権限はタスクロールに付ける。",
+          "C": "イメージを取るのはエージェントで、権限はタスク実行ロールに付ける。",
+          "D": "タスク実行ロールの権限はコンテナから直接使えない。",
+          "E": "非公開のリポジトリを公開することになり、権限の問題の答えにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S6",
+          "quote": "For basic ECS implementations, these permissions should be added to the task execution role rather than the task IAM role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S6",
+          "quote": "The Amazon ECS task execution role managed policy (AmazonECSTaskExecutionRolePolicy) includes the necessary permissions for pulling images from Amazon ECR."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "source_id": "S5",
+          "quote": "but they aren't directly accessible by the containers in the task."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "EC2 のインスタンスには、アプリが置かれた S3 のバケットや GitHub に入る権限が要り、その権限はインスタンスプロファイルのロールで CodeDeploy のエージェントに与える。ポリシーは、インスタンスが入る必要のあるバケットだけに絞るのが勧められている。",
+        "per_choice": {
+          "A": "正しい。エージェントが使うインスタンスプロファイルで、必要なバケットだけを読ませる。",
+          "B": "全てのバケットへの全ての操作を許すことになり、最小権限に反する。",
+          "C": "S3 からリビジョンを取るのはインスタンスの上のエージェントで、インスタンスプロファイルの権限を使う。",
+          "D": "公開のバケットは許されていない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "source_id": "S7",
+          "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "source_id": "S7",
+          "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
+        }
+      ]
+    }
+  ]
+}

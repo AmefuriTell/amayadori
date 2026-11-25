@@ -1,0 +1,56 @@
+{
+  "id": "q-3.3-0002",
+  "task": "3.3",
+  "services": [
+    "Amazon Aurora"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. All clusters are healthy. The company plans a maintenance event in us-east-1 and must move the primary role to us-west-2 beforehand. No committed data may be lost, and the company wants to use the built-in capability instead of rebuilding clusters. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Perform a switchover of the global database to the secondary cluster in us-west-2."
+    },
+    {
+      "key": "B",
+      "text": "Perform a failover of the global database to the secondary cluster in us-west-2."
+    },
+    {
+      "key": "C",
+      "text": "Copy the latest snapshot to us-west-2 and restore it as a new primary cluster."
+    },
+    {
+      "key": "D",
+      "text": "Perform a failover to us-west-2 now, and fail back with another failover after the maintenance."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "switchover（以前の managed planned failover）は、全てのクラスターが健全な時の計画した切り替えに使う。切り替えの前に副のクラスターを主と同期するので、RPO は 0（データの損失なし）。failover は計画外の障害から戻るための方法で、RPO は秒単位の 0 でない値になる。",
+    "per_choice": {
+      "A": "正しい。同期してから切り替えるので、データを失わない。",
+      "B": "failover の RPO は秒単位で 0 にならず、データを失う可能性がある。",
+      "C": "クラスターを作り直すことになり、スナップショットの後のデータも失う。",
+      "D": "failover を 2 回行うことになり、どちらでもデータを失う可能性がある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+      "source_id": "S3",
+      "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+      "source_id": "S4",
+      "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

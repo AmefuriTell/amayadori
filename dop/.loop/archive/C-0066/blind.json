@@ -1,0 +1,125 @@
+{
+  "item": "C-0066",
+  "questions": [
+    {
+      "id": "q-5.2-0001",
+      "task": "5.2",
+      "services": [
+        "Amazon EC2 Auto Scaling",
+        "Amazon EventBridge",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Before an Auto Scaling group terminates an instance during scale-in, the company must copy the instance's local logs to Amazon S3. The copy usually takes 20 minutes but can take up to 3 hours for large instances. Termination must wait until the copy finishes. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a termination lifecycle hook, start the copy from an EventBridge rule, record heartbeats while the copy runs, and then complete the lifecycle action."
+        },
+        {
+          "key": "B",
+          "text": "Add a termination lifecycle hook with the default timeout, and start the copy from an EventBridge rule."
+        },
+        {
+          "key": "C",
+          "text": "Add a termination lifecycle hook, start the copy from an EventBridge rule, and complete the action with ABANDON when the copy starts."
+        },
+        {
+          "key": "D",
+          "text": "Run a cron job on each instance that copies the logs every hour, and let scale-in terminate instances normally."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0002",
+      "task": "5.2",
+      "services": [
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Auto Scaling group with a desired capacity of 20 instances must move to a new launch template version. During the update, at least 90 percent of the desired capacity must stay in service, the group must not launch extra instances above the desired capacity, and the update should replace 2 instances at a time. Which instance refresh settings BEST meet these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Minimum healthy percentage 90 and maximum healthy percentage 100."
+        },
+        {
+          "key": "B",
+          "text": "Minimum healthy percentage 100 and maximum healthy percentage 100."
+        },
+        {
+          "key": "C",
+          "text": "Minimum healthy percentage 0 and maximum healthy percentage 100."
+        },
+        {
+          "key": "D",
+          "text": "Minimum healthy percentage 50 and maximum healthy percentage 100."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0003",
+      "task": "5.2",
+      "services": [
+        "Amazon EC2 Auto Scaling",
+        "Amazon CloudWatch",
+        "Amazon EventBridge"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team runs an instance refresh for an Auto Scaling group. The team wants to be notified when 20 percent of the instances have been replaced so that it can check the application, and wants every replaced instance to be reverted automatically if a CloudWatch alarm on errors goes into ALARM during the refresh. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set checkpoints at 20 percent and 100 percent, and use an EventBridge rule to send checkpoint events to Amazon SNS."
+        },
+        {
+          "key": "B",
+          "text": "Turn on auto rollback for the instance refresh and specify the CloudWatch alarm."
+        },
+        {
+          "key": "C",
+          "text": "Cancel the instance refresh if the alarm goes off, because canceling restores the replaced instances."
+        },
+        {
+          "key": "D",
+          "text": "Wait until the instance refresh finishes, and then roll it back if the alarm went off."
+        },
+        {
+          "key": "E",
+          "text": "Set a single checkpoint at 20 percent, which also completes the refresh after the team confirms."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0004",
+      "task": "5.2",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "During an incident, engineers changed several security group rules directly in the console, although the security groups are managed by an AWS CloudFormation stack. The team now needs to find which stack resources were changed outside of CloudFormation and which properties differ from the template, without changing any resources. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run drift detection on the stack and review the drifted resources and their properties."
+        },
+        {
+          "key": "B",
+          "text": "Create a change set with the current template and review the resources that the change set would modify."
+        },
+        {
+          "key": "C",
+          "text": "Update the stack with the same template so that CloudFormation lists the resources it restores."
+        },
+        {
+          "key": "D",
+          "text": "Review the stack events list to find the resources whose rules were changed in the console."
+        }
+      ]
+    }
+  ]
+}

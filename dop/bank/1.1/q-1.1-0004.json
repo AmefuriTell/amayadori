@@ -1,0 +1,58 @@
+{
+  "id": "q-1.1-0004",
+  "task": "1.1",
+  "services": [
+    "AWS CodePipeline",
+    "AWS CodeBuild",
+    "AWS CodeConnections"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS CodePipeline pipeline uses a GitHub source action through a connection, followed by an AWS CodeBuild action. The build script runs git commands that read the commit history to compute a version number, but the commands fail because no Git metadata is present. A later AWS CodeDeploy action must keep receiving the build output. The team does not want to store Git credentials in the build. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure the source action to output a full clone, and pass the source artifact directly to the CodeDeploy action."
+    },
+    {
+      "key": "B",
+      "text": "Configure the source action to output a full clone, and keep CodeBuild as the action that uses the source artifact."
+    },
+    {
+      "key": "C",
+      "text": "Keep the default ZIP output and add a git clone command that uses a personal access token to the buildspec."
+    },
+    {
+      "key": "D",
+      "text": "Keep the default ZIP output and run git init in the build before the version script runs."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+    "per_choice": {
+      "A": "full clone の参照は CodeBuild のアクションしか使えない。",
+      "B": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+      "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+      "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+      "source_id": "S4",
+      "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+      "source_id": "S4",
+      "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

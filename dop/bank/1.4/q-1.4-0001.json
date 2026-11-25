@@ -1,0 +1,52 @@
+{
+  "id": "q-1.4-0001",
+  "task": "1.4",
+  "services": [
+    "AWS CodeDeploy",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company deploys new versions of an AWS Lambda function by using AWS CodeDeploy. The operations team wants each release to first receive a small portion of production traffic. If no problems are found, all remaining traffic must move to the new version five minutes later. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure the deployment group to use the CodeDeployDefault.LambdaCanary10Percent5Minutes deployment configuration."
+    },
+    {
+      "key": "B",
+      "text": "Configure the deployment group to use the CodeDeployDefault.LambdaLinear10PercentEvery1Minute deployment configuration."
+    },
+    {
+      "key": "C",
+      "text": "Configure the deployment group to use the CodeDeployDefault.LambdaAllAtOnce configuration and monitor errors after release."
+    },
+    {
+      "key": "D",
+      "text": "Run a scheduled script that calls update-alias to change the alias routing weights every five minutes."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "LambdaCanary10Percent5Minutes は、最初に 10% の通信を新しい版へ移し、残りの 90% を 5 分後に移す決まった設定。要件の「少しだけ先に流し、5 分後に残り全部」にそのまま合い、作る物も無い。",
+    "per_choice": {
+      "A": "正しい。最初に 10%、5 分後に残りの 90% を移す canary の設定。",
+      "B": "linear は 1 分ごとに 10% ずつ移すので、全部移るまで約 10 分かかり、「5 分後に残り全部」と合わない。",
+      "C": "全部を一度に移すので、先に一部だけ流す要件に合わない。",
+      "D": "エイリアスの重みを自分で変えれば動くが、スクリプトを作って保守する手間がかかる。CodeDeploy の決まった設定で足りる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html",
+      "source_id": "S1",
+      "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "q-4.2-0002",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs workloads in four AWS accounts and in two Regions, us-east-1 and ap-northeast-1. Managers want one CloudWatch dashboard that shows graphs, alarms, and CloudWatch Logs Insights results from all accounts and both Regions together. The company wants to use built-in CloudWatch features and avoid copying data. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set up CloudWatch cross-account observability in us-east-1 only, and build the dashboard in the monitoring account."
+    },
+    {
+      "key": "B",
+      "text": "Build one dashboard in each Region of each account, and give managers links to all eight dashboards."
+    },
+    {
+      "key": "C",
+      "text": "Enable the accounts as sharing accounts and the managers' account as a monitoring account, and build a cross-account cross-Region dashboard."
+    },
+    {
+      "key": "D",
+      "text": "Export the metrics and logs from every account and Region to Amazon S3 each hour, and visualize them in a separate tool."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "cross-account cross-Region のダッシュボードは、複数のアカウントと複数のリージョンの CloudWatch のデータを 1 つのダッシュボードにまとめ、グラフ・アラーム・Logs Insights のウィジェットを置ける。作る前に、共有するアカウントと監視するアカウントを少なくとも 1 つずつ有効にする。cross-account observability は 1 つのリージョンの中のアカウントをまたぐ物。",
+    "per_choice": {
+      "A": "cross-account observability は 1 つのリージョンの中でアカウントをまたぐ物で、us-east-1 だけでは ap-northeast-1 のデータが入らない。",
+      "B": "1 つのダッシュボードにする要件に合わない。",
+      "C": "正しい。複数のアカウントとリージョンを 1 つのダッシュボードにまとめられる。",
+      "D": "データを写すことになり、要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create_xaxr_dashboard.html",
+      "source_id": "S5",
+      "quote": "You can create cross-account cross-Region dashboards, which summarize your CloudWatch data from multiple AWS accounts and multiple Regions into one dashboard."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create_xaxr_dashboard.html",
+      "source_id": "S5",
+      "quote": "Before you can create a cross-account cross-Region dashboard, you must enable at least one sharing account and at least one monitoring account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Unified-Cross-Account.html",
+      "source_id": "S4",
+      "quote": "With Amazon CloudWatch cross-account observability, you can monitor and troubleshoot applications that span multiple accounts within a Region."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

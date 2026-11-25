@@ -1,0 +1,65 @@
+{
+  "item": "C-0011",
+  "questions": [
+    {
+      "qid": "q-1.3-0001",
+      "blind": {
+        "answer": [
+          "A"
+        ],
+        "confidence": "mid",
+        "reason": "Higher priority rule matches release images first so lower rule cannot expire them; huge count means never expire."
+      },
+      "match": true,
+      "issues": [],
+      "verdict": "ok"
+    },
+    {
+      "qid": "q-1.3-0002",
+      "blind": {
+        "answer": [
+          "B"
+        ],
+        "confidence": "high",
+        "reason": "Pipeline needs an artifact store per Region (artifactStores) for cross-Region actions."
+      },
+      "match": true,
+      "issues": [],
+      "verdict": "ok"
+    },
+    {
+      "qid": "q-1.3-0003",
+      "blind": {
+        "answer": [
+          "C"
+        ],
+        "confidence": "mid",
+        "reason": "One domain, one KMS key, repo per team, domain policy."
+      },
+      "match": true,
+      "issues": [
+        {
+          "kind": "style",
+          "where": "explanation per_choice D",
+          "detail": "前回指摘の D の解説は S1（ドメインで組織のポリシーを複数リポジトリに適用）の範囲に直っており、unsupported は解消。",
+          "source": "S1"
+        }
+      ],
+      "verdict": "ok"
+    },
+    {
+      "qid": "q-1.3-0004",
+      "blind": {
+        "answer": [
+          "A",
+          "B"
+        ],
+        "confidence": "high",
+        "reason": "ECR repo policy and CodeArtifact domain policy with role credentials; others violate constraints."
+      },
+      "match": true,
+      "issues": [],
+      "verdict": "ok"
+    }
+  ]
+}

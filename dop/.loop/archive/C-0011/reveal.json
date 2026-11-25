@@ -1,0 +1,145 @@
+{
+  "item": "C-0011",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ある規則の条件に合ったイメージは、それより優先度の低い規則では消されない。優先度 1 の規則で release のタグのイメージを選び、数の上限を大きくして実際には消さないようにすると、優先度 2 の「90 日より古いものを消す」規則から守れる。",
+        "per_choice": {
+          "A": "正しい。release のイメージは優先度 1 の規則に合うので、優先度 2 の規則では消されない。imageCountMoreThan は上限を超えた分だけを消すので、上限を大きくすれば残る。",
+          "B": "優先度の高い規則が全てのイメージを 90 日で消すので、release のイメージも消える。",
+          "C": "tagPrefixList は tagStatus が tagged の時しか使えない。",
+          "D": "1 つの規則に tagPrefixList と tagPatternList は両方は書けない。また release のイメージも 90 日で消える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "An image that matches the tagging requirements of a rule cannot be expired or archived by a rule with a lower priority."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S7",
+          "quote": "With countType = imageCountMoreThan, images are sorted from youngest to oldest based on pushed_at_time and then all images greater than the specified count are expired or archived."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "The tagPatternList or tagPrefixList parameters may only used if the tagStatus is tagged."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "source_id": "S4",
+          "quote": "A lifecycle policy rule may specify either tagPatternList or tagPrefixList, but not both."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "アクションを動かすリージョンごとに 1 つのアーティファクトバケットが要る。コンソールなら自動で作られるが、AWS CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを自分で指定する。",
+        "per_choice": {
+          "A": "アーティファクトバケットは、S3 のソースアクションで使うソースのバケットとは別の物。また別リージョンのアクションにはそのリージョンのバケットが要る。",
+          "B": "正しい。CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを指定する。",
+          "C": "リージョンの間でコピーする仕組みを足すことになり、要件に反する。リージョンごとのアーティファクトバケットの指定も無いまま。",
+          "D": "パイプラインを 1 つにする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "you must have one artifact bucket per Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "you must provide an artifact bucket for each additional Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "source_id": "S6",
+          "quote": "The artifact bucket is not the same bucket as the bucket used as the source file location for a pipeline where the chosen source action is S3."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ドメインは複数のリポジトリをまとめる単位で、中の全ての資産は同じ KMS キーで暗号化される。ドメインを使うと、どのアカウントがリポジトリに入れるか、どの公開リポジトリをパッケージの元にするかを、複数のリポジトリにまとめて決められる。AWS も本番用には 1 つのドメインを勧めている。",
+        "per_choice": {
+          "A": "暗号化はそろうが、ドメインごとにポリシーを持つことになり、1 か所で管理する要件に合わない。",
+          "B": "1 か所で管理でき暗号化もそろうが、チームごとのリポジトリを持つ要件に合わない。",
+          "C": "正しい。1 つのドメインの中にチームごとのリポジトリを置き、ドメインでまとめて管理する。",
+          "D": "チームごとのリポジトリは持てるが、ドメインを使わないので、どのアカウントが入れるかやどの公開リポジトリを使うかを 1 か所でまとめて決められない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "All of the assets and metadata in a domain are encrypted with the same AWS KMS key (KMS key) stored in AWS Key Management Service (AWS KMS)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain, and which public repositories can be used as the sources of packages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "we recommend a single production domain that contains all published artifacts."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ECR のプライベートリポジトリは、IAM を使ったリソースベースの権限（リポジトリポリシー）で別アカウントに pull を許せる。CodeArtifact は、ドメインでどのアカウントが入れるかを決め、使う側は自分の AWS の認証情報で認可トークンを作って認証する。",
+        "per_choice": {
+          "A": "正しい。リポジトリポリシーで、必要なロールにだけ pull を許す。",
+          "B": "正しい。ドメインでアカウント B を許し、ビルドはロールの認証情報からトークンを作るので、長く使う認証情報が要らない。",
+          "C": "CodeArtifact のリポジトリのパッケージは公開できない。公開も禁止されている。",
+          "D": "IAM ユーザーのアクセスキーは長く使う認証情報で、要件に反する。",
+          "E": "リポジトリは 1 つのドメインに属し、別のドメインへ移せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "source_id": "S3",
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S2",
+          "quote": "You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "source_id": "S1",
+          "quote": "Each repository is a member of a single domain and can't be moved to a different domain."
+        }
+      ]
+    }
+  ]
+}

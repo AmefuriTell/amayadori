@@ -1,0 +1,67 @@
+{
+  "id": "q-2.3-0007",
+  "task": "2.3",
+  "services": [
+    "AWS Lambda",
+    "Amazon SQS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS Lambda function is invoked asynchronously to process orders. When the function keeps failing, some events disappear after the retries are used up. The team must keep a record of every invocation that fails after all retries, keep a separate record of successful invocations, and avoid adding error-handling code to the function. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Wrap the handler in try/catch blocks that write failed and successful events to Amazon S3."
+    },
+    {
+      "key": "B",
+      "text": "Configure an on-failure destination and an on-success destination for the function, and give the execution role the needed permissions."
+    },
+    {
+      "key": "C",
+      "text": "Keep the default settings, because Lambda keeps failed events in its queue until they succeed."
+    },
+    {
+      "key": "D",
+      "text": "Invoke the function synchronously instead, and have each caller store the failed requests."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "非同期の呼び出しが失敗すると、Lambda は既定であと 2 回やり直し、期限切れか全てのやり直しに失敗したイベントは捨てる。失敗した呼び出しの記録を残すには on-failure の宛先を作る。成功と失敗で別々の宛先を設定でき、送るには関数の実行ロールに権限が要る。",
+    "per_choice": {
+      "A": "関数にエラー処理のコードを足すことになり、要件に反する。",
+      "B": "正しい。コードを変えずに、失敗と成功の記録を別々に残せる。",
+      "C": "全てのやり直しに失敗したイベントは捨てられる。",
+      "D": "呼び出し側にエラー処理を持つことになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+      "source_id": "S6",
+      "quote": "When an event expires or fails all processing attempts, Lambda discards it."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+      "source_id": "S6",
+      "quote": "To capture records of failed invocations (such as timeouts or runtime errors), create an on-failure destination."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+      "source_id": "S7",
+      "quote": "Each function can have multiple destinations, so you can configure separate destinations for successful and failed events."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+      "source_id": "S7",
+      "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

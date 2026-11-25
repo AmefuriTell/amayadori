@@ -1,0 +1,62 @@
+{
+  "id": "q-6.3-0001",
+  "task": "6.3",
+  "services": [
+    "AWS CloudTrail",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations and is a new AWS CloudTrail customer. The security team works from a dedicated security account and must record events for the management account and every member account, including accounts that join later. The security team must manage the logging configuration without signing in to the management account. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use CloudFormation StackSets to create a separate trail in every member account, and add the stack to new accounts when they join."
+    },
+    {
+      "key": "B",
+      "text": "Create an organization trail in the management account, and give the security team an IAM role in the management account to manage it."
+    },
+    {
+      "key": "C",
+      "text": "Create a CloudTrail Lake event data store for the organization in the security account, and query events from there."
+    },
+    {
+      "key": "D",
+      "text": "From the management account, make the security account a CloudTrail delegated administrator, and create an organization trail from the security account."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "組織の証跡（organization trail）は、管理アカウントと全メンバーアカウントのイベントを記録する。管理アカウントは委任管理者を決められ、委任管理者は組織の証跡を作って管理できるので、セキュリティのチームは管理アカウントに入らずに済む。",
+    "per_choice": {
+      "A": "アカウントごとに証跡を持つことになり、新しいアカウントへの追加の作業も要る。",
+      "B": "記録はできるが、セキュリティのチームが管理アカウントに入ることになり、要件に反する。",
+      "C": "CloudTrail Lake は 2026 年 5 月 31 日から新しい利用者の受付を止めており、新しく使い始める会社には選べない。",
+      "D": "正しい。委任管理者として組織の証跡を作り、管理アカウントにも入らない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+      "source_id": "S2",
+      "quote": "The management account for the organization can assign a delegated administrator to create new organization trails or manage existing organization trails."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+      "source_id": "S2",
+      "quote": "Organization trails log events for the management account and all member accounts in the organization."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html",
+      "source_id": "S0",
+      "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

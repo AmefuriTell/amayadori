@@ -1,0 +1,86 @@
+{
+  "item": "C-0002",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+        "per_choice": {
+          "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+          "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+          "C": "正しい。コンソールで編集すれば AVAILABLE になる。",
+          "D": "個人のトークンを持たない要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "source_id": "S3",
+          "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+        "per_choice": {
+          "A": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+          "B": "full clone の参照は CodeBuild のアクションしか使えない。",
+          "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+          "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "source_id": "S4",
+          "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+        "per_choice": {
+          "A": "正しい。release で始まるタグが作られた時だけ始まる。",
+          "B": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+          "C": "自分でコードを書くことになり、要件に反する。",
+          "D": "毎回人が始めることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "This example shows you how to create a pipeline that allows filtering for tags based on the syntax of the tag name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "source_id": "S5",
+          "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+        }
+      ]
+    }
+  ]
+}

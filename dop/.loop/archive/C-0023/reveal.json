@@ -1,0 +1,142 @@
+{
+  "item": "C-0023",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "組織の間でアカウントを移すには、新しい組織の管理アカウントから招待を送り、移るアカウントで受け入れる。移るアカウントは、今の組織を先に抜けたり、単独のアカウントとして動いたりする必要は無い。組織で作ったアカウントは作ってから 4 日待つ必要があるが、招待で入ったアカウントにはこの待ちは無い。アカウントは 1 つの組織にしか入れない。",
+        "per_choice": {
+          "A": "正しい。新しい組織の管理アカウントが招待し、移るアカウントが受け入れる。",
+          "B": "正しい。先に抜ける必要は無い。",
+          "C": "招待は新しい組織の管理アカウントから送る。",
+          "D": "4 日の待ちは組織で作ったアカウントの物で、招待で入ったアカウントには無い。",
+          "E": "アカウントは 1 つの組織にしか入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "The migrating account doesn't need to leave its current organization or operate as a standalone account first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "Invited accounts are not subject to this waiting period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "An account can only join one organization."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+        "per_choice": {
+          "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+          "B": "正しい。招待されたアカウントには自分で作る。",
+          "C": "15 日は招待に返事をする期限で、ロールは作られない。",
+          "D": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "Each invitation must be responded to within 15 days, or it expires."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+        "per_choice": {
+          "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+          "B": "正しい。タグの無いリソースは評価されない。",
+          "C": "タグの無いリソースは評価されない。",
+          "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+          "E": "強制されるのは、指定したリソースの種類だけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Tag policies are available only in an organization that has all features enabled."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+        "per_choice": {
+          "A": "正しい。Config のリソースを外してから登録し直す。",
+          "B": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+          "C": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+          "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "The account to be enrolled must not have existing AWS Config resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ]
+    }
+  ]
+}

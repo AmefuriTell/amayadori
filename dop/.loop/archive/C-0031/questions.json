@@ -1,0 +1,188 @@
+{
+  "item": "C-0031",
+  "questions": [
+    {
+      "id": "q-3.1-0001",
+      "task": "3.1",
+      "services": [
+        "Amazon VPC"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Application servers run in private subnets in three Availability Zones. All private subnets route internet traffic through a single NAT gateway in AZ-a. During an outage of AZ-a, the servers in the other two Availability Zones also lost internet access. The company wants internet access to keep working in the remaining zones during a single-AZ outage. Which solution BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a NAT gateway in each Availability Zone, and route each private subnet to the NAT gateway in its own Availability Zone."
+        },
+        {
+          "key": "B",
+          "text": "Create a second NAT gateway in AZ-a, and split the private subnets between the two NAT gateways."
+        },
+        {
+          "key": "C",
+          "text": "Move the NAT gateway to AZ-b, and route all private subnets to it."
+        },
+        {
+          "key": "D",
+          "text": "Replace the NAT gateway with one that has more bandwidth, and keep the current routing."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "NAT ゲートウェイは特定のアベイラビリティーゾーンに作られ、そのゾーンの中で冗長になっている。複数のゾーンの資源が 1 つの NAT ゲートウェイを共有すると、そのゾーンが落ちた時に他のゾーンの資源もインターネットに出られなくなる。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの NAT ゲートウェイを使うように経路を決める。",
+        "per_choice": {
+          "A": "正しい。1 つのゾーンが落ちても、他のゾーンは自分のゾーンの NAT ゲートウェイを使い続けられる。",
+          "B": "2 つとも AZ-a にあるので、AZ-a が落ちると両方使えない。",
+          "C": "単一の障害点が AZ-b に移るだけ。",
+          "D": "ゾーンの障害に対する弱さは変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "source_id": "S1",
+          "quote": "If you have resources in multiple Availability Zones and they share one NAT gateway, and if the NAT gateway's Availability Zone is down, resources in the other Availability Zones lose internet access."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "source_id": "S1",
+          "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26",
+      "note": "P-009: 最新のドキュメントには、AZ をまたいで自動で高可用になる regional NAT gateway もある（S2）。試験は AZ ごとの NAT ゲートウェイの形を想定しているので、選択肢には入れていない"
+    },
+    {
+      "id": "q-3.1-0002",
+      "task": "3.1",
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones and has cross-zone load balancing disabled. Its targets come from an Auto Scaling group. After several scaling events, AZ-a has five instances and AZ-b has one. The single instance in AZ-b is overloaded, and if AZ-a fails, too little capacity remains. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing so that each load balancer node distributes traffic across targets in all enabled Availability Zones."
+        },
+        {
+          "key": "B",
+          "text": "Configure the Auto Scaling group to use subnets in both Availability Zones with balanced Availability Zone distribution."
+        },
+        {
+          "key": "C",
+          "text": "Disable AZ-b on the load balancer so that all traffic goes to the instances in AZ-a."
+        },
+        {
+          "key": "D",
+          "text": "Move all instances into AZ-a so that the targets are in one place."
+        },
+        {
+          "key": "E",
+          "text": "Keep cross-zone load balancing disabled, because each node already sends traffic to targets in every zone."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ゾーン間の負荷分散（cross-zone load balancing）を有効にすると、各ゾーンのロードバランサーのノードが、有効な全てのゾーンのターゲットに通信を配る。無効なら、各ノードは自分のゾーンのターゲットにだけ配る。Auto Scaling は、有効なゾーンに同じ数のインスタンスを保つように動く（balanced best effort）。",
+        "per_choice": {
+          "A": "正しい。AZ-b のノードも全てのターゲットに配るので、1 台に集中しない。",
+          "B": "正しい。インスタンスをゾーンに均等に置き、1 つのゾーンが落ちても容量が残る。",
+          "C": "1 つのゾーンだけに頼ることになり、単一の障害点が残る。",
+          "D": "全てのインスタンスが 1 つのゾーンに集まり、そのゾーンの障害で止まる。",
+          "E": "無効の時は、各ノードは自分のゾーンのターゲットにしか配らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-availability-zone-balanced.html",
+          "source_id": "S6",
+          "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-3.1-0003",
+      "task": "3.1",
+      "services": [
+        "Amazon ElastiCache"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An ElastiCache (Redis OSS) replication group has one primary and one replica, with Multi-AZ disabled. When the primary node failed, ElastiCache took it offline and provisioned a new primary, and the application had a long outage. The company wants a replica in another Availability Zone to be promoted automatically if the primary fails. Which change BEST meets this requirement?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable automatic failover only, and keep Multi-AZ disabled."
+        },
+        {
+          "key": "B",
+          "text": "Enable Multi-AZ, with at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "key": "C",
+          "text": "Move to a larger node type so that the primary is less likely to fail."
+        },
+        {
+          "key": "D",
+          "text": "Take snapshots every hour so that a new primary can be restored quickly."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ を有効にすると、ElastiCache はレプリカを別々のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にする。主ノードが落ちると、複製の遅れが最も少ないレプリカを自動で主に上げる。Multi-AZ には、主と別のゾーンに少なくとも 1 つのレプリカが要る。Multi-AZ なしで自動フェイルオーバーだけを有効にすると、レプリカが別のゾーンにある保証は無い。",
+        "per_choice": {
+          "A": "レプリカが別のゾーンにある保証が無い。",
+          "B": "正しい。別のゾーンのレプリカを自動で主に上げる。",
+          "C": "落ちにくくなるだけで、落ちた時の切り替えは変わらない。",
+          "D": "戻すのに時間がかかり、自動の昇格にもならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "source_id": "S7",
+          "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}

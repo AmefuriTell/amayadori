@@ -1,0 +1,128 @@
+{
+  "item": "C-0018",
+  "questions": [
+    {
+      "id": "q-2.1-0001",
+      "task": "2.1",
+      "services": [
+        "AWS CloudFormation",
+        "Amazon S3",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company manages a production stack in AWS CloudFormation that contains an Amazon RDS DB instance and an Amazon S3 bucket that stores audit logs. Before any update is applied, the operations team must see whether any resource will be replaced or deleted. If a future template change removes the S3 bucket from the stack, the bucket must not be deleted. The team does not want to add manual backup steps. Which approach meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add DeletionPolicy: Retain to the S3 bucket and apply each update directly with an UpdateStack call after testing in staging."
+        },
+        {
+          "key": "B",
+          "text": "Create a change set for each update, review it, and then execute it. Do not change the S3 bucket's DeletionPolicy."
+        },
+        {
+          "key": "C",
+          "text": "Create a change set for each update, review it, and then execute it. Add DeletionPolicy: Retain to the S3 bucket."
+        },
+        {
+          "key": "D",
+          "text": "Create a change set for each update, review it, and then execute it. Rely on the default policy, which takes a snapshot of the bucket."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0002",
+      "task": "2.1",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A network team's AWS CloudFormation stack exports a subnet ID, and three application stacks in the same account and Region import it with Fn::ImportValue. The network team must change the exported value. A new application stack in a different AWS account must also read this stack's outputs. Values must not be copied by hand. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Update the three application stacks to stop importing the value, and then change the exported value."
+        },
+        {
+          "key": "B",
+          "text": "Use Fn::GetStackOutput in the new stack to read the output of the network stack in the other account."
+        },
+        {
+          "key": "C",
+          "text": "Use Fn::ImportValue in the new stack in the other account with the same export name."
+        },
+        {
+          "key": "D",
+          "text": "Change the exported value first, and let CloudFormation update the importing stacks automatically."
+        },
+        {
+          "key": "E",
+          "text": "Delete the network stack and create it again with the new value, and then update the importing stacks."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0003",
+      "task": "2.1",
+      "services": [
+        "AWS SAM",
+        "AWS Lambda",
+        "AWS CodeDeploy"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team defines an AWS Lambda function with an AWS SAM template. The team wants each new version to receive traffic through an alias, with the traffic shift handled by AWS CodeDeploy. The team does not want to write the CodeDeploy application, deployment group, or IAM role resources by hand, and wants to keep the template short. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add the AutoPublishAlias property to the function and update the alias to the new version after each deployment."
+        },
+        {
+          "key": "B",
+          "text": "Add the AutoPublishAlias and DeploymentPreference properties to the AWS::Serverless::Function resource."
+        },
+        {
+          "key": "C",
+          "text": "Add AWS::CodeDeploy::Application, AWS::CodeDeploy::DeploymentGroup, and an IAM role to the template next to the function."
+        },
+        {
+          "key": "D",
+          "text": "Publish a Lambda version after each deployment and change the weights of a weighted alias with a script."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0004",
+      "task": "2.1",
+      "services": [
+        "AWS CDK",
+        "AWS CloudFormation",
+        "Amazon S3",
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has an AWS CDK app with Lambda function code and a container image as assets. The company will deploy the app for the first time to two new environments: an account in us-east-1 and an account in eu-west-1. The company wants the CDK CLI to handle asset storage, and wants to prepare both environments with as few manual steps as possible. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run cdk deploy against each environment. The CDK CLI deploys the stacks and their assets without any preparation."
+        },
+        {
+          "key": "B",
+          "text": "Run one cdk bootstrap command that lists both environments, and then run cdk deploy for the app."
+        },
+        {
+          "key": "C",
+          "text": "Create an S3 bucket and an ECR repository in each environment by hand, and then run cdk deploy."
+        },
+        {
+          "key": "D",
+          "text": "Run cdk bootstrap in us-east-1 only, and then run cdk deploy for both environments."
+        }
+      ]
+    }
+  ]
+}

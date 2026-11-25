@@ -1,0 +1,150 @@
+{
+  "item": "C-0068",
+  "questions": [
+    {
+      "id": "q-5.3-0001",
+      "task": "5.3",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An in-place AWS CodeDeploy deployment to Amazon EC2 instances fails in the ApplicationStop lifecycle event. The logs show that the ApplicationStop script has a bug. The team fixed the script in the new revision, but the next deployment fails in ApplicationStop with the same error. The team must deploy the fixed revision as soon as possible without logging in to the instances. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Deploy the same fixed revision again, because CodeDeploy runs ApplicationStop from the revision that is being deployed."
+        },
+        {
+          "key": "B",
+          "text": "Create a deployment of the fixed revision with the --ignore-application-stop-failures option."
+        },
+        {
+          "key": "C",
+          "text": "Roll back to the last successful revision, and then deploy the fixed revision again without changes."
+        },
+        {
+          "key": "D",
+          "text": "Reinstall the CodeDeploy agent on every instance so that it downloads the new ApplicationStop script."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0002",
+      "task": "5.3",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS CloudFormation stack update failed, and the rollback also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because a dependent resource could not return to its original state. The team found and manually fixed the cause of the failure. The team wants to return the stack to a working state and then apply the update again, without deleting the stack. What should the team do next with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run a new stack update with the original template, because updates are allowed in the UPDATE_ROLLBACK_FAILED state."
+        },
+        {
+          "key": "B",
+          "text": "Continue the update rollback so that the stack reaches UPDATE_ROLLBACK_COMPLETE, and then update the stack again."
+        },
+        {
+          "key": "C",
+          "text": "Wait for CloudFormation to retry the rollback automatically after the resource is fixed."
+        },
+        {
+          "key": "D",
+          "text": "Delete the stack and create it again from the new template."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0003",
+      "task": "5.3",
+      "services": [
+        "AWS CodePipeline"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A pipeline stage runs three test actions in parallel. Occasionally one action fails because of a short network problem while the other two succeed. The team wants to rerun only the failed action without starting the pipeline from the beginning or rerunning the successful actions. The team also wants the stage to be retried automatically once when it fails. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use Retry failed actions on the stage when an action fails."
+        },
+        {
+          "key": "B",
+          "text": "Configure automatic retry on stage failure for the stage, with one retry attempt."
+        },
+        {
+          "key": "C",
+          "text": "Use Retry failed stage, which reruns only the actions that failed."
+        },
+        {
+          "key": "D",
+          "text": "Choose Release change to run the pipeline again from the source stage."
+        },
+        {
+          "key": "E",
+          "text": "Configure automatic retry on stage failure with three retry attempts to cover longer problems."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0004",
+      "task": "5.3",
+      "services": [
+        "AWS CodePipeline"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer creates a new AWS CodePipeline pipeline and configures automatic rollback on failure for the Deploy stage. The very first execution of the pipeline fails in the Deploy stage, but no rollback happens. The engineer wants to understand the behavior before changing anything. Which statement BEST explains why the stage did not roll back?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Automatic rollback works only after the stage has had at least one successful execution to roll back to."
+        },
+        {
+          "key": "B",
+          "text": "Automatic rollback is supported only for stages that contain AWS CodeDeploy actions."
+        },
+        {
+          "key": "C",
+          "text": "Automatic rollback must also be configured on the source stage before it can work on the Deploy stage."
+        },
+        {
+          "key": "D",
+          "text": "Automatic rollback runs only when the stage is retried by hand after the failure."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0005",
+      "task": "5.3",
+      "services": [
+        "Amazon CloudWatch Synthetics"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Shortly after a new application version is deployed, a CloudWatch Synthetics canary that tests the checkout flow starts to fail. Customers are affected. The team must restore service quickly and must still be able to find the root cause afterward. Which approach BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the new version, compare the failed run's screenshots and logs with a successful run, and roll back only if the cause is unclear."
+        },
+        {
+          "key": "B",
+          "text": "Roll back the recent deployment, and then compare the failed run's screenshots, logs, and step reports with a successful run."
+        },
+        {
+          "key": "C",
+          "text": "Check the SuccessPercent metric over the next hour to see whether failures are intermittent, and then decide whether to roll back."
+        },
+        {
+          "key": "D",
+          "text": "Roll back the recent deployment, and delete the failed canary runs' artifacts so that the next runs start from a clean state."
+        }
+      ]
+    }
+  ]
+}

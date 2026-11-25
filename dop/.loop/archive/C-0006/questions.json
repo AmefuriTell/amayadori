@@ -1,0 +1,172 @@
+{
+  "item": "C-0006",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "task": "1.2",
+      "services": [
+        "AWS CodeBuild",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team hosts its code in GitHub and uses an AWS CodeBuild project with a webhook to run unit tests. The tests must run when a pull request is opened and every time new commits are added to it. The tests must run only for pull requests that target the main branch. Pull requests that target other branches must not start any build. Which webhook configuration meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "B",
+          "text": "Two filter groups: one with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and one with BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "C",
+          "text": "One filter group with EVENT set to PUSH, PULL_REQUEST_CREATED and BASE_REF set to refs/heads/main."
+        },
+        {
+          "key": "D",
+          "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_MERGED and BASE_REF set to refs/heads/main."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ビルドは、どれかのフィルターグループが真になると始まり、グループが真になるのはその中の全フィルターが真の時。1 つのグループに「作成と更新の PR イベント」と「BASE_REF が main」を入れると、main 向けの PR の作成と更新だけでビルドが始まる。",
+        "per_choice": {
+          "A": "正しい。同じグループの中のフィルターは全部そろった時だけ真になるので、main 向けの PR の作成と更新に絞れる。",
+          "B": "グループどうしはどれか 1 つが真ならよいので、PR イベントだけのグループが他のブランチ向けの PR でも真になり、ビルドが始まってしまう。",
+          "C": "BASE_REF は PR のイベントでしか使えない。また PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）が入っていない。",
+          "D": "PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）に動かない。MERGED はマージの時で、要件に無い。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "source_id": "S1",
+          "quote": "A build is triggered if any filter group evaluates to true, which occurs when all the filters in the group evaluate to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "source_id": "S1",
+          "quote": "A BASE_REF filter can be used with pull request events only."
+        }
+      ],
+      "difficulty": 3,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.2-0002",
+      "task": "1.2",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds a .NET application with AWS CodeBuild. The test framework writes its results as NUnit 3 XML files to the test-results directory. The developers want the results to appear as a test report in CodeBuild for each build. The company does not want to add steps that convert or upload files. Which change meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a reports section to the buildspec that lists the test-results files and leaves file-format unset."
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the buildspec that lists the test-results files and sets file-format to NUNIT3XML."
+        },
+        {
+          "key": "C",
+          "text": "Add a build command that converts the results to JUnit XML, and list the converted files in a reports section."
+        },
+        {
+          "key": "D",
+          "text": "Add the test-results files to the artifacts section so that they are stored in Amazon S3 after each build."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "buildspec の reports に、試験結果のファイルの場所（files）と形式（file-format）を書くと、CodeBuild がテストレポートにする。file-format を書かないと JUNITXML として扱うので、NUnit 3 XML なら NUNIT3XML を指定する。",
+        "per_choice": {
+          "A": "file-format を書かないと JUNITXML として扱われ、NUnit 3 XML の形式と合わない。",
+          "B": "正しい。形式を NUNIT3XML にすれば、変換なしでテストレポートになる。",
+          "C": "動くが、変換の手順を足すことになり、要件に反する。CodeBuild は NUnit 3 XML をそのまま扱える。",
+          "D": "S3 にファイルが残るだけで、CodeBuild のテストレポートにはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "NUNIT3XML NUnit 3 XML"
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.2-0003",
+      "task": "1.2",
+      "services": [
+        "AWS CodePipeline",
+        "GitHub"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an AWS CodePipeline V2 pipeline with a GitHub source action that uses a connection. The pipeline must start when a pull request that targets the main branch is opened, and again whenever a new revision is published to that pull request. The pipeline must also start for every push to main. The company wants to use one pipeline and no custom code. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a trigger with a pullRequest filter for main with the Open and Closed events, and a push filter for main."
+        },
+        {
+          "key": "B",
+          "text": "Add a trigger with a pullRequest filter for main with the Open and Update events, and a push filter for main."
+        },
+        {
+          "key": "C",
+          "text": "Add a trigger with only a push filter for main, and add a CodeBuild webhook that runs tests for pull requests."
+        },
+        {
+          "key": "D",
+          "text": "Create a second pipeline for pull request events, and keep the first pipeline for pushes to main."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "V2 パイプラインのトリガーは、git の設定で push と pull request のイベントを絞り込める。pull request の Open は PR が作られた時、Update は PR に新しいリビジョンが出た時に動くので、main への push のフィルターと合わせると 1 つのパイプラインで要件を満たす。",
+        "per_choice": {
+          "A": "Closed は PR が閉じられた時。新しいリビジョンが出た時（Update）に動かない。",
+          "B": "正しい。Open と Update の pull request のフィルターと、main の push のフィルターを 1 つのパイプラインに入れる。",
+          "C": "PR の時に動くのは CodeBuild だけで、パイプラインは始まらない。",
+          "D": "動くが、パイプラインを 1 つにする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-triggers.html",
+          "source_id": "S3",
+          "quote": "Update - This option triggers the pipeline when a pull request revision is published for the branch/file path."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-requirements.html",
+          "source_id": "S4",
+          "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

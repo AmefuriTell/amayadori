@@ -1,0 +1,86 @@
+{
+  "item": "C-0006",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ビルドは、どれかのフィルターグループが真になると始まり、グループが真になるのはその中の全フィルターが真の時。1 つのグループに「作成と更新の PR イベント」と「BASE_REF が main」を入れると、main 向けの PR の作成と更新だけでビルドが始まる。",
+        "per_choice": {
+          "A": "正しい。同じグループの中のフィルターは全部そろった時だけ真になるので、main 向けの PR の作成と更新に絞れる。",
+          "B": "グループどうしはどれか 1 つが真ならよいので、PR イベントだけのグループが他のブランチ向けの PR でも真になり、ビルドが始まってしまう。",
+          "C": "BASE_REF は PR のイベントでしか使えない。また PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）が入っていない。",
+          "D": "PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）に動かない。MERGED はマージの時で、要件に無い。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "source_id": "S1",
+          "quote": "A build is triggered if any filter group evaluates to true, which occurs when all the filters in the group evaluate to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "source_id": "S1",
+          "quote": "A BASE_REF filter can be used with pull request events only."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "buildspec の reports に、試験結果のファイルの場所（files）と形式（file-format）を書くと、CodeBuild がテストレポートにする。file-format を書かないと JUNITXML として扱うので、NUnit 3 XML なら NUNIT3XML を指定する。",
+        "per_choice": {
+          "A": "file-format を書かないと JUNITXML として扱われ、NUnit 3 XML の形式と合わない。",
+          "B": "正しい。形式を NUNIT3XML にすれば、変換なしでテストレポートになる。",
+          "C": "動くが、変換の手順を足すことになり、要件に反する。CodeBuild は NUnit 3 XML をそのまま扱える。",
+          "D": "S3 にファイルが残るだけで、CodeBuild のテストレポートにはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "source_id": "S2",
+          "quote": "NUNIT3XML NUnit 3 XML"
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "V2 パイプラインのトリガーは、git の設定で push と pull request のイベントを絞り込める。pull request の Open は PR が作られた時、Update は PR に新しいリビジョンが出た時に動くので、main への push のフィルターと合わせると 1 つのパイプラインで要件を満たす。",
+        "per_choice": {
+          "A": "Closed は PR が閉じられた時。新しいリビジョンが出た時（Update）に動かない。",
+          "B": "正しい。Open と Update の pull request のフィルターと、main の push のフィルターを 1 つのパイプラインに入れる。",
+          "C": "PR の時に動くのは CodeBuild だけで、パイプラインは始まらない。",
+          "D": "動くが、パイプラインを 1 つにする要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-triggers.html",
+          "source_id": "S3",
+          "quote": "Update - This option triggers the pipeline when a pull request revision is published for the branch/file path."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-requirements.html",
+          "source_id": "S4",
+          "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
+        }
+      ]
+    }
+  ]
+}

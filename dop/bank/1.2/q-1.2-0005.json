@@ -1,0 +1,61 @@
+{
+  "id": "q-1.2-0005",
+  "task": "1.2",
+  "services": [
+    "AWS CodeBuild"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A CodeBuild project runs 2,000 integration tests in one build, which takes 60 minutes. The team wants the same test suite, with the same configuration, to be split across 10 builds that run at the same time. The team does not want to divide the test files by hand or maintain several projects. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure a batch build with a build matrix that lists 10 configurations of the same environment."
+    },
+    {
+      "key": "B",
+      "text": "Create 10 CodeBuild projects, and give each project a list of test files to run."
+    },
+    {
+      "key": "C",
+      "text": "Run the tests in one build, and start the build 10 times from the pipeline at the same time."
+    },
+    {
+      "key": "D",
+      "text": "Configure a batch build with a build fanout and set the parallelism field to 10."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "build fanout は、1 つの作業をバッチの中の複数のビルドに分け、試験を並べて動かすのに使える。parallelism の値に合わせて、試験のケースを分けた塊ごとに別のビルドを作る。build matrix は、違う設定の組み合わせごとにビルドを作る物。",
+    "per_choice": {
+      "A": "build matrix は違う設定の組み合わせごとにビルドを作る物で、同じ試験を分けて動かす物ではない。",
+      "B": "試験のファイルを手で分け、10 個のプロジェクトを持つことになり、要件に反する。",
+      "C": "同じ試験の全部を 10 回動かすだけで、試験は分かれない。",
+      "D": "正しい。試験を 10 に分け、並べて動かす。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S5",
+      "quote": "A build fanout defines a task that will be split into multiple builds in the batch. This can be used for running tests in parallel."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S5",
+      "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+      "source_id": "S4",
+      "quote": "A build matrix defines tasks with different configurations that run in parallel."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

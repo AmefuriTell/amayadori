@@ -1,0 +1,57 @@
+{
+  "id": "q-1.1-0001",
+  "task": "1.1",
+  "services": [
+    "Amazon ECR",
+    "Amazon Inspector"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company stores container images in Amazon ECR private repositories. The security team found that images pushed months ago are never re-evaluated after new vulnerabilities are disclosed. The team wants every repository to be checked automatically on an ongoing basis without any person or pipeline starting the checks. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure basic scanning with scan on push for every repository in the registry."
+    },
+    {
+      "key": "B",
+      "text": "Create a scheduled AWS Lambda function that starts a manual basic scan of each image every day."
+    },
+    {
+      "key": "C",
+      "text": "Turn on enhanced scanning for the registry so that Amazon Inspector evaluates the images."
+    },
+    {
+      "key": "D",
+      "text": "Add an AWS CodeBuild stage that runs an open-source image scanner before each image push."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+    "per_choice": {
+      "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+      "B": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+      "C": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+      "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+      "source_id": "S1",
+      "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+      "source_id": "S1",
+      "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,140 @@
+{
+  "item": "C-0078",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "組織の証跡（organization trail）は、管理アカウントと全メンバーアカウントのイベントを記録する。管理アカウントは委任管理者を決められ、委任管理者は組織の証跡を作って管理できるので、セキュリティのチームは管理アカウントに入らずに済む。",
+        "per_choice": {
+          "A": "正しい。委任管理者として組織の証跡を作り、管理アカウントにも入らない。",
+          "B": "アカウントごとに証跡を持つことになり、新しいアカウントへの追加の作業も要る。",
+          "C": "記録はできるが、セキュリティのチームが管理アカウントに入ることになり、要件に反する。",
+          "D": "CloudTrail Lake は 2026 年 5 月 31 日から新しい利用者の受付を止めており、新しく使い始める会社には選べない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+          "source_id": "S2",
+          "quote": "The management account for the organization can assign a delegated administrator to create new organization trails or manage existing organization trails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html",
+          "source_id": "S2",
+          "quote": "Organization trails log events for the management account and all member accounts in the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html",
+          "source_id": "S0",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けた全てのログファイルのハッシュを作り、1 時間ごとにその時間のログファイルとハッシュを並べたファイルも届ける。これで、届けた後の変更・削除・偽造を見つけられ、ある期間にログファイルが届けられなかったことも言える。",
+        "per_choice": {
+          "A": "変更の前の版は残るが、どれが CloudTrail の届けたままのファイルかや、ある期間に届けられた物が無いことは示せない。",
+          "B": "自分で仕組みを作ることになり、要件に反する。",
+          "C": "正しい。CloudTrail の機能だけで、変更・削除の有無と、届けられなかった期間を示せる。",
+          "D": "比べる手間がかかり、届けた後に変えられていないことの証明にはならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html",
+          "source_id": "S3",
+          "quote": "assert positively that no log files were delivered to your account during a given period of time."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "compliance モードでは、保持期間の間、ルートユーザーを含め誰もオブジェクトの版を上書きも削除もできない。法的保持（legal hold）は期間を持たず、外されるまで続き、s3:PutObjectLegalHold の権限を持つ人が付け外しできる。",
+        "per_choice": {
+          "A": "正しい。ルートユーザーも含めて 7 年間は上書きも削除もできない。",
+          "B": "governance モードは、特別な権限を持つ人なら削除や設定の変更ができるので、「誰も」の要件に合わない。",
+          "C": "正しい。調査が続く間は残り、調査のチームが外せる。",
+          "D": "法的保持には決まった期間が無い。外されるまで続く。",
+          "E": "governance モードでは誰も消せないことにならない。期間を延ばすのは法的保持で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S5",
+          "quote": "In compliance mode, a protected object version can't be overwritten or deleted by any user, including the root user in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S5",
+          "quote": "In governance mode, users can't overwrite or delete an object version or alter its lock settings unless they have special permissions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S6",
+          "quote": "However, a legal hold doesn't have an associated fixed amount of time and remains in effect until removed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+          "source_id": "S6",
+          "quote": "Legal holds can be freely placed and removed by any user who has the s3:PutObjectLegalHold permission."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "アグリゲーターは、許された元のアカウントとリージョンのデータを集約アカウントへ写し、読むだけの見え方を作る。元のアカウントやリージョンを変える権限は持たない。AWS Organizations の一部のアカウントを集める時は、承認が要らない。",
+        "per_choice": {
+          "A": "正しい。組織を元にすれば各アカウントでの承認が要らず、読むだけで変えられない。",
+          "B": "読むだけの見え方は作れるが、アカウントごとに承認する作業が要り、要件に反する。",
+          "C": "書き込みの権限を与えることになり、変えられない要件に反する。1 つの見え方にもならない。",
+          "D": "自分で仕組みを作ることになり、手間が大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Aggregators provide a read-only view into the source accounts and Regions that the aggregator is authorized to view by replicating data from the source accounts into the aggregator account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Aggregators do not provide mutating access into a source account or region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html",
+          "source_id": "S4",
+          "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        }
+      ]
+    }
+  ]
+}

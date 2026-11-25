@@ -1,0 +1,71 @@
+{
+  "id": "q-1.4-0008",
+  "task": "1.4",
+  "services": [
+    "Amazon ECS",
+    "AWS Fargate",
+    "Amazon ECR",
+    "AWS IAM",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A new Amazon ECS service on AWS Fargate fails to start because the image cannot be pulled from a private Amazon ECR repository in the same account. After it starts, the application code in the container must write objects to an Amazon S3 bucket. The security team requires each permission to be granted to the right role. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach the AmazonECSTaskExecutionRolePolicy managed policy to the task execution role."
+    },
+    {
+      "key": "B",
+      "text": "Grant the S3 write permissions to the task IAM role."
+    },
+    {
+      "key": "C",
+      "text": "Grant the ECR pull permissions to the task IAM role instead of the task execution role."
+    },
+    {
+      "key": "D",
+      "text": "Grant the S3 write permissions to the task execution role so that the container can use them."
+    },
+    {
+      "key": "E",
+      "text": "Make the ECR repository public so that no role needs pull permissions."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "タスク実行ロールは、ECS のコンテナや Fargate のエージェントが代わりに AWS の API を呼ぶための物で、ECR からイメージを取る権限はここに付ける（マネージドポリシー AmazonECSTaskExecutionRolePolicy に含まれる）。その権限はタスクのコンテナからは直接使えないので、コンテナの中のアプリが使う権限はタスクロールに付ける。",
+    "per_choice": {
+      "A": "正しい。イメージを取る権限はタスク実行ロールに付ける。",
+      "B": "正しい。アプリのコードが使う権限はタスクロールに付ける。",
+      "C": "イメージを取るのはエージェントで、権限はタスク実行ロールに付ける。",
+      "D": "タスク実行ロールの権限はコンテナから直接使えない。",
+      "E": "非公開のリポジトリを公開することになり、権限の問題の答えにならない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+      "source_id": "S6",
+      "quote": "For basic ECS implementations, these permissions should be added to the task execution role rather than the task IAM role."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+      "source_id": "S6",
+      "quote": "The Amazon ECS task execution role managed policy (AmazonECSTaskExecutionRolePolicy) includes the necessary permissions for pulling images from Amazon ECR."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+      "source_id": "S5",
+      "quote": "but they aren't directly accessible by the containers in the task."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

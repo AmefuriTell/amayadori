@@ -1,0 +1,68 @@
+{
+  "id": "q-4.2-0005",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A payment API publishes custom metrics for latency, request count, and error count. The SRE team needs an alarm within 30 seconds when p99 latency is too high, and a separate alarm when the error rate (errors divided by requests) exceeds 2%. The team does not want to run code that computes these values. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Publish raw high-resolution latency data, and alarm on p99 with a 10-second period."
+    },
+    {
+      "key": "B",
+      "text": "Alarm on a metric math expression that divides errors by requests into one time series."
+    },
+    {
+      "key": "C",
+      "text": "Publish only pre-summarized statistic sets for latency, and create the p99 alarm on those sets."
+    },
+    {
+      "key": "D",
+      "text": "Create a regular alarm with a 10-second period on the standard-resolution latency metric instead."
+    },
+    {
+      "key": "E",
+      "text": "Create an alarm on a SEARCH expression that returns both the error metric and the request metric."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "高い解像度のメトリクスには、10 秒か 30 秒の期間の高い解像度のアラームを付けられる（60 秒の倍数のふつうのアラームも可）。パーセンタイルの統計は、カスタムメトリクスなら要約していない生のデータ点を発行した時に使える。アラームは 1 つのメトリクスか、1 本の時系列を作るメトリクスの数式に付けられ、SEARCH の式には付けられない。",
+    "per_choice": {
+      "A": "正しい。生のデータ点で p99 が使え、10 秒の期間で 30 秒以内に気づける。",
+      "B": "正しい。数式で率を作り、1 本の時系列にアラームを付ける。",
+      "C": "パーセンタイルは要約していない生のデータ点が要る。",
+      "D": "10 秒や 30 秒の期間は高い解像度のアラームのもので、ふつうのアラームは 60 秒の倍数。",
+      "E": "SEARCH の式にはアラームを作れない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+      "source_id": "S1",
+      "quote": "you can specify a high-resolution alarm with a period of 10 seconds or 30 seconds, or you can set a regular alarm with a period of any multiple of 60 seconds."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+      "source_id": "S3",
+      "quote": "Percentile statistics are available for custom metrics as long as you publish the raw, unsummarized data points for your custom metric."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+      "source_id": "S4",
+      "quote": "The expression that you choose for the alarm must produce a single time series and show only one line on the graph."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "選択肢 D の「標準の解像度のメトリクスに 10 秒のアラームは付けられない」は、S1 の「高い解像度のメトリクスに付ける時」の書き方からの推論",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,57 @@
+{
+  "id": "q-5.3-0001",
+  "task": "5.3",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An in-place AWS CodeDeploy deployment to Amazon EC2 instances fails in the ApplicationStop lifecycle event. The logs show that the ApplicationStop script has a bug. The team fixed the script in the new revision, but the next deployment fails in ApplicationStop with the same error. The team must deploy the fixed revision as soon as possible without logging in to the instances. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a deployment of the fixed revision with the --ignore-application-stop-failures option."
+    },
+    {
+      "key": "B",
+      "text": "Deploy the same fixed revision again, because CodeDeploy runs ApplicationStop from the revision that is being deployed."
+    },
+    {
+      "key": "C",
+      "text": "Roll back to the last successful revision, and then deploy the fixed revision again without changes."
+    },
+    {
+      "key": "D",
+      "text": "Reinstall the CodeDeploy agent on every instance so that it downloads the new ApplicationStop script."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "CodeDeploy のエージェントは、ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトを、前に成功したデプロイの AppSpec から動かす。新しいリビジョンでスクリプトを直しても、前の成功したデプロイのスクリプトが動くので同じ所で失敗する。そのスクリプトが必ず失敗するなら、失敗を無視するデプロイを作る（CLI の --ignore-application-stop-failures）。",
+    "per_choice": {
+      "A": "正しい。前のデプロイの壊れたスクリプトの失敗を無視して、直したリビジョンを配れる。",
+      "B": "ApplicationStop は前に成功したデプロイのスクリプトから動くので、同じ失敗がくり返す。",
+      "C": "前の成功したリビジョンに戻っても、そのリビジョンの壊れたスクリプトが次の ApplicationStop で動き、同じ所で失敗する。",
+      "D": "どのスクリプトを動かすかは前に成功したデプロイで決まるので、エージェントを入れ直しても変わらない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html",
+      "source_id": "S1",
+      "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html",
+      "source_id": "S1",
+      "quote": "Use the AWS CLI to call the create-deployment command and include the --ignore-application-stop-failures option."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-26"
+}

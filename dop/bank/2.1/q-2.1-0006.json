@@ -1,0 +1,61 @@
+{
+  "id": "q-2.1-0006",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation StackSets"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A DevOps engineer sets Maximum concurrent accounts to 20 and Failure tolerance to 0 for a StackSet update that targets 200 accounts, using the default concurrency mode. The update processes only one account at a time and takes many hours. The engineer wants the operation to run 20 accounts at a time regardless of failures. What should the engineer do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the concurrency mode to SOFT_FAILURE_TOLERANCE in the operation preferences."
+    },
+    {
+      "key": "B",
+      "text": "Set Region concurrency to Parallel so that more accounts are processed at the same time."
+    },
+    {
+      "key": "C",
+      "text": "Split the accounts into 10 StackSets and run their updates at the same time."
+    },
+    {
+      "key": "D",
+      "text": "Increase Maximum concurrent accounts to 200, and keep the default concurrency mode."
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "既定の Strict Failure Tolerance では、実際の同時の数は「Maximum concurrent accounts」と「Failure tolerance + 1」の小さい方から始まる。Failure tolerance が 0 なら 1 アカウントずつになる。Soft Failure Tolerance は Failure tolerance と同時の数を切り離し、失敗の数にかかわらず Maximum concurrent accounts の数で動かす。",
+    "per_choice": {
+      "A": "正しい。失敗の数にかかわらず 20 アカウントずつ動く。",
+      "B": "リージョンを同時に処理するだけで、各リージョンの中のアカウントは 1 つずつのまま。",
+      "C": "StackSet を分けることになり、管理の手間が大きい。",
+      "D": "既定のままでは同時の数は Failure tolerance + 1 の 1 のまま。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+      "source_id": "S3",
+      "quote": "The initial actual concurrency is set to the lower of either the value of the Maximum concurrent accounts, or the value of Failure tolerance +1. This is the default behavior."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+      "source_id": "S3",
+      "quote": "This allows StackSet operations to run at the concurrency level set by the Maximum concurrent accounts value, regardless of the number of failures."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+      "source_id": "S4",
+      "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

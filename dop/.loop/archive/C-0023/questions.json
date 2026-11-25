@@ -1,0 +1,267 @@
+{
+  "item": "C-0023",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "task": "2.2",
+      "services": [
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "After a merger, a company must move a member account that was invited into organization A into organization B. The account must not run as a standalone account at any point, because consolidated billing must continue. Organization B was created a month ago. Which statements about the migration are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The management account of organization B sends the invitation, and the migrating account accepts it."
+        },
+        {
+          "key": "B",
+          "text": "The account does not need to leave organization A or operate as a standalone account before it joins organization B."
+        },
+        {
+          "key": "C",
+          "text": "The management account of organization A sends the invitation to organization B on behalf of the account."
+        },
+        {
+          "key": "D",
+          "text": "The account must wait four days after it joined organization A, because invited accounts have a waiting period."
+        },
+        {
+          "key": "E",
+          "text": "The account belongs to both organizations until organization A removes it."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "組織の間でアカウントを移すには、新しい組織の管理アカウントから招待を送り、移るアカウントで受け入れる。移るアカウントは、今の組織を先に抜けたり、単独のアカウントとして動いたりする必要は無い。組織で作ったアカウントは作ってから 4 日待つ必要があるが、招待で入ったアカウントにはこの待ちは無い。アカウントは 1 つの組織にしか入れない。",
+        "per_choice": {
+          "A": "正しい。新しい組織の管理アカウントが招待し、移るアカウントが受け入れる。",
+          "B": "正しい。先に抜ける必要は無い。",
+          "C": "招待は新しい組織の管理アカウントから送る。",
+          "D": "4 日の待ちは組織で作ったアカウントの物で、招待で入ったアカウントには無い。",
+          "E": "アカウントは 1 つの組織にしか入れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "The migrating account doesn't need to leave its current organization or operate as a standalone account first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "source_id": "S3",
+          "quote": "Invited accounts are not subject to this waiting period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "An account can only join one organization."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-2.2-0002",
+      "task": "2.2",
+      "services": [
+        "AWS Organizations",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company invited 20 existing AWS accounts into its organization. Administrators in the management account try to switch to the OrganizationAccountAccessRole role in these accounts, as they do for accounts that were created in the organization, but the role does not exist. The administrators need this cross-account access in every invited account. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Remove the accounts from the organization and invite them again so that the role is created on acceptance."
+        },
+        {
+          "key": "B",
+          "text": "Create the OrganizationAccountAccessRole role in each invited account, with a trust policy for the management account."
+        },
+        {
+          "key": "C",
+          "text": "Wait 15 days, because AWS Organizations creates the role when the invitation period ends."
+        },
+        {
+          "key": "D",
+          "text": "Turn on consolidated billing so that the management account gains access to the member accounts."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+        "per_choice": {
+          "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+          "B": "正しい。招待されたアカウントには自分で作る。",
+          "C": "15 日は招待に返事をする期限で、ロールは作られない。",
+          "D": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "source_id": "S2",
+          "quote": "Each invitation must be responded to within 15 days, or it expires."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26",
+      "note": "解説 D の「一括請求は権限を与えない」は S7 の「管理アカウントが支払う」からの範囲で書いた"
+    },
+    {
+      "id": "q-2.2-0003",
+      "task": "2.2",
+      "services": [
+        "AWS Organizations",
+        "Amazon EC2"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company with all features enabled in AWS Organizations wants the CostCenter tag key to use one consistent case, and wants tagging requests that set an invalid CostCenter value on Amazon EC2 instances to be blocked. The FinOps team also asks whether a tag policy will flag EC2 instances that have no CostCenter tag at all. Which statements are correct? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A tag policy enforced for the EC2 instance resource type blocks noncompliant tagging requests."
+        },
+        {
+          "key": "B",
+          "text": "Resources that have no CostCenter tag are not evaluated for compliance with the tag policy."
+        },
+        {
+          "key": "C",
+          "text": "A tag policy evaluates untagged EC2 instances and reports them as noncompliant."
+        },
+        {
+          "key": "D",
+          "text": "Tag policies are available in organizations that have only consolidated billing features enabled."
+        },
+        {
+          "key": "E",
+          "text": "A tag policy blocks noncompliant tagging requests on every resource type, even without specifying resource types for enforcement."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+        "per_choice": {
+          "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+          "B": "正しい。タグの無いリソースは評価されない。",
+          "C": "タグの無いリソースは評価されない。",
+          "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+          "E": "強制されるのは、指定したリソースの種類だけ。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "source_id": "S5",
+          "quote": "Tag policies are available only in an organization that has all features enabled."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-2.2-0004",
+      "task": "2.2",
+      "services": [
+        "AWS Control Tower",
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company set up AWS Control Tower a year ago. A team now wants to bring an existing account, which is in an unregistered OU of the same organization, under Control Tower governance by enrolling it into a governed OU. The enrollment fails because the account already has an AWS Config configuration recorder and delivery channel. The company also asks whether this account could replace the current log archive account. What should the company do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Remove the existing AWS Config resources from the account, and enroll it into the governed OU again."
+        },
+        {
+          "key": "B",
+          "text": "Enroll the account as the new log archive account, because existing Config resources are allowed for that role."
+        },
+        {
+          "key": "C",
+          "text": "Move the account to a different organization first, and then enroll it into the governed OU."
+        },
+        {
+          "key": "D",
+          "text": "Keep the AWS Config resources and register the unregistered OU instead, so the account does not need to meet any conditions."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+        "per_choice": {
+          "A": "正しい。Config のリソースを外してから登録し直す。",
+          "B": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+          "C": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+          "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "The account to be enrolled must not have existing AWS Config resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "source_id": "S1",
+          "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "item": "C-0027",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company automates account offboarding with AWS Step Functions. One step sends a request to an external approval system, and the workflow must pause until a manager responds, which can take up to three days. Each step must run exactly once, and the team wants to avoid polling code. Which design meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "An Express workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+        },
+        {
+          "key": "B",
+          "text": "A Standard workflow that calls the approval system with .waitForTaskToken and resumes on SendTaskSuccess."
+        },
+        {
+          "key": "C",
+          "text": "A Standard workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+        },
+        {
+          "key": "D",
+          "text": "An Express workflow with a loop that calls a Lambda function every minute to check whether the approval exists."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Task state in a Step Functions workflow calls an API that sometimes throttles. Throttling errors must be retried up to 5 times, starting 2 seconds after the error and doubling the wait each time. If the state still fails, or fails with any other error, including a timeout, the workflow must move to a NotifyOps state. Which configurations meet these requirements? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 5, and BackoffRate 2."
+        },
+        {
+          "key": "B",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed alone as the last catcher, with Next set to NotifyOps."
+        },
+        {
+          "key": "C",
+          "text": "A Retry entry for the throttling error with IntervalSeconds 2, MaxAttempts 0, and BackoffRate 2."
+        },
+        {
+          "key": "D",
+          "text": "A Catch entry whose ErrorEquals is States.TaskFailed, as the only catcher, with Next set to NotifyOps."
+        },
+        {
+          "key": "E",
+          "text": "A Catch entry whose ErrorEquals is States.ALL, placed first, followed by a catcher for the throttling error."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "task": "2.3",
+      "services": [
+        "AWS Lambda",
+        "Amazon SQS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS Lambda function is invoked asynchronously to process orders. When the function keeps failing, some events disappear after the retries are used up. The team must keep a record of every invocation that fails after all retries, keep a separate record of successful invocations, and avoid adding error-handling code to the function. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure an on-failure destination and an on-success destination for the function, and give the execution role the needed permissions."
+        },
+        {
+          "key": "B",
+          "text": "Wrap the handler in try/catch blocks that write failed and successful events to Amazon S3."
+        },
+        {
+          "key": "C",
+          "text": "Keep the default settings, because Lambda keeps failed events in its queue until they succeed."
+        },
+        {
+          "key": "D",
+          "text": "Invoke the function synchronously instead, and have each caller store the failed requests."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "task": "2.3",
+      "services": [
+        "AWS Step Functions",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A high-volume IoT ingestion workflow in AWS Step Functions finishes each execution in a few seconds. Each step only needs an HTTP response from the called service before continuing. The team accepts that a step might run more than once and has made the steps idempotent. The team wants the workflow type designed for high event rates. Which choice BEST meets these requirements?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Standard workflow, because it supports every integration pattern and runs each step exactly once."
+        },
+        {
+          "key": "B",
+          "text": "An Express workflow that uses Request Response service integrations."
+        },
+        {
+          "key": "C",
+          "text": "An Express workflow that uses .waitForTaskToken integrations so that each step waits for a callback."
+        },
+        {
+          "key": "D",
+          "text": "A Standard workflow that uses .waitForTaskToken integrations to limit duplicate executions."
+        }
+      ]
+    }
+  ]
+}

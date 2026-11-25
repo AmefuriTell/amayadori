@@ -1,0 +1,72 @@
+{
+  "id": "q-6.3-0003",
+  "task": "6.3",
+  "services": [
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company stores audit logs in an Amazon S3 bucket with S3 Object Lock enabled. No user, including the root user, may overwrite or delete any log object for 7 years. Some log objects are part of a legal investigation and must be kept beyond 7 years, for as long as the investigation lasts. The investigation team must be able to release those objects when the investigation ends. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set a default retention period of 7 years in compliance mode for the bucket."
+    },
+    {
+      "key": "B",
+      "text": "Set a default retention period of 7 years in governance mode for the bucket."
+    },
+    {
+      "key": "C",
+      "text": "Place a legal hold on the investigation objects, and give the investigation team the s3:PutObjectLegalHold permission."
+    },
+    {
+      "key": "D",
+      "text": "Place a legal hold with a fixed period of 10 years on the investigation objects."
+    },
+    {
+      "key": "E",
+      "text": "Give the investigation team permission to bypass governance mode so that they can extend retention when needed."
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "compliance モードでは、保持期間の間、ルートユーザーを含め誰もオブジェクトの版を上書きも削除もできない。法的保持（legal hold）は期間を持たず、外されるまで続き、s3:PutObjectLegalHold の権限を持つ人が付け外しできる。",
+    "per_choice": {
+      "A": "正しい。ルートユーザーも含めて 7 年間は上書きも削除もできない。",
+      "B": "governance モードは、特別な権限を持つ人なら削除や設定の変更ができるので、「誰も」の要件に合わない。",
+      "C": "正しい。調査が続く間は残り、調査のチームが外せる。",
+      "D": "法的保持には決まった期間が無い。外されるまで続く。",
+      "E": "governance モードでは誰も消せないことにならない。期間を延ばすのは法的保持で足りる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+      "source_id": "S5",
+      "quote": "In compliance mode, a protected object version can't be overwritten or deleted by any user, including the root user in your AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+      "source_id": "S5",
+      "quote": "In governance mode, users can't overwrite or delete an object version or alter its lock settings unless they have special permissions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+      "source_id": "S6",
+      "quote": "However, a legal hold doesn't have an associated fixed amount of time and remains in effect until removed."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+      "source_id": "S6",
+      "quote": "Legal holds can be freely placed and removed by any user who has the s3:PutObjectLegalHold permission."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,57 @@
+{
+  "id": "q-5.2-0008",
+  "task": "5.2",
+  "services": [
+    "AWS CloudFormation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "During an incident, engineers changed several security group rules directly in the console, although the security groups are managed by an AWS CloudFormation stack. The team now needs to find which stack resources were changed outside of CloudFormation and which properties differ from the template, without changing any resources. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a change set with the current template and review the resources that the change set would modify."
+    },
+    {
+      "key": "B",
+      "text": "Run drift detection on the stack and review the drifted resources and their properties."
+    },
+    {
+      "key": "C",
+      "text": "Update the stack with the same template so that CloudFormation lists the resources it restores."
+    },
+    {
+      "key": "D",
+      "text": "Review the stack events list to find the resources whose rules were changed in the console."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "ドリフト検出は、CloudFormation の管理の外で設定が変えられたスタックのリソースを見つけ、実際の設定が期待される設定と違うかを調べる。1 つ以上のプロパティが消されたり値を変えられたりしたリソースはドリフトしたとみなされる。",
+    "per_choice": {
+      "A": "change set はテンプレートの変更で何が変わるかを見る物で、管理の外の変更を調べる物ではない。",
+      "B": "正しい。リソースを変えずに、管理の外で変わったリソースとプロパティを見つける。",
+      "C": "リソースに手を入れることになり、何も変えない要件に反する。",
+      "D": "スタックのイベントは CloudFormation の操作の記録で、コンソールでの直接の変更は出ない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+      "source_id": "S7",
+      "quote": "You can use drift detection to identify stack resources to which configuration changes have been made outside of CloudFormation management."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+      "source_id": "S7",
+      "quote": "A resource is considered to have drifted if one or more of its properties have been deleted, or had their value changed."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "選択肢 B・C・D の説明は、この束の sources に直接の原文は無い（C-0018 の change sets の出典 S1 で B を言える）",
+  "last_checked": "2026-11-26"
+}

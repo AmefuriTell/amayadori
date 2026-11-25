@@ -1,0 +1,59 @@
+{
+  "id": "q-1.1-0003",
+  "task": "1.1",
+  "services": [
+    "AWS CodePipeline",
+    "AWS CodeConnections",
+    "AWS CloudFormation",
+    "GitHub"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A DevOps engineer uses AWS CloudFormation to create a connection to GitHub and an AWS CodePipeline pipeline that uses it as the source. The stack deploys successfully, but the pipeline cannot access the repository, and the connection status is PENDING. The engineer wants to keep the connection that the stack created and avoid storing personal tokens. What should the engineer do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Wait for the connection to change to AVAILABLE automatically after the first pipeline run."
+    },
+    {
+      "key": "B",
+      "text": "Delete the connection and create it again with the AWS CLI so that it becomes AVAILABLE."
+    },
+    {
+      "key": "C",
+      "text": "Store a GitHub personal access token in AWS Secrets Manager and point the source action to it."
+    },
+    {
+      "key": "D",
+      "text": "Edit the connection in the console to complete its setup so that its status becomes AVAILABLE."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+    "per_choice": {
+      "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+      "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+      "C": "個人のトークンを持たない要件に反する。",
+      "D": "正しい。コンソールで編集すれば AVAILABLE になる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+      "source_id": "S3",
+      "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+      "source_id": "S3",
+      "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

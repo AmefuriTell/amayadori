@@ -1,0 +1,68 @@
+{
+  "id": "q-3.1-0005",
+  "task": "3.1",
+  "services": [
+    "Elastic Load Balancing",
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A Network Load Balancer is enabled in two Availability Zones and has cross-zone load balancing disabled. Its targets come from an Auto Scaling group. After several scaling events, AZ-a has five instances and AZ-b has one. The single instance in AZ-b is overloaded, and if AZ-a fails, too little capacity remains. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on cross-zone load balancing so that each load balancer node distributes traffic across targets in all enabled Availability Zones."
+    },
+    {
+      "key": "B",
+      "text": "Configure the Auto Scaling group to use subnets in both Availability Zones with balanced Availability Zone distribution."
+    },
+    {
+      "key": "C",
+      "text": "Disable AZ-b on the load balancer so that all traffic goes to the instances in AZ-a."
+    },
+    {
+      "key": "D",
+      "text": "Move all instances into AZ-a so that the targets are in one place."
+    },
+    {
+      "key": "E",
+      "text": "Keep cross-zone load balancing disabled, because each node already sends traffic to targets in every zone."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "ゾーン間の負荷分散（cross-zone load balancing）を有効にすると、各ゾーンのロードバランサーのノードが、有効な全てのゾーンのターゲットに通信を配る。無効なら、各ノードは自分のゾーンのターゲットにだけ配る。Auto Scaling は、有効なゾーンに同じ数のインスタンスを保つように動く（balanced best effort）。",
+    "per_choice": {
+      "A": "正しい。AZ-b のノードも全てのターゲットに配るので、1 台に集中しない。",
+      "B": "正しい。インスタンスをゾーンに均等に置き、1 つのゾーンが落ちても容量が残る。",
+      "C": "1 つのゾーンだけに頼ることになり、単一の障害点が残る。",
+      "D": "全てのインスタンスが 1 つのゾーンに集まり、そのゾーンの障害で止まる。",
+      "E": "無効の時は、各ノードは自分のゾーンのターゲットにしか配らない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "source_id": "S4",
+      "quote": "When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+      "source_id": "S4",
+      "quote": "When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-availability-zone-balanced.html",
+      "source_id": "S6",
+      "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,74 @@
+{
+  "id": "q-2.1-0008",
+  "task": "2.1",
+  "services": [
+    "AWS CloudFormation StackSets",
+    "AWS Organizations"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A platform team works from a member account in AWS Organizations and must create and manage StackSets with service-managed permissions for the organization, without signing in to the management account. The security team asks how this delegation works before approving it. Which statements are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The platform team's account can be registered as a delegated administrator for StackSets."
+    },
+    {
+      "key": "B",
+      "text": "StackSets with service-managed permissions that a delegated administrator creates are created in the management account."
+    },
+    {
+      "key": "C",
+      "text": "The management account can limit the delegated administrator to deploy only to specific OUs."
+    },
+    {
+      "key": "D",
+      "text": "An organization can register up to 10 delegated administrators for StackSets at one time."
+    },
+    {
+      "key": "E",
+      "text": "A delegated administrator can create StackSets only with self-managed permissions."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "管理アカウントのほかに、委任管理者の権限を持つメンバーアカウントも、組織の service-managed の StackSet を作って管理できる。委任管理者が作った物も含め、service-managed の StackSet は管理アカウントに作られる。委任管理者は同時に 5 つまでで、組織のアカウントへ展開する全ての権限を持ち、管理アカウントは特定の OU や操作に絞れない。",
+    "per_choice": {
+      "A": "正しい。メンバーアカウントを委任管理者として登録できる。",
+      "B": "正しい。委任管理者が作った物も管理アカウントに作られる。",
+      "C": "管理アカウントは、委任管理者の展開を特定の OU や操作に絞れない。",
+      "D": "同時に登録できる委任管理者は 5 つまで。",
+      "E": "委任管理者は service-managed の StackSet を作って管理できる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+      "source_id": "S7",
+      "quote": "member accounts with delegated administrator permissions can create and manage StackSets with service-managed permissions for the organization."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+      "source_id": "S7",
+      "quote": "StackSets with service-managed permissions are created in the management account, including StackSets created by delegated administrators."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+      "source_id": "S7",
+      "quote": "The management account can't limit delegated administrator permissions to deploy to specific OUs or to perform specific StackSet operations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+      "source_id": "S7",
+      "quote": "Your organization can have up to five registered delegated administrators at one time."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "low_confidence": true,
+  "last_checked": "2026-11-26"
+}

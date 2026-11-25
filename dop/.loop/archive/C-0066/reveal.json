@@ -1,0 +1,135 @@
+{
+  "item": "C-0066",
+  "questions": [
+    {
+      "id": "q-5.2-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "終了のライフサイクルフックは、縮小の時にインスタンスを終了の前に止め、EventBridge で知らせる。既定の待ち時間は 1 時間（heartbeat timeout）で、時間が足りなければ heartbeat を記録して待ち時間をやり直せる。フックが時間切れになるか abandon にされると、すぐに終了へ進む。",
+        "per_choice": {
+          "A": "正しい。heartbeat で待ち時間を延ばし、コピーが終わってから進める。",
+          "B": "既定の 1 時間を超えると、コピーの途中でも終了へ進む。",
+          "C": "フックを abandon にすると、すぐに終了へ進むので、コピーが終わる前にインスタンスが終了する。",
+          "D": "最後の 1 時間までのログが失われうる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+          "source_id": "S1",
+          "quote": "When a scale-in event occurs, a lifecycle hook pauses the instance before it is terminated and sends you a notification using Amazon EventBridge."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html",
+          "source_id": "S2",
+          "quote": "If you need more time, you can restart the timeout period by recording a heartbeat."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+          "source_id": "S3",
+          "quote": "If a termination lifecycle hook times out, or is abandoned, Amazon EC2 Auto Scaling proceeds with terminating the instance immediately."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "最小の正常率は、更新の間に動かし続ける希望の容量の割合。最小 90% と最大 100% なら、一度に容量の 10% を入れ替える（20 台なら 2 台）。最小と最大を両方 100% にすると 1 台ずつ、最小 0% にすると全部を一度に入れ替える。",
+        "per_choice": {
+          "A": "正しい。20 台の 10% で 2 台ずつ入れ替え、90% を保つ。",
+          "B": "1 台ずつの入れ替えになり、2 台ずつの要件に合わない。",
+          "C": "全部を一度に入れ替え、90% を保てない。",
+          "D": "一度に 10 台を入れ替え、90% を保てない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "source_id": "S4",
+          "quote": "For example, if the minimum healthy percentage is 90 percent and the maximum healthy percentage is 100 percent, then 10 percent of capacity will be replaced at a time."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "source_id": "S4",
+          "quote": "To replace one instance at a time, set both the minimum and maximum healthy percentage to 100 percent."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "source_id": "S4",
+          "quote": "To replace all instances at once, set a minimum healthy percentage of 0 percent."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "チェックポイントは、新しいインスタンスが何 % になったら止まるかを決め、100% 以外のチェックポイントごとにイベントを出す。EventBridge のルールで SNS などへ送れる。複数のチェックポイントを使う時は、全て入れ替えるために最後を 100% にする。自動のロールバックは、更新が失敗するか指定したアラームが ALARM になった時に元へ戻す。取り消しや失敗で止まっても、入れ替えた物は戻らず、終わった後はロールバックできない。",
+        "per_choice": {
+          "A": "正しい。20% で知らせ、最後は 100% にして全て入れ替える。",
+          "B": "正しい。アラームが ALARM になれば自動で元へ戻す。",
+          "C": "取り消しても、既に入れ替えたインスタンスは元に戻らない。",
+          "D": "終わった後のインスタンスのリフレッシュはロールバックできない。",
+          "E": "複数のチェックポイントでは最後を 100% にする必要がある。20% だけでは全て入れ替わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+          "source_id": "S5",
+          "quote": "You can add an EventBridge rule to send the events to a target such as Amazon SNS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+          "source_id": "S5",
+          "quote": "If you cancel the operation or it fails before reaching the last checkpoint, any instances that were already replaced are not rolled back to their previous configuration."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+          "source_id": "S6",
+          "quote": "Auto rollback: Amazon EC2 Auto Scaling automatically reverses what was deployed if the instance refresh fails for some reason or if any CloudWatch alarms you specify go into the ALARM state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+          "source_id": "S6",
+          "quote": "You can't roll it back after it's finished."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ドリフト検出は、CloudFormation の管理の外で設定が変えられたスタックのリソースを見つけ、実際の設定が期待される設定と違うかを調べる。1 つ以上のプロパティが消されたり値を変えられたりしたリソースはドリフトしたとみなされる。",
+        "per_choice": {
+          "A": "正しい。リソースを変えずに、管理の外で変わったリソースとプロパティを見つける。",
+          "B": "change set はテンプレートの変更で何が変わるかを見る物で、管理の外の変更を調べる物ではない。",
+          "C": "リソースに手を入れることになり、何も変えない要件に反する。",
+          "D": "スタックのイベントは CloudFormation の操作の記録で、コンソールでの直接の変更は出ない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+          "source_id": "S7",
+          "quote": "You can use drift detection to identify stack resources to which configuration changes have been made outside of CloudFormation management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+          "source_id": "S7",
+          "quote": "A resource is considered to have drifted if one or more of its properties have been deleted, or had their value changed."
+        }
+      ]
+    }
+  ]
+}

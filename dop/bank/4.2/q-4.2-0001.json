@@ -1,0 +1,62 @@
+{
+  "id": "q-4.2-0001",
+  "task": "4.2",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company has 30 AWS accounts in us-east-1. The central operations team works only in a monitoring account. The team must create alarms in that account on metrics from the other accounts, and must run one CloudWatch Logs Insights query across log groups in many accounts at once. Only selected namespaces and log groups may be shared. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a dashboard in each account, and have the operations team switch roles into each account to create alarms and run queries."
+    },
+    {
+      "key": "B",
+      "text": "Set up CloudWatch cross-account observability with the central account as the monitoring account, and share filtered namespaces and log groups from each source account."
+    },
+    {
+      "key": "C",
+      "text": "Run an AWS Lambda function in each account that copies metrics into the central account with PutMetricData, and copy the logs to a central log group."
+    },
+    {
+      "key": "D",
+      "text": "Create a cross-account dashboard in the central account, and create the alarms in each source account."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "cross-account observability では、監視アカウントで、元のアカウントのメトリクスのグラフを作り、元のアカウントのメトリクスを見るアラームを作り、1 つの Logs Insights の問い合わせで複数のアカウントの複数のロググループを調べられる。元のアカウントは、共有するメトリクスの名前空間やロググループを絞れる。",
+    "per_choice": {
+      "A": "アカウントごとの作業になり、1 つの問い合わせで複数のアカウントを調べる要件にも合わない。",
+      "B": "正しい。監視アカウントでアラームも問い合わせもでき、共有する物を絞れる。",
+      "C": "自分で写す仕組みを作ることになり、手間が大きい。",
+      "D": "アラームを中央のアカウントで作る要件に合わない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+      "source_id": "S1",
+      "quote": "Create alarms in the monitoring account that watch metrics in source accounts."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html",
+      "source_id": "S1",
+      "quote": "A single CloudWatch Logs Insights query in a monitoring account can query multiple log groups in multiple source accounts at once."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Unified-Cross-Account.html",
+      "source_id": "S4",
+      "quote": "You can choose to share the metrics from all namespaces with the monitoring account, or filter to a subset of namespaces."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

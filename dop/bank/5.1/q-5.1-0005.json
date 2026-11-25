@@ -1,0 +1,68 @@
+{
+  "id": "q-5.1-0005",
+  "task": "5.1",
+  "services": [
+    "Amazon SQS",
+    "AWS Lambda"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A Lambda function processes messages from an Amazon SQS standard queue through an event source mapping. The team is raising the function timeout to 3 minutes. Messages that keep failing must go to a dead-letter queue, but only after Lambda has had a few chances to retry them. The team wants to follow AWS recommendations. Which settings should the team use? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the source queue's visibility timeout to 18 minutes."
+    },
+    {
+      "key": "B",
+      "text": "Set maxReceiveCount in the source queue's redrive policy to 5."
+    },
+    {
+      "key": "C",
+      "text": "Keep the source queue's visibility timeout at 30 seconds, because Lambda manages visibility itself."
+    },
+    {
+      "key": "D",
+      "text": "Set maxReceiveCount in the source queue's redrive policy to 1 so that failures reach the dead-letter queue quickly."
+    },
+    {
+      "key": "E",
+      "text": "Set the function timeout to 20 minutes, longer than the queue's visibility timeout."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "キューの可視性タイムアウトは、関数のタイムアウトの少なくとも 6 倍にするのが勧められている（3 分なら 18 分）。関数のタイムアウトは可視性タイムアウト以下でなければならず、超えるとイベントソースマッピングの作成や更新でエラーになる。デッドレターキューへ送る前に数回やり直せるよう、maxReceiveCount は少なくとも 5 にするのが勧められている。",
+    "per_choice": {
+      "A": "正しい。3 分の 6 倍で 18 分。",
+      "B": "正しい。数回やり直してからデッドレターキューへ送る。",
+      "C": "関数のタイムアウトは可視性タイムアウト以下である必要があり、3 分の関数では設定できない。",
+      "D": "やり直さずにすぐデッドレターキューへ送られ、数回やり直す要件に反する。",
+      "E": "関数のタイムアウトは可視性タイムアウト以下である必要がある。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+      "source_id": "S1",
+      "quote": "set the source queue's visibility timeout to at least six times the configuration timeout on your function."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+      "source_id": "S1",
+      "quote": "Your function's timeout must be less than or equal to the queue's visibility timeout."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+      "source_id": "S1",
+      "quote": "We recommend setting the maxReceiveCount on your source queue's redrive policy to at least 5."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,127 @@
+{
+  "item": "C-0001",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "task": "1.1",
+      "services": [
+        "Amazon ECR",
+        "Amazon Inspector"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company stores container images in Amazon ECR private repositories. The security team found that images pushed months ago are never re-evaluated after new vulnerabilities are disclosed. The team wants every repository to be checked automatically on an ongoing basis without any person or pipeline starting the checks. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure basic scanning with scan on push for every repository in the registry."
+        },
+        {
+          "key": "B",
+          "text": "Turn on enhanced scanning for the registry so that Amazon Inspector evaluates the images."
+        },
+        {
+          "key": "C",
+          "text": "Create a scheduled AWS Lambda function that starts a manual basic scan of each image every day."
+        },
+        {
+          "key": "D",
+          "text": "Add an AWS CodeBuild stage that runs an open-source image scanner before each image push."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+        "per_choice": {
+          "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+          "B": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+          "C": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+          "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "source_id": "S1",
+          "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.1-0003",
+      "task": "1.1",
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS CodeArtifact. Each development team has its own repository, and all repositories are in one domain. Builds must resolve both the company's internal npm packages and open-source npm packages through the team's own repository. A central team wants to control how open-source packages are brought in, instead of each team configuring this separately. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a shared repository that has an external connection to the public npmjs registry."
+        },
+        {
+          "key": "B",
+          "text": "Configure the shared repository as an upstream repository of each team repository."
+        },
+        {
+          "key": "C",
+          "text": "Move each team repository into its own domain and point it to the shared repository."
+        },
+        {
+          "key": "D",
+          "text": "Make the shared repository public so that builds can download packages without credentials."
+        },
+        {
+          "key": "E",
+          "text": "Add an external connection to npmjs on every team repository and remove the shared one."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "外部接続（external connection）を持つ共有のリポジトリを中央のチームが持ち、それを各チームのリポジトリの upstream にする。upstream は同じドメインの中で設定でき、各チームのリポジトリから社内のパッケージと公開のパッケージの両方を取れる。",
+        "per_choice": {
+          "A": "正しい。公開の npmjs から取り込む入口を 1 か所にまとめられる。",
+          "B": "正しい。同じドメインの中なら、あるリポジトリのパッケージを別のリポジトリで使えるようにできる。",
+          "C": "あるリポジトリのパッケージを別のリポジトリで使えるようにできるのは、同じドメインの中だけ。ドメインを分ける構成はこの要件に合わない。",
+          "D": "CodeArtifact のリポジトリのパッケージは公開できない。",
+          "E": "各チームが別々に外部接続を持つことになり、中央のチームがまとめて管理する要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "You can make packages in one repository available to another repository in the same domain."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S5",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

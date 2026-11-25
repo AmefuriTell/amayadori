@@ -1,0 +1,68 @@
+{
+  "id": "q-4.3-0004",
+  "task": "4.3",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon SNS",
+    "AWS Systems Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "When the primary database fails, about 20 CloudWatch alarms for application health go into ALARM at the same time, and the on-call team receives 20 notifications. The team wants a single notification to an Amazon SNS topic and an OpsItem in Systems Manager OpsCenter only when the database alarm is in ALARM and at least half of the application health alarms are in ALARM. All alarms are in one account and Region. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a composite alarm with the rule ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+    },
+    {
+      "key": "B",
+      "text": "Create a composite alarm with the same AND rule, and set an EC2 reboot action on it to restart the database host."
+    },
+    {
+      "key": "C",
+      "text": "Create a composite alarm with the rule ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)), and set the SNS and OpsItem actions on it."
+    },
+    {
+      "key": "D",
+      "text": "Subscribe a Lambda function to all 21 alarms that counts their states and publishes one message when the conditions are met."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "複合アラームはルールの式で他のアラームの状態をまとめる。AND は全ての条件が真の時、OR はどれか 1 つが真の時に真。AT_LEAST は決めた数か割合のアラームが指定の状態の時に真になる。複合アラームが取れるアクションは、SNS への通知・Lambda の呼び出し・OpsCenter の OpsItem・Incident Manager のインシデントだけ。",
+    "per_choice": {
+      "A": "OR ではどちらか片方の条件だけでも通知が出る。",
+      "B": "複合アラームは EC2 のアクションを取れない。",
+      "C": "正しい。両方の条件がそろった時だけ、1 つの通知と OpsItem を出す。",
+      "D": "自分で数える仕組みを作ることになり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+      "source_id": "S4",
+      "quote": "Logical AND operator. Returns TRUE when all specified conditions are TRUE."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+      "source_id": "S4",
+      "quote": "Function that returns TRUE when a minimum number or percentage of specified alarms are in the required state."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+      "source_id": "S3",
+      "quote": "Composite alarms can take only the following actions:"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+      "source_id": "S3",
+      "quote": "Create OpsItems in Systems Manager Ops Center"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,125 @@
+{
+  "item": "C-0064",
+  "questions": [
+    {
+      "id": "q-5.1-0001",
+      "task": "5.1",
+      "services": [
+        "Amazon SQS",
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Lambda function processes messages from an Amazon SQS standard queue through an event source mapping. The team is raising the function timeout to 3 minutes. Messages that keep failing must go to a dead-letter queue, but only after Lambda has had a few chances to retry them. The team wants to follow AWS recommendations. Which settings should the team use? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the source queue's visibility timeout to 18 minutes."
+        },
+        {
+          "key": "B",
+          "text": "Set maxReceiveCount in the source queue's redrive policy to 5."
+        },
+        {
+          "key": "C",
+          "text": "Keep the source queue's visibility timeout at 30 seconds, because Lambda manages visibility itself."
+        },
+        {
+          "key": "D",
+          "text": "Set maxReceiveCount in the source queue's redrive policy to 1 so that failures reach the dead-letter queue quickly."
+        },
+        {
+          "key": "E",
+          "text": "Set the function timeout to 20 minutes, longer than the queue's visibility timeout."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0002",
+      "task": "5.1",
+      "services": [
+        "Amazon SQS",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function receives batches of 10 messages from an Amazon SQS standard queue. When one message in a batch fails, all 10 messages become visible again and are processed again, which creates duplicate records downstream. The team must keep the batch size of 10 for throughput and avoid reprocessing messages that already succeeded. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on ReportBatchItemFailures on the event source mapping, and return the IDs of the failed messages in batchItemFailures."
+        },
+        {
+          "key": "B",
+          "text": "Throw an exception from the function whenever any message in the batch fails."
+        },
+        {
+          "key": "C",
+          "text": "Increase the queue's visibility timeout so that failed batches wait longer before they are retried."
+        },
+        {
+          "key": "D",
+          "text": "Set the batch size to 1 so that each failure affects only one message."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0003",
+      "task": "5.1",
+      "services": [
+        "Amazon Kinesis Data Streams",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function processes a Kinesis data stream that has four shards, and the function is falling behind. Records with the same partition key must still be processed in order. The team does not want to change the stream, and wants the function to process more batches from each shard at the same time. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the event source mapping's ParallelizationFactor to 10."
+        },
+        {
+          "key": "B",
+          "text": "Set the event source mapping's ParallelizationFactor to 20."
+        },
+        {
+          "key": "C",
+          "text": "Add shards to the data stream so that Lambda can process more records at once."
+        },
+        {
+          "key": "D",
+          "text": "Send the records to an Amazon SQS standard queue and process them from the queue instead."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0004",
+      "task": "5.1",
+      "services": [
+        "Amazon SNS",
+        "Amazon SQS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An orders topic in Amazon SNS fans out to three Amazon SQS queues. The shipping team's queue must receive only orders whose message body contains \"region\": \"EU\". The publisher does not set any message attributes and cannot be changed. The other two queues must keep receiving every order. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Assign a filter policy with the MessageBody scope to the shipping queue's subscription, matching region EU."
+        },
+        {
+          "key": "B",
+          "text": "Assign a filter policy with the MessageAttributes scope to the shipping queue's subscription, matching region EU."
+        },
+        {
+          "key": "C",
+          "text": "Let the shipping consumer read every message and delete the ones whose region is not EU."
+        },
+        {
+          "key": "D",
+          "text": "Create a separate SNS topic for EU orders and ask the publisher to send EU orders to it."
+        }
+      ]
+    }
+  ]
+}

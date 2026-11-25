@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dop/backlog-item.schema.json",
+  "title": "作業の一覧（backlog）の 1 項目",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "priority", "status", "attempts"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(C|A|L|R)-[0-9]{4}$" },
+    "kind": { "enum": ["content", "app", "learn", "recheck"] },
+    "title": { "type": "string" },
+    "why": { "type": "string", "description": "人の言葉の理由" },
+    "task": { "type": "string", "pattern": "^[1-6]\\.[0-9]+$", "description": "content・recheck の時" },
+    "topic": { "type": "string" },
+    "services": { "type": "array", "items": { "type": "string" } },
+    "count": { "type": "integer", "minimum": 1, "maximum": 10, "default": 5 },
+    "question_ids": { "type": "array", "items": { "type": "string" }, "description": "recheck の時" },
+    "depends_on": { "type": "array", "items": { "type": "string" } },
+    "priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "status": { "enum": ["todo", "doing", "done", "blocked", "dropped"] },
+    "attempts": { "type": "integer", "minimum": 0 },
+    "source": { "enum": ["human", "coverage", "learn", "proposal"] },
+    "note": { "type": "string" }
+  }
+}

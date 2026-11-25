@@ -1,0 +1,56 @@
+{
+  "id": "q-3.3-0001",
+  "task": "3.3",
+  "services": [
+    "Amazon RDS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs a production database on an Amazon RDS Multi-AZ DB instance. Before a major launch, the DevOps team must verify that the application reconnects correctly when the database fails over to the standby in another Availability Zone. The test must use the existing DB instance, must not lose data, and must not require restoring backups. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Restore the latest automated snapshot to a new DB instance in another Availability Zone, and point the application to it."
+    },
+    {
+      "key": "B",
+      "text": "Create a read replica in another Availability Zone, and promote it to a standalone DB instance during the test."
+    },
+    {
+      "key": "C",
+      "text": "Reboot the DB instance and choose the Reboot with failover option during a planned test window."
+    },
+    {
+      "key": "D",
+      "text": "Turn off Multi-AZ, and then turn it on again so that a new standby is created in another Availability Zone."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Multi-AZ の DB インスタンスは、障害の時に別のアベイラビリティーゾーンのスタンバイへ自動で切り替わる（多くは 60〜120 秒）。再起動の時に Reboot with failover を選ぶと、利用者の求めでこの切り替えを起こせるので、今のインスタンスのまま試せる。",
+    "per_choice": {
+      "A": "別のインスタンスを作ることになり、今のインスタンスで試す要件にも、バックアップを戻さない要件にも反する。",
+      "B": "別のインスタンスに切り替える試験になり、Multi-AZ のスタンバイへの切り替えを試すことにならない。",
+      "C": "正しい。今のインスタンスで、スタンバイへの切り替えを起こせる。",
+      "D": "スタンバイを作り直すだけで、切り替えそのものは起きない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+      "source_id": "S1",
+      "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+      "source_id": "S2",
+      "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,72 @@
+{
+  "id": "q-1.2-0008",
+  "task": "1.2",
+  "services": [
+    "Amazon ECS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An Amazon ECS task has an application container and a log-forwarding sidecar container. The essential parameter is omitted for both. When the sidecar crashes, the whole task stops. The team wants the sidecar's failure to leave the application running, and wants the task's health to reflect only whether the application is healthy. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set essential to false for the sidecar container."
+    },
+    {
+      "key": "B",
+      "text": "Define a health check command for the application container, and keep it essential."
+    },
+    {
+      "key": "C",
+      "text": "Set essential to false for both containers."
+    },
+    {
+      "key": "D",
+      "text": "Add a health check command to the sidecar and keep it essential so that its health is reported too."
+    },
+    {
+      "key": "E",
+      "text": "Keep the essential parameter omitted for the sidecar, because omitted means non-essential."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "essential が true のコンテナが止まると、タスクの他のコンテナも全て止まる。false なら他に影響しない。省くと essential とみなされ、タスクには少なくとも 1 つの essential のコンテナが要る。タスクの健全性は、essential でヘルスチェックのコマンドを持つコンテナだけで決まる。",
+    "per_choice": {
+      "A": "正しい。サイドカーが止まってもアプリは動き続ける。",
+      "B": "正しい。essential でヘルスチェックを持つアプリのコンテナだけで、タスクの健全性が決まる。",
+      "C": "タスクには少なくとも 1 つの essential のコンテナが要る。",
+      "D": "サイドカーの状態もタスクの健全性に入り、止まればタスクも止まる。",
+      "E": "省くと essential とみなされる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S2",
+      "quote": "If this parameter is omitted, a container is assumed to be essential."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S2",
+      "quote": "If the essential parameter of a container is marked as false, then its failure doesn't affect the rest of the containers in a task."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S2",
+      "quote": "All tasks must have at least one essential container."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html",
+      "source_id": "S3",
+      "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

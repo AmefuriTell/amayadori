@@ -1,0 +1,57 @@
+{
+  "id": "q-1.2-0001",
+  "task": "1.2",
+  "services": [
+    "AWS CodeBuild",
+    "GitHub"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A team hosts its code in GitHub and uses an AWS CodeBuild project with a webhook to run unit tests. The tests must run when a pull request is opened and every time new commits are added to it. The tests must run only for pull requests that target the main branch. Pull requests that target other branches must not start any build. Which webhook configuration meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Two filter groups: one with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and one with BASE_REF set to refs/heads/main."
+    },
+    {
+      "key": "B",
+      "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED and BASE_REF set to refs/heads/main."
+    },
+    {
+      "key": "C",
+      "text": "One filter group with EVENT set to PUSH, PULL_REQUEST_CREATED and BASE_REF set to refs/heads/main."
+    },
+    {
+      "key": "D",
+      "text": "One filter group with EVENT set to PULL_REQUEST_CREATED, PULL_REQUEST_MERGED and BASE_REF set to refs/heads/main."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "ビルドは、どれかのフィルターグループが真になると始まり、グループが真になるのはその中の全フィルターが真の時。1 つのグループに「作成と更新の PR イベント」と「BASE_REF が main」を入れると、main 向けの PR の作成と更新だけでビルドが始まる。",
+    "per_choice": {
+      "A": "グループどうしはどれか 1 つが真ならよいので、PR イベントだけのグループが他のブランチ向けの PR でも真になり、ビルドが始まってしまう。",
+      "B": "正しい。同じグループの中のフィルターは全部そろった時だけ真になるので、main 向けの PR の作成と更新に絞れる。",
+      "C": "BASE_REF は PR のイベントでしか使えない。また PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）が入っていない。",
+      "D": "PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）に動かない。MERGED はマージの時で、要件に無い。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+      "source_id": "S1",
+      "quote": "A build is triggered if any filter group evaluates to true, which occurs when all the filters in the group evaluate to true."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+      "source_id": "S1",
+      "quote": "A BASE_REF filter can be used with pull request events only."
+    }
+  ],
+  "difficulty": 3,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

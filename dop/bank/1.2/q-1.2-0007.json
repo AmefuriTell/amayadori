@@ -1,0 +1,66 @@
+{
+  "id": "q-1.2-0007",
+  "task": "1.2",
+  "services": [
+    "Amazon ECS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon ECS service runs a container whose health check command returns a non-zero exit code until the application finishes loading, which takes about 90 seconds. The health check uses the default interval, timeout, and retries. New tasks are marked unhealthy and replaced before they finish starting. The team wants failed checks during startup to be ignored without weakening checks afterward. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set retries in the container health check to 20."
+    },
+    {
+      "key": "B",
+      "text": "Set interval in the container health check to 400 seconds."
+    },
+    {
+      "key": "C",
+      "text": "Set startPeriod in the container health check to 120 seconds."
+    },
+    {
+      "key": "D",
+      "text": "Set timeout in the container health check to 90 seconds."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "コンテナのヘルスチェックは、コマンドの終了コード 0 で成功、0 以外で失敗とする。startPeriod は、起動の間の失敗を retries の回数に数えない猶予（0〜300 秒、既定は無効）。interval は 5〜300 秒、timeout は 2〜60 秒、retries は 1〜10 回。",
+    "per_choice": {
+      "A": "retries は 10 回まで。",
+      "B": "interval は 300 秒まで。起動の後の確かめも弱くなる。",
+      "C": "正しい。起動の間の失敗を数えず、その後は今までどおり確かめる。",
+      "D": "timeout は 60 秒まで。1 回の確かめの待ち時間で、起動の遅さの問題は解決しない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S1",
+      "quote": "The optional grace period to provide containers time to bootstrap in before failed health checks count towards the maximum number of retries."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S1",
+      "quote": "You can specify between 1 and 10 retries."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S1",
+      "quote": "You can specify between 5 and 300 seconds. The default value is 30 seconds."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+      "source_id": "S1",
+      "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

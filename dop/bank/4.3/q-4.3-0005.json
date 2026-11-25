@@ -1,0 +1,62 @@
+{
+  "id": "q-4.3-0005",
+  "task": "4.3",
+  "services": [
+    "Amazon S3",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Application servers upload raw log files to the bucket app-logs under the prefix raw/. An S3 event notification on all new objects invokes a Lambda function that parses each file and writes the result back to app-logs. After release, the function's invocations and costs grow without limit. The company wants to keep one bucket and keep processing every new raw file. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set the function's reserved concurrency to 0 until the backlog clears, and then remove the setting."
+    },
+    {
+      "key": "B",
+      "text": "Raise the account's Lambda concurrency limit so that the function can keep up with the growing number of events."
+    },
+    {
+      "key": "C",
+      "text": "Limit the notification to the prefix raw/, and have the function write its results under a different prefix such as processed/."
+    },
+    {
+      "key": "D",
+      "text": "Keep the notification on all objects, and add a suffix filter for .log while the function also writes .log files."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "S3 は、オブジェクトが作られた時に Lambda の関数を非同期で呼べる。関数が自分を呼んだのと同じバケットに書くと、呼び出しがくり返し続く。避けるには、バケットを 2 つにするか、入ってくるオブジェクトの prefix にだけトリガーを当てる。通知は key の prefix と suffix で絞れる。",
+    "per_choice": {
+      "A": "処理そのものが止まり、全ての新しいファイルを処理する要件に反する。",
+      "B": "くり返しは止まらず、費用がさらに増える。",
+      "C": "正しい。raw/ にだけ反応し、結果は別の prefix に書くので、くり返しが止まる。",
+      "D": "結果も .log なので、書いた結果でまた関数が呼ばれる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+      "source_id": "S5",
+      "quote": "If your Lambda Event Function uses the same bucket that triggers it, it could cause the function to run in a loop."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+      "source_id": "S5",
+      "quote": "To avoid this, use two buckets, or configure the trigger to only apply to a prefix used for incoming objects."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-filtering.html",
+      "source_id": "S4",
+      "quote": "You can configure notifications to be filtered by the prefix and suffix of the key name of objects."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

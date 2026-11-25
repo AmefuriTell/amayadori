@@ -1,0 +1,73 @@
+{
+  "id": "q-2.2-0007",
+  "task": "2.2",
+  "services": [
+    "AWS Organizations",
+    "Amazon EC2"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company with all features enabled in AWS Organizations wants the CostCenter tag key to use one consistent case, and wants tagging requests that set an invalid CostCenter value on Amazon EC2 instances to be blocked. The FinOps team also asks whether a tag policy will flag EC2 instances that have no CostCenter tag at all. Which statements are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A tag policy enforced for the EC2 instance resource type blocks noncompliant tagging requests."
+    },
+    {
+      "key": "B",
+      "text": "Resources that have no CostCenter tag are not evaluated for compliance with the tag policy."
+    },
+    {
+      "key": "C",
+      "text": "A tag policy evaluates untagged EC2 instances and reports them as noncompliant."
+    },
+    {
+      "key": "D",
+      "text": "Tag policies are available in organizations that have only consolidated billing features enabled."
+    },
+    {
+      "key": "E",
+      "text": "A tag policy blocks noncompliant tagging requests on every resource type, even without specifying resource types for enforcement."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+    "per_choice": {
+      "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+      "B": "正しい。タグの無いリソースは評価されない。",
+      "C": "タグの無いリソースは評価されない。",
+      "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+      "E": "強制されるのは、指定したリソースの種類だけ。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+      "source_id": "S5",
+      "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+      "source_id": "S5",
+      "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+      "source_id": "S5",
+      "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+      "source_id": "S5",
+      "quote": "Tag policies are available only in an organization that has all features enabled."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

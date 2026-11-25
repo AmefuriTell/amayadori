@@ -1,0 +1,62 @@
+{
+  "id": "q-6.2-0010",
+  "task": "6.2",
+  "services": [
+    "Amazon Macie",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations with 50 member accounts. The security team must manage Amazon Macie centrally from a security account, review S3 bucket information for member accounts, and enable Macie for member accounts without signing in to each one. Which approach BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Send Macie membership invitations from the security account to all 50 accounts, and have each account owner accept them."
+    },
+    {
+      "key": "B",
+      "text": "Sign in to each member account to enable Macie, and share the findings with the security team by email."
+    },
+    {
+      "key": "C",
+      "text": "Enable Macie only in the security account, because it automatically scans buckets in every member account."
+    },
+    {
+      "key": "D",
+      "text": "Integrate Macie with AWS Organizations, designate the security account as the Macie administrator, and enable Macie for the member accounts from it."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Macie の組織は、指定した Macie の管理者アカウントとメンバーアカウントでできる。つなぎ方は AWS Organizations との連携か、Macie の招待で、Organizations との連携が勧められている。Organizations でつないだ場合、Macie の管理者はメンバーアカウントで Macie を有効にでき、メンバーの S3 バケットの情報も見られる。",
+    "per_choice": {
+      "A": "動くが、各アカウントで受け入れる作業が要り、勧められている方法でもない。",
+      "B": "各アカウントに入る必要があり、要件に反する。",
+      "C": "管理者とメンバーの関係を作らないと、他のアカウントのバケットは見られない。",
+      "D": "正しい。勧められている Organizations との連携で、管理者が各メンバーで有効にできる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+      "source_id": "S6",
+      "quote": "We recommend that you integrate Macie with AWS Organizations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+      "source_id": "S6",
+      "quote": "If the accounts are associated through AWS Organizations, the Macie administrator can also enable Macie for member accounts in the organization."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+      "source_id": "S6",
+      "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,130 @@
+{
+  "item": "C-0014",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "task": "1.4",
+      "services": [
+        "AWS CodeArtifact",
+        "AWS CodeBuild",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeBuild project's service role has an IAM policy that allows codeartifact:GetAuthorizationToken and codeartifact:ReadFromRepository for the company's domain and repository. The build's login step to CodeArtifact fails with an access denied error, and npm cannot install packages. Which change will fix the problem with the LEAST privilege?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add sts:GetServiceBearerToken to the service role's policy."
+        },
+        {
+          "key": "B",
+          "text": "Attach the AWSCodeArtifactAdminAccess managed policy to the service role."
+        },
+        {
+          "key": "C",
+          "text": "Run the login step with the account's root user credentials stored in Secrets Manager."
+        },
+        {
+          "key": "D",
+          "text": "Set the authorization token lifetime to 24 hours so that the token does not expire during the build."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "task": "1.4",
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A nightly data job runs for about 14 hours and downloads Python packages from AWS CodeArtifact at several points during the run. It gets a CodeArtifact authorization token once at the start with the default settings. The job always fails late in the run with authentication errors. Which change BEST fixes the problem?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Request the token with a lifetime of 24 hours at the start of the job."
+        },
+        {
+          "key": "B",
+          "text": "Fetch a new authorization token before the current one expires, for example before each download step."
+        },
+        {
+          "key": "C",
+          "text": "Attach the AWSCodeArtifactReadOnlyAccess managed policy so that the token never expires."
+        },
+        {
+          "key": "D",
+          "text": "Keep one token for the whole run, because CodeArtifact renews the token automatically while it is in use."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "task": "1.4",
+      "services": [
+        "Amazon ECS",
+        "AWS Fargate",
+        "Amazon ECR",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A new Amazon ECS service on AWS Fargate fails to start because the image cannot be pulled from a private Amazon ECR repository in the same account. After it starts, the application code in the container must write objects to an Amazon S3 bucket. The security team requires each permission to be granted to the right role. Which actions should the company take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach the AmazonECSTaskExecutionRolePolicy managed policy to the task execution role."
+        },
+        {
+          "key": "B",
+          "text": "Grant the S3 write permissions to the task IAM role."
+        },
+        {
+          "key": "C",
+          "text": "Grant the ECR pull permissions to the task IAM role instead of the task execution role."
+        },
+        {
+          "key": "D",
+          "text": "Grant the S3 write permissions to the task execution role so that the container can use them."
+        },
+        {
+          "key": "E",
+          "text": "Make the ECR repository public so that no role needs pull permissions."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Amazon S3",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "AWS CodeDeploy deployments to Amazon EC2 instances fail because the CodeDeploy agent cannot download the application revision from the S3 bucket deploy-artifacts. The instances have no instance profile. The security team requires least privilege and does not allow public buckets. Which solution meets these requirements with the LEAST privilege?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an instance profile whose role allows reading objects only from the deploy-artifacts bucket."
+        },
+        {
+          "key": "B",
+          "text": "Attach an instance profile whose role allows all S3 actions on all buckets."
+        },
+        {
+          "key": "C",
+          "text": "Add S3 read permissions to the CodeDeploy service role, and keep the instances without an instance profile."
+        },
+        {
+          "key": "D",
+          "text": "Make the deploy-artifacts bucket public so that the agent can download revisions without credentials."
+        }
+      ]
+    }
+  ]
+}

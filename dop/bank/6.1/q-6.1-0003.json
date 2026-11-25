@@ -1,0 +1,64 @@
+{
+  "id": "q-6.1-0003",
+  "task": "6.1",
+  "services": [
+    "IAM Access Analyzer",
+    "Amazon S3",
+    "AWS IAM",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations. The security team must find Amazon S3 buckets and IAM roles in any account whose resource-based policies allow access from principals outside the organization. The team wants a finding for each such resource and does not want to maintain scripts that parse policies. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use IAM last accessed information in each account to find resources that were used by external principals."
+    },
+    {
+      "key": "B",
+      "text": "Attach a permissions boundary to every IAM role so that external principals cannot use the roles."
+    },
+    {
+      "key": "C",
+      "text": "Run a scheduled script that reads every bucket policy and role trust policy and reports external principals."
+    },
+    {
+      "key": "D",
+      "text": "Use IAM Access Analyzer with the organization as the zone of trust, and review its findings."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "IAM Access Analyzer は、組織やアカウントのリソース（S3 バケットや IAM ロールなど）のうち、外部と共有されているものを見つける。リソースベースのポリシーを論理的に分析し、外部と共有されたリソースごとに検出結果（finding）を作る。",
+    "per_choice": {
+      "A": "最終アクセスの情報は、使っていないユーザー・ロール・権限を見つけて外すためのもので、外部との共有を見つけるものではない。",
+      "B": "境界は ID ベースのポリシーの上限を決めるもので、外部と共有されているリソースを見つけない。",
+      "C": "動くが、スクリプトを保守することになり、要件に反する。",
+      "D": "正しい。リソースベースのポリシーを分析し、外部と共有されたリソースごとに検出結果を作る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+      "source_id": "S6",
+      "quote": "IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, shared with an external entity."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+      "source_id": "S6",
+      "quote": "For each instance of a resource shared outside of your account, IAM Access Analyzer generates a finding."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+      "source_id": "S5",
+      "quote": "IAM provides last accessed information to help you identify the users, roles, permissions, policies, and credentials that you no longer need so that you can remove them."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

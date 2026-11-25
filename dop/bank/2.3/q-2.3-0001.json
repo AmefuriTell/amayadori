@@ -1,0 +1,62 @@
+{
+  "id": "q-2.3-0001",
+  "task": "2.3",
+  "services": [
+    "AWS Systems Manager",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs Amazon EC2 managed nodes in 20 AWS accounts across three Regions, all in AWS Organizations. The nodes must be scanned for missing patches every day and patched every Sunday. The operations team wants to manage this from a single configuration and does not want to create resources in each account and Region. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a maintenance window in each account and Region that runs a patch task every Sunday, and a second window for daily scans."
+    },
+    {
+      "key": "B",
+      "text": "Use the Patch now option from the console every Sunday, and review the compliance report each morning."
+    },
+    {
+      "key": "C",
+      "text": "Create a Patch Manager patch policy that targets the organization, with a daily scan schedule and a weekly install schedule."
+    },
+    {
+      "key": "D",
+      "text": "Create a State Manager association in each account and Region that runs the patching document on a weekly schedule."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "パッチポリシーは AWS Organizations と連携し、1 つのポリシーで複数のアカウントとリージョンのパッチを構成できる。スキャンとインストールに別々のスケジュールを設定できる。",
+    "per_choice": {
+      "A": "スケジュールは満たすが、アカウントとリージョンごとに作ることになり、1 つの設定で管理する要件に反する。",
+      "B": "Patch now はその場で行う操作で、毎週人が押すことになり、毎日のスキャンも自動にならない。",
+      "C": "正しい。組織全体に 1 つのポリシーで、毎日のスキャンと毎週のインストールを分けて設定できる。",
+      "D": "アカウントとリージョンごとに作ることになり、毎日のスキャンも別に要る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S1",
+      "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S1",
+      "quote": "Scheduling flexibility – Set different schedules for scanning and installing patches using custom CRON or Rate expressions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+      "source_id": "S1",
+      "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

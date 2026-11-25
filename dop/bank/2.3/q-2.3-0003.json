@@ -1,0 +1,73 @@
+{
+  "id": "q-2.3-0003",
+  "task": "2.3",
+  "services": [
+    "AWS Systems Manager",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company requires a monitoring agent on every managed node tagged Env=Prod. If the agent is removed, it must be installed again within one day. The compliance team also needs to query, from a central location, which nodes run the required software versions. The company wants to use managed AWS features instead of custom scripts. Which actions should the company take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a State Manager association that targets the Env=Prod tag and installs the agent on a daily schedule."
+    },
+    {
+      "key": "B",
+      "text": "Configure Systems Manager Inventory to collect metadata from the nodes and store it in a central S3 bucket."
+    },
+    {
+      "key": "C",
+      "text": "Configure Systems Manager Inventory to install the agent on nodes where the agent is missing."
+    },
+    {
+      "key": "D",
+      "text": "Run an AWS Lambda function every day that connects to each node over SSH and reinstalls the agent."
+    },
+    {
+      "key": "E",
+      "text": "Use the Patch Manager Patch now option every day on the Env=Prod nodes to reinstall the agent and report software versions."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "State Manager の関連付けは、保ちたい状態とスケジュールと対象を決め、タグでも対象を選べる。ソフトが入っていなければ入れるよう指示できる。Inventory は管理ノードからメタデータを集め、中央の S3 バケットに置いて問い合わせできる。",
+    "per_choice": {
+      "A": "正しい。Env=Prod のタグで選び、毎日望む状態に戻す。",
+      "B": "正しい。メタデータを中央の S3 に集め、必要なソフトや設定のノードを調べられる。",
+      "C": "Inventory はメタデータを集めるだけで、ソフトを入れない。",
+      "D": "動くかもしれないが、自分のコードを持つことになり、要件に反する。",
+      "E": "Patch now はその場で行うパッチの操作で、毎日人が行うことになる。ソフトの入っている状態を保つ仕組みでも、メタデータを中央に集めて問い合わせる仕組みでもない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+      "source_id": "S3",
+      "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+      "source_id": "S3",
+      "quote": "If the software isn't installed on a node, then the association could instruct State Manager to install it."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+      "source_id": "S3",
+      "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+      "source_id": "S4",
+      "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

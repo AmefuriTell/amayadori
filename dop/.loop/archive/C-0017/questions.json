@@ -1,0 +1,286 @@
+{
+  "item": "C-0017",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company deploys new versions of an AWS Lambda function by using AWS CodeDeploy. The operations team wants each release to first receive a small portion of production traffic. If no problems are found, all remaining traffic must move to the new version five minutes later. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaCanary10Percent5Minutes deployment configuration."
+        },
+        {
+          "key": "B",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaLinear10PercentEvery1Minute deployment configuration."
+        },
+        {
+          "key": "C",
+          "text": "Configure the deployment group to use the CodeDeployDefault.LambdaAllAtOnce configuration and monitor errors after release."
+        },
+        {
+          "key": "D",
+          "text": "Run a scheduled script that calls update-alias to change the alias routing weights every five minutes."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "LambdaCanary10Percent5Minutes は、最初に 10% の通信を新しい版へ移し、残りの 90% を 5 分後に移す決まった設定。要件の「少しだけ先に流し、5 分後に残り全部」にそのまま合い、作る物も無い。",
+        "per_choice": {
+          "A": "正しい。最初に 10%、5 分後に残りの 90% を移す canary の設定。",
+          "B": "linear は 1 分ごとに 10% ずつ移すので、全部移るまで約 10 分かかり、「5 分後に残り全部」と合わない。",
+          "C": "全部を一度に移すので、先に一部だけ流す要件に合わない。",
+          "D": "エイリアスの重みを自分で変えれば動くが、スクリプトを作って保守する手間がかかる。CodeDeploy の決まった設定で足りる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html",
+          "source_id": "S1",
+          "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.4-0002",
+      "task": "1.4",
+      "services": [
+        "Amazon ECS",
+        "AWS CodeDeploy",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs an Amazon ECS service behind a Network Load Balancer and deploys it with AWS CodeDeploy blue/green deployments. The company now wants to send 10% of production traffic to each new version for 5 minutes before shifting the rest. Which solution will meet this requirement with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a custom canary deployment configuration in CodeDeploy and keep the Network Load Balancer."
+        },
+        {
+          "key": "B",
+          "text": "Switch the deployment group to CodeDeployDefault.ECSLinear10PercentEvery1Minutes and keep the Network Load Balancer."
+        },
+        {
+          "key": "C",
+          "text": "Move the service to an Application Load Balancer and use CodeDeployDefault.ECSCanary10Percent5Minutes."
+        },
+        {
+          "key": "D",
+          "text": "Keep CodeDeployDefault.ECSAllAtOnce and add a manual approval before each production deployment."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと、使える設定は ECSAllAtOnce だけ。canary で一部だけ流すには Application Load Balancer に替え、ECSCanary10Percent5Minutes を使う。",
+        "per_choice": {
+          "A": "Network Load Balancer では ECSAllAtOnce しか使えないので、独自の canary 設定も使えない。",
+          "B": "linear の設定も Network Load Balancer では使えない。また 1 分ごとに 10% ずつで、要件の形とも違う。",
+          "C": "正しい。Application Load Balancer なら canary の決まった設定が使え、10% を 5 分流してから残りを移せる。",
+          "D": "承認を挟んでも一度に全部を移すことは変わらず、一部だけ先に流す要件に合わない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "source_id": "S3",
+          "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "source_id": "S3",
+          "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.4-0003",
+      "task": "1.4",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2",
+        "Elastic Load Balancing"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses AWS CodeDeploy blue/green deployments for an application on Amazon EC2 instances behind an Application Load Balancer. The QA team must test the replacement instances before they receive any production traffic, and the team will decide when to switch. After the switch, the original instances must stay running until the operations team decides to remove them. Which deployment group settings meet these requirements? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Select the traffic rerouting option \"Reroute traffic immediately.\""
+        },
+        {
+          "key": "B",
+          "text": "Select the traffic rerouting option \"I will choose whether to reroute traffic.\""
+        },
+        {
+          "key": "C",
+          "text": "Select \"Terminate the original instances in the deployment group\" with a one-hour wait period."
+        },
+        {
+          "key": "D",
+          "text": "Select \"Keep the original instances in the deployment group running.\""
+        },
+        {
+          "key": "E",
+          "text": "Use an in-place deployment with the CodeDeployDefault.OneAtATime configuration."
+        }
+      ],
+      "answer": [
+        "B",
+        "D"
+      ],
+      "explanation": {
+        "summary": "「I will choose whether to reroute traffic」にすると、置き換え先のインスタンスは手で切り替えるまでロードバランサーに登録されないので、本番の通信を受けずに試験できる。「Keep the original instances … running」にすると、切り替えた後も元のインスタンスが動き続ける。",
+        "per_choice": {
+          "A": "用意ができしだい自動で登録されて本番の通信が流れるので、先に試験する要件に合わない。",
+          "B": "正しい。手で切り替えるまで置き換え先は登録されない。",
+          "C": "待つ時間の後に元のインスタンスが自動で終了する。運用チームが決めるまで残す要件に合わない。",
+          "D": "正しい。切り替えた後も元のインスタンスを動かしたままにする。",
+          "E": "in-place は同じインスタンスを更新するので、置き換え先を先に試験できず、元の環境も残らない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "source_id": "S2",
+          "quote": "Instances in the replacement environment are not registered with the specified load balancers and target groups unless you manually reroute traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "source_id": "S2",
+          "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.4-0004",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a web application in an AWS Elastic Beanstalk environment. For each release, the company wants 10% of incoming traffic to go to the new version for 30 minutes. If the new instances stay healthy, all traffic must move to the new version and the old instances must be removed automatically. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set the deployment policy to Immutable and set the health check wait time to 30 minutes."
+        },
+        {
+          "key": "B",
+          "text": "Set the deployment policy to Rolling with additional batch and set the batch size to 10%."
+        },
+        {
+          "key": "C",
+          "text": "Set the deployment policy to TrafficSplitting with a 10% traffic split and a 30-minute evaluation time."
+        },
+        {
+          "key": "D",
+          "text": "Create a second environment and use Amazon Route 53 weighted records to move traffic by hand."
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Traffic splitting は、新しいインスタンス一式を立ち上げ、決めた割合の通信を決めた時間だけ新しい版へ流し、問題が無ければ全部を移して古いインスタンスを終了する。割合（Traffic split）と時間（evaluation time）を設定するだけでよい。",
+        "per_choice": {
+          "A": "Immutable は新しいインスタンス一式を別の Auto Scaling グループで立ち上げるが、一部の通信だけを一定時間流す仕組みではない。",
+          "B": "バッチごとに順にインスタンスを入れ替える方式で、通信の 10% を 30 分流してから判断する形にはならない。",
+          "C": "正しい。割合と評価の時間を決めるだけで canary の形になり、古いインスタンスも自動で終了する。",
+          "D": "動くが、環境を 2 つ持ち、重みを手で変える手間がかかる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "source_id": "S5",
+          "quote": "It then forwards a specified percentage of incoming client traffic to the new application version for a specified evaluation period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "source_id": "S5",
+          "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    },
+    {
+      "id": "q-1.4-0005",
+      "task": "1.4",
+      "services": [
+        "AWS Elastic Beanstalk"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company updates an application in an AWS Elastic Beanstalk environment by using in-place updates, and users see brief outages during releases. The company wants to test each new version at its own URL before release, switch users to it instantly, and be able to switch back quickly. Which solution meets these requirements with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the deployment policy to Rolling and reduce the batch size to one instance."
+        },
+        {
+          "key": "B",
+          "text": "Deploy the new version to a separate environment and use Swap environment URLs."
+        },
+        {
+          "key": "C",
+          "text": "Change the deployment policy to Immutable for all future application releases."
+        },
+        {
+          "key": "D",
+          "text": "Deploy to a separate environment and terminate the old environment right after switching DNS."
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Elastic Beanstalk の blue/green は、新しい版を別の環境に置き、2 つの環境の CNAME を入れ替える（Swap environment URLs）。入れ替える前に新しい環境の URL で試験でき、入れ替えはすぐ効き、もう一度入れ替えれば戻せる。",
+        "per_choice": {
+          "A": "同じ環境の中でインスタンスを順に更新するので、新しい版を別の URL で先に試験できない。",
+          "B": "正しい。別の環境で試験してから CNAME を入れ替え、戻すときも入れ替えるだけ。",
+          "C": "Immutable は止まらずに更新できるが、同じ環境の中の更新なので、別の URL で先に試験して入れ替える形にはならない。",
+          "D": "DNS の変更が行き渡り古い記録が切れるまで、古い環境は終了してはいけない。すぐ終了すると戻せない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "source_id": "S6",
+          "quote": "deploy the new version to a separate environment, and then swap the CNAMEs of the two environments to redirect traffic to the new version instantly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "source_id": "S6",
+          "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-25"
+    }
+  ]
+}

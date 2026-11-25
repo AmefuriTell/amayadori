@@ -1,0 +1,135 @@
+{
+  "item": "C-0071",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "属性ベースのアクセス制御（ABAC）は、タグという属性で権限を決める。主体のタグとリソースのタグが一致する時に操作を許す 1 つのポリシーで済み、新しいリソースを足してもポリシーを変えなくてよい。従来の役割ベース（RBAC）は職務ごとにポリシーを作り、リソースが増えるたびにポリシーの更新が要る。",
+        "per_choice": {
+          "A": "正しい。1 つのポリシーで、タグが一致するリソースだけに許す。",
+          "B": "ポリシーの数は減らず、更新をスクリプトで続けることになる。",
+          "C": "職務別のマネージドポリシーは RBAC の考え方で、プロジェクトごとのリソースに絞れない。",
+          "D": "最小権限に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S1",
+          "quote": "You can design ABAC policies that allow operations when the principal's tag matches the resource tag."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S2",
+          "quote": "The disadvantage to using the traditional RBAC model is that when you or your users add new resources to your environment, you have to update the policies to allow access to those resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "source_id": "S2",
+          "quote": "ABAC requires fewer policies."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "IAM Identity Center の Attributes for access control で、ポリシーで使うユーザーの属性（例 Department）を選ぶ。IAM Identity Center はその属性を、入る先のアカウントへセッションタグとして渡し、ポリシーでは aws:PrincipalTag/タグのキー の条件で参照できる。属性がバケットのタグと一致する時だけ許すポリシーを権限セットに書く。",
+        "per_choice": {
+          "A": "正しい。Department の属性をセッションタグとして渡すようにする。",
+          "B": "正しい。1 つの権限セットで、部署が一致するバケットだけに許す。",
+          "C": "部署ごとの権限セットを作ることになり、要件に反する。",
+          "D": "IAM ユーザーを作らない要件に反する。",
+          "E": "バケットごとに書き足すことになり、属性で決める仕組みにならない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "While on the Attributes for access control page, you select the Department user attribute for use with attribute-based access control (ABAC)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "they are sent as session tags that you can reference using the aws:PrincipalTag/tag-key condition key in all relevant AWS IAM policy types."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "source_id": "S4",
+          "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "権限セットは 1 つ以上の IAM ポリシーをまとめたテンプレートで、1 つの権限セットで複数のアカウントへのアクセスを与えられる。割り当てると IAM Identity Center が各アカウントにロールを作り、権限セットを変えるとロールとポリシーも更新される。割り当ては個人よりグループにするのが勧められ、1 回に選べるアカウントは 10 まで。",
+        "per_choice": {
+          "A": "正しい。グループに割り当てれば人の出入りはグループの変更だけで済み、権限セットを変えれば全アカウントに反映される。",
+          "B": "人が入れ替わるたびに割り当てを直すことになる。グループに割り当てるのが勧められている。",
+          "C": "25 個のロールを自分で保つことになり、手間が大きい。",
+          "D": "同じ権限を 25 個の権限セットで保つことになり、変更の手間が増える。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html",
+          "source_id": "S5",
+          "quote": "As you modify the permission set, IAM Identity Center ensures that the corresponding IAM policies and roles are updated accordingly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "source_id": "S6",
+          "quote": "we recommended that you assign access directly to groups rather than to individual users."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "source_id": "S6",
+          "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0004",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "混乱した代理（confused deputy）は、権限の無い者がより権限のある者に操作をさせる問題。外部 ID をロールの信頼ポリシーの条件で求めると防げる。外部 ID は業者が顧客ごとに一意に作って管理する値で、顧客が自分で決めるものではない。別の顧客が ARN を渡しても、業者が要求に入れる外部 ID は操れない。",
+        "per_choice": {
+          "A": "正しい。業者が顧客ごとに決めた外部 ID を条件にする。",
+          "B": "外部 ID は業者が作って管理する値で、顧客が自分で決めるものではない。",
+          "C": "業者のアカウントは他の顧客のためにも動くので、別の顧客が ARN を渡すと業者が代わりに入れてしまう。",
+          "D": "長く使う認証情報を外部に渡すことになり、混乱した代理の問題も解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "The primary function of the external ID is to address and prevent the confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "The ExternalId value must be unique among Example Corp's customers and controlled by Example Corp, not its customers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "source_id": "S7",
+          "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ]
+    }
+  ]
+}

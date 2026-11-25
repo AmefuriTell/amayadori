@@ -1,0 +1,12 @@
+{"item":"C-0070","questions":[
+{"qid":"q-6.1-0001","blind":{"answer":["A"],"confidence":"high","reason":"iam:CreateRole を境界ポリシー付きに限定する委任の定番"},"match":true,
+"issues":[
+{"kind":"style","where":"explanation B","detail":"「開発者自身の境界では、開発者が作るロールの上限にならない」は sources.md に無い。事実としては正しく、正解の決定には関わらない。","source":"S3"},
+{"kind":"style","where":"explanation C","detail":"「アカウント全体の上限になり他のチームも止まる」は SCP の説明が sources.md に無いが、事実として正しく、題意から明らか。","source":""},
+{"kind":"style","where":"explanation A","detail":"「必ず境界が付く」は iam:PermissionsBoundary 条件でロール作成を縛る前提（選択肢 A の文で述べている）。sources.md に条件キーの記述は無いが、選択肢の文が前提を明示している。","source":"S3"}],
+"verdict":"ok"},
+{"qid":"q-6.1-0002","blind":{"answer":["B"],"confidence":"high","reason":"Access Analyzer の CloudTrail ベースのポリシー生成"},"match":true,"issues":[],"verdict":"ok"},
+{"qid":"q-6.1-0003","blind":{"answer":["C"],"confidence":"high","reason":"組織を信頼ゾーンにした Access Analyzer の外部アクセス検出"},"match":true,
+"issues":[{"kind":"style","where":"choice C","detail":"「zone of trust」は sources.md の引用に無い用語（組織を分析対象にする意味で正しい）。","source":"S6"}],"verdict":"ok"},
+{"qid":"q-6.1-0004","blind":{"answer":["A","C"],"confidence":"high","reason":"許可は identity と boundary の共通部分、明示 deny 優先"},"match":true,
+"issues":[{"kind":"style","where":"stem","detail":"s3:GetObject 等はオブジェクト ARN、ListBucket はバケット ARN が対象で、「on the bucket」は厳密には曖昧。ただし正解は変わらない。","source":"S1"}],"verdict":"ok"}]}

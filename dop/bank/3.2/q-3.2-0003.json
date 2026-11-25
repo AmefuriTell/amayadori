@@ -1,0 +1,57 @@
+{
+  "id": "q-3.2-0003",
+  "task": "3.2",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Auto Scaling group uses a target tracking scaling policy with a target of 50% average CPU utilization. New instances run CPU-heavy initialization for about 5 minutes after launch. During that time, the group's average CPU rises and the policy launches more instances than needed. The company must keep the 50% target for normal operation and must not change the application. What should the company do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Raise the target value to 80% so that the initialization load does not trigger scale-out."
+    },
+    {
+      "key": "B",
+      "text": "Lower the target value to 30% so that capacity is added earlier and the average CPU stays low."
+    },
+    {
+      "key": "C",
+      "text": "Set an instance warmup time of about 5 minutes in the target tracking scaling policy."
+    },
+    {
+      "key": "D",
+      "text": "Disable scale-in on the scaling policy so that the extra instances are not terminated."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "新しいインスタンスのウォームアップの時間を決めると、その時間が過ぎるまで、そのインスタンスは Auto Scaling グループのメトリクスの集計に入らない。ウォームアップ中は、ウォームアップしていないインスタンスの値が目標を超えた時だけ増やす。",
+    "per_choice": {
+      "A": "50% の目標を保つ要件に反する。",
+      "B": "目標を変えることになり、増やしすぎもさらにひどくなる。",
+      "C": "正しい。初期化の間の CPU が集計に入らないので、余計に増えない。",
+      "D": "余計なインスタンスが残り続けるだけで、増やしすぎは止まらない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+      "source_id": "S5",
+      "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+      "source_id": "S5",
+      "quote": "While instances are in the warmup period, your scaling policies only scale out if the metric value from instances that are not warming up is greater than the policy's target utilization."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

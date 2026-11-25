@@ -1,0 +1,98 @@
+{
+  "item": "C-0052",
+  "questions": [
+    {
+      "id": "q-4.2-0001",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudWatch は、同じ名前のメトリクスでも、ディメンションの組ごとに別のメトリクスとして扱う。取り出せるのは、実際に発行したディメンションの組だけで、名前空間・名前・ディメンションは作った時と同じ値を指定する。Service だけの組で見たいなら、その組でも発行する。SEARCH の式にはアラームを作れない。",
+        "per_choice": {
+          "A": "組ごとに別のメトリクスで、自動ではまとめられない。",
+          "B": "正しい。Service だけの組でも発行すれば、その組にアラームを付けられる。",
+          "C": "名前空間は作った時と同じ値を指定する必要がある。",
+          "D": "SEARCH の式にはアラームを作れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S2",
+          "quote": "CloudWatch treats each unique combination of dimensions as a separate metric, even if the metrics have the same metric name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S2",
+          "quote": "You can only retrieve statistics using combinations of dimensions that you specifically published."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+          "source_id": "S4",
+          "quote": "You can't create an alarm based on the SEARCH expression."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "高い解像度のメトリクスには、10 秒か 30 秒の期間の高い解像度のアラームを付けられる（60 秒の倍数のふつうのアラームも可）。パーセンタイルの統計は、カスタムメトリクスなら要約していない生のデータ点を発行した時に使える。アラームは 1 つのメトリクスか、1 本の時系列を作るメトリクスの数式に付けられ、SEARCH の式には付けられない。",
+        "per_choice": {
+          "A": "正しい。生のデータ点で p99 が使え、10 秒の期間で 30 秒以内に気づける。",
+          "B": "正しい。数式で率を作り、1 本の時系列にアラームを付ける。",
+          "C": "パーセンタイルは要約していない生のデータ点が要る。",
+          "D": "10 秒や 30 秒の期間は高い解像度のアラームのもので、ふつうのアラームは 60 秒の倍数。",
+          "E": "SEARCH の式にはアラームを作れない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S1",
+          "quote": "you can specify a high-resolution alarm with a period of 10 seconds or 30 seconds, or you can set a regular alarm with a period of any multiple of 60 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html",
+          "source_id": "S3",
+          "quote": "Percentile statistics are available for custom metrics as long as you publish the raw, unsummarized data points for your custom metric."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html",
+          "source_id": "S4",
+          "quote": "The expression that you choose for the alarm must produce a single time series and show only one line on the graph."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0003",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "EC2 のインスタンスごとのメトリクスのアラームには、停止・終了・再起動・復旧のアクションを付けられる。復旧（recover）のアクションは StatusCheckFailed_System でだけ使え、StatusCheckFailed_Instance では使えない。対応するのは一部のインスタンスの種類だけ。",
+        "per_choice": {
+          "A": "正しい。システムの状態の確認の失敗で、自動で復旧する。",
+          "B": "復旧のアクションは StatusCheckFailed_Instance では使えない。",
+          "C": "インスタンスが終了してしまい、同じインスタンスとして動き続ける要件に反する。",
+          "D": "人が起こし直すことになり、自動で戻す要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+          "source_id": "S6",
+          "quote": "The recover action can be used only with StatusCheckFailed_System, not with StatusCheckFailed_Instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html",
+          "source_id": "S5",
+          "quote": "The main difference between using the stop and the terminate alarm actions is that you can easily restart a stopped instance if you need to run it again later."
+        }
+      ]
+    }
+  ]
+}

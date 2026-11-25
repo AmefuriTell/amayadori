@@ -1,0 +1,203 @@
+{
+  "item": "C-0008",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "task": "1.2",
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Amazon ECS service runs a container whose health check command returns a non-zero exit code until the application finishes loading, which takes about 90 seconds. The health check uses the default interval, timeout, and retries. New tasks are marked unhealthy and replaced before they finish starting. The team wants failed checks during startup to be ignored without weakening checks afterward. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set startPeriod in the container health check to 120 seconds."
+        },
+        {
+          "key": "B",
+          "text": "Set retries in the container health check to 20."
+        },
+        {
+          "key": "C",
+          "text": "Set interval in the container health check to 400 seconds."
+        },
+        {
+          "key": "D",
+          "text": "Set timeout in the container health check to 90 seconds."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "コンテナのヘルスチェックは、コマンドの終了コード 0 で成功、0 以外で失敗とする。startPeriod は、起動の間の失敗を retries の回数に数えない猶予（0〜300 秒、既定は無効）。interval は 5〜300 秒、timeout は 2〜60 秒、retries は 1〜10 回。",
+        "per_choice": {
+          "A": "正しい。起動の間の失敗を数えず、その後は今までどおり確かめる。",
+          "B": "retries は 10 回まで。",
+          "C": "interval は 300 秒まで。起動の後の確かめも弱くなる。",
+          "D": "timeout は 60 秒まで。1 回の確かめの待ち時間で、起動の遅さの問題は解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "The optional grace period to provide containers time to bootstrap in before failed health checks count towards the maximum number of retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 1 and 10 retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 5 and 300 seconds. The default value is 30 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S1",
+          "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-1.2-0002",
+      "task": "1.2",
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An Amazon ECS task has an application container and a log-forwarding sidecar container. The essential parameter is omitted for both. When the sidecar crashes, the whole task stops. The team wants the sidecar's failure to leave the application running, and wants the task's health to reflect only whether the application is healthy. Which actions should the team take? (Choose TWO.)",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set essential to false for the sidecar container."
+        },
+        {
+          "key": "B",
+          "text": "Define a health check command for the application container, and keep it essential."
+        },
+        {
+          "key": "C",
+          "text": "Set essential to false for both containers."
+        },
+        {
+          "key": "D",
+          "text": "Add a health check command to the sidecar and keep it essential so that its health is reported too."
+        },
+        {
+          "key": "E",
+          "text": "Keep the essential parameter omitted for the sidecar, because omitted means non-essential."
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "essential が true のコンテナが止まると、タスクの他のコンテナも全て止まる。false なら他に影響しない。省くと essential とみなされ、タスクには少なくとも 1 つの essential のコンテナが要る。タスクの健全性は、essential でヘルスチェックのコマンドを持つコンテナだけで決まる。",
+        "per_choice": {
+          "A": "正しい。サイドカーが止まってもアプリは動き続ける。",
+          "B": "正しい。essential でヘルスチェックを持つアプリのコンテナだけで、タスクの健全性が決まる。",
+          "C": "タスクには少なくとも 1 つの essential のコンテナが要る。",
+          "D": "サイドカーの状態もタスクの健全性に入り、止まればタスクも止まる。",
+          "E": "省くと essential とみなされる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "If this parameter is omitted, a container is assumed to be essential."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "If the essential parameter of a container is marked as false, then its failure doesn't affect the rest of the containers in a task."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "source_id": "S2",
+          "quote": "All tasks must have at least one essential container."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html",
+          "source_id": "S3",
+          "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
+        }
+      ],
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "q-1.2-0003",
+      "task": "1.2",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS CodeDeploy deployment to Amazon EC2 instances runs a script in the ValidateService hook that polls the application until it returns healthy responses, which can take up to 4 minutes. The hook's timeout is set to 60 seconds, and deployments fail at ValidateService even when the application becomes healthy. The team must keep verifying the deployment before it is marked successful. What should the team do with the LEAST operational effort?",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Increase the timeout of the ValidateService hook to 300 seconds."
+        },
+        {
+          "key": "B",
+          "text": "Increase the timeout of the ValidateService hook to 7200 seconds."
+        },
+        {
+          "key": "C",
+          "text": "Move the polling script to the BeforeInstall hook."
+        },
+        {
+          "key": "D",
+          "text": "Remove the ValidateService hook so that deployments complete without the check."
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "hooks の timeout は、スクリプトが失敗とみなされるまでの秒数で、既定と最大は 3600 秒（1 時間）。超えるとデプロイが止まり、そのインスタンスへのデプロイは失敗する。ValidateService は最後のライフサイクルイベントで、デプロイがうまく終わったかを確かめるのに使う。",
+        "per_choice": {
+          "A": "正しい。4 分の確かめが収まる長さにする。",
+          "B": "1 つのライフサイクルイベントのスクリプトに許されるのは最大 3600 秒。",
+          "C": "BeforeInstall はアプリを入れる前で、入れた後の確かめにならない。",
+          "D": "成功とする前に確かめる要件に反する。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S4",
+          "quote": "The number of seconds to allow the script to execute before it is considered to have failed. The default is 3600 seconds (1 hour)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S4",
+          "quote": "3600 seconds (1 hour) is the maximum amount of time allowed for script execution for each deployment lifecycle event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "source_id": "S5",
+          "quote": "ValidateService – This is the last deployment lifecycle event. It is used to verify the deployment was completed successfully."
+        }
+      ],
+      "difficulty": 1,
+      "status": "draft",
+      "created": "2026-11-26",
+      "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い"
+    }
+  ]
+}

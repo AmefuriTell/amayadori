@@ -1,0 +1,57 @@
+{
+  "id": "q-3.1-0004",
+  "task": "3.1",
+  "services": [
+    "Amazon VPC"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Application servers run in private subnets in three Availability Zones. All private subnets route internet traffic through a single NAT gateway in AZ-a. During an outage of AZ-a, the servers in the other two Availability Zones also lost internet access. The company wants internet access to keep working in the remaining zones during a single-AZ outage. Which solution BEST meets this requirement?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a second NAT gateway in AZ-a, and split the private subnets between the two NAT gateways."
+    },
+    {
+      "key": "B",
+      "text": "Move the NAT gateway to AZ-b, and route all private subnets to it."
+    },
+    {
+      "key": "C",
+      "text": "Replace the NAT gateway with one that has more bandwidth, and keep the current routing."
+    },
+    {
+      "key": "D",
+      "text": "Create a NAT gateway in each Availability Zone, and route each private subnet to the NAT gateway in its own Availability Zone."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "NAT ゲートウェイは特定のアベイラビリティーゾーンに作られ、そのゾーンの中で冗長になっている。複数のゾーンの資源が 1 つの NAT ゲートウェイを共有すると、そのゾーンが落ちた時に他のゾーンの資源もインターネットに出られなくなる。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの NAT ゲートウェイを使うように経路を決める。",
+    "per_choice": {
+      "A": "2 つとも AZ-a にあるので、AZ-a が落ちると両方使えない。",
+      "B": "単一の障害点が AZ-b に移るだけ。",
+      "C": "ゾーンの障害に対する弱さは変わらない。",
+      "D": "正しい。1 つのゾーンが落ちても、他のゾーンは自分のゾーンの NAT ゲートウェイを使い続けられる。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+      "source_id": "S1",
+      "quote": "If you have resources in multiple Availability Zones and they share one NAT gateway, and if the NAT gateway's Availability Zone is down, resources in the other Availability Zones lose internet access."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+      "source_id": "S1",
+      "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "note": "P-009: 最新のドキュメントには、AZ をまたいで自動で高可用になる regional NAT gateway もある（S2）。試験は AZ ごとの NAT ゲートウェイの形を想定しているので、選択肢には入れていない",
+  "last_checked": "2026-11-26"
+}

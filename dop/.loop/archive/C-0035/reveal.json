@@ -1,0 +1,98 @@
+{
+  "item": "C-0035",
+  "questions": [
+    {
+      "id": "q-3.2-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "予約された同時実行（reserved concurrency）を関数に割り当てると、その分は他の関数が使えないので、他の関数の急増で使い切られない。ただし予約した実行環境は事前に初期化されていないので、コールドスタートを避けるには、事前に初期化した実行環境を用意する provisioned concurrency を使う。",
+        "per_choice": {
+          "A": "正しい。200 を予約すれば、他の関数がその分を使えない。",
+          "B": "正しい。事前に初期化した実行環境が、すぐにリクエストに応える。",
+          "C": "支払いの関数は守れるが、バッチの関数を制限しない要件に反する。",
+          "D": "バッチの関数を速くするだけで、支払いの関数が使い切られる問題は残る。",
+          "E": "メモリを増やしても、アカウントの同時実行を他の関数に使い切られる問題は解決しない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S2",
+          "quote": "When you dedicate reserved concurrency to an Event Function, no other Event Function can use that concurrency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S3",
+          "quote": "However, none of these environments come pre-initialized."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html",
+          "source_id": "S3",
+          "quote": "Lambda initializes that number of execution environments so that they are prepared to respond immediately to Event Function requests."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0002",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "warm pool は、起動にとても時間がかかる（例えば大量のデータをディスクに書く）アプリの遅れを減らす。warm pool を使えば、遅れを抑えるために Auto Scaling グループを過剰に用意しなくてよい。",
+        "per_choice": {
+          "A": "遅れは抑えられるが、過剰に用意する費用がさらに増える。",
+          "B": "正しい。起動の遅れを warm pool で減らし、過剰な最小の数をやめられる。",
+          "C": "ウォームアップの時間は、メトリクスに数え始める時を決めるだけで、起動そのものは速くならない。",
+          "D": "費用が増え、過剰に用意していることも変わらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+          "source_id": "S4",
+          "quote": "A warm pool gives you the ability to decrease latency for your applications that have exceptionally long boot times, for example, because instances need to write massive amounts of data to disk."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html",
+          "source_id": "S4",
+          "quote": "With warm pools, you no longer have to over-provision your Auto Scaling groups to manage latency in order to improve application performance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0003",
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "新しいインスタンスのウォームアップの時間を決めると、その時間が過ぎるまで、そのインスタンスは Auto Scaling グループのメトリクスの集計に入らない。ウォームアップ中は、ウォームアップしていないインスタンスの値が目標を超えた時だけ増やす。",
+        "per_choice": {
+          "A": "50% の目標を保つ要件に反する。",
+          "B": "正しい。初期化の間の CPU が集計に入らないので、余計に増えない。",
+          "C": "目標を変えることになり、増やしすぎもさらにひどくなる。",
+          "D": "余計なインスタンスが残り続けるだけで、増やしすぎは止まらない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html",
+          "source_id": "S5",
+          "quote": "While instances are in the warmup period, your scaling policies only scale out if the metric value from instances that are not warming up is greater than the policy's target utilization."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "q-5.1-0006",
+  "task": "5.1",
+  "services": [
+    "Amazon SQS",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A Lambda function receives batches of 10 messages from an Amazon SQS standard queue. When one message in a batch fails, all 10 messages become visible again and are processed again, which creates duplicate records downstream. The team must keep the batch size of 10 for throughput and avoid reprocessing messages that already succeeded. What should the team do with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Throw an exception from the function whenever any message in the batch fails."
+    },
+    {
+      "key": "B",
+      "text": "Increase the queue's visibility timeout so that failed batches wait longer before they are retried."
+    },
+    {
+      "key": "C",
+      "text": "Turn on ReportBatchItemFailures on the event source mapping, and return the IDs of the failed messages in batchItemFailures."
+    },
+    {
+      "key": "D",
+      "text": "Set the batch size to 1 so that each failure affects only one message."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "既定では、関数がバッチの処理で誤ると、うまく処理したメッセージも含めてバッチの全てのメッセージがキューに見えるようになる。イベントソースマッピングで ReportBatchItemFailures を指定し、応答の batchItemFailures に失敗したメッセージの ID を返すと、失敗した物だけがやり直される。関数が例外を投げると、バッチ全体が失敗とみなされる。",
+    "per_choice": {
+      "A": "例外を投げるとバッチ全体が失敗とみなされ、今と同じになる。",
+      "B": "やり直すまでの時間が延びるだけで、成功したメッセージもやり直される。",
+      "C": "正しい。失敗したメッセージだけがやり直される。",
+      "D": "バッチの大きさ 10 を保つ要件に反する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+      "source_id": "S3",
+      "quote": "To turn on partial batch responses, specify ReportBatchItemFailures for the FunctionResponseTypes action when configuring your event source mapping."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+      "source_id": "S3",
+      "quote": "If your function throws an exception, the entire batch is considered a complete failure."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+      "source_id": "S3",
+      "quote": "all messages in that batch become visible in the queue again by default, including messages that Lambda processed successfully."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

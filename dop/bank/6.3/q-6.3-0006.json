@@ -1,0 +1,56 @@
+{
+  "id": "q-6.3-0006",
+  "task": "6.3",
+  "services": [
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A custom metric counts failed sign-in attempts. Its normal value changes strongly by hour of day and day of week, so static thresholds either miss attacks at night or raise false alarms during business hours. The security team wants an alarm only when failures are unusually high for that time, not when they are unusually low. Which alarm BEST meets these requirements?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A static threshold alarm set to the highest value seen during business hours."
+    },
+    {
+      "key": "B",
+      "text": "An anomaly detection alarm that triggers when the metric is either above or below the band."
+    },
+    {
+      "key": "C",
+      "text": "An anomaly detection alarm that triggers when the metric is above the band of expected values."
+    },
+    {
+      "key": "D",
+      "text": "An anomaly detection alarm that triggers when the metric is below the band of expected values."
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "異常検知（anomaly detection）では、統計と機械学習で過去のデータから期待される値の範囲（バンド）を作る。異常検知のアラームは決まったしきい値を持たず、その時の期待値と比べる。バンドより上・下・どちらでも、のどれで鳴らすかを選べる。",
+    "per_choice": {
+      "A": "決まったしきい値で、夜の攻撃を見逃し、時間帯による変化に合わない。",
+      "B": "少なすぎる時にも鳴り、要件に反する。",
+      "C": "正しい。その時間帯にしては多すぎる時だけ鳴る。",
+      "D": "少なすぎる時に鳴り、多すぎる時には鳴らない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+      "source_id": "S3",
+      "quote": "These types of alarms don't have a static threshold for determining alarm state."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html",
+      "source_id": "S3",
+      "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,73 @@
+{
+  "id": "q-1.1-0007",
+  "task": "1.1",
+  "services": [
+    "AWS CodeBuild",
+    "Amazon ECR"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A team moved a CodeBuild project to AWS Lambda compute to shorten start-up time. The project builds Docker images and pushes them to Amazon ECR, and now every build fails when it runs docker build. The team needs the Docker builds to work again with the fewest changes to the buildspec. Which actions should the team take? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Change the project back to EC2 compute."
+    },
+    {
+      "key": "B",
+      "text": "Set privilegedMode to true in the project's environment."
+    },
+    {
+      "key": "C",
+      "text": "Keep Lambda compute and set privilegedMode to true."
+    },
+    {
+      "key": "D",
+      "text": "Keep Lambda compute and raise the build timeout to 60 minutes."
+    },
+    {
+      "key": "E",
+      "text": "Keep Lambda compute and switch to a reserved capacity fleet for Docker."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+    "per_choice": {
+      "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+      "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+      "C": "Lambda の計算は privileged モードに対応しない。",
+      "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+      "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+      "source_id": "S4",
+      "quote": "AWS Lambda doesn't support Docker builds or runs."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+      "source_id": "S4",
+      "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+      "source_id": "S6",
+      "quote": "Set to true only if you plan to use this build project to build Docker images. Otherwise, all associated builds that attempt to interact with the Docker daemon fail."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html",
+      "source_id": "S3",
+      "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

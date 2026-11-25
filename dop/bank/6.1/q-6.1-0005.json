@@ -1,0 +1,61 @@
+{
+  "id": "q-6.1-0005",
+  "task": "6.1",
+  "services": [
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company has 40 project teams, and each team uses an IAM role. Teams create new Amazon S3 buckets and DynamoDB tables every week. Today the security team writes a separate policy for each team that lists the ARNs of the team's resources, and must update the policies whenever a resource is added. The company wants least privilege with fewer policies and no policy updates when resources are added. Which approach meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep one policy per team, and add a script that appends new resource ARNs to the team's policy every night."
+    },
+    {
+      "key": "B",
+      "text": "Use the AWS managed job function policies for each team so that new resources are included automatically."
+    },
+    {
+      "key": "C",
+      "text": "Give every team role full access to S3 and DynamoDB, and review access logs each month."
+    },
+    {
+      "key": "D",
+      "text": "Tag each role and each resource with a project tag, and use one policy that allows access when the principal's tag matches the resource's tag."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "属性ベースのアクセス制御（ABAC）は、タグという属性で権限を決める。主体のタグとリソースのタグが一致する時に操作を許す 1 つのポリシーで済み、新しいリソースを足してもポリシーを変えなくてよい。従来の役割ベース（RBAC）は職務ごとにポリシーを作り、リソースが増えるたびにポリシーの更新が要る。",
+    "per_choice": {
+      "A": "ポリシーの数は減らず、更新をスクリプトで続けることになる。",
+      "B": "職務別のマネージドポリシーは RBAC の考え方で、プロジェクトごとのリソースに絞れない。",
+      "C": "最小権限に反する。",
+      "D": "正しい。1 つのポリシーで、タグが一致するリソースだけに許す。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+      "source_id": "S1",
+      "quote": "You can design ABAC policies that allow operations when the principal's tag matches the resource tag."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+      "source_id": "S2",
+      "quote": "The disadvantage to using the traditional RBAC model is that when you or your users add new resources to your environment, you have to update the policies to allow access to those resources."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+      "source_id": "S2",
+      "quote": "ABAC requires fewer policies."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
