@@ -1,0 +1,113 @@
+{
+  "item": "C-0036",
+  "questions": [
+    {
+      "id": "q-3.2-0001",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "予測スケーリングは、過去最大 14 日のメトリクスから 48 時間先までの必要な容量を予測する。最初に有効にした時は forecast only のモードで、予測は作るが実際には増やさない。予測に合わせて増やすには forecast and scale にする。既定では毎時の始めに増やし、pre-launch instances（SchedulingBufferTime）で、起動に時間がかかるインスタンスを前もって起こせる。",
+        "per_choice": {
+          "A": "正しい。予測に合わせて増やし、起動の時間の分だけ前もって起こす。",
+          "B": "forecast only では予測を作るだけで、待っても増やさない。",
+          "C": "決まった予定を持ち続けることになり、形が変わるたびに直す必要がある。",
+          "D": "作り直しても最初は forecast only のまま。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "In this mode, it generates capacity forecasts but does not actually scale your Auto Scaling group based on those forecasts."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "This causes Amazon EC2 Auto Scaling to launch new instances ahead of the forecasted demand, giving them time to boot and become ready to handle traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/predictive-scaling-policy-overview.html",
+          "source_id": "S1",
+          "quote": "When you first enable predictive scaling, it runs in forecast only mode."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0002",
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Network Load Balancer は、有効にした各アベイラビリティーゾーンにネットワークインターフェイスを作って固定の IP アドレスを持ち、それぞれに Elastic IP アドレスを 1 つ結び付けられる。接続を受けたノードは、各 TCP の接続をその間ずっと 1 つのターゲットに送る。Application Load Balancer はリスナーのルールを優先度の順に評価して振り分ける。",
+        "per_choice": {
+          "A": "正しい。ゾーンごとの固定の IP を相手のファイアウォールに登録でき、接続は 1 つのターゲットに留まる。",
+          "B": "パスでの振り分けは要らず、ゾーンごとの固定の IP という要件も満たさない。",
+          "C": "相手のファイアウォールは IP アドレスの一覧しか受け付けない。",
+          "D": "1 台のインスタンスが単一の障害点になる。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S3",
+          "quote": "With Network Load Balancers, Elastic Load Balancing creates a network interface for each Availability Zone that you enable, and uses it to get a static IP address."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S3",
+          "quote": "You can optionally associate one Elastic IP address with each network interface when you create the Network Load Balancer."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "source_id": "S4",
+          "quote": "Routes each individual TCP connection to a single target for the life of the connection."
+        }
+      ]
+    },
+    {
+      "id": "q-3.2-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "write-through ではデータベースに書くたびにキャッシュも更新するので、キャッシュのデータは古くならない。ただし新しいノードには、書かれるまでデータが無く、読まれないデータも入る。lazy loading を組み合わせれば足りないデータを読む時に入れられ、TTL を付ければ無駄な場所を減らせる。lazy loading だけだと、データベースの変更がキャッシュに反映されず古くなることがある。",
+        "per_choice": {
+          "A": "正しい。書くたびに更新するので、古い値が出ない。",
+          "B": "正しい。新しいノードの足りないデータを埋め、TTL で読まれないデータを減らす。",
+          "C": "lazy loading だけでは、データベースの変更がキャッシュに届かず古くなる。",
+          "D": "読まれないデータが残り続け、無駄が増える。",
+          "E": "lazy loading ではノードの障害は致命的ではない。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "Because the data in the cache is updated every time it's written to the database, the data in the cache is always current."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "You can minimize this by implementing lazy loading with write-through."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S6",
+          "quote": "By adding a time to live (TTL) value, you can minimize wasted space."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S5",
+          "quote": "This result occurs because there are no updates to the cache when data is changed in the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html",
+          "source_id": "S5",
+          "quote": "Node failures aren't fatal for your application."
+        }
+      ]
+    }
+  ]
+}
