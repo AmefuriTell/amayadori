@@ -1,0 +1,16 @@
+{
+  "item": "F-0004",
+  "goal": "q.mjs・g.mjs・dg.mjs に写してある、工程の共通の処理（項目 ID・工程の確認・直しの指示・検証の判定・出典の原文の照合）を tools/lib/step.mjs の 1 か所にまとめる",
+  "findings": ["dup:tools/dg.mjs|tools/g.mjs", "dup:tools/g.mjs|tools/q.mjs"],
+  "plan": [
+    "tools/lib/step.mjs に itemIdOf・requireState・failToFeedback・judge（検証役の判定 → ok/fix/drop と数えるか）・referenceErrors（出典の url と原文の照合）を作る",
+    "g.mjs と dg.mjs の verdict の本体を step.mjs の concludeBatch（束の結論・札・記録の書き出し）にまとめ、両方から呼ぶ",
+    "q.mjs の itemIdOf・requireState・failToFeedback・references の照合・verdict の判定の部分を step.mjs から使う（P-011・too_easy・recheck の扱いは q.mjs に残す）"
+  ],
+  "invariants": [
+    "ツールの出力（JSON）・札（result.json）・work/ に書くファイルの名前と形は変えない",
+    "検証役が fix と言って指摘が 0 件の時、q は fix、g・dg は ok のまま（違いは今のまま残し、直すかは別の案 P-017 にする）",
+    "試験のファイルは変えない"
+  ],
+  "allow_test_changes": []
+}

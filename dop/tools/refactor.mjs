@@ -58,7 +58,7 @@ function runTests(id) {
   const env = { ...process.env };
   delete env.NODE_TEST_CONTEXT;
   const unit = spawnSync('npm', ['test', '--silent'], { cwd: CODE, encoding: 'utf8', env });
-  const e2e = spawnSync('node', ['--test', '--test-concurrency=1', 'app/e2e/'], { cwd: CODE, encoding: 'utf8', env });
+  const e2e = spawnSync('node', ['--test', '--test-concurrency=1', 'app/e2e/**/*.e2e.js'], { cwd: CODE, encoding: 'utf8', env });
   const summary = (r) => (r.stdout.match(/^# (pass|fail) \d+$/gm) ?? []).join(' ');
   const file = writeReport(`${id}/tests.txt`, `## unit\n${unit.stdout}\n${unit.stderr}\n## e2e\n${e2e.stdout}\n${e2e.stderr}\n`);
   return { ok: unit.status === 0 && e2e.status === 0, unit: summary(unit), e2e: summary(e2e), file };

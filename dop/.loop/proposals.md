@@ -142,3 +142,15 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>refactor.mjs scan がコード（tools/・app/src）を測り（ファイル 400 行・関数 70 行・6 行の塊の重複。config/refactor.json）、超えた所をリファクタリングの項目（F-）として足す。loop start と、app・refactor の項目の loop close で自動で動く。F- は A1（直す計画と変えない物）→ A2 → A3 を通り、A3 は refactor.mjs check: 試験のファイルを変えていない（始めた時の git の位置と比べる）・直す所が消え新しく増えていない・unit と e2e の全部が通る、で確かめる</change>
 </proposal>
 ```
+
+## F-0004（2026-11-26）から
+
+```xml
+<proposal id="P-017" from="F-0004" status="proposed">
+  <issue>検証役が fix と言い指摘を 1 つも書かなかった時、q（問題）は直しに回すが、g（事典）・dg（図）は通してしまう。g・dg を q から写した時の違いで、意図した物ではない。リファクタリングでは振る舞いを変えないので残した（step.mjs の judge の emptyFixSevere）</issue>
+  <kind>tool</kind>
+  <change>g・dg も q と同じく直しに回す（emptyFixSevere を true にする）。試験を 1 つ足す。人が決める</change>
+</proposal>
+```
+
+- refactor.mjs check の中の e2e の呼び方が誤っていて（フォルダーを渡していた）、F-0004 の A3 で見つけて直した。項目のコードの誤りではない。

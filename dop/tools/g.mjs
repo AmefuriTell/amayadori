@@ -3,23 +3,15 @@
 // 事典の項目（G-）の束は work/<ID>/glossary.json に { "item": "<ID>", "entries": [ … ] } の形で置く。
 // 1 ページは schemas/glossary.schema.json。出来上がりは glossary/services/<id>.json（問題の services から名前で引く）。
 import fs from 'node:fs';
-import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, setResult, writeReport } from './lib/io.mjs';
+import { paths, readJSON, writeJSON, emit, main, ToolError, today, setResult, writeReport } from './lib/io.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, referenceErrors, concludeBatch } from './lib/step.mjs';
 import { validate as validateSchema } from './lib/schema.mjs';
-import { normalize, parseSources } from './lib/text.mjs';
+import { parseSources } from './lib/text.mjs';
 
 const SEVERE = new Set(['fact', 'unsupported', 'deprecated']);
 const MILD = new Set(['unclear', 'style']);
 
-function itemIdOf(arg) {
-  const id = typeof arg === 'string' ? (arg.match(/G-[0-9]{4}/)?.[0] ?? arg) : null;
-  if (!id || !ITEM_ID.test(id) || !id.startsWith('G-')) throw new ToolError('事典の項目 ID（例 G-0001）を渡す');
-  return id;
-}
-
-function requireState(id, state) {
-  const s = readJSON(paths.state(), { state: 'S0_pick', item: null });
-  if (s.state !== state || s.item !== id) throw new ToolError(`この操作は ${id} が ${state} の時だけ（今は ${s.state}${s.item ? ` / ${s.item}` : ''}）`);
-}
+const itemIdOf = (arg) => idOf(arg, { prefix: 'G', message: '事典の項目 ID（例 G-0001）を渡す' });
 
 function loadBatch(id) {
   const b = readJSON(paths.work(id, 'glossary.json'), null);
@@ -56,15 +48,7 @@ export function checkGlossary(id, batch = loadBatch(id)) {
     const refIds = new Set((e.references ?? []).map((r) => r.source_id));
     const used = [...(e.features ?? []), ...(e.exam_points ?? []), ...(e.compare ?? [])].map((x) => x?.source_id).filter(Boolean);
     for (const s of used) if (!refIds.has(s)) add('/references', `${s} を根拠に使っているが references に無い`);
-    (e.references ?? []).forEach((r, j) => {
-      if (!sources) { add(`/references/${j}`, `work/${id}/sources.md が無い`); return; }
-      const s = sources.find((x) => x.id === r.source_id);
-      if (!s) { add(`/references/${j}/source_id`, `${r.source_id} が sources.md に無い`); return; }
-      if (s.url && r.url && r.url.split('#')[0] !== s.url.split('#')[0]) add(`/references/${j}/url`, `${r.source_id} の url と違う`);
-      if (typeof r.quote === 'string' && !normalize(s.quote).includes(normalize(r.quote).replace(/^\.\.\.|\.\.\.$/g, '').trim())) {
-        add(`/references/${j}/quote`, `quote が ${r.source_id} の原文に無い（写すときは原文のまま）`);
-      }
-    });
+    referenceErrors(e.references, sources, add, id);
   });
   const missing = (item.services ?? []).filter((s) => !covered.has(s));
   if (missing.length) errors.push({ id: null, pointer: '/entries', message: `項目のサービスにページが無い: ${missing.join(', ')}（aliases に入れる）` });
@@ -93,12 +77,7 @@ export function gateGlossary(id) {
   return fails;
 }
 
-function failToFeedback(id, step, fails) {
-  const byE = {};
-  for (const f of fails) (byE[f.id ?? '(束)'] ??= []).push({ kind: f.check, detail: f.message });
-  writeJSON(paths.work(id, 'feedback.json'), { from: step, entries: byE });
-  appendLine(paths.work(id, 'history.jsonl'), { step, kinds: [...new Set(fails.map((f) => f.check))] });
-}
+const failToFeedback = (id, step, fails) => toFeedback(id, step, fails, { idField: 'id', key: 'entries' });
 
 const commands = {
   validate(args) {
@@ -119,42 +98,7 @@ const commands = {
   verdict(args) {
     const id = itemIdOf(args._[0]);
     requireState(id, 'C3_verify');
-    const batch = loadBatch(id);
-    const v = readJSON(paths.work(id, 'verify.json'), null);
-    if (!v || !Array.isArray(v.entries)) throw new ToolError(`work/${id}/verify.json が無い（検証役が書く）`);
-    const hist = readJSON(paths.work(id, 'ghistory.json'), {});
-    const results = {};
-    const feedback = {};
-    const kinds = new Set();
-    let anyCounted = false;
-    for (const e of batch.entries) {
-      const x = v.entries.find((y) => y.id === e.id);
-      if (!x) throw new ToolError(`verify.json に ${e.id} が無い`);
-      const issues = Array.isArray(x.issues) ? x.issues : [];
-      issues.forEach((i) => kinds.add(i.kind));
-      const severe = issues.some((i) => SEVERE.has(i.kind)) || (x.verdict === 'fix' && !issues.every((i) => MILD.has(i.kind)));
-      const mild = issues.some((i) => MILD.has(i.kind));
-      let verdict = severe || (mild && x.verdict === 'fix') ? 'fix' : 'ok';
-      if (x.verdict === 'drop') verdict = 'drop';
-      if (verdict === 'fix' && severe) {
-        hist[e.id] = (hist[e.id] ?? 0) + 1;
-        if (hist[e.id] >= 2) verdict = 'drop'; else anyCounted = true;
-      }
-      results[e.id] = verdict;
-      if (verdict === 'fix') feedback[e.id] = issues;
-    }
-    const kept = batch.entries.filter((e) => results[e.id] !== 'drop');
-    const dropped = batch.entries.filter((e) => results[e.id] === 'drop');
-    if (dropped.length) writeJSON(paths.work(id, 'dropped.json'), [...readJSON(paths.work(id, 'dropped.json'), []), ...dropped]);
-    writeJSON(paths.work(id, 'ghistory.json'), hist);
-    writeJSON(paths.work(id, 'glossary.json'), { ...batch, entries: kept });
-    const result = !kept.length ? 'drop' : Object.values(feedback).length ? 'fix' : 'pass';
-    if (result === 'fix') writeJSON(paths.work(id, 'feedback.json'), { from: 'C3_verify', entries: feedback });
-    writeJSON(paths.work(id, 'verdict.json'), { entries: results });
-    appendLine(paths.work(id, 'history.jsonl'), { step: 'C3_verify', result, kinds: [...kinds] });
-    setResult(id, 'C3_verify', result, { count: anyCounted });
-    const n = (k) => Object.values(results).filter((r) => r === k).length;
-    emit({ ok: true, summary: `ok ${n('ok')} / fix ${n('fix')} / drop ${n('drop')} → loop advance --result ${result}`, extra: { result } });
+    concludeBatch({ id, batch: loadBatch(id), batchFile: 'glossary.json', key: 'entries', histFile: 'ghistory.json', severe: SEVERE, mild: MILD, keepDropped: true });
   },
 
   gate(args) {
