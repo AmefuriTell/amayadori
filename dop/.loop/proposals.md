@@ -80,3 +80,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ```
 
 - C-0063（2026-11-25）: EventBridge のドキュメントにも新しい API（Custom Event Bus と Classic、CreateSubscriber、PutRawEvents、JSONata の変換、既定の再試行 5 回・300 秒）が出ていた。従来のルールの既定の再試行とは違う可能性があり、試験とずれるので、P-009 に沿って新旧で答えが変わる所（S5・S7）は問題にしなかった。
+
+```xml
+<proposal id="P-010" from="C-0065,C-0007" status="adopted">
+  <issue>正解の長さの偏り（len_bias）と All/None of the above は C4 の関門でしか見ておらず、落ちると検証（C3）を 1 往復やり直していた（C-0065 で 2 回）</issue>
+  <kind>tool</kind>
+  <change>q validate（書くたびの hook）でも同じ検査をする。利用者の不在中に、任された判断として入れた</change>
+</proposal>
+```

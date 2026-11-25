@@ -73,6 +73,9 @@ export function checkBatch(id, batch = loadBatch(id)) {
     if (pc !== [...keys].sort().join(',')) add('/explanation/per_choice', `全ての選択肢の解説が要る（あるのは ${pc || 'なし'}）`);
     if (tasks.length && !tasks.includes(q.task)) add('/task', `タスク番号 ${q.task} が config/exam.json に無い`);
     if (typeof q.stem === 'string' && !QUALIFIER.test(q.stem)) add('/stem', '条件の語（MOST / LEAST / BEST / Choose TWO）が無い');
+    // P-010: 関門（C4）でしか見ていなかった検査を書く時にも行う（検証を 1 往復むだにしないため）
+    for (const m of lengthBias(q)) add('/choices', m);
+    for (const c of q.choices) if (typeof c.text === 'string' && BANNED.test(c.text)) add('/choices', `選択肢 ${c.key} に All/None of the above`);
     if (q.type === 'multi' && typeof q.stem === 'string' && !/\(Choose (TWO|THREE)\.?\)/.test(q.stem)) add('/stem', 'multi は問題文に (Choose TWO.) か (Choose THREE.) を入れる');
 
     // 出典: sources.md の S 番号と原文
@@ -87,6 +90,15 @@ export function checkBatch(id, batch = loadBatch(id)) {
     });
   });
   return errors;
+}
+
+/** 正解の選択肢が、誤りの選択肢の平均の 1.5 倍より長い時の文 */
+export function lengthBias(q) {
+  const len = (c) => words(String(c.text ?? '')).length;
+  const right = q.choices.filter((c) => q.answer.includes(c.key));
+  const wrong = q.choices.filter((c) => !q.answer.includes(c.key));
+  const avgWrong = wrong.reduce((n, c) => n + len(c), 0) / Math.max(1, wrong.length);
+  return right.filter((c) => len(c) > avgWrong * 1.5).map((c) => `正解 ${c.key} が長すぎる（${len(c)} 語、他の平均 ${avgWrong.toFixed(0)} 語）。誤りの選択肢と同じくらいにする`);
 }
 
 // ---- gate -----------------------------------------------------------------
@@ -125,13 +137,8 @@ export function gateBatch(id, opts = {}) {
     }
 
     // len_bias: 正解が他の平均の 1.5 倍より長くない
-    const len = (c) => words(c.text).length;
+    for (const m of lengthBias(q)) fails.push({ check: 'len_bias', qid: q.id, message: m });
     const right = q.choices.filter((c) => q.answer.includes(c.key));
-    const wrong = q.choices.filter((c) => !q.answer.includes(c.key));
-    const avgWrong = wrong.reduce((n, c) => n + len(c), 0) / Math.max(1, wrong.length);
-    for (const c of right) {
-      if (len(c) > avgWrong * 1.5) fails.push({ check: 'len_bias', qid: q.id, message: `正解 ${c.key} が長すぎる（${len(c)} 語、他の平均 ${avgWrong.toFixed(0)} 語）` });
-    }
 
     // banned
     for (const c of q.choices) if (BANNED.test(c.text)) fails.push({ check: 'banned', qid: q.id, message: `選択肢 ${c.key} に All/None of the above` });

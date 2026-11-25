@@ -164,3 +164,11 @@ test('verdict: 検証役が ok にした言い回しの指摘は戻さない（P
   verify(sb, id, [{ qid: 'q-1.1-0001', blind: { answer: ['A'], confidence: 'mid' }, issues: [{ kind: 'style', detail: '補足は根拠に無いが正しい' }], verdict: 'ok' }]);
   assert.equal(sb.run('q', 'verdict', id).result, 'pass');
 });
+
+test('validate: 正解だけ長いと書く時点で落とす（P-010）', () => {
+  const sb = sandbox();
+  const long = question();
+  long.choices[0].text = 'Use CodeDeploy blue/green deployments with a linear configuration that shifts traffic in equal increments and rolls back automatically when alarms fire.';
+  const id = authored(sb, [long]);
+  assert.match(sb.run('q', 'validate', id).items.join('\n'), /正解 A が長すぎる/);
+});

@@ -1,0 +1,61 @@
+{
+  "id": "q-5.2-0004",
+  "task": "5.2",
+  "services": [
+    "AWS Systems Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A DevOps engineer must run a Systems Manager Automation runbook that changes a configuration file on 400 managed instances. No more than 20 instances may run the change at the same time. The company allows up to 5 instances to fail; after that, Systems Manager must stop sending the change to the remaining instances. Which approach meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run the automation with adaptive concurrency so that Systems Manager raises the number of concurrent runs automatically."
+    },
+    {
+      "key": "B",
+      "text": "Run the automation with rate control, set the concurrency to 20, and set the error threshold to 5."
+    },
+    {
+      "key": "C",
+      "text": "Write a script that starts the runbook on 20 instances, waits, counts failures, and repeats until all instances are done."
+    },
+    {
+      "key": "D",
+      "text": "Run the automation one instance at a time from the console, and stop when 5 instances have failed."
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "rate control の concurrency は、同時に自動化を動かしてよいリソースの数を決める。error threshold は、他のリソースへ送るのを止めるまでに失敗してよい自動化の数を決める。adaptive concurrency は、同時の数を 100 から 500 まで自動で増やす物。",
+    "per_choice": {
+      "A": "同時の数を自動で増やす物で、同時に 20 までに抑える要件に反する。",
+      "B": "正しい。concurrency で同時に動かす数を 20 にし、error threshold で止めるまでに許す失敗の数を 5 にする。",
+      "C": "自分でスクリプトを作ることになり、手間が大きい。",
+      "D": "1 台ずつの手作業になり、手間が大きい。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+      "source_id": "S6",
+      "quote": "The concurrency value determines how many resources are allowed to run the automation simultaneously."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+      "source_id": "S6",
+      "quote": "An error threshold determines how many automations are allowed to fail before Systems Manager stops sending the automation to other resources."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+      "source_id": "S6",
+      "quote": "Adaptive concurrency automatically scales your automation quota from 100 concurrently running automations up to 500."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

@@ -1,0 +1,69 @@
+{
+  "id": "q-5.2-0002",
+  "task": "5.2",
+  "services": [
+    "AWS AppConfig",
+    "Amazon CloudWatch",
+    "AWS IAM"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A DevOps engineer configures AWS AppConfig deployments with CloudWatch alarms as rollback monitors. The team wants to understand exactly when a rollback happens and what it needs, so that it can rely on the feature instead of watching each deployment. Which statements are correct? (Choose TWO.)",
+  "choices": [
+    {
+      "key": "A",
+      "text": "If a monitored alarm enters ALARM or INSUFFICIENT_DATA during a deployment, AWS AppConfig reverts to the previous configuration data."
+    },
+    {
+      "key": "B",
+      "text": "AWS AppConfig needs permissions to be configured before it can roll back deployments based on CloudWatch alarms."
+    },
+    {
+      "key": "C",
+      "text": "AWS AppConfig rolls back only after an operator approves the rollback in the console."
+    },
+    {
+      "key": "D",
+      "text": "A rollback redeploys the previous version of the application code to the compute targets."
+    },
+    {
+      "key": "E",
+      "text": "AWS AppConfig stops monitoring alarms as soon as the configuration reaches 100% of its targets."
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "配信の間に見張るアラームが ALARM か INSUFFICIENT_DATA になると、AppConfig は設定のデータを前の版へ自動で戻す。CloudWatch のアラームで戻すには、AppConfig に権限を設定しておく必要がある。100% に配った後も bake time の間はアラームを見続ける。",
+    "per_choice": {
+      "A": "正しい。ALARM と INSUFFICIENT_DATA の両方で戻す。",
+      "B": "正しい。戻すための権限を設定する必要がある。",
+      "C": "自動で戻る。人の承認は要らない。",
+      "D": "戻すのは設定のデータで、アプリのコードではない。",
+      "E": "100% に配った後も、bake time の間はアラームを見る。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+      "source_id": "S3",
+      "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+      "source_id": "S2",
+      "quote": "You must configure permissions for AWS AppConfig to roll back based on CloudWatch alarms."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+      "source_id": "S2",
+      "quote": "This setting specifies the amount of time AWS AppConfig monitors for Amazon CloudWatch alarms after the configuration has been deployed to 100% of its targets"
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}

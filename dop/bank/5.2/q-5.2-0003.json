@@ -1,0 +1,62 @@
+{
+  "id": "q-5.2-0003",
+  "task": "5.2",
+  "services": [
+    "AWS Systems Manager",
+    "Amazon EventBridge"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "When the Systems Manager parameter /app/db-endpoint is updated, the company must restart the application on a fleet of instances so that they read the new value. A senior engineer must approve each restart before it happens, and the company does not want to write or host custom code. Which solution meets these requirements with the LEAST operational effort?",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an EventBridge rule for the parameter update event that invokes an AWS Lambda function, which emails the engineer and waits for a reply before restarting."
+    },
+    {
+      "key": "B",
+      "text": "Create an EventBridge rule for the parameter update event, with a Systems Manager Automation runbook as the target that restarts the application immediately."
+    },
+    {
+      "key": "C",
+      "text": "Have the engineer check the parameter history every morning and restart the application by hand when the value has changed."
+    },
+    {
+      "key": "D",
+      "text": "Create an EventBridge rule for the parameter update event, with a Systems Manager Automation runbook as the target that includes an aws:approve step before the restart."
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Parameter Store のパラメータの作成・更新・削除を EventBridge で受け、ルールのターゲットに Automation のランブックを指定すれば、イベントに応じて自動化を始められる。aws:approve のアクションは、決めた人が承認か拒否をするまで自動化を一時停止する。",
+    "per_choice": {
+      "A": "自分でコードを書いて動かすことになり、要件に反する。",
+      "B": "承認の手順が無く、承認してから再起動する要件に反する。",
+      "C": "人が毎朝確かめることになり、手間が大きく、反映も遅れる。",
+      "D": "正しい。更新を受けてランブックを始め、承認を待ってから再起動する。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-cwe.html",
+      "source_id": "S7",
+      "quote": "Notify you when a parameter or a parameter label version is created, updated, or deleted."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html",
+      "source_id": "S4",
+      "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-require-approvals.html",
+      "source_id": "S5",
+      "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action."
+    }
+  ],
+  "difficulty": 1,
+  "status": "verified",
+  "created": "2026-11-25",
+  "last_checked": "2026-11-25"
+}
