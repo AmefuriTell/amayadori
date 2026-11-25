@@ -49,7 +49,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
 | `node dop/tools/app.mjs data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 済 |
 | `node dop/tools/app.mjs check <ID>` | A3 | spec.json・app/test・app/e2e | AC ごとの合否・画面写真 | 試験・e2e のログ全文 | 済 |
-| `learn:weak` | L1 | .loop/answers/*.json | 足した項目 | 解答の記録の全部 | 未（記録の書き出しの後） |
+| `node dop/tools/learn.mjs weak [--dry]` | L1 | .loop/answers/*.json（記録の書き出しと issues.json） | 足した項目・直近の正答率・受けてよい頃か | 解答の記録と issue の本文 | 済 |
 | `aws:cost` | 週 1 | なし | 今月の費用 | Cost Explorer の応答 | 未（AWS へ移す時） |
 
 ## ハーネス（Claude Code）に入れたもの
@@ -82,7 +82,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
   "C3_verify":   { "pass|fix|drop": "Q verdict（fix で言い回しだけなら count: false）" },
   "C4_gate":     { "pass": "Q publish が ok", "fail": "Q gate か Q publish が落ちた" },
   "A3_check":    { "pass|fail": "app.mjs check" },
-  "L1_learn":    { "ok": "learn:weak（未）" }
+  "L1_learn":    { "ok": "learn.mjs weak" }
 }
 ```
 
