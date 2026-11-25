@@ -148,7 +148,7 @@ test('placeAnswer: 正解と解説の鍵が一緒に動く', () => {
 
 test('verdict: 3 問以上を全部 high で正解したら too_easy', () => {
   const sb = sandbox();
-  const qs = [1, 2, 3].map((n) => question({ id: `q-1.1-000${n}`, stem: question().stem + ` Case ${n} uses a different team and region setup.` }));
+  const qs = [1, 2, 3].map((n) => question({ id: `q-1.1-000${n}`, stem: question().stem + ` Case ${n} uses a different team and region setup.`, stem_ja: question().stem_ja + ` 事例 ${n} は別のチームとリージョンの構成。` }));
   const id = authored(sb, qs);
   toVerify(sb, id);
   verify(sb, id, qs.map((q) => ({ qid: q.id, blind: { answer: ['A'], confidence: 'high' }, issues: [], verdict: 'ok' })));

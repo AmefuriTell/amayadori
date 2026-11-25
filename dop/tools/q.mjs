@@ -6,19 +6,20 @@ import { execFileSync } from 'node:child_process';
 import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel, seeded, setResult, writeReport } from './lib/io.mjs';
 import { validate as validateSchema } from './lib/schema.mjs';
 import { normalize, ngrams, jaccard, questionText, parseSources, words } from './lib/text.mjs';
+import { jaErrors, changedBesidesJa } from './lib/ja.mjs';
 import { loadBank, coverage as bankCoverage, exam, taskIds, serviceStatus } from './lib/bank.mjs';
 
 const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const QUALIFIER = /\b(MOST|LEAST)\b|\(Choose (TWO|THREE)\.?\)|\bBEST\b/;
 const BANNED = /\b(all|none) of the above\b/i;
 // これが issues にあれば直す（attempts を数える）。style・giveaway は直すが数えない。
-const SEVERE = new Set(['fact', 'ambiguous', 'two_correct', 'no_correct', 'unsupported', 'deprecated']);
+const SEVERE = new Set(['fact', 'ambiguous', 'two_correct', 'no_correct', 'unsupported', 'deprecated', 'translation']);
 const MILD = new Set(['style', 'giveaway']);
 const DUP_FAIL = 0.6;
 const DUP_WARN = 0.4;
 
 function itemIdOf(arg) {
-  const id = typeof arg === 'string' ? (arg.match(/[CALR]-[0-9]{4}/)?.[0] ?? arg) : null;
+  const id = typeof arg === 'string' ? (arg.match(/[CALRT]-[0-9]{4}/)?.[0] ?? arg) : null;
   if (!id || !ITEM_ID.test(id)) throw new ToolError('項目 ID（例 C-0012）か work/<ID>/questions.json を渡す');
   return id;
 }
@@ -77,6 +78,16 @@ export function checkBatch(id, batch = loadBatch(id)) {
     for (const m of lengthBias(q)) add('/choices', m);
     for (const c of q.choices) if (typeof c.text === 'string' && BANNED.test(c.text)) add('/choices', `選択肢 ${c.key} に All/None of the above`);
     if (q.type === 'multi' && typeof q.stem === 'string' && !/\(Choose (TWO|THREE)\.?\)/.test(q.stem)) add('/stem', 'multi は問題文に (Choose TWO.) か (Choose THREE.) を入れる');
+
+    // P-012: 日本語版（本番を日本語で受けるため）
+    for (const m of jaErrors(q)) add('/stem_ja', m);
+    // 訳の束は日本語だけを足す。英語・答え・解説・出典は検証済みの bank のまま
+    if (batch.translate) {
+      const orig = readJSON(paths.bank(q.task, `${q.id}.json`), null);
+      if (!orig) add('/id', `訳の元の ${q.id} が bank に無い`);
+      else if (changedBesidesJa(q, orig)) add('', '訳の束では stem_ja と choices[].text_ja 以外を変えない');
+      return;
+    }
 
     // 出典: sources.md の S 番号と原文
     (q.references ?? []).forEach((r, j) => {
@@ -223,7 +234,10 @@ const commands = {
 
   blind(args) {
     const id = itemIdOf(args._[0]);
-    const qs = loadBatch(id).questions.map(({ id: qid, task, services, type, select_count, stem, choices }) => ({ id: qid, task, services, type, select_count, stem, choices }));
+    // P-012: 本番と同じ日本語で解く（英語は reveal で見せ、訳のずれを照らす）
+    const qs = loadBatch(id).questions.map(({ id: qid, task, services, type, select_count, stem_ja, choices }) => ({
+      id: qid, task, services, type, select_count, stem: stem_ja, choices: choices.map((c) => ({ key: c.key, text: c.text_ja })),
+    }));
     const file = paths.work(id, 'blind.json');
     writeJSON(file, { item: id, questions: qs });
     emit({ ok: true, summary: `答えを抜いた ${qs.length} 問を書いた。これを解いて verify.json の blind を埋めてから reveal`, extra: { file: rel(file) } });
@@ -236,7 +250,7 @@ const commands = {
     const missing = batch.questions.filter((q) => !v?.questions?.find((x) => x.qid === q.id)?.blind?.answer?.length);
     if (missing.length) throw new ToolError(`先に答えを見ずに解く。verify.json に blind.answer が無い: ${missing.map((q) => q.id).join(', ')}`);
     const file = paths.work(id, 'reveal.json');
-    writeJSON(file, { item: id, questions: batch.questions.map((q) => ({ id: q.id, answer: q.answer, explanation: q.explanation, references: q.references })) });
+    writeJSON(file, { item: id, questions: batch.questions.map((q) => ({ id: q.id, answer: q.answer, stem_en: q.stem, choices_en: q.choices.map((c) => ({ key: c.key, text: c.text })), explanation: q.explanation, references: q.references })) });
     emit({ ok: true, summary: `答えと解説を書いた。照らして verify.json の issues と verdict を埋め、q verdict を呼ぶ`, extra: { file: rel(file) } });
   },
 
@@ -281,7 +295,7 @@ const commands = {
     }
     const kept = batch.questions.filter((q) => results[q.id] !== 'drop');
     // 見直し（recheck）で捨てた問題は、bank の物を retired にする（アプリに出さない）
-    if (batch.recheck) {
+    if (batch.recheck && !batch.translate) { // 訳で捨てた時は、英語の問題は残す（日本語が無いだけ）
       for (const q of dropped) {
         const file = paths.bank(q.task, `${q.id}.json`);
         const cur = readJSON(file, null);
@@ -350,7 +364,7 @@ const commands = {
     const published = [];
     for (const q0 of batch.questions) {
       let q = q0;
-      if (q.type === 'single') {
+      if (q.type === 'single' && !batch.translate) { // 訳では答えの位置を変えない
         const min = Math.min(...counts);
         const choices = counts.map((n, i) => (n === min ? i : -1)).filter((i) => i >= 0);
         const target = choices[Math.floor(rand() * choices.length)];

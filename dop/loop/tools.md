@@ -31,12 +31,13 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `L close` | S9 | なし | outcome, repeated_issues, human_needed | runs.jsonl・archive への移動 | 済 |
 | `L add --json '<項目か配列>'` / `--file` | 人・L1 | backlog の項目 | added | ID の振り方・重複の確認 | 済 |
 | `L seed [--task 1.1] [--dry]` | 人（初め・試験ガイドの更新時） | config/exam.json | 足した項目数・タスク別の問題数 | 試験ガイドの skills の一覧 | 済 |
+| `L seed --translate [--size 10] [--dry]` | 人（P-012） | bank | 足した訳の項目（T-）の数 | 日本語版の無い問題の一覧 | 済 |
 | `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
 | `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
 | `L pause` | 人に止められた時 | なし | state | | 済 |
 | `D fetch <url> --item <ID>` | C1 | 許可した URL（200 以外・別ページへの転送・本文 50 語未満は失敗） | 見出しと語数、file、links（本文の中のリンク） | HTML・ナビ・不要な部分 | 済 |
 | `D check <ID>` | C1 | work/<ID>/sources.md と raw/*.md | 誤り（原文の控えに無い文も） | | 済 |
-| `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由） | スキーマの細部 | 済 |
+| `Q validate <ID>` | C2（hook でも） | questions.json | 誤り（qid・JSON Pointer・理由。日本語版の条件の語・数字・名前も） | スキーマの細部 | 済 |
 | `Q blind <ID>` / `Q reveal <ID>` | C3 | questions.json | file（blind.json / reveal.json） | 答え（先に見ないように） | 済 |
 | `Q verdict <ID>` | C3 | verify.json | result, 問ごとの verdict | 判定の決まり・drop の移動 | 済 |
 | `Q gate <ID> [--net]` | C4 | work/<ID>/ | 落ちた検査 | C4 の検査の全部 | 済 |
