@@ -108,6 +108,7 @@ function renderAnswer(q) {
     el('ul', { class: 'explain' }, q.choices.map((c) => el('li', {
       class: q.answer.includes(c.key) ? 'is-correct' : '', 'data-testid': 'explain-item',
     }, el('strong', { text: `${c.key}. ` }), q.explanation.per_choice[c.key] ?? ''))),
+    q.note ? el('aside', { class: 'note', 'data-testid': 'note' }, el('strong', { text: '補足' }), el('p', { text: q.note })) : null,
     el('div', { class: 'refs' }, q.references.map((r) => el('figure', { class: 'ref', 'data-testid': 'reference' },
       el('blockquote', { lang: 'en', text: r.quote }),
       el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' }))))),
