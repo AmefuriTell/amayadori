@@ -1,0 +1,171 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "地図で lifecycle hook を「2 グループの入れ替え」に入れている。S7 の lifecycle hook の例はスケールインでの終了で、instance refresh の入れ替えとつながるとは根拠に無い（s06 の指摘と同じ根）。",
+          "suggest": "まとまりの名前を「Auto Scaling グループのインスタンス」など入れ替えに限らない名前にするか、lifecycle hook は入れ替えに限らないと s06 で言う。"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "表の行名が「選ぶ時 1〜3」で、Run Command の欄も選ぶ条件のように並ぶ。S3 は State Manager と Maintenance Windows の選び分けだが、Run Command の S1 は機能の説明（できる事）で、選び分けの指針ではない。",
+          "suggest": "Run Command の欄は「できる事」と分かる書き方にするか、表の注記で S1 は機能の説明だと分ける。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "bullets の「同じ tag なら association 1 つ」で、S4 の条件「全てのノードに同じ key と値」の「全て」が落ちる（台本と図には有る）。s12 の表の「同じ tag なら 1 つ」も同じ。",
+          "suggest": "「全ノードが同じ tag なら 1 つ」とする。"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本では「戻せるのは実行中だけ」を rollback 全体の条件として言うが、表では「手動の rollback」の行にだけ付いている。S6 の文は手動・自動を分けていない。",
+          "suggest": "「実行中だけ。後は不可」を rollback 全体の行にするか、手動の行の名前を「rollback（手動・自動とも）の時期」などにする。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "台本の「グループの入れ替えでは、ライフサイクルフックも押さえます」「インスタンスが入れ替わる途中で、自分の処理を挟みたいときの候補です」は、lifecycle hook を instance refresh の入れ替えの一部・入れ替え用と読ませる。S7 の根拠は待ち状態での custom actions と、スケールインで終了を始める例だけで、入れ替えとのつながりは無い。受験者が lifecycle hook を入れ替えの時の機能と覚えるおそれ。",
+          "suggest": "「インスタンスが起動や終了で状態を移るとき」ではなく根拠どおり「lifecycle hook で待ち状態に移ったときに独自の処理を挟みたいとき」に言い換え、入れ替えとの結び付けを外す。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "図で EventBridge から「target」の矢印が Automation の箱（ラベル「runbook を開始」）に向く。S12 と bullets では target に指定するのは runbook で、Automation が始まる側。図だと target が Automation そのものに見え、「runbook を開始」は主語もずれる。",
+          "suggest": "箱のラベルを「runbook（target）→ Automation が始まる」などにし、target の矢印が runbook を指すと読めるようにする。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "台本の締め「設定を変え、問題が出たら自動で戻したい場面の候補です」で、S18 の条件「構成の変更がアラームを起こしたとき」が「問題が出たら」に広がる。AppConfig がどんな問題でも自動で戻すと覚えるおそれ。",
+          "suggest": "「設定を変え、アラームが起きたら自動で戻したい場面の候補です」とする。"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "中",
+          "detail": "台本の「修復には、オートメーションのドキュメントを使います。ドキュメントには、行う操作が書かれています」の「ドキュメント」は Automation documents の意味だが、ほかのスライドでは「ドキュメント」を AWS の説明書の意味で使う（s05 表の見出し「ドキュメントの説明」、s06「ドキュメントには…場面が挙がっています」、s07「ドキュメントにならって」、s13「ドキュメントの例」）。耳で聞くと、同じ語で別の物を指し、どちらの話か分からなくなる。",
+          "suggest": "Automation documents は「オートメーションドキュメント」と一語で呼ぶか、AWS の説明書の方を「AWS の説明」「公式の説明」などに言い換えて、ドキュメントの語を一つの意味にそろえる。"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "図の運用の担当者から OpsCenter への矢印は「見る・調べる」だけで、台本と bullets の「解決する」が無い。",
+          "suggest": "矢印のラベルを「見る・調べる・解決する」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "bullets「simplified: 既定で有効」で、S16 の条件「対応するインスタンスでは（on supported instances）」が落ちる（表と台本には有る）。",
+          "suggest": "「simplified: 対応する物は既定で有効」とする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "表の「アラームの動作: 停止・終了・再起動・復旧」が CloudWatch action based recovery の欄に入る。S15 は CloudWatch のアラームのアクション全般の話で、停止・終了は復旧のやり方ではない。復旧のやり方に停止・終了が含まれると読める。",
+          "suggest": "行名を「CloudWatch のアラームのアクション（参考）」とし、復旧に関わるのは reboot と recover だと分かる書き方にする。"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "Run Command の「確かめる所: 保ち続けない変更か」は、S1 の one-time からの推し量りで、State Manager との対比は根拠に直接は無い。",
+          "suggest": "「一度きりの変更か」と S1 の語のままにする。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本の「まず簡単にした自動の復旧です」の「まず」は、simplified を先に選ぶべきという優先を言う。根拠に優先の話は無い（既定で有効という事実だけ）。",
+          "suggest": "「まず」を取り、「対応するインスタンスでは既定で有効な、簡単にした自動の復旧があります」とする。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "まとめの図のラベル「EC2 の復旧 simplified は既定」で、本文で付けた条件「対応するインスタンスでは」が落ちる（台本と alt には有る）。画面だけ見ると、全ての EC2 で既定で有効と覚えるおそれ。",
+          "suggest": "ラベルを「simplified は対応する物で既定」にする。"
+        },
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "地図（s01）で 1 に並べた Maintenance Windows と、2 の lifecycle hook がまとめから消える。bullets の「条件付きの所に注意」も台本では触れていない。",
+          "suggest": "まとめの 1 に「時刻・パッチ Maintenance Windows」を足すか、台本で触れない bullets を台本の言葉に合わせる。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "中",
+      "detail": "「ドキュメント」が、AWS の説明書（s05・s06・s07・s13）と Systems Manager の Automation documents（s09・s15）の二つの意味で使われる。s07 で runbook を「オートメーションで動かす手順の定義」と言い、s09 で「Automation のドキュメントには行う操作が書かれています」と言うため、runbook と Automation documents の関係も宙に浮く（notes の方針で同じ物とは言わないのは良いが、語の重なりで混乱する）。",
+      "suggest": "AWS の説明書の意味は「AWS の説明」などに言い換え、「ドキュメント」は Automation documents だけに使う。"
+    },
+    {
+      "severity": "中",
+      "detail": "lifecycle hook を「グループの入れ替え」のまとまりに置く構成（s01・s06・s13）が、lifecycle hook を instance refresh の入れ替えの機能と思わせる。根拠（S7）はスケールインの終了の例だけ。",
+      "suggest": "まとまりの名前を「Auto Scaling グループのインスタンスを扱う」などにするか、lifecycle hook は入れ替え専用ではないと台本で一言いう。"
+    }
+  ]
+}

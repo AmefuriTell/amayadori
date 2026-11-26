@@ -1,0 +1,804 @@
+{
+ "task": "6.2",
+ "title": "セキュリティの決まりとデータ保護の自動化",
+ "notes": [
+  "根拠（sources.md）に AWS Shield・AWS Systems Manager・AWS Config の資料が無いため、試験ガイドの例にあるこの 3 つは扱わず、s01 でそう断った。",
+  "S0（hsm1.medium の新規クラスター不可）は s08 と s14 で触れ、試験とずれるかもしれない事を台本で断った。",
+  "S2 の Security Hub CSPM で意図しないネットワークの到達性を確かめる勧めは、条件の表の行の上限のため扱わなかった。"
+ ],
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "4 つのまとまりを番号の順に",
+    "Shield・Systems Manager・Config は扱わない",
+    "最後に条件から選ぶ表"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph G4[\"4 組織全体\"]\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>Control Tower ほか\" }\n  end\n  subgraph G3[\"3 機密データ\"]\n    MC@{ svc: \"Amazon Macie\", label: \"Amazon Macie<br/>見つけ方は 2 つ\" }\n  end\n  subgraph G2[\"2 証明書と鍵\"]\n    ACM[\"ACM<br/>証明書\"]\n    KMS@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>CloudHSM と<br/>S3 Bucket Keys も\" }\n  end\n  subgraph G1[\"1 VPC の守り\"]\n    SG[\"security groups<br/>network ACLs\"]\n    NF[\"Network Firewall<br/>VPC の境界\"]\n    WAF@{ svc: \"AWS WAF\", label: \"AWS WAF<br/>Web の要求\" }\n  end\n",
+    "alt": "講義の地図。4 つのまとまりを番号を付けて並べる。1 VPC の守りは security groups と network ACLs、VPC の境界の Network Firewall、Web の要求を見る AWS WAF。2 証明書と鍵は ACM と AWS KMS で、CloudHSM と S3 Bucket Keys も扱う。3 機密データは Amazon Macie の 2 つの見つけ方。4 組織全体は Security Hub CSPM と Control Tower ほか。並びは講義の順で、処理の流れではない。"
+   },
+   "narration": "この講義では、セキュリティの決まりとデータの保護を、自動で当てはめる方法を学びます。画面の四つのまとまりを、番号の順に進みます。図の並びは講義の順番で、処理の流れではありません。一つ目はブイピーシーの守り、二つ目は証明書と鍵、三つ目は機密データを見つけるアマゾンメイシー、四つ目は組織全体でまとめる方法です。最後に、問題文の条件から選ぶ表を置きます。なお、試験ガイドの例にあるシールド、システムズマネージャー、コンフィグは、この講義の根拠に含まれていないので扱いません。",
+   "refs": [
+    {
+     "source_id": "S2",
+     "quote": "Use security groups as the primary mechanism for controlling network access to your VPCs.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S6",
+     "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+    },
+    {
+     "source_id": "S12",
+     "quote": "Amazon Macie is a data security service that discovers sensitive data by using machine learning and pattern matching",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#what-is-macie"
+    },
+    {
+     "source_id": "S16",
+     "quote": "With an AWS Security Hub CSPM declarative policy, you can centrally enable and configure Security Hub CSPM across the accounts in your organization.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "VPC の守り 1: security groups と network ACLs",
+   "bullets": [
+    "主な仕組みは security groups",
+    "network ACLs はサブネット単位",
+    "route tables は最小限の経路"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  SG[\"security groups<br/>主な仕組み\"]\n  NACL[\"network ACLs<br/>必要な時に足す層\"]\n  RT[\"route tables<br/>最小限の経路\"]\n  subgraph VPC[\"VPC\"]\n    subgraph SUB[\"サブネット\"]\n      I@{ svc: \"Amazon EC2\", label: \"インスタンス\" }\n    end\n  end\n  SG -- \"インスタンスを守る\" --> I\n  NACL -- \"許可と拒否\" --> SUB\n  RT -- \"経路を決める\" --> SUB\n",
+    "alt": "VPC の中のサブネットにインスタンスがある。security groups は主な仕組みで、インスタンスを守る。network ACLs は必要な時に足す層で、サブネットの単位で通信を許可したり拒否したりする。route tables はサブネットの経路を決め、最小限の経路にする。"
+   },
+   "narration": "一つ目のまとまり、ブイピーシーの守りです。ブイピーシーは、大まかに言うと、エーダブリューエスの中に作る自分のネットワークです。アクセスを絞る主な仕組みとして勧められているのは、セキュリティグループです。インスタンスは、セキュリティグループだけでも守れます。そこに、追加の守りの層として、ネットワークエーシーエルを足せます。ネットワークエーシーエルは、サブネットの単位で、入る通信と出る通信を許可や拒否します。必要な時に、ステートレスで粗い制御として使います。ステートレスは、大まかに言うと、やり取りの状態を覚えずに判断する、という意味です。あわせて、サブネットのルートテーブルには、つなぐのに要る最小限の経路だけを置くよう勧めています。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "A network access control list (ACL) allows or denies specific inbound or outbound traffic at the subnet level.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#vpc-network-acls"
+    },
+    {
+     "source_id": "S2",
+     "quote": "When necessary, use network ACLs to provide stateless, coarse-grain network control.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Configure subnet route tables with the minimum network routes to support your connectivity requirements.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S3",
+     "quote": "You can secure your instances using only security groups. However, you can add network ACLs as an additional layer of defense.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "VPC の守り 2: Network Firewall と AWS WAF",
+   "bullets": [
+    "Network Firewall: VPC の境界",
+    "AWS WAF: HTTP(S) の要求",
+    "組み合わせて多層防御"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "観点",
+     "Network Firewall",
+     "AWS WAF"
+    ],
+    "rows": [
+     [
+      "見る所",
+      "VPC の境界の通信",
+      "HTTP(S) の要求"
+     ],
+     [
+      "種類",
+      "stateful・マネージド",
+      "Web アプリ向け"
+     ],
+     [
+      "できる事",
+      "侵入の検知と防御",
+      "見張りとアクセス制御"
+     ],
+     [
+      "stateful rule groups",
+      "security groups に似る",
+      "—"
+     ]
+    ]
+   },
+   "narration": "次は、ネットワークファイアウォールとエーダブリューエスワフです。ネットワークファイアウォールは、ブイピーシーの境界で、通信をふるい分けるサービスです。ステートフルで、マネージドのファイアウォールであり、侵入の検知と防御のサービスでもあります。サブネットをよくある脅威から守るのに勧められています。ステートフルなルールグループは、セキュリティグループに似た動きをします。エーダブリューエスワフは、ウェブアプリケーションのファイアウォールです。守るリソースに転送される、エイチティーティーピーやエイチティーティーピーエスの要求を見張り、アクセスを制御します。試験ガイドは、これらを組み合わせた多層防御を求めています。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "Network Firewall is a stateful, managed, network firewall and intrusion detection and prevention service.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/network-firewall.html#network-firewall"
+    },
+    {
+     "source_id": "S4",
+     "quote": "Stateful rule groups are similar in behavior and use to Amazon VPC security groups.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/network-firewall.html#network-firewall"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Use AWS Network Firewall to protect the subnets in your VPC from common network threats.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S5",
+     "quote": "AWS WAF is a web application firewall that lets you monitor the HTTP(S) requests that are forwarded to your protected web application resources.",
+     "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html#waf-chapter"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "ACM 1: 証明書を扱う",
+   "bullets": [
+    "作成・保存・更新を引き受ける",
+    "公開とプライベートの証明書",
+    "Private CA 署名は社内 PKI へ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  ACM[\"ACM<br/>作成・保存・更新\"]\n  PUB[\"公開の証明書<br/>SSL/TLS\"]\n  PRI[\"プライベートの証明書<br/>SSL/TLS\"]\n  PKI[\"社内の PKI<br/>どこでも使える\"]\n  ACM -- \"扱う\" --> PUB\n  ACM -- \"扱う\" --> PRI\n  PRI -- \"Private CA 署名なら\" --> PKI\n",
+    "alt": "ACM は証明書の作成、保存、更新を扱う。扱うのは公開とプライベートの SSL/TLS の証明書。AWS Private CA が署名した証明書なら、エクスポートして社内の PKI のどこでも使える。"
+   },
+   "narration": "二つ目のまとまり、証明書と鍵に入ります。エーダブリューエスサーティフィケートマネージャー、略してエーシーエムは、証明書の面倒な部分を引き受けます。対象は、公開とプライベートの、エスエスエルやティーエルエスの証明書と鍵で、ウェブサイトやアプリケーションを守る物です。エーシーエムは、その作成、保存、更新を扱います。また、エーダブリューエスプライベートシーエーが署名したエーシーエムの証明書は、エクスポートして、社内の公開鍵基盤のどこでも使えます。画面のピーケーアイが公開鍵基盤です。プライベートシーエーは、大まかに言うと、自分たちのための証明書を発行する認証局です。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+    },
+    {
+     "source_id": "S6",
+     "quote": "You can also export ACM certificates signed by AWS Private CA for use anywhere in your internal PKI.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "ACM 2: 管理された更新",
+   "bullets": [
+    "対象は Amazon が発行した証明書",
+    "DNS 検証なら自動で更新",
+    "インポートした証明書は対象外"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "証明書",
+     "管理された更新"
+    ],
+    "rows": [
+     [
+      "Amazon 発行・DNS 検証",
+      "自動で更新"
+     ],
+     [
+      "Amazon 発行・DNS 検証でない",
+      "期限前にメールで知らせる"
+     ],
+     [
+      "インポートした証明書",
+      "対象外"
+     ]
+    ]
+   },
+   "narration": "エーシーエムの、管理された更新です。英語ではマネージドリニューアルです。これは、アマゾンが発行した、エスエスエルやティーエルエスの証明書に用意された仕組みです。ディーエヌエスによる検証を使っていれば、エーシーエムが証明書を自動で更新します。そうでない場合は、期限が近づくと、メールで知らせます。ディーエヌエスによる検証は、大まかに言うと、ドメインを持っている事を、ディーエヌエスの設定で示すやり方です。一方、外から取り込んだ、インポートした証明書は、管理された更新の対象になりません。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "ACM provides managed renewal for your Amazon-issued SSL/TLS certificates. This means that ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+    },
+    {
+     "source_id": "S7",
+     "quote": "NOT ELIGIBLE if imported.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "AWS KMS: 鍵の種類とローテーション",
+   "bullets": [
+    "管理が大事 → customer managed keys",
+    "手軽さが一番 → AWS owned keys",
+    "自動ローテーションは既定で毎年"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "項目",
+     "ドキュメントの説明"
+    ],
+    "rows": [
+     [
+      "customer managed keys",
+      "寿命と使い方を全て管理"
+     ],
+     [
+      "AWS owned keys",
+      "手軽さが一番大事な時"
+     ],
+     [
+      "自動ローテーション",
+      "有効にすると既定で毎年"
+     ],
+     [
+      "ローテーションの影響",
+      "鍵が守るデータには無い"
+     ]
+    ]
+   },
+   "narration": "次は、エーダブリューエスケーエムエスの鍵です。ケーエムエスは、暗号化の鍵を作って管理する、マネージドのサービスです。カスタマーマネージドキー、つまり自分で管理する鍵は、鍵の寿命と使い方を全て管理したい人に勧められています。ドキュメントは、管理が大事ならカスタマーマネージドキー、手軽さが一番大事なら、エーダブリューエスオウンドキー、つまりエーダブリューエスが持つ鍵を使う、と書いています。鍵のローテーションは、大まかに言うと、鍵の中身を新しくする事です。自動のローテーションを有効にすると、既定では、ケーエムエスが一年ごとに、その鍵の新しい暗号の素材を作ります。ローテーションは、その鍵が守っているデータには影響しません。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Use customer managed keys when control is important, but use AWS owned keys when convenience is most important.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+    },
+    {
+     "source_id": "S10",
+     "quote": "By default, when you enable automatic key rotation for a KMS key, AWS KMS generates new cryptographic material for the KMS key every year.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+    },
+    {
+     "source_id": "S10",
+     "quote": "Key rotation has no effect on the data that the KMS key protects.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "S3 Bucket Keys: SSE-KMS の費用を減らす",
+   "bullets": [
+    "SSE-KMS に S3 Bucket Key を使う",
+    "短い寿命のバケット単位の鍵",
+    "一時的に S3 の中に置く"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  K@{ svc: \"AWS KMS\", label: \"AWS KMS\" }\n  BK[\"バケット単位の鍵<br/>短い寿命\"]\n  B@{ svc: \"Amazon S3\", label: \"S3 のバケット<br/>SSE-KMS と<br/>S3 Bucket Key\" }\n  K -- \"元にして作る\" --> BK\n  BK -- \"一時的に置く\" --> B\n",
+    "alt": "S3 のバケットで SSE-KMS に S3 Bucket Key を使うよう設定すると、AWS は AWS KMS から短い寿命のバケット単位の鍵を作り、その鍵を一時的に S3 の中に置く。"
+   },
+   "narration": "鍵の続きで、エススリーのバケットキーです。エスエスイーケーエムエスは、大まかに言うと、ケーエムエスの鍵を使った、エススリーのサーバー側の暗号化です。ドキュメントの題は、その費用をバケットキーで減らす、という物です。バケットで、エスエスイーケーエムエスにバケットキーを使うよう設定すると、エーダブリューエスは、ケーエムエスから、短い寿命のバケット単位の鍵を作ります。そして、その鍵を一時的にエススリーの中に置きます。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "When you configure your bucket to use an S3 Bucket Key for SSE-KMS, AWS generates a short-lived bucket-level key from AWS KMS, then temporarily keeps it in S3.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "AWS CloudHSM と AWS KMS",
+   "bullets": [
+    "HSM: 暗号の処理と鍵の保管",
+    "HSM を運用しない → AWS KMS",
+    "hsm1.medium は新規クラスター不可"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "観点",
+     "AWS CloudHSM",
+     "AWS KMS"
+    ],
+    "rows": [
+     [
+      "選ぶ時",
+      "自分の HSM を運用する",
+      "HSM を運用したくない"
+     ],
+     [
+      "形",
+      "HSM のクラスター",
+      "マネージドのサービス"
+     ],
+     [
+      "注意",
+      "hsm1.medium で新規不可",
+      "—"
+     ]
+    ]
+   },
+   "narration": "次は、エーダブリューエスクラウドエイチエスエムです。エイチエスエム、つまりハードウェアセキュリティモジュールは、暗号の処理を行い、暗号の鍵を安全に保管する装置です。クラウドエイチエスエムでは、エイチエスエムを、大まかに言うとまとまりである、クラスターの単位で使います。ドキュメントは、鍵を作って管理するマネージドのサービスが欲しく、自分のエイチエスエムを運用したくない、または運用する必要が無いなら、ケーエムエスを考えるよう勧めています。一つ注意があります。エイチエスエムの種類のうち、エイチエスエムワンミディアムは、サポートの終わりが近く、この種類では新しいクラスターを作れません。今の告知なので、試験とずれる事もあります。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "A hardware security module (HSM) is a computing device that processes cryptographic operations and provides secure storage for cryptographic keys.",
+     "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+    },
+    {
+     "source_id": "S8",
+     "quote": "If you want a managed service for creating and controlling your encryption keys but you don't want or need to operate your own HSMs, consider using AWS Key Management Service.",
+     "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+    },
+    {
+     "source_id": "S0",
+     "quote": "The hsm1.medium HSM type is reaching end of support so new clusters cannot be created with this type.",
+     "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/clusters.html#clusters"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "Amazon Macie: 機密データを見つける",
+   "bullets": [
+    "機械学習とパターンの照合",
+    "自動の検出: 広い見通し",
+    "ジョブ: 深く絞った分析"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "観点",
+     "自動の機密データ検出",
+     "機密データ検出ジョブ"
+    ],
+    "rows": [
+     [
+      "得られる物",
+      "広い見通し",
+      "深く絞った分析"
+     ],
+     [
+      "対象",
+      "S3 のデータ全体",
+      "S3 の汎用バケット"
+     ],
+     [
+      "自動にする事",
+      "どこにありそうか",
+      "検出・記録・報告"
+     ],
+     [
+      "識別子",
+      "—",
+      "マネージド・カスタム"
+     ]
+    ]
+   },
+   "narration": "三つ目のまとまり、機密データです。アマゾンメイシーは、機械学習とパターンの照合で、機密データを見つけるデータセキュリティのサービスです。見つけ方は二つです。自動の機密データ検出は、エススリーのデータ全体のどこに機密データがありそうかを、広く見通します。機密データ検出ジョブは、より深く、的を絞って分析します。ジョブは、エススリーの汎用バケットについて、機密データの検出、記録、報告を自動にします。ジョブでは、識別子、英語ではデータアイデンティファイアを使います。メイシーが用意するマネージドの物、自分で決めるカスタムの物、またはその両方です。マネージドの物の例は、エーダブリューエスの秘密アクセスキー、クレジットカードの番号、国や地域ごとのパスポートの番号です。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "Amazon Macie is a data security service that discovers sensitive data by using machine learning and pattern matching, provides visibility into data security risks, and enables automated protection against those risks.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#what-is-macie"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+    },
+    {
+     "source_id": "S14",
+     "quote": "You can configure a job to use managed data identifiers that Macie provides, custom data identifiers that you define, or a combination of the two.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html#discovery-jobs"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Each managed data identifier is designed to detect a specific type of sensitive data—for example, AWS secret access keys, credit card numbers, or passport numbers for a particular country or region.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/managed-data-identifiers.html#managed-data-identifiers"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "Security Hub CSPM: 組織全体で有効に",
+   "bullets": [
+    "宣言型ポリシーで一か所から",
+    "対象: ルート・OU・アカウント",
+    "集約は別の機能でリージョンを一つに"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  ORG@{ svc: \"AWS Organizations\", label: \"Organizations の<br/>宣言型ポリシー\" }\n  T[\"対象<br/>ルート・OU<br/>アカウント\"]\n  SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>有効か無効か\" }\n  HOME[\"ホームリージョン<br/>結果をまとめて見る\"]\n  ORG -- \"対象を選ぶ\" --> T\n  T -- \"各リージョンで決める\" --> SH\n  SH -. \"別の機能で集約\" .-> HOME\n",
+    "alt": "AWS Organizations の宣言型ポリシーで、対象としてルート、OU、アカウントを選び、各リージョンで Security Hub CSPM を有効にするか無効にするかを決める。別の機能のクロスリージョン集約で、複数のリージョンの検出結果などを一つのホームリージョンにまとめる。"
+   },
+   "narration": "四つ目のまとまり、組織全体でまとめる方法です。セキュリティハブシーエスピーエムは、シーエスピーエムまでが名前です。その宣言型ポリシーを使うと、組織の中のアカウントで、このサービスを一か所から有効にし、設定できます。これは、中央設定に代わって勧められるやり方です。中身は、オーガニゼーションズの宣言型ポリシーで、各リージョンのどこで有効にし、どこで無効にするかを決めます。オーガニゼーションズは、大まかに言うと、複数のアカウントをまとめて扱うサービスです。対象には、組織のルート、組織単位、個々のアカウントを選べます。画面のオーユーが組織単位です。これとは別の機能として、クロスリージョンの集約があります。複数のリージョンの検出結果などを、一つのホームリージョンに集めます。",
+   "refs": [
+    {
+     "source_id": "S16",
+     "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+    },
+    {
+     "source_id": "S16",
+     "quote": "You use an AWS Organizations declarative policy to specify where Security Hub CSPM is enabled or disabled in each AWS Region.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+    },
+    {
+     "source_id": "S16",
+     "quote": "You can target the organization root, organizational units (OUs), or individual accounts.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+    },
+    {
+     "source_id": "S18",
+     "quote": "By using cross-Region aggregation in AWS Security Hub CSPM, you can aggregate findings, finding updates, insights, control compliance statuses, and security scores from multiple AWS Regions to a single home Region.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "Control Tower・GuardDuty・Detective",
+   "bullets": [
+    "control は OU 全体に効く",
+    "GuardDuty は委任された管理者",
+    "根本原因を調べる → Detective"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph G1[\"Control Tower\"]\n    CT@{ svc: \"AWS Control Tower\", label: \"Control Tower の<br/>control\" }\n    OU[\"OU<br/>中の全アカウント\"]\n  end\n  subgraph G2[\"GuardDuty\"]\n    MG[\"管理アカウント\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"GuardDuty の<br/>委任された管理者\" }\n    MB[\"メンバーアカウント<br/>そのリージョンで\"]\n  end\n  subgraph G3[\"Detective\"]\n    DT@{ svc: \"Amazon Detective\", label: \"Detective<br/>根本原因を調べる\" }\n  end\n  CT -- \"OU 全体に\" --> OU\n  MG -- \"指名する\" --> GD\n  GD -- \"有効にして管理\" --> MB\n  G1 ~~~ G2\n  G2 ~~~ G3\n",
+    "alt": "3 つの別々のまとまり。Control Tower の control は OU の全体に付き、中の全てのアカウントが影響を受ける。GuardDuty では、管理アカウントが委任された管理者を指名し、その管理者が既定で、そのリージョンの組織の全てのメンバーアカウントで GuardDuty を有効にし管理できる。Detective は検出結果や怪しい動きの根本原因を調べる。"
+   },
+   "narration": "次は、コントロールタワーのコントロールです。ここでのコントロールは、統制のための決まりです。種類は三つで、予防のプリベンティブ、検出のディテクティブ、先回りのプロアクティブです。サービスのディテクティブとは別の物です。コントロールは組織単位の全体に付き、その中の全てのアカウントが影響を受けます。続いて、アマゾンガードデューティです。組織では、管理アカウントが、どのアカウントでも、委任された管理者に指名できます。既定では、その管理者が、そのリージョンの組織の全てのメンバーアカウントで、ガードデューティを有効にし、管理できます。アマゾンディテクティブは、検出結果や怪しい動きの、根本の原因を調べやすくするサービスです。",
+   "refs": [
+    {
+     "source_id": "S17",
+     "quote": "AWS Control Tower implements preventive, detective, and proactive controls that help you govern your resources and monitor compliance across groups of AWS accounts.",
+     "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+    },
+    {
+     "source_id": "S17",
+     "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+     "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+    },
+    {
+     "source_id": "S19",
+     "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account.",
+     "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+    },
+    {
+     "source_id": "S19",
+     "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region.",
+     "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+    },
+    {
+     "source_id": "S20",
+     "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity.",
+     "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html#detective-investigation-about"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "条件から選ぶ 1: VPC の守り",
+   "bullets": [
+    "主な仕組み → security groups",
+    "層を足す → network ACLs",
+    "Web の要求 → AWS WAF"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "通信を絞る主な仕組み",
+      "security groups",
+      "インスタンスを守る"
+     ],
+     [
+      "サブネット単位で層を足す",
+      "network ACLs",
+      "ステートレスで粗い"
+     ],
+     [
+      "経路を必要な分だけに",
+      "route tables",
+      "最小限の経路"
+     ],
+     [
+      "VPC の境界で脅威を防ぐ",
+      "Network Firewall",
+      "stateful・検知と防御"
+     ],
+     [
+      "Web の要求を見て制御",
+      "AWS WAF",
+      "HTTP(S) の要求"
+     ]
+    ]
+   },
+   "narration": "ここからは、条件から方法を選ぶ表です。左から、条件、選ぶ方法、確かめる所です。一枚目は、ブイピーシーの守りです。通信を絞る主な仕組みは、セキュリティグループで、インスタンスを守ります。サブネットの単位で守りの層を一つ足したいなら、ネットワークエーシーエルで、ステートレスで粗い制御だと確かめます。経路を必要な分だけにしたいなら、ルートテーブルに最小限の経路を置きます。ブイピーシーの境界で、よくある脅威からサブネットを守りたいなら、ネットワークファイアウォールです。ウェブの要求を見て制御したいなら、エーダブリューエスワフです。",
+   "refs": [
+    {
+     "source_id": "S2",
+     "quote": "Use security groups as the primary mechanism for controlling network access to your VPCs.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S2",
+     "quote": "When necessary, use network ACLs to provide stateless, coarse-grain network control.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Use AWS Network Firewall to protect the subnets in your VPC from common network threats.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+    },
+    {
+     "source_id": "S5",
+     "quote": "AWS WAF lets you control access to your content.",
+     "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html#waf-chapter"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "条件から選ぶ 2: 証明書と AWS KMS の鍵",
+   "bullets": [
+    "自動の更新 → DNS 検証",
+    "管理が大事 → customer managed keys",
+    "素材を新しく → 自動ローテーション"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "証明書の更新を自動に",
+      "ACM の DNS 検証",
+      "Amazon 発行・インポート不可"
+     ],
+     [
+      "社内の PKI で使う",
+      "Private CA の署名",
+      "エクスポートできる"
+     ],
+     [
+      "鍵を全面的に管理",
+      "customer managed keys",
+      "寿命と使い方"
+     ],
+     [
+      "手軽さが一番大事",
+      "AWS owned keys",
+      "—"
+     ],
+     [
+      "鍵の素材を定期的に新しく",
+      "自動ローテーション",
+      "有効なら既定で毎年"
+     ]
+    ]
+   },
+   "narration": "二枚目は、証明書とケーエムエスの鍵です。証明書の更新を自動にしたいなら、アマゾンが発行した証明書を、ディーエヌエスで検証します。インポートした証明書は、管理された更新の対象外です。社内の公開鍵基盤で使いたいなら、プライベートシーエーが署名した証明書を、エクスポートして使えます。鍵を全面的に管理したいならカスタマーマネージドキー、手軽さが一番ならエーダブリューエスオウンドキーです。鍵の素材を定期的に新しくしたいなら、自動のローテーションを有効にします。既定では一年ごとで、守っているデータには影響しません。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "NOT ELIGIBLE if imported.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+    },
+    {
+     "source_id": "S6",
+     "quote": "You can also export ACM certificates signed by AWS Private CA for use anywhere in your internal PKI.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Use customer managed keys when control is important, but use AWS owned keys when convenience is most important.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+    },
+    {
+     "source_id": "S10",
+     "quote": "By default, when you enable automatic key rotation for a KMS key, AWS KMS generates new cryptographic material for the KMS key every year.",
+     "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から選ぶ 3: S3 の暗号化・HSM・Macie",
+   "bullets": [
+    "費用を減らす → S3 Bucket Keys",
+    "HSM を運用しない → AWS KMS",
+    "広く → 自動検出、深く → ジョブ"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "SSE-KMS の費用を減らす",
+      "S3 Bucket Keys",
+      "バケット単位の鍵"
+     ],
+     [
+      "HSM を運用せず鍵を管理",
+      "AWS KMS",
+      "マネージドのサービス"
+     ],
+     [
+      "自分の HSM を運用する",
+      "AWS CloudHSM",
+      "hsm1.medium は新規不可"
+     ],
+     [
+      "S3 の機密データを広く",
+      "Macie の自動の検出",
+      "どこにありそうか"
+     ],
+     [
+      "汎用バケットを深く調べる",
+      "Macie のジョブ",
+      "識別子を選ぶ"
+     ]
+    ]
+   },
+   "narration": "三枚目は、エススリーの暗号化、エイチエスエム、メイシーです。エスエスイーケーエムエスの費用を減らしたいなら、エススリーのバケットキーです。自分でエイチエスエムを運用せずに鍵を管理したいなら、ケーエムエスです。自分のエイチエスエムを運用するならクラウドエイチエスエムで、エイチエスエムワンミディアムでは新しいクラスターを作れない点を確かめます。エススリーのどこに機密データがありそうかを広く見通したいなら、メイシーの自動の機密データ検出です。汎用バケットを、深く的を絞って調べたいなら、機密データ検出ジョブで、使う識別子を選びます。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "When you configure your bucket to use an S3 Bucket Key for SSE-KMS, AWS generates a short-lived bucket-level key from AWS KMS, then temporarily keeps it in S3.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview"
+    },
+    {
+     "source_id": "S8",
+     "quote": "If you want a managed service for creating and controlling your encryption keys but you don't want or need to operate your own HSMs, consider using AWS Key Management Service.",
+     "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+    },
+    {
+     "source_id": "S0",
+     "quote": "The hsm1.medium HSM type is reaching end of support so new clusters cannot be created with this type.",
+     "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/clusters.html#clusters"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から選ぶ 4: 組織全体",
+   "bullets": [
+    "一か所から有効に → 宣言型ポリシー",
+    "OU 全体を統制 → control",
+    "根本原因 → Detective"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "組織で一か所から有効に",
+      "Security Hub CSPM",
+      "宣言型ポリシー"
+     ],
+     [
+      "複数リージョンを一つに",
+      "クロスリージョン集約",
+      "ホームリージョン"
+     ],
+     [
+      "OU 全体を統制",
+      "Control Tower の control",
+      "中の全アカウント"
+     ],
+     [
+      "組織の GuardDuty を管理",
+      "委任された管理者",
+      "そのリージョンの範囲"
+     ],
+     [
+      "根本原因を調べる",
+      "Amazon Detective",
+      "検出結果や怪しい動き"
+     ]
+    ]
+   },
+   "narration": "四枚目は、組織全体でまとめる方法です。組織のアカウントで、セキュリティハブシーエスピーエムを一か所から有効にしたいなら、宣言型ポリシーで、ルート、組織単位、アカウントを対象に選びます。複数のリージョンの結果を一つにまとめて見たいなら、クロスリージョンの集約で、ホームリージョンに集めます。組織単位の全体を統制したいなら、コントロールタワーのコントロールで、中の全てのアカウントに効く点を確かめます。組織のガードデューティを管理したいなら、委任された管理者を指名します。既定の範囲は、そのリージョンです。検出結果や怪しい動きの根本の原因を調べたいなら、ディテクティブです。",
+   "refs": [
+    {
+     "source_id": "S16",
+     "quote": "With an AWS Security Hub CSPM declarative policy, you can centrally enable and configure Security Hub CSPM across the accounts in your organization.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+    },
+    {
+     "source_id": "S18",
+     "quote": "By using cross-Region aggregation in AWS Security Hub CSPM, you can aggregate findings, finding updates, insights, control compliance statuses, and security scores from multiple AWS Regions to a single home Region.",
+     "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation"
+    },
+    {
+     "source_id": "S17",
+     "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+     "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+    },
+    {
+     "source_id": "S19",
+     "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region.",
+     "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+    },
+    {
+     "source_id": "S20",
+     "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity.",
+     "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html#detective-investigation-about"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "4 つのまとまりに戻る",
+    "条件付きの所を見落とさない",
+    "迷ったら条件の表に戻る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph G4[\"4 組織全体\"]\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>宣言型ポリシー<br/>control と委任\" }\n  end\n  subgraph G3[\"3 機密データ\"]\n    MC@{ svc: \"Amazon Macie\", label: \"Amazon Macie<br/>広く自動検出<br/>深くジョブ\" }\n  end\n  subgraph G2[\"2 証明書と鍵\"]\n    ACM[\"ACM<br/>DNS 検証なら<br/>自動で更新\"]\n    KMS@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>管理か手軽さか<br/>HSM は CloudHSM\" }\n  end\n  subgraph G1[\"1 VPC の守り\"]\n    SG[\"security groups<br/>network ACLs<br/>主な仕組みと足す層\"]\n    NF[\"Network Firewall<br/>境界で脅威を防ぐ\"]\n    WAF@{ svc: \"AWS WAF\", label: \"AWS WAF<br/>HTTP(S) を制御\" }\n  end\n",
+    "alt": "講義の地図に戻ったまとめ。1 VPC の守りでは、security groups が主な仕組みで network ACLs は足す層、Network Firewall が VPC の境界で脅威を防ぎ、AWS WAF が HTTP(S) の要求を制御する。2 証明書と鍵では、ACM は Amazon 発行で DNS 検証なら自動で更新し、AWS KMS は管理か手軽さかで鍵を選び、自分の HSM を運用するなら CloudHSM。3 Amazon Macie は広く見るなら自動の検出、深く調べるならジョブ。4 組織全体は Security Hub CSPM の宣言型ポリシー、Control Tower の control、GuardDuty の委任された管理者。並びは講義の順で、処理の流れではない。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。一つ目では、セキュリティグループを主な仕組みにし、ネットワークエーシーエル、ネットワークファイアウォール、エーダブリューエスワフを重ねました。二つ目では、エーシーエムの自動の更新は、アマゾンが発行し、ディーエヌエスで検証した証明書が条件でした。ケーエムエスの鍵は管理と手軽さで選び、自分のエイチエスエムを運用するならクラウドエイチエスエムでした。三つ目のメイシーは、広く見るなら自動の検出、深く調べるならジョブでした。四つ目では、宣言型ポリシー、コントロール、委任された管理者で、組織全体に守りを広げました。問題文で迷ったら、さっきの四つの表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "You can secure your instances using only security groups. However, you can add network ACLs as an additional layer of defense.",
+     "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison"
+    },
+    {
+     "source_id": "S7",
+     "quote": "ACM provides managed renewal for your Amazon-issued SSL/TLS certificates.",
+     "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate.",
+     "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+    },
+    {
+     "source_id": "S17",
+     "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+     "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+    }
+   ]
+  }
+ ]
+}

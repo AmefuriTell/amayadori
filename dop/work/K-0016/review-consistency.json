@@ -1,0 +1,150 @@
+{
+  "slides": [
+    {
+      "id": "s05",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "図で operation ID への点線が「CloudFormation スタックの作成が失敗」のノードから出ており、operation ID が作成の失敗に限った手がかりに見える。S7 はデプロイのイベント全般に operation ID が付くという話で、作成の失敗と結び付けていない（alt と台本は「別に」「もう一つの手がかり」と分けている）。",
+          "suggest": "operation ID のノードを作成の失敗のノードから切り離し、「デプロイのイベント全般」などの別のノードから出すか、つながりを消して並べるだけにする。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本「どちらも、インスタンスの側にあるログです」は S3 に直接は無い（S3 は「インスタンスにつながずに済む」と言うだけ）。",
+          "suggest": "この一文を削るか、「CloudWatch に出せば、インスタンスにつながずに見られます」という S3 の言い方に寄せる。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "画面（タイトル・bullets・steps）に CloudFormation の名が無く、UPDATE_ROLLBACK_FAILED がどのサービスの状態かが台本でしか分からない。",
+          "suggest": "タイトルを「失敗したデプロイ 3: CloudFormation の UPDATE_ROLLBACK_FAILED」などにする。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本の最後の CodeBuild の一文（buildspec のコマンドがコンテナの中で動く）が、画面の bullets・表に無い。地図（s01）・表（s14）・まとめ（s16）にも CodeBuild が出ず、失敗を調べる話との結び付きも示されない。",
+          "suggest": "画面に CodeBuild の行か bullet を足して、地図の「CodePipeline と CodeDeploy」にも CodeBuild を入れる。または台本からこの一文を外す。"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "表の行「自動で戻す条件: 失敗か監視のしきい値」で、S11 の「deployment group か deployment に設定すれば」という条件が落ちている。表だけ見ると CodeDeploy が既定で自動ロールバックするように読める（台本と s14 は「設定」を言っている）。",
+          "suggest": "行を「自動で戻す（設定時）: 失敗か監視のしきい値」にするか、行を「自動ロールバックの設定先: デプロイメントグループかデプロイ」と分けて足す。"
+        },
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "表の行「多くの失敗の原因: デプロイ中のログ」は、ログが原因であるかのように読める。S12 は「ログファイルを見れば原因が分かる」。",
+          "suggest": "行の見出しを「多くの失敗の原因が分かる所」にするか、値を「デプロイ中のログで分かる」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本の InService の言い換え「グループで使われている状態」は、sources.md に根拠が無い。",
+          "suggest": "言い換えを外して「インサービスのインスタンス」とだけ言うか、根拠を足す。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "表の EKS 列「注意: ソフトの問題は検出しない」は、S19 の「（managed node group の）これらのヘルスチェックは EC2 のヘルスチェックに基づくので、ソフトの問題を検出しない」という条件が落ち、EKS 全体がソフトの問題を検出しないように読める。台本は「イーシーツーのヘルスチェックに基づくので」と条件を残している。",
+          "suggest": "値を「このヘルスチェックはソフトの問題を検出しない（EC2 のヘルスチェックに基づく）」にする。"
+        },
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "bullet「止まったタスクは 1 時間だけ表示」で「コンソールに」が落ちている（表と台本はコンソールと言っている）。また表は「ハード」、台本は「ハードウェア」と表記が揺れる。",
+          "suggest": "bullet を「止まったタスクはコンソールに 1 時間だけ」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "bullet「ロールバックの失敗 → 手で直す」で「原因しだいで」が落ちている。s07 の台本が「どんな原因でも手で直せる、とは書かれていない」と念を押した条件で、S13 も「Depending on the cause」。表と台本は条件を残している。",
+          "suggest": "bullet を「ロールバックの失敗 → 原因しだいで手で直す」にする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "表の行「EC2 の問題 → cloud-init・cfn ログ / CloudWatch に出す」で、「インスタンスにつながずに見たいなら」という条件が落ち、CloudWatch に出すのが必須の手順に読める（台本は条件付きで言っている）。",
+          "suggest": "確かめる所を「つながずに見るなら CloudWatch」にするか、行を分ける。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "中",
+          "detail": "同じ表に「ステージの自動ロールバック」（CodePipeline）と、ただの「自動ロールバック」（5 行目、CodeDeploy）が並び、5 行目がどちらのサービスの話か画面では分からない。3 行目「EC2・オンプレミスで失敗」も CodeDeploy の話だと画面に出ていない。",
+          "suggest": "5 行目を「CodeDeploy の自動ロールバック」、3 行目の条件を「CodeDeploy の EC2・オンプレミスへのデプロイが失敗」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "bullet「EKS: ソフトの問題は検出しない」は、S19 の条件（managed node group のヘルスチェック、EC2 のヘルスチェックに基づく）が落ち、EKS がソフトの問題を一切検出しないと誤って覚えやすい。表でも「EKS ノード」と書き、s11 の「managed node group」と呼び方がそろわない。",
+          "suggest": "bullet を「EKS ノードグループのヘルスチェック: ソフトは検出しない」にし、表の条件を「EKS の managed node group のハードの不調」にそろえる。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "bullet「まず根本原因の手がかりを探す」が台本で言われていない。また地図の 2 の部は s01 で「AWS X-Ray と canary」だったのが「trace map と X-Ray Analytics」になり、canary が消えている。",
+          "suggest": "台本に bullet の一文を足すか bullet を台本に合わせる。2 の部のラベルに canary を残す。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "軽",
+      "detail": "「健全性」（s02・s11・部の名）と「ヘルス」（s10「ヘルスの状態」「ヘルスを見続ける」）が混在し、AWS Health の部とヘルスチェックの話が同じ語に見えたり別の語に見えたりする。",
+      "suggest": "Auto Scaling・EKS の側は「ヘルスチェック」「ヘルスの状態」に、AWS Health の部は「健全性」に、と使い分けを決めて全スライドでそろえる。"
+    }
+  ]
+}

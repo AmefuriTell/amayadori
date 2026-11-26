@@ -1,0 +1,241 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        {
+          "kind": "jargon",
+          "severity": "軽",
+          "detail": "講義の軸の言葉「構成を当てる」が、地図でも台本でも何を指すか説明されないまま使われる。初めての受験者には「当てる」が apply の意味だと分かりにくい。",
+          "suggest": "s01 か s02 の台本の最初に「構成を当てる、つまり決めた構成をノードに反映することです」と一言の言い換えを置く。"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "issues": [
+        {
+          "kind": "visual",
+          "severity": "軽",
+          "detail": "図の State Manager → association の矢印の言葉が「設定」だけで、State Manager が association を持つのか作るのかが読み取りにくい。",
+          "suggest": "矢印の言葉を「association を持つ」などに言い換えるか、State Manager と association を一つの枠にまとめ、枠からノードへ「日程どおりに当てる」の矢印だけにする。"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "issues": [
+        {
+          "kind": "listen",
+          "severity": "中",
+          "detail": "台本は「似た機能を、二つ比べます」で始まり、Maintenance Windows → State Manager → Run Command の順に話すが、画面の表は State Manager・Maintenance Windows・Run Command の 3 列で順も違う。耳で追うと「二つ」と画面の三つが合わず、どの列の話か迷う。",
+          "suggest": "台本を「State Manager と、似た機能二つを並べます」と言い換え、表の列の順（State Manager → Maintenance Windows → Run Command）に話す順をそろえる。"
+        },
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "表の行「選ぶ時 1・2・3」は列ごとに別の事を並べているだけで、同じ行で比べられない。試験で効く対比（保ち続ける State Manager と、一度きりの Run Command）が台本でも明示されず、受験者が自分で読み取る必要がある。",
+          "suggest": "行を観点で作り直す（例: 「続けて保つか・一度きりか」「いつ動くかを決めるか」「パッチ」）。台本の Run Command の所に「State Manager が状態を保ち続けるのに対し、Run Command は一度きりの変更です」と対比の一文を置く（s12 の確かめる所「保ち続けない変更か」と同じ言い方）。"
+        },
+        {
+          "kind": "visual",
+          "severity": "軽",
+          "detail": "State Manager の列の「Auto Scaling で増える」は、State Manager がノードを増やすようにも読める。",
+          "suggest": "「Auto Scaling で増えたノードにも当てる」と言い換える。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        {
+          "kind": "jargon",
+          "severity": "軽",
+          "detail": "s02〜s04 は Auto Scaling グループの中身を「ノード」、s05 以降は同じ物を「インスタンス」と呼ぶ。初めての受験者は別の物かと迷う。",
+          "suggest": "s05 の冒頭で「ここからは、出典に合わせて、ノードをインスタンスと呼びます」と一言つなぐ。"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        {
+          "kind": "leap",
+          "severity": "中",
+          "detail": "s04 の「Auto Scaling で増えたノードに State Manager で構成を当てる」から、s05 の「インスタンスそのものを入れ替える」へ移る理由が語られない。どちらも Auto Scaling グループの構成を変える話なので、受験者はいつどちらかを区別できない。",
+          "suggest": "s05 の冒頭で、まとまり 1 は今あるノードに構成を当て続ける方法、まとまり 2 は新しい構成を定めてインスタンスを入れ替える方法、と既に出た事実だけで対比してから入る。"
+        },
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "表では「実行中だけ。後は不可」が手動の rollback の行にだけあり、自動の rollback には付かない。台本は rollback 全体の制限として話しているので、画面だけ見た受験者は「自動の rollback なら終わった後でも戻る」と覚えかねない。",
+          "suggest": "行を「rollback（手動・自動とも）: 実行中だけ。後は不可」と「自動になる条件: 失敗か指定の ALARM」に分け直す。s13 の表も同じく直す。"
+        },
+        {
+          "kind": "listen",
+          "severity": "軽",
+          "detail": "「戻すときは、それまでに入れ替えたインスタンスを置き換えます」は、耳だと何を何に置き換えるのか分かりにくい。「望ましい容量」も説明が無い。",
+          "suggest": "「戻すときは、それまでに新しくしたインスタンスを、もう一度置き換えます」と言い換える。「望ましい容量」は「グループに決めておいた台数」と言い換える。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "leap",
+          "severity": "中",
+          "detail": "まとまり「グループの入れ替え」に置かれ、台本も「入れ替わる途中で」と言うが、出てくる例はスケールインの終了で instance refresh とのつながりが語られない。「待ち状態」が何のために要るのかも分からず、lifecycle hook が instance refresh の一部だと誤って結び付けるおそれがある。",
+          "suggest": "台本で「instance refresh とは別の仕組みで、インスタンスが起動や終了で移る途中に待ち状態を挟み、その間に自分の処理を動かす」と位置付けを先に言う（例はスケールインのまま）。待ち状態は「次の段階へ進む前に止めておく状態」と言い換える。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "jargon",
+          "severity": "中",
+          "detail": "ここで runbook を「Automation で動かす手順の定義」と呼ぶが、s09 では「Automation のドキュメント」、s10・s15 では再び runbook が出る。同じ表（s15）に両方が並び、受験者は別の物かどうか迷う。",
+          "suggest": "s09 で「ここでは出典に合わせて Automation のドキュメントと呼びます。行う操作が書かれた物です」と呼び方の断りを入れ、s15 の表は出典ごとの呼び方である事が分かるよう確かめる所の言葉を「Automation のドキュメント（AWS Config の出典の呼び方）」などにする。同じ物だとは言い切らない。"
+        },
+        {
+          "kind": "visual",
+          "severity": "軽",
+          "detail": "矢印「target」が Automation の機能に向いていて、target にするのが runbook である事が図からは読み取りにくい。",
+          "suggest": "矢印の言葉を「runbook を target に」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "visual",
+          "severity": "軽",
+          "detail": "図の左（構成の変更で振る舞いを変える）と右（アラームで戻す）がつながっておらず、右の「変更」が左の変更の事だと示されない。",
+          "suggest": "本番のアプリ → 「変更がアラームを起こした時」へ点線の矢印をつなぎ、一続きの流れに描き直す。"
+        },
+        {
+          "kind": "leap",
+          "severity": "軽",
+          "detail": "AppConfig が「イベントで変える」のまとまりにある理由（どのイベントか）が語られない。",
+          "suggest": "台本に「ここでのイベントは、構成の変更が起こしたアラームです」と一言置く。"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "issues": [
+        {
+          "kind": "visual",
+          "severity": "中",
+          "detail": "図は「評価」と「修復する」の矢印が同じ高さでリソースに入り、noncompliant が最後に来るので、順番（評価 → 違反なら noncompliant と通知 → 修復）が逆に見える。修復するのが AWS Config である事も図に無く、Automation が自分で直すように見える。",
+          "suggest": "縦の一本の流れに描き直す: AWS Config Rules「評価」→ リソース →「違反」→ noncompliant と通知 →「AWS Config が修復」（Automation のドキュメントを使う）→ リソース。"
+        },
+        {
+          "kind": "exam",
+          "severity": "軽",
+          "detail": "マネージドルールが台本にだけ出て、画面にも表にも無い。覚える事か流してよい事かが分からない。",
+          "suggest": "画面に出さないなら台本でも「あらかじめ用意されたルールもあります」程度に軽くする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "復旧の二つのやり方を比べる表に「アラームの動作: 停止・終了・再起動・復旧」が入り、停止や終了まで「復旧のやり方」の一部に見える。受験者が「CloudWatch action の復旧はインスタンスを終了する」と取り違えるおそれがある。",
+          "suggest": "その行を「CloudWatch のアラームの動作（停止・終了・再起動・復旧）の中の、再起動と復旧を使う」と言い換えるか、表の外の注に出す。台本も「アラームの動作には停止や終了もあり、その中の再起動と復旧を使う」の順に言い直す。"
+        },
+        {
+          "kind": "jargon",
+          "severity": "軽",
+          "detail": "「システムの障害」（system impairment）が説明無しで出る。",
+          "suggest": "冒頭の「下で動くハードウェアやソフトウェアの障害」と同じ言い方にそろえる。"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "行「Auto Scaling で増える → association を tag で」は、s13 のグループの入れ替え（instance refresh）とどちらも Auto Scaling の条件で、見分けの手掛かりが表に無い。",
+          "suggest": "条件を「増えたノードにも同じ構成を当て続ける」と書き、s13 の「新しい版へ入れ替える」と対になる言い方にする。台本でも「入れ替えるのではなく、当て続けるなら」と添える。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "exam",
+          "severity": "軽",
+          "detail": "lifecycle hook の行の確かめる所が「例: スケールインの終了」だけで、スケールインの時だけの機能と覚えかねない。",
+          "suggest": "「待ち状態に移った時（例はスケールインの終了）」と、条件を先に書く。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "行「日程で自動で動かす → Automation（EventBridge の日程）」は、s12 の association の日程や Maintenance Windows の「いつ動くか」と条件が重なる。問題文に「日程」とあった時にどれを選ぶかが表から決まらない。",
+          "suggest": "条件を何を動かすかで書き分ける: 決めた状態を保つ日程 → State Manager、パッチや更新の時間 → Maintenance Windows、runbook を日程で始める → EventBridge と Automation。s14 の行を「runbook を日程で始める」に言い換える。"
+        },
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "行「設定の変更でアラーム → AppConfig（自動で戻す）」と s13 の「失敗やアラームで戻す → 自動の rollback」は、どちらも「アラームで自動で戻す」で、見分けが表に無い。",
+          "suggest": "何を戻すかで書き分ける: アプリの設定（コードは再デプロイしない）→ AppConfig、入れ替えたインスタンス → instance refresh の自動の rollback。両方の行の条件にその言葉を入れる。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "exam",
+          "severity": "中",
+          "detail": "「ルールに合わない物を直す → AWS Config の修復」と s12 の「状態を保つ → State Manager」は、どちらも「決めた状態に戻す・保つ」に聞こえ、見分けが語られない。",
+          "suggest": "既に出た事実で対比を一文入れる: State Manager は管理対象のノードを association の日程で決めた状態に保つ、AWS Config は AWS リソースの構成をルールで評価し、noncompliant になった物を修復する。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "visual",
+          "severity": "軽",
+          "detail": "まとまり 3 の EventBridge のアイコンの言葉が「runbook を target に」だけで、サービス名が無い。",
+          "suggest": "「EventBridge の target に runbook」とサービス名を入れる。"
+        },
+        {
+          "kind": "listen",
+          "severity": "軽",
+          "detail": "bullet「条件付きの所に注意」が何を指すか、台本で言われない。",
+          "suggest": "「戻すのは実行中だけ・simplified は対応する物だけ」など、指す所を bullet か台本で言う。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "中",
+      "detail": "条件から選ぶ表（s12〜s15）がまとまりごとに分かれ、まとまりをまたいで似た条件（Auto Scaling、日程、アラームで自動で戻す、決めた状態）が重なる。本文でも見分けの対比が語られないので、問題文から一つに決められない。",
+      "suggest": "各表の条件を「何を・どう変えるか」で書き、重なる 4 組（State Manager と instance refresh、日程の 3 つ、AppConfig と instance refresh の rollback、State Manager と AWS Config）を s16 の台本か表の注で一度ずつ対比する。"
+    },
+    {
+      "severity": "中",
+      "detail": "runbook と Automation のドキュメント、ノードとインスタンスなど、出典ごとの呼び方がそのまま並び、初めての受験者は別の物かどうか迷う。",
+      "suggest": "呼び方が変わる所で「出典に合わせてこう呼びます」と一言の断りを入れる（同じ物とは言い切らない）。"
+    }
+  ]
+}
