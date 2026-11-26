@@ -1,0 +1,47 @@
+{
+  "id": "cloudfront",
+  "name": "Amazon CloudFront",
+  "aliases": [
+    "Amazon CloudFront"
+  ],
+  "reading": "クラウドフロント",
+  "summary": ".html・.css・.js・画像などの Web の中身を、利用者へ速く届ける Web サービス。エッジロケーションと呼ばれる世界中のデータセンターの網から届ける。",
+  "features": [
+    {
+      "title": "オリジン",
+      "text": "S3 バケットや自分の HTTP サーバーなど、元のファイルを置く所（オリジン）を決める。CloudFront はそこからファイルを取り、世界中のエッジロケーションから配る。",
+      "source_id": "S8"
+    },
+    {
+      "title": "オリジングループのフェイルオーバー",
+      "text": "オリジンを、主のオリジンと予備の 2 つ目のオリジンの組（オリジングループ）にできる。予備のオリジンに切り替える（フェイルオーバーする）のは、見る人の要求の HTTP のメソッドが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+      "source_id": "S9"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "オリジングループで予備のオリジンに切り替えたい場面では、切り替わるのが GET・HEAD・OPTIONS の要求だけで、POST などのデータを送る要求は切り替わらないことに注意する。",
+      "source_id": "S9"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html#Introduction",
+      "source_id": "S7",
+      "quote": "CloudFront delivers your content through a worldwide network of data centers called edge locations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html#HowCloudFrontWorksOverview",
+      "source_id": "S8",
+      "quote": "An origin server stores the original, definitive version of your objects."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/RequestAndResponseBehaviorOriginGroups.html#RequestAndResponseBehaviorOriginGroups",
+      "source_id": "S9",
+      "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

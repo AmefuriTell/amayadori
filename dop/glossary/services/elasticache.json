@@ -1,0 +1,52 @@
+{
+  "id": "elasticache",
+  "name": "Amazon ElastiCache",
+  "aliases": [
+    "Amazon ElastiCache"
+  ],
+  "reading": "エラスティキャッシュ",
+  "summary": "クラウドで、メモリの上にデータを置く分散型のデータストアやキャッシュ（よく使うデータを速く返すための一時的な置き場）を、用意・管理・拡張しやすくするサービス。",
+  "features": [
+    {
+      "title": "フルマネージド",
+      "text": "ハードウェアの用意・見張り・ノード（キャッシュを動かす 1 台 1 台）の置き換え・ソフトウェアのパッチ当てを自動で行う。1 つのアベイラビリティーゾーンか、複数のアベイラビリティーゾーン（マルチ AZ）かを選べる。",
+      "source_id": "S2"
+    },
+    {
+      "title": "レプリカのあるクラスター",
+      "text": "Valkey や Redis OSS のエンジンでは、2〜6 個のノードを、読み書きできるプライマリ 1 つと、その複製を持つ読み込み専用のノード 1〜5 個にまとめられる。",
+      "source_id": "S3"
+    },
+    {
+      "title": "マルチ AZ でのフェイルオーバー",
+      "text": "マルチ AZ が有効で、プライマリが障害を起こすと、読み込み用のレプリカに切り替わる（フェイルオーバー）。複製が遅れるので、一部のデータが失われることがある。",
+      "source_id": "S3"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "プライマリの障害の時にレプリカへ自動で切り替えたい場面では、レプリカを持つクラスターでマルチ AZ を有効にすることを考える。",
+      "source_id": "S3"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html",
+      "source_id": "S1",
+      "quote": "Amazon ElastiCache is a web service that makes it easy to set up, manage, and scale a distributed in-memory data store or cache environment in the cloud."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html#WhatIs.Overview.cluster",
+      "source_id": "S2",
+      "quote": "you can choose to operate a cluster with single-AZ availability or multi-AZ availability depending on your needs."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Replication.html",
+      "source_id": "S3",
+      "quote": "If the cluster with replicas has Multi-AZ enabled and the primary node fails, the primary fails over to a read replica."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

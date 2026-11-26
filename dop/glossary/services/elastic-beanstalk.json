@@ -1,0 +1,52 @@
+{
+  "id": "elastic-beanstalk",
+  "name": "AWS Elastic Beanstalk",
+  "aliases": [
+    "AWS Elastic Beanstalk"
+  ],
+  "reading": "エラスティック ビーンストーク",
+  "summary": "Web アプリケーションを AWS のクラウドにデプロイするサービス。EC2 インスタンスなどの用意・ロードバランサーの設定・ヘルスの見張り・環境の拡張を、Elastic Beanstalk が受け持つ。",
+  "features": [
+    {
+      "title": "デプロイポリシー",
+      "text": "一度に全部・ローリング・追加バッチによるローリング・イミュータブル・トラフィックの分割、から選べる。既定は一度に全部。",
+      "source_id": "S14"
+    },
+    {
+      "title": "イミュータブル",
+      "text": "新しい版を動かすインスタンスの一式を、別の Auto Scaling グループで、古い版のインスタンスの横に起動する。",
+      "source_id": "S14"
+    },
+    {
+      "title": "Blue/Green（CNAME のスワップ）",
+      "text": "版を更新するとインプレースの更新になり、少しの間使えなくなることがある。それを避けるには、新しい版を別の環境にデプロイし、2 つの環境の CNAME を入れ替えて、通信をすぐ新しい版へ向ける。",
+      "source_id": "S15"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "更新の間に使えなくなる時間を避けたい場面では、別の環境にデプロイして CNAME を入れ替える Blue/Green を考える。",
+      "source_id": "S15"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html",
+      "source_id": "S13",
+      "quote": "Elastic Beanstalk provisions Amazon EC2 instances or EKS clusters, configures load balancing, sets up health monitoring, and dynamically scales your environment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+      "source_id": "S14",
+      "quote": "By default, your environment uses all-at-once deployments."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+      "source_id": "S15",
+      "quote": "deploy the new version to a separate environment, and then swap the CNAMEs of the two environments to redirect traffic to the new version instantly."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

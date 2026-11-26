@@ -1,0 +1,53 @@
+{
+  "id": "fault-injection-service",
+  "name": "AWS Fault Injection Service (AWS FIS)",
+  "aliases": [
+    "AWS Fault Injection Service",
+    "AWS Fault Injection Service (AWS FIS)"
+  ],
+  "reading": "フォールト インジェクション サービス",
+  "summary": "AWS で動く仕組みにわざと障害を起こす実験（障害注入の実験）を行うための、AWS が管理するサービス。カオスエンジニアリング（わざと障害を起こして強さを確かめるやり方）の考えにもとづく。",
+  "features": [
+    {
+      "title": "テンプレートと安全のための仕組み",
+      "text": "障害を起こすためのテンプレートと、本番で実験するのに要る制御（条件を満たしたら自動で戻す・止める、など）を用意している。",
+      "source_id": "S9"
+    },
+    {
+      "title": "停止条件",
+      "text": "CloudWatch のアラームで決めたしきい値に達したら、実験を止める仕組み。実験の途中で停止条件が鳴ると、FIS は実験を止める。",
+      "source_id": "S10"
+    },
+    {
+      "title": "アクションとターゲット",
+      "text": "アクションは、実験の間に FIS が AWS のリソースに行う操作。ターゲットは、そのアクションを行う 1 つ以上のリソース。",
+      "source_id": "S11"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "障害の実験で影響が大きくなりすぎたら自動で止めたい場面では、CloudWatch のアラームを使った停止条件を考える。",
+      "source_id": "S10"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is",
+      "source_id": "S9",
+      "quote": "Fault injection is based on the principles of chaos engineering."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is-stop-conditions",
+      "source_id": "S10",
+      "quote": "If a stop condition is triggered while the experiment is running, AWS FIS stops the"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is-actions",
+      "source_id": "S11",
+      "quote": "An action is an activity that AWS FIS performs on an AWS"
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

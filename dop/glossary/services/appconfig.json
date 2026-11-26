@@ -1,0 +1,56 @@
+{
+  "id": "appconfig",
+  "name": "AWS AppConfig",
+  "aliases": [
+    "AWS AppConfig"
+  ],
+  "reading": "アップコンフィグ",
+  "summary": "コードをデプロイし直さずに、本番で動いているアプリケーションの動きを安全に変えるためのサービス。機能フラグ（機能のオン・オフの切り替え）や設定を、動かしたまま変えられる。",
+  "features": [
+    {
+      "title": "機能フラグと設定",
+      "text": "機能フラグ・自由な形の設定・AI の設定を使って、アプリの動きをその場で変えられる。",
+      "source_id": "S7"
+    },
+    {
+      "title": "デプロイ戦略と自動ロールバック",
+      "text": "設定を少しずつ配るデプロイ戦略と、CloudWatch のアラームによる自動ロールバックを組み合わせ、誤った設定がエラーを起こすのを抑える。デプロイの途中なら StopDeployment の API で戻すこともできる。",
+      "source_id": "S8"
+    },
+    {
+      "title": "用意されたデプロイ戦略の例",
+      "text": "AppConfig.Linear20PercentEvery6Minutes は、6 分ごとに全体の 20% ずつ配る 30 分のデプロイ。30 分間 CloudWatch のアラームを見張り、その間に鳴ったらロールバックする。",
+      "source_id": "S9"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "コードをデプロイし直さずに機能をオン・オフしたい場面では、AppConfig の機能フラグを考える。",
+      "source_id": "S7"
+    },
+    {
+      "text": "設定の変更でエラーが出たら自動で戻したい場面では、デプロイ戦略と CloudWatch のアラームによる自動ロールバックを考える。",
+      "source_id": "S8"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html",
+      "source_id": "S7",
+      "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+      "source_id": "S8",
+      "quote": "using a combination of AWS AppConfig deployment strategies and automatic rollbacks based on Amazon CloudWatch alarms."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy-predefined.html",
+      "source_id": "S9",
+      "quote": "This strategy deploys the configuration to 20% of all targets every six minutes for a 30 minute deployment."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
