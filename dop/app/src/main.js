@@ -5,14 +5,14 @@ import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
 import { resume, snapshot } from './logic/progress.js';
-import { lookup } from './logic/glossary.js';
 import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, loadProgress, saveProgress, loadRetry, saveRetry } from './storage.js';
 import { wrongIds } from './logic/retry.js';
 import { el } from './ui/el.js';
 import { showVersion, checkVersion } from './ui/version.js';
-import { openGlossary, serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } from './ui/glossary.js';
+import { serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } from './ui/glossary.js';
 import { createSpeech } from './ui/speech.js';
 import { createMock } from './ui/mock.js';
+import { createDiagram } from './ui/diagram.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -36,6 +36,7 @@ const speech = createSpeech(state, () => render());
 const stopSpeech = () => speech.stop();
 const autoSpeak = (q, view) => speech.auto(q, view);
 const renderSpeech = () => speech.panel();
+const renderDiagram = createDiagram(state, () => render());
 const serviceLabel = (name) => glossaryLabel(name, state.glossary);
 function renderGlossaryList() {
   progress.textContent = '';
@@ -212,36 +213,6 @@ function render() {
   }
   app.replaceChildren(...[renderQlinkMissing(), renderRetryBar(), renderSolveBar(), card].filter(Boolean));
   autoSpeak(q, view);
-}
-
-// ---- 構成図（A-0014、P-015）: 答えた後に出す。箱を押すと事典を開く ----
-const diagrams = {}; // 問題 ID → SVG の文字列（null は取れなかった）
-
-function renderDiagram(q) {
-  if (!q.diagram) return null;
-  if (!(q.id in diagrams)) {
-    diagrams[q.id] = undefined;
-    fetch(`public/diagrams/${encodeURIComponent(q.id)}.svg`, { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.text() : null)).catch(() => null)
-      .then((svg) => { diagrams[q.id] = svg && svg.trim().startsWith('<svg') ? svg : null; if (state.questions[state.index]?.id === q.id && state.answered) render(); });
-    return null;
-  }
-  const svg = diagrams[q.id];
-  if (!svg) return null;
-  const box = el('div', { class: 'diagram-box', role: 'img', 'aria-label': q.diagram.alt });
-  box.innerHTML = svg; // 自分たちが作って検証した図だけ（app/public/diagrams/）
-  const open = (ev) => {
-    const node = ev.target.closest?.('[data-service]');
-    if (!node) return;
-    const p = lookup(state.glossary, node.getAttribute('data-service'));
-    if (p) openGlossary(p);
-  };
-  box.addEventListener('click', open);
-  box.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') open(ev); });
-  return el('figure', { class: 'diagram', 'data-testid': 'diagram' },
-    el('h3', { class: 'small', text: '構成図' }),
-    box,
-    el('figcaption', { class: 'muted small', text: '図のサービスを押すと、事典の説明が開きます。' }));
 }
 
 function renderAnswer(q) {
