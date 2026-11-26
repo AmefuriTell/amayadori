@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0013",
+  "source": "flowchart TB\n  PT([\"プラットフォームチーム\"])\n  SC@{ svc: \"AWS Service Catalog\", label: \"✔ C: ポートフォリオ（起動の制約付き）\" }\n  DEV([\"開発者\"])\n  ROLE@{ svc: \"AWS IAM\", label: \"起動の制約の IAM ロール\" }\n  CF@{ svc: \"AWS CloudFormation\", label: \"承認済みの環境のスタック\" }\n  PT -- \"承認済みのテンプレートを登録\" --> SC\n  DEV -- \"起動・更新・終了\" --> SC\n  SC == \"✔ C: ロールを引き受ける\" ==> ROLE\n  ROLE -- \"リソースを作る\" --> CF\n  BADBD[\"⚠ B: 管理者権限は広すぎる<br/>⚠ D: プラットフォームチームが全部起動する手間\"]\n  DEV -. \"⚠ A: 制約なしだと開発者に権限が要る\" .-> CF\n  BADBD -.-> DEV\n",
+  "alt": "Service Catalog のポートフォリオに起動の制約を付けると、開発者は承認済みの製品だけを起動でき、リソースは起動の制約の IAM ロールが作るので開発者に CloudFormation などの権限が要らない（C）。A は制約なしで権限が要る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

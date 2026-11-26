@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0012",
+  "source": "flowchart TB\n  RES[\"S3 バケットとセキュリティグループ\"]\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 構成の記録\" }\n  PACK@{ svc: \"AWS Config\", label: \"✔ A: コンフォーマンスパック（ルールの一式）\" }\n  SEC([\"セキュリティチーム\"])\n  RES -- \"構成\" --> CFG\n  PACK == \"✔ A: 1 つの単位でデプロイ・評価\" ==> CFG\n  CFG == \"基準に反したら通知\" ==> SEC\n  BADB[\"⚠ B: ルールを 1 つずつ作る → 一式を 1 つの単位にできない\"]\n  BADCD[\"⚠ C: Lambda を書いて保守・記録も残らない<br/>⚠ D: 毎月の手作業で通知が遅れる\"]\n  BADB -.-> PACK\n  BADCD -.-> RES\n",
+  "alt": "AWS Config で S3 バケットとセキュリティグループの構成を記録し、ルールの一式をコンフォーマンスパックとして 1 つの単位でデプロイして評価し、基準違反を通知する図（A）。B はルールを 1 つずつ作る手間が増える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
