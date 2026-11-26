@@ -8,6 +8,17 @@ import { execFileSync } from 'node:child_process';
 const [file, speaker = '2', outDir = 'audio'] = process.argv.slice(2);
 const ENGINE = process.env.VOICEVOX_URL ?? 'http://127.0.0.1:50021';
 const lecture = JSON.parse(fs.readFileSync(file, 'utf8'));
+// 一般的なアクセントにそろえる語を、ユーザー辞書に入れる（accents.json。同じ語は入れ直す）
+const ACCENTS = new URL('./accents.json', import.meta.url);
+if (fs.existsSync(ACCENTS)) {
+  const have = await (await fetch(`${ENGINE}/user_dict`)).json();
+  for (const [uuid, w] of Object.entries(have)) await fetch(`${ENGINE}/user_dict_word/${uuid}`, { method: 'DELETE' });
+  for (const w of JSON.parse(fs.readFileSync(ACCENTS, 'utf8')).words) {
+    const q = new URLSearchParams({ surface: w.surface, pronunciation: w.pronunciation, accent_type: String(w.accent), word_type: 'PROPER_NOUN', priority: '10' });
+    const r = await fetch(`${ENGINE}/user_dict_word?${q}`, { method: 'POST' });
+    if (!r.ok) throw new Error(`user_dict_word ${w.surface}: ${r.status} ${await r.text()}`);
+  }
+}
 fs.mkdirSync(outDir, { recursive: true });
 const out = [];
 for (const s of lecture.slides) {
