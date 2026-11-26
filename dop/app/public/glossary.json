@@ -1,18 +1,108 @@
 {
   "names": {
+    "AWS CloudFormation": "cloudformation",
+    "AWS CloudTrail": "cloudtrail",
     "Amazon CloudWatch Logs": "cloudwatch-logs",
     "Amazon CloudWatch": "cloudwatch",
     "AWS CodeBuild": "codebuild",
+    "AWS CodeDeploy": "codedeploy",
     "AWS CodePipeline": "codepipeline",
     "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
+    "Amazon EC2": "ec2",
     "Amazon EventBridge": "eventbridge",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
     "AWS Lambda": "lambda",
     "AWS Organizations": "organizations",
-    "Amazon S3": "s3"
+    "Amazon S3": "s3",
+    "AWS Systems Manager": "systems-manager"
   },
   "pages": {
+    "cloudformation": {
+      "id": "cloudformation",
+      "name": "AWS CloudFormation",
+      "reading": "クラウドフォーメーション",
+      "summary": "欲しい AWS のリソースをテンプレート（設計図のファイル）に書くと、その通りに作って設定してくれるサービス。リソースの管理にかける手間を減らせる。",
+      "features": [
+        {
+          "title": "テンプレートで作る",
+          "text": "EC2 インスタンスや RDS の DB インスタンスなど、欲しいリソースをテンプレートに書くと、CloudFormation が用意と設定を受け持つ。"
+        },
+        {
+          "title": "変更セット",
+          "text": "テンプレートから作ったリソースのまとまり（スタック）を変える時、その変更が動いているリソースにどう影響するか（消える・置き換わるか）を、実行する前に見られる。変更セットを実行すると決めた時だけ変更する。"
+        },
+        {
+          "title": "ドリフトの検出",
+          "text": "スタックの実際の設定が、期待した設定から変わって（ずれて）いないかを見つける。プロパティが消されたり値が変えられたりしたリソースを、ずれているとみなす。"
+        }
+      ],
+      "exam_points": [
+        "本番のスタックを更新する前に、消えたり置き換わったりするリソースが無いか確かめたい場面では、変更セットを考える。",
+        "スタックの実際の設定が、期待した設定とずれていないかを確かめたい場面では、ドリフトの検出を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome",
+          "quote": "You create a template that describes all the AWS resources that you want"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html#what-is-drift",
+          "quote": "Drift detection enables you to detect whether a stack's actual configuration differs, or has drifted, from its expected configuration."
+        }
+      ]
+    },
+    "cloudtrail": {
+      "id": "cloudtrail",
+      "name": "AWS CloudTrail",
+      "reading": "クラウドトレイル",
+      "summary": "AWS アカウントの中で、ユーザー・ロール・AWS サービスが行った操作を「イベント」として記録するサービス。監査・統制・コンプライアンスに使う。",
+      "features": [
+        {
+          "title": "証跡（トレイル）",
+          "text": "AWS の操作の記録を取り、Amazon S3 のバケットに届けて保存する。CloudWatch Logs や Amazon EventBridge にも届けられる。"
+        },
+        {
+          "title": "管理イベント",
+          "text": "アカウントのリソースそのものを管理する操作の記録（コントロールプレーンの操作とも呼ぶ）。証跡は既定で管理イベントを記録する。"
+        },
+        {
+          "title": "データイベント",
+          "text": "リソースの上や中で行われた操作の記録（データプレーンの操作とも呼ぶ）。量が多くなりやすい。"
+        },
+        {
+          "title": "CloudTrail Lake の受付停止",
+          "text": "CloudTrail Lake（イベントをイベントデータストアにためる仕組み）は、2026 年 5 月 31 日から新しい顧客の受付を止めている。"
+        }
+      ],
+      "exam_points": [
+        "既定の証跡が記録するのは管理イベント。データの読み書きのような操作まで記録したい時は、データイベントを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting on May 31, 2026."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html#cloudtrail-user-guide",
+          "quote": "Actions taken by a user, role, or an AWS service are recorded as events in CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-management-events",
+          "quote": "By default, CloudTrail trails and CloudTrail Lake event data stores log management events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-data-events",
+          "quote": "Data events provide information about the resource operations performed on or in a resource."
+        }
+      ]
+    },
     "cloudwatch-logs": {
       "id": "cloudwatch-logs",
       "name": "Amazon CloudWatch Logs",
@@ -140,6 +230,44 @@
         }
       ]
     },
+    "codedeploy": {
+      "id": "codedeploy",
+      "name": "AWS CodeDeploy",
+      "reading": "コードデプロイ",
+      "summary": "アプリケーションのデプロイ（新しい版を配って動かすこと）を自動にするサービス。EC2 インスタンス・社内のサーバー・Lambda 関数・ECS のサービスに配れる。",
+      "features": [
+        {
+          "title": "インプレースデプロイ",
+          "text": "各インスタンスでアプリを止め、新しい版を入れて起動し、確かめる。使えるのは EC2/オンプレミスのデプロイだけ。"
+        },
+        {
+          "title": "Blue/Green デプロイ",
+          "text": "元のインスタンスの集まりを、別の新しいインスタンスの集まりに置き換える。新しい方をロードバランサーに登録して、通信をそちらへ回す。"
+        },
+        {
+          "title": "AppSpec ファイル",
+          "text": "CodeDeploy 専用のファイルで、デプロイの時に CodeDeploy にさせる動きを決める。"
+        }
+      ],
+      "exam_points": [
+        "各インスタンスを止めて新しい版に入れ替えるインプレースと、新しいインスタンスの集まりに通信を回す Blue/Green の違いが問われる。インプレースは EC2/オンプレミスでだけ使える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome",
+          "quote": "CodeDeploy is a deployment service that automates application deployments to Amazon EC2 instances, on-premises instances, serverless Lambda functions, or Amazon ECS services."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview",
+          "quote": "Only deployments that use the EC2/On-Premises compute platform can use in-place deployments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview-in-place",
+          "quote": "The AppSpec file is unique to CodeDeploy. It defines the deployment actions you want CodeDeploy to execute."
+        }
+      ]
+    },
     "codepipeline": {
       "id": "codepipeline",
       "name": "AWS CodePipeline",
@@ -211,6 +339,44 @@
         {
           "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#ec2-auto-scaling-features",
           "quote": "Lifecycle hooks are useful for defining custom actions that are invoked as new instances launch or before instances are terminated."
+        }
+      ]
+    },
+    "ec2": {
+      "id": "ec2",
+      "name": "Amazon EC2",
+      "reading": "イーシーツー",
+      "summary": "AWS のクラウドの中で、必要な時に必要なだけ使える計算の能力（仮想サーバー）を提供するサービス。1 台の仮想サーバーを EC2 インスタンスという。",
+      "features": [
+        {
+          "title": "インスタンス",
+          "text": "EC2 インスタンスはクラウドの中の仮想サーバー。ハードウェアの費用を減らし、アプリを早く作って動かせる。"
+        },
+        {
+          "title": "インスタンスタイプ",
+          "text": "インスタンスタイプごとに、計算・メモリ・ストレージの能力が違う。動かすアプリの要件に合わせて選ぶ。"
+        },
+        {
+          "title": "AMI（マシンイメージ）",
+          "text": "インスタンスを用意して起動するのに要るソフトウェアをまとめた物。起動の時に必ず指定し、選んだインスタンスタイプと合っている必要がある。"
+        }
+      ],
+      "exam_points": [
+        "インスタンスを起動する時は、インスタンスタイプ（ハードウェアの能力）と AMI（起動するソフトウェア）を決める。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html#concepts",
+          "quote": "An EC2 instance is a virtual server in the AWS Cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-types",
+          "quote": "Each instance type offers different compute, memory, and storage capabilities, and is grouped in an instance family based on these capabilities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html#AMIs",
+          "quote": "You must specify an AMI when you launch an instance."
         }
       ]
     },
@@ -404,6 +570,45 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#features-data-processing",
           "quote": "Event notifications – Trigger workflows that use Amazon Simple Notification Service (Amazon SNS), Amazon Simple Queue Service (Amazon SQS), and AWS Lambda when a change is made to your S3 resources."
+        }
+      ]
+    },
+    "systems-manager": {
+      "id": "systems-manager",
+      "name": "AWS Systems Manager",
+      "reading": "システムズ マネージャー",
+      "summary": "AWS・社内のデータセンター・ほかのクラウドにあるサーバー（ノード）を、まとめて見て、管理し、操作するためのサービス。サーバーにログインせずに、パッチ当てやコマンドの実行などを多くのサーバーに行える。",
+      "features": [
+        {
+          "title": "いろいろな道具の集まり",
+          "text": "Run Command・Session Manager・Automation・Parameter Store などの道具がある。パッチをまとめて当てる、受信のポートを開けずに安全につなぐ、遠くからコマンドを動かす、アプリが使うデータを安全にしまう、よくある管理の作業を自動にする、などができる。"
+        },
+        {
+          "title": "ログインせずに管理",
+          "text": "サーバーにログインせずに、多くのノードを安全に遠くから管理できる。レジストリの編集・ユーザーの管理・ソフトウェアやパッチの導入など、よくある管理の作業をまとめて自動にできる。"
+        },
+        {
+          "title": "アカウントとリージョンをまたぐ",
+          "text": "1 つのコンソールで、AWS アカウントやリージョンをまたいでノードの作業ができる。"
+        }
+      ],
+      "exam_points": [
+        "多くのサーバーにパッチを当てる・コマンドを動かす作業を、ログインせずに自動にしたい場面で、Systems Manager の道具が選択肢になる。",
+        "アプリが使うデータを安全にしまいたい場面で、Systems Manager の道具が選択肢になる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#what-is-systems-manager",
+          "quote": "AWS Systems Manager helps you centrally view, manage, and operate nodes at scale in AWS, on-premises, and multicloud environments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#features",
+          "quote": "Tools consist of the individual capabilities of Systems Manager and their features such as Run Command, Session Manager, Automation, and Parameter Store."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#benefits",
+          "quote": "Systems Manager provides safe and secure remote management of your nodes at scale without logging into your servers."
         }
       ]
     }
