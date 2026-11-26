@@ -1,0 +1,80 @@
+{
+  "task": "4.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.3-0014",
+  "services": [
+    "Amazon Route 53",
+    "Amazon CloudWatch"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company uses Route 53 failover routing for an internal service that is reachable only from a VPC and must not be exposed to the internet. The company wants Route 53 to fail over when the service becomes unhealthy. Which approaches can a DevOps engineer use to provide the health status? (Choose TWO.)",
+  "stem_ja": "ある会社は、VPC からしか届かず、インターネットに公開してはならない社内のサービスに、Route 53 のフェイルオーバーのルーティングを使っています。会社は、サービスが正常でなくなった時に Route 53 にフェイルオーバーさせたいと考えています。ヘルス状態を与えるために DevOps エンジニアが使える方法はどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a private endpoint health check that uses a health check source in the VPC.",
+      "text_ja": "VPC の中のヘルスチェックの送り元を使う、プライベートエンドポイントのヘルスチェックを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Create a health check that monitors a CloudWatch alarm on a service health metric in the same account.",
+      "text_ja": "同じアカウントで、サービスのヘルスのメトリクスの CloudWatch アラームを監視するヘルスチェックを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Create a public endpoint health check that uses the private IP address of the service.",
+      "text_ja": "サービスのプライベート IP アドレスを使う、公開のエンドポイントのヘルスチェックを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Create a health check that monitors a CloudWatch alarm in a different AWS account that owns the service.",
+      "text_ja": "サービスを持つ別の AWS アカウントの CloudWatch アラームを監視するヘルスチェックを作る。"
+    },
+    {
+      "key": "E",
+      "text": "Create a calculated health check that references a private endpoint health check for the service.",
+      "text_ja": "サービスのプライベートエンドポイントのヘルスチェックを参照する、計算されたヘルスチェックを作る。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "プライベートエンドポイントのヘルスチェックは、VPC から届くエンドポイントを、インターネットに公開せずに監視し、VPC の中のヘルスチェックの送り元からリクエストを送ります。また、CloudWatch のメトリクスにアラームを作れば、そのアラームと同じデータを監視するヘルスチェックを作れます。アラームはヘルスチェックと同じアカウントにある必要があります。",
+    "per_choice": {
+      "A": "正しい。インターネットに公開せずに、VPC の中からサービスを直接確かめられます。",
+      "B": "正しい。同じアカウントのアラームのデータをもとに、ヘルス状態が変わります。",
+      "C": "公開のエンドポイントのヘルスチェックは、世界の各地のヘルスチェッカーから確かめるもので、VPC の中だけのサービスには届きません。",
+      "D": "ヘルスチェックが監視できるのは、同じアカウントの CloudWatch アラームだけです。",
+      "E": "計算されたヘルスチェックから、プライベートエンドポイントのヘルスチェックは参照できません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+      "source_id": "S5",
+      "quote": "A private endpoint health check monitors an endpoint that is reachable from your VPC, such as a specific IP address, domain name, or port."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+      "source_id": "S5",
+      "quote": "You don't need to expose any endpoint to the internet."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+      "source_id": "S1",
+      "quote": "A health check can only monitor a CloudWatch alarm that exists in the same AWS account as the health check."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+      "source_id": "S5",
+      "quote": "You can't reference a private endpoint health check from a calculated health check."
+    }
+  ],
+  "low_confidence": true,
+  "last_checked": "2026-11-26"
+}

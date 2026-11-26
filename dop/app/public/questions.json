@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 265,
+  "count": 267,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -12220,6 +12220,140 @@
         }
       ],
       "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0013",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon Route 53"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A web application in one Region has three public components: a web front end, an API, and an image service. Each component already has its own Route 53 health check on a public endpoint. The company wants a single health status for the whole application that a failover record can use, based on the status of the three existing health checks. Which solution meets this requirement with the LEAST operational overhead?",
+      "stem_ja": "あるリージョンの Web アプリケーションには、Web のフロントエンド、API、画像のサービスという 3 つの公開の部品があります。各部品には既に、公開のエンドポイントに対する Route 53 のヘルスチェックがあります。会社は、既存の 3 つのヘルスチェックの状態をもとに、フェイルオーバーのレコードが使えるアプリケーション全体の 1 つのヘルス状態を求めています。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Associate only the web front end health check with the failover record, and ignore the other two components.",
+          "text_ja": "Web のフロントエンドのヘルスチェックだけをフェイルオーバーのレコードに関連付け、ほかの 2 つの部品は見ない。"
+        },
+        {
+          "key": "B",
+          "text": "Create an \"M out of N\" CloudWatch alarm over the three components, and create a health check that monitors the alarm.",
+          "text_ja": "3 つの部品にまたがる「N 個中 M 個」の CloudWatch アラームを作り、そのアラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a calculated health check that monitors the three existing health checks, and associate it with the failover record.",
+          "text_ja": "既存の 3 つのヘルスチェックを監視する計算されたヘルスチェックを作り、フェイルオーバーのレコードに関連付ける。"
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that checks the three endpoints every minute and updates the DNS record when one fails.",
+          "text_ja": "1 分ごとに 3 つのエンドポイントを確かめ、1 つが失敗したら DNS のレコードを更新する AWS Lambda 関数を書く。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ほかのヘルスチェックの状態を監視するヘルスチェックを、計算されたヘルスチェックといいます。1 つの親のヘルスチェックは最大 255 の子のヘルスチェックを監視でき、Route 53 がほかのヘルスチェックを正常とみなすかどうかを見ます。",
+        "per_choice": {
+          "A": "API や画像のサービスの障害を見られず、アプリケーション全体の状態になりません。",
+          "B": "Route 53 は「N 個中 M 個」のアラームに対応していません。",
+          "C": "正しい。既存の 3 つのヘルスチェックを 1 つの状態にまとめ、レコードで使えます。",
+          "D": "独自の関数を作って保守する必要があり、組み込みの仕組みより手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "A health check can monitor the status of other health checks; this type of health check is known as a calculated health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "One parent health check can monitor the health of up to 255 child health checks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "Route 53 does not support \"M out of N\" alarms."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0014",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon Route 53",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses Route 53 failover routing for an internal service that is reachable only from a VPC and must not be exposed to the internet. The company wants Route 53 to fail over when the service becomes unhealthy. Which approaches can a DevOps engineer use to provide the health status? (Choose TWO.)",
+      "stem_ja": "ある会社は、VPC からしか届かず、インターネットに公開してはならない社内のサービスに、Route 53 のフェイルオーバーのルーティングを使っています。会社は、サービスが正常でなくなった時に Route 53 にフェイルオーバーさせたいと考えています。ヘルス状態を与えるために DevOps エンジニアが使える方法はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a private endpoint health check that uses a health check source in the VPC.",
+          "text_ja": "VPC の中のヘルスチェックの送り元を使う、プライベートエンドポイントのヘルスチェックを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create a health check that monitors a CloudWatch alarm on a service health metric in the same account.",
+          "text_ja": "同じアカウントで、サービスのヘルスのメトリクスの CloudWatch アラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a public endpoint health check that uses the private IP address of the service.",
+          "text_ja": "サービスのプライベート IP アドレスを使う、公開のエンドポイントのヘルスチェックを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Create a health check that monitors a CloudWatch alarm in a different AWS account that owns the service.",
+          "text_ja": "サービスを持つ別の AWS アカウントの CloudWatch アラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "E",
+          "text": "Create a calculated health check that references a private endpoint health check for the service.",
+          "text_ja": "サービスのプライベートエンドポイントのヘルスチェックを参照する、計算されたヘルスチェックを作る。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "プライベートエンドポイントのヘルスチェックは、VPC から届くエンドポイントを、インターネットに公開せずに監視し、VPC の中のヘルスチェックの送り元からリクエストを送ります。また、CloudWatch のメトリクスにアラームを作れば、そのアラームと同じデータを監視するヘルスチェックを作れます。アラームはヘルスチェックと同じアカウントにある必要があります。",
+        "per_choice": {
+          "A": "正しい。インターネットに公開せずに、VPC の中からサービスを直接確かめられます。",
+          "B": "正しい。同じアカウントのアラームのデータをもとに、ヘルス状態が変わります。",
+          "C": "公開のエンドポイントのヘルスチェックは、世界の各地のヘルスチェッカーから確かめるもので、VPC の中だけのサービスには届きません。",
+          "D": "ヘルスチェックが監視できるのは、同じアカウントの CloudWatch アラームだけです。",
+          "E": "計算されたヘルスチェックから、プライベートエンドポイントのヘルスチェックは参照できません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "A private endpoint health check monitors an endpoint that is reachable from your VPC, such as a specific IP address, domain name, or port."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You don't need to expose any endpoint to the internet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "A health check can only monitor a CloudWatch alarm that exists in the same AWS account as the health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You can't reference a private endpoint health check from a calculated health check."
+        }
+      ],
+      "low_confidence": true
     },
     {
       "id": "q-5.1-0001",
