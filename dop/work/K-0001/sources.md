@@ -56,9 +56,58 @@ fetched: 2026-11-26
 > - Deployment requirements
 > - Rollback procedures
 
+## S10 AWS CodeBuild — Build specification reference (buildspec)
+url: https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref
+fetched: 2026-11-26
+> A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.
+
+## S11 AWS CodeDeploy — What is CodeDeploy?
+url: https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html
+fetched: 2026-11-26
+> CodeDeploy performs a blue/green deployment by installing an updated version of the application
+> as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the
+
+## S12 AWS CodeDeploy — Working with deployment configurations
+url: https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations
+fetched: 2026-11-26
+> A deployment configuration is a set of rules and success and failure conditions used by
+> CodeDeploy during a deployment.
+
+## S13 AWS CodeDeploy — Redeploy and roll back a deployment
+url: https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy
+fetched: 2026-11-26
+> Deployments can be rolled back automatically or manually.
+> You can configure a deployment group or deployment to automatically roll back when a
+
+## S14 AWS CodePipeline — GitHub connections (source action)
+url: https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html
+fetched: 2026-11-26
+> To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you
+
+## S15 Amazon ECR — What is Amazon Elastic Container Registry?
+url: https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr
+fetched: 2026-11-26
+> Amazon ECR supports private repositories with resource-based permissions
+> using AWS IAM.
+
+## S16 AWS CodeArtifact — What is AWS CodeArtifact?
+url: https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome
+fetched: 2026-11-26
+> AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps
+> organizations to store and share software packages for application development.
+
+## S17 AWS Secrets Manager — What is AWS Secrets Manager?
+url: https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro
+fetched: 2026-11-26
+> AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.
+> Secrets Manager helps you improve your security posture, because you no longer need hard-coded credentials in application source code.
+
+## S18 AWS Systems Manager — Parameter Store
+url: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store
+fetched: 2026-11-26
+> Parameter Store is a centralized configuration data store for named values called parameters.
+
 ### 覆えなかった行
 
-- Software development lifecycle (SDLC) concepts, phases, and models: 公式ドキュメントを取れなかった。S1 は試験ガイドの行そのもので、SDLC の段階やモデルを説明する公式ページは未取得。
-- Pipeline deployment patterns for single- and multi-account environments: 複数アカウントの構成を説明するページを取れなかった（リンクが無い）。S9 の「Deployment requirements」は見出しだけ。
-- Setting up build processes / Determining appropriate deployment strategies / Managing build and deployment secrets / Configuring code, image, and artifact repositories / Using version control...: 各サービス（CodeBuild・CodeDeploy・Secrets Manager・Parameter Store・ECR・CodeArtifact・CodePipeline）の使い分けを説明するページを取れなかった。S4〜S8 は試験ガイドの一覧（サービス名だけ）。
-- 不足の理由: 試験ガイドのページ（domain1・in-scope・technologies・certification）には、サービスの公式ドキュメントへのリンクが無い。URL を推測せずに取れなかったので、次の回で各サービスのページを取り直す必要がある。
+- Software development lifecycle (SDLC) concepts, phases, and models: 公式ドキュメントを取れなかった。S1 は試験ガイドの行そのもので、SDLC の段階やモデルを説明するページは取れていない。
+- Pipeline deployment patterns for single- and multi-account environments: 複数アカウントの構成を説明するページを取れなかった。S14 の connections ページには「use a connection shared with another account」の記述があるが、パターンそのものの説明ではないため、覆えたとは見なさない。
