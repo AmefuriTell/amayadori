@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0011",
+  "source": "flowchart TB\n  subgraph USE1[\"us-east-1\"]\n    P@{ svc: \"AWS CodePipeline\", label: \"1 つのパイプライン（このリージョン）\" }\n    B1@{ svc: \"Amazon S3\", label: \"アーティファクトバケット\" }\n    CF1@{ svc: \"AWS CloudFormation\", label: \"スタックのデプロイ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    B2@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF2@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  subgraph AP[\"ap-northeast-1\"]\n    B3@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF3@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  P --> CF1\n  P == \"✔ A: アクションを追加\" ==> CF2\n  P == \"✔ A: アクションを追加\" ==> CF3\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B2\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B3\n  WC[\"⚠ C: コピーは CodePipeline が行うので Lambda は不要\"] -.- B1\n  WD[\"⚠ D: 別のパイプラインは要件違反\"] -.- P\n  WE[\"⚠ E: 他のリージョンにもバケットが必要\"] -.- B1\n",
+  "alt": "us-east-1 の 1 つのパイプラインから eu-west-1 と ap-northeast-1 にも CloudFormation をデプロイする図。他リージョンのアクションをクロスリージョンのアクションとして足し（A）、各リージョンにアーティファクトバケットを作る（B）。コピーは CodePipeline が行う。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

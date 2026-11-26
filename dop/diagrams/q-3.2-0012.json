@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0012",
+  "source": "flowchart TB\n  U([\"世界中の利用者\"])\n  R@{ svc: \"Amazon Route 53\", label: \"ホストゾーン（✔ A: レイテンシーのレコード）\" }\n  subgraph W[\"us-west-2\"]\n    LW@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  subgraph S[\"ap-southeast-1\"]\n    LS@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  U -- \"DNS の問い合わせ\" --> R\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LW\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LS\n  X[\"⚠ B: 半分ずつで利用者の遠さを見ない・⚠ D: 全員が us-west-2 へ\"] -.- R\n  Y[\"⚠ C: Global Accelerator は別のサービスを足す要件違反\"] -.- U\n",
+  "alt": "2 つのリージョンの ALB へ、利用者ごとに最もレイテンシーが低い方で応答させる図。Route 53 のホストゾーンに各ロードバランサーのレイテンシーのレコードを作る（A）。加重（B）や単一のレコード（D）は遠い利用者に不利。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

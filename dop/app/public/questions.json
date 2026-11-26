@@ -8633,7 +8633,10 @@
           "quote": "CodePipeline handles the copying of artifacts from one AWS Region to the other Regions when performing cross-region actions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "us-east-1 の 1 つのパイプラインから eu-west-1 と ap-northeast-1 にも CloudFormation をデプロイする図。他リージョンのアクションをクロスリージョンのアクションとして足し（A）、各リージョンにアーティファクトバケットを作る（B）。コピーは CodePipeline が行う。"
+      }
     },
     {
       "id": "q-3.2-0012",
@@ -8695,7 +8698,10 @@
           "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "2 つのリージョンの ALB へ、利用者ごとに最もレイテンシーが低い方で応答させる図。Route 53 のホストゾーンに各ロードバランサーのレイテンシーのレコードを作る（A）。加重（B）や単一のレコード（D）は遠い利用者に不利。"
+      }
     },
     {
       "id": "q-3.2-0013",
@@ -8765,7 +8771,10 @@
           "quote": "However, none of these environments come pre-initialized."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "朝の山で Lambda のコールドスタートによるレイテンシーが出る図。Application Auto Scaling で山の時間だけプロビジョニングされた同時実行を用意すれば、レイテンシーを下げつつ他の時間の費用を抑えられる（D）。"
+      }
     },
     {
       "id": "q-3.2-0014",
@@ -8826,7 +8835,10 @@
           "quote": "Using provisioned concurrency incurs additional charges to your account."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "バッチ用の Lambda 関数が同時実行を使い切り、決済の関数がスロットリングされる図。決済の関数に予約された同時実行を設定すればその分を取っておけて、設定の料金もかからない（B）。プロビジョニング（A、C）は追加の料金がかかる。"
+      }
     },
     {
       "id": "q-3.2-0015",
@@ -8902,7 +8914,10 @@
           "quote": "Both throttles and quotas are applied on a best-effort basis and should be thought of as targets rather than guaranteed request ceilings."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "提携先の過剰な GET を抑える API Gateway の図。提携先ごとに使用量プランで速さとバーストを制限し（A）、ステージのキャッシュを TTL 600 秒で有効にして繰り返しの GET をキャッシュから返す（B）。TTL 0 や 2 時間は不可。"
+      }
     },
     {
       "id": "q-3.3-0001",

@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0015",
+  "source": "flowchart TB\n  PT([\"提携先のクライアント\"])\n  subgraph GW[\"REST API\"]\n    UP@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>✔ A: 使用量プラン（速さとバーストの上限）\" }\n    CA[\"✔ B: ステージのキャッシュ（TTL 600 秒）\"]\n  end\n  BE[\"バックエンド\"]\n  PT -- \"GET のリクエスト\" --> UP\n  UP -- \"上限内だけ\" --> CA\n  CA -. \"キャッシュに無い時だけ\" .-> BE\n  X[\"⚠ C: TTL 0 はキャッシュ無効・⚠ D: TTL は最大 3600 秒\"] -.- CA\n  Y[\"⚠ E: アカウント全体の上限は提携先ごとに分けられない\"] -.- UP\n",
+  "alt": "提携先の過剰な GET を抑える API Gateway の図。提携先ごとに使用量プランで速さとバーストを制限し（A）、ステージのキャッシュを TTL 600 秒で有効にして繰り返しの GET をキャッシュから返す（B）。TTL 0 や 2 時間は不可。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
