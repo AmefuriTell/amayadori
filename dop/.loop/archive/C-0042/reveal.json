@@ -1,0 +1,261 @@
+{
+  "item": "C-0042",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "EC2 instances in an Auto Scaling group are registered with an Application Load Balancer target group by a launch script, not by the Auto Scaling group. Sometimes the application process hangs: the load balancer marks the instance unhealthy, but the EC2 status checks still pass, so the instance is never replaced. The company wants such instances to be replaced automatically. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Attach the target group to the Auto Scaling group instead of registering instances with a script."
+        },
+        {
+          "key": "B",
+          "text": "Turn on Elastic Load Balancing health checks for the Auto Scaling group."
+        },
+        {
+          "key": "C",
+          "text": "Increase the minimum capacity of the Auto Scaling group so that more healthy instances remain."
+        },
+        {
+          "key": "D",
+          "text": "Create a CloudWatch alarm that notifies an engineer to reboot instances that the load balancer marks unhealthy."
+        },
+        {
+          "key": "E",
+          "text": "Shorten the health check grace period so that EC2 status checks start earlier."
+        }
+      ],
+      "explanation": {
+        "summary": "既定では、Amazon EC2 Auto Scaling は EC2 のヘルスチェックで異常か届かないインスタンスだけを入れ替えます。ロードバランサー（ALB の場合はターゲットグループ）を Auto Scaling グループにアタッチし、Elastic Load Balancing のヘルスチェックを有効にすると、ロードバランサーが unhealthy と報告したインスタンスも入れ替えられます。",
+        "per_choice": {
+          "A": "正しい。ALB はロードバランサーではなくターゲットグループをアタッチし、ロードバランサーの判定を Auto Scaling で使えるようにします。",
+          "B": "正しい。ロードバランサーが unhealthy と報告したインスタンスを、Auto Scaling が入れ替えるようになります。",
+          "C": "固まったインスタンスは入れ替えられないまま残ります。",
+          "D": "再起動が手作業で、自動で入れ替える要件を満たしません。",
+          "E": "EC2 のステータスチェックは通っているので、早く始めても入れ替えは起きません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "source_id": "S7",
+          "quote": "By default, Amazon EC2 Auto Scaling only replaces instances that are unhealthy or unreachable based on Amazon EC2 health checks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "source_id": "S7",
+          "quote": "Amazon EC2 Auto Scaling can replace a running instance if any of the Elastic Load Balancing load balancers you attach to the Auto Scaling group report it as unhealthy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "source_id": "S7",
+          "quote": "When you attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, you attach a target group rather than the load balancer itself."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "During scale-in events, some users receive 500-level errors. Investigation shows that instances behind an Application Load Balancer are terminated while requests that take up to 90 seconds are still running. The target group's deregistration delay was set to 10 seconds. Which change will MOST effectively prevent these errors?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Increase the deregistration delay to a value longer than the longest request, such as the default of 300 seconds."
+        },
+        {
+          "key": "B",
+          "text": "Turn on slow start mode for the target group so that new targets receive fewer requests at first."
+        },
+        {
+          "key": "C",
+          "text": "Change the health check success codes to 200-499 so that fewer targets are marked unhealthy."
+        },
+        {
+          "key": "D",
+          "text": "Lower the deregistration delay to 0 seconds so that instances leave the target group immediately."
+        }
+      ],
+      "explanation": {
+        "summary": "Elastic Load Balancing は登録解除中のターゲットへ新しいリクエストを送らず、既定では 300 秒待ってから登録解除を終えるので、処理中のリクエストが終わるのを助けます。遅延が過ぎる前に登録解除中のターゲットが接続を切ると、クライアントは 500 番台のエラーを受け取ります。Auto Scaling のターゲットは、登録解除が終わった後に終了・入れ替えされます。",
+        "per_choice": {
+          "A": "正しい。最も長いリクエストが終わるまで待ってから登録解除を終えるので、実行中のリクエストが切られません。",
+          "B": "スロースタートは新しいターゲットへの送り方で、終了するターゲットのリクエストは守れません。",
+          "C": "ヘルスチェックの判定は、スケールインで終了するインスタンスのリクエストとは関係ありません。",
+          "D": "待ち時間が無くなり、実行中のリクエストがさらに切られやすくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "source_id": "S4",
+          "quote": "By default, Elastic Load Balancing waits 300 seconds before completing the deregistration process, which can help in-flight requests to the target to complete."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "source_id": "S4",
+          "quote": "If a deregistering target terminates the connection before the deregistration delay elapses, the client receives a 500-level error response."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "source_id": "S4",
+          "quote": "If the target is part of an Auto Scaling group, it can be terminated and replaced."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0003",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company serves users from Application Load Balancers in two Regions through Route 53 latency alias records. During an incident, every target behind the us-east-1 load balancer was unhealthy, but Route 53 kept sending users in that area to us-east-1 instead of the healthy Region. Which change will make Route 53 route to the other Region in this situation with the LEAST effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Replace the latency records with weighted records that send 50 percent of traffic to each Region."
+        },
+        {
+          "key": "B",
+          "text": "Set Evaluate Target Health to Yes on both latency alias records."
+        },
+        {
+          "key": "C",
+          "text": "Turn off health checks on the us-east-1 target group so that its targets are never marked unhealthy."
+        },
+        {
+          "key": "D",
+          "text": "Have an on-call engineer change the DNS records by hand whenever a Region becomes unhealthy."
+        }
+      ],
+      "explanation": {
+        "summary": "エイリアスのレコードで Evaluate Target Health を Yes にすると、Route 53 はトラフィックを送る前にそのリージョンに正常なリソースがあるかを確かめ、無ければもう一方のリージョンの正常なリソースを選びます。No にすると、ヘルスチェックが失敗していても、そのレコードへ送り続けます。",
+        "per_choice": {
+          "A": "レイテンシーで選ばなくなるうえ、異常なリージョンにも半分のトラフィックが送られ続けます。",
+          "B": "正しい。正常なリソースが無いリージョンを避け、もう一方のリージョンへ送ります。",
+          "C": "異常を隠すだけで、壊れたターゲットにトラフィックが送られ続けます。",
+          "D": "手作業で、切り替えが遅れます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs",
+          "source_id": "S9",
+          "quote": "This causes Route 53 to determine whether there are any healthy resources in a Region before trying to route traffic there."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs-eth-no",
+          "source_id": "S10",
+          "quote": "If you set Evaluate Target Health to No, Route 53 continues to route traffic to the records that an alias record refers to even if health checks for those records are failing."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "After a deployment changed the health check path, every target in an Application Load Balancer target group, in all enabled Availability Zones, failed its health checks at the same time. The team expected the load balancer to stop sending requests, but users still reached the targets and received application errors. What is the MOST likely explanation?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "When all targets fail health checks at the same time, the load balancer fails open and routes requests to all targets."
+        },
+        {
+          "key": "B",
+          "text": "The deregistration delay kept the unhealthy targets in service for 300 seconds after they failed."
+        },
+        {
+          "key": "C",
+          "text": "Slow start mode kept sending a small share of requests to the unhealthy targets."
+        },
+        {
+          "key": "D",
+          "text": "Application Load Balancers do not stop routing to targets based on health checks unless the Auto Scaling group replaces them."
+        }
+      ],
+      "explanation": {
+        "summary": "各ロードバランサーのノードは、通常は正常なターゲットにだけリクエストを送ります。ただし、ターゲットグループに unhealthy なターゲットしか無い時は、状態に関係なくすべてのターゲットへ送ります。有効なすべてのアベイラビリティーゾーンで全ターゲットが同時に失敗すると、ロードバランサーはフェイルオープンになります。",
+        "per_choice": {
+          "A": "正しい。全ターゲットが同時に失敗したため、フェイルオープンですべてのターゲットへ送られました。",
+          "B": "登録解除の遅延は登録解除中のターゲットの話で、ヘルスチェックに失敗したターゲットを使い続ける仕組みではありません。",
+          "C": "スロースタートのターゲットは、unhealthy になるとスロースタートを抜けます。",
+          "D": "ロードバランサーは通常、正常なターゲットにだけリクエストを送ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "source_id": "S1",
+          "quote": "If a target group contains only unhealthy registered targets, the load balancer routes requests to all those targets, regardless of their health status."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "source_id": "S1",
+          "quote": "if all targets fail health checks at the same time in all enabled Availability Zones, the load balancer fails open."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#slow-start-mode",
+          "source_id": "S5",
+          "quote": "If a target in slow start mode becomes unhealthy, the target exits slow start mode."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0005",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An Application Load Balancer health check uses the path / and expects a 200 response. The home page returns 200 even when the instance has lost its connection to the database, so users are sent to broken instances. The application already exposes /health, which returns 503 when the database is unreachable and 200 otherwise. Which change BEST ensures that requests go only to instances that can serve them?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Change the health check path to /health and keep 200 as the success code."
+        },
+        {
+          "key": "B",
+          "text": "Change the health check success codes to 200-499 so that more responses count as healthy."
+        },
+        {
+          "key": "C",
+          "text": "Keep the path / and shorten the health check interval so that failures are detected sooner."
+        },
+        {
+          "key": "D",
+          "text": "Keep the load balancer health check on / and create a Route 53 health check that requests /health."
+        }
+      ],
+      "explanation": {
+        "summary": "ヘルスチェックのパスは、ターゲットのヘルスチェックの送り先で、成功コードはターゲットからの成功の応答として扱うコードです。データベースに届かない時に 503 を返す /health を使い、成功を 200 にすれば、壊れたインスタンスは unhealthy になり、ロードバランサーは正常なターゲットにだけリクエストを送ります。",
+        "per_choice": {
+          "A": "正しい。データベースに届かないインスタンスが 503 で unhealthy になり、外されます。",
+          "B": "/ のままでは壊れていても 200 が返り、問題は変わりません。",
+          "C": "/ は壊れていても 200 を返すので、間隔を短くしても失敗として見つかりません。",
+          "D": "ロードバランサーは自分のヘルスチェック（/ の 200）で判断するため、データベースに届かないインスタンスにもリクエストを送り続けます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "source_id": "S2",
+          "quote": "If the protocol version is HTTP/1.1 or HTTP/2, the possible values are from 200 to 499."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "source_id": "S2",
+          "quote": "The codes to use when checking for a successful response from a target."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "source_id": "S1",
+          "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer."
+        }
+      ]
+    }
+  ]
+}

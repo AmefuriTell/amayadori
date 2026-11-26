@@ -1,0 +1,67 @@
+{
+  "task": "3.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.3-0011",
+  "services": [
+    "Elastic Load Balancing",
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "During scale-in events, some users receive 500-level errors. Investigation shows that instances behind an Application Load Balancer are terminated while requests that take up to 90 seconds are still running. The target group's deregistration delay was set to 10 seconds. Which change will MOST effectively prevent these errors?",
+  "stem_ja": "スケールインの時に、一部の利用者が 500 番台のエラーを受け取ります。調べると、Application Load Balancer の後ろのインスタンスが、最大 90 秒かかるリクエストの実行中に終了していました。ターゲットグループの登録解除の遅延は 10 秒に設定されていました。これらのエラーを最も効果的に防ぐ変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on slow start mode for the target group so that new targets receive fewer requests at first.",
+      "text_ja": "新しいターゲットが最初は少ないリクエストを受けるよう、ターゲットグループのスロースタートのモードを有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Change the health check success codes to 200-499 so that fewer targets are marked unhealthy.",
+      "text_ja": "unhealthy とされるターゲットが減るよう、ヘルスチェックの成功コードを 200-499 にする。"
+    },
+    {
+      "key": "C",
+      "text": "Lower the deregistration delay to 0 seconds so that instances leave the target group immediately.",
+      "text_ja": "インスタンスがすぐにターゲットグループから外れるよう、登録解除の遅延を 0 秒にする。"
+    },
+    {
+      "key": "D",
+      "text": "Increase the deregistration delay to a value longer than the longest request, such as the default of 300 seconds.",
+      "text_ja": "登録解除の遅延を、最も長いリクエストより長い値（例えば既定の 300 秒）に増やす。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Elastic Load Balancing は登録解除中のターゲットへ新しいリクエストを送らず、既定では 300 秒待ってから登録解除を終えるので、処理中のリクエストが終わるのを助けます。遅延が過ぎる前に登録解除中のターゲットが接続を切ると、クライアントは 500 番台のエラーを受け取ります。Auto Scaling のターゲットは、登録解除が終わった後に終了・入れ替えされます。",
+    "per_choice": {
+      "A": "スロースタートは新しいターゲットへの送り方で、終了するターゲットのリクエストは守れません。",
+      "B": "ヘルスチェックの判定は、スケールインで終了するインスタンスのリクエストとは関係ありません。",
+      "C": "待ち時間が無くなり、実行中のリクエストがさらに切られやすくなります。",
+      "D": "正しい。最も長いリクエストが終わるまで待ってから登録解除を終えるので、実行中のリクエストが切られません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+      "source_id": "S4",
+      "quote": "By default, Elastic Load Balancing waits 300 seconds before completing the deregistration process, which can help in-flight requests to the target to complete."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+      "source_id": "S4",
+      "quote": "If a deregistering target terminates the connection before the deregistration delay elapses, the client receives a 500-level error response."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+      "source_id": "S4",
+      "quote": "If the target is part of an Auto Scaling group, it can be terminated and replaced."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
