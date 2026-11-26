@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0012",
+  "source": "flowchart TB\n  subgraph SRC[\"複数のアカウント\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"検出結果\" }\n    IN@{ svc: \"Amazon Inspector\", label: \"検出結果\" }\n    MA@{ svc: \"Amazon Macie\", label: \"検出結果\" }\n    TP[\"対応しているサードパーティの製品\"]\n  end\n  SH@{ svc: \"AWS Security Hub CSPM\", label: \"✔ C: 検出結果を集めて優先順位付け\" }\n  TEAM([\"セキュリティチーム\"])\n  GD -- \"ASFF\" --> SH\n  IN -- \"ASFF\" --> SH\n  MA -- \"ASFF\" --> SH\n  TP -- \"ASFF\" --> SH\n  SH == \"標準に照らして評価\" ==> TEAM\n  W[\"⚠ A: 変換の仕組みを自作<br/>⚠ D: 毎日の手作業\"]\n  W -.- SH\n",
+  "alt": "複数のアカウントの GuardDuty・Inspector・Macie・サードパーティの検出結果を 1 か所にまとめる図。Security Hub CSPM が ASFF で集めて優先順位を付け、標準に照らして評価する（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

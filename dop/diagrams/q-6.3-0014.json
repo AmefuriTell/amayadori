@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0014",
+  "source": "flowchart TB\n  ENG([\"セキュリティのエンジニア<br/>SQL で調べる\"])\n  subgraph ACC[\"会社のアカウント\"]\n    ATH[\"Amazon Athena<br/>✔ D: LOCATION を指定して直接クエリ\"]\n    S3@{ svc: \"Amazon S3\", label: \"CloudTrail のログファイル（6 か月分）\" }\n  end\n  ENG -- \"SQL\" --> ATH\n  ATH == \"ログを置いたまま読む\" ==> S3\n  W1[\"⚠ A: ダウンロードして手作業\"]\n  W2[\"⚠ B: RDS へ読み込む手間\"]\n  W3[\"⚠ C: GuardDuty は API 呼び出しの一覧ではない\"]\n  W1 -.- S3\n  W2 -.- ATH\n  W3 -.- ENG\n",
+  "alt": "S3 にある 6 か月分の CloudTrail ログから、誰がどの IP でリソースを削除したか調べる図。Athena で S3 のログを置いたまま直接 SQL でクエリすれば、サーバーも別のデータベースも要らない（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

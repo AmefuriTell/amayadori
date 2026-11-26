@@ -17083,7 +17083,10 @@
           "quote": "With EventBridge, you can send findings data to your preferred storage platform and store the data for as long as you like."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty の検出結果を 1 年以上、自動で残す図。検出結果は EventBridge に自動で送られるので、ルールで Firehose へ送り S3 へ届ける（A）。GuardDuty だけでは 90 日、手作業やポーリングは手間が大きい。"
+      }
     },
     {
       "id": "q-6.3-0012",
@@ -17151,7 +17154,10 @@
           "quote": "helps you assess your AWS environment against security industry standards and best practices."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "複数のアカウントの GuardDuty・Inspector・Macie・サードパーティの検出結果を 1 か所にまとめる図。Security Hub CSPM が ASFF で集めて優先順位を付け、標準に照らして評価する（C）。"
+      }
     },
     {
       "id": "q-6.3-0013",
@@ -17223,7 +17229,10 @@
           "quote": "or assert positively that no log files were delivered to your account during a given period of time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail のログが変更・削除されていないことを証明する図。整合性の検証を有効にして署名付きダイジェストを届け（A）、AWS CLI でログをダイジェストと照らして検証する（B）。有効にするだけでは検証されない。"
+      }
     },
     {
       "id": "q-6.3-0014",
@@ -17286,7 +17295,10 @@
           "quote": "When GuardDuty detects potential security threats associated with your AWS resources, it starts generating security findings"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 にある 6 か月分の CloudTrail ログから、誰がどの IP でリソースを削除したか調べる図。Athena で S3 のログを置いたまま直接 SQL でクエリすれば、サーバーも別のデータベースも要らない（D）。"
+      }
     }
   ]
 }

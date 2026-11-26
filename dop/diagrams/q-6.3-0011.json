@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0011",
+  "source": "flowchart TB\n  subgraph ACC[\"会社のアカウント\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"検出結果（保存は 90 日）\" }\n    EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: 検出結果のルール\" }\n    FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム\" }\n    S3@{ svc: \"Amazon S3\", label: \"1 年以上の保存\" }\n  end\n  GD -- \"自動でイベント\" --> EB\n  EB -- \"ターゲット\" --> FH\n  FH == \"コード無しで届ける\" ==> S3\n  W1[\"⚠ B: GuardDuty に置いたままでは 90 日\"]\n  W2[\"⚠ C: 毎週の手作業　⚠ D: ポーリングのコードが要る\"]\n  W1 -.- GD\n  W2 -.- EB\n",
+  "alt": "GuardDuty の検出結果を 1 年以上、自動で残す図。検出結果は EventBridge に自動で送られるので、ルールで Firehose へ送り S3 へ届ける（A）。GuardDuty だけでは 90 日、手作業やポーリングは手間が大きい。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
