@@ -68,8 +68,10 @@
     "AWS Service Catalog": "service-catalog",
     "Amazon SNS": "sns",
     "Amazon SQS": "sqs",
+    "AWS Systems Manager Automation": "ssm-automation",
     "AWS Systems Manager Compliance": "ssm-compliance",
     "AWS Systems Manager Distributor": "ssm-distributor",
+    "AWS Systems Manager OpsCenter": "ssm-opscenter",
     "AWS Systems Manager Run Command": "ssm-run-command",
     "AWS Systems Manager State Manager": "state-manager",
     "AWS Step Functions": "step-functions",
@@ -2452,6 +2454,40 @@
         }
       ]
     },
+    "ssm-automation": {
+      "id": "ssm-automation",
+      "name": "AWS Systems Manager Automation",
+      "reading": "オートメーション",
+      "summary": "EC2・RDS・Redshift・S3 などの AWS のサービスについて、よくある保守・デプロイ・修復の作業を簡単にする Systems Manager の機能。作業の手順はランブック（手順を書いた文書）に書き、Automation のサービスが実行する。",
+      "features": [
+        {
+          "title": "ランブック",
+          "text": "1 回の Automation は、ランブックに書いたすべての作業から成り、Automation のサービスがそれを実行する。"
+        },
+        {
+          "title": "規模に合わせた実行の制御",
+          "text": "同時に対象にするリソースの数と、止めるまでに許すエラーの数を細かく決められる。"
+        }
+      ],
+      "exam_points": [
+        "多くの AWS のリソースのデプロイ・設定・管理を自動にする時に、同時に対象にするリソースの数と、止めるまでに許すエラーの数を決められる点を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#systems-manager-automation",
+          "quote": "Automation simplifies common maintenance, deployment, and remediation tasks for AWS services"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#systems-manager-automation",
+          "quote": "This means you can specify how many resources to target concurrently, and how many errors can occur before an automation is stopped."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#what-is-an-automation",
+          "quote": "An automation consists of all of the tasks that are defined in a runbook, and are performed by the Automation service."
+        }
+      ]
+    },
     "ssm-compliance": {
       "id": "ssm-compliance",
       "name": "AWS Systems Manager Compliance",
@@ -2517,6 +2553,44 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor-features",
           "quote": "You can choose to deploy packages one time, on a regular schedule, or whenever the default package version is changed to a different version."
+        }
+      ]
+    },
+    "ssm-opscenter": {
+      "id": "ssm-opscenter",
+      "name": "AWS Systems Manager OpsCenter",
+      "reading": "オプスセンター",
+      "summary": "AWS のリソースに関する運用の作業項目（OpsItem）を、運用の担当者が 1 か所で見て、調べて、解決できる Systems Manager の機能。問題の解決までの時間を短くすることを目的にしている。",
+      "features": [
+        {
+          "title": "OpsItem の集約",
+          "text": "サービスをまたいで OpsItem を集めて形をそろえ、各 OpsItem や関係する OpsItem・リソースの調査用の情報を示す。状態や発生元ごとの要約のレポートも自動で作る。"
+        },
+        {
+          "title": "自動の作成",
+          "text": "CloudWatch アラームが ALARM の状態になった時や、EventBridge がイベントを処理した時に、OpsItem を自動で作るよう設定できる。手作業でも作れる。"
+        },
+        {
+          "title": "修復のランブック",
+          "text": "問題を素早く解決するための Systems Manager Automation のランブックを使える。"
+        }
+      ],
+      "exam_points": [
+        "アラームやイベントから自動で OpsItem を作り、1 つのコンソールで診断して修復する使い方を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter",
+          "quote": "OpsCenter provides a central location where operations engineers and IT professionals can view, investigate, and resolve operational work items (OpsItems) related to AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter",
+          "quote": "lets you quickly diagnose and remediate issues with AWS resources from a single console."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter-learn-more-features",
+          "quote": "You can also manually create OpsItems."
         }
       ]
     },
