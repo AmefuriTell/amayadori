@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0005",
+  "source": "flowchart TB\n  LB@{ svc: \"Elastic Load Balancing\", label: \"NLB（クロスゾーン無効）\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"✔ B: 両ゾーンに均等に配置\" }\n  subgraph AZA[\"AZ-a\"]\n    A1[\"インスタンス 5 台\"]\n  end\n  subgraph AZB[\"AZ-b\"]\n    B1[\"インスタンス 1 台（過負荷）\"]\n  end\n  X1[\"⚠ C・D: 1 つのゾーンに頼ると単一障害点\"]\n  X2[\"⚠ E: 無効のままは自ゾーンにしか配らない\"]\n  LB -- \"今: 自ゾーンのターゲットだけ\" --> B1\n  LB == \"✔ A: クロスゾーンを有効に\" ==> A1\n  ASG == \"均等に起動\" ==> B1\n  X1 -.-> A1\n  X2 -.-> LB\n",
+  "alt": "クロスゾーン無効の NLB に AZ-a が 5 台、AZ-b が 1 台のインスタンスがある図。クロスゾーン負荷分散を有効にし（A）、Auto Scaling グループを両ゾーンに均等に配置する（B）のが正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

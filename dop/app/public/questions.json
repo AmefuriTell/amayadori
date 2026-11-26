@@ -7217,7 +7217,10 @@
           "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "復旧先リージョンに縮小した完全な本番の複製を動かしておくウォームスタンバイの図。障害時は縮小した量ですぐ処理して後で拡張できる D が正解で、バックアップと復元（A）やパイロットライト（B）はすぐには処理できない。"
+      }
     },
     {
       "id": "q-3.1-0002",
@@ -7283,7 +7286,10 @@
           "quote": "This approach is the most complex and costly approach to disaster recovery"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "データベースだけを復旧先リージョンへ継続的に複製し、アプリサーバーは止めておくパイロットライトの図。データ損失が小さく費用も低い B が正解で、毎晩のコピー（A）は継続的でなく、C や D は費用が高い。"
+      }
     },
     {
       "id": "q-3.1-0003",
@@ -7355,7 +7361,10 @@
           "quote": "This type of outage can be resolved by switching to a different Availability Zone."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "RTO 1 時間・RPO 5 分の目標を AWS Resilience Hub の耐障害性の方針に決め、今のアーキテクチャが満たすかを評価する図。正解は A（止まってよい時間が RTO）と C で、B は逆、E は手作業。"
+      }
     },
     {
       "id": "q-3.1-0004",
@@ -7485,7 +7494,10 @@
           "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クロスゾーン無効の NLB に AZ-a が 5 台、AZ-b が 1 台のインスタンスがある図。クロスゾーン負荷分散を有効にし（A）、Auto Scaling グループを両ゾーンに均等に配置する（B）のが正解。"
+      }
     },
     {
       "id": "q-3.1-0006",
@@ -7546,7 +7558,10 @@
           "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ElastiCache のプライマリが落ちた時、別のアベイラビリティーゾーンのレプリカが自動で昇格する図。Multi-AZ を有効にしてレプリカを別のゾーンに置く B が正解で、自動フェイルオーバーだけ（A）では別ゾーンの保証がない。"
+      }
     },
     {
       "id": "q-3.1-0007",
@@ -7607,7 +7622,10 @@
           "quote": "An Aurora global database consists of one primary AWS Region where your data is written, and up to 10 read-only secondary AWS Regions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "us-east-1 と eu-west-1 の DynamoDB グローバルテーブルのレプリカに、プレイヤーが自分のリージョンで読み書きする図。複製は自動でマルチアクティブな D が正解で、A や C は書き込みがプライマリだけ、B は自作が要る。"
+      }
     },
     {
       "id": "q-3.1-0008",
@@ -7668,7 +7686,10 @@
           "quote": "connect to the Aurora Global Database writer endpoint, which always points to the primary DB cluster, even after a switchover or failover to a different AWS Region."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Aurora グローバルデータベースのプライマリを計画してもう一方のリージョンへ移す図。データを失わないスイッチオーバーを使い、アプリはライターエンドポイントに接続する C が正解で、B や D は要件に反する。"
+      }
     },
     {
       "id": "q-3.1-0009",
@@ -7741,7 +7762,10 @@
           "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudFront のオリジングループで、us-east-1 のバケットが使えない時に us-west-2 の写しへ自動で切り替える図。S3 のクロスリージョンレプリケーション（A）とオリジングループ（C）が正解で、B・D・E は要件に合わない。"
+      }
     },
     {
       "id": "q-3.1-0010",
@@ -7802,7 +7826,10 @@
           "quote": "After you create the load balancer, you can enable or disable cross-zone load balancing at any time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "NLB のクロスゾーン負荷分散は既定で無効のため、2 台と 6 台のゾーンで偏る図。クロスゾーン負荷分散を有効にすれば、インスタンスを足さず種類も変えずに全 8 台へ分散できる A が正解。"
+      }
     },
     {
       "id": "q-3.1-0011",
@@ -7864,7 +7891,10 @@
           "quote": "When the health checks exceed HealthyThresholdCount consecutive successes, the load balancer puts the target back in service."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB が us-east-1a と 1b だけで有効なため、1c に登録した正常なインスタンスにトラフィックが来ない図。ロードバランサーで 1c を有効にしてノードを作る B が原因と対処。"
+      }
     },
     {
       "id": "q-3.1-0012",
