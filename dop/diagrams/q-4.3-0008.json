@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0008",
+  "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"インスタンスの終了イベント\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"トピック\" }\n  E[\"当番のエンジニア\"]\n  EC2 -- \"JSON 全体\" --> EB\n  EB == \"✔ A: ターゲットの入力トランスフォーマーで短いメッセージに\" ==> SNS\n  SNS -- \"メール\" --> E\n  B[\"⚠ B: イベントパターンを変える（送る中身は変わらない）\"]\n  B -.-> EB\n  C[\"⚠ C: Lambda で整形する（関数が増える）\"]\n  C -.-> SNS\n  D[\"⚠ D: メールから値を探す（読みにくいまま）\"]\n  D -.-> E\n",
+  "alt": "EventBridge から SNS へ送る終了イベントを短いメッセージに変える図。ターゲットの入力トランスフォーマーで値を取り出しテンプレートに入れる（A）。イベントパターンの変更や Lambda では要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

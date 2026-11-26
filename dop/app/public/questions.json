@@ -12155,7 +12155,10 @@
           "quote": "You must set the maximum storage threshold to at least 10% more than the current allocated storage."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "RDS のストレージ自動スケーリングが止まっている図。空きが少ない条件は満たしているが、次の増加分（950 GiB の 10%）が最大しきい値 1,000 GiB を超えるので拡張されない。正解 A は最大しきい値を十分に高くすること。"
+      }
     },
     {
       "id": "q-4.3-0002",
@@ -12217,7 +12220,10 @@
           "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECS のマネージドスケーリングと独自の CPU ポリシーが同じ Auto Scaling グループを動かしてぶつかる図。正解 B は独自ポリシーを削除し、ECS が管理するターゲット追跡ポリシーだけに希望する容量を任せること。"
+      }
     },
     {
       "id": "q-4.3-0003",
@@ -12283,7 +12289,10 @@
           "quote": "If you configure 3 out of 3 data points with a period of 10 minutes, the evaluation interval is 30 minutes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "DynamoDB の ThrottledRequests は絞り込みの時だけ値が出る。5 つのうち 3 つで ALARM にし、静かな期間は OK にするには、欠落データを notBreaching にする（A）。breaching や既定のままでは合わない。"
+      }
     },
     {
       "id": "q-4.3-0004",
@@ -12350,7 +12359,10 @@
           "quote": "Create OpsItems in Systems Manager Ops Center"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "データベースとアプリのヘルスの複数のアラームを複合アラームでまとめる図。AND と AT_LEAST の 50% を使い、両方そろった時だけ SNS の通知と OpsItem を 1 件出す（C）。OR や EC2 の再起動は不適切。"
+      }
     },
     {
       "id": "q-4.3-0005",
@@ -12412,7 +12424,10 @@
           "quote": "You can configure notifications to be filtered by the prefix and suffix of the key name of objects."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 のイベントで Lambda が動き、結果を同じバケットへ書くと呼び出しが繰り返される図。通知を raw/ に限り、結果を processed/ など別のプレフィックスへ書けば止まる（C）。"
+      }
     },
     {
       "id": "q-4.3-0006",
@@ -12486,7 +12501,10 @@
           "quote": "If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 のログバケットの新しいオブジェクトを EventBridge で FIFO キュー・Step Functions・Lambda に振り分ける図。通知は少なくとも 1 回の配信なので重複に耐える設計にする（A と B）。"
+      }
     },
     {
       "id": "q-4.3-0007",
@@ -12553,7 +12571,10 @@
           "quote": "To allow EventBridge to publish to an Amazon SNS topic, use the aws sns get-topic-attributes and the aws sns set-topic-attributes commands."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "EC2 インスタンスの終了だけを SNS のメールで知らせる図。EventBridge のイベントパターンで状態が terminated のものだけに絞り、SNS をターゲットにする（B）。Lambda や定期確認は手間が増える。"
+      }
     },
     {
       "id": "q-4.3-0008",
@@ -12619,7 +12640,10 @@
           "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "EventBridge から SNS へ送る終了イベントを短いメッセージに変える図。ターゲットの入力トランスフォーマーで値を取り出しテンプレートに入れる（A）。イベントパターンの変更や Lambda では要件に合わない。"
+      }
     },
     {
       "id": "q-4.3-0009",
@@ -12685,7 +12709,10 @@
           "quote": "you don't need to configure your firewall to allow inbound traffic to your instances for Systems Manager."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インスタンスプロファイル無しで EC2 を Systems Manager のマネージドノードにする図。リージョンで Default Host Management Configuration を有効にすれば、IMDSv2 と新しい SSM Agent の今と今後の全インスタンスが対象になる（C）。"
+      }
     },
     {
       "id": "q-4.3-0010",
@@ -12758,7 +12785,10 @@
           "quote": "SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Gateway Service (ssmmessages)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インターネットに出られないプライベートサブネットの EC2 を Systems Manager で管理する図。ssm・ssmmessages・ec2messages の VPC エンドポイントを作り、443 番の外向き HTTPS を許す（A と B）。"
+      }
     },
     {
       "id": "q-4.3-0011",

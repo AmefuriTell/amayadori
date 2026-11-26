@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0010",
+  "source": "flowchart TB\n  subgraph VPC[\"VPC（外へのルート無し）\"]\n    subgraph SUB[\"プライベートサブネット\"]\n      EC2@{ svc: \"Amazon EC2\", label: \"SSM Agent のあるインスタンス\" }\n    end\n    EP@{ svc: \"Amazon VPC\", label: \"VPC エンドポイント\" }\n  end\n  SSM@{ svc: \"AWS Systems Manager\", label: \"サービス\" }\n  A[\"✔ A: ssm・ssmmessages・ec2messages の 3 つを作る\"]\n  A == \"作る\" ==> EP\n  EC2 == \"✔ B: 443 番の外向き HTTPS\" ==> EP\n  EP --> SSM\n  C[\"⚠ C: 受信ルールを足す（不要）\"]\n  C -.-> EC2\n  D[\"⚠ D: NAT とインターネット経路を足す（要件に反する）\"]\n  D -.-> EC2\n  E[\"⚠ E: CloudWatch エージェントを入れる（無関係）\"]\n  E -.-> EC2\n",
+  "alt": "インターネットに出られないプライベートサブネットの EC2 を Systems Manager で管理する図。ssm・ssmmessages・ec2messages の VPC エンドポイントを作り、443 番の外向き HTTPS を許す（A と B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

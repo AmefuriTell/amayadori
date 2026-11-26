@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0004",
+  "source": "flowchart TB\n  DBA[\"データベースのアラーム\"]\n  APPA[\"アプリのヘルスのアラーム（約 20 個）\"]\n  subgraph ACC[\"1 つのアカウント\"]\n    CA@{ svc: \"Amazon CloudWatch\", label: \"複合アラーム\" }\n    SNS@{ svc: \"Amazon SNS\", label: \"1 件の通知\" }\n    SM@{ svc: \"AWS Systems Manager\", label: \"OpsItem を 1 つ\" }\n  end\n  HOST[\"データベースのホスト\"]\n  DBA -- \"状態\" --> CA\n  APPA -- \"状態\" --> CA\n  CA == \"✔ C: db AND AT_LEAST(50%)\" ==> SNS\n  CA ==> SM\n  CA -. \"⚠ B: EC2 の再起動は取れないアクション\" .-> HOST\n  A[\"⚠ A: ルールが OR だと片方だけで通知\"]\n  A -.-> CA\n  D[\"⚠ D: Lambda で状態を数える（自前の仕組み）\"]\n  D -.-> APPA\n",
+  "alt": "データベースとアプリのヘルスの複数のアラームを複合アラームでまとめる図。AND と AT_LEAST の 50% を使い、両方そろった時だけ SNS の通知と OpsItem を 1 件出す（C）。OR や EC2 の再起動は不適切。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

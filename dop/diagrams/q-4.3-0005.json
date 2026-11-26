@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0005",
+  "source": "flowchart TB\n  APP[\"アプリケーションサーバー\"]\n  subgraph B[\"バケット app-logs\"]\n    RAW@{ svc: \"Amazon S3\", label: \"raw/ の生ログ<br/>✔ C: 通知は raw/ だけに限る\" }\n    OUT@{ svc: \"Amazon S3\", label: \"processed/ の結果\" }\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"ログを解析する関数\" }\n  APP -- \"ログのアップロード\" --> RAW\n  RAW -- \"イベント通知\" --> FN\n  FN == \"✔ C: 別のプレフィックスへ書く\" ==> OUT\n  NOW[\"⚠ 今: 同じ場所へ書き戻す<br/>→ また呼ばれる\"]\n  NOW -.-> RAW\n  A[\"⚠ A: 同時実行を 0 にする（処理が止まる）\"]\n  A -.-> FN\n  BB[\"⚠ B: 同時実行の上限を上げる（繰り返しは続く）\"]\n  BB -.-> FN\n  D[\"⚠ D: .log フィルター＋結果も .log\"]\n  D -.-> RAW\n",
+  "alt": "S3 のイベントで Lambda が動き、結果を同じバケットへ書くと呼び出しが繰り返される図。通知を raw/ に限り、結果を processed/ など別のプレフィックスへ書けば止まる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

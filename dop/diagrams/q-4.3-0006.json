@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0006",
+  "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"ログバケット（EventBridge 配信を有効）\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"ルールで 3 つに振り分け\" }\n  Q@{ svc: \"Amazon SQS\", label: \"FIFO キュー\" }\n  SF@{ svc: \"AWS Step Functions\", label: \"ワークフロー\" }\n  FN@{ svc: \"AWS Lambda\", label: \"セキュリティ用の関数\" }\n  S3 == \"✔ A: 新しいオブジェクトのイベント\" ==> EB\n  EB ==> Q\n  EB ==> SF\n  EB ==> FN\n  S3 -. \"⚠ C: 通知は FIFO キューに直接送れない\" .-> Q\n  N1[\"✔ B: 少なくとも 1 回の配信 → 重複に耐える設計\"]\n  N1 -.- FN\n  D[\"⚠ D: 必ず 1 回と仮定し重複を処理しない\"]\n  D -.-> FN\n  E[\"⚠ E: プレフィックスで絞って有効化（絞るのはルール側）\"]\n  E -.-> S3\n",
+  "alt": "S3 のログバケットの新しいオブジェクトを EventBridge で FIFO キュー・Step Functions・Lambda に振り分ける図。通知は少なくとも 1 回の配信なので重複に耐える設計にする（A と B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

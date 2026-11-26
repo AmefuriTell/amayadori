@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0003",
+  "source": "flowchart TB\n  M@{ svc: \"Amazon DynamoDB\", label: \"ThrottledRequests（絞り込みの時だけ値が出る）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム（期間 1 分・直近 5 つのうち 3 つで ALARM）\" }\n  MD[\"静かな期間はデータが欠ける<br/>欠落データの扱い\"]\n  M -- \"データポイント\" --> AL\n  AL --> MD\n  A[\"✔ A: notBreaching → 静かな時は OK\"]\n  A ==> MD\n  B[\"⚠ B: breaching → 静かな時に ALARM\"]\n  B -.-> MD\n  C[\"⚠ C: 既定の missing → INSUFFICIENT_DATA\"]\n  C -.-> MD\n  D[\"⚠ D: 期間 5 分・3 個中 3 個 → 範囲が 15 分\"]\n  D -.-> AL\n",
+  "alt": "DynamoDB の ThrottledRequests は絞り込みの時だけ値が出る。5 つのうち 3 つで ALARM にし、静かな期間は OK にするには、欠落データを notBreaching にする（A）。breaching や既定のままでは合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
