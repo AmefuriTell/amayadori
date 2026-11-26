@@ -6,7 +6,8 @@ import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
 import { resume, snapshot } from './logic/progress.js';
 import { lookup } from './logic/glossary.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, loadProgress, saveProgress } from './storage.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, loadProgress, saveProgress, loadRetry, saveRetry } from './storage.js';
+import { wrongIds } from './logic/retry.js';
 import { el } from './ui/el.js';
 import { showVersion, checkVersion } from './ui/version.js';
 import { openGlossary, serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } from './ui/glossary.js';
@@ -25,6 +26,8 @@ const state = {
   report: null, // 報告の欄を開いている間 { kind, comment, status }
   lang: loadLang(), // 問題文と選択肢の言葉（P-012）
   glossary: null, // サービス事典（A-0013）。取れなければ null のまま
+  allQuestions: [], // 全部の問題。questions は解き直し（A-0004）の間は絞った物
+  retry: loadRetry(), // 解き直しの問題 { ids }（A-0004）
   speech: loadSpeech(), // 読み上げ（A-0009）{ on, rate }
   spokenKey: null, // 最後に読んだ段（"問題の番号:答えたか"）。同じ段は読み直さない
 };
@@ -41,7 +44,7 @@ function renderGlossaryList() {
 
 // 模試（A-0003）: 答えは終えた時に記録へ足す
 const mockUi = createMock({
-  app, progress, state: () => state, render: () => render(),
+  app, progress, state: () => ({ ...state, questions: state.allQuestions }), render: () => render(),
   record(entries) {
     for (const e of entries) state.answers = addAnswer(state.answers, e);
     if (!saveAnswers(state.answers)) state.storageOk = false;
@@ -64,6 +67,38 @@ async function loadGlossary() {
   }
 }
 
+// ---- 間違えた問題だけ解き直す（A-0004） ----
+function useQuestions(retry) {
+  const byId = Object.fromEntries(state.allQuestions.map((q) => [q.id, q]));
+  const picked = retry ? retry.ids.map((id) => byId[id]).filter(Boolean) : [];
+  state.retry = picked.length ? retry : null;
+  state.questions = picked.length ? picked : state.allQuestions;
+}
+
+function startRetry() {
+  const ids = wrongIds(state.answers, state.allQuestions);
+  if (!ids.length) return;
+  saveRetry({ ids });
+  useQuestions({ ids });
+  Object.assign(state, { view: 'solve', index: 0, selected: [], answered: false, skipped: false, correct: 0, report: null });
+  render();
+}
+
+function stopRetry() {
+  const current = state.questions[state.index]?.id;
+  saveRetry(null);
+  useQuestions(null);
+  Object.assign(state, resume(state.questions, current ? { id: current, selected: [], answered: false, correct: 0 } : null));
+  render();
+}
+
+function renderRetryBar() {
+  if (!state.retry) return null;
+  return el('div', { class: 'retry-bar', 'data-testid': 'retry-bar' },
+    el('span', { text: `間違えた問題だけ（${state.questions.length} 問）` }),
+    el('button', { type: 'button', class: 'secondary', onclick: stopRetry, text: 'やめる' }));
+}
+
 async function load() {
   showVersion();
   checkVersion();
@@ -73,8 +108,9 @@ async function load() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data.questions) || !data.questions.length) throw new Error('問題が 0 問');
-    state.questions = data.questions;
+    state.allQuestions = data.questions;
     state.domains = data.domains ?? {};
+    useQuestions(state.retry);
     Object.assign(state, resume(state.questions, loadProgress())); // A-0010: 読み込み直しても続きから
     render();
   } catch (e) {
@@ -144,7 +180,7 @@ function render() {
   } else {
     card.append(renderAnswer(q));
   }
-  app.replaceChildren(card);
+  app.replaceChildren(...[renderRetryBar(), card].filter(Boolean));
   autoSpeak(q, view);
 }
 
@@ -270,16 +306,17 @@ function next() {
 function renderResult() {
   progress.textContent = '';
   const n = state.questions.length;
-  app.replaceChildren(el('section', { class: 'card result', 'data-testid': 'result' },
+  app.replaceChildren(...[renderRetryBar(), el('section', { class: 'card result', 'data-testid': 'result' },
     el('p', { class: 'muted', text: '結果' }),
     el('p', { class: 'score', text: `${n} 問中 ${state.correct} 問 正解` }),
     el('div', { class: 'actions', style: 'justify-content:center' }, el('button', { type: 'button', onclick: restart, text: 'もう一度' })),
-  ));
+  )].filter(Boolean));
 }
 
 function renderStats() {
   progress.textContent = '';
-  const rows = domainStats(state.answers, state.questions, state.domains);
+  const rows = domainStats(state.answers, state.allQuestions, state.domains);
+  const wrong = wrongIds(state.answers, state.allQuestions).length;
   const pct = (r) => (r == null ? '—' : `${Math.round(r * 100)}%`);
   app.replaceChildren(el('section', { class: 'card', 'aria-labelledby': 'stats-title' },
     el('h2', { id: 'stats-title', class: 'title', text: 'ドメイン別の正答率' }),
@@ -292,6 +329,9 @@ function renderStats() {
         el('td', { class: 'num', text: `${r.answered} / ${r.total}` }),
         el('td', { class: 'num', text: pct(r.rate) })))),
     ),
+    el('div', { class: 'retry' },
+      el('div', { class: 'actions' }, el('button', { type: 'button', 'data-testid': 'retry-start', disabled: !wrong, onclick: startRetry, text: `間違えた問題を解き直す（${wrong} 問）` })),
+      wrong ? null : el('p', { class: 'muted small', 'data-testid': 'retry-hint', text: '間違えた問題はまだありません。' })),
     renderExport(),
     el('div', { class: 'actions' }, el('button', { type: 'button', class: 'secondary', onclick: onClear, text: '記録を消す' })),
   ));
