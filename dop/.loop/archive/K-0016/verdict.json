@@ -1,0 +1,179 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 21
+  },
+  "mild": [
+    {
+      "slide": "s05",
+      "from": "consistency",
+      "kind": "fact",
+      "severity": "軽",
+      "detail": "前回の軽が残る。図で operation ID への点線が「スタックの作成が失敗」のノードから出ており、operation ID が作成の失敗だけの手がかりに見える。S7 はデプロイのイベント全般に付くという話（台本は「もう一つの手がかり」と分けている）。",
+      "suggest": "operation ID の箱を作成の失敗のノードから切り離し、「関係するイベントを追う」の別の箱から出すか、並べるだけにする。"
+    },
+    {
+      "slide": "s06",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "「どちらも、インスタンスの側に残るログです」「立ち上げのときの設定を受け持つ仕組みと考えてよさそう」「cfn は CloudFormation を略した書き方と見てよい」は sources.md に無い。弱めた言い方なので誤って覚える害は小さい（notes の理由は妥当）。",
+      "suggest": "「インスタンスの側に残る」は「CloudWatch に出せば、インスタンスにつながずに見られる」という S3 の言い方に寄せる。"
+    },
+    {
+      "slide": "s07",
+      "from": "consistency",
+      "kind": "flow",
+      "severity": "軽",
+      "detail": "前回の軽が残る。画面（タイトル・bullets・steps）に CloudFormation の名が無く、UPDATE_ROLLBACK_FAILED がどのサービスの状態かが台本でしか分からない。「原因しだいで手で直す」と条件は直っている。",
+      "suggest": "タイトルを「失敗したデプロイ 3: CloudFormation の UPDATE_ROLLBACK_FAILED」にする。"
+    },
+    {
+      "slide": "s11",
+      "from": "consistency",
+      "kind": "terms",
+      "severity": "軽",
+      "detail": "bullet「止まったタスクは 1 時間だけ表示」で「コンソールに」が落ちている（表・台本はコンソールと言う）。表は「ハード」、台本は「ハードウェア」と揺れる。EKS の条件（managed node group・EC2 ヘルスチェック基準・ソフトは検出しない）は直っている。",
+      "suggest": "bullet を「止まったタスクはコンソールに 1 時間だけ」にする。"
+    },
+    {
+      "slide": "s11",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "「EKS は、大まかに言うと、Kubernetes でコンテナを動かすサービス」は sources.md に無い。弱めた言い方で事実としても誤りではないので軽。",
+      "suggest": "このままでよいが、言うなら「大まかに言うと」を残す。"
+    },
+    {
+      "slide": "s13",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "前回の軽が残る。表の「EC2 の問題 → cloud-init・cfn ログ / CloudWatch に出す」で「インスタンスにつながずに見たいなら」の条件が落ちている（台本は条件付き）。",
+      "suggest": "確かめる所を「つながず見るなら CloudWatch」にする。"
+    },
+    {
+      "slide": "s15",
+      "from": "consistency",
+      "kind": "terms",
+      "severity": "軽",
+      "detail": "bullet「検査は EC2 ヘルスチェックに基づく」に主語（EKS の managed node group）が無く、すぐ上の Auto Scaling の bullet の話に見えうる。表と台本は managed node group と書いており、事実の誤りではない。",
+      "suggest": "bullet を「node group の検査は EC2 基準・ソフトは対象外」にする。"
+    },
+    {
+      "slide": "s16",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "前回の軽が残る。bullet「まず根本原因の手がかりを探す」が台本で言われない。2 の部のラベルから s01 にあった canary が消えている。",
+      "suggest": "台本に一文足すか bullet を台本に合わせる。2 の部に canary を残す。"
+    },
+    {
+      "slide": null,
+      "from": "consistency",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の中 5 件（s09 の CodeDeploy 自動ロールバックの設定先、s11 の EKS の条件、s13 の「原因しだいで」、s14 のサービス名、s15 の EKS の条件と呼び方）はどれも直っている。s09 は「自動にする設定先: deployment group か deployment」と「自動のきっかけ: 失敗か監視のしきい値」に分かれ S11 と合う。新しい重・中は見つからなかった。",
+      "suggest": "なし。"
+    },
+    {
+      "slide": "s01",
+      "from": "clarity",
+      "kind": "jargon",
+      "severity": "軽",
+      "detail": "前回の軽が残る。地図と台本に canary が説明無しで出る。",
+      "suggest": "「カナリア、後で説明する見張り役のスクリプト」と一言添える。"
+    },
+    {
+      "slide": "s03",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "2 つのまとまりに作り直され、きっかけと集める元の区別は読める（前回の中は直った）。ただ矢印のラベル「設定すれば自動で」が CloudWatch の矢印にだけ付き、EventBridge の矢印には付かないので、EventBridge 側は設定が要らないようにも見える。",
+      "suggest": "ラベルをまとまりの見出しに移し「OpsItem を作るきっかけ（設定すれば自動）」にする。"
+    },
+    {
+      "slide": "s04",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "前回の軽が残る。canary と CloudWatch のアラームが同じアイコンで上下に並ぶ。X-Ray と X-Ray Analytics の関係は図（X-Ray の枠の中）と台本（同じエックスレイの中に）で直っている。",
+      "suggest": "canary 側をアイコン無しの箱にする。"
+    },
+    {
+      "slide": "s05",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "前回の軽が残る。operation ID の箱に「失敗で絞り込む」が同居し、operation ID が失敗を絞り込む機能に見える。",
+      "suggest": "箱を「operation ID で関係を追う」にし、「失敗での絞り込みと合わせて」を矢印のラベルに移す。"
+    },
+    {
+      "slide": "s06",
+      "from": "clarity",
+      "kind": "listen",
+      "severity": "軽",
+      "detail": "「考えてよさそうです」「見てよいでしょう」と講師が推測で話す形になり、耳では自信の無い説明に聞こえる。音と表記は結べており、前回の中は直った。",
+      "suggest": "「大まかに言うと、立ち上げのときの設定の仕組みです」「シーエフエヌは、クラウドフォーメーションの略と考えてください」と、他スライドの「大まかに」の形にそろえる。"
+    },
+    {
+      "slide": "s09",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "左右の比べる表になり、2 つのロールバックの違いは読める（前回の中 2 件は直った）。ただ 1 行目の CodePipeline の「—」は、CodePipeline には失敗の原因を探す方法が無いと読める。",
+      "suggest": "1 行目を表の外（bullet と台本だけ）に出すか、「—」を「この講義では扱わない」とする。"
+    },
+    {
+      "slide": "s09",
+      "from": "clarity",
+      "kind": "jargon",
+      "severity": "軽",
+      "detail": "前回の軽が残る。デプロイメントグループが説明無しで出る。",
+      "suggest": "「デプロイのまとまりの設定」とだけ言い換える。"
+    },
+    {
+      "slide": "s10",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "前回の軽が残る。「起動の失敗」の箱がどこともつながらず浮いている。",
+      "suggest": "置き換えと起動の失敗を 2 つの subgraph に分ける。"
+    },
+    {
+      "slide": "s14",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "方法の列にサービス名が付き、2 つの自動ロールバックは区別できる（前回の中は直った）。ただ 1 行目の条件「ステージを途中からやり直す」は、ステージの中の途中から、と読めて s08 の「ステージの最初のアクションから全部」とぶつかって聞こえる。",
+      "suggest": "条件を「最初から流さずに失敗ステージをやり直す」にする。"
+    },
+    {
+      "slide": "s16",
+      "from": "clarity",
+      "kind": "listen",
+      "severity": "軽",
+      "detail": "前回の軽が残る。bullet「まず根本原因の手がかりを探す」が台本で触れられない。",
+      "suggest": "台本に一文入れる。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の中 13 件は直っている。CloudWatch は s03 で「ログを集めて表示したり、アラームで見張ったりするサービス」と言い換えられ、根拠（S3・S5・S12）の範囲に収まる（メトリクスを言わない notes の理由は妥当）。s12 の X-Ray の 2 行は「通り道を見る」と「canary 失敗の根本原因を統計で絞る」で書き分けられた。s08 の CodeBuild は外され、s11 の EKS・managed node group も「大まかに」で言い換えられた。新しい重・中は無い。",
+      "suggest": "なし。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の軽が残る。CloudFormation のロールバックも含めた 3 つの違いを一度に見る所は無い（CodePipeline と CodeDeploy は s09 で並んだ）。",
+      "suggest": "s16 の台本で 3 つの戻り方を一文ずつ再掲する。"
+    }
+  ],
+  "verify_hash": "da1ef8897bc04117"
+}

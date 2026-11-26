@@ -1,41 +1,13 @@
 {
   "slides": [
     {
-      "id": "s06",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "bullets の「自動ローテーションは既定で毎年」は、S10 の条件「when you enable automatic key rotation」（表・台本では「有効にすると」）が落ちている。自動ローテーションが既定で有効になっている、と読める。",
-          "suggest": "「自動ローテーションは有効にすると既定で毎年」のように、有効にした時の話だと bullets にも書く。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "題が「鍵の種類」で、表は customer managed keys と AWS owned keys の 2 つだけ。S9 は 2 つを比べた勧めで、鍵の種類がこの 2 つだけとは言っていない。s16 の「管理か手軽さか」も二択に見える。",
-          "suggest": "題を「鍵の選び方とローテーション」などにするか、台本で「ドキュメントが比べている 2 つ」と断る。"
-        }
-      ]
-    },
-    {
-      "id": "s08",
+      "id": "s14",
       "issues": [
         {
           "kind": "unsupported",
           "severity": "軽",
-          "detail": "表の「AWS CloudHSM 選ぶ時: 自分の HSM を運用する」は、S8 の「HSM を運用したくないなら KMS を考える」の裏を取った推論で、根拠に直接は無い。s14 の表と s16 の図・台本でも同じ言い切りをしている。",
-          "suggest": "「KMS の勧めの反対側」と分かる言い方にする（例: 「HSM を自分で運用する場合（KMS の勧めの外）」）か、台本で根拠の向きを一言添える。"
-        }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "表の「識別子」の行で、自動の機密データ検出の欄が「—」。根拠は自動の検出が識別子を使わないとは言っていないが、「—」は「使わない・選べない」と読める。",
-          "suggest": "行をジョブだけの説明にするか（例: 列を分けずに台本でジョブの話として言う）、欄を「（この講義では扱わない）」とする。"
+          "detail": "hsm1.medium の話は s14 の表と台本から外れたのに、refs に S0（hsm1.medium の告知）が残っている。notes の「s08 だけで触れ」とも合わない。",
+          "suggest": "s14 の refs から S0 を外す。"
         }
       ]
     },
@@ -43,49 +15,10 @@
       "id": "s11",
       "issues": [
         {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "GuardDuty と Control Tower が何をするサービスかを説明しないまま、委任された管理者や control の話に入る。Organizations は s10 で説明したが、この 2 つは説明が無い。",
-          "suggest": "根拠にある範囲で言う（Control Tower は S17 の「アカウントのまとまりでリソースを統制し、準拠を見張る」）。GuardDuty の役目は根拠に無いので、根拠を足すか、「ここでは組織での管理の仕方だけを見る」と断る。"
-        },
-        {
           "kind": "unsupported",
           "severity": "軽",
-          "detail": "図の「有効にして管理 → メンバーアカウント そのリージョンで」は、S19 と台本にある「既定では」が落ちている。",
-          "suggest": "矢印のラベルを「既定で有効にして管理」にする。"
-        }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        {
-          "kind": "fact",
-          "severity": "中",
-          "detail": "表の確かめる所「Amazon 発行・インポート不可」は、「ACM には証明書をインポートできない」と読める。S7 が言うのは、インポートした証明書は管理された更新の対象外（NOT ELIGIBLE if imported）という事。台本は「対象外」と正しく言っているので、画面と台本もずれている。",
-          "suggest": "「Amazon 発行・インポートした物は対象外」にする。"
-        }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "hsm1.medium の話で、s08 の台本は「今の告知なので試験とずれる事もある」と断っているが、s14 の台本には無い（notes は s14 でも断ったと書いている）。",
-          "suggest": "s14 の台本にも一言添えるか、notes を直す。"
-        }
-      ]
-    },
-    {
-      "id": "s15",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "表の「複数リージョンを一つに → クロスリージョン集約」は、Security Hub CSPM の機能だという主語が落ちていて、何でも集約できる一般の機能に見える（台本も「結果」とだけ言う）。",
-          "suggest": "「Security Hub CSPM のクロスリージョン集約」と書く。"
+          "detail": "台本の「コントロールで、アカウントのまとまりを統制し」は、S17 の「govern your resources ... across groups of AWS accounts」（統制するのはリソース）より少しずれた言い方。",
+          "suggest": "「アカウントのまとまりにわたって、リソースを統制し、準拠を見張ります」とする。"
         }
       ]
     },
@@ -93,36 +26,13 @@
       "id": "s16",
       "issues": [
         {
-          "kind": "fact",
-          "severity": "中",
-          "detail": "図の 4 組織全体で、Security Hub CSPM のアイコンとラベルの下に「宣言型ポリシー / control と委任」をまとめている。control は Control Tower、委任された管理者は GuardDuty の話なので、Security Hub CSPM の機能だと覚えさせる。alt と台本はサービスを分けて言っているので、画面とずれる。",
-          "suggest": "s01 と同じく「Security Hub CSPM の宣言型ポリシー / Control Tower の control / GuardDuty の委任」のように、サービス名を付けて分ける。"
-        },
-        {
           "kind": "mismatch",
-          "severity": "中",
-          "detail": "図の ACM は「DNS 検証なら自動で更新」で、alt と台本にある「Amazon 発行」の条件が落ちている（bullets は「条件付きの所を見落とさない」と言っている）。",
-          "suggest": "「Amazon 発行・DNS 検証なら自動で更新」にする。"
-        }
-      ]
-    },
-    {
-      "id": "s10",
-      "issues": [
-        {
-          "kind": "flow",
           "severity": "軽",
-          "detail": "図で Security Hub CSPM からホームリージョンへの点線の矢印が、宣言型ポリシーの流れの続きに見える。ラベルで「別の機能」と言ってはいる。",
-          "suggest": "ホームリージョンを横に分けた枠に置き、矢印を流れの縦の線から外す。"
+          "detail": "bullets は「DNS 検証・リージョンなどの条件」と言うが、台本ではリージョンの条件（GuardDuty の委任は既定でそのリージョン）に触れていない。台本の四つ目は「宣言型ポリシー」とだけ言い、Security Hub CSPM の名前・集約・Detective が図にあるのに台本に無い。",
+          "suggest": "台本の四つ目を「セキュリティハブシーエスピーエムの宣言型ポリシーと集約、…ガードデューティの委任された管理者は既定でそのリージョン、根本原因はディテクティブ」とする。"
         }
       ]
     }
   ],
-  "global": [
-    {
-      "severity": "軽",
-      "detail": "Macie の自動の検出の呼び方が「自動の機密データ検出」（s09・s14 台本）、「自動の検出」（s14 表・s16 台本）、「自動検出」（s14 bullets・s16 図）とそろわない。",
-      "suggest": "正式名は「自動の機密データ検出」とし、略す時は「自動の検出」に統一する。"
-    }
-  ]
+  "global": []
 }
