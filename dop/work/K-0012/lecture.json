@@ -1,0 +1,774 @@
+{
+ "task": "4.2",
+ "title": "ログとメトリクスの監査・監視・分析",
+ "notes": [
+  "根拠が足りず扱わなかった事（sources.md の「覆えなかった行」）: よく使うメトリクスの名前（EC2 の CPU 使用率・RDS の queue 長・ALB の 5xx）、Amazon Inspector 本体と assessment templates、Amazon Quick Sight の可視化。講義では「資料に無いので扱わない」と台本で断った（s02・s06・s11）。",
+  "S0（X-Ray SDK・daemon の保守モードと OpenTelemetry への移行の推奨）は、試験とずれるかもしれない点として s10 と s15 で触れた。",
+  "条件の表は 1 枚 5 行のため 3 枚（メトリクス・ログ・トレースと設定）に分けた。CloudTrail から CloudWatch Logs へ送る行は、ログに関わるので 2 枚目の表に置き、台本でそう断った。"
+ ],
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "4 つの部を上から順に扱う",
+    "図は扱う順。処理の流れではない",
+    "最後に条件の表を 3 枚"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"メトリクス\"]\n    CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>アラーム・<br/>ダッシュボード\" }\n  end\n  subgraph P2[\"ログ\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>Logs Insights・<br/>subscription filter\" }\n    AT@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>ログの分析\" }\n    KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams<br/>リアルタイムの分析\" }\n  end\n  subgraph P3[\"トレース\"]\n    XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>Lambda・<br/>API Gateway・ECS\" }\n  end\n  subgraph P4[\"設定と操作の記録\"]\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>Config rules\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"AWS CloudTrail<br/>イベント\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n",
+    "alt": "講義の地図。扱う順に 4 つの部を上から並べた図で、処理の流れではないので矢印は無い。メトリクスの部は CloudWatch のアラームとダッシュボード。ログの部は CloudWatch Logs の Logs Insights と subscription filter、Amazon Athena、Kinesis Data Streams。トレースの部は Lambda・API Gateway・ECS での AWS X-Ray。設定と操作の記録の部は AWS Config の Config rules と AWS CloudTrail のイベント。"
+   },
+   "narration": "この講義では、ログとメトリクスを見張り、調べて、問題を見つける方法を学びます。画面の地図は、扱う順に四つの部を並べた物で、処理の流れではありません。一つ目はメトリクスの部です。ここでは、時間とともに記録される数値をメトリクスと呼びます。アラーム、異常検出、ダッシュボードを見ます。二つ目はログの部です。たまったログを調べる方法と、リアルタイムに分析する方法を見ます。三つ目はトレースの部です。トレースは、ここでは一つの要求がサービスをどう通ったかの記録と考えてください。エックスレイの設定を見ます。四つ目は、設定と操作の記録の部です。コンフィグのルールと、クラウドトレイルのイベントを見ます。最後に、条件から方法を選ぶ表を三枚見て、この地図に戻ります。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "When you enable anomaly detection for a metric, CloudWatch applies statistical and machine learning algorithms.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection"
+    },
+    {
+     "source_id": "S7",
+     "quote": "anomaly Identifies unusual patterns in your log data using machine learning.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S11",
+     "quote": "You can use AWS X-Ray to trace your AWS Lambda functions.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S16",
+     "quote": "You do this by creating AWS Config rules, which represent your ideal configuration settings.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html#evaluate-config"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "メトリクス 1: 名前空間",
+   "bullets": [
+    "サービスが CloudWatch に発行",
+    "名前空間ごとにまとまる",
+    "表はドキュメントの表の一部"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "サービス",
+     "名前空間"
+    ],
+    "rows": [
+     [
+      "Amazon EC2",
+      "AWS/EC2"
+     ],
+     [
+      "Application Load Balancer",
+      "AWS/ApplicationELB"
+     ],
+     [
+      "Amazon RDS",
+      "AWS/RDS"
+     ]
+    ]
+   },
+   "narration": "メトリクスの部の一枚目は、メトリクスの置き場所です。多くのエーダブリューエスのサービスが、クラウドウォッチにメトリクスを発行していて、ドキュメントの表で調べられます。表には、サービスごとに名前空間が書かれています。名前空間は、メトリクスをまとめる入れ物の名前と考えてください。画面の三行は、その表から抜き出した例で、ほかにも多くのサービスが並んでいます。試験ガイドには、イーシーツーのシーピーユー使用率のような、よく使うメトリクスの例が挙がっています。ただし、この講義の資料には、メトリクスの一つ一つの名前は含まれていません。各サービスのドキュメントで確かめてください。",
+   "refs": [
+    {
+     "source_id": "S5",
+     "quote": "You can use the following table to learn which AWS services publish metrics to CloudWatch.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html#aws-services-cloudwatch-metrics"
+    },
+    {
+     "source_id": "S5",
+     "quote": "Amazon EC2 AWS/EC2 Monitoring Your Instances Using CloudWatch",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html#aws-services-cloudwatch-metrics"
+    },
+    {
+     "source_id": "S5",
+     "quote": "Elastic Load Balancing AWS/ApplicationELB CloudWatch Metrics for your Application Load Balancer",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html#aws-services-cloudwatch-metrics"
+    },
+    {
+     "source_id": "S5",
+     "quote": "Amazon Relational Database Service AWS/RDS Monitoring Amazon RDS metrics with Amazon CloudWatch",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html#aws-services-cloudwatch-metrics"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "メトリクス 2: アラームが評価する物",
+   "bullets": [
+    "1 つのメトリクスか metric math 式",
+    "SEARCH 式ではアラームを作れない",
+    "複数の時系列は Metrics Insights"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  M1[\"メトリクス 1 つ\"]\n  MM[\"metric math 式<br/>組み合わせ・変換して<br/>1 つの時系列に\"]\n  MI[\"Metrics Insights の<br/>SQL のクエリ<br/>複数の時系列を扱える\"]\n  AL@{ svc: \"Amazon CloudWatch\", label: \"メトリクスの<br/>アラーム\" }\n  SE[\"SEARCH 式<br/>アラームを作れない\"]\n  M1 -- \"評価\" --> AL\n  MM --> AL\n  MI --> AL\n",
+    "alt": "メトリクスのアラームが評価する物。1 つのメトリクス、または 1 つ以上のメトリクスを組み合わせ・変換して 1 つの時系列にする metric math 式を評価する。複数の時系列を扱えるのは Metrics Insights の SQL のクエリを元にしたアラームだけ。SEARCH 式を元にしたアラームは作れないので、アラームにつながっていない。"
+   },
+   "narration": "メトリクスの部の二枚目は、アラームです。ここでは、メトリクスを見張って状態を決める仕組みを、アラームと呼びます。メトリクスのアラームが評価するのは、時刻ごとの値の並び、つまり時系列です。時系列は、一つのメトリクスか、メトリクスマスの式で決めます。メトリクスマスの式は、一つ以上のメトリクスを組み合わせたり変換したりして、一つの時系列にする式です。気をつけたい点が二つあります。サーチ式を元にしたアラームは作れません。また、複数の時系列を扱えるのは、メトリクスインサイツのエスキューエルのクエリを元にしたアラームだけです。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "Metric alarms are designed to evaluate time series that you define from either a single metric, or a metric math expression that combines or transforms one or more metrics into a time series that deliver insights more closely aligned to your unique needs.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html#Create-alarm-on-metric-math-expression"
+    },
+    {
+     "source_id": "S3",
+     "quote": "You can't create an alarm based on the SEARCH expression. Only alarms based on Metrics Insights SQL queries can operate on multiple time series.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html#Create-alarm-on-metric-math-expression"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "メトリクス 3: 異常検出のアラーム",
+   "bullets": [
+    "統計と機械学習でモデル",
+    "基準は期待値。固定のしきい値無し",
+    "学習から期間を除ける"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  MT[\"メトリクスと統計\"]\n  AD@{ svc: \"Amazon CloudWatch\", label: \"anomaly detection<br/>統計と機械学習\" }\n  MD[\"モデル<br/>メトリクスと統計ごと\"]\n  EX[\"除く期間<br/>学習に使わない\"]\n  AL[\"異常検出のアラーム<br/>期待値が基準<br/>固定のしきい値無し\"]\n  MT -- \"有効にする\" --> AD\n  AD -- \"作る\" --> MD\n  EX -. \"除外\" .-> MD\n  MD -- \"期待値\" --> AL\n",
+    "alt": "メトリクスで anomaly detection を有効にすると、CloudWatch が統計と機械学習のアルゴリズムを当てはめ、メトリクスと統計ごとのモデルを作る。除く期間を指定すると、その期間は学習に使われない。異常検出のアラームはモデルの期待値を基準にし、固定のしきい値を持たない。"
+   },
+   "narration": "メトリクスの部の三枚目は、異常検出、英語でアノマリーディテクションです。あるメトリクスで異常検出を有効にすると、クラウドウォッチは、統計と機械学習のアルゴリズムを当てはめます。作られるモデルは、一つのメトリクスと一つの統計ごとの物です。ここでの統計は、値のまとめ方のことです。有効にした後で、決まった期間を、学習に使わないよう除くこともできます。このモデルを使うのが、異常検出のアラームです。基準はメトリクスの期待される値で、固定のしきい値を持ちません。固定のしきい値を使わずに見張りたい、とあれば候補になります。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "When you enable anomaly detection for a metric, CloudWatch applies statistical and machine learning algorithms.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection"
+    },
+    {
+     "source_id": "S1",
+     "quote": "Create anomaly detection alarms based on a metric's expected value. These types of alarms don't have a static threshold for determining alarm state.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection"
+    },
+    {
+     "source_id": "S2",
+     "quote": "The machine learning model is specific to a metric and a statistic.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection_Algorithm"
+    },
+    {
+     "source_id": "S2",
+     "quote": "After you enable anomaly detection on a metric, you can choose to exclude specified time periods of the metric from being used to train the model.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection_Algorithm"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "メトリクス 4: アラームで EC2 を動かす",
+   "bullets": [
+    "停止・終了・再起動・復旧",
+    "アラームの動作で自動に",
+    "停止・終了で費用を抑える"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch の<br/>アラーム\" }\n  SP[\"停止・終了<br/>stop・terminate<br/>不要な時の費用を抑える\"]\n  RB[\"再起動・復旧<br/>reboot・recover\"]\n  EC@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス\" }\n  AL -- \"アラームの動作\" --> SP\n  AL --> RB\n  SP --> EC\n  RB --> EC\n",
+    "alt": "CloudWatch のアラームの動作で、EC2 インスタンスを自動で停止・終了（stop・terminate）、または再起動・復旧（reboot・recover）させられる。停止と終了は、インスタンスを動かしておく必要が無い時に費用を抑える助けになる。"
+   },
+   "narration": "メトリクスの部の四枚目は、アラームの動作です。クラウドウォッチのアラームの動作を使うと、イーシーツーのインスタンスを、自動で停止、終了、再起動、復旧させるアラームを作れます。このうち停止と終了は、インスタンスを動かしておく必要がなくなったときに、費用を抑える助けになります。使っていないインスタンスの費用を、手を動かさずに抑えたい、とあれば、停止か終了の動作が候補です。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "Using Amazon CloudWatch alarm actions, you can create alarms that automatically stop, terminate, reboot, or recover your EC2 instances.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions"
+    },
+    {
+     "source_id": "S4",
+     "quote": "You can use the stop or terminate actions to help you save money when you no longer need an instance to be running.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "メトリクス 5: ダッシュボード",
+   "bullets": [
+    "組み込み＋自分で作る",
+    "リージョンをまたいで 1 画面",
+    "アカウントをまたぐ設定"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  R1[\"リージョン A の<br/>リソース\"]\n  R2[\"リージョン B の<br/>リソース\"]\n  OA[\"ほかのアカウントの<br/>リソース\"]\n  subgraph MA[\"監視のアカウント\"]\n    DB@{ svc: \"Amazon CloudWatch\", label: \"ダッシュボード<br/>1 つの画面\" }\n  end\n  R1 -- \"表示\" --> DB\n  R2 --> DB\n  OA -- \"cross-account\" --> DB\n",
+    "alt": "CloudWatch のダッシュボードは、別々のリージョンにあるリソースも 1 つの画面で見張れる。複数のアカウントがある時は CloudWatch cross-account observability を設定し、監視のアカウントにアカウントをまたぐダッシュボードを作る。"
+   },
+   "narration": "メトリクスの部の最後は、ダッシュボードです。クラウドウォッチには、自動で用意される組み込みのダッシュボードがあり、自分で作ることもできます。ダッシュボードでは、別々のリージョンにあるリソースも、一つの画面で見張れます。アカウントが複数あるときは、クラウドウォッチのクロスアカウントオブザーバビリティを設定します。そのうえで、監視のアカウントに、アカウントをまたぐダッシュボードを作れます。なお、試験ガイドにあるアマゾンクイックサイトの可視化は、この講義の資料に含まれていないため扱いません。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "Amazon CloudWatch includes automatic pre-built dashboards and also enables you to create your own dashboards.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html#CloudWatch_Dashboards"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Dashboards help you to monitor your resources in a single view, even those resources that are spread across different Regions.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html#CloudWatch_Dashboards"
+    },
+    {
+     "source_id": "S6",
+     "quote": "If you have multiple AWS accounts, you can set up CloudWatch cross-account observability and then create rich cross-account dashboards in your monitoring accounts.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html#CloudWatch_Dashboards"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "ログ 1: Logs Insights と Athena",
+   "bullets": [
+    "Logs Insights は | でコマンドをつなぐ",
+    "filter で絞る・anomaly で探す",
+    "Athena は partition projection"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "道具",
+     "機能",
+     "できる事"
+    ],
+    "rows": [
+     [
+      "Logs Insights",
+      "|（パイプ）",
+      "コマンドをつなぐ"
+     ],
+     [
+      "Logs Insights",
+      "filter",
+      "条件に合う物だけ"
+     ],
+     [
+      "Logs Insights",
+      "anomaly",
+      "珍しい型を探す"
+     ],
+     [
+      "Athena",
+      "partition projection",
+      "分割の多い表を速く"
+     ],
+     [
+      "Athena",
+      "partition projection",
+      "分割の管理を自動に"
+     ]
+    ]
+   },
+   "narration": "ここからはログの部です。まず、たまったログを調べる道具を二つ見ます。一つ目は、クラウドウォッチログスのログインサイツです。いくつかのコマンドを含むクエリは、コマンドをパイプの記号で区切って書きます。フィルターコマンドは、条件に合うログイベントだけを返します。アノマリーコマンドは、機械学習を使って、ログの中の珍しい型を見つけます。メトリクスの異常検出とは別の、クエリの中のコマンドです。二つ目は、アマゾンアテナです。ここでは、表にクエリを動かすサービスとして登場します。パーティションプロジェクションを使うと、細かく分割された表へのクエリを速くし、分割の管理を自動にできます。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "To create queries that contain multiple commands, separate the commands with the pipe character (|).",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S7",
+     "quote": "anomaly Identifies unusual patterns in your log data using machine learning.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S7",
+     "quote": "filter Filters the query to return only the log events that match one or more conditions.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S8",
+     "quote": "You can use partition projection in Athena to speed up query processing of highly partitioned tables and automate partition management.",
+     "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "ログ 2: リアルタイムの分析",
+   "bullets": [
+    "subscription filter で送る",
+    "資料の送り先は 4 つ。gzip で届く",
+    "stream consumer はシャードを順に"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ<br/>subscription filter\" }\n  KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams\" }\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"Data Firehose\" }\n  OS@{ svc: \"Amazon OpenSearch Service\", label: \"Amazon OpenSearch Service\" }\n  SC[\"stream consumer<br/>シャードを順に読む<br/>状態を持つ処理\"]\n  LG -- \"gzip で送る\" --> KD\n  LG --> LA\n  LG --> FH\n  LG --> OS\n  KD -- \"順に読む\" --> SC\n",
+    "alt": "ロググループの subscription filter で、ログを Kinesis Data Streams・Lambda・Data Firehose・Amazon OpenSearch Service へ送れる。送られるログは gzip で圧縮されている。Kinesis Data Streams の stream consumer はシャードのレコードを順に読み、状態を持つ処理に向く。"
+   },
+   "narration": "ログの部の二枚目は、リアルタイムの分析です。サブスクリプションフィルターを使うと、ロググループのログを、ほかのサービスへ送れます。資料に挙がる送り先は、キネシスデータストリームズ、ラムダ、データファイアホース、オープンサーチサービスの四つです。送られるログは、ジージップで圧縮されています。キネシスデータストリームズは、大量のレコードをリアルタイムで集めて処理するサービスです。シャードは、ストリームを分けた区切りと考えてください。ストリームコンシューマーは、シャードのレコードを順に読むので、前のレコードに頼る、状態を持つ処理に向きます。使い道の例には、異常や型の検出が挙がっています。一方、キューコンシューマーは、レコードを一つずつ別々に受け取り、状態を持たない処理に向きます。",
+   "refs": [
+    {
+     "source_id": "S10",
+     "quote": "You can use a subscription filter with Amazon Kinesis Data Streams, AWS Lambda, Amazon Data Firehose, or Amazon OpenSearch Service.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S10",
+     "quote": "Logs sent to a service through a subscription filter are compressed with the gzip format.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S9",
+     "quote": "You can use Amazon Kinesis Data Streams to collect and process large streams of data records in real time.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S9",
+     "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing, where processing one record depends on the records before it, for use cases such as live analytics, personalization, and anomaly and pattern detection.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S9",
+     "quote": "A queue consumer receives each record independently, which suits stateless processing, for use cases such as microservice integration, order processing, and per-record inference.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "トレース 1: X-Ray をサービスごとに",
+   "bullets": [
+    "Lambda は daemon を Lambda が動かす",
+    "API Gateway はステージで有効に",
+    "ECS は daemon のコンテナ"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "サービス",
+     "設定の仕方",
+     "気をつける所"
+    ],
+    "rows": [
+     [
+      "Lambda",
+      "Lambda が daemon",
+      "細かくは SDK を同梱"
+     ],
+     [
+      "API Gateway",
+      "ステージで active tracing",
+      "REST API だけ"
+     ],
+     [
+      "Amazon ECS",
+      "daemon のコンテナ",
+      "ECR にイメージ"
+     ]
+    ]
+   },
+   "narration": "ここからはトレースの部です。試験ガイドには、コンテナ、エーピーアイゲートウェイ、ラムダのように、サービスごとにエックスレイを設定するスキルが挙がっています。資料にある設定の仕方を、表で比べます。ラムダでは、ラムダがエックスレイのデーモンを動かし、関数の呼び出しと実行についてセグメントを記録します。デーモンは裏で動き続けるプログラム、セグメントは記録の一つのまとまりと考えてください。さらに詳しく記録したいときは、エックスレイのエスディーケーを関数に同梱し、外への呼び出しや、注釈とメタデータを記録します。エーピーアイゲートウェイでは、ステージでアクティブトレーシングを有効にし、入ってくる要求からサンプルを取って、トレースを送ります。追えるのはレストエーピーアイだけです。イーシーエスでは、デーモンを動かすコンテナを、クラスターにデプロイします。エックスレイは、アプリケーションと並べてデプロイできるイメージを、イーシーアールに用意しています。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "Lambda runs the X-Ray daemon and records a segment with details about invoking and running the function.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S11",
+     "quote": "For further instrumentation, you can bundle the X-Ray SDK with your function to record outgoing calls and add annotations and metadata.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S12",
+     "quote": "Amazon API Gateway provides active tracing support for AWS X-Ray. Enable active tracing on your API stages to sample incoming requests and send traces to X-Ray.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-apigateway.html#xray-services-apigateway"
+    },
+    {
+     "source_id": "S12",
+     "quote": "X-Ray only supports tracing for REST APIs through API Gateway.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-apigateway.html#xray-services-apigateway"
+    },
+    {
+     "source_id": "S13",
+     "quote": "In Amazon ECS, create a Docker image that runs the X-Ray daemon, upload it to a Docker image repository, and then deploy it to your Amazon ECS cluster.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ecs.html#xray-daemon-ecs"
+    },
+    {
+     "source_id": "S13",
+     "quote": "X-Ray provides a Docker container image on Amazon ECR that you can deploy alongside your application.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ecs.html#xray-daemon-ecs"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "トレース 2: サンプリングと SDK の今後",
+   "bullets": [
+    "sampling rules で記録する要求",
+    "SDK と daemon は保守モード",
+    "OpenTelemetry への移行を推奨"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  SR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>sampling rules<br/>コンソールで設定\" }\n  AO[\"AWS Distro for<br/>OpenTelemetry\"]\n  SD[\"X-Ray SDK<br/>保守モード\"]\n  AT[\"active tracing の<br/>AWS のサービス\"]\n  AO -- \"ルールを使う\" --> SR\n  SD --> SR\n  AT --> SR\n",
+    "alt": "AWS X-Ray のコンソールで sampling rules を設定する。AWS Distro for OpenTelemetry、X-Ray SDK、サンプリングの設定を持つ active tracing の AWS のサービスが、このルールで記録する要求を決める。X-Ray SDK は 2026 年 2 月 25 日から保守モードになると告知されている。"
+   },
+   "narration": "トレースの部の二枚目です。どの要求を記録するかを決めるのが、サンプリングルールで、エックスレイのコンソールで設定できます。ルールを使うのは、エーダブリューエスディストロフォーオープンテレメトリー、エックスレイのエスディーケー、そしてサンプリングの設定を持つアクティブトレーシングのサービスです。ここで大事な告知があります。二千二十六年二月二十五日に、エックスレイのエスディーケーとデーモンは保守モードに入り、リリースはセキュリティの対応だけになると告知されています。エーダブリューエスは、オープンテレメトリーへの移行を勧めています。試験とドキュメントがずれているかもしれない点として、覚えておいてください。",
+   "refs": [
+    {
+     "source_id": "S14",
+     "quote": "You can use the AWS X-Ray console to configure sampling rules for your services.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html#xray-console-sampling"
+    },
+    {
+     "source_id": "S14",
+     "quote": "The AWS Distro for OpenTelemetry, X-Ray SDK, and AWS services that support active tracing with sampling configurations use sampling rules to determine which requests to record.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-console-sampling.html#xray-console-sampling"
+    },
+    {
+     "source_id": "S0",
+     "quote": "On February 25th, 2026, the AWS X-Ray SDKs/Daemon will enter maintenance mode, where AWS will limit X-Ray SDK and Daemon releases to address security issues only.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S0",
+     "quote": "We recommend to migrate to OpenTelemetry.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "設定と操作の記録 1: AWS Config のルール",
+   "bullets": [
+    "Config は設定・関係・過去",
+    "Config rules はあるべき設定",
+    "例: inspector-ec2-scan-enabled"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  RS[\"AWS のリソース<br/>設定・関係・過去\"]\n  CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>設定を見せて評価\" }\n  subgraph RU[\"Config rules\"]\n    MR[\"managed rules<br/>用意済み・変えられる\"]\n    IN[\"ルールの例<br/>inspector-ec2-<br/>scan-enabled\"]\n  end\n  NC[\"NON_COMPLIANT<br/>EC2 スキャンが無効\"]\n  RS -- \"設定\" --> CF\n  CF -- \"ルールで評価\" --> RU\n  IN -- \"無効なら\" --> NC\n",
+    "alt": "AWS Config はリソースの設定、リソースどうしの関係、過去の設定を見せる。Config rules はあるべき設定を表し、用意済みで変えられる managed rules がある。ルールの例の inspector-ec2-scan-enabled は Amazon Inspector V2 の EC2 スキャンが有効かを確かめ、無効なら NON_COMPLIANT になる。"
+   },
+   "narration": "最後の部は、設定と操作の記録です。エーダブリューエスコンフィグは、アカウントの中のリソースの設定を詳しく見せるサービスです。リソースどうしの関係や過去の設定も分かり、時間とともにどう変わったかを追えます。設定を評価するために作るのが、コンフィグルールです。コンフィグルールは、あるべき設定を表します。始めやすいように、用意済みで変えることもできる、マネージドルールがあります。ルールの例が、インスペクターイーシーツースキャンイネーブルドです。アマゾンインスペクターのブイツーで、イーシーツーのスキャンが有効かを確かめます。このスキャンは、脆弱性やネットワークの到達性の問題を見つけるための物です。有効でなければ、結果はノンコンプライアント、つまり準拠していない、になります。インスペクター自体と評価テンプレートは、資料に無いため扱いません。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+    },
+    {
+     "source_id": "S15",
+     "quote": "This includes how the resources are related to one another and how they were configured in the past so that you can see how the configurations and relationships change over time.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+    },
+    {
+     "source_id": "S16",
+     "quote": "You do this by creating AWS Config rules, which represent your ideal configuration settings.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html#evaluate-config"
+    },
+    {
+     "source_id": "S16",
+     "quote": "AWS Config provides customizable, predefined rules called managed rules to help you get started.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html#evaluate-config"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Checks if Amazon Inspector V2 EC2 scanning is activated for your single or multi-account environment to detect potential vulnerabilities and network reachability issues on your EC2 instances.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/inspector-ec2-scan-enabled.html#inspector-ec2-scan-enabled"
+    },
+    {
+     "source_id": "S17",
+     "quote": "The rule is NON_COMPLIANT if EC2 scanning is not activated.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/inspector-ec2-scan-enabled.html#inspector-ec2-scan-enabled"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "設定と操作の記録 2: CloudTrail のイベント",
+   "bullets": [
+    "Event history は過去 90 日",
+    "90 日より長くは trail か Lake",
+    "trail から CloudWatch Logs へ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  EH@{ svc: \"AWS CloudTrail\", label: \"Event history<br/>過去 90 日の<br/>管理イベント\" }\n  subgraph LONG[\"90 日より長く\"]\n    TR@{ svc: \"AWS CloudTrail\", label: \"trail\" }\n    LK@{ svc: \"AWS CloudTrail\", label: \"CloudTrail Lake<br/>event data store\" }\n  end\n  CL@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>trail の設定に<br/>合うイベントだけ\" }\n  EH ~~~ LONG\n  TR -- \"data・Insights・管理\" --> CL\n",
+    "alt": "CloudTrail の Event history は、リージョンごとに過去 90 日の管理イベントを見る・調べる・ダウンロードでき、変更できない。90 日より長く記録を続けるには trail か CloudTrail Lake の event data store を作る。trail は CloudWatch Logs へ、trail の設定に合うデータ・Insights・管理のイベントを送れる。"
+   },
+   "narration": "設定と操作の記録の部の二枚目は、クラウドトレイルのイベントです。イベント履歴では、一つのリージョンで記録された管理イベントの、過去九十日分を、見たり、調べたり、ダウンロードしたりできます。この記録は変更できません。管理イベントは、ここでは、リソースを管理する操作の記録と考えてください。九十日より長く記録を続けたいときは、トレイルか、クラウドトレイルレイクのイベントデータストアを作ります。トレイルは、クラウドウォッチログスにイベントを送るよう設定できます。送られるのは、トレイルの設定に合うイベントだけです。データイベント、インサイツイベント、管理イベントを送れます。",
+   "refs": [
+    {
+     "source_id": "S18",
+     "quote": "The Event history provides a viewable, searchable, downloadable, and immutable record of the past 90 days of recorded management events in an AWS Region.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/how-cloudtrail-works.html#how-cloudtrail-works-eventhistory"
+    },
+    {
+     "source_id": "S18",
+     "quote": "For an ongoing record of events in your AWS account past 90 days, create a trail or a CloudTrail Lake event data store.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/how-cloudtrail-works.html#how-cloudtrail-works-eventhistory"
+    },
+    {
+     "source_id": "S19",
+     "quote": "When you configure your trail to send events to CloudWatch Logs, CloudTrail sends only the events that match your trail settings.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cw_send_ct_events.html#send-cloudtrail-events-to-cloudwatch-logs"
+    },
+    {
+     "source_id": "S19",
+     "quote": "CloudTrail supports sending data, Insights, and management events to CloudWatch Logs.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cw_send_ct_events.html#send-cloudtrail-events-to-cloudwatch-logs"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "条件から選ぶ 1: メトリクス",
+   "bullets": [
+    "しきい値無し → anomaly detection",
+    "組み合わせ → metric math 式",
+    "複数の時系列 → Metrics Insights"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "固定のしきい値無しで",
+      "anomaly detection",
+      "メトリクスと統計ごと"
+     ],
+     [
+      "メトリクスを組み合わせる",
+      "metric math 式",
+      "SEARCH 式は不可"
+     ],
+     [
+      "複数の時系列を一つで",
+      "Metrics Insights",
+      "SQL のクエリ"
+     ],
+     [
+      "不要な EC2 の費用",
+      "アラームの動作",
+      "stop・terminate"
+     ],
+     [
+      "リージョン・アカウント横断",
+      "ダッシュボード",
+      "cross-account 設定"
+     ]
+    ]
+   },
+   "narration": "ここからは、問題文の条件から方法を選ぶ表です。一枚目はメトリクスの部です。固定のしきい値を使わずに見張りたいなら、異常検出のアラームです。モデルはメトリクスと統計ごとです。メトリクスを組み合わせて見張りたいなら、メトリクスマスの式です。サーチ式ではアラームを作れません。複数の時系列を一つのアラームで扱いたいなら、メトリクスインサイツのクエリです。使っていないイーシーツーの費用を抑えたいなら、アラームの停止か終了の動作です。リージョンやアカウントをまたいで一つの画面で見たいなら、ダッシュボードです。アカウントをまたぐときは、クロスアカウントオブザーバビリティの設定が要ります。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Create anomaly detection alarms based on a metric's expected value. These types of alarms don't have a static threshold for determining alarm state.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection"
+    },
+    {
+     "source_id": "S3",
+     "quote": "You can't create an alarm based on the SEARCH expression. Only alarms based on Metrics Insights SQL queries can operate on multiple time series.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Create-alarm-on-metric-math-expression.html#Create-alarm-on-metric-math-expression"
+    },
+    {
+     "source_id": "S4",
+     "quote": "You can use the stop or terminate actions to help you save money when you no longer need an instance to be running.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions"
+    },
+    {
+     "source_id": "S6",
+     "quote": "If you have multiple AWS accounts, you can set up CloudWatch cross-account observability and then create rich cross-account dashboards in your monitoring accounts.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html#CloudWatch_Dashboards"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から選ぶ 2: ログ",
+   "bullets": [
+    "珍しい型 → anomaly コマンド",
+    "送り続ける → subscription filter",
+    "順に処理 → Kinesis Data Streams"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "ログの珍しい型を探す",
+      "anomaly コマンド",
+      "Logs Insights の中"
+     ],
+     [
+      "分割の多い表を速く",
+      "partition projection",
+      "分割の管理も自動"
+     ],
+     [
+      "ログを他へ送り続ける",
+      "subscription filter",
+      "gzip で届く"
+     ],
+     [
+      "前のレコードに頼る処理",
+      "Kinesis Data Streams",
+      "シャードを順に読む"
+     ],
+     [
+      "操作の記録をログへ",
+      "trail から Logs へ",
+      "設定に合う物だけ"
+     ]
+    ]
+   },
+   "narration": "二枚目はログの部の表です。ログの中の珍しい型を探したいなら、ログインサイツのアノマリーコマンドです。細かく分割された表へのクエリを速くしたいなら、アテナのパーティションプロジェクションです。分割の管理も自動になります。ログをほかのサービスへ送り続けたいなら、サブスクリプションフィルターです。ログはジージップで届きます。前のレコードに頼る処理をリアルタイムでしたいなら、キネシスデータストリームズのストリームコンシューマーです。最後の行は設定と操作の記録の部の話ですが、ログに関わるのでここに置きました。操作の記録をログで扱いたいなら、トレイルからクラウドウォッチログスへ送ります。送られるのは、設定に合うイベントだけです。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "anomaly Identifies unusual patterns in your log data using machine learning.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S8",
+     "quote": "You can use partition projection in Athena to speed up query processing of highly partitioned tables and automate partition management.",
+     "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection"
+    },
+    {
+     "source_id": "S10",
+     "quote": "Logs sent to a service through a subscription filter are compressed with the gzip format.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S9",
+     "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing, where processing one record depends on the records before it, for use cases such as live analytics, personalization, and anomaly and pattern detection.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S19",
+     "quote": "When you configure your trail to send events to CloudWatch Logs, CloudTrail sends only the events that match your trail settings.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cw_send_ct_events.html#send-cloudtrail-events-to-cloudwatch-logs"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から選ぶ 3: トレースと設定",
+   "bullets": [
+    "API Gateway → REST API だけ",
+    "ECS → daemon のコンテナ",
+    "90 日より前 → trail か Lake"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "API Gateway を追う",
+      "active tracing",
+      "REST API だけ"
+     ],
+     [
+      "ECS のアプリを追う",
+      "daemon のコンテナ",
+      "ECR のイメージ"
+     ],
+     [
+      "Lambda の外への呼び出し",
+      "X-Ray SDK を同梱",
+      "SDK は保守モード"
+     ],
+     [
+      "あるべき設定と比べる",
+      "Config rules",
+      "managed rules"
+     ],
+     [
+      "90 日より前の操作",
+      "trail か Lake",
+      "Event history は 90 日"
+     ]
+    ]
+   },
+   "narration": "三枚目は、トレースと、設定と操作の記録の表です。エーピーアイゲートウェイの要求を追いたいなら、ステージのアクティブトレーシングです。追えるのはレストエーピーアイだけです。イーシーエスのアプリケーションを追いたいなら、デーモンのコンテナを並べてデプロイします。イーシーアールのイメージを使えます。ラムダから外への呼び出しまで記録したいなら、エックスレイのエスディーケーを同梱します。ただし、エスディーケーは保守モードと告知されています。設定をあるべき設定と比べたいなら、コンフィグルールです。マネージドルールから始められます。九十日より前の操作を調べたいなら、イベント履歴では足りません。トレイルかレイクを作っておきます。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "X-Ray only supports tracing for REST APIs through API Gateway.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-apigateway.html#xray-services-apigateway"
+    },
+    {
+     "source_id": "S13",
+     "quote": "X-Ray provides a Docker container image on Amazon ECR that you can deploy alongside your application.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-ecs.html#xray-daemon-ecs"
+    },
+    {
+     "source_id": "S11",
+     "quote": "For further instrumentation, you can bundle the X-Ray SDK with your function to record outgoing calls and add annotations and metadata.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S0",
+     "quote": "We recommend to migrate to OpenTelemetry.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S16",
+     "quote": "AWS Config provides customizable, predefined rules called managed rules to help you get started.",
+     "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html#evaluate-config"
+    },
+    {
+     "source_id": "S18",
+     "quote": "For an ongoing record of events in your AWS account past 90 days, create a trail or a CloudTrail Lake event data store.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/how-cloudtrail-works.html#how-cloudtrail-works-eventhistory"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "同じ 4 つの部に戻る",
+    "資料に無い物は各ドキュメントで",
+    "迷ったら条件の表に戻る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"メトリクス\"]\n    CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>anomaly detection・<br/>アラームの動作・<br/>ダッシュボード\" }\n  end\n  subgraph P2[\"ログ\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>anomaly コマンド・<br/>subscription filter\" }\n    AT@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>partition projection\" }\n    KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams<br/>シャードを順に読む\" }\n  end\n  subgraph P3[\"トレース\"]\n    XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サービスごとの設定・<br/>SDK は保守モード\" }\n  end\n  subgraph P4[\"設定と操作の記録\"]\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>Config rules\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"AWS CloudTrail<br/>90 日より長くは<br/>trail か Lake\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n",
+    "alt": "講義の地図に戻ったまとめ。扱った順に 4 つの部を並べた図で、処理の流れではない。メトリクスの部は CloudWatch の anomaly detection・アラームの動作・ダッシュボード。ログの部は CloudWatch Logs の anomaly コマンドと subscription filter、Amazon Athena の partition projection、シャードを順に読む Kinesis Data Streams。トレースの部はサービスごとの AWS X-Ray の設定と、SDK が保守モードである点。設定と操作の記録の部は AWS Config の Config rules と、90 日より長くは trail か Lake を使う AWS CloudTrail。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。図は扱った順に部を並べた物で、処理の流れではありません。メトリクスの部では、アラームが評価する物、異常検出のアラーム、アラームの動作、ダッシュボードを見ました。ログの部では、ログインサイツとアテナでたまったログを調べる方法と、サブスクリプションフィルターとキネシスデータストリームズでのリアルタイムの分析を見ました。トレースの部では、サービスごとのエックスレイの設定と、エスディーケーの保守モードを見ました。設定と操作の記録の部では、コンフィグルールと、クラウドトレイルのイベント履歴、トレイル、レイクを見ました。資料に無かったメトリクスの名前やインスペクター自体は、各ドキュメントで確かめてください。問題文で迷ったら、三枚の表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Create anomaly detection alarms based on a metric's expected value. These types of alarms don't have a static threshold for determining alarm state.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html#CloudWatch_Anomaly_Detection"
+    },
+    {
+     "source_id": "S10",
+     "quote": "You can use a subscription filter with Amazon Kinesis Data Streams, AWS Lambda, Amazon Data Firehose, or Amazon OpenSearch Service.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S11",
+     "quote": "You can use AWS X-Ray to trace your AWS Lambda functions.",
+     "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda"
+    },
+    {
+     "source_id": "S18",
+     "quote": "For an ongoing record of events in your AWS account past 90 days, create a trail or a CloudTrail Lake event data store.",
+     "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/how-cloudtrail-works.html#how-cloudtrail-works-eventhistory"
+    }
+   ]
+  }
+ ]
+}

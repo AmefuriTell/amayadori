@@ -1,0 +1,102 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        { "kind": "flow", "severity": "軽", "detail": "bullets は「最後に条件から選ぶ表」、台本は「問題文の条件から方法を選ぶ表で締めます」と 1 つの表のように予告するが、本文は s12〜s15 の 4 つの表で、s16 も「四つの表に戻って」と言う。", "suggest": "bullets を「最後に条件から選ぶ 4 つの表」、台本も「四つの表で締めます」にそろえる。" }
+      ]
+    },
+    {
+      "id": "s02",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "台本は RPO を「失ってよいデータの量」（目標）と言うが、図の矢印と bullets 以外の画面は「RPO: 失うデータ」（実際の損失）。RTO も bullets「止まっている時間」・図「止まる時間」で揺れる。", "suggest": "図の矢印を「RPO: 失ってよいデータ」「RTO: 止まってよい時間」に、または台本で「図は実際に失う幅を示し、RPO はその許せる上限」と一言そえる。" }
+      ]
+    },
+    {
+      "id": "s03",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "表の pilot light の行「DB と保存先だけ動く」の「だけ」。S4 は \"Resources required to support data replication and backup, such as databases and object storage, are always on\" で、DB と保存先は例。台本は「〜のように」と例として言っており、画面と台本も食い違う（mismatch）。", "suggest": "「データを支える物（DB・保存先など）は常時動く」にし、「だけ」を外す。" }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        { "kind": "fact", "severity": "軽", "detail": "図は起点を「本番のリージョンのバックアップ計画」とし、そこから「都度か計画で自動」の矢印を出す。S15 では都度（on demand）のコピーはバックアップ計画の一部ではないので、計画から都度のコピーが出るように読める。", "suggest": "起点を「本番のリージョンのバックアップ」にし、矢印を「都度、またはバックアップ計画で自動」にする。" },
+        { "kind": "unsupported", "severity": "軽", "detail": "コピーの箱の「本番のデータから離す」は、S15 では「離して置く要件があるとき特に役立つ」という条件付きの話。図では常に成り立つ性質のように見える。", "suggest": "「離して置く要件があるとき役立つ」と条件を残すか、箱から外して bullets に任せる。" }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        { "kind": "flow", "severity": "中", "detail": "表で「S3 CRR」と「live replication」を別の行の別の仕組みのように並べるが、両者の関係（CRR は続けて自動で写す複製の一つ）を説明していない。s13 の「続けて写す複製ではなく Batch」とあわせ、CRR と live replication が別物と受け取られうる。", "suggest": "live replication の行を独立させず、台本で「CRR のように続けて自動で写す複製（ライブレプリケーション）は新しいオブジェクトを写す」と CRR に結び付ける。表は CRR の行の「写す物」を「新しいオブジェクトを続けて」にする。" },
+        { "kind": "terms", "severity": "軽", "detail": "Batch Replication の呼び方が bullets「Batch」、表「Batch Replication」、台本「エススリーバッチレプリケーション」、s16 図「Batch」でそろわない。CRR も画面では略語だけ。", "suggest": "画面は「S3 Batch Replication」「S3 CRR（Cross-Region Replication）」に一度はそろえる。" }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": []
+    },
+    {
+      "id": "s07",
+      "issues": [
+        { "kind": "unsupported", "severity": "重", "detail": "表の failover の「古い primary: 書き込みを止める」と bullets「古い primary の書き込み停止」は、S7 の手動の（manual）failover の手順。台本は「手動で行うときは」と条件を付けるが、画面は failover 全般の決まりとして示す（条件付きを一般化、画面と台本の食い違いも）。", "suggest": "表の行を「手動の failover: 停止したリージョンの primary への書き込みを止める」、bullets を「手動: 古い primary の書き込み停止」にする。" },
+        { "kind": "mismatch", "severity": "中", "detail": "表の RPO の行で failover を「全体で秒の単位」とするが、台本は failover の RPO に触れない。また S2 は Aurora global database 一般で \"typically\" 秒の単位と言うだけで、failover 固有の値でも「全体で」でもない。", "suggest": "「ふつう秒の単位（Aurora Global Database 一般）」にし、台本で一言触れる。または行を外す。" },
+        { "kind": "terms", "severity": "軽", "detail": "表の「古い primary」と台本の「停止したリージョンのプライマリ」、s14 の「古い側」で呼び方が揺れる。", "suggest": "「停止したリージョンの primary」にそろえる。" }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": []
+    },
+    {
+      "id": "s09",
+      "issues": [
+        { "kind": "mismatch", "severity": "中", "detail": "図で「普段」の矢印の先の primary の箱に「使えない、または失敗の状態コード」と書くため、普段から失敗しているオリジンへ送るように読める。切り替えの条件は secondary へ向かう矢印の条件のはず。", "suggest": "primary の箱は「primary のオリジン」だけにし、点線の矢印を「primary が使えない、または失敗の状態コードのとき 自動で切り替え」にする。" },
+        { "kind": "terms", "severity": "軽", "detail": "台本は「特定の」HTTP の状態コード（S12 の specific）と言うが、図・bullets は「失敗の状態コード」で、どの失敗コードでも切り替わるように見える。", "suggest": "図・bullets を「決めた失敗の状態コード」にする。" }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        { "kind": "flow", "severity": "軽", "detail": "台本の「各ノードは」のノード（ロードバランサーのノード）を説明していない。また図の「InService」と台本の「稼働中」が結び付けられていない。", "suggest": "「ロードバランサーの各ノードは」と言い、「稼働中、つまり InService の」と一度そろえる。" }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        { "kind": "fact", "severity": "中", "detail": "steps の 3 段目だけに「本物のリソースに本当の操作」と注を付けるため、本番の前の環境の実験は本当の操作ではないように読める。S13 は FIS が常に本物のリソースに本当の操作をする、だから先に計画と本番の前の環境で、という順の理由。", "suggest": "注を外し、図の上か 1 段目の前に「FIS はどの段でも本物のリソースを操作する」と置く。3 段目の注は「計画と前の段を終えてから」にする。" },
+        { "kind": "mismatch", "severity": "軽", "detail": "bullets「Aurora: 計画を試し訓練」と台本の後半（S7 の計画のテストと人の訓練）が画面の steps に出ない。", "suggest": "steps の外に「手順のテストと担当の訓練（Aurora の手動 failover）」を添える。" }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": []
+    },
+    {
+      "id": "s13",
+      "issues": []
+    },
+    {
+      "id": "s14",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "bullets「AZ の障害 → RDS Multi-AZ」、表「AZ の障害で DB を戻す」、台本「アベイラビリティーゾーンの基盤の不具合から」。S9 の条件は DB インスタンスの停止が基盤の不具合（infrastructure defect）による場合で、「AZ の障害」とは言っていない。s06 の言い方ともそろわない（terms）。", "suggest": "「基盤の不具合で DB が止まった → RDS Multi-AZ（別の AZ のスタンバイへ自動）」に、台本も「DB インスタンスの停止が基盤の不具合によるなら」にそろえる。" },
+        { "kind": "unsupported", "severity": "重", "detail": "予定外の停止の行の「古い側の書き込み停止」と台本「停止したリージョンのプライマリへの書き込みを止める点を確かめます」は、S7 の手動の failover の手順だが、条件を落として failover 一般の確認点にしている（s07 と同じ）。", "suggest": "「手動なら、停止したリージョンの primary への書き込みを止める」にする。" }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "bullets は「不健全な送り先 → ヘルスチェック」、表は「選ぶ物: Application Load Balancer」で、選ぶ物の呼び方が画面の中でそろわない。", "suggest": "bullets を「不健全なターゲット → ALB のヘルスチェック」にそろえる。" }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "図の「RDS Multi-AZ は自動」は s06 で強調した条件（基盤の不具合による停止のとき）を落とし、どんな停止でも自動で切り替わるように読める。", "suggest": "「RDS Multi-AZ は基盤の不具合で自動」にする。" }
+      ]
+    }
+  ],
+  "global": [
+    { "severity": "中", "detail": "Aurora の書き込み停止（手動の failover）と RDS Multi-AZ の自動の切り替え（基盤の不具合のとき）の条件が、本文のスライド（s06・s07 台本）では付いているのに、画面・選ぶ表・まとめ（s07 表、s14、s16）で落ちる傾向がある。", "suggest": "条件付きの根拠は、表・bullets・まとめの図でも条件の語を残す。" }
+  ]
+}

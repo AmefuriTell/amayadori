@@ -1,0 +1,816 @@
+{
+ "task": "4.1",
+ "title": "ログとメトリクスの収集・集約・保存の設定",
+ "notes": [
+  "根拠が無く扱わなかった事: 転送中（in-transit）のログとメトリクスの暗号化、client-side と server-side の区別（S18 の server-side の default だけ扱った）、フィルターパターンの構文、Kinesis Data Streams の作成手順と Lambda 関数の例、metric streams の S3 の形式などの細かい設定。",
+  "CloudWatch agent・Systems Manager・IAM ロール・namespace・storage class は根拠に定義が無いので、台本では「と考えてください」の弱い言い方で一言だけ説明した。"
+ ],
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "扱う 5 つの部",
+    "並びは扱う順",
+    "最後に条件から選ぶ表"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"第 1 部 集める\"]\n    AG@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch agent<br/>カスタムメトリクス\" }\n  end\n  subgraph P2[\"第 2 部 指標にする\"]\n    MF@{ svc: \"Amazon CloudWatch Logs\", label: \"metric filter\" }\n  end\n  subgraph P3[\"第 3 部 流す\"]\n    SF@{ svc: \"Amazon CloudWatch Logs\", label: \"subscription filter<br/>ログを送る\" }\n    MS@{ svc: \"Amazon CloudWatch\", label: \"metric streams<br/>メトリクスを送る\" }\n  end\n  subgraph P4[\"第 4 部 保存と保護\"]\n    LC@{ svc: \"Amazon CloudWatch Logs\", label: \"log class・retention<br/>S3 Lifecycle\" }\n    KM@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>ログの暗号化\" }\n  end\n  subgraph P5[\"第 5 部 探す\"]\n    LI@{ svc: \"Amazon CloudWatch Logs\", label: \"Logs Insights\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n",
+    "alt": "講義の地図。扱う 5 つの部を、扱う順に上から並べた物で、処理の流れではない。第 1 部 集めるは CloudWatch agent とカスタムメトリクス。第 2 部 指標にするは metric filter。第 3 部 流すは、ログを送る subscription filter と、メトリクスを送る metric streams。第 4 部 保存と保護は log class・retention・S3 Lifecycle と AWS KMS によるログの暗号化。第 5 部 探すは Logs Insights。"
+   },
+   "narration": "この講義では、ログとメトリクスを、集めて、まとめて、ためておく設定を学びます。画面の地図は、扱う五つの部を、扱う順に上から並べた物です。処理の流れを表す図ではありません。第一部は、集めるです。クラウドウォッチエージェントと、カスタムメトリクスの形を見ます。第二部は、指標にするです。ログからメトリクスを作る、メトリクスフィルターです。第三部は、流すです。ログを送るサブスクリプションフィルターと、メトリクスを送るメトリクスストリームです。第四部は、保存と保護です。ログクラス、保持期間、エススリーのライフサイクル、そしてケーエムエスによる暗号化です。第五部は、探すです。ログズインサイツで、ログに問い合わせます。最後に、問題文の条件から方法を選ぶ表を三枚見て、この地図に戻ります。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "Metric filters are assigned to log groups, and all of the filters assigned to a log group are applied to their log streams.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#FilterAndPatternSyntaxForMetricFilters"
+    },
+    {
+     "source_id": "S12",
+     "quote": "You can use a subscription filter with Amazon Kinesis Data Streams, AWS Lambda, Amazon Data Firehose, or Amazon OpenSearch Service.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "集める 1: agent を Systems Manager で配る",
+   "bullets": [
+    "1 台で設定ファイルを作る",
+    "Systems Manager で他へ入れる",
+    "IAM ロールにポリシー"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "1 台に agent を入れる",
+      "note": "fleet 全体の設定ファイルを作る"
+     },
+     {
+      "label": "Systems Manager で他のサーバーへ",
+      "note": "作った設定ファイルを使う"
+     },
+     {
+      "label": "あわせて IAM ロールを確かめる",
+      "note": "CloudWatchAgentServerPolicy"
+     }
+    ]
+   },
+   "narration": "第一部、集めるです。クラウドウォッチエージェントは、ここでは、サーバーに入れてクラウドウォッチへ送る物を集める道具、と考えてください。サーバーがたくさんあるときの入れ方が、ドキュメントにあります。まず、一台のサーバーにエージェントを入れ、フリート、つまりサーバーの群れ全体のための設定ファイルを作ります。次に、システムズマネージャーを使って、ほかのサーバーにエージェントを入れます。このとき、さっき作った設定ファイルを使います。システムズマネージャーは、たくさんのサーバーをまとめて扱うサービス、と考えてください。このページには、インスタンスに付けたアイエーエムロールに、クラウドウォッチエージェントサーバーポリシーが付いていることも確かめるよう、書かれています。アイエーエムロールは、インスタンスに権限を渡すための物です。",
+   "refs": [
+    {
+     "source_id": "S10",
+     "quote": "You can download the agent into one server and create your CloudWatch agent configuration file for all servers in the fleet.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm"
+    },
+    {
+     "source_id": "S10",
+     "quote": "Then you can use Systems Manager to install the agent on the other servers, using the configuration file that you created.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm"
+    },
+    {
+     "source_id": "S11",
+     "quote": "You must also make sure that the IAM role attached to the instance has the CloudWatchAgentServerPolicy attached.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "集める 2: Classic configuration",
+   "bullets": [
+    "Classic configuration だけの機能",
+    "その機能のときに使う",
+    "表の物は例"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "Classic だけの機能の例"
+    ],
+    "rows": [
+     [
+      "configuration wizard"
+     ],
+     [
+      "StatsD・collectd"
+     ],
+     [
+      "procstat・JMX"
+     ],
+     [
+      "NVIDIA GPU・EFA・NVMe"
+     ],
+     [
+      "Application Signals"
+     ]
+    ]
+   },
+   "narration": "エージェントの設定には、クラシックコンフィギュレーションという書き方があります。ドキュメントは、クラシックコンフィギュレーションでしか使えない機能のときに、これを使うよう勧めています。例として挙がるのは、設定のウィザード、スタッツディー、コレクトディー、プロックスタット、ジェイエムエックス、エヌビディアのジーピーユー、イーエフエー、エヌブイエムイー、ネットワークの性能のメトリクス、アプリケーションシグナルズです。これらは例です。一つ一つの中身は、この講義の根拠には書かれていないので、ここでは名前で覚えておきます。試験ガイドの、エージェントでカスタムメトリクスを集める、という項目に関わります。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "Use the Classic configuration for the agent features that only it offers, such as the configuration wizard, StatsD, collectd, procstat, JMX, NVIDIA GPU, EFA, NVMe, network performance metrics, and Application Signals.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Classic-configuration.html#CloudWatch-Agent-Classic-configuration"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "集める 3: カスタムメトリクスの形と分解能",
+   "bullets": [
+    "namespace・metric name・dimension",
+    "dimension は 1 つに 30 まで",
+    "high-resolution は 1 秒"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "項目",
+     "ドキュメントの説明"
+    ],
+    "rows": [
+     [
+      "dimension",
+      "name と value の組"
+     ],
+     [
+      "dimension の数",
+      "1 つの metric に 30 まで"
+     ],
+     [
+      "high-resolution",
+      "1 秒で保存"
+     ],
+     [
+      "読む period",
+      "1・5・10・30 秒"
+     ],
+     [
+      "読む period",
+      "60 秒の倍数も"
+     ]
+    ]
+   },
+   "narration": "次は、自分で送るメトリクス、カスタムメトリクスです。ドキュメントのこのやり方では、ネームスペース、メトリクスの名前、ディメンションを使います。ネームスペースは、メトリクスを分けて入れる入れ物の名前、と考えると分かりやすいでしょう。ディメンションは、名前と値の組で決まります。一つのメトリクスに、三十個まで付けられます。分解能、つまり記録の細かさも選べます。高分解能のメトリクスとして送ると、クラウドウォッチは一秒の細かさで保存します。読み出すときの期間は、画面の表のとおりです。一分より短い間の動きを、すぐに見たいときに役立ちます。なお、ドキュメントは、新しく作るときには、オープンテレメトリーでカスタムメトリクスを送ることを勧めています。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "This approach uses CloudWatch namespaces, metric names, and dimensions.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#publishingMetrics"
+    },
+    {
+     "source_id": "S3",
+     "quote": "You can have up to 30 dimensions assigned to one metric, and each dimension is defined by a name and value pair.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#usingDimensions"
+    },
+    {
+     "source_id": "S2",
+     "quote": "When you publish a high-resolution metric, CloudWatch stores it with a resolution of 1 second, and you can read and retrieve it with a period of 1 second, 5 seconds, 10 seconds, 30 seconds, or any multiple of 60 seconds.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics"
+    },
+    {
+     "source_id": "S4",
+     "quote": "For new implementations, we recommend using OpenTelemetry to publish custom metrics.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#publishingMetrics"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "指標にする: metric filter と default value",
+   "bullets": [
+    "log group に割り当てる",
+    "一致で数を増やす",
+    "default value は 0 でも決める"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph LG[\"log group\"]\n    LS1[\"log stream\"]\n    LS2[\"log stream\"]\n    MF[\"metric filter<br/>全ての log stream に効く\"]\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch の<br/>メトリクス<br/>default value が無いと<br/>一致無しは報告なし\" }\n  MF -- \"一致で数を増やす\" --> CW\n",
+    "alt": "log group に metric filter を割り当てると、その log group の全ての log stream に効く。フィルターが一致すると、CloudWatch のメトリクスの数を決めた値だけ増やす。default value を決めていないと、一致が無い時は CloudWatch がデータを報告しない。"
+   },
+   "narration": "第二部、指標にするです。メトリクスフィルターは、ログからメトリクスを作る仕組みです。ロググループは、保持期間、監視、アクセスの設定を共有する、ログストリームの集まりです。メトリクスフィルターは、ロググループに割り当てます。ロググループに割り当てたフィルターは、全て、その中のログストリームに当てはめられます。フィルターが言葉に一致すると、メトリクスの数が、決めた値だけ増えます。気をつけたいのが、デフォルト値です。デフォルト値を決めていないと、一致が無いときに、クラウドウォッチはデータを報告しません。ドキュメントは、ゼロでもよいので、デフォルト値を決めるよう勧めています。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "Metric filters are assigned to log groups, and all of the filters assigned to a log group are applied to their log streams.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#FilterAndPatternSyntaxForMetricFilters"
+    },
+    {
+     "source_id": "S7",
+     "quote": "When a metric filter matches a term, it increments the metric's count by a specified numerical value.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#FilterAndPatternSyntaxForMetricFilters"
+    },
+    {
+     "source_id": "S8",
+     "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#changing-default-increment-value"
+    },
+    {
+     "source_id": "S8",
+     "quote": "We recommend that you specify a default value, even if the value is 0.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#changing-default-increment-value"
+    },
+    {
+     "source_id": "S15",
+     "quote": "A log group is a group of log streams that share the same retention, monitoring, and access control settings.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "流す 1: subscription filter",
+   "bullets": [
+    "挙がる送り先は 4 つ",
+    "gzip で圧縮して届く",
+    "Lambda には base64"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"log group\" }\n  SF[\"subscription filter<br/>gzip で圧縮して送る\"]\n  KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams\" }\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda<br/>base64 で届く\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"Data Firehose\" }\n  OS[\"Amazon OpenSearch<br/>Service<br/>Standard の<br/>log group だけ\"]\n  LG -- \"ログ\" --> SF\n  SF --> KD\n  SF --> LA\n  SF --> FH\n  SF --> OS\n",
+    "alt": "log group のログを subscription filter が gzip で圧縮して送る。ドキュメントに挙がる送り先は Kinesis Data Streams、Lambda、Data Firehose、OpenSearch Service の 4 つ。Lambda には base64 で符号にした形で届く。OpenSearch Service に流せるのは Standard の log class の log group だけ。"
+   },
+   "narration": "第三部、流すです。サブスクリプションフィルターは、ロググループのログを、ほかのサービスに送る仕組みです。ドキュメントに挙がる送り先は、キネシスデータストリームズ、ラムダ、データファイアホース、オープンサーチサービスの四つです。送られるログは、ジージップという形式で圧縮されています。ラムダは、データを、ベース六十四という符号にした形で受け取ります。オープンサーチサービスには、気をつける点が二つあります。流せるのは、スタンダードのログクラスのロググループだけです。また、大量に流すと料金が高くなることがあるので、ドキュメントは、請求とコストの管理の画面で、予算を作るよう勧めています。ログクラスは、第四部で見ます。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "You can use a subscription filter with Amazon Kinesis Data Streams, AWS Lambda, Amazon Data Firehose, or Amazon OpenSearch Service.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S12",
+     "quote": "Logs sent to a service through a subscription filter are compressed with the gzip format.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S12",
+     "quote": "AWS Lambda receives the data base64 encoded in the awslogs.data field.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Streaming to OpenSearch Service is supported only for log groups in the Standard log class.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream"
+    },
+    {
+     "source_id": "S14",
+     "quote": "we recommend that you create a budget in the AWS Billing and Cost Management console.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "流す 2: Kinesis Data Streams の throttling",
+   "bullets": [
+    "Kinesis Data Streams の例",
+    "既定の配り方で throttling",
+    "24 時間を過ぎると捨てる"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "配り方の既定",
+      "note": "log stream ごと"
+     },
+     {
+      "label": "throttling が起きうる",
+      "note": "流量の制限で断られる"
+     },
+     {
+      "label": "最大 24 時間 送り直す",
+      "note": "届けられなかった分"
+     },
+     {
+      "label": "24 時間を過ぎる",
+      "note": "失敗した分は捨てられる"
+     }
+    ]
+   },
+   "narration": "キネシスデータストリームズを送り先にしたドキュメントの例に、気をつけたい点があります。スロットリングとは、流量の制限にかかって、受け取りを断られることです。この例では、フィルターがデータを配る方法、つまり配り方の既定は、ログストリームごとです。ドキュメントは、これがスロットリングを起こしうると書いています。スロットリングで届けられなかった分は、最大で二十四時間、送り直されます。二十四時間を過ぎると、失敗した分は捨てられます。つまり、制限にかかり続けると、ログが届かずに失われることがあります。",
+   "refs": [
+    {
+     "source_id": "S13",
+     "quote": "By default, the stream filter distribution is by log stream and this can cause throttling.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Throttled deliverables are retried for up to 24 hours.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample"
+    },
+    {
+     "source_id": "S13",
+     "quote": "After 24 hours, the failed deliverables are dropped.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "流す 3: metric streams",
+   "bullets": [
+    "メトリクスを流し続ける",
+    "全部か、filter で一部",
+    "Data Firehose か S3 へ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch の<br/>メトリクス<br/>全部か filter で一部\" }\n  MS[\"metric streams<br/>near-real-time\"]\n  FH@{ svc: \"Amazon Data Firehose\", label: \"Data Firehose<br/>望む先へ届ける\" }\n  S3@{ svc: \"Amazon S3\", label: \"Amazon S3<br/>quick setup\" }\n  CW --> MS\n  MS -- \"delivery stream\" --> FH\n  MS --> S3\n",
+    "alt": "CloudWatch のメトリクスを、全部か filter で選んだ一部だけ、metric streams がほぼリアルタイムで流し続ける。ドキュメントに挙がる使い方のうち 2 つを示す。1 つは Data Firehose の delivery stream に向け、Firehose が望む先へ届ける形。もう 1 つは Amazon S3 に quick setup で流す形。"
+   },
+   "narration": "メトリクスのほうは、メトリクスストリームで流します。メトリクスストリームは、クラウドウォッチのメトリクスを、選んだ送り先に流し続ける仕組みです。届くのは、ほぼリアルタイムで、遅れは小さいとされています。全てのメトリクスを流すことも、フィルターで決めたメトリクスだけを流すこともできます。ドキュメントに挙がる使い方のうち、ここでは二つを見ます。一つは、データファイアホースの配信ストリームに向ける形です。ファイアホースが、メトリクスを望む先へ届けます。もう一つは、エススリーに流す形で、手早く済む設定の手順が用意されています。",
+   "refs": [
+    {
+     "source_id": "S5",
+     "quote": "You can use metric streams to continually stream CloudWatch metrics to a destination of your choice, with near-real-time delivery and low latency.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    },
+    {
+     "source_id": "S5",
+     "quote": "You can stream all of your CloudWatch metrics, or use filters to stream only specified metrics.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Create a metric stream and direct it to an Amazon Data Firehose delivery stream that delivers your CloudWatch metrics to where you want them to go.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Stream to Amazon Simple Storage Service with a quick setup process.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "保存と保護 1: log class",
+   "bullets": [
+    "Standard: 全機能・よく見る",
+    "Essentials: たまに調べる",
+    "作った後は変えられない"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "Standard",
+     "Essentials"
+    ],
+    "rows": [
+     [
+      "向くログ",
+      "リアルタイム監視・頻繁",
+      "あまり見ない"
+     ],
+     [
+      "使い方",
+      "全機能",
+      "随時の検索・事後調査"
+     ],
+     [
+      "OpenSearch へ",
+      "流せる",
+      "流せない"
+     ],
+     [
+      "Logs Insights",
+      "全命令",
+      "pattern・diff・unmask 以外"
+     ],
+     [
+      "作った後の変更",
+      "できない",
+      "できない"
+     ]
+    ]
+   },
+   "narration": "第四部、保存と保護です。ロググループには、ログクラスがあります。スタンダードは、全ての機能を持つ形です。リアルタイムで監視したいログや、よく見るログに向いています。エッセンシャルズは、あまり見ないログを、その時々に問い合わせたり、後から調べたりするのに向いています。特に覚えたいのは三つです。一つ目、ロググループを作った後は、ログクラスを変えられません。二つ目、オープンサーチサービスに流せるのは、スタンダードだけです。三つ目、ログズインサイツの命令のうち、パターン、ディフ、アンマスクの三つは、エッセンシャルズでは使えません。ログズインサイツは、第五部で見る、ログに問い合わせる仕組みです。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "CloudWatch Logs Standard log class is a full-featured option for logs that require real-time monitoring or logs that you access frequently.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch_Logs_Log_Classes.html#CloudWatch_Logs_Log_Classes"
+    },
+    {
+     "source_id": "S1",
+     "quote": "The Essentials log class is ideal for ad-hoc querying and after-the-fact forensic analysis on infrequently accessed logs.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch_Logs_Log_Classes.html#CloudWatch_Logs_Log_Classes"
+    },
+    {
+     "source_id": "S1",
+     "quote": "After a log group is created, its log class can't be changed.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch_Logs_Log_Classes.html#CloudWatch_Logs_Log_Classes"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Log groups in the Essentials log class (formerly Infrequent Access) support all Logs Insights QL query commands except pattern, diff, and unmask.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "保存と保護 2: retention と S3 Lifecycle",
+   "bullets": [
+    "retention より古いログは消える",
+    "すぐには消えない",
+    "S3 Lifecycle は既存にも効く"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph RT[\"log group の retention\"]\n    R1[\"retention より古いデータ<br/>削除される\"]\n    R2[\"retention に達しても<br/>すぐには消えない\"]\n  end\n  subgraph LC[\"S3 Lifecycle の rule\"]\n    L1[\"別の storage class へ<br/>移す時期\"]\n    L2[\"期限が切れた object<br/>S3 が削除\"]\n    L3[\"既存と後から足す<br/>object の両方に効く\"]\n  end\n  RT ~~~ LC\n",
+    "alt": "2 つの仕組みを並べた図で、流れではない。上は log group の retention。retention より古いデータは削除されるが、retention に達してもすぐには消えない。下は S3 Lifecycle の rule。別の storage class へ移す時期を決め、期限が切れた object は S3 が削除する。rule は既存の object と後から足す object の両方に効く。"
+   },
+   "narration": "次は、ログをためておく期間です。試験ガイドは、保存の期間の管理の例として、ロググループの保持期間と、エススリーのライフサイクルを挙げています。画面は二つを並べた物で、流れではありません。保持期間は、ロググループごとの設定です。今の保持期間より古いデータは、削除されます。ただし、保持期間に達したログを、すぐに消すわけではない、とドキュメントにあります。エススリーのライフサイクルの設定は、オブジェクトの集まりに対して、エススリーが行う動作を決める、ルールの集まりです。オブジェクトを、別のストレージクラス、つまり別の保存の種類に移す時期を決められます。期限が切れたオブジェクトは、エススリーが代わりに削除します。バケットにこの設定を足すと、すでにあるオブジェクトにも、後から足すオブジェクトにも、ルールが効きます。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "Any data older than the current retention setting is deleted.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention"
+    },
+    {
+     "source_id": "S15",
+     "quote": "CloudWatch Logs doesn’t immediately delete log events when they reach their retention setting.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention"
+    },
+    {
+     "source_id": "S16",
+     "quote": "An S3 Lifecycle configuration is a set of rules that define actions that Amazon S3 applies to a group of objects.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt"
+    },
+    {
+     "source_id": "S16",
+     "quote": "These actions define when objects transition to another storage class.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt"
+    },
+    {
+     "source_id": "S16",
+     "quote": "Amazon S3 deletes expired objects on your behalf.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt"
+    },
+    {
+     "source_id": "S16",
+     "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "保存と保護 3: AWS KMS で暗号化",
+   "bullets": [
+    "ログはいつも暗号化される",
+    "KMS key は関連付け後のデータに",
+    "kms:DescribeKey が要る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph DF[\"default\"]\n    AES[\"AES-GCM 256 ビット<br/>server-side\"]\n  end\n  subgraph KMSG[\"代わりに AWS KMS\"]\n    KEY@{ svc: \"AWS KMS\", label: \"AWS KMS の key<br/>log group ごとに<br/>別の key\" }\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"log group<br/>関連付け後のデータ\" }\n  end\n  P@{ svc: \"AWS IAM\", label: \"呼び出す IAM principal<br/>kms:DescribeKey が要る\" }\n  DF ~~~ KMSG\n  KEY -- \"暗号化\" --> LG\n  P -- \"AssociateKmsKey\" --> LG\n",
+    "alt": "CloudWatch Logs のロググループのデータはいつも暗号化される。default は 256 ビットの AES-GCM による server-side の暗号化。代わりに AWS KMS の key を使える。key を log group に関連付けると、その後に取り込まれたデータがその key で暗号化される。log group ごとに別の key が勧められる。CreateLogGroup に kmsKeyId を付けて、または AssociateKmsKey を呼ぶ IAM principal には kms:DescribeKey の権限が要る。"
+   },
+   "narration": "ロググループのデータは、いつも暗号化されています。デフォルトでは、クラウドウォッチログズが、二百五十六ビットのエーイーエスジーシーエムという方式で、保存されたデータをサーバー側で暗号化します。その代わりに、エーダブリューエスキーマネジメントサービス、略してケーエムエスの鍵を使うこともできます。ケーエムエスの鍵をロググループに関連付けると、その後に取り込まれたデータは、その鍵で暗号化されます。ドキュメントは、暗号化するロググループごとに、別の鍵を使うよう勧めています。権限にも注意します。鍵を指定してロググループを作る、または鍵を関連付ける、アイエーエムのプリンシパルには、その鍵に対するディスクライブキーの権限が要ります。また、暗号化されたデータが求められるたびに、クラウドウォッチログズが、その鍵の権限を持っている必要があります。",
+   "refs": [
+    {
+     "source_id": "S18",
+     "quote": "Log group data is always encrypted in CloudWatch Logs.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms"
+    },
+    {
+     "source_id": "S18",
+     "quote": "By default, CloudWatch Logs uses server-side encryption with 256-bit Advanced Encryption Standard Galois/Counter Mode (AES-GCM) to encrypt log data at rest.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms"
+    },
+    {
+     "source_id": "S18",
+     "quote": "After you associate a KMS key with a log group, all newly ingested data for the log group is encrypted using this key.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms"
+    },
+    {
+     "source_id": "S18",
+     "quote": "We recommend that you use different KMS keys for each of your encrypted log groups.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms"
+    },
+    {
+     "source_id": "S19",
+     "quote": "The IAM principal that calls CreateLogGroup with a kmsKeyId parameter, or calls AssociateKmsKey, must have kms:DescribeKey permission on the specified KMS key.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-association"
+    },
+    {
+     "source_id": "S19",
+     "quote": "CloudWatch Logs must have permissions for the KMS key whenever encrypted data is requested.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-association"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "探す: Logs Insights",
+   "bullets": [
+    "log group に問い合わせる",
+    "命令は | で区切る",
+    "時間の幅はできるだけ狭く"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "ドキュメントの説明"
+    ],
+    "rows": [
+     [
+      "問い合わせる先",
+      "log group"
+     ],
+     [
+      "命令をつなぐ",
+      "| で区切る"
+     ],
+     [
+      "時間の幅",
+      "できるだけ狭く"
+     ],
+     [
+      "Standard",
+      "全命令"
+     ],
+     [
+      "Essentials",
+      "pattern・diff・unmask 以外"
+     ]
+    ]
+   },
+   "narration": "第五部、探すです。ログズインサイツは、専用の問い合わせの言葉で、ロググループに問い合わせる仕組みです。いくつもの命令を一つの問い合わせにするときは、命令をパイプという縦の線の記号で区切ります。ドキュメントは、問い合わせの時間の幅を、いつもできるだけ狭く決めるよう勧めています。ログクラスとの関係は、第四部で見たとおりです。スタンダードでは全ての命令が使え、エッセンシャルズでは三つの命令が使えません。フィルターとパターンの書き方の細部は、根拠に無いので扱いません。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "For information about how to query your log groups with the Amazon CloudWatch Logs Insights query language, see CloudWatch Logs Insights language query syntax.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#FilterAndPatternSyntaxForMetricFilters"
+    },
+    {
+     "source_id": "S17",
+     "quote": "To create queries that contain multiple commands, separate the commands with the pipe character (|).",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Always specify the narrowest possible time range for your queries.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    },
+    {
+     "source_id": "S17",
+     "quote": "All Logs Insights QL query commands are supported on log groups in the Standard log class.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "条件から選ぶ 1: 集める・指標にする",
+   "bullets": [
+    "多くのサーバー → Systems Manager",
+    "StatsD など → Classic",
+    "ログを数える → metric filter"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "多くのサーバーに agent",
+      "Systems Manager",
+      "CloudWatchAgentServerPolicy"
+     ],
+     [
+      "StatsD・procstat を使う",
+      "Classic configuration",
+      "それだけの機能か"
+     ],
+     [
+      "名前と値で分ける",
+      "dimension",
+      "1 つに 30 まで"
+     ],
+     [
+      "1 分より細かい動き",
+      "high-resolution",
+      "1 秒で保存"
+     ],
+     [
+      "ログの語を数える",
+      "metric filter",
+      "default value を 0"
+     ]
+    ]
+   },
+   "narration": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、集めると、指標にするの部です。たくさんのサーバーにエージェントを入れたい、とあれば、システムズマネージャーで配ります。インスタンスのアイエーエムロールに、クラウドウォッチエージェントサーバーポリシーがあるかを確かめます。スタッツディーやプロックスタットを使いたいなら、クラシックコンフィギュレーションです。その機能が、クラシックコンフィギュレーションだけの物かを確かめます。メトリクスを名前と値の組で分けたいなら、ディメンションです。一つのメトリクスに三十個までです。一分より細かい動きを見たいなら、高分解能のメトリクスです。一秒の細かさで保存されます。ログの言葉を数えてメトリクスにしたいなら、メトリクスフィルターです。デフォルト値をゼロに決めたかを確かめます。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "You must also make sure that the IAM role attached to the instance has the CloudWatchAgentServerPolicy attached.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Use the Classic configuration for the agent features that only it offers",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Classic-configuration.html#CloudWatch-Agent-Classic-configuration"
+    },
+    {
+     "source_id": "S3",
+     "quote": "You can have up to 30 dimensions assigned to one metric",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#usingDimensions"
+    },
+    {
+     "source_id": "S2",
+     "quote": "High-resolution metrics can give you more immediate insight into your application's sub-minute activity.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics"
+    },
+    {
+     "source_id": "S8",
+     "quote": "We recommend that you specify a default value, even if the value is 0.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#changing-default-increment-value"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から選ぶ 2: 流す",
+   "bullets": [
+    "ログを送る → subscription filter",
+    "Kinesis が欠ける → 配り方",
+    "メトリクス → metric streams"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "ログを Lambda で処理",
+      "subscription filter",
+      "gzip・base64"
+     ],
+     [
+      "ログを OpenSearch へ",
+      "subscription filter",
+      "Standard・予算"
+     ],
+     [
+      "Kinesis で throttling",
+      "配り方を見る",
+      "24 時間で捨てる"
+     ],
+     [
+      "メトリクスを S3 へ",
+      "metric streams",
+      "quick setup"
+     ],
+     [
+      "メトリクスを望む先へ",
+      "metric streams",
+      "Data Firehose へ"
+     ]
+    ]
+   },
+   "narration": "二枚目は、流すの部です。ログをラムダで処理したいなら、サブスクリプションフィルターです。ジージップで圧縮され、ベース六十四で届く点を確かめます。ログをオープンサーチサービスに送りたいときも、サブスクリプションフィルターです。ロググループがスタンダードか、予算を作ったかを確かめます。キネシスデータストリームズに送るログが、スロットリングにかかる、とあれば、配り方を見ます。既定はログストリームごとで、二十四時間を過ぎた分は捨てられます。メトリクスをエススリーに送りたいなら、メトリクスストリームの、手早く済む設定です。メトリクスを望む先に届けたいなら、メトリクスストリームをデータファイアホースに向けます。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "Logs sent to a service through a subscription filter are compressed with the gzip format.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#SubscriptionFilters"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Streaming to OpenSearch Service is supported only for log groups in the Standard log class.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream"
+    },
+    {
+     "source_id": "S13",
+     "quote": "By default, the stream filter distribution is by log stream and this can cause throttling.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Stream to Amazon Simple Storage Service with a quick setup process.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Create a metric stream and direct it to an Amazon Data Firehose delivery stream",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html#CloudWatch-Metric-Streams"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から選ぶ 3: 保存と保護・探す",
+   "bullets": [
+    "たまに調べる → Essentials",
+    "古いログ → retention",
+    "自分の鍵 → AWS KMS"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "たまに調べるログ",
+      "Essentials",
+      "後から変えられない"
+     ],
+     [
+      "古いログを消す",
+      "retention",
+      "すぐには消えない"
+     ],
+     [
+      "S3 の object を移す",
+      "S3 Lifecycle",
+      "既存の物にも効く"
+     ],
+     [
+      "自分の鍵で暗号化",
+      "AWS KMS",
+      "kms:DescribeKey"
+     ],
+     [
+      "ログに問い合わせる",
+      "Logs Insights",
+      "時間の幅を狭く"
+     ]
+    ]
+   },
+   "narration": "三枚目は、保存と保護、そして探すの部です。あまり見ないログを、その時々に調べるなら、エッセンシャルズのログクラスです。作った後は変えられないので、作るときに決めます。古いログを消したいなら、ロググループの保持期間です。保持期間に達しても、すぐには消えません。エススリーのオブジェクトを別のストレージクラスに移したり、消したりしたいなら、エススリーのライフサイクルです。すでにあるオブジェクトにも効きます。自分で選んだ鍵で暗号化したいなら、ケーエムエスの鍵を関連付けます。呼び出す側の、ディスクライブキーの権限を確かめます。ログに問い合わせたいなら、ログズインサイツです。時間の幅を狭くします。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "After a log group is created, its log class can't be changed.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch_Logs_Log_Classes.html#CloudWatch_Logs_Log_Classes"
+    },
+    {
+     "source_id": "S15",
+     "quote": "CloudWatch Logs doesn’t immediately delete log events when they reach their retention setting.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention"
+    },
+    {
+     "source_id": "S16",
+     "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt"
+    },
+    {
+     "source_id": "S19",
+     "quote": "must have kms:DescribeKey permission on the specified KMS key.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-association"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Always specify the narrowest possible time range for your queries.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "5 つの部に戻る",
+    "並びは扱った順",
+    "迷ったら 3 枚の表へ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"第 1 部 集める\"]\n    AG@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch agent<br/>Systems Manager<br/>で配る\" }\n  end\n  subgraph P2[\"第 2 部 指標にする\"]\n    MF@{ svc: \"Amazon CloudWatch Logs\", label: \"metric filter<br/>default value を決める\" }\n  end\n  subgraph P3[\"第 3 部 流す\"]\n    SF@{ svc: \"Amazon CloudWatch Logs\", label: \"subscription filter<br/>ログを送る\" }\n    MS@{ svc: \"Amazon CloudWatch\", label: \"metric streams<br/>メトリクスを送る\" }\n  end\n  subgraph P4[\"第 4 部 保存と保護\"]\n    LC@{ svc: \"Amazon CloudWatch Logs\", label: \"log class・retention<br/>S3 Lifecycle\" }\n    KM@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>log group ごとの key\" }\n  end\n  subgraph P5[\"第 5 部 探す\"]\n    LI@{ svc: \"Amazon CloudWatch Logs\", label: \"Logs Insights<br/>時間の幅を狭く\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n",
+    "alt": "講義の地図に戻ったまとめ。5 つの部を扱った順に上から並べた物で、処理の流れではない。第 1 部 集めるは CloudWatch agent を Systems Manager で配る。第 2 部 指標にするは metric filter で、default value を決める。第 3 部 流すは、ログを送る subscription filter と、メトリクスを送る metric streams。第 4 部 保存と保護は log class・retention・S3 Lifecycle と、log group ごとの AWS KMS の key。第 5 部 探すは Logs Insights で、時間の幅を狭く問い合わせる。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。扱った部は五つで、並びは扱った順です。第一部、集めるでは、エージェントをシステムズマネージャーで配り、カスタムメトリクスを、ネームスペース、名前、ディメンションで形にしました。第二部、指標にするでは、メトリクスフィルターでログの一致を数えました。デフォルト値を決めておくことが大事でした。第三部、流すでは、ログはサブスクリプションフィルターで、メトリクスはメトリクスストリームで送りました。第四部、保存と保護では、ログクラス、保持期間、エススリーのライフサイクル、ケーエムエスの鍵を見ました。第五部、探すでは、ログズインサイツで、時間の幅を狭く問い合わせました。問題文で迷ったら、三枚の表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "Metric filters are assigned to log groups, and all of the filters assigned to a log group are applied to their log streams.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html#FilterAndPatternSyntaxForMetricFilters"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Always specify the narrowest possible time range for your queries.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax"
+    }
+   ]
+  }
+ ]
+}
