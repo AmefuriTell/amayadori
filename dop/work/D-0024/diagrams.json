@@ -1,0 +1,55 @@
+{
+  "item": "D-0024",
+  "diagrams": [
+    {
+      "id": "q-4.2-0001",
+      "source": "flowchart TB\n  subgraph SRC[\"ソースアカウント（30 個）\"]\n    SM@{ svc: \"Amazon CloudWatch\", label: \"選んだ名前空間のメトリクス\" }\n    SL@{ svc: \"Amazon CloudWatch Logs\", label: \"選んだロググループ\" }\n  end\n  subgraph MON[\"監視アカウント\"]\n    MA@{ svc: \"Amazon CloudWatch\", label: \"ソースのメトリクスのアラーム\" }\n    Q@{ svc: \"Amazon CloudWatch Logs\", label: \"1 回の Logs Insights のクエリ\" }\n  end\n  OK[\"✔ B: クロスアカウントのオブザーバビリティ<br/>共有する物を絞れる\"]\n  WA[\"⚠ A: アカウントごとの作業\"]\n  WC[\"⚠ C・D: 自前のコピーや<br/>各ソースでのアラーム\"]\n  SM -- \"共有\" --> MA\n  SL -- \"共有\" --> Q\n  OK -.- MON\n  WA -.- SRC\n  WC -.- SRC\n",
+      "alt": "30 個のアカウントを監視アカウントでまとめて見る図。クロスアカウントのオブザーバビリティで、選んだ名前空間とロググループだけを共有し、監視アカウントでアラームと複数アカウントにまたがるクエリを実行する（B）。"
+    },
+    {
+      "id": "q-4.2-0002",
+      "source": "flowchart TB\n  subgraph SH[\"共有アカウント（4 つ）\"]\n    R1@{ svc: \"Amazon CloudWatch\", label: \"us-east-1 のグラフ・アラーム・ログ\" }\n    R2@{ svc: \"Amazon CloudWatch\", label: \"ap-northeast-1 の同じ物\" }\n  end\n  subgraph MG[\"マネージャーのアカウント（監視）\"]\n    DASH@{ svc: \"Amazon CloudWatch\", label: \"✔ C: 1 つのダッシュボード\" }\n  end\n  WA[\"⚠ A: オブザーバビリティは<br/>1 リージョンの中だけ\"]\n  WB[\"⚠ B: ダッシュボードが 8 つに分かれる\"]\n  WD[\"⚠ D: データをコピーする\"]\n  R1 -- \"表示（コピーなし）\" --> DASH\n  R2 -- \"表示（コピーなし）\" --> DASH\n  WA -.- DASH\n  WB -.- SH\n  WD -.- DASH\n",
+      "alt": "4 つのアカウントと 2 つのリージョンを 1 つのダッシュボードで見る図。共有アカウントとマネージャーの監視アカウントを決め、クロスアカウント・クロスリージョンのダッシュボードを作る（C）。コピーはしない。"
+    },
+    {
+      "id": "q-4.2-0003",
+      "source": "flowchart TB\n  ENG[\"エンジニア\"]\n  DASH@{ svc: \"Amazon CloudWatch\", label: \"ダッシュボード（コードで管理）\" }\n  W[\"ログウィジェット\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"別アカウントの app-a・app-b\" }\n  OA[\"✔ A: accountId に<br/>ロググループのあるアカウントの ID\"]\n  OB[\"✔ B: クエリは<br/>SOURCE 'app-a' | SOURCE 'app-b' | 構文\"]\n  WC[\"⚠ C: カンマ区切りは使えない\"]\n  WD[\"⚠ D・E: API でも作れる<br/>view を省くと表になる\"]\n  ENG -- \"API で定義\" --> DASH\n  DASH --> W\n  W -- \"Logs Insights のクエリ\" --> LG\n  OA -.- W\n  OB -.- W\n  WC -.- W\n  WD -.- DASH\n",
+      "alt": "別アカウントのロググループを Logs Insights で表示するダッシュボードのログウィジェットの図。accountId にそのアカウントの ID を設定し（A）、クエリは SOURCE をパイプでつないでから構文を書く（B）。"
+    },
+    {
+      "id": "q-4.2-0004",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  M1@{ svc: \"Amazon CloudWatch\", label: \"Latency（Service + InstanceId）\" }\n  M2@{ svc: \"Amazon CloudWatch\", label: \"Latency（Service だけ）\" }\n  AL[\"アラーム Service=checkout\"]\n  WA[\"⚠ A: 組ごとに別のメトリクス<br/>自動ではまとまらない\"]\n  WD[\"⚠ D: SEARCH の式には<br/>アラームを作れない\"]\n  APP -- \"今の発行\" --> M1\n  APP == \"✔ B: Service だけの組も発行\" ==> M2\n  AL == \"✔ B: 組が合ってデータあり\" ==> M2\n  AL -. \"⚠ 今: 組が違いデータなし\" .-> M1\n  WA -.- M1\n  WD -.- AL\n",
+      "alt": "ディメンションの組ごとに別のメトリクスになる図。アラームは Service だけの組を見るので、Service だけのディメンションの Latency も発行すればデータが入る（B）。自動でまとまることも、SEARCH の式へのアラームもない。"
+    },
+    {
+      "id": "q-4.2-0005",
+      "source": "flowchart TB\n  API[\"決済 API\"]\n  LAT@{ svc: \"Amazon CloudWatch\", label: \"レイテンシー（高解像度の生データ）\" }\n  ERR@{ svc: \"Amazon CloudWatch\", label: \"エラー数・リクエスト数\" }\n  A1[\"✔ A: p99 のアラーム（10 秒の期間）\"]\n  A2[\"✔ B: エラー数 ÷ リクエスト数 の<br/>数式にアラーム\"]\n  WC[\"⚠ C: 統計セットではパーセンタイルが使えない\"]\n  WD[\"⚠ D: 標準解像度は 10 秒の期間にできない\"]\n  WE[\"⚠ E: SEARCH にはアラームを作れない\"]\n  API --> LAT\n  API --> ERR\n  LAT --> A1\n  ERR --> A2\n  WC -.- LAT\n  WD -.- LAT\n  WE -.- ERR\n",
+      "alt": "決済 API の 2 つのアラームの図。高解像度の生データを発行して 10 秒の期間で p99 にアラームを付け（A）、エラー率はエラー数をリクエスト数で割る数式にアラームを付ける（B）。SEARCH の式にはアラームを付けられない。"
+    },
+    {
+      "id": "q-4.2-0006",
+      "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"ライセンスサーバー（1 台）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム\" }\n  WB[\"⚠ B: Instance のチェックでは<br/>復旧のアクションが使えない\"]\n  WC[\"⚠ C: 終了すると別のインスタンスになる\"]\n  WD[\"⚠ D: 停止して人が起動するのは自動でない\"]\n  EC2 -- \"StatusCheckFailed_System\" --> AL\n  AL == \"✔ A: 復旧のアクション\" ==> EC2\n  WB -.- AL\n  WC -.- AL\n  WD -.- AL\n",
+      "alt": "ハードウェアの問題で EC2 を自動で復旧する図。StatusCheckFailed_System のアラームに復旧のアクションを付けると、同じインスタンスとして復旧する（A）。Instance のチェックでは復旧できず、終了や停止では要件に合わない。"
+    },
+    {
+      "id": "q-4.2-0007",
+      "source": "flowchart TB\n  EB[\"EventBridge のスケジュール\"]\n  AL[\"エイリアス prod\"]\n  V12@{ svc: \"AWS Lambda\", label: \"バージョン 12（公開済み）\" }\n  UN@{ svc: \"AWS Lambda\", label: \"未公開（Active tracing 有効）\" }\n  V13@{ svc: \"AWS Lambda\", label: \"新しいバージョン\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>トレース\" }\n  WB[\"⚠ B: 公開済みのバージョンは<br/>トレースのモードを変えられない\"]\n  EB -- \"呼び出し\" --> AL\n  AL -. \"⚠ 今: トレースなし\" .-> V12\n  UN -- \"✔ A: 公開\" --> V13\n  AL == \"✔ A: 新しい版へ更新\" ==> V13\n  V13 -- \"トレース\" --> XR\n  WB -.- V12\n",
+      "alt": "エイリアス prod 経由の Lambda 関数を X-Ray でトレースする図。トレースのモードは公開済みのバージョンでは変えられないので、Active tracing を有効にした未公開のバージョンから新しいバージョンを公開し、prod を向ける（A）。"
+    },
+    {
+      "id": "q-4.2-0008",
+      "source": "flowchart TB\n  CL[\"クライアント\"]\n  API@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\" }\n  FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サンプリングルール\" }\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WA[\"⚠ A: Lambda だけでは<br/>API Gateway から始まらない\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WA -.- FN\n  WBD -.- API\n",
+      "alt": "API Gateway から X-Ray のトレースを始める図。ステージで X-Ray を有効にして再デプロイし、/orders 用とそれ以外用のサンプリングルールを X-Ray のコンソールで作ると、割合を後から変えられる（C）。"
+    },
+    {
+      "id": "q-4.2-0009",
+      "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"ストリーム\" }\n  APP[\"検出のアプリケーション\"]\n  WB[\"⚠ B: 毎日のエクスポートでは数分以内にならない\"]\n  WC[\"⚠ C: Firehose は S3 にためてから届ける\"]\n  WD[\"⚠ D: 1 時間ごとの手作業\"]\n  LG == \"✔ A: サブスクリプション（通常 3 分以内）\" ==> KDS\n  KDS -- \"シャードを順番に読む\" --> APP\n  WB -.- LG\n  WC -.- LG\n  WD -.- LG\n",
+      "alt": "ログインの不審な動きを数分以内に順番に検出する図。サブスクリプションフィルターで Kinesis Data Streams に送り、アプリがシャードを順番に読む（A）。毎日のエクスポートや Firehose 経由の S3、手作業は要件に合わない。"
+    },
+    {
+      "id": "q-4.2-0010",
+      "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"忙しいロググループ\" }\n  KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"ストリーム（シャードは合計で足りる）\" }\n  WA[\"⚠ A: 保持期間は送る量と関係ない\"]\n  WB[\"⚠ B: 再試行は最大 24 時間<br/>その後は落とされる\"]\n  WD[\"⚠ D: 読み出しを速くしても<br/>スロットリングは減らない\"]\n  LG -. \"⚠ 既定: ログストリームごとに分配（偏る）\" .-> KDS\n  LG == \"✔ C: random に分配\" ==> KDS\n  WA -.- LG\n  WB -.- KDS\n  WD -.- KDS\n",
+      "alt": "CloudWatch Logs から Kinesis Data Streams へ送る時の DeliveryThrottling の図。既定のログストリームごとの分配は偏るので、サブスクリプションフィルターの分配を random にするとスロットリングが減る（C）。"
+    }
+  ]
+}
