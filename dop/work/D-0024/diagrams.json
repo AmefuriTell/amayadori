@@ -8,7 +8,7 @@
     },
     {
       "id": "q-4.2-0002",
-      "source": "flowchart TB\n  subgraph SH[\"共有アカウント（4 つ）\"]\n    R1@{ svc: \"Amazon CloudWatch\", label: \"us-east-1 のグラフ・アラーム・ログ\" }\n    R2@{ svc: \"Amazon CloudWatch\", label: \"ap-northeast-1 の同じ物\" }\n  end\n  subgraph MG[\"マネージャーのアカウント（監視）\"]\n    DASH@{ svc: \"Amazon CloudWatch\", label: \"✔ C: 1 つのダッシュボード\" }\n  end\n  WA[\"⚠ A: オブザーバビリティは<br/>1 リージョンの中だけ\"]\n  WB[\"⚠ B: ダッシュボードが 8 つに分かれる\"]\n  WD[\"⚠ D: データをコピーする\"]\n  R1 -- \"表示（コピーなし）\" --> DASH\n  R2 -- \"表示（コピーなし）\" --> DASH\n  WA -.- DASH\n  WB -.- SH\n  WD -.- DASH\n",
+      "source": "flowchart TB\n  subgraph SH[\"共有アカウント（4 つ）\"]\n    R1@{ svc: \"Amazon CloudWatch\", label: \"us-east-1 のグラフ・アラーム・ログ\" }\n    R2@{ svc: \"Amazon CloudWatch\", label: \"ap-northeast-1 の同じ物\" }\n  end\n  subgraph MG[\"監視アカウント\"]\n    DASH@{ svc: \"Amazon CloudWatch\", label: \"✔ C: 1 つのダッシュボード\" }\n  end\n  WA[\"⚠ A: オブザーバビリティは<br/>1 リージョンの中だけ\"]\n  WB[\"⚠ B: ダッシュボードが 8 つに分かれる\"]\n  WD[\"⚠ D: データをコピーする\"]\n  R1 -- \"表示（コピーなし）\" --> DASH\n  R2 -- \"表示（コピーなし）\" --> DASH\n  WA -.- DASH\n  WB -.- SH\n  WD -.- DASH\n",
       "alt": "4 つのアカウントと 2 つのリージョンを 1 つのダッシュボードで見る図。共有アカウントとマネージャーの監視アカウントを決め、クロスアカウント・クロスリージョンのダッシュボードを作る（C）。コピーはしない。"
     },
     {
@@ -28,7 +28,7 @@
     },
     {
       "id": "q-4.2-0006",
-      "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"ライセンスサーバー（1 台）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム\" }\n  WB[\"⚠ B: Instance のチェックでは<br/>復旧のアクションが使えない\"]\n  WC[\"⚠ C: 終了すると別のインスタンスになる\"]\n  WD[\"⚠ D: 停止して人が起動するのは自動でない\"]\n  EC2 -- \"StatusCheckFailed_System\" --> AL\n  AL == \"✔ A: 復旧のアクション\" ==> EC2\n  WB -.- AL\n  WC -.- AL\n  WD -.- AL\n",
+      "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"ライセンスサーバー（1 台）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム<br/>StatusCheckFailed_System\" }\n  WB[\"⚠ B: Instance のチェックでは<br/>復旧のアクションが使えない\"]\n  WC[\"⚠ C: 終了すると別のインスタンスになる\"]\n  WD[\"⚠ D: 停止して人が起動するのは自動でない\"]\n  AL == \"✔ A: 復旧のアクション\" ==> EC2\n  WB -.- AL\n  WC -.- AL\n  WD -.- AL\n",
       "alt": "ハードウェアの問題で EC2 を自動で復旧する図。StatusCheckFailed_System のアラームに復旧のアクションを付けると、同じインスタンスとして復旧する（A）。Instance のチェックでは復旧できず、終了や停止では要件に合わない。"
     },
     {
@@ -38,7 +38,7 @@
     },
     {
       "id": "q-4.2-0008",
-      "source": "flowchart TB\n  CL[\"クライアント\"]\n  API@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\" }\n  FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サンプリングルール\" }\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WA[\"⚠ A: Lambda だけでは<br/>API Gateway から始まらない\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WA -.- FN\n  WBD -.- API\n",
+      "source": "flowchart TB\n  CL[\"クライアント\"]\n  API@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\" }\n  FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>⚠ A: ここだけ有効でも<br/>API Gateway から始まらない\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サンプリングルール\" }\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WBD -.- API\n",
       "alt": "API Gateway から X-Ray のトレースを始める図。ステージで X-Ray を有効にして再デプロイし、/orders 用とそれ以外用のサンプリングルールを X-Ray のコンソールで作ると、割合を後から変えられる（C）。"
     },
     {
