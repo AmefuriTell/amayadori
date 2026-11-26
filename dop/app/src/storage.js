@@ -6,6 +6,7 @@ import { SPEECH_KEY, parseSpeech } from './logic/speech.js';
 import { PROGRESS_KEY, parseProgress } from './logic/progress.js';
 import { MOCK_KEY, parseMock } from './logic/mock.js';
 import { RETRY_KEY, parseRetry } from './logic/retry.js';
+import { LECTURE_KEY, parseLecture } from './logic/lecture.js';
 
 export function loadAnswers() {
   try {
@@ -129,6 +130,23 @@ export function loadRetry() {
 export function saveRetry(retry) {
   try {
     if (retry) window.localStorage.setItem(RETRY_KEY, JSON.stringify(retry)); else window.localStorage.removeItem(RETRY_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadLecture() {
+  try {
+    return parseLecture(window.localStorage.getItem(LECTURE_KEY));
+  } catch {
+    return parseLecture(null);
+  }
+}
+
+export function saveLecture(lecture) {
+  try {
+    window.localStorage.setItem(LECTURE_KEY, JSON.stringify(lecture));
     return true;
   } catch {
     return false;

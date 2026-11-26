@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, rel, seeded, setResult, writeReport } from './lib/io.mjs';
 import { normalize, ngrams, jaccard, questionText } from './lib/text.mjs';
-import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, judge, sameVerdict, verifyHash } from './lib/step.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, judge, emitSameVerdict, verifyHash } from './lib/step.mjs';
 import { loadBank, coverage as bankCoverage } from './lib/bank.mjs';
 import { loadBatch, checkBatch, lengthBias, gateBatch, linkFailures, DUP_FAIL, DUP_WARN } from './lib/qcheck.mjs';
 
@@ -84,8 +84,7 @@ const commands = {
   verdict(args) {
     const id = itemIdOf(args._[0]);
     requireState(id, 'C3_verify');
-    const again = sameVerdict(id); // P-019: 同じ verify.json での 2 回目は数え直さない
-    if (again) return emit({ ok: true, summary: `前と同じ verify.json なので前の結論のまま（${again.result}）→ loop advance --result ${again.result}`, extra: { result: again.result } });
+    if (emitSameVerdict(id)) return; // P-019: 同じ verify.json での 2 回目は数え直さない
     const batch = loadBatch(id);
     const v = readJSON(paths.work(id, 'verify.json'));
     const qhist = readJSON(paths.work(id, 'qhistory.json'), {});

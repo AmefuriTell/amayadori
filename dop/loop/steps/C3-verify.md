@@ -87,7 +87,7 @@
 
 ## 講義の項目（K-）の検証
 
-検証役を 2 人、別々の新しい文脈で起こす（互いの結果は見せない）。どちらも work/&lt;ID&gt;/lecture.json・sources.md・preview/&lt;スライド id&gt;.png（図の絵）を見る。Web は使わない。
+検証役を 2 人、別々の新しい文脈で起こす（互いの結果は見せない）。どちらも work/&lt;ID&gt;/lecture.json・sources.md・preview/&lt;スライド id&gt;.png（図の絵）を見る。Web は使わない。試験ガイドの task の knowledge・skills（item.json の task_info、無ければ config/exam.json）も見る。そこにある観点（例: mutable と immutable）を講義の軸や見出しに使うのは根拠に無い分類ではない。ただし観点の中身の事実は sources.md に根拠が要る。
 
 - 整合性の検証役 → work/&lt;ID&gt;/review-consistency.json。fact（根拠と食い違う。図の矢印・つながりも）・unsupported（根拠に無い事を言い切る。図・表・bullets も）・mismatch（同じスライドで画面と台本が違う）・terms（スライドをまたいで呼び方・表記がそろわない）・flow（説明していない語を前提にする、予告とまとめが本文と合わない）。
 - 分かりやすさの検証役 → work/&lt;ID&gt;/review-clarity.json。初めて学ぶ受験者の目で、jargon（説明の無い専門用語）・leap（話の飛び、なぜその方法かが分からない）・visual（図が言いたい事を示さない、読めない）・listen（耳で追えない台本）・exam（試験の判断が印象に残らない）。直し方の提案は、新しい事実を足さずに順番・言い換え・図の作り直しで。

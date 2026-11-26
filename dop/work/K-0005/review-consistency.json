@@ -1,0 +1,106 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        { "kind": "mismatch", "severity": "軽", "detail": "台本は「講義は四つの部分に分かれます」と言い、表は「最後に」と別扱いにしているが、画面の bullets と steps は 1〜5 の五つに番号を振っている。", "suggest": "台本を「五つの段に分けます。最後の五つ目は条件から選ぶ表です」とするか、画面の 5 を番号なしの「最後: 条件から選ぶ表」にする。" },
+        { "kind": "terms", "severity": "軽", "detail": "bullets は「5 選ぶ表」、steps は「5 条件から選ぶ」、s15 の題は「条件から方法を選ぶ」。同じ部分の呼び方が三通り。", "suggest": "「条件から選ぶ表」などに一つにそろえる（s16 も同じ）。" }
+      ]
+    },
+    {
+      "id": "s02",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "台本の「作りたいリソースを書いたファイルを、テンプレートと呼びます」「テンプレートから一緒に作って扱うリソースのまとまりを、スタックと呼びます」と、図の「テンプレート →書いて渡す→ CloudFormation →用意する→ スタック」という流れは S1 に無い。S1 は「リソースを model and set up する」だけ。S14 に stack templates という語はあるが、テンプレートとスタックの定義や作られ方は根拠に無い。講義全体がこの 2 語の上に立っているので、根拠なしの言い切りが土台になっている。", "suggest": "根拠に定義の一文（テンプレートとスタックの説明）を足してもらうか、台本を「この先、リソースを書いたファイルをテンプレート、まとめて扱うリソースをスタックと呼びます」程度の語の紹介にとどめ、図の矢印の仕組み（書いて渡す→用意する→スタック）は根拠が揃うまで外す。" },
+        { "kind": "fact", "severity": "軽", "detail": "図の点線「スタック → アプリケーション（ここに時間を回す）」は、スタックがアプリに流れ込むつながりに見える。S1 の内容は「リソース管理の時間を減らし、アプリに時間を回す」という時間の配分で、スタックとアプリのつながりではない。", "suggest": "点線を外し、アプリの箱は図の外（bullets）に置く。または線のラベルを「管理の時間を減らす」にして、つながりではない事が分かる形にする。" }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "図は「ライブラリと CLI」、bullets と台本は「コマンドラインの道具」。bullets は「cdk deploy でスタックを配置」で、図・台本の「デプロイ」と言い方が違う。", "suggest": "「コマンドラインの道具」と「デプロイ」にそろえる（図のラベルも「ライブラリとコマンドラインの道具」、bullets は「cdk deploy でデプロイ」）。" }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        { "kind": "unsupported", "severity": "軽", "detail": "「ブートストラップは、デプロイの前に、環境の側で済ませておく準備」「アセットとは、テンプレートとは別に、スタックが一緒に持っていく物」は S9 に無い説明。S9 は bootstrap されていない時の条件だけ。", "suggest": "語の説明は「準備」「テンプレート以外に持つ物」程度にとどめ、中身を言い切らない。または根拠に bootstrap と assets の説明を足す。" },
+        { "kind": "mismatch", "severity": "軽", "detail": "表の列見出しが「bootstrap 無しの環境 / デプロイに成功する物」なのに、左の列の中身は「条件 1」「条件 2」「両方を満たす」で見出しと合わない。条件 2 が「合成したテンプレート」と「51,200 バイト未満」の 2 行に割れていて、条件が 3 つに見える。", "suggest": "列を「条件 / 中身」にし、行を「1 / assets が無い」「2 / 合成したテンプレートが 51,200 バイト未満」「結果 / 両方を満たすスタックだけ成功」の 3 行にする。" }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "S3 は running resources（動いているリソース）への影響。台本の最後「本番のリソースに何が起きるかを先に知りたい」と s15 の表「本番への影響を先に見る」は「本番」に言い換えており、change set が本番環境専用・本番向けの物と覚えるおそれがある。", "suggest": "台本と s15 の表を「動いているリソースへの影響を先に見る」にそろえる。" },
+        { "kind": "flow", "severity": "軽", "detail": "「属性とは、リソースが持つ値」と、s03 の「プロパティとは、リソースごとの設定の値」が、ほぼ同じ説明で違いが分からない。", "suggest": "違いを根拠なしに言い切らないよう、属性の説明は「プロパティとは別に、リソースが持つ値」程度にし、違いの細部には入らないと断る。" }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "S4 の best practices を、s01・s07・s15・s16 の台本では「組織の決まり」と言い換え、s07 の画面と台本の中では「ベストプラクティス」。同じ物の呼び方が二つある。", "suggest": "「組織のベストプラクティス」に統一する（一度「良いとされるやり方」と説明済み）。" }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        { "kind": "fact", "severity": "軽", "detail": "図の線ラベル「作成・更新・削除」がアカウント A への線にだけ付き、アカウント B への線は無ラベル。B には作成・更新・削除しないようにも読める。", "suggest": "両方の線に同じラベルを付けるか、線のラベルを外して StackSets の箱に「作成・更新・削除 1 回の操作」と書く。" },
+        { "kind": "unsupported", "severity": "軽", "detail": "「アカウントとリージョンが増えるほど、スタックを一つずつ扱う手間は増えます」は S10 に無い推論。", "suggest": "「一回の操作で」という根拠の言葉の言い直しにとどめる。" }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        { "kind": "flow", "severity": "軽", "detail": "題と s01 の台本が「名前の似た 3 つ」と言うが、名前が似ているのは AWS Config と AWS AppConfig の 2 つで、State Manager は似ていない。", "suggest": "題を「設定管理の 3 つ」とし、名前が似ているのは AWS Config と AWS AppConfig だと台本で言う。" }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        { "kind": "fact", "severity": "軽", "detail": "図の「自分で決めた状態 →定義する→ State Manager」は、状態が State Manager を定義する、と読める。S6 は利用者が状態を定義し、State Manager がノードとリソースをその状態に保つ。State Manager から AWS のリソースへの線は無ラベル。", "suggest": "線のラベルを「この状態に保つ」に替えるか、箱を「利用者が定義した状態」にする。リソースへの線にも「状態に保つ」を付ける。" },
+        { "kind": "terms", "severity": "軽", "detail": "bullets は「AWS Config: 設定を詳しく見る」、図と s10 の表は「設定を詳しく見せる」。", "suggest": "どちらかにそろえる。" },
+        { "kind": "unsupported", "severity": "軽", "detail": "「ノードとは、ここではシステムズマネージャーが管理する機械」は S6 に無い説明。", "suggest": "「管理されたノード、つまりシステムズマネージャーが管理する対象」程度にとどめる。" }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "bullets「4 つの置き場から配る」、台本「四つの置き場から設定をデプロイできます」、alt「4 つの置き場」と数を言い切っている。S13 は use case の一文で 4 つを挙げているだけで、置き場がこれだけだとは書いていない。受験者が「AppConfig の設定の置き場は 4 つだけ」と覚えるおそれがある。", "suggest": "数を外し、「AppConfig 自身の置き場、Secrets Manager、Parameter Store、Amazon S3 などから設定をデプロイできる」と根拠の挙げ方どおりにする。bullets は「置き場から設定をデプロイ」。" },
+        { "kind": "mismatch", "severity": "軽", "detail": "図は「AppConfig の hosted configuration store」と書くが、台本は「アップコンフィグ自身の置き場」としか言わず、画面の名前と結び付かない。図の 4 本の線のうち 1 本だけに「設定の置き場」のラベルがある。", "suggest": "台本で「ホステッドコンフィギュレーションストアという、アップコンフィグ自身の置き場」と読み、線のラベルは全部外すか全部付ける。" },
+        { "kind": "terms", "severity": "軽", "detail": "「いくつもの仕事にまたがって」は S13 の workloads の訳。ほかでは使わない語で意味が取りにくい。", "suggest": "「いくつものワークロードにまたがって」とし、一言説明を付ける。" }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        { "kind": "flow", "severity": "中", "detail": "台本で CDK を「この技能の例に挙がっています」と出し、「シーディーケーはライブラリの集まりです」で終わるため、CDK がどう使い回しになるのかが宙に浮く。s01 の地図の「4 使い回す部品」の note（modules・Service Catalog）と s16 にも CDK は無く、予告・まとめと本文が合わない。", "suggest": "根拠で言える範囲（試験ガイドが例に挙げる、ライブラリである）にとどめると断って短くするか、CDK の段落を外す。残すなら地図とまとめの note にも入れる。" },
+        { "kind": "unsupported", "severity": "軽", "detail": "「同じ設定を、テンプレートごとに書き写さずに済みます」は S14 に無い言い切り（S14 は package for inclusion across stack templates）。", "suggest": "「いくつものテンプレートに組み込める」という根拠の言い方にとどめる。" },
+        { "kind": "terms", "severity": "軽", "detail": "題・bullets 側は「CloudFormation modules」、図は「CloudFormation module」、s01・s16 は「modules」。「使い回す部品」（s01・s16 画面）と「使い回せる部品」（台本）も混在。", "suggest": "表記を一つにそろえる（例: CloudFormation modules、使い回せる部品）。" }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        { "kind": "unsupported", "severity": "軽", "detail": "「プロダクトは、利用者に用意する物の単位」と、三つ目の段階を「許した相手が使う」としている所は S15 に無い。S15 の三段階は assemble portfolios / add constraints and resource tags / grant access。", "suggest": "段階を「組み立てる・制約とタグを付ける・アクセスを許す」と根拠どおりにし、プロダクトの説明は「カタログに載っている物」程度にする。" }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        { "kind": "mismatch", "severity": "中", "detail": "台本は Hooks（組織の決まり）、AWS Config（設定を詳しく見る）、concurrency mode（失敗の後に遅くなる）も読み上げるが、画面の表には 5 行（change set・StackSets・AWS AppConfig・State Manager・Service Catalog）しか無い。特に AWS Config と AWS AppConfig の取り違えを避ける行が画面に無い。", "suggest": "表に「組織のベストプラクティスに合うか → CloudFormation Hooks」「リソースの設定を詳しく見る → AWS Config」「失敗の後に遅くなる → concurrency mode（Strict Failure Tolerance）」の行を足すか、台本を表の行だけにする。" },
+        { "kind": "flow", "severity": "中", "detail": "地図で扱った bootstrap していない環境（s05）と CloudFormation modules（s13）が、問題集への橋の表に無い。予告した各部分が表で引けない。", "suggest": "「bootstrap していない環境へ cdk deploy が失敗 → assets の有無とテンプレートの大きさ」「設定を複数のテンプレートに組み込みたい → CloudFormation modules」の行を足す。" },
+        { "kind": "mismatch", "severity": "軽", "detail": "表は「決めた形を利用者に配る」、台本は「管理者が決めた形と制約で、利用者にリソースを用意させたい」。表の「配る」は台本にも S15 にも無い言い方。", "suggest": "表を「管理者の決めた形と制約で使わせる」など台本に合わせる。" }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        { "kind": "terms", "severity": "中", "detail": "同じスライドの中で「変える」が二つの意味に使われている。bullets「変える・広げる・設定を管理する」の「変える」は change set などの変更の管理、steps の「変える AWS AppConfig」と台本「変えるアップコンフィグ」は AppConfig。見る・保つ・変えるの覚え方とぶつかり、change set と AppConfig を取り違えるもとになる。", "suggest": "bullets の 2 を「変更を先に見る・広げる・設定の管理」などにして、「変える」は AppConfig だけに使う。" },
+        { "kind": "flow", "severity": "軽", "detail": "steps の 1 の note に「と bootstrap」があるが、s01 の地図の同じ項目には無い。まとめが地図と少しずれる。", "suggest": "s01 の note にも bootstrap を入れるか、s16 から外す。" }
+      ]
+    }
+  ],
+  "global": [
+    { "severity": "軽", "detail": "台本の語の説明（リソース、ノード、bootstrap、assets、プロダクトなど）の多くが sources.md に無い言い切りになっている。どれも一般的な言い換えで誤りではないが、根拠に無い中身を足している。", "suggest": "語の説明は最小限の言い換えにとどめ、仕組みや範囲を言い切らない。要るなら根拠に定義の一文を足す。" },
+    { "severity": "軽", "detail": "試験ガイドの技能にある AWS OpsWorks は、sources.md の「覆えなかった行」どおり講義で扱っていない。s10 の台本は「根拠のある三つを見ます」と断っており、言い切りの問題は無い。", "suggest": "このままでよい。OpsWorks を扱わない事は notes に残しておく。" }
+  ]
+}

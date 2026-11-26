@@ -78,6 +78,12 @@ export function sameVerdict(id) {
   // 次の回で検証役が同じ中身を書き直した時（同じ指摘がもう一度出た）は数える。verdict の後に書かれていないかを時刻で見る
   return fs.statSync(vfile).mtimeMs <= fs.statSync(dfile).mtimeMs ? prev : null;
 }
+/** P-019: 同じ verify.json での 2 回目なら前の結論をそのまま出して true（呼ぶ側はそこで終える） */
+export function emitSameVerdict(id) {
+  const again = sameVerdict(id);
+  if (again) emit({ ok: true, summary: `前と同じ verify.json なので前の結論のまま（${again.result}）→ loop advance --result ${again.result}`, extra: { result: again.result } });
+  return Boolean(again);
+}
 export const verifyHash = (id) => hashOf(readRaw(paths.work(id, 'verify.json')) ?? '');
 function readRaw(file) { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } }
 function hashOf(text) { return crypto.createHash('sha256').update(text).digest('hex').slice(0, 16); }
@@ -87,8 +93,7 @@ function hashOf(text) { return crypto.createHash('sha256').update(text).digest('
  * batchFile: 束のファイル名、key: 束の中の一覧の鍵（entries / diagrams）、histFile: 重い fix の回数のファイル、keepDropped: 捨てた物を dropped.json に残すか
  */
 export function concludeBatch({ id, batch, batchFile, key, histFile, severe, mild, keepDropped = false }) {
-  const again = sameVerdict(id);
-  if (again) return emit({ ok: true, summary: `前と同じ verify.json なので前の結論のまま（${again.result}）→ loop advance --result ${again.result}`, extra: { result: again.result } });
+  if (emitSameVerdict(id)) return;
   const v = readJSON(paths.work(id, 'verify.json'), null);
   if (!v || !Array.isArray(v[key])) throw new ToolError(`work/${id}/verify.json が無い（検証役が書く）`);
   const hist = readJSON(paths.work(id, histFile), {});

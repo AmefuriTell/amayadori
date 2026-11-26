@@ -9,12 +9,13 @@ DOP-C02 の問題を解く静的なページ。ビルドしない（素の HTML�
 | `index.html` | 入口。`version:start`〜`end` の間（版の meta・CSS・import map・main.js）は `node dop/tools/app.mjs stamp` が書く。手で直さない |
 | `style.css` | 見た目（明るい・暗いの配色は端末の設定に従う） |
 | `src/main.js` | 画面（読み込み・1 問ずつの表示・答えた後の解説・結果・記録・読み上げ・版のお知らせ） |
-| `src/ui/*.js` | 画面の部品（F-0003 で main.js から切り出した）: `el.js` 要素を作る、`version.js` 版のお知らせ、`glossary.js` 事典の表示、`speech.js` 読み上げ |
+| `src/ui/*.js` | 画面の部品（F-0003 で main.js から切り出した）: `el.js` 要素を作る、`version.js` 版のお知らせ、`glossary.js` 事典の表示、`speech.js` 読み上げ、`lecture.js` 講義（A-0017） |
 | `src/storage.js` | localStorage の読み書き（使えない時も例外を外に出さない） |
 | `src/logic/*.js` | 画面に頼らない計算（採点・記録・報告・書き出し・言葉・読み上げの文・進み具合）。unit で試す |
 | `public/questions.json` | 配信用の問題。`node dop/tools/app.mjs data` が bank から作る。手で書かない |
 | `public/version.json` | 最新の版の番号。`app.mjs stamp` が書く |
 | `public/diagrams/<問題 ID>.svg` | 構成図（P-015）。`dg.mjs publish` が diagrams/ の図の元から描く。手で書かない |
+| `public/lectures/` | 講義（A-0017）。`index.json`（一覧）と `<task>/lecture.json`・`visuals/`・`audio/`。`lec.mjs publish` が置く。手で書かない |
 | `public/glossary.json` | サービス事典（名前 → ページの表とページ）。`app.mjs data` が glossary/services/ から作る |
 | `test/*.test.js`・`e2e/*.e2e.js` | 試験。名前の先頭は「<項目 ID> <AC>」 |
 
@@ -36,3 +37,4 @@ DOP-C02 の問題を解く静的なページ。ビルドしない（素の HTML�
 - 間違えた問題だけ解き直す（A-0004）: 「記録」の「間違えた問題を解き直す（n 問）」で、最新の答えが不正解（分からないを含む）の問題だけを解く画面にする。上に「間違えた問題だけ（n 問）」と「やめる」。一覧は始めた時に決めて dop:v1:retry に残す（途中で正解しても減らさない）。記録の正答率の表と模試は全部の問題（state.allQuestions）で数える。
 - 問題 ID と直接のリンク（A-0015）: カードの上の行に問題 ID（例 q-1.3-0002）。`?q=<問題 ID>` の URL で開くと、続きの記録より優先してその問題を答える前の状態で出す（解き直しの対象に無ければ解き直しをやめる）。開いた後は URL から q を消す。無い ID なら続きどおりに開き「指定の問題 … は見つかりません」。
 - 「最初から」（A-0016）: 解く画面の上のボタン。確認のうえで 1 問目の答える前の状態（正解の数 0）に戻す。記録は消さない。解き直しの最中は解き直しの 1 問目へ。1 問目の答える前は押せない。
+- 講義（A-0017）: 上の「講義」。一覧（`public/lectures/index.json`）に task・題・分、見終えた講義に「見た」。無い・空なら「講義はまだありません」。選ぶとスライド 1 枚ずつ（見出し・図〈mermaid は SVG を白い板に、compare は表、steps は番号付き〉・要点・「i / n」）。「前へ」「次へ」・番号のボタン・←→ のキー。音声のある講義は「再生」「一時停止」と「自動で次へ」（終わると次のスライドへ進んで続ける）。「台本を読む」「根拠」（原文とリンク）、下に音声のクレジット。最後のスライドの「この task の問題を解く」でその task の最初の問題を答える前の状態で開き、その講義を「見た」にする。講義ごとの最後のスライド・見た講義・開いていた講義は dop:v1:lecture に残り、講義の途中で閉じて開き直すとそのスライドから続く（形は `logic/lecture.js`）。e2e は `e2e/lectures/` の試験用の講義を配る。

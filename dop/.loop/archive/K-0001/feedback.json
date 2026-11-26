@@ -1,0 +1,222 @@
+{
+  "from": "C3_verify",
+  "slides": {
+    "s01": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "地図の図が 置き場 → CodePipeline → CodeBuild → Secrets Manager → CodeDeploy を矢印でつないでいる。ラベル「講義の順」は最初の矢印にしか付いていないので、2 本目からは処理の流れに見える。特に CodeBuild → Secrets Manager → CodeDeploy は、Secrets Manager がパイプラインの段の一つで、ビルドとデプロイの間にあるように読める。根拠にはこのつながりが無い。s15 も同じ図。",
+        "suggest": "矢印を全部やめて 1〜5 の番号付きの並び（steps か compare）にするか、すべての矢印に「講義の順」と付け、構成図ではないと分かる形にする。s15 も同じように直す。"
+      },
+      {
+        "from": "clarity",
+        "kind": "visual",
+        "severity": "中",
+        "detail": "地図が 1 本の矢印の列（置き場 → CodePipeline → CodeBuild → Secrets Manager → CodeDeploy）になっている。「講義の順」のラベルは最初の矢印にしか無いので、残りの矢印はパイプラインの流れに見え、Secrets Manager がビルドとデプロイの間にある段だと覚えやすい。台本では秘密情報は「ビルドとデプロイで使う」物で、段ではない。",
+        "suggest": "矢印をやめ、番号付きの 5 つの箱を並べるだけにする。流れを見せたいなら、CodePipeline → CodeBuild → CodeDeploy を本線にし、Secrets Manager は CodeBuild と CodeDeploy に点線でつながる横の箱にする（台本の「ビルドとデプロイで使う秘密情報」と同じ形）。s15 も同じように直す。"
+      }
+    ],
+    "s02": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "bullet の「関連の概念も同じ範囲」が、S9 の技術と概念の一覧をこのタスクの範囲だと言い切っている。S9 は試験全体で出るかもしれない物の一覧（non-exhaustive）で、タスク 1.1 の範囲とは言っていない。台本は「並んでいます」としか言わないので、画面と台本も合っていない。",
+        "suggest": "bullet を「技術と概念の一覧にも関連語」くらいにし、「同じ範囲」とは言い切らない。"
+      }
+    ],
+    "s03": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "「開発者ツールに Code の 5 つ」「Code で始まる 5 つ」、台本の「五つが並びます」は、開発者ツールの分類がこの 5 つだけだと言い切っている。sources.md はこのタスクに関わる行を抜き出した物で、分類の全体を示していない。コンテナの分類も表では ECR だけに見える。",
+        "suggest": "「開発者ツールの分類から、このタスクに関わる Code の付くサービス」と、抜き出しだと分かる言い方にし、数を言い切らない。表の題も「このタスクに関わる物」にする。"
+      },
+      {
+        "from": "clarity",
+        "kind": "listen",
+        "severity": "中",
+        "detail": "台本でコードアーティファクト・コードビルド・コードデプロイ・コードパイプライン・コードスターと似た音の名前を 5 つ続けて読むが、画面の表は「Code で始まる 5 つ」だけで名前が出ない。耳だけでは 5 つを聞き分けて覚えられない。",
+        "suggest": "表のその行のセルに 5 つの名前（CodeArtifact・CodeBuild・CodeDeploy・CodePipeline・CodeStar）を書く。"
+      },
+      {
+        "from": "clarity",
+        "kind": "leap",
+        "severity": "中",
+        "detail": "「コードスターとイメージビルダーは名前だけを覚えておきます。この講義の資料には中身の説明が無いためです」は作り手の都合の説明で、受験者には何の物か、覚えて何に使うのかが分からないまま残る。",
+        "suggest": "「この 2 つはこの講義では扱いません」とだけ言うか、表から外して範囲の一覧の話にとどめる。"
+      }
+    ],
+    "s04": [
+      {
+        "from": "consistency",
+        "kind": "terms",
+        "severity": "中",
+        "detail": "三つ目の置き場の呼び方がスライドごとに違う。s01・s15 の図では「artifact」、s04 の bullet・図・s14・s15 の台本では「パッケージ」、s04 の台本では「アーティファクトの置き場」。そのうえ台本で「ここではソフトウェアのパッケージを指します」と言い換えているので、試験ガイドの artifact repository はパッケージの置き場だけ、と覚えかねない。この言い換えは根拠に無い（S16 は CodeArtifact がパッケージを保存・共有すると言っているだけ）。",
+        "suggest": "呼び方を「artifact（アーティファクト）の置き場」にそろえ、「CodeArtifact はソフトウェアパッケージを保存・共有する artifact repository」と、根拠どおりの説明にとどめる。「アーティファクト＝パッケージ」とは言わない。"
+      },
+      {
+        "from": "clarity",
+        "kind": "jargon",
+        "severity": "中",
+        "detail": "「イメージ」「コンテナ」「レジストリ」がまとめて出るが、イメージが何かは説明されない（アーティファクトとリポジトリは言い換えがある）。イメージの置き場とパッケージの置き場の違いが分からず、ECR と CodeArtifact の使い分けがぼやける。",
+        "suggest": "アーティファクトと同じ型で「イメージとは、コンテナを動かすための一式のことです」のように一言で言い換え、パッケージとの違いを並べて言う。"
+      }
+    ],
+    "s05": [
+      {
+        "from": "consistency",
+        "kind": "mismatch",
+        "severity": "中",
+        "detail": "図では「resource-based permissions」を AWS IAM の箱に書いている。一方、台本は「リソースベースとは、置き場の側に付ける権限」と説明している。図を見ると、権限が IAM の側にあるように覚えてしまう。なお「置き場の側に付ける」という定義も根拠には無い。",
+        "suggest": "図では resource-based permissions を ECR（private repository）の側に置き、IAM からの線は「仕組みを提供」くらいにする。定義の一言は、根拠どおりの「AWS IAM を使った resource-based permissions」に寄せる。"
+      },
+      {
+        "from": "clarity",
+        "kind": "visual",
+        "severity": "重",
+        "detail": "台本は resource-based permissions を「置き場の側に付ける権限」と説明するのに、図では resource-based permissions が AWS IAM の箱に書かれ、IAM から ECR へ矢印が出ている。権限が IAM の側に付くと覚えやすく、台本と逆の像が残る。",
+        "suggest": "resource-based permissions を ECR の箱（private repository の下）に移す。IAM は「権限の仕組み」と書いた別の箱にし、点線で ECR の権限につなぐ。矢印のラベルは「使える人を決める」をリポジトリ側の権限から出す形にする。"
+      }
+    ],
+    "s07": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "図の CodePipeline → アプリケーションの環境 の矢印（「版管理でつなぐ」）が、台本で説明されていない。台本は「ギットハブのリポジトリとパイプラインがつながります」で終わる。版管理は GitHub の側の話なのに、パイプラインと環境の間に「版管理」のラベルがあるので、パイプラインが版管理で環境へ届けるように読める。パイプラインと環境のつながりは根拠（S14）に無い。",
+        "suggest": "図を GitHub → CodePipeline（source action）までにし、試験ガイドの行は表か bullet で示す。環境への矢印を残すなら、ラベルを「試験ガイドの行」として図の外に出し、台本で触れる。"
+      },
+      {
+        "from": "clarity",
+        "kind": "leap",
+        "severity": "中",
+        "detail": "試験ガイドの行は「パイプラインをアプリケーションの環境とつなぐ」だが、台本は GitHub とパイプラインがつながった所で終わる。図の 2 本目の矢印（CodePipeline → アプリケーションの環境「版管理でつなぐ」）は台本で一度も説明されず、何がどうつながるのか分からない。",
+        "suggest": "図を GitHub → source action → CodePipeline の 1 本に絞るか、2 本目の矢印は「この先は 3 作る・5 届ける で見る」と台本で予告する（s01 の地図の順に結ぶ）。"
+      },
+      {
+        "from": "clarity",
+        "kind": "exam",
+        "severity": "中",
+        "detail": "5 つの部で、この部だけ「問題文に〜が出たら」が無く、s14 の表にも行が無い。GitHub をパイプラインにつなぐ方法（source action）が判断として残らない。",
+        "suggest": "台本の最後に「問題文に、ギットハブのリポジトリをパイプラインにつなぎたい、と出たら、ソースアクションです」を足し、s14 の表にも同じ行を足す。"
+      }
+    ],
+    "s09": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "図の「扱う秘密情報」の箱に、DB の認証情報・OAuth トークン・API キーの 3 つだけが「など」無しで並んでいる。根拠（S17）ではアプリケーションの認証情報と other secrets も挙がっていて、これらは例。図だけ見ると、扱えるのはこの 3 種類だと覚えかねない。",
+        "suggest": "箱に「など」を付け、アプリケーションの認証情報も入れる（例: 「DB・アプリの認証情報／OAuth トークン・API キー など」）。"
+      },
+      {
+        "from": "clarity",
+        "kind": "leap",
+        "severity": "中",
+        "detail": "この部は試験ガイドの「ビルドとデプロイの秘密情報の管理」だが、台本も図も「アプリケーションのソースコード」の話だけで、パイプライン（ビルド・デプロイ）とのつながりが語られない。なぜ CI/CD の講義でこれを学ぶのかが分からない。",
+        "suggest": "冒頭で「試験ガイドの行は、ビルドとデプロイで使う秘密情報を管理すること、でした」と s02 の行を言い直してから、Secrets Manager の説明に入る順にする。"
+      }
+    ],
+    "s11": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "台本の「コードデプロイで、進め方を決めるのが、デプロイメントコンフィギュレーションです」が、部の題「デプロイ戦略」と deployment configuration を結び付けている。続く s12 が「戦略の一つに blue/green」なので、blue/green を deployment configuration で選ぶ、と覚えかねない。根拠（S12）は「規則と成功・失敗の条件の集まりで、デプロイの間に CodeDeploy が使う」と言っているだけで、戦略との関係は言っていない。",
+        "suggest": "「進め方を決める」をやめ、根拠どおり「規則と成功・失敗の条件の集まり」とだけ言う。戦略（blue/green）と deployment configuration は別の物として並べる。"
+      },
+      {
+        "from": "clarity",
+        "kind": "leap",
+        "severity": "中",
+        "detail": "「デプロイ戦略」の部で、deployment configuration（規則と成功・失敗の条件）と次の blue/green（戦略の一つ）の関係が語られない。configuration ＝ 戦略と取る人も、無関係と取る人も出る。",
+        "suggest": "順番を入れ替え、具体的な blue/green（s12）を先に、その進め方と成功・失敗を決めておく物として deployment configuration を後に置く。または s11 の終わりに「次に、戦略の一つ、ブルーグリーンを見ます」と予告し、両者を別の物として並べる。"
+      }
+    ],
+    "s12": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "重",
+        "detail": "根拠（S11）は、新しい版を replacement task set として入れ、original task set から本番トラフィックを移す、という task set を使う場合の文。講義はこれを「コードデプロイの blue/green」一般として説明し、「タスクセットは、アプリケーションの一つの版を入れた一式」という根拠に無い定義まで付けている。受験者は、CodeDeploy の blue/green はいつも task set を使う、と覚えてしまう（ある条件の話を一般の話として書かない、という決まりにも当たる）。「その場で書き換えるのではなく」という対比も、in-place を説明する根拠が無い。",
+        "suggest": "「task set を使う場合の CodeDeploy の blue/green」と条件を付けて言い、task set の一般的な定義は外す。in-place との対比はやめ、「新しい task set を入れてからトラフィックを移す」という根拠の文だけにする。S11 の引用は「to the」で切れているので、移す先は根拠の文の流れから読み取れる所までにとどめる。"
+      },
+      {
+        "from": "clarity",
+        "kind": "visual",
+        "severity": "中",
+        "detail": "original task set → replacement task set の矢印に「本番トラフィックを移す」とあり、元の版が新しい版へトラフィックを流す（中継する）ように見える。利用者・トラフィックの出元が図に無く、切り替え前と後の違いが見えない。",
+        "suggest": "「本番トラフィック」の箱を置き、切り替え前は original へ実線、切り替え後は replacement へ実線（前の線は点線）と 2 つの状態で描く。CodeDeploy からは replacement へ「新しい版を入れる」だけにする。"
+      },
+      {
+        "from": "clarity",
+        "kind": "jargon",
+        "severity": "中",
+        "detail": "タスクセットを「アプリの一つの版を入れた一式」と言い換えているが、どの仕組みの言葉かを言わないので、blue/green は必ず task set で行う物と一般化して覚えやすい。blue と green がどちらを指すかも図・台本に無い。",
+        "suggest": "「公式の説明の一つでは、タスクセットという単位で、こう書かれています」と出典の説明の範囲だと断る。blue/green の色の説明はせず、図の箱を「元の版」「新しい版」で通す。"
+      }
+    ],
+    "s13": [
+      {
+        "from": "consistency",
+        "kind": "unsupported",
+        "severity": "中",
+        "detail": "根拠（S13）は「automatically roll back when a」で切れていて、自動 rollback が何をきっかけに起きるかは書かれていない。講義は「うまくいかなかったときに」と言い、s14 の表でも「失敗したら元に戻す → 自動の rollback」と言い切っている。「前もって設定」も根拠に無い。",
+        "suggest": "根拠に書かれている所（自動でも手動でも戻せる。deployment group か deployment に、自動で戻すよう設定できる）までにする。きっかけを言うなら、根拠の続きを sources に足してからにする。"
+      }
+    ],
+    "s14": [
+      {
+        "from": "consistency",
+        "kind": "flow",
+        "severity": "中",
+        "detail": "条件の表に、部 2（source action）、Parameter Store、deployment configuration、blue/green の行が無い。s15 は「迷ったら条件の表に戻る」と言っているが、表は 5 つの部を覆っていない。さらに「認証情報を書き込まない → Secrets Manager」だけを置いているので、試験ガイドで並んでいる Parameter Store が候補から抜けて見える。",
+        "suggest": "根拠の範囲で行を足す（例: GitHub のコードをパイプラインに入れる → CodePipeline の source action。新しい版を入れてトラフィックを移す → CodeDeploy の blue/green（task set の場合））。秘密情報の行は「Secrets Manager（Parameter Store も試験ガイドの例）」くらいにする。"
+      },
+      {
+        "from": "clarity",
+        "kind": "exam",
+        "severity": "中",
+        "detail": "表が 5 つの部の判断を覆っていない。2 つなぐ（source action）と、この部の要の「デプロイ戦略」（blue/green・deployment configuration）の行が無く、5 届ける は rollback だけ。試験ガイドの 5 行目「ふさわしいデプロイ戦略を決める」が判断として残らない。",
+        "suggest": "s07・s11・s12 の台本の内容から行を足す：「GitHub をパイプラインにつなぐ → source action」「元の版を書き換えず新しい一式に切り替える → blue/green（replacement task set へトラフィックを移す）」「成功・失敗の条件を決める → deployment configuration」。"
+      },
+      {
+        "from": "clarity",
+        "kind": "exam",
+        "severity": "中",
+        "detail": "「認証情報を書き込まない → Secrets Manager」だけでは、Parameter Store を答えから外してよいと覚えやすい（s10 では両方が秘密情報の例）。",
+        "suggest": "s10 の直し方とそろえ、「認証情報を書き込まない → Secrets Manager か Parameter Store」「ローテーションも要る → Secrets Manager（説明にローテーションがある）」の 2 行に分ける。"
+      }
+    ],
+    "s10": [
+      {
+        "from": "clarity",
+        "kind": "exam",
+        "severity": "中",
+        "detail": "「表で比べてください」で終わり、どう選び分けるかを言わない。表の「できる事」の行から「Parameter Store は秘密情報には使えない」と読む人と、「どちらでもよい」と読む人に分かれる。一方で表の最後の行は両方とも「秘密情報の例」。",
+        "suggest": "表から言える事だけをはっきり言う：「どちらも試験ガイドで秘密情報の管理の例。公式の説明でローテーションという言葉が出るのはシークレッツマネージャーの方」。問題文にローテーションが出たらシークレッツマネージャーの説明と合う、とまとめ、s14 にも行を足す。"
+      }
+    ],
+    "s15": [
+      {
+        "from": "clarity",
+        "kind": "visual",
+        "severity": "中",
+        "detail": "s01 と同じ 1 本の矢印の列で、最後に見る図として「Secrets Manager がビルドとデプロイの間の段」という誤った像を固める。縦にとても細長い。",
+        "suggest": "s01 と同じく、番号付きの箱を矢印無しで並べるか、Secrets Manager を横の箱にして CodeBuild と CodeDeploy に点線でつなぐ。"
+      }
+    ]
+  },
+  "global": [
+    {
+      "from": "consistency",
+      "kind": null,
+      "severity": "中",
+      "detail": "タスク 1.1 には、skills の 5 行のほかに knowledge の 2 行（SDLC の概念・段階・モデル、単一アカウントと複数アカウントのパイプラインのデプロイパターン）がある。講義はこれに一度も触れず、地図も s02 も skills の 5 行だけを範囲として示している。受験者は、タスク 1.1 はこの 5 部で全部だと覚えかねない（sources.md の「覆えなかった行」にある通り、根拠は無い）。",
+      "suggest": "s02 で、knowledge の 2 行があり、この講義の資料では扱えていない事を一言、画面と台本で示す。中身は書かない。"
+    }
+  ]
+}

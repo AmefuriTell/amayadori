@@ -38,7 +38,7 @@ export async function launch() {
  * data を渡すと public/questions.json の代わりにそれを返す（null なら 404 にする）。
  * init はページの前に動かす JavaScript（localStorage を壊すなど）。
  */
-export async function openPage(browser, url, { width = 1280, height = 800, data, glossary, init, context } = {}) {
+export async function openPage(browser, url, { width = 1280, height = 800, data, glossary, lectures, init, context } = {}) {
   // context を渡すと、その中で開く（localStorage を開き直しの間で残す試験のため）
   const page = await (context ?? browser).newPage(context ? undefined : { viewport: { width, height } });
   if (context) await page.setViewportSize({ width, height });
@@ -56,8 +56,24 @@ export async function openPage(browser, url, { width = 1280, height = 800, data,
       ? route.fulfill({ status: 404, body: 'not found' })
       : route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(glossary) })));
   }
+  if (lectures !== undefined) await routeLectures(page, lectures);
   await page.goto(url);
   return { page, errors };
+}
+
+/**
+ * 講義（A-0017）: public/lectures/ の代わりに配る。
+ * 文字列ならその場所（e2e/lectures のような作り）から、配列なら index.json をそれにし、null なら全部 404。
+ */
+async function routeLectures(page, lectures) {
+  await page.route('**/public/lectures/**', (route) => {
+    const rest = decodeURIComponent(new URL(route.request().url()).pathname.split('/public/lectures/')[1] ?? '');
+    if (Array.isArray(lectures) && rest === 'index.json') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(lectures) });
+    if (typeof lectures !== 'string') return route.fulfill({ status: 404, body: 'not found' });
+    const file = path.join(lectures, rest);
+    if (!file.startsWith(lectures) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) return route.fulfill({ status: 404, body: 'not found' });
+    return route.fulfill({ path: file });
+  });
 }
 
 export async function shot(page, name) {

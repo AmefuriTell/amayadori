@@ -1,0 +1,803 @@
+{
+ "task": "3.3",
+ "title": "RTO と RPO を満たす自動の復旧",
+ "notes": [
+  "根拠が無く扱わなかった物: 試験ガイドの skills にある AWS Systems Manager（リージョンをまたぐバックアップと復旧）は sources.md に根拠が無いため扱わなかった（s04 の台本で触れた）。"
+ ],
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "5 つの部を順に",
+    "並びは処理の流れではない",
+    "最後に条件から選ぶ表"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"考え方\"]\n    K[\"RTO と RPO<br/>戦略の例\"]\n  end\n  subgraph P2[\"データの写し\"]\n    BK@{ svc: \"AWS Backup\", label: \"AWS Backup<br/>別リージョンへコピー\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3 の複製\" }\n  end\n  subgraph P3[\"切り替え\"]\n    DB[\"RDS Multi-AZ<br/>Aurora Global Database\"]\n    RC[\"Route 53<br/>CloudFront\"]\n  end\n  subgraph P4[\"バックエンドの障害\"]\n    BE[\"Application<br/>Load Balancer<br/>EC2 Auto Scaling\"]\n  end\n  subgraph P5[\"試す\"]\n    FI@{ svc: \"AWS Fault Injection Service\", label: \"AWS FIS<br/>障害を起こして試す\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n",
+    "alt": "講義の地図。五つの部を並べる。考え方は RTO と RPO と戦略の例。データの写しは AWS Backup の別リージョンへのコピーと S3 の複製。切り替えは RDS Multi-AZ、Aurora Global Database、Route 53、CloudFront。バックエンドの障害は Application Load Balancer と EC2 Auto Scaling。試すは AWS FIS。部の並びは処理の流れではない。"
+   },
+   "narration": "この講義では、復旧の目標を守るための、自動の復旧を学びます。画面の地図は、扱う五つの部を並べた物で、処理の流れではありません。はじめは考え方の部です。アールティーオーとアールピーオー、そして災害からの復旧の戦略の例を見ます。次はデータの写しの部です。エーダブリューエスバックアップとエススリーで、データを別のリージョンへ写します。リージョンは、ここでは、地理的な拠点の単位と考えてください。三つ目は切り替えの部です。アールディーエス、オーロラ、ルートフィフティースリー、クラウドフロントの切り替えを見ます。四つ目はバックエンドの障害の部です。アプリケーションロードバランサーと、イーシーツーオートスケーリングを見ます。最後は試す部です。そのあと、問題文の条件から方法を選ぶ表で締めます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Recovery time objective (RTO) – The time it takes a system to return to a working state after a disaster or service outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Using AWS Backup, you can copy backups to multiple AWS Regions on demand or automatically as part of a scheduled backup plan.",
+     "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html#cross-region-backup"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html#Concepts.MultiAZ.Failover"
+    },
+    {
+     "source_id": "S19",
+     "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S13",
+     "quote": "AWS FIS carries out real actions on real AWS resources in your system.",
+     "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "考え方 1: RTO と RPO",
+   "bullets": [
+    "RTO: 止まっている時間",
+    "RPO: 失うデータを時間で",
+    "原因は多くが非同期の遅れ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  L[\"最後に写せたデータ\"]\n  D[\"災害・停止\"]\n  W[\"動く状態に戻る\"]\n  L -- \"RPO: 失うデータ\" --> D\n  D -- \"RTO: 止まる時間\" --> W\n",
+    "alt": "RTO と RPO の図。最後に写せたデータから災害・停止までが RPO で、失うデータを時間で表す。災害・停止から動く状態に戻るまでが RTO で、止まる時間を表す。"
+   },
+   "narration": "まず、二つの目標です。アールティーオーは、災害やサービスの停止のあと、システムが動く状態に戻るまでの時間です。言いかえると、止まっている時間を測ります。アールピーオーは、災害や停止のあとに失ってよいデータの量です。量といっても、時間で測ります。データを失うのは、多くの場合、非同期の複製の遅れのためです。非同期とは、ここでは、書き込みを待たずに、あとから写すやり方と考えてください。画面の図では、最後に写せた時点から障害までをアールピーオー、障害から動く状態に戻るまでをアールティーオーとして描いています。目安の例として、オーロラグローバルデータベースでは、アールティーオーは分の単位、アールピーオーはふつう秒の単位とされています。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Recovery time objective (RTO) – The time it takes a system to return to a working state after a disaster or service outage. In other words, RTO measures downtime.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Recovery point objective (RPO) – The amount of data that can be lost (measured in time) after a disaster or service outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S2",
+     "quote": "This data loss is usually due to asynchronous replication lag.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S1",
+     "quote": "For Aurora Global Database, RTO can be in the order of minutes.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S2",
+     "quote": "For an Aurora global database, RPO is typically measured in seconds.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "考え方 2: 戦略の例",
+   "bullets": [
+    "3 つは戦略の例",
+    "pilot light: 先に手を打つ",
+    "warm standby: すぐ処理"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "戦略",
+     "普段の様子",
+     "障害のとき"
+    ],
+    "rows": [
+     [
+      "backup and restore",
+      "データを残す",
+      "基盤もコードも作り直す"
+     ],
+     [
+      "pilot light",
+      "DB と保存先だけ動く",
+      "手を打ってから処理"
+     ],
+     [
+      "warm standby",
+      "減らした能力で待つ",
+      "すぐ処理できる"
+     ]
+    ]
+   },
+   "narration": "次は、災害からの復旧の戦略です。試験ガイドは、パイロットライトとウォームスタンバイを例として挙げています。ここで見る三つは例で、戦略がこれだけというわけではありません。一つ目は、バックアップアンドリストアです。データの損失や破損に備えるのに向いています。復旧するリージョンでは、データに加えて、基盤、設定、アプリケーションのコードもデプロイし直す必要があります。二つ目は、パイロットライトです。データベースやオブジェクトの保存先のように、データを支える物は、いつも動かしておきます。アプリケーションのサーバーなどは、準備したうえで止めておき、テストとフェイルオーバーのときだけ使います。フェイルオーバーは、ここでは、障害のときに予備の側へ切り替えることと考えてください。三つ目は、ウォームスタンバイです。パイロットライトは、先に何か手を打たないとリクエストを処理できません。ウォームスタンバイは、能力を減らした形ですが、すぐにトラフィックを受けられます。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "Backup and restore is a suitable approach for mitigating against data loss or corruption.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#backup-and-restore"
+    },
+    {
+     "source_id": "S3",
+     "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#backup-and-restore"
+    },
+    {
+     "source_id": "S4",
+     "quote": "Resources required to support data replication and backup, such as databases and object storage, are always on.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#pilot-light"
+    },
+    {
+     "source_id": "S4",
+     "quote": "Other elements, such as application servers, are loaded with application code and configurations, but are \"switched off\" and are only used during testing or when disaster recovery failover is invoked.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#pilot-light"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#warm-standby"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "データの写し 1: AWS Backup",
+   "bullets": [
+    "別のリージョンへコピー",
+    "都度か、計画で自動",
+    "離れた場所に置く要件"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  BP@{ svc: \"AWS Backup\", label: \"AWS Backup<br/>本番のリージョンの<br/>バックアップ計画\" }\n  CP[\"別のリージョンの<br/>バックアップのコピー<br/>本番のデータから離す\"]\n  BP -- \"都度か計画で自動\" --> CP\n",
+    "alt": "本番のリージョンの AWS Backup のバックアップ計画から、別のリージョンへバックアップをコピーする。コピーは都度か、計画で自動。コピーは本番のデータから離して置く。"
+   },
+   "narration": "ここからはデータの写しの部です。試験ガイドは、リージョンをまたぐバックアップの例として、エーダブリューエスバックアップ、エススリー、システムズマネージャーを挙げています。この講義では、根拠のある前の二つを扱います。エーダブリューエスバックアップでは、バックアップを複数のリージョンへコピーできます。コピーは、必要なときにその都度行うことも、日程を決めたバックアップ計画の一部として自動で行うこともできます。リージョンをまたぐ複製が特に役に立つのは、事業を続けるための要件や、規制などを守るための要件で、本番のデータから一定の距離を離してバックアップを置く必要があるときです。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "Using AWS Backup, you can copy backups to multiple AWS Regions on demand or automatically as part of a scheduled backup plan.",
+     "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html#cross-region-backup"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Cross-Region replication is particularly valuable if you have business continuity or compliance requirements to store backups a minimum distance away from your production data.",
+     "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html#cross-region-backup"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "データの写し 2: S3 の複製",
+   "bullets": [
+    "CRR: 続けて非同期に写す",
+    "RTC: 時間の約束",
+    "既にある物は Batch"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "仕組み",
+     "写す物",
+     "押さえる点"
+    ],
+    "rows": [
+     [
+      "S3 CRR",
+      "オブジェクトを続けて",
+      "版で戻す点を選ぶ"
+     ],
+     [
+      "S3 RTC",
+      "新しい物",
+      "99.99% を 15 分以内"
+     ],
+     [
+      "live replication",
+      "新しい物",
+      "続けて自動"
+     ],
+     [
+      "Batch Replication",
+      "既にある物",
+      "必要な時に動かす"
+     ]
+    ]
+   },
+   "narration": "次はエススリーです。エススリーのクロスリージョンレプリケーションを使うと、オブジェクトを、災害に備えるリージョンのバケットへ、非同期に続けて写せます。バージョニング、つまり古い版を残す仕組みで、戻す時点も選べます。写す時間に約束が要るときは、エススリーアールティーシーです。新しいオブジェクトの大部分を決まった時間のうちに写すことが、取り決めで約束されています。数字は画面で確かめてください。気をつけたいのは、すでにあるオブジェクトです。続けて自動で写すライブレプリケーションが写すのは、新しいオブジェクトです。すでにあるオブジェクトを写すのは、エススリーバッチレプリケーションで、必要なときに動かします。",
+   "refs": [
+    {
+     "source_id": "S16",
+     "quote": "you can use Amazon S3 Cross-Region Replication (CRR) to asynchronously copy objects to an S3 bucket in the DR region continuously, while providing versioning for the stored objects so that you can choose your restoration point.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#aws-services"
+    },
+    {
+     "source_id": "S18",
+     "quote": "S3 RTC replicates 99.99 percent of new objects stored in Amazon S3 within 15 minutes (backed by a service-level agreement).",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication"
+    },
+    {
+     "source_id": "S17",
+     "quote": "S3 Batch Replication differs from live replication, which continuously and automatically replicates new objects across Amazon S3 buckets.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html#s3-batch-replication-batch"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Instead, S3 Batch Replication occurs on demand on existing objects.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html#s3-batch-replication-batch"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "切り替え 1: RDS Multi-AZ",
+   "bullets": [
+    "原因が基盤の不具合のとき",
+    "別の AZ のスタンバイへ自動",
+    "多くは 60〜120 秒"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  P@{ svc: \"Amazon RDS\", label: \"Amazon RDS<br/>元の AZ の<br/>Multi-AZ の<br/>DB インスタンス<br/>基盤の不具合で停止\" }\n  SB@{ svc: \"Amazon RDS\", label: \"別の AZ の<br/>スタンバイレプリカ<br/>多くは 60〜120 秒<br/>で切り替え\" }\n  P -- \"自動で切り替え\" --> SB\n",
+    "alt": "元の AZ の Amazon RDS の Multi-AZ の DB インスタンスが基盤の不具合で止まると、別の AZ のスタンバイレプリカへ自動で切り替わる。切り替えは多くは 60 から 120 秒。"
+   },
+   "narration": "ここからは切り替えの部です。試験ガイドには、マルチエーゼットと複数のリージョンの仕組みで、フェイルオーバーを試す、という項目があります。まず、アールディーエスのマルチエーゼットです。アベイラビリティーゾーンは、ここでは、リージョンの中の独立した場所の単位と考えてください。マルチエーゼットのディービーインスタンスが、計画した停止や予定外の停止で止まり、その原因が基盤の不具合であれば、アールディーエスは、別のアベイラビリティーゾーンのスタンバイレプリカへ自動で切り替えます。スタンバイレプリカは、切り替えに備えて待っている写しです。ドキュメントがこう書いているのは、基盤の不具合が原因の場合です。切り替えにかかる時間の目安は、画面で確かめてください。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "If a planned or unplanned outage of your Multi-AZ DB instance results from an infrastructure defect, Amazon RDS automatically switches to a standby replica in another Availability Zone.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html#Concepts.MultiAZ.Failover"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Failover times are typically 60–120 seconds.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html#Concepts.MultiAZ.Failover"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "切り替え 2: Aurora Global Database",
+   "bullets": [
+    "計画した場面: switchover",
+    "予定外の停止: failover",
+    "古い primary の書き込み停止"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "switchover",
+     "failover"
+    ],
+    "rows": [
+     [
+      "使う場面",
+      "計画した保守など",
+      "予定外の停止"
+     ],
+     [
+      "前提",
+      "全てが健全",
+      "リージョンの停止"
+     ],
+     [
+      "RPO",
+      "0（先に同期）",
+      "全体で秒の単位"
+     ],
+     [
+      "古い primary",
+      "―",
+      "書き込みを止める"
+     ],
+     [
+      "前の呼び名",
+      "managed planned failover",
+      "―"
+     ]
+    ]
+   },
+   "narration": "次は、オーロラグローバルデータベースです。切り替えの方法は二つあります。スイッチオーバーは、保守のように計画した場面で使います。全てのクラスターと、関わるほかのサービスが健全なことが前提です。以前は、マネージドプランドフェイルオーバーと呼ばれていました。セカンダリをプライマリと同期させてから切り替えるので、アールピーオーはゼロ、つまりデータを失いません。フェイルオーバーは、予定外の停止から戻るときに使います。セカンダリのディービークラスターの一つへ、リージョンをまたいで切り替えます。手動で行うときは、停止したリージョンのプライマリへの書き込みを止めます。ディーエムエル文、つまりデータを変える命令などです。",
+   "refs": [
+    {
+     "source_id": "S14",
+     "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures where all the Aurora clusters and other services they interact with are in a healthy state.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-disaster-recovery.managed-failover"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss).",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-disaster-recovery.managed-failover"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Switchover – This operation was previously called \"managed planned failover\".",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-disaster-recovery.managed-failover"
+    },
+    {
+     "source_id": "S6",
+     "quote": "With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-failover"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Stop issuing DML statements and other write operations to the primary Aurora DB cluster in the AWS Region with the outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-failover.manual-unplanned"
+    },
+    {
+     "source_id": "S2",
+     "quote": "For an Aurora global database, RPO is typically measured in seconds.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "切り替え 3: Route 53 のヘルスチェック",
+   "bullets": [
+    "ヘルスチェックで健全さを見張る",
+    "例: latency alias レコード",
+    "Evaluate Target Health"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  R53@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>latency alias レコード<br/>Evaluate Target<br/>Health: Yes\" }\n  HA[\"リージョン A<br/>健全なリソースがある\"]\n  HB[\"リージョン B<br/>健全なリソースが無い\"]\n  R53 -- \"送る\" --> HA\n  R53 -. \"送らない\" .-> HB\n",
+    "alt": "Route 53 の latency alias レコードで Evaluate Target Health を Yes にした例。健全なリソースがあるリージョン A には送り、健全なリソースが無いリージョン B には送らない。"
+   },
+   "narration": "次は、ルートフィフティースリーです。ルートフィフティースリーのヘルスチェックは、ウェブアプリケーションやウェブサーバーなどのリソースの、健全さと性能を見張ります。ドキュメントの例では、二つのリージョンに向けたレイテンシーのエイリアスレコードを置き、どちらにも、エバリュエートターゲットヘルスをイエスに設定します。エイリアスレコードは、ここでは、エーダブリューエスのリソースを指すレコードと考えてください。こう設定すると、ルートフィフティースリーは、トラフィックを送ろうとする前に、そのリージョンに健全なリソースがあるかを確かめます。健全なリソースが無いリージョンを避けて送れる、ということです。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "Amazon Route 53 health checks monitor the health and performance of your web applications, web servers, and other resources.",
+     "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html#dns-failover"
+    },
+    {
+     "source_id": "S10",
+     "quote": "For both latency alias records, you set the value of Evaluate Target Health to Yes.",
+     "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs"
+    },
+    {
+     "source_id": "S10",
+     "quote": "This causes Route 53 to determine whether there are any healthy resources in a Region before trying to route traffic there.",
+     "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "切り替え 4: CloudFront の origin failover",
+   "bullets": [
+    "origin group に 2 つのオリジン",
+    "primary が失敗なら secondary",
+    "失敗の状態コードでも"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CF@{ svc: \"Amazon CloudFront\", label: \"CloudFront<br/>origin group\" }\n  PO[\"primary のオリジン<br/>使えない、または<br/>失敗の状態コード\"]\n  SO[\"secondary のオリジン\"]\n  CF -- \"普段\" --> PO\n  CF -. \"自動で切り替え\" .-> SO\n",
+    "alt": "CloudFront の origin group は、普段は primary のオリジンへ送る。primary が使えない、または失敗の状態コードを返すと、自動で secondary のオリジンへ切り替える。"
+   },
+   "narration": "クラウドフロントでは、オリジンのフェイルオーバーを使えます。オリジンは、ここでは、クラウドフロントがコンテンツを取りに行く元と考えてください。はじめに、オリジングループを作り、プライマリとセカンダリの二つのオリジンを入れます。プライマリのオリジンが使えないとき、または、失敗を表す特定のエイチティーティーピーの状態コードを返したとき、クラウドフロントは自動でセカンダリのオリジンへ切り替えます。止まったときだけでなく、決まった失敗の応答でも切り替わる点を押さえます。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "To get started, you create an origin group with two origins: a primary and a secondary.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover"
+    },
+    {
+     "source_id": "S12",
+     "quote": "If the primary origin is unavailable, or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "バックエンドの障害: Application Load Balancer と EC2 Auto Scaling",
+   "bullets": [
+    "健全なターゲットだけへ送る",
+    "全てが不健全なら fail open",
+    "不健全なインスタンスを置き換え"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph L[\"健全な所へ送る\"]\n    LB@{ svc: \"Elastic Load Balancing\", label: \"Application<br/>Load Balancer\" }\n    T1[\"ターゲット<br/>健全\"]\n    T2[\"ターゲット<br/>不健全\"]\n  end\n  subgraph G[\"台数を保つ\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling\" }\n    I1[\"InService の<br/>不健全なインスタンス\"]\n    I2[\"新しいインスタンス\"]\n  end\n  L ~~~ G\n  LB -- \"送る\" --> T1\n  LB -. \"送らない\" .-> T2\n  AS -- \"不健全と判断\" --> I1\n  I1 -- \"置き換え\" --> I2\n",
+    "alt": "左は Application Load Balancer。健全なターゲットには送り、不健全なターゲットには送らない。右は EC2 Auto Scaling。InService の不健全なインスタンスを、新しいインスタンスに置き換えて台数を保つ。"
+   },
+   "narration": "ここからはバックエンドの障害の部です。試験ガイドには、バックエンドの障害から戻れるようにロードバランサーを設定する、という項目があります。アプリケーションロードバランサーでは、ターゲットのヘルスチェックを使います。ターゲットは、リクエストの送り先です。各ノードは、有効にしたアベイラビリティーゾーンの、健全なターゲットにだけリクエストを送ります。ただし、例外があります。ターゲットグループに不健全なターゲットしか無いときは、健康状態にかかわらず、全てのターゲットへ送ります。ドキュメントは、この動きをフェイルオープンと呼んでいます。もう一つは、イーシーツーオートスケーリングです。稼働中のインスタンスが不健全だと判断すると、新しいインスタンスに置き換えて、グループの希望の台数を保ちます。",
+   "refs": [
+    {
+     "source_id": "S19",
+     "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S19",
+     "quote": "If a target group contains only unhealthy registered targets, the load balancer routes requests to all those targets, regardless of their health status.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S20",
+     "quote": "This means that if all targets fail health checks at the same time in all enabled Availability Zones, the load balancer fails open.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S8",
+     "quote": "When Amazon EC2 Auto Scaling determines that an InService instance is unhealthy, it replaces it with a new instance to maintain the desired capacity of the group.",
+     "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "試す: AWS FIS と手順の訓練",
+   "bullets": [
+    "AWS FIS は本物を操作",
+    "本番の前の環境で先に",
+    "Aurora: 計画を試し訓練"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "計画を立てる",
+      "note": "本番で使う前に"
+     },
+     {
+      "label": "本番の前の環境で実験",
+      "note": "AWS FIS の実験"
+     },
+     {
+      "label": "本番で実験",
+      "note": "本物のリソースに本当の操作"
+     }
+    ]
+   },
+   "narration": "最後は試す部です。試験ガイドの項目は、フェイルオーバーを試すことでした。障害を起こして試すサービスに、エーダブリューエスフォールトインジェクションサービス、略してエフアイエスがあります。エフアイエスは、システムの本物のエーダブリューエスのリソースに、本当の操作を行います。そのため、本番の環境で実験を動かす前に、計画の段階を終え、本番の前の環境で実験を動かすことが、強く勧められています。試す物は、仕組みだけではありません。オーロラグローバルデータベースの手動のフェイルオーバーのドキュメントは、計画を試し、手順に抜けが無く正しいことを確かめるよう書いています。あわせて、本当に起きる前に、担当の人がフェイルオーバーを行えるよう訓練しておくことも求めています。",
+   "refs": [
+    {
+     "source_id": "S13",
+     "quote": "AWS FIS carries out real actions on real AWS resources in your system.",
+     "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Therefore, before you use AWS FIS to run experiments in production, we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment.",
+     "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Make sure to test your plan to check that your procedures are complete and accurate, and that staff are trained to perform a disaster recovery failover before it really happens.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-failover.manual-unplanned"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "条件から選ぶ 1: 考え方",
+   "bullets": [
+    "時間なら RTO、データなら RPO",
+    "手を打てるなら pilot light",
+    "すぐなら warm standby"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ物",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "止まってよい時間",
+      "RTO",
+      "動く状態に戻るまで"
+     ],
+     [
+      "失ってよいデータ",
+      "RPO",
+      "時間で測る"
+     ],
+     [
+      "データの損失や破損",
+      "backup and restore",
+      "基盤も作り直す"
+     ],
+     [
+      "切り替え前に手を打てる",
+      "pilot light",
+      "DB と保存先は常時"
+     ],
+     [
+      "すぐ処理が要る",
+      "warm standby",
+      "減らした能力"
+     ]
+    ]
+   },
+   "narration": "ここから、問題文の条件から方法を選ぶ表です。まず、考え方の部です。止まってよい時間が問われていれば、アールティーオーの話です。失ってよいデータの量なら、アールピーオーで、時間で測ります。データの損失や破損に備えたい、という条件なら、バックアップアンドリストアが候補です。復旧のリージョンで、基盤やコードを作り直す必要がある点を確かめます。データベースと保存先は動かしておき、ほかは止めておいてよく、切り替えの前に手を打てるなら、パイロットライトです。障害のあと、すぐにトラフィックを受けたいなら、ウォームスタンバイです。能力は減らした形です。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "In other words, RTO measures downtime.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Recovery point objective (RPO) – The amount of data that can be lost (measured in time) after a disaster or service outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S3",
+     "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#backup-and-restore"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#warm-standby"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "条件から選ぶ 2: データの写し",
+   "bullets": [
+    "別リージョンへ → AWS Backup",
+    "続けて写す → S3 CRR",
+    "既にある物 → Batch"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ物",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "バックアップを別リージョンへ",
+      "AWS Backup",
+      "都度か計画で自動"
+     ],
+     [
+      "オブジェクトを続けて写す",
+      "S3 CRR",
+      "版で戻す点を選ぶ"
+     ],
+     [
+      "写す時間に約束が要る",
+      "S3 RTC",
+      "15 分以内の割合"
+     ],
+     [
+      "既にある物を写す",
+      "Batch Replication",
+      "必要な時に動かす"
+     ]
+    ]
+   },
+   "narration": "次は、データの写しの部です。バックアップを別のリージョンへ置きたい、とあれば、エーダブリューエスバックアップのコピーです。その都度でも、バックアップ計画の一部として自動でもできます。エススリーのオブジェクトを、別のリージョンへ続けて写したいなら、クロスリージョンレプリケーションです。バージョニングで戻す時点を選べる点も確かめます。写す時間に約束が要るなら、エススリーアールティーシーです。すでにあるオブジェクトを写したい、とあれば、続けて写す複製ではなく、エススリーバッチレプリケーションです。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "Using AWS Backup, you can copy backups to multiple AWS Regions on demand or automatically as part of a scheduled backup plan.",
+     "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html#cross-region-backup"
+    },
+    {
+     "source_id": "S16",
+     "quote": "while providing versioning for the stored objects so that you can choose your restoration point.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html#aws-services"
+    },
+    {
+     "source_id": "S18",
+     "quote": "S3 RTC replicates 99.99 percent of new objects stored in Amazon S3 within 15 minutes (backed by a service-level agreement).",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Instead, S3 Batch Replication occurs on demand on existing objects.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html#s3-batch-replication-batch"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から選ぶ 3: 切り替え",
+   "bullets": [
+    "AZ の障害 → RDS Multi-AZ",
+    "計画 → switchover",
+    "予定外 → failover"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ物",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "AZ の障害で DB を戻す",
+      "RDS Multi-AZ",
+      "基盤の不具合で自動"
+     ],
+     [
+      "計画した保守で移す",
+      "Aurora switchover",
+      "RPO は 0"
+     ],
+     [
+      "予定外の停止",
+      "Aurora failover",
+      "古い側の書き込み停止"
+     ],
+     [
+      "不健全なリージョン",
+      "Route 53",
+      "Evaluate Target Health"
+     ],
+     [
+      "オリジンの失敗",
+      "CloudFront",
+      "origin group"
+     ]
+    ]
+   },
+   "narration": "次は、切り替えの部です。アベイラビリティーゾーンの基盤の不具合から、データベースを自動で戻したいなら、アールディーエスのマルチエーゼットです。オーロラグローバルデータベースで、全てが健全なまま計画して切り替えたいなら、スイッチオーバーです。データを失いません。予定外の停止から戻るなら、フェイルオーバーです。停止したリージョンのプライマリへの書き込みを止める点を確かめます。健全なリソースが無いリージョンを避けたいなら、ルートフィフティースリーのエバリュエートターゲットヘルスです。オリジンが失敗したときに別のオリジンへ切り替えたいなら、クラウドフロントのオリジングループです。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "If a planned or unplanned outage of your Multi-AZ DB instance results from an infrastructure defect, Amazon RDS automatically switches to a standby replica in another Availability Zone.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html#Concepts.MultiAZ.Failover"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss).",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-disaster-recovery.managed-failover"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Stop issuing DML statements and other write operations to the primary Aurora DB cluster in the AWS Region with the outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-failover.manual-unplanned"
+    },
+    {
+     "source_id": "S10",
+     "quote": "This causes Route 53 to determine whether there are any healthy resources in a Region before trying to route traffic there.",
+     "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs"
+    },
+    {
+     "source_id": "S12",
+     "quote": "If the primary origin is unavailable, or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin.",
+     "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から選ぶ 4: バックエンドの障害と試す",
+   "bullets": [
+    "不健全な送り先 → ヘルスチェック",
+    "インスタンス → EC2 Auto Scaling",
+    "本物で試す → AWS FIS"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ物",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "不健全なターゲット",
+      "Application Load Balancer",
+      "健全な所だけへ"
+     ],
+     [
+      "全てが不健全",
+      "fail open の動き",
+      "全てへ送る"
+     ],
+     [
+      "不健全なインスタンス",
+      "EC2 Auto Scaling",
+      "置き換えて台数を保つ"
+     ],
+     [
+      "本物の障害で試す",
+      "AWS FIS",
+      "先に本番の前の環境"
+     ],
+     [
+      "Aurora の手動 failover",
+      "計画のテスト",
+      "人の訓練も"
+     ]
+    ]
+   },
+   "narration": "最後の表は、バックエンドの障害と、試す部です。不健全なターゲットにリクエストを送りたくないなら、アプリケーションロードバランサーのヘルスチェックです。健全なターゲットだけに送ります。ただし、全てのターゲットが不健全なときは、全てへ送るフェイルオープンになる点を確かめます。不健全なインスタンスを自動で入れ替えたいなら、イーシーツーオートスケーリングです。希望の台数を保ちます。本物のリソースで障害を起こして試したいなら、エフアイエスです。本番の前の環境で先に試します。オーロラの手動のフェイルオーバーでは、計画を試し、担当の人を訓練しておきます。",
+   "refs": [
+    {
+     "source_id": "S19",
+     "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S20",
+     "quote": "This means that if all targets fail health checks at the same time in all enabled Availability Zones, the load balancer fails open.",
+     "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks"
+    },
+    {
+     "source_id": "S8",
+     "quote": "When Amazon EC2 Auto Scaling determines that an InService instance is unhealthy, it replaces it with a new instance to maintain the desired capacity of the group.",
+     "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Therefore, before you use AWS FIS to run experiments in production, we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment.",
+     "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Make sure to test your plan to check that your procedures are complete and accurate, and that staff are trained to perform a disaster recovery failover before it really happens.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-failover.manual-unplanned"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "5 つの部に戻る",
+    "条件の語から方法を選ぶ",
+    "迷ったら 4 つの表へ"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P1[\"考え方\"]\n    K[\"RTO は止まる時間<br/>RPO は失うデータ\"]\n  end\n  subgraph P2[\"データの写し\"]\n    BK@{ svc: \"AWS Backup\", label: \"AWS Backup<br/>都度か計画で自動\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3 の複製<br/>既にある物は Batch\" }\n  end\n  subgraph P3[\"切り替え\"]\n    DB[\"RDS Multi-AZ は自動<br/>Aurora は<br/>2 つの切り替え\"]\n    RC[\"Route 53 は<br/>健全な所へ<br/>CloudFront は<br/>origin group\"]\n  end\n  subgraph P4[\"バックエンドの障害\"]\n    BE[\"Application<br/>Load Balancer は<br/>健全な所へ<br/>EC2 Auto Scaling<br/>は置き換え\"]\n  end\n  subgraph P5[\"試す\"]\n    FI@{ svc: \"AWS Fault Injection Service\", label: \"AWS FIS<br/>本番の前の環境で先に\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n",
+    "alt": "講義の地図に戻ったまとめ。考え方は RTO が止まる時間、RPO が失うデータ。データの写しは AWS Backup の都度か計画で自動のコピーと S3 の複製、既にある物は Batch。切り替えは RDS Multi-AZ の自動の切り替え、Aurora の 2 つの切り替え、Route 53 は健全な所へ、CloudFront は origin group。バックエンドの障害は Application Load Balancer が健全な所へ送り、EC2 Auto Scaling が置き換える。試すは AWS FIS を本番の前の環境で先に。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。考え方の部では、アールティーオーが止まっている時間、アールピーオーが失ってよいデータの量で、時間で測ることを見ました。データの写しの部では、エーダブリューエスバックアップのリージョンをまたぐコピーと、エススリーの複製を見ました。すでにあるオブジェクトはバッチレプリケーションです。切り替えの部では、アールディーエスのマルチエーゼット、オーロラの二つの切り替え方、ルートフィフティースリー、クラウドフロントを見ました。バックエンドの障害の部では、アプリケーションロードバランサーのヘルスチェックと、イーシーツーオートスケーリングの置き換えです。試す部では、エフアイエスを本番の前の環境で先に動かすことでした。問題文で迷ったら、四つの表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S2",
+     "quote": "The amount of data that can be lost (measured in time) after a disaster or service outage.",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-bcdr-planning"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Instead, S3 Batch Replication occurs on demand on existing objects.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html#s3-batch-replication-batch"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss).",
+     "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html#aurora-global-database-disaster-recovery.managed-failover"
+    },
+    {
+     "source_id": "S8",
+     "quote": "When Amazon EC2 Auto Scaling determines that an InService instance is unhealthy, it replaces it with a new instance to maintain the desired capacity of the group.",
+     "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+    },
+    {
+     "source_id": "S13",
+     "quote": "AWS FIS carries out real actions on real AWS resources in your system.",
+     "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is"
+    }
+   ]
+  }
+ ]
+}
