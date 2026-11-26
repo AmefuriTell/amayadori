@@ -1,6 +1,11 @@
 {
   "names": {
+    "Amazon CloudWatch Logs": "cloudwatch-logs",
     "Amazon CloudWatch": "cloudwatch",
+    "AWS CodeBuild": "codebuild",
+    "AWS CodePipeline": "codepipeline",
+    "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
+    "Amazon EventBridge": "eventbridge",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
     "AWS Lambda": "lambda",
@@ -8,6 +13,50 @@
     "Amazon S3": "s3"
   },
   "pages": {
+    "cloudwatch-logs": {
+      "id": "cloudwatch-logs",
+      "name": "Amazon CloudWatch Logs",
+      "reading": "クラウドウォッチ ログズ",
+      "summary": "EC2 インスタンス・CloudTrail・自分のアプリなど、いろいろな所のログ（記録）を 1 か所に集めて、保存・監視・検索できるサービス。",
+      "features": [
+        {
+          "title": "ログを 1 か所に集める",
+          "text": "システム・アプリ・AWS サービスのログを、1 つの規模を広げやすいサービスにまとめる。クエリ言語（検索のための言葉）でログを検索でき、機密のデータを隠すこともできる。"
+        },
+        {
+          "title": "保持期間",
+          "text": "ログは既定では消えずにずっと残る。ロググループごとに、無期限か 1 日〜10 年の保持期間を決められる。アカウント全体や、名前の先頭が同じロググループにまとめて決めることもできる。"
+        },
+        {
+          "title": "ログから数値を作る",
+          "text": "たとえばアプリのログのエラーの数を数えて CloudWatch のメトリクスにし、決めた値を超えたら通知できる。"
+        }
+      ],
+      "exam_points": [
+        "ログを決まった期間だけ残したい時は、ロググループの保持期間を決める（既定では消えずにずっと残る）。",
+        "アプリのログのエラーの数が決めた値を超えた時に通知したい場面で、CloudWatch Logs のこの機能が使える。"
+      ],
+      "compare": [
+        {
+          "with": "Amazon CloudWatch",
+          "text": "CloudWatch Logs はログを集めて保存・検索する部分。ログから作った数値は CloudWatch のメトリクスとして使う。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#WhatIsCloudWatchLogs",
+          "quote": "CloudWatch Logs enables you to centralize the logs from all of your systems, applications, and AWS services that you use, in a single, highly scalable service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#cloudwatch-logs-features",
+          "quote": "By default, logs are kept indefinitely and never expire."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#cloudwatch-logs-features",
+          "quote": "CloudWatch Logs can track the number of errors that occur in your application logs and send you a notification whenever the rate of errors exceeds a threshold you specify."
+        }
+      ]
+    },
     "cloudwatch": {
       "id": "cloudwatch",
       "name": "Amazon CloudWatch",
@@ -44,6 +93,162 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-logs-overview",
           "quote": "Create metric filters to extract numerical values from logs and generate CloudWatch metrics, which you can use for alerting and dashboards."
+        }
+      ]
+    },
+    "codebuild": {
+      "id": "codebuild",
+      "name": "AWS CodeBuild",
+      "reading": "コードビルド",
+      "summary": "クラウドでソースコードのビルド（コンパイル）とテストを行い、デプロイできる成果物（アーティファクト）を作るサービス。ビルド用のサーバーを自分で用意・管理する必要がない。",
+      "features": [
+        {
+          "title": "フルマネージドのビルド",
+          "text": "ソースコードのコンパイル・ユニットテスト・成果物の作成を行う。よく使う言語やツール（Maven・Gradle など）の環境が用意されており、自分のツールを入れた環境も使える。ビルドの要求が増えると自動で規模を広げる。"
+        },
+        {
+          "title": "パイプラインの一部として動く",
+          "text": "コンソール・AWS CLI・SDK から動かせるほか、AWS CodePipeline のビルドやテストのステージにアクションとして入れられる。"
+        },
+        {
+          "title": "テストレポート",
+          "text": "buildspec ファイルにレポートグループとテストの情報を書くと、ビルドの中で動いたテストの結果をレポートとして残せる。テストを動かすたびに新しいレポートができる。"
+        }
+      ],
+      "exam_points": [
+        "ビルド用のサーバーを管理せずにビルドとテストを自動化したい場面で、CodeBuild が選択肢になる。",
+        "テストの結果を CodeBuild で見たい時は、buildspec にレポートグループを書く形になる。"
+      ],
+      "compare": [
+        {
+          "with": "AWS CodePipeline",
+          "text": "CodePipeline はリリースの流れ全体（ステージとアクション）を受け持ち、CodeBuild はその中のビルドやテストのアクションとして動く。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html#welcome",
+          "quote": "CodeBuild compiles your source code, runs unit tests, and produces artifacts that are ready to deploy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html#welcome-quick-look",
+          "quote": "you can add CodeBuild as a build or test action to the build or test stage of a pipeline in AWS CodePipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+          "quote": "To create a test report, you add a report group name to the buildspec file of a build project with information about your test cases."
+        }
+      ]
+    },
+    "codepipeline": {
+      "id": "codepipeline",
+      "name": "AWS CodePipeline",
+      "reading": "コードパイプライン",
+      "summary": "ソフトウェアをリリースするまでの手順（ソースの取得・ビルド・テスト・デプロイなど）を形にし、目に見えるようにして、自動で流す継続的デリバリーのサービス。",
+      "features": [
+        {
+          "title": "リリースの流れを自動化",
+          "text": "リリースの手順をステージとして形にし、変更があるたびに自動で流す。"
+        },
+        {
+          "title": "ステージ",
+          "text": "環境を分け、その環境に同時に入る変更の数を抑えるための単位。各ステージには、アーティファクト（ソースコードなどの成果物）に対して行うアクションが入る。"
+        },
+        {
+          "title": "アクション",
+          "text": "アクションの種類は、ソース・ビルド・テスト・デプロイ・承認・呼び出し。アクションは順番にも並列にも動かせる。"
+        }
+      ],
+      "exam_points": [
+        "ビルドとテストなどを同時に動かしたい場面では、アクションを並列に並べる形を考える（順番にも並列にも動かせる）。",
+        "ソースの取得からデプロイまでを自動でつなぎたい場面で、CodePipeline のステージとアクションの組み合わせが選択肢になる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html#welcome",
+          "quote": "AWS CodePipeline is a continuous delivery service you can use to model, visualize, and automate the steps required to release your software."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html#concepts-stages",
+          "quote": "Valid CodePipeline action types are source, build, test, deploy, approval, and invoke. Actions can run in series or in parallel."
+        }
+      ]
+    },
+    "ec2-auto-scaling": {
+      "id": "ec2-auto-scaling",
+      "name": "Amazon EC2 Auto Scaling",
+      "reading": "イーシーツー オートスケーリング",
+      "summary": "アプリケーションの負荷に合わせて、ちょうどよい数の EC2 インスタンス（仮想サーバー）がそろうようにするサービス。インスタンスのまとまり（Auto Scaling グループ）の最小と最大の数を守る。",
+      "features": [
+        {
+          "title": "Auto Scaling グループ",
+          "text": "インスタンスのまとまりに最小と最大の数を決めると、その範囲を守る。スケーリングポリシーを決めると、需要に合わせてインスタンスを起動・終了する。"
+        },
+        {
+          "title": "ヘルスチェックと置き換え",
+          "text": "インスタンスの状態を見張り、終了したり正常でなくなったりしたインスタンスを置き換えて、希望する数を保つ。アプリに合わせた独自のヘルスチェックも決められる。"
+        },
+        {
+          "title": "インスタンスの更新とライフサイクルフック",
+          "text": "AMI や起動テンプレートを変えた時、インスタンスの更新で少しずつ入れ替えられる。ライフサイクルフックで、起動の時や終了の前に独自の処理を動かせる。"
+        }
+      ],
+      "exam_points": [
+        "インスタンスを終了する前や起動した時に決まった処理を挟みたい場面では、ライフサイクルフックを考える。",
+        "起動テンプレートを変えたインスタンスへ少しずつ入れ替えたい場面では、インスタンスの更新を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#what-is-amazon-ec2-auto-scaling",
+          "quote": "Amazon EC2 Auto Scaling helps you ensure that you have the correct number of Amazon EC2 instances available to handle the load for your application."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#ec2-auto-scaling-features",
+          "quote": "you can define custom health checks that are specific to your application to verify that it's responding as expected."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#ec2-auto-scaling-features",
+          "quote": "Lifecycle hooks are useful for defining custom actions that are invoked as new instances launch or before instances are terminated."
+        }
+      ]
+    },
+    "eventbridge": {
+      "id": "eventbridge",
+      "name": "Amazon EventBridge",
+      "reading": "イベントブリッジ",
+      "summary": "「何かが起きた」という知らせ（イベント）を使って、アプリケーションの部品どうしをつなぐサーバーレスのサービス。イベントを受け取り、絞り込み、形を変えて、届け先に送る。",
+      "features": [
+        {
+          "title": "イベントバス",
+          "text": "イベントを受け取って、0 個以上の届け先（ターゲット）に配る中継役。多くの送り元から多くの届け先へイベントを振り分けるのに向く。"
+        },
+        {
+          "title": "ルールとイベントパターン",
+          "text": "イベントが届くと、そのイベントバスのルールごとに、イベントがルールのパターンに合うかを確かめる。"
+        },
+        {
+          "title": "ターゲットへの配信と変換",
+          "text": "ルールに合ったイベントを、そのルールのターゲットへ送る。送る前にイベントの形を変えることもできる。1 つのルールのターゲットは 5 個まで。"
+        }
+      ],
+      "exam_points": [
+        "AWS のサービスや自分のアプリで起きたことをきっかけに、別の処理を自動で動かしたい場面では、EventBridge のルールでイベントを絞り込み、ターゲットに送る形を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is",
+          "quote": "Amazon EventBridge is a serverless service that uses events to connect application components together"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html#eb-event-bus",
+          "quote": "Rules associated with the event bus evaluate events as they arrive. Each rule checks whether an event matches the rule's pattern."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html#eb-what-is-how-it-works",
+          "quote": "For each event that matches a rule, EventBridge then sends the event to the targets specified for that rule."
         }
       ]
     },
