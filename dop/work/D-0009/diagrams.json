@@ -1,0 +1,40 @@
+{
+  "item": "D-0009",
+  "diagrams": [
+    {
+      "id": "q-1.4-0011",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ\" }\n  LAM@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  ECS@{ svc: \"Amazon ECS\", label: \"ECS サービス\" }\n  EC2P[\"EC2/オンプレミスのサーバー\"]\n  BADB[\"⚠ B: サイドカー・レイヤーは作業が増えるだけ\"]\n  BADC[\"⚠ C: EC2 を残す費用と手間が増える\"]\n  BADD[\"⚠ D: Lambda は EC2 のプラットフォームでデプロイできない\"]\n  CD == \"✔ A: エージェント不要\" ==> LAM\n  CD == \"✔ A: エージェント不要\" ==> ECS\n  CD -- \"エージェントが必要\" --> EC2P\n  BADB -.-> ECS\n  BADC -.-> EC2P\n  BADD -.-> LAM",
+      "alt": "CodeDeploy エージェントが要るのは EC2/オンプレミスへのデプロイだけ。Lambda と ECS へのデプロイでは要らないので、用意する作業は無い（A）。サイドカーやレイヤー（B）や EC2 を残す案（C）は無駄。"
+    },
+    {
+      "id": "q-1.4-0012",
+      "source": "flowchart TB\n  subgraph INS[\"新しい EC2 インスタンス\"]\n    AG@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy エージェント\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"インスタンスプロファイルのロール\" }\n  end\n  S3R@{ svc: \"Amazon S3\", label: \"リビジョンのバケット\" }\n  S3A@{ svc: \"Amazon S3\", label: \"エージェントのバケット\" }\n  BADA[\"⚠ A: 公開すると誰でも読める\"]\n  BADB[\"⚠ B: 通信は 443 番の外向き。受信ルールでは直らない\"]\n  BADC[\"⚠ C: 再起動しても権限は無いまま\"]\n  ROLE -- \"✔ D: s3:Get* と s3:List* を足す\" --> AG\n  AG == \"リビジョンの取得\" ==> S3R\n  AG == \"エージェントの取得・更新\" ==> S3A\n  BADA -.-> S3R\n  BADB -.-> AG\n  BADC -.-> AG",
+      "alt": "インスタンスプロファイルのロールに S3 の権限が無いので、リビジョンとエージェントを取れない。2 つのバケットへの s3:Get* と s3:List* をロールに足すのが最も安全（D）。公開（A）などでは直らない。"
+    },
+    {
+      "id": "q-1.4-0013",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"インプレースのデプロイ\" }\n  INS[\"インスタンス（ライフサイクルのスクリプトを実行中）\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"スケールイン\" }\n  AGT[\"CodeDeploy エージェントが止まる\"]\n  ST[\"デプロイの状態が Failed になるまで最大 1 時間\"]\n  BADA[\"⚠ A: ログの削除（7 日後）は状態の報告と無関係\"]\n  BADD[\"⚠ D: エージェントは 443 番の外向き通信。受信は無関係\"]\n  BADC[\"⚠ C: 最初のイベントの前の終了なら 5 分でタイムアウト\"]\n  CD -- \"スクリプトを実行\" --> INS\n  ASG -- \"実行中に終了\" --> INS\n  INS --> AGT\n  AGT == \"✔ B: 最大 1 時間待つ\" ==> ST\n  BADA -.-> ST\n  BADC -.-> AGT\n  BADD -.-> AGT",
+      "alt": "実行中のインスタンスがスケールインで終了すると CodeDeploy エージェントが止まり、デプロイが Failed になるまで最大 1 時間かかる（B）。最初のイベントの前に終了した時は 5 分でタイムアウトする（C）。"
+    },
+    {
+      "id": "q-1.4-0014",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"新しいデプロイ\" }\n  STOP[\"ApplicationStop のスクリプト\"]\n  PREV[\"前に成功したリビジョンの AppSpec（壊れた物）\"]\n  NEW[\"新しいリビジョン（スクリプトを修正済み）\"]\n  BADB[\"⚠ B: 新しいリビジョンで直しても、動くのは前のスクリプト\"]\n  BADC[\"⚠ C: 新しい AppSpec のタイムアウトは前のスクリプトを直さない\"]\n  BADD[\"⚠ D: 作り直しは手間が大きく不要\"]\n  CD --> STOP\n  PREV -- \"スクリプトの出どころ\" --> STOP\n  STOP == \"✔ A: 失敗を無視して続ける\" ==> NEW\n  BADB -.-> PREV\n  BADC -.-> STOP\n  BADD -.-> CD",
+      "alt": "ApplicationStop は前に成功したリビジョンの AppSpec のスクリプトで動くので、新しいリビジョンで直しても失敗する。失敗を無視するオプションでデプロイを作り直せば、直したスクリプトを入れられる（A）。"
+    },
+    {
+      "id": "q-1.4-0015",
+      "source": "flowchart TB\n  CF@{ svc: \"AWS CloudFormation\", label: \"スタック（UPDATE_ROLLBACK_FAILED）\" }\n  DB[\"データベース（CloudFormation の外で削除済み）\"]\n  OK[\"UPDATE_ROLLBACK_COMPLETE（また更新できる）\"]\n  BADA[\"⚠ A: シグナルは、消えたデータベースには効かない\"]\n  BADB[\"⚠ B: スタックを削除する → 要件に反する\"]\n  BADC[\"⚠ C: 原因は権限ではない。待っても終わらない\"]\n  CF -- \"戻せない\" --> DB\n  CF == \"✔ D: ロールバックを続ける\" ==> OK\n  DB -. \"消えた物は飛ばす\" .-> OK\n  BADA -.-> DB\n  BADB -.-> CF\n  BADC -.-> CF",
+      "alt": "外で消されたデータベースに戻れず UPDATE_ROLLBACK_FAILED になったスタックは、ロールバックを続けて消えたリソースを飛ばすと UPDATE_ROLLBACK_COMPLETE に戻り、削除せずに更新できる（D）。"
+    },
+    {
+      "id": "q-1.4-0016",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  REPL[\"置き換え先のインスタンス（ログにエラー無し・アプリは起動）\"]\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサーのヘルスチェック\" }\n  EV[\"AllowTraffic で失敗\"]\n  BADA[\"⚠ A: ApplicationStop の失敗ならそのイベントで失敗する\"]\n  BADC[\"⚠ C: エージェントが無ければ AllowTraffic まで進まない\"]\n  BADD[\"⚠ D: タスク定義は ECS の話。EC2 には無関係\"]\n  CD -- \"デプロイ\" --> REPL\n  REPL -- \"登録\" --> ALB\n  ALB == \"✔ B: 設定の誤り\" ==> EV\n  BADA -.-> REPL\n  BADC -.-> REPL\n  BADD -.-> CD",
+      "alt": "ログに原因が出ない AllowTraffic の失敗は、ふつうロードバランサーのヘルスチェックの設定の誤りが原因（B）。それより前のイベントが動いているので、ApplicationStop（A）やエージェント（C）は原因ではない。"
+    },
+    {
+      "id": "q-1.4-0017",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"EC2 へのデプロイ\" }\n  RES[\"HEALTH_CONSTRAINTS で失敗・全イベントが Skipped\"]\n  AG@{ svc: \"AWS CodeDeploy\", label: \"✔ A: エージェントが入っていない・動いていない\" }\n  ROLE[\"✔ B: サービスロールに必要な権限が無い\"]\n  BADX[\"⚠ C: スクリプトの誤りなら、そのイベントは実行されて失敗<br/>⚠ D: AllowTraffic の失敗なら前のイベントは実行済み<br/>⚠ E: 終了保護はデプロイに無関係\"]\n  CD -- \"結果\" --> RES\n  AG == \"原因\" ==> RES\n  ROLE == \"原因\" ==> RES\n  BADX -.-> RES",
+      "alt": "すべてのライフサイクルイベントが Skipped で HEALTH_CONSTRAINTS になる時は、CodeDeploy エージェントが入っていない・動いていないこと（A）と、サービスロールの権限不足（B）を確かめる。"
+    }
+  ]
+}
