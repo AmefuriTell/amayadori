@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0006",
+  "source": "flowchart TB\n  subgraph R1[\"元のリージョン\"]\n    PL@{ svc: \"AWS Backup\", label: \"✔ B: 毎日のルールのバックアッププラン\" }\n    EBS@{ svc: \"Amazon EBS\", label: \"backup=daily のボリューム\" }\n    RDS@{ svc: \"Amazon RDS\", label: \"backup=daily のデータベース\" }\n  end\n  subgraph R2[\"2 つ目のリージョン\"]\n    CP[\"バックアップのコピー\"]\n  end\n  EBS -- \"タグで割り当て（新しい物も自動）\" --> PL\n  RDS -- \"タグで割り当て\" --> PL\n  PL == \"✔ B: Copy to destination\" ==> CP\n  X[\"⚠ A: ARN を追加し続ける\"] -.- PL\n  X2[\"⚠ C: Lambda は自作\"] -.- EBS\n  X3[\"⚠ D: 各リージョンで別々のバックアップ\"] -.- CP\n",
+  "alt": "タグ付きの EBS と RDS を毎日バックアップし 2 つ目のリージョンにコピーする図。AWS Backup のプランに毎日のルールとコピー先を決め、backup=daily のタグで割り当てれば新しいリソースも設定を変えず対象になる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,35 +1,35 @@
 {
- "item": "D-0013",
- "diagrams": [
-  {
-   "id": "q-2.2-0011",
-   "source": "flowchart TB\n  subgraph VA[\"ベンダーの AWS アカウント\"]\n    VS[\"監視サービス\"]\n  end\n  subgraph CA[\"会社の AWS アカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ A: ロール（信頼ポリシーで外部 ID を必須）\" }\n    CW@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  end\n  STS@{ svc: \"AWS STS\", label: \"✔ B: AssumeRole（毎回、外部 ID）\" }\n  VS -- \"外部 ID を付けて\" --> STS\n  STS == \"一時的な認証情報\" ==> ROLE\n  ROLE -- \"読む\" --> CW\n  VS -. \"⚠ C: アクセスキーは長期の認証情報\" .-> CW\n",
-   "alt": "ベンダーが会社のロールを AssumeRole で引き受け、一時的な認証情報でメトリクスを読む図。ロールの信頼ポリシーで外部 ID を必須にし（A）、AssumeRole のたびに外部 ID を指定する（B）。混乱した代理を防ぎ、長期の認証情報も渡さない。"
-  },
-  {
-   "id": "q-2.2-0012",
-   "source": "flowchart TB\n  DEV([\"開発者\"])\n  PB@{ svc: \"AWS IAM\", label: \"✔ C: permissions boundary（決めた範囲）\" }\n  ROLE@{ svc: \"AWS IAM\", label: \"開発者が作る Lambda 用のロール\" }\n  PT([\"プラットフォームチーム（完全な管理者権限）\"])\n  DEV -- \"境界を付ける時だけ作れる\" --> ROLE\n  PB == \"✔ C: 広いポリシーでも超えられない\" ==> ROLE\n  PT -- \"影響なし\" --> ROLE\n  PT -. \"⚠ A: SCP はこのチームも制限する\" .-> PB\n",
-   "alt": "開発者がロールを作る時は、決めた範囲の管理ポリシーを permissions boundary に設定することを条件にする図（C）。広いポリシーを付けても境界を超えず、プラットフォームチームの権限は変わらない。A の SCP は管理者まで制限する。"
-  },
-  {
-   "id": "q-2.2-0013",
-   "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 組織の Config ルール（PutOrganizationConfigRule）\" }\n  ORG@{ svc: \"AWS Organizations\", label: \"管理アカウントか委任管理者\" }\n  ACC[\"組織のアカウント 150 個（新しいアカウントも）\"]\n  SBX[\"サンドボックスのアカウント\"]\n  ORG -- \"中央で作成・更新\" --> CFG\n  CFG == \"✔ A: 共通のルールを配る\" ==> ACC\n  CFG -. \"除外するアカウントに指定\" .-> SBX\n  CFG -. \"⚠ B: アグリゲーターはルールを配れない\" .-> ACC\n",
-   "alt": "管理アカウントか委任管理者から PutOrganizationConfigRule で、組織のすべてのアカウントに同じ Config ルールを配り、サンドボックスのアカウントを除外する図（A）。新しいアカウントにも配られる。B のアグリゲーターはルールを配れない。"
-  },
-  {
-   "id": "q-2.2-0014",
-   "source": "flowchart TB\n  SRC[\"組織のすべてのアカウント\"]\n  AGG@{ svc: \"AWS Config\", label: \"✔ C: 組織のアグリゲーター（監査のアカウント）\" }\n  AUD([\"監査担当\"])\n  SRC -- \"構成と準拠のデータ\" --> AGG\n  AGG == \"✔ C: 承認なし・読み取りだけ\" ==> AUD\n  AUD -. \"⚠ A: 管理者権限は送り元を変えられる\" .-> SRC\n  AUD -. \"⚠ B: ルールの配布はデータを集めない\" .-> AGG\n",
-   "alt": "監査のアカウントに組織の AWS Config アグリゲーターを作ると、承認なしで組織のすべてのアカウントの構成と準拠のデータを 1 か所で読める図（C）。送り元は読むだけで変更できない。A の管理者権限は強すぎ、B はルールの配布。"
-  },
-  {
-   "id": "q-2.2-0015",
-   "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph REGS[\"3 つのリージョンそれぞれ\"]\n    DA@{ svc: \"Amazon GuardDuty\", label: \"✔ A: 各リージョンで同じ委任管理者（セキュリティ）\" }\n    MEM[\"メンバーアカウントの GuardDuty\"]\n  end\n  MGMT == \"✔ A: 3 リージョンのそれぞれで指定\" ==> DA\n  DA == \"✔ B: 有効にして管理\" ==> MEM\n  MGMT -. \"⚠ D: us-east-1 だけでは足りない\" .-> DA\n  MEM -. \"⚠ E: 各所有者の作業は中央管理でない\" .-> DA\n",
-   "alt": "GuardDuty はリージョンのサービスなので、管理アカウントが 3 つのリージョンのそれぞれで同じセキュリティのアカウントを委任管理者に指定する図（A）。委任管理者は各リージョンでメンバーアカウントの GuardDuty を有効にして管理する（B）。"
-  },
-  {
-   "id": "q-2.2-0016",
-   "source": "flowchart TB\n  GD@{ svc: \"Amazon GuardDuty\", label: \"不審な活動の検出結果\" }\n  DT@{ svc: \"Amazon Detective\", label: \"✔ B: ログのデータを自動で集める\" }\n  AN([\"分析担当\"])\n  LOG[\"CloudTrail・VPC フローログ\"]\n  LOG -- \"AWS のリソースのログ\" --> DT\n  GD -- \"検出結果\" --> DT\n  DT == \"✔ B: 根本の原因を素早く調べる\" ==> AN\n  AN -. \"⚠ D: 手作業でログを探す\" .-> LOG\n",
-   "alt": "Amazon Detective は AWS のリソースのログのデータを自動で集め、GuardDuty の検出結果を分析担当が調べて根本の原因を素早く見つけるのを助ける図（B）。D はログを手作業で探す今のやり方で、時間がかかる。"
-  }
- ]
+  "item": "D-0013",
+  "diagrams": [
+    {
+      "id": "q-2.2-0011",
+      "source": "flowchart TB\n  subgraph VA[\"ベンダーの AWS アカウント\"]\n    VS[\"監視サービス\"]\n  end\n  subgraph CA[\"会社の AWS アカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ A: ロール（信頼ポリシーで外部 ID を必須）\" }\n    CW@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  end\n  STS@{ svc: \"AWS STS\", label: \"✔ B: AssumeRole（毎回、外部 ID）\" }\n  VS -- \"外部 ID を付けて\" --> STS\n  STS == \"一時的な認証情報\" ==> ROLE\n  ROLE -- \"読む\" --> CW\n  BADC[\"⚠ C: アクセスキーは長期の認証情報\"]\n  BADDE[\"⚠ D: 外部 ID が無く混乱した代理を防げない<br/>⚠ E: SCP は権限を与えない\"]\n  BADC -.-> VS\n  BADDE -.-> VS\n",
+      "alt": "ベンダーが会社のロールを AssumeRole で引き受け、一時的な認証情報でメトリクスを読む図。ロールの信頼ポリシーで外部 ID を必須にし（A）、AssumeRole のたびに外部 ID を指定する（B）。混乱した代理を防ぎ、長期の認証情報も渡さない。"
+    },
+    {
+      "id": "q-2.2-0012",
+      "source": "flowchart TB\n  DEV([\"開発者\"])\n  PB@{ svc: \"AWS IAM\", label: \"✔ C: permissions boundary（決めた範囲）\" }\n  ROLE@{ svc: \"AWS IAM\", label: \"開発者が作る Lambda 用のロール\" }\n  PT([\"プラットフォームチーム（完全な管理者権限）\"])\n  DEV -- \"境界を付ける時だけ作れる\" --> ROLE\n  PB == \"✔ C: 広いポリシーでも超えられない\" ==> ROLE\n  PT -- \"影響なし\" --> ROLE\n  BADA[\"⚠ A: SCP はこのチームの管理者権限も制限する\"]\n  BADBD[\"⚠ B: RCP は開発者のロールの上限にならない<br/>⚠ D: 毎週の確認までは範囲を超えて使える\"]\n  BADA -.-> PT\n  BADBD -.-> DEV\n",
+      "alt": "開発者がロールを作る時は、決めた範囲の管理ポリシーを permissions boundary に設定することを条件にする図（C）。広いポリシーを付けても境界を超えず、プラットフォームチームの権限は変わらない。A の SCP は管理者まで制限する。"
+    },
+    {
+      "id": "q-2.2-0013",
+      "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 組織の Config ルール（PutOrganizationConfigRule）\" }\n  ORG@{ svc: \"AWS Organizations\", label: \"管理アカウントか委任管理者\" }\n  ACC[\"組織のアカウント 150 個（新しいアカウントも）\"]\n  SBX[\"サンドボックスのアカウント\"]\n  ORG -- \"中央で作成・更新\" --> CFG\n  CFG == \"✔ A: 共通のルールを配る\" ==> ACC\n  CFG -. \"除外するアカウントに指定\" .-> SBX\n  BADB[\"⚠ B: アグリゲーターはルールを配れない\"]\n  BADCD[\"⚠ C: 各所有者の手作業<br/>⚠ D: Lambda を作って保守\"]\n  BADB -.-> ACC\n  BADCD -.-> ACC\n",
+      "alt": "管理アカウントか委任管理者から PutOrganizationConfigRule で、組織のすべてのアカウントに同じ Config ルールを配り、サンドボックスのアカウントを除外する図（A）。新しいアカウントにも配られる。B のアグリゲーターはルールを配れない。"
+    },
+    {
+      "id": "q-2.2-0014",
+      "source": "flowchart TB\n  SRC[\"組織のすべてのアカウント\"]\n  AGG@{ svc: \"AWS Config\", label: \"✔ C: 組織のアグリゲーター（監査のアカウント）\" }\n  AUD([\"監査担当\"])\n  SRC -- \"構成と準拠のデータ\" --> AGG\n  AGG == \"✔ C: 承認なし・読み取りだけ\" ==> AUD\n  BADA[\"⚠ A: 管理者権限は送り元を変えられる\"]\n  BADBD[\"⚠ B: ルールの配布はデータを集めない<br/>⚠ D: 毎週の手作業で最大 1 週間古い\"]\n  BADA -.-> SRC\n  BADBD -.-> AUD\n",
+      "alt": "監査のアカウントに組織の AWS Config アグリゲーターを作ると、承認なしで組織のすべてのアカウントの構成と準拠のデータを 1 か所で読める図（C）。送り元は読むだけで変更できない。A の管理者権限は強すぎ、B はルールの配布。"
+    },
+    {
+      "id": "q-2.2-0015",
+      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph REGS[\"3 つのリージョンそれぞれ\"]\n    DA@{ svc: \"Amazon GuardDuty\", label: \"✔ A: 各リージョンで同じ委任管理者（セキュリティ）\" }\n    MEM[\"メンバーアカウントの GuardDuty\"]\n  end\n  MGMT == \"✔ A: 3 リージョンのそれぞれで指定\" ==> DA\n  DA == \"✔ B: 有効にして管理\" ==> MEM\n  BADC[\"⚠ C: リージョンごとに別の委任管理者にしてはいけない\"]\n  BADD[\"⚠ D: us-east-1 だけでは足りない\"]\n  BADE[\"⚠ E: 各所有者の作業は中央管理でない\"]\n  BADC -.-> MGMT\n  BADD -.-> MGMT\n  BADE -.-> MEM\n",
+      "alt": "GuardDuty はリージョンのサービスなので、管理アカウントが 3 つのリージョンのそれぞれで同じセキュリティのアカウントを委任管理者に指定する図（A）。委任管理者は各リージョンでメンバーアカウントの GuardDuty を有効にして管理する（B）。"
+    },
+    {
+      "id": "q-2.2-0016",
+      "source": "flowchart TB\n  GD@{ svc: \"Amazon GuardDuty\", label: \"不審な活動の検出結果\" }\n  DT@{ svc: \"Amazon Detective\", label: \"✔ B: ログのデータを自動で集める\" }\n  AN([\"分析担当\"])\n  LOG[\"CloudTrail・VPC フローログ\"]\n  LOG -- \"AWS のリソースのログ\" --> DT\n  GD -- \"検出結果\" --> DT\n  DT == \"✔ B: 根本の原因を素早く調べる\" ==> AN\n  BADAC[\"⚠ A: Config アグリゲーターは構成と準拠のデータ<br/>⚠ C: Control Tower のコントロールはガバナンス用\"]\n  BADD[\"⚠ D: 手作業でログを探す\"]\n  BADAC -.-> AN\n  BADD -.-> LOG\n",
+      "alt": "Amazon Detective は AWS のリソースのログのデータを自動で集め、GuardDuty の検出結果を分析担当が調べて根本の原因を素早く見つけるのを助ける図（B）。D はログを手作業で探す今のやり方で、時間がかかる。"
+    }
+  ]
 }

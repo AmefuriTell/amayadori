@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0013",
+  "source": "flowchart TB\n  subgraph USE1[\"us-east-1\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n    EP1[\"⚠ 今: ここへ結果を報告 → アクションが完了しない\"]\n  end\n  subgraph EUW1[\"eu-west-1\"]\n  LF@{ svc: \"AWS Lambda\", label: \"スモークテストの関数\" }\n    EP2[\"✔ C: PutJobSuccessResult / PutJobFailureResult の送り先\"]\n  end\n  CP -- \"クロスリージョン呼び出し\" --> LF\n  LF -. \"⚠ 結果\" .-> EP1\n  LF == \"✔ C: 結果を関数のリージョンへ\" ==> EP2\n  EP2 -- \"成功か失敗に\" --> CP\n  X[\"⚠ A: 時間延長<br/>⚠ B: ログに認証情報が残る\"] -.-> LF\n  D[\"⚠ D: 手動の承認に置き換える\"] -.-> CP\n",
+  "alt": "クロスリージョンの Lambda 呼び出しアクションで、結果を CodePipeline のリージョンへ送ると完了しない。PutJobSuccessResult と PutJobFailureResult を関数のある eu-west-1 へ送る（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

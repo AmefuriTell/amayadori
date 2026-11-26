@@ -184,3 +184,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>docs check に検査を足す: ① 「## S」の見出しの後、空行までの行は「url:」「fetched:」「> 」のどれかで始まること。② 「S<番号>」の見出しは必ず「## 」で始まること。どちらも落ちたら ok にしない。人が決める</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-021" from="D-0004" status="proposed">
+  <issue>図の検証で、verdict を ok にしたまま issues に kind "unsupported" を書いた図を、dg verdict が重い指摘として数えて drop にし、図が抜けて C4 の form 検査に落ちた</issue>
+  <kind>tool</kind>
+  <change>dg verdict（と q verdict）で、verdict が ok の図に style 以外の kind があれば、判定せずに「verify.json が食い違っている」と返す。C3 の文書に「ok の図の issues は style だけ」を 1 行足す</change>
+</proposal>
+```

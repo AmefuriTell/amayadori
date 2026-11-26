@@ -33,12 +33,12 @@
     },
     {
       "id": "q-4.2-0007",
-      "source": "flowchart TB\n  EB[\"EventBridge のスケジュール\"]\n  AL[\"エイリアス prod\"]\n  V12@{ svc: \"AWS Lambda\", label: \"バージョン 12（公開済み）\" }\n  UN@{ svc: \"AWS Lambda\", label: \"未公開（Active tracing 有効）\" }\n  V13@{ svc: \"AWS Lambda\", label: \"新しいバージョン\" }\n  XR[\"AWS X-Ray<br/>トレース\"]\n  WB[\"⚠ B: 公開済みのバージョンは<br/>トレースのモードを変えられない\"]\n  EB -- \"呼び出し\" --> AL\n  AL -. \"⚠ 今: トレースなし\" .-> V12\n  UN -- \"✔ A: 公開\" --> V13\n  AL == \"✔ A: 新しい版へ更新\" ==> V13\n  V13 -- \"トレース\" --> XR\n  WB -.- V12\n",
+      "source": "flowchart TB\n  EB[\"EventBridge のスケジュール\"]\n  AL[\"エイリアス prod\"]\n  V12@{ svc: \"AWS Lambda\", label: \"バージョン 12（公開済み）\" }\n  UN@{ svc: \"AWS Lambda\", label: \"未公開（Active tracing 有効）\" }\n  V13@{ svc: \"AWS Lambda\", label: \"新しいバージョン\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>トレース\" }\n  WB[\"⚠ B: 公開済みのバージョンは<br/>トレースのモードを変えられない\"]\n  EB -- \"呼び出し\" --> AL\n  AL -. \"⚠ 今: トレースなし\" .-> V12\n  UN -- \"✔ A: 公開\" --> V13\n  AL == \"✔ A: 新しい版へ更新\" ==> V13\n  V13 -- \"トレース\" --> XR\n  WB -.- V12\n",
       "alt": "エイリアス prod 経由の Lambda 関数を X-Ray でトレースする図。トレースのモードは公開済みのバージョンでは変えられないので、Active tracing を有効にした未公開のバージョンから新しいバージョンを公開し、prod を向ける（A）。"
     },
     {
       "id": "q-4.2-0008",
-      "source": "flowchart TB\n  CL[\"クライアント\"]\n  API[\"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\"]\n  FN[\"Lambda 関数\"]\n  XR[\"AWS X-Ray<br/>サンプリングルール\"]\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WA[\"⚠ A: Lambda だけでは<br/>API Gateway から始まらない\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WA -.- FN\n  WBD -.- API\n",
+      "source": "flowchart TB\n  CL[\"クライアント\"]\n  API@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\" }\n  FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サンプリングルール\" }\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WA[\"⚠ A: Lambda だけでは<br/>API Gateway から始まらない\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WA -.- FN\n  WBD -.- API\n",
       "alt": "API Gateway から X-Ray のトレースを始める図。ステージで X-Ray を有効にして再デプロイし、/orders 用とそれ以外用のサンプリングルールを X-Ray のコンソールで作ると、割合を後から変えられる（C）。"
     },
     {

@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0009",
+  "source": "flowchart TB\n  subgraph SRC[\"元のリージョン\"]\n    OLD@{ svc: \"Amazon S3\", label: \"バケット（既存の数百万オブジェクト）\" }\n  end\n  subgraph DST[\"送信先のリージョン\"]\n    DS@{ svc: \"Amazon S3\", label: \"送信先のバケット\" }\n  end\n  OLD == \"✔ A: S3 バッチレプリケーションで既存の物を複製\" ==> DS\n  OLD -- \"✔ B: Replication Time Control（99.9% を 15 分以内）\" --> DS\n  X[\"⚠ C: 通常のレプリケーションは新しい物だけ\"] -.- OLD\n  Y[\"⚠ D: 同一リージョンは別のリージョンに置く要件に反する\"] -.- DS\n  Z[\"⚠ E: 全部を 1 分以内ではない\"] -.- DS\n",
+  "alt": "既存の数百万オブジェクトを持つバケットの S3 クロスリージョンレプリケーションの図。設定前からのオブジェクトは S3 バッチレプリケーションで複製し（A）、新しい物は Replication Time Control で 99.9% を 15 分以内にし複製の時間も見える（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

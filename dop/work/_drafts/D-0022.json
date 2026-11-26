@@ -3,7 +3,7 @@
   "diagrams": [
     {
       "id": "q-4.1-0001",
-      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"既存のロググループ\" }\n    KEY@{ svc: \"AWS KMS\", label: \"対称の KMS キー\" }\n    POL[\"✔ D: キーポリシーに文を追加<br/>logs のサービスプリンシパルを許可<br/>条件: このロググループの ARN\"]\n  end\n  WC[\"⚠ C: us-east-1 のキーと<br/>サービスプリンシパルは合わない\"]\n  WA[\"⚠ A: 非対称キーは使えない\"]\n  WB[\"⚠ B: IAM ロールに権限を足しても<br/>サービスプリンシパルは使えない\"]\n  LG -- \"関連付け\" --> KEY\n  POL == \"使う権限\" ==> KEY\n  WC -.- KEY\n  WA -.- KEY\n  WB -.- LG\n",
+      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"既存のロググループ\" }\n    KEY@{ svc: \"AWS KMS\", label: \"対称の KMS キー\" }\n    POL[\"✔ D: キーポリシーに文を追加<br/>logs のサービスプリンシパルを許可<br/>条件: このロググループの ARN\"]\n  end\n  WC[\"⚠ C: us-east-1 のキーと<br/>サービスプリンシパルは合わない\"]\n  WA[\"⚠ A: 非対称キーは使えない\"]\n  WB[\"⚠ B: IAM ロールに権限を足しても<br/>サービスプリンシパルは使えない\"]\n  LG -- \"関連付け\" --> KEY\n  POL == \"使う権限\" ==> KEY\n  WC -.- KEY\n  WA -.- KEY\n  WB -.- KEY\n",
       "alt": "eu-west-1 の CloudWatch Logs のロググループを KMS キーで暗号化する図。キーポリシーに、ロググループの ARN の条件付きで CloudWatch Logs のサービスプリンシパルへの許可を足すのが正解（D）。非対称キーや別リージョンのキーは使えない。"
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "id": "q-4.1-0005",
-      "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"AWS/EC2 と AWS/RDS のメトリクス\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム（Parquet に変換）\" }\n  DL@{ svc: \"Amazon S3\", label: \"データレイク\" }\n  OK[\"✔ D: 2 つの名前空間の include フィルター<br/>変換は Firehose で行う\"]\n  WA[\"⚠ A: ストリームが直接出せる形式は<br/>JSON と OpenTelemetry だけ\"]\n  WB[\"⚠ B: include と exclude の<br/>両方は置けない\"]\n  CW -- \"メトリクスストリーム\" --> FH\n  FH -- \"Parquet\" --> DL\n  OK -.- CW\n  WA -.- FH\n  WB -.- CW\n",
+      "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"AWS/EC2 と AWS/RDS のメトリクス\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム（Parquet に変換）\" }\n  DL@{ svc: \"Amazon S3\", label: \"データレイク\" }\n  OK[\"✔ D: 2 つの名前空間の include フィルター<br/>変換は Firehose で行う\"]\n  WA[\"⚠ A: ストリームが直接出せる形式は<br/>JSON と OpenTelemetry だけ\"]\n  WB[\"⚠ B: include と exclude の<br/>両方は置けない\"]\n  CW -- \"メトリクスストリーム\" --> FH\n  FH -- \"Parquet\" --> DL\n  OK -.- CW\n  WA -.- DL\n  WB -.- CW\n",
       "alt": "CloudWatch のメトリクスを Parquet で S3 に届ける図。名前空間の include フィルターを持つメトリクスストリームを Firehose へ送り、Firehose で Parquet に変換する（D）。ストリームが直接出せる形式は JSON と OpenTelemetry だけ。"
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "id": "q-4.1-0007",
-      "source": "flowchart TB\n  PS[\"AWS Systems Manager Parameter Store<br/>エージェントの設定\"]\n  SM[\"Systems Manager<br/>（エージェントを一括で入れる）\"]\n  EC2[\"EC2 インスタンス 300 台<br/>（CloudWatchAgentServerPolicy）\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"メモリ・ディスクのメトリクス\" }\n  OK[\"✔ C: パラメータ名が<br/>AmazonCloudWatch- で始まる\"]\n  WA[\"⚠ A: 名前が違うと管理ポリシーで読めない\"]\n  WB[\"⚠ B・D: 独自の cron や<br/>手作業のコピーになる\"]\n  SM -- \"インストール\" --> EC2\n  PS -- \"設定を読む\" --> EC2\n  EC2 -- \"メトリクス\" --> CW\n  OK -.- PS\n  WA -.- PS\n  WB -.- EC2\n",
+      "source": "flowchart TB\n  PS@{ svc: \"AWS Systems Manager Parameter Store\", label: \"AWS Systems Manager Parameter Store<br/>エージェントの設定\" }\n  SM[\"Systems Manager<br/>（エージェントを一括で入れる）\"]\n  EC2[\"EC2 インスタンス 300 台<br/>（CloudWatchAgentServerPolicy）\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"メモリ・ディスクのメトリクス\" }\n  OK[\"✔ C: パラメータ名が<br/>AmazonCloudWatch- で始まる\"]\n  WA[\"⚠ A: 名前が違うと管理ポリシーで読めない\"]\n  WB[\"⚠ B・D: 独自の cron や<br/>手作業のコピーになる\"]\n  SM -- \"インストール\" --> EC2\n  PS -- \"設定を読む\" --> EC2\n  EC2 -- \"メトリクス\" --> CW\n  OK -.- PS\n  WA -.- PS\n  WB -.- EC2\n",
       "alt": "300 台の EC2 に CloudWatch エージェントの 1 つの設定を使わせる図。設定を AmazonCloudWatch- で始まる名前で Parameter Store に置けば、管理ポリシーのままで読め、Systems Manager で一括で入れられる（C）。"
     },
     {
@@ -48,7 +48,7 @@
     },
     {
       "id": "q-4.1-0010",
-      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  B@{ svc: \"Amazon S3\", label: \"ログのバケット\" }\n  RULE[\"ライフサイクルのルール<br/>30 日後に安いクラスへ\"]\n  IA[\"より安いストレージクラス\"]\n  OK[\"✔ D: 128 KB より小さい<br/>オブジェクトは既定で移されない\"]\n  WA[\"⚠ A: ルールは既存のオブジェクトにも効く\"]\n  APP -- \"約 20 KB のファイル（数百万）\" --> B\n  RULE -.- B\n  B -. \"移されない\" .-> IA\n  OK -.- B\n  WA -.- RULE\n",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  B@{ svc: \"Amazon S3\", label: \"ログのバケット\" }\n  RULE[\"ライフサイクルのルール<br/>30 日後に安いクラスへ\"]\n  IA[\"より安いストレージクラス\"]\n  OK[\"✔ D: 128 KB より小さい<br/>オブジェクトは既定で移されない\"]\n  WA[\"⚠ A: ルールは既存のオブジェクトにも効く\"]\n  APP -- \"約 20 KB のファイル（数百万）\" --> B\n  RULE -.- B\n  B -. \"移されない\" .-> IA\n  OK -.- B\n  WA -.- RULE\n  WB[\"⚠ B: バケットポリシーでライフサイクルは止まらない\"] -.- B\n  WC[\"⚠ C: 移行に取り出しの料金はかからない\"] -.- RULE\n",
       "alt": "S3 のライフサイクルのルールが小さなログファイルを移さない図。約 20 KB のオブジェクトは、既定で 128 KB より小さい物はどのストレージクラスへも移されないため、元のクラスのままで費用も下がらない（D）。"
     }
   ]

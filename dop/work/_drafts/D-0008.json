@@ -1,55 +1,55 @@
 {
- "item": "D-0008",
- "diagrams": [
-  {
-   "id": "q-1.4-0001",
-   "source": "flowchart TB\n  USERS[\"本番のトラフィック\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ設定\" }\n  OLD@{ svc: \"AWS Lambda\", label: \"旧バージョン\" }\n  NEW@{ svc: \"AWS Lambda\", label: \"新バージョン\" }\n  BADB[\"⚠ B: linear は 1 分ごとに 10% → 全部移るまで約 10 分\"]\n  BADC[\"⚠ C: AllAtOnce は一度に全部\"]\n  BADD[\"⚠ D: update-alias のスクリプトを自分で保守\"]\n  USERS --> CD\n  CD -- \"最初は 90%\" --> OLD\n  CD -- \"✔ A: 最初に 10%\" --> NEW\n  CD == \"✔ A: 5 分後に残り 90%\" ==> NEW\n  BADB -.-> CD\n  BADC -.-> CD\n  BADD -.-> OLD",
-   "alt": "CodeDeploy の LambdaCanary10Percent5Minutes は、最初に 10% を新バージョンへ送り、5 分後に残り 90% を移す（A）。linear（B）は全部移るまで約 10 分、AllAtOnce（C）は一度に全部で要件に合わない。"
-  },
-  {
-   "id": "q-1.4-0002",
-   "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"ECS の blue/green デプロイ\" }\n  NLB[\"⚠ A・B: Network Load Balancer では ECSAllAtOnce しか使えない\"]\n  LB@{ svc: \"Elastic Load Balancing\", label: \"✔ D: Application Load Balancer に替える\" }\n  OLD@{ svc: \"Amazon ECS\", label: \"旧タスクセット\" }\n  NEW@{ svc: \"Amazon ECS\", label: \"新タスクセット\" }\n  BADC[\"⚠ C: 承認を足しても一度に全部移る\"]\n  CD -- \"ECSCanary10Percent5Minutes\" --> LB\n  LB == \"✔ D: 最初の 10% を 5 分\" ==> NEW\n  LB -- \"その後に残り\" --> OLD\n  NLB -.-> CD\n  BADC -.-> CD",
-   "alt": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと ECSAllAtOnce しか使えない。Application Load Balancer に替えて ECSCanary10Percent5Minutes を使うと、10% を 5 分流してから残りを移せる（D）。"
-  },
-  {
-   "id": "q-1.4-0003",
-   "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  ORIG@{ svc: \"Amazon EC2\", label: \"元のインスタンス（✔ D: 切り替え後も動かす）\" }\n  REPL@{ svc: \"Amazon EC2\", label: \"置き換え先のインスタンス\" }\n  QA[\"QA チーム\"]\n  BADA[\"⚠ A: すぐ再ルーティング → 試験前に本番の通信が流れる\"]\n  BADC[\"⚠ C: 待機後に元を自動で終了 → 運用チームが決められない\"]\n  CD -- \"インスタンスを用意\" --> REPL\n  QA -- \"先に試験\" --> REPL\n  ALB -- \"今の通信\" --> ORIG\n  REPL == \"✔ B: 手で切り替えるまで未登録\" ==> ALB\n  BADA -.-> REPL\n  BADC -.-> ORIG",
-   "alt": "置き換え先のインスタンスは、再ルーティングを手で選ぶ設定（B）にすると切り替えるまでロードバランサーに登録されず、QA が先に試験できる。元のインスタンスは動かしたままにする（D）。すぐ切り替え（A）や自動終了（C）は合わない。"
-  },
-  {
-   "id": "q-1.4-0004",
-   "source": "flowchart TB\n  USERS[\"受信トラフィック\"]\n  subgraph EB[\"Elastic Beanstalk の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョンのインスタンス\" }\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョンのインスタンス（新しい一式）\" }\n  end\n  OK[\"正常なら全部を新へ移し、旧を自動で削除\"]\n  BADA[\"⚠ A: Immutable は一部を一定時間だけ流す仕組みではない\"]\n  BADC[\"⚠ C: ローリングは 10% を 30 分流す形にならない\"]\n  USERS -- \"90%\" --> OLD\n  USERS == \"✔ B: 10% を 30 分\" ==> NEW\n  NEW -- \"問題なし\" --> OK\n  BADA -.-> NEW\n  BADC -.-> OLD",
-   "alt": "Elastic Beanstalk のデプロイポリシーを TrafficSplitting にして割合 10%、評価時間 30 分にすると、新バージョンへ 10% を 30 分流し、問題なければ全部を移して旧インスタンスを削除する（B）。"
-  },
-  {
-   "id": "q-1.4-0005",
-   "source": "flowchart TB\n  USERS[\"ユーザー\"]\n  subgraph BL[\"今の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョン\" }\n  end\n  subgraph GR[\"別の環境\"]\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョン（専用の URL で試験）\" }\n  end\n  BADAB[\"⚠ A・B: 同じ環境の更新 → 別の URL で先に試験できない\"]\n  BADD[\"⚠ D: すぐ古い環境を終了 → 戻せない\"]\n  USERS -- \"本番の URL\" --> OLD\n  USERS == \"✔ C: 環境 URL のスワップで切り替え\" ==> NEW\n  NEW -. \"戻す時も入れ替えるだけ\" .-> OLD\n  BADAB -.-> OLD\n  BADD -.-> OLD",
-   "alt": "Elastic Beanstalk の blue/green。新バージョンを別の環境に置き、専用の URL で試験してから環境 URL のスワップで即座に切り替え、もう一度入れ替えれば戻せる（C）。インプレースの更新（A・B）や、すぐ終了（D）は合わない。"
-  },
-  {
-   "id": "q-1.4-0006",
-   "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（サービスロール）\" }\n  STS@{ svc: \"AWS STS\", label: \"sts:GetServiceBearerToken の権限\" }\n  CA@{ svc: \"AWS CodeArtifact\", label: \"GetAuthorizationToken\" }\n  NPM[\"npm でパッケージをインストール\"]\n  BADB[\"⚠ B: 管理者の権限まで付く（最小権限に反する）\"]\n  BADC[\"⚠ C: ルートユーザーはトークンを取れない\"]\n  BADD[\"⚠ D: 寿命を延ばしてもトークンを取れない\"]\n  CB -- \"⚠ 今はアクセス拒否\" --> CA\n  STS == \"✔ A: 足りない権限を追加\" ==> CB\n  CA -- \"認可トークン\" --> NPM\n  BADB -.-> CB\n  BADC -.-> CA\n  BADD -.-> CA",
-   "alt": "CodeBuild が CodeArtifact の認可トークンを取るには、codeartifact の権限に加えて sts:GetServiceBearerToken が要る。足りないこの権限だけを追加するのが最小権限の解決（A）。"
-  },
-  {
-   "id": "q-1.4-0007",
-   "source": "flowchart TB\n  JOB[\"毎晩のジョブ（約 14 時間）\"]\n  TK[\"認可トークン（寿命 15 分〜12 時間）\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"パッケージのダウンロード\" }\n  BADA[\"⚠ A: 24 時間は選べない\"]\n  BADB[\"⚠ B: 権限を足しても寿命は変わらない\"]\n  BADC[\"⚠ C: 期限が切れても自動では延びない\"]\n  JOB -- \"開始時に 1 回だけ取得\" --> TK\n  TK -. \"12 時間で切れ、終盤にエラー\" .-> CA\n  JOB == \"✔ D: 切れる前に取り直す\" ==> CA\n  BADA -.-> TK\n  BADB -.-> TK\n  BADC -.-> TK",
-   "alt": "CodeArtifact の認可トークンの寿命は最大 12 時間で自動では延びないので、14 時間のジョブは開始時の 1 回だけだと終盤に切れる。期限が切れる前に新しいトークンを取り直す（D）。"
-  },
-  {
-   "id": "q-1.4-0008",
-   "source": "flowchart TB\n  subgraph TASK[\"Fargate 上の ECS タスク\"]\n    AG@{ svc: \"AWS Fargate\", label: \"エージェント（イメージを取得）\" }\n    APP@{ svc: \"Amazon ECS\", label: \"コンテナのアプリ\" }\n  end\n  ER@{ svc: \"AWS IAM\", label: \"✔ A: タスク実行ロール\" }\n  TR@{ svc: \"AWS IAM\", label: \"✔ B: タスクの IAM ロール\" }\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ\" }\n  S3@{ svc: \"Amazon S3\", label: \"バケット\" }\n  BAD[\"⚠ C・D: 権限を付けるロールが逆では届かない\"]\n  ER -- \"取得の権限\" --> AG\n  AG == \"イメージの取得\" ==> ECR\n  TR -- \"S3 への書き込み\" --> APP\n  APP == \"オブジェクトを書く\" ==> S3\n  BAD -.-> TASK",
-   "alt": "ECR からイメージを取るのはエージェントで、権限はタスク実行ロールに付ける（A）。コンテナ内のアプリが S3 に書く権限はタスクの IAM ロールに付ける（B）。ロールを逆にすると届かない（C・D）。"
-  },
-  {
-   "id": "q-1.4-0009",
-   "source": "flowchart TB\n  subgraph EC2[\"EC2 インスタンス\"]\n    AG@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy エージェント\" }\n    PROF@{ svc: \"AWS IAM\", label: \"✔ B: インスタンスプロファイルのロール\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"deploy-artifacts バケット\" }\n  BADA[\"⚠ A: 全バケットの全操作 → 最小権限に反する\"]\n  BADC[\"⚠ C: 取得するのはインスタンスのエージェント。サービスロールではない\"]\n  BADD[\"⚠ D: バケットの公開は禁止\"]\n  PROF -- \"このバケットの読み取りだけ\" --> AG\n  AG == \"リビジョンの取得\" ==> S3\n  BADA -.-> PROF\n  BADC -.-> AG\n  BADD -.-> S3",
-   "alt": "CodeDeploy エージェントは、インスタンスプロファイルのロールの権限で S3 からリビジョンを取る。deploy-artifacts からの読み取りだけを許すロールを付けるのが最小権限（B）。"
-  },
-  {
-   "id": "q-1.4-0010",
-   "source": "flowchart TB\n  SSM@{ svc: \"AWS Systems Manager\", label: \"✔ C: パッケージの配布（スケジュール）\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"AWSCodeDeployAgentV2 のパッケージ\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 200 台\" }\n  ONP[\"オンプレミス 50 台\"]\n  BADA[\"⚠ A: ユーザーデータは EC2 だけ。オンプレは手作業\"]\n  BADB[\"⚠ B: 1 回だけ。新バージョンは手作業\"]\n  BADD[\"⚠ D: cron ジョブを作って保守\"]\n  CD -- \"パッケージ\" --> SSM\n  SSM == \"インストール + 新版へ更新\" ==> EC2\n  SSM == \"インストール + 新版へ更新\" ==> ONP\n  BADA -.-> ONP\n  BADB -.-> SSM\n  BADD -.-> EC2",
-   "alt": "Systems Manager でスケジュールを組み、AWSCodeDeployAgentV2 のパッケージを EC2 とオンプレミスの全サーバーに、ログイン無しで入れて新バージョンにも更新する（C）。手作業や cron は手間が増える。"
-  }
- ]
+  "item": "D-0008",
+  "diagrams": [
+    {
+      "id": "q-1.4-0001",
+      "source": "flowchart TB\n  USERS[\"本番のトラフィック\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ設定\" }\n  OLD@{ svc: \"AWS Lambda\", label: \"旧バージョン\" }\n  NEW@{ svc: \"AWS Lambda\", label: \"新バージョン\" }\n  BADB[\"⚠ B: linear は 1 分ごとに 10% → 全部移るまで約 10 分\"]\n  BADC[\"⚠ C: AllAtOnce は一度に全部\"]\n  BADD[\"⚠ D: update-alias のスクリプトを自分で保守\"]\n  USERS --> CD\n  CD -- \"最初は 90%\" --> OLD\n  CD -- \"✔ A: 最初に 10%\" --> NEW\n  CD == \"✔ A: 5 分後に残り 90%\" ==> NEW\n  BADB -.-> CD\n  BADC -.-> CD\n  BADD -.-> OLD",
+      "alt": "CodeDeploy の LambdaCanary10Percent5Minutes は、最初に 10% を新バージョンへ送り、5 分後に残り 90% を移す（A）。linear（B）は全部移るまで約 10 分、AllAtOnce（C）は一度に全部で要件に合わない。"
+    },
+    {
+      "id": "q-1.4-0002",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"ECS の blue/green デプロイ\" }\n  NLB[\"⚠ A・B: Network Load Balancer では ECSAllAtOnce しか使えない\"]\n  LB@{ svc: \"Elastic Load Balancing\", label: \"✔ D: Application Load Balancer に替える\" }\n  OLD@{ svc: \"Amazon ECS\", label: \"旧タスクセット\" }\n  NEW@{ svc: \"Amazon ECS\", label: \"新タスクセット\" }\n  BADC[\"⚠ C: 承認を足しても一度に全部移る\"]\n  CD -- \"ECSCanary10Percent5Minutes\" --> LB\n  LB == \"✔ D: 10% を 5 分、その後に残り\" ==> NEW\n  LB -- \"最初は 90%\" --> OLD\n  NLB -.-> CD\n  BADC -.-> CD",
+      "alt": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと ECSAllAtOnce しか使えない。Application Load Balancer に替えて ECSCanary10Percent5Minutes を使うと、10% を 5 分流してから残りを移せる（D）。"
+    },
+    {
+      "id": "q-1.4-0003",
+      "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  ORIG@{ svc: \"Amazon EC2\", label: \"元のインスタンス（✔ D: 切り替え後も動かす）\" }\n  REPL@{ svc: \"Amazon EC2\", label: \"置き換え先のインスタンス\" }\n  QA[\"QA チーム\"]\n  BADA[\"⚠ A: すぐ再ルーティング → 試験前に本番の通信が流れる\"]\n  BADE[\"⚠ E: in-place は同じインスタンスを更新 → 先に試験できず元も残らない\"]\n  BADC[\"⚠ C: 待機後に元を自動で終了 → 運用チームが決められない\"]\n  CD -- \"インスタンスを用意\" --> REPL\n  QA -- \"先に試験\" --> REPL\n  ALB -- \"今の通信\" --> ORIG\n  REPL == \"✔ B: 手で切り替えるまで未登録\" ==> ALB\n  BADA -.-> REPL\n  BADC -.-> ORIG\n  BADE -.-> CD",
+      "alt": "置き換え先のインスタンスは、再ルーティングを手で選ぶ設定（B）にすると切り替えるまでロードバランサーに登録されず、QA が先に試験できる。元のインスタンスは動かしたままにする（D）。すぐ切り替え（A）や自動終了（C）は合わない。"
+    },
+    {
+      "id": "q-1.4-0004",
+      "source": "flowchart TB\n  USERS[\"受信トラフィック\"]\n  subgraph EB[\"Elastic Beanstalk の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョンのインスタンス\" }\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョンのインスタンス（新しい一式）\" }\n  end\n  OK[\"正常なら全部を新へ移し、旧を自動で削除\"]\n  BADA[\"⚠ A: Immutable は一部を一定時間だけ流す仕組みではない\"]\n  BADD[\"⚠ D: 環境を 2 つ持ち、重みを手作業で変える\"]\n  BADC[\"⚠ C: ローリングは 10% を 30 分流す形にならない\"]\n  USERS -- \"90%\" --> OLD\n  USERS == \"✔ B: 10% を 30 分\" ==> NEW\n  NEW -- \"問題なし\" --> OK\n  BADA -.-> NEW\n  BADC -.-> OLD\n  BADD -.-> USERS",
+      "alt": "Elastic Beanstalk のデプロイポリシーを TrafficSplitting にして割合 10%、評価時間 30 分にすると、新バージョンへ 10% を 30 分流し、問題なければ全部を移して旧インスタンスを削除する（B）。"
+    },
+    {
+      "id": "q-1.4-0005",
+      "source": "flowchart TB\n  USERS[\"ユーザー\"]\n  subgraph BL[\"今の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョン\" }\n  end\n  subgraph GR[\"別の環境\"]\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョン（専用の URL で試験）\" }\n  end\n  BADAB[\"⚠ A・B: 同じ環境の更新 → 別の URL で先に試験できない\"]\n  BADD[\"⚠ D: すぐ古い環境を終了 → 戻せない\"]\n  USERS -- \"本番の URL\" --> OLD\n  USERS == \"✔ C: 環境 URL のスワップで切り替え\" ==> NEW\n  NEW -. \"戻す時も入れ替えるだけ\" .-> OLD\n  BADAB -.-> OLD\n  BADD -.-> OLD",
+      "alt": "Elastic Beanstalk の blue/green。新バージョンを別の環境に置き、専用の URL で試験してから環境 URL のスワップで即座に切り替え、もう一度入れ替えれば戻せる（C）。インプレースの更新（A・B）や、すぐ終了（D）は合わない。"
+    },
+    {
+      "id": "q-1.4-0006",
+      "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（サービスロール）\" }\n  STS@{ svc: \"AWS STS\", label: \"sts:GetServiceBearerToken の権限\" }\n  CA@{ svc: \"AWS CodeArtifact\", label: \"GetAuthorizationToken\" }\n  NPM[\"npm でパッケージをインストール\"]\n  BADB[\"⚠ B: 管理者の権限まで付く（最小権限に反する）\"]\n  BADC[\"⚠ C: ルートユーザーはトークンを取れない\"]\n  BADD[\"⚠ D: 寿命を延ばしてもトークンを取れない\"]\n  CB -- \"⚠ 今はアクセス拒否\" --> CA\n  STS == \"✔ A: 足りない権限を追加\" ==> CB\n  CA -- \"認可トークン\" --> NPM\n  BADB -.-> CB\n  BADC -.-> CA\n  BADD -.-> CA",
+      "alt": "CodeBuild が CodeArtifact の認可トークンを取るには、codeartifact の権限に加えて sts:GetServiceBearerToken が要る。足りないこの権限だけを追加するのが最小権限の解決（A）。"
+    },
+    {
+      "id": "q-1.4-0007",
+      "source": "flowchart TB\n  JOB[\"毎晩のジョブ（約 14 時間）\"]\n  TK[\"認可トークン（寿命 15 分〜12 時間）\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"パッケージのダウンロード\" }\n  BADA[\"⚠ A: 24 時間は選べない\"]\n  BADB[\"⚠ B: 権限を足しても寿命は変わらない\"]\n  BADC[\"⚠ C: 期限が切れても自動では延びない\"]\n  JOB -- \"開始時に 1 回だけ取得\" --> TK\n  TK -. \"12 時間で切れ、終盤にエラー\" .-> CA\n  JOB == \"✔ D: 切れる前に取り直す\" ==> CA\n  BADA -.-> TK\n  BADB -.-> TK\n  BADC -.-> TK",
+      "alt": "CodeArtifact の認可トークンの寿命は最大 12 時間で自動では延びないので、14 時間のジョブは開始時の 1 回だけだと終盤に切れる。期限が切れる前に新しいトークンを取り直す（D）。"
+    },
+    {
+      "id": "q-1.4-0008",
+      "source": "flowchart TB\n  subgraph TASK[\"ECS タスク\"]\n    AG@{ svc: \"AWS Fargate\", label: \"エージェント（イメージを取得）\" }\n    APP@{ svc: \"Amazon ECS\", label: \"コンテナのアプリ\" }\n  end\n  ER@{ svc: \"AWS IAM\", label: \"✔ A: タスク実行ロール\" }\n  TR@{ svc: \"AWS IAM\", label: \"✔ B: タスクの IAM ロール\" }\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ\" }\n  S3@{ svc: \"Amazon S3\", label: \"バケット\" }\n  BADC[\"⚠ C: 取得の権限をタスクロールに付けても、取るのはエージェント\"]\n  BADD[\"⚠ D: S3 の権限を実行ロールに付けてもコンテナは使えない\"]\n  BADE[\"⚠ E: ECR を公開 → 権限の問題の答えにならない\"]\n  ER -- \"取得の権限\" --> AG\n  AG == \"イメージの取得\" ==> ECR\n  TR -- \"S3 への書き込み\" --> APP\n  APP == \"オブジェクトを書く\" ==> S3\n  BADC -.-> TR\n  BADD -.-> ER\n  BADE -.-> ECR",
+      "alt": "ECR からイメージを取るのはエージェントで、権限はタスク実行ロールに付ける（A）。コンテナ内のアプリが S3 に書く権限はタスクの IAM ロールに付ける（B）。ロールを逆にすると届かない（C・D）。"
+    },
+    {
+      "id": "q-1.4-0009",
+      "source": "flowchart TB\n  subgraph EC2[\"EC2 インスタンス\"]\n    AG@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy エージェント\" }\n    PROF@{ svc: \"AWS IAM\", label: \"✔ B: インスタンスプロファイルのロール\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"deploy-artifacts バケット\" }\n  BADA[\"⚠ A: 全バケットの全操作 → 最小権限に反する\"]\n  BADC[\"⚠ C: 取得するのはインスタンスのエージェント。サービスロールではない\"]\n  BADD[\"⚠ D: バケットの公開は禁止\"]\n  PROF -- \"このバケットの読み取りだけ\" --> AG\n  AG == \"リビジョンの取得\" ==> S3\n  BADA -.-> PROF\n  BADC -.-> AG\n  BADD -.-> S3",
+      "alt": "CodeDeploy エージェントは、インスタンスプロファイルのロールの権限で S3 からリビジョンを取る。deploy-artifacts からの読み取りだけを許すロールを付けるのが最小権限（B）。"
+    },
+    {
+      "id": "q-1.4-0010",
+      "source": "flowchart TB\n  SSM@{ svc: \"AWS Systems Manager\", label: \"✔ C: パッケージの配布（スケジュール）\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"AWSCodeDeployAgentV2 のパッケージ\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 200 台\" }\n  ONP[\"オンプレミス 50 台\"]\n  BADA[\"⚠ A: ユーザーデータは EC2 だけ。オンプレは手作業\"]\n  BADB[\"⚠ B: 1 回だけ。新バージョンは手作業\"]\n  BADD[\"⚠ D: cron ジョブを作って保守\"]\n  CD -- \"パッケージ\" --> SSM\n  SSM == \"インストール + 新版へ更新\" ==> EC2\n  SSM == \"インストール + 新版へ更新\" ==> ONP\n  BADA -.-> ONP\n  BADB -.-> SSM\n  BADD -.-> EC2",
+      "alt": "Systems Manager でスケジュールを組み、AWSCodeDeployAgentV2 のパッケージを EC2 とオンプレミスの全サーバーに、ログイン無しで入れて新バージョンにも更新する（C）。手作業や cron は手間が増える。"
+    }
+  ]
 }

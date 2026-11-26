@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0008",
+  "source": "flowchart TB\n  subgraph STR[\"✔ A: プロバイダー戦略\"]\n    SP@{ svc: \"AWS Fargate\", label: \"FARGATE_SPOT（ほとんどのタスク）\" }\n    OD@{ svc: \"AWS Fargate\", label: \"FARGATE（Spot が使えない時の分）\" }\n  end\n  S@{ svc: \"Amazon ECS\", label: \"キューのワーカーのサービス\" }\n  S -- \"タスク\" --> SP\n  S -- \"タスク\" --> OD\n  SP == \"✔ C: 回収の 2 分前に SIGTERM → stopTimeout 内に後片付け\" ==> CL[\"コンテナ\"]\n  X[\"⚠ B: Spot をオンデマンドへ自動で置き換えない\"] -.- SP\n  Y[\"⚠ D: Auto Scaling グループとは混ぜられない・⚠ E: タスク 1 つは止まる\"] -.- S\n",
+  "alt": "Fargate Spot でワーカーを動かす図。戦略に FARGATE_SPOT と FARGATE の両方を入れ、ほとんどを Spot に置いて、使えない時も処理を続ける（A）。回収時は SIGTERM を受け、stopTimeout の中に後片付けを収める（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

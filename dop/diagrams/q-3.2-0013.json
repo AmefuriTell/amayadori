@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0013",
+  "source": "flowchart TB\n  API([\"API\"])\n  F@{ svc: \"AWS Lambda\", label: \"関数（朝 08:00〜10:00 が山）\" }\n  AAS@{ svc: \"Application Auto Scaling\", label: \"Application Auto Scaling<br/>山の時間だけスケジュール\" }\n  API -- \"リクエスト\" --> F\n  AAS == \"✔ D: プロビジョニングされた同時実行（前もって初期化）\" ==> F\n  A[\"⚠ A: 予約された同時実行は前もって初期化しない\"] -.- F\n  B[\"⚠ B: 一日中の山の水準は使わない間も課金\"] -.- F\n  C[\"⚠ C: 上限を上げても初期化は変わらない\"] -.- F\n",
+  "alt": "朝の山で Lambda のコールドスタートによるレイテンシーが出る図。Application Auto Scaling で山の時間だけプロビジョニングされた同時実行を用意すれば、レイテンシーを下げつつ他の時間の費用を抑えられる（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

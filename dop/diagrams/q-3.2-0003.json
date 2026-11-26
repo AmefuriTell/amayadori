@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0003",
+  "source": "flowchart TB\n  subgraph ASG[\"Auto Scaling グループ\"]\n    NEW@{ svc: \"Amazon EC2 Auto Scaling\", label: \"新しいインスタンス（約 5 分 CPU が高い）\" }\n    OLD[\"既存のインスタンス\"]\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"平均 CPU のメトリクス\" }\n  POL[\"ターゲット追跡ポリシー（目標 50%）\"]\n  OLD -- \"CPU\" --> CW\n  NEW -. \"⚠ 初期化中の CPU も集計され、増やしすぎ\" .-> CW\n  NEW == \"✔ C: ウォームアップ約 5 分の間は集計に入れない\" ==> CW\n  CW -- \"平均 CPU\" --> POL\n  POL -- \"起動\" --> NEW\n  X[\"⚠ A: 目標 80%・B: 目標 30%・D: スケールイン無効 は要件に反する\"] -.- POL\n",
+  "alt": "ターゲット追跡スケーリングで、新しいインスタンスの初期化中の高い CPU が集計に入り増やしすぎる図。インスタンスのウォームアップ時間を約 5 分にすると、その間は集計に入らず目標 50% のまま余計に増えない（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

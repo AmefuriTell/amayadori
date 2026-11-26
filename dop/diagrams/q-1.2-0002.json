@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0002",
+  "source": "flowchart TB\n  DEV[\"開発者\"]\n  subgraph R[\"CodeBuild ビルド（.NET）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"テストが test-results に NUnit 3 XML を出力\" }\n    RP[\"✔ A: reports セクション（file-format: NUNIT3XML）\"]\n  end\n  CB -- \"結果ファイル\" --> RP\n  RP == \"✔ A: 変換なしでテストレポート\" ==> DEV\n  B[\"⚠ B: file-format 無しは JUNITXML 扱い\"] -.-> RP\n  C[\"⚠ C: 変換手順を足すのは余計\"] -.-> CB\n  D[\"⚠ D: S3 に残るだけでレポートにならない\"] -.-> CB\n",
+  "alt": "NUnit 3 の XML 結果を CodeBuild のテストレポートで見る図。buildspec の reports に結果ファイルと file-format NUNIT3XML を指定する（A）。形式を省くと JUNITXML 扱いになり合わない（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

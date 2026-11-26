@@ -3,32 +3,32 @@
   "diagrams": [
     {
       "id": "q-2.3-0011",
-      "source": "flowchart TB\n  ENG[\"DevOps エンジニア\"]\n  RC[\"AWS Systems Manager Run Command<br/>Run Command（1 回きり）\"]\n  N[\"200 台のマネージドノード\"]\n  X1[\"⚠ B: 既定は 50 で 4 分の 1 が同時に動く\"]\n  X2[\"⚠ D: 10% のエラーまで送信を続ける\"]\n  X3[\"⚠ E: 毎日の関連付けは 1 回きりでない\"]\n  ENG -- \"コマンド\" --> RC\n  RC == \"✔ A: 同時は 10% まで\" ==> N\n  N -- \"エラー\" --> RC\n  RC -. \"✔ C: max-errors 0 で送信停止\" .-> N\n  X1 -.-> RC\n  X2 -.-> RC\n  X3 -.-> RC\n",
+      "source": "flowchart TB\n  ENG[\"DevOps エンジニア\"]\n  RC@{ svc: \"AWS Systems Manager\", label: \"Run Command（1 回きり）\" }\n  N[\"200 台のマネージドノード\"]\n  X1[\"⚠ B: 既定は 50 で 4 分の 1 が同時に動く\"]\n  X2[\"⚠ D: 10% のエラーまで送信を続ける\"]\n  X3[\"⚠ E: 毎日の関連付けは 1 回きりでない\"]\n  ENG -- \"コマンド\" --> RC\n  RC == \"✔ A: 同時は 10% まで\" ==> N\n  N -- \"エラー\" --> RC\n  RC -. \"✔ C: max-errors 0 で送信停止\" .-> N\n  X1 -.-> RC\n  X2 -.-> RC\n  X3 -.-> RC\n",
       "alt": "Run Command で 200 台に 1 回きりの変更を行う図。max-concurrency を 10%（A）、max-errors を 0（C）にすると、同時実行が 10 分の 1 以下で、最初のエラーで送信が止まる。"
     },
     {
       "id": "q-2.3-0012",
-      "source": "flowchart TB\n  SM[\"AWS Systems Manager State Manager<br/>関連付け\"]\n  PM[\"Patch Manager のパッチ\"]\n  CP[\"AWS Systems Manager Compliance<br/>✔ A: Compliance（1 か所で確認）\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: ルール\" }\n  N[\"準拠していないノード\"]\n  X1[\"⚠ B・D: 独自の収集やレポートを作る\"]\n  X2[\"⚠ C: 修復が手作業\"]\n  SM -- \"関連付けの準拠\" --> CP\n  PM -- \"パッチの準拠\" --> CP\n  CP == \"準拠していない\" ==> EB\n  EB == \"自動で修復を開始\" ==> N\n  X1 -.-> CP\n  X2 -.-> N\n",
+      "source": "flowchart TB\n  SM@{ svc: \"AWS Systems Manager State Manager\", label: \"AWS Systems Manager State Manager<br/>関連付け\" }\n  PM[\"Patch Manager のパッチ\"]\n  CP@{ svc: \"AWS Systems Manager\", label: \"✔ A: Compliance（1 か所で確認）\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: ルール\" }\n  N[\"準拠していないノード\"]\n  X1[\"⚠ B・D: 独自の収集やレポートを作る\"]\n  X2[\"⚠ C: 修復が手作業\"]\n  SM -- \"関連付けの準拠\" --> CP\n  PM -- \"パッチの準拠\" --> CP\n  CP == \"準拠していない\" ==> EB\n  EB == \"自動で修復を開始\" ==> N\n  X1 -.-> CP\n  X2 -.-> N\n",
       "alt": "State Manager の関連付けと Patch Manager のパッチの準拠を Systems Manager Compliance で 1 か所に表示し、EventBridge のルールで修復を自動で始める図。独自ツールが要らない A が正解。"
     },
     {
       "id": "q-2.3-0013",
-      "source": "flowchart TB\n  QS[\"Quick Setup\"]\n  PP[\"AWS Systems Manager Patch Manager<br/>✔ A: パッチポリシー 1 つ\"]\n  ORG@{ svc: \"AWS Organizations\", label: \"40 アカウント・4 リージョンのノード\" }\n  X1[\"⚠ B: 場所ごとにウィンドウを作って保守する\"]\n  X2[\"⚠ C・D: ノードごとの cron や手作業\"]\n  QS -- \"組織で作成\" --> PP\n  PP == \"スキャンと導入は別の日程\" ==> ORG\n  X1 -.-> ORG\n  X2 -.-> ORG\n",
+      "source": "flowchart TB\n  QS[\"Quick Setup\"]\n  PP@{ svc: \"AWS Systems Manager\", label: \"✔ A: Patch Manager のパッチポリシー 1 つ\" }\n  ORG@{ svc: \"AWS Organizations\", label: \"40 アカウント・4 リージョンのノード\" }\n  X1[\"⚠ B: 場所ごとにウィンドウを作って保守する\"]\n  X2[\"⚠ C・D: ノードごとの cron や手作業\"]\n  QS -- \"組織で作成\" --> PP\n  PP == \"スキャンと導入は別の日程\" ==> ORG\n  X1 -.-> ORG\n  X2 -.-> ORG\n",
       "alt": "40 アカウント・4 リージョンのノードに、Quick Setup で作るパッチポリシー 1 つを組織全体へ当てる図。毎日のスキャンと毎週のインストールを別のスケジュールにできる A が正解で、場所ごとの設定（B）や手作業（C・D）は手間が大きい。"
     },
     {
       "id": "q-2.3-0014",
-      "source": "flowchart TB\n  UP[\"重要な更新（公開された）\"]\n  PB[\"AWS Systems Manager Patch Manager<br/>✔ B: 独自のベースライン（自動承認の遅延 7 日）\"]\n  N[\"マネージドノード\"]\n  X1[\"⚠ A: 事前定義のベースラインは変えられない\"]\n  X2[\"⚠ C: 締め切り日を毎週手作業で更新\"]\n  X3[\"⚠ D: 毎週 1 つずつ手作業で承認\"]\n  UP -- \"公開から 7 日待つ\" --> PB\n  PB == \"自動で承認して適用\" ==> N\n  X1 -.-> PB\n  X2 -.-> PB\n  X3 -.-> PB\n",
+      "source": "flowchart TB\n  UP[\"重要な更新（公開された）\"]\n  PB@{ svc: \"AWS Systems Manager\", label: \"✔ B: 独自のパッチベースライン（自動承認の遅延 7 日）\" }\n  PRE[\"事前定義のパッチベースライン\"]\n  N[\"マネージドノード\"]\n  X1[\"⚠ A: 事前定義のベースラインは変えられない\"]\n  X2[\"⚠ C: 締め切り日を毎週手作業で更新\"]\n  X3[\"⚠ D: 毎週 1 つずつ手作業で承認\"]\n  UP -- \"公開から 7 日待つ\" --> PB\n  PB == \"自動で承認して適用\" ==> N\n  X1 -.-> PRE\n  X2 -.-> PB\n  X3 -.-> UP\n",
       "alt": "公開から 7 日たった重要な更新だけを適用する図。承認ルールで 7 日の自動承認の遅延を使う独自のパッチベースライン（B）なら手作業が要らない。事前定義のベースラインは変えられない（A）。"
     },
     {
       "id": "q-2.3-0015",
-      "source": "flowchart TB\n  MW[\"AWS Systems Manager Maintenance Windows<br/>✔ D: 日曜 02:00〜05:00 のウィンドウ\"]\n  T1@{ svc: \"AWS Lambda\", label: \"タスク 1: ロードバランサーから外す\" }\n  T2[\"タスク 2: Run Command でパッチを入れる\"]\n  N[\"対象のノード\"]\n  X1[\"⚠ A: State Manager は構成の準拠向き\"]\n  X2[\"⚠ B・C: cron や手作業は手間が大きい\"]\n  MW -- \"ターゲットとタスクを登録\" --> T1\n  T1 -- \"続けて実行\" --> T2\n  T2 == \"パッチを入れる\" ==> N\n  X1 -.-> MW\n  X2 -.-> MW\n",
+      "source": "flowchart TB\n  MW@{ svc: \"AWS Systems Manager Maintenance Windows\", label: \"AWS Systems Manager Maintenance Windows<br/>✔ D: 日曜 02:00〜05:00 のウィンドウ\" }\n  T1@{ svc: \"AWS Lambda\", label: \"タスク 1: ロードバランサーから外す\" }\n  T2[\"タスク 2: Run Command でパッチを入れる\"]\n  N[\"対象のノード\"]\n  X1[\"⚠ A: State Manager は構成の準拠向き\"]\n  X2[\"⚠ B・C: cron や手作業は手間が大きい\"]\n  MW -- \"ターゲットとタスクを登録\" --> T1\n  T1 -- \"続けて実行\" --> T2\n  T2 == \"パッチを入れる\" ==> N\n  X1 -.-> N\n  X2 -.-> N\n",
       "alt": "日曜の決まった時間帯だけパッチを当てる図。メンテナンスウィンドウに最大の長さ・ターゲット・Lambda と Run Command のタスクを登録する D が正解で、State Manager（A）は時間帯内で複数のタスクを動かす用途に合わない。"
     },
     {
       "id": "q-2.3-0016",
-      "source": "flowchart TB\n  N[\"2,000 台のマネージドノード\"]\n  INV[\"AWS Systems Manager Inventory<br/>✔ C: Inventory\"]\n  S3@{ svc: \"Amazon S3\", label: \"中央のバケット\" }\n  Q[\"組み込みのツールでクエリ\"]\n  X1[\"⚠ A: パッチの準拠は承認パッチの確認用\"]\n  X2[\"⚠ B: 収集スクリプトを書いて保守する\"]\n  X3[\"⚠ D: 各ノードへ手作業でサインイン\"]\n  N -- \"メタデータ\" --> INV\n  INV == \"集めて置く\" ==> S3\n  S3 -- \"どのノードに入っているか\" --> Q\n  X1 -.-> Q\n  X2 -.-> INV\n  X3 -.-> N\n",
+      "source": "flowchart TB\n  N[\"2,000 台のマネージドノード\"]\n  INV@{ svc: \"AWS Systems Manager Inventory\", label: \"AWS Systems Manager Inventory<br/>✔ C: Inventory\" }\n  S3@{ svc: \"Amazon S3\", label: \"中央のバケット\" }\n  Q[\"組み込みのツールでクエリ\"]\n  X1[\"⚠ A: パッチの準拠は承認パッチの確認用\"]\n  X2[\"⚠ B: 収集スクリプトを書いて保守する\"]\n  X3[\"⚠ D: 各ノードへ手作業でサインイン\"]\n  N -- \"メタデータ\" --> INV\n  INV == \"集めて置く\" ==> S3\n  S3 -- \"どのノードに入っているか\" --> Q\n  X1 -.-> Q\n  X2 -.-> INV\n  X3 -.-> N\n",
       "alt": "脆弱なエージェントのバージョンが入ったノードを探す図。Inventory が 2,000 台のメタデータを中央の S3 に集め、組み込みのツールでクエリできる C が正解で、スクリプト（B）や手作業（D）は要件に反する。"
     }
   ]

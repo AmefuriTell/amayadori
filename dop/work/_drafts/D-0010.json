@@ -1,55 +1,55 @@
 {
- "item": "D-0010",
- "diagrams": [
-  {
-   "id": "q-2.1-0001",
-   "source": "flowchart TB\n  OPS([\"運用チーム\"])\n  CS@{ svc: \"AWS CloudFormation\", label: \"✔ B: 変更セットを作って確認\" }\n  CF@{ svc: \"AWS CloudFormation\", label: \"スタックの更新\" }\n  S3@{ svc: \"Amazon S3\", label: \"✔ B: 監査ログのバケット（Retain）\" }\n  RDS@{ svc: \"Amazon RDS\", label: \"DB インスタンス\" }\n  OPS --> CS\n  CS == \"確認後に実行\" ==> CF\n  OPS -. \"⚠ A: 直接 UpdateStack、事前に見えない\" .-> CF\n  CF --> RDS\n  CF == \"✔ B: 外れても残る\" ==> S3\n  CF -. \"⚠ C: 指定なしだと消える\" .-> S3\n",
-   "alt": "本番の CloudFormation スタックの更新の図。変更セットで実行前に置き換えや削除を確かめ、S3 バケットに DeletionPolicy: Retain を付けて残す（B）。直接の UpdateStack（A）や指定なし（C）は要件に合わない。"
-  },
-  {
-   "id": "q-2.1-0002",
-   "source": "flowchart TB\n  NET@{ svc: \"AWS CloudFormation\", label: \"ネットワークのスタック（サブネット ID を export）\" }\n  APP@{ svc: \"AWS CloudFormation\", label: \"同じアカウントのアプリのスタック 3 つ\" }\n  NEW@{ svc: \"AWS CloudFormation\", label: \"別アカウントの新しいスタック\" }\n  NET -- \"ImportValue で import 中\" --> APP\n  APP == \"✔ A: 先に import を外す\" ==> NET\n  NET == \"✔ B: Fn::GetStackOutput で読む\" ==> NEW\n  NET -. \"⚠ C: ImportValue は同じアカウントだけ\" .-> NEW\n  APP -. \"⚠ D: import 中は値を変えられない\" .-> NET\n",
-   "alt": "ネットワークのスタックの export 値を変える図。import 中は変更も削除もできないので先に import を外し（A）、別アカウントのスタックは Fn::GetStackOutput で出力を読む（B）。"
-  },
-  {
-   "id": "q-2.1-0003",
-   "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"AWS::Serverless::Function（SAM）\" }\n  AL@{ svc: \"AWS Lambda\", label: \"エイリアスとバージョン\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"アプリケーション・デプロイグループ・ロール\" }\n  FN == \"✔ D: AutoPublishAlias\" ==> AL\n  FN == \"✔ D: DeploymentPreference\" ==> CD\n  CD -- \"通信を移す\" --> AL\n  FN -. \"⚠ A: エイリアスだけ\" .-> AL\n  FN -. \"⚠ B: 手で書くと長くなる\" .-> CD\n",
-   "alt": "SAM の Lambda 関数に AutoPublishAlias と DeploymentPreference を書くと、エイリアスと CodeDeploy のリソースを SAM が作り、CodeDeploy が通信を移す（D）。手で書く B や CodeDeploy 無しの A は不適切。"
-  },
-  {
-   "id": "q-2.1-0004",
-   "source": "flowchart TB\n  APP[\"CDK のアプリ\"]\n  subgraph E1[\"us-east-1 のアカウント\"]\n    T1@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n    B1@{ svc: \"Amazon S3\", label: \"アセットのバケット\" }\n    R1@{ svc: \"Amazon ECR\", label: \"イメージのリポジトリ\" }\n  end\n  subgraph E2[\"eu-west-1 のアカウント\"]\n    T2@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n  end\n  APP == \"✔ A: cdk bootstrap を 1 回\" ==> T1\n  APP == \"✔ A: 環境の引数を 2 つ\" ==> T2\n  T1 -- \"作る\" --> B1\n  T1 -- \"作る\" --> R1\n  APP -. \"⚠ D: us-east-1 だけだと不足\" .-> T2\n",
-   "alt": "CDK のアプリを 2 つの環境に初めてデプロイする図。cdk bootstrap に環境を 2 つ指定して 1 回実行すると、各環境に CDKToolkit スタックと S3・ECR ができる（A）。片方だけ（D）や準備なしは不足。"
-  },
-  {
-   "id": "q-2.1-0005",
-   "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新\" }\n  R1[\"リージョン 1: 10 アカウントずつ\"]\n  R2[\"リージョン 2: 10 アカウントずつ\"]\n  STOP([\"停止\"])\n  OP == \"✔ C: Sequential（1 リージョンずつ）\" ==> R1\n  R1 == \"終わったら次へ\" ==> R2\n  R1 -. \"✔ C: 失敗が 2 を超える\" .-> STOP\n  OP -. \"⚠ A: Parallel は同時に複数\" .-> R2\n  OP -. \"⚠ B: 同時 100 は多すぎる\" .-> R1\n",
-   "alt": "StackSet の更新を、同時 10 アカウント・障害耐性 2・Sequential で行う図。10 個ずつ、1 リージョンずつ進み、失敗が 2 を超えると止まる（C）。A は Parallel、B は 100 同時、D は耐性 10 で要件に反する。"
-  },
-  {
-   "id": "q-2.1-0006",
-   "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新（200 アカウント）\" }\n  ST[\"既定の Strict: 同時数が 耐性+1 に縛られ 1 つずつ\"]\n  SF[\"✔ A: Soft: 失敗に関わらず 20 アカウントずつ\"]\n  OP -. \"⚠ 今: 耐性 0\" .-> ST\n  OP == \"✔ A: SOFT_FAILURE_TOLERANCE\" ==> SF\n  ST -. \"⚠ D: 200 にしても 1 のまま\" .-> SF\n",
-   "alt": "StackSet の更新が耐性 0 の既定の Strict モードで 1 アカウントずつになる図。同時実行モードを SOFT_FAILURE_TOLERANCE にすると失敗の数に関わらず 20 アカウントずつ動く（A）。D では解決しない。"
-  },
-  {
-   "id": "q-2.1-0007",
-   "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet（InstanceType の既定値）\" }\n  O[\"その他のアカウント: 既定値\"]\n  P[\"eu-west-1 の本番: ✔ B: 上書きした大きい値\"]\n  SS -- \"既定値\" --> O\n  SS == \"✔ B: そのスタックだけ上書き\" ==> P\n  SS -. \"⚠ A: 全スタックが変わる\" .-> O\n  SS -. \"⚠ C: StackSet が 2 つになる\" .-> P\n",
-   "alt": "StackSet の既定値はそのままに、eu-west-1 の本番のスタックインスタンスだけ InstanceType の値を上書きする図（B）。更新で値が残り、ドリフトにもならない。A、C は要件に合わない。"
-  },
-  {
-   "id": "q-2.1-0008",
-   "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  DA@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ A: 委任管理者（プラットフォーム）\" }\n  SSM@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ B: StackSet は管理アカウントに作られる\" }\n  OU[\"組織のアカウント\"]\n  MGMT -- \"委任管理者に登録\" --> DA\n  DA -- \"作る・管理\" --> SSM\n  SSM -- \"スタックを展開\" --> OU\n  MGMT -. \"⚠ C: OU に絞れない\" .-> DA\n  DA -. \"⚠ E: service-managed も作れる\" .-> SSM\n",
-   "alt": "メンバーアカウントを StackSets の委任管理者に登録すると、管理アカウントにサインインせずに service-managed の StackSet を作れる図。StackSet 自体は管理アカウントに作られる（A、B）。"
-  },
-  {
-   "id": "q-2.1-0009",
-   "source": "flowchart TB\n  DEV([\"プロダクトチーム\"])\n  AC@{ svc: \"AWS AppConfig\", label: \"✔ B: 機能フラグ＋段階的な戦略\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"エラー率のアラーム\" }\n  APP[\"ECS のウェブアプリ\"]\n  DEV -- \"フラグを変更\" --> AC\n  AC == \"✔ B: 一部から全員へ\" ==> APP\n  CW -- \"ALARM（環境に指定）\" --> AC\n  AC == \"✔ B: 自動で元に戻す\" ==> APP\n  DEV -. \"⚠ D: 設定の変更にデプロイが要る\" .-> APP\n",
-   "alt": "機能フラグを AWS AppConfig に置き、段階的なデプロイ戦略で一部から全員へ展開する図。環境に指定した CloudWatch アラームが ALARM になると自動で前の設定に戻る（B）。D はコードの再デプロイが要る。"
-  },
-  {
-   "id": "q-2.1-0010",
-   "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"既存の S3 バケット（JSON の設定）\" }\n  PR@{ svc: \"AWS AppConfig\", label: \"✔ A: 設定プロファイル（ソースは S3）\" }\n  LV@{ svc: \"AWS Lambda\", label: \"✔ B: draft-07 のバリデーター\" }\n  APP[\"アプリケーション\"]\n  S3 -- \"設定データ\" --> PR\n  PR -- \"デプロイ時に検証\" --> LV\n  PR == \"✔ A: 通ったものだけ\" ==> APP\n  PR -. \"⚠ C: インラインは 4.X だけ\" .-> LV\n  S3 -. \"⚠ D: S3 から移すと要件に反する\" .-> PR\n",
-   "alt": "S3 の JSON 設定を、AppConfig の設定プロファイル（ソースは S3）と Lambda のバリデーターで draft-07 の検証をしてからアプリに届ける図（A と B）。インラインのスキーマは 4.X だけで、D は要件に反する。"
-  }
- ]
+  "item": "D-0010",
+  "diagrams": [
+    {
+      "id": "q-2.1-0001",
+      "source": "flowchart TB\n  OPS([\"運用チーム\"])\n  CS@{ svc: \"AWS CloudFormation\", label: \"✔ B: 変更セットを作って確認\" }\n  CF@{ svc: \"AWS CloudFormation\", label: \"スタックの更新\" }\n  S3@{ svc: \"Amazon S3\", label: \"✔ B: 監査ログのバケット（Retain）\" }\n  RDS@{ svc: \"Amazon RDS\", label: \"DB インスタンス\" }\n  OPS --> CS\n  CS == \"確認後に実行\" ==> CF\n  OPS -. \"⚠ A: 直接 UpdateStack、事前に見えない\" .-> CF\n  CF --> RDS\n  CF == \"✔ B: 外れても残る\" ==> S3\n  CF -. \"⚠ C・D: 指定なしだと消える（既定は Snapshot ではない）\" .-> S3\n",
+      "alt": "本番の CloudFormation スタックの更新の図。変更セットで実行前に置き換えや削除を確かめ、S3 バケットに DeletionPolicy: Retain を付けて残す（B）。直接の UpdateStack（A）や指定なし（C）は要件に合わない。"
+    },
+    {
+      "id": "q-2.1-0002",
+      "source": "flowchart TB\n  NET@{ svc: \"AWS CloudFormation\", label: \"ネットワークのスタック（サブネット ID を export）\" }\n  APP@{ svc: \"AWS CloudFormation\", label: \"同じアカウントのアプリのスタック 3 つ\" }\n  NEW@{ svc: \"AWS CloudFormation\", label: \"別アカウントの新しいスタック\" }\n  NET -- \"ImportValue で import 中\" --> APP\n  APP == \"✔ A: 先に import を外す\" ==> NET\n  NET == \"✔ B: Fn::GetStackOutput で読む\" ==> NEW\n  NET -. \"⚠ C: ImportValue は同じアカウントだけ\" .-> NEW\n  APP -. \"⚠ D・E: import 中は値の変更も削除もできない\" .-> NET\n",
+      "alt": "ネットワークのスタックの export 値を変える図。import 中は変更も削除もできないので先に import を外し（A）、別アカウントのスタックは Fn::GetStackOutput で出力を読む（B）。"
+    },
+    {
+      "id": "q-2.1-0003",
+      "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"AWS::Serverless::Function（SAM）\" }\n  AL@{ svc: \"AWS Lambda\", label: \"エイリアスとバージョン\" }\n  BADC[\"⚠ C: CodeDeploy を使わず、重みを変えるスクリプトを保守\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"アプリケーション・デプロイグループ・ロール\" }\n  FN == \"✔ D: AutoPublishAlias\" ==> AL\n  FN == \"✔ D: DeploymentPreference\" ==> CD\n  CD -- \"通信を移す\" --> AL\n  FN -. \"⚠ A: エイリアスだけ\" .-> AL\n  BADC -.-> AL\n  FN -. \"⚠ B: 手で書くと長くなる\" .-> CD\n",
+      "alt": "SAM の Lambda 関数に AutoPublishAlias と DeploymentPreference を書くと、エイリアスと CodeDeploy のリソースを SAM が作り、CodeDeploy が通信を移す（D）。手で書く B や CodeDeploy 無しの A は不適切。"
+    },
+    {
+      "id": "q-2.1-0004",
+      "source": "flowchart TB\n  APP[\"CDK のアプリ\"]\n  subgraph E1[\"us-east-1\"]\n    T1@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n    B1@{ svc: \"Amazon S3\", label: \"アセットのバケット\" }\n    R1@{ svc: \"Amazon ECR\", label: \"イメージのリポジトリ\" }\n  end\n  subgraph E2[\"eu-west-1\"]\n    T2@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n  end\n  BADBC[\"⚠ B: 準備なしではアセットを置けない<br/>⚠ C: S3・ECR を手で作る\"]\n  APP == \"✔ A: cdk bootstrap を 1 回\" ==> T1\n  APP == \"✔ A: 環境の引数を 2 つ\" ==> T2\n  T1 -- \"作る\" --> B1\n  T1 -- \"作る\" --> R1\n  BADBC -.-> APP\n  APP -. \"⚠ D: us-east-1 だけだと不足\" .-> T2\n",
+      "alt": "CDK のアプリを 2 つの環境に初めてデプロイする図。cdk bootstrap に環境を 2 つ指定して 1 回実行すると、各環境に CDKToolkit スタックと S3・ECR ができる（A）。片方だけ（D）や準備なしは不足。"
+    },
+    {
+      "id": "q-2.1-0005",
+      "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新\" }\n  R1[\"リージョン 1: 10 アカウントずつ\"]\n  R2[\"リージョン 2: 10 アカウントずつ\"]\n  STOP([\"停止\"])\n  BADD[\"⚠ D: 耐性 10 だと 2 を超えても止まらない\"]\n  OP == \"✔ C: Sequential（1 リージョンずつ）\" ==> R1\n  R1 == \"終わったら次へ\" ==> R2\n  R1 -. \"✔ C: 失敗が 2 を超える\" .-> STOP\n  BADD -.-> STOP\n  OP -. \"⚠ A: Parallel は同時に複数\" .-> R2\n  OP -. \"⚠ B: 同時 100 は多すぎる\" .-> R1\n",
+      "alt": "StackSet の更新を、同時 10 アカウント・障害耐性 2・Sequential で行う図。10 個ずつ、1 リージョンずつ進み、失敗が 2 を超えると止まる（C）。A は Parallel、B は 100 同時、D は耐性 10 で要件に反する。"
+    },
+    {
+      "id": "q-2.1-0006",
+      "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新（200 アカウント）\" }\n  ST[\"既定の Strict: 同時数が 耐性+1 に縛られ 1 つずつ\"]\n  SF[\"✔ A: Soft: 失敗に関わらず 20 アカウントずつ\"]\n  BADBC[\"⚠ B: リージョンの並列はアカウントの同時数と無関係<br/>⚠ C: StackSet を 10 個に分けると管理の手間\"]\n  BADD[\"⚠ D: 200 に増やしても Strict のまま 1 つずつ\"]\n  OP -. \"⚠ 今: 耐性 0\" .-> ST\n  BADBC -.-> OP\n  BADD -.-> ST\n  OP == \"✔ A: SOFT_FAILURE_TOLERANCE\" ==> SF\n",
+      "alt": "StackSet の更新が耐性 0 の既定の Strict モードで 1 アカウントずつになる図。同時実行モードを SOFT_FAILURE_TOLERANCE にすると失敗の数に関わらず 20 アカウントずつ動く（A）。D では解決しない。"
+    },
+    {
+      "id": "q-2.1-0007",
+      "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet（InstanceType の既定値）\" }\n  O[\"その他のアカウント: 既定値\"]\n  P[\"eu-west-1 の本番: 上書きした大きい値\"]\n  BADD[\"⚠ D: StackSet に無いパラメータは上書きできない\"]\n  SS -- \"既定値\" --> O\n  SS == \"✔ B: そのスタックだけ上書き\" ==> P\n  SS -. \"⚠ A: 全スタックが変わる\" .-> O\n  BADD -.-> SS\n  SS -. \"⚠ C: StackSet が 2 つになる\" .-> P\n",
+      "alt": "StackSet の既定値はそのままに、eu-west-1 の本番のスタックインスタンスだけ InstanceType の値を上書きする図（B）。更新で値が残り、ドリフトにもならない。A、C は要件に合わない。"
+    },
+    {
+      "id": "q-2.1-0008",
+      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  DA@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ A: 委任管理者（プラットフォーム）\" }\n  SSM@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ B: StackSet は管理アカウントに作られる\" }\n  OU[\"組織のアカウント\"]\n  BADD[\"⚠ D: 委任管理者は同時に 5 つまで（10 ではない）\"]\n  MGMT -- \"委任管理者に登録\" --> DA\n  DA -- \"作る・管理\" --> SSM\n  SSM -- \"スタックを展開\" --> OU\n  BADD -.-> MGMT\n  MGMT -. \"⚠ C: OU に絞れない\" .-> DA\n  DA -. \"⚠ E: service-managed も作れる\" .-> SSM\n",
+      "alt": "メンバーアカウントを StackSets の委任管理者に登録すると、管理アカウントにサインインせずに service-managed の StackSet を作れる図。StackSet 自体は管理アカウントに作られる（A、B）。"
+    },
+    {
+      "id": "q-2.1-0009",
+      "source": "flowchart TB\n  DEV([\"プロダクトチーム\"])\n  AC@{ svc: \"AWS AppConfig\", label: \"✔ B: 機能フラグ＋段階的な戦略\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"エラー率のアラーム\" }\n  APP[\"ECS のウェブアプリ\"]\n  BADA[\"⚠ A: 一度にすべて・戻すのも人の操作\"]\n  BADC[\"⚠ C: Parameter Store で手作業の変更・復旧\"]\n  DEV -- \"フラグを変更\" --> AC\n  AC == \"✔ B: 一部から全員へ\" ==> APP\n  CW -- \"ALARM（環境に指定）\" --> AC\n  AC == \"✔ B: 自動で元に戻す\" ==> APP\n  BADA -.-> AC\n  BADC -.-> DEV\n  DEV -. \"⚠ D: 設定の変更にデプロイが要る\" .-> APP\n",
+      "alt": "機能フラグを AWS AppConfig に置き、段階的なデプロイ戦略で一部から全員へ展開する図。環境に指定した CloudWatch アラームが ALARM になると自動で前の設定に戻る（B）。D はコードの再デプロイが要る。"
+    },
+    {
+      "id": "q-2.1-0010",
+      "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"既存の S3 バケット（JSON の設定）\" }\n  PR@{ svc: \"AWS AppConfig\", label: \"✔ A: 設定プロファイル（ソースは S3）\" }\n  LV@{ svc: \"AWS Lambda\", label: \"✔ B: draft-07 のバリデーター\" }\n  APP[\"アプリケーション\"]\n  BADC[\"⚠ C: インラインは 4.X だけで draft-07 に使えない\"]\n  BADD[\"⚠ D: ホスト型へ移すと S3 に置いたままの要件に反する\"]\n  BADE[\"⚠ E: 届いた後に手で戻すだけ\"]\n  S3 -- \"設定データ\" --> PR\n  PR -- \"デプロイ時に検証\" --> LV\n  PR == \"✔ A: 通ったものだけ\" ==> APP\n  BADC -.-> PR\n  BADD -.-> S3\n  BADE -.-> APP\n",
+      "alt": "S3 の JSON 設定を、AppConfig の設定プロファイル（ソースは S3）と Lambda のバリデーターで draft-07 の検証をしてからアプリに届ける図（A と B）。インラインのスキーマは 4.X だけで、D は要件に反する。"
+    }
+  ]
 }

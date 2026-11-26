@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0009",
+  "source": "flowchart TB\n  subgraph R[\"CodeDeploy のデプロイ（EC2）\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"ライフサイクルイベント\" }\n    BI[\"BeforeInstall（インストール前）\"]\n    VS[\"ValidateService: 最大 4 分ポーリング\"]\n    TO[\"✔ D: タイムアウトを 300 秒に\"]\n  end\n  CD --> BI\n  CD -- \"最後のイベント\" --> VS\n  TO == \"✔ D: 4 分が収まる（今は 60 秒で失敗）\" ==> VS\n  A[\"⚠ A: 上限は 3600 秒\"] -.-> TO\n  B[\"⚠ B: インストール前では確かめにならない\"] -.-> BI\n  C[\"⚠ C: 確認なしは要件に反する\"] -.-> VS\n",
+  "alt": "ValidateService のポーリングが最大 4 分かかるのにタイムアウトが 60 秒で失敗する図。タイムアウトを 300 秒に増やせば確認を続けられる（D）。上限は 3600 秒（A）で、フックの削除や移動は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

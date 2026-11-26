@@ -1,0 +1,55 @@
+{
+  "item": "D-0020",
+  "diagrams": [
+    {
+      "id": "q-3.3-0001",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph AZA[\"AZ-a\"]\n    PR@{ svc: \"Amazon RDS\", label: \"プライマリの DB インスタンス\" }\n  end\n  subgraph AZB[\"AZ-b\"]\n    SB@{ svc: \"Amazon RDS\", label: \"スタンバイ（マルチ AZ）\" }\n  end\n  APP -- \"接続\" --> PR\n  PR -. \"同期のレプリケーション\" .-> SB\n  PR == \"✔ C: フェイルオーバーで再起動 → 切り替え\" ==> SB\n  APP -. \"切り替え後に再接続できるか確認\" .-> SB\n  X[\"⚠ A: 復元は別のインスタンス・⚠ B: リードレプリカは別物\"] -.- PR\n  Y[\"⚠ D: マルチ AZ の無効化はスタンバイを作り直すだけ\"] -.- SB\n",
+      "alt": "マルチ AZ の RDS で、アプリケーションが再接続できるか試す図。計画した時間帯に、フェイルオーバーで再起動のオプションで再起動すれば、今のインスタンスのままスタンバイへの切り替えを起こせる（C）。復元やレプリカ昇格は別のインスタンスを使う。"
+    },
+    {
+      "id": "q-3.3-0002",
+      "source": "flowchart TB\n  subgraph GDB[\"グローバルデータベース\"]\n    subgraph E[\"us-east-1\"]\n      PR@{ svc: \"Amazon Aurora\", label: \"プライマリクラスター（正常）\" }\n    end\n    subgraph W[\"us-west-2\"]\n      SC@{ svc: \"Amazon Aurora\", label: \"セカンダリクラスター（正常）\" }\n    end\n  end\n  PR -. \"レプリケーション\" .-> SC\n  PR == \"✔ A: スイッチオーバー（同期してから切り替え。RPO 0）\" ==> SC\n  F[\"⚠ B・D: フェイルオーバーは RPO が秒単位で 0 でない\"] -.- PR\n  C[\"⚠ C: スナップショットの復元は作り直しで、後のデータも失う\"] -.- SC\n",
+      "alt": "正常な Aurora のグローバルデータベースで、計画メンテナンス前にプライマリを us-west-2 へ移す図。スイッチオーバーは同期してから切り替えるのでデータを失わない（A）。フェイルオーバーは計画外の障害用で RPO が 0 にならない。"
+    },
+    {
+      "id": "q-3.3-0003",
+      "source": "flowchart TB\n  subgraph GDB[\"グローバルデータベース\"]\n    subgraph E[\"eu-west-1\"]\n      PR@{ svc: \"Amazon Aurora\", label: \"プライマリクラスター（障害で使えない）\" }\n    end\n    subgraph C[\"eu-central-1\"]\n      SC@{ svc: \"Amazon Aurora\", label: \"セカンダリクラスター\" }\n    end\n  end\n  PR -. \"レプリケーション（途切れた）\" .-> SC\n  PR == \"✔ B: クロスリージョンのフェイルオーバー（失うのは数秒）\" ==> SC\n  A[\"⚠ A: スイッチオーバーは全て正常な時の計画した操作\"] -.- SC\n  W[\"⚠ C: 待つと書き込みの再開が遅れる\"] -.- PR\n  D[\"⚠ D: スナップショットの復元は時間がかかる\"] -.- SC\n",
+      "alt": "計画外の障害で eu-west-1 のプライマリが使えなくなった Aurora のグローバルデータベースの図。セカンダリの eu-central-1 へクロスリージョンのフェイルオーバーを行えば、数秒のデータ損失で素早く書き込みを再開できる（B）。"
+    },
+    {
+      "id": "q-3.3-0004",
+      "source": "flowchart TB\n  V([\"ビューワー\"])\n  subgraph CF[\"オリジングループ\"]\n    CFD@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション\" }\n    PR[\"プライマリのオリジン（503）\"]\n    SE[\"セカンダリのオリジン\"]\n  end\n  V -- \"GET（ページの読み込み）\" --> CFD\n  V -- \"POST（フォームの送信）\" --> CFD\n  CFD --> PR\n  CFD == \"✔ B: 503 など選んだコードで切り替え\" ==> SE\n  X[\"✔ A: 切り替えるのは GET・HEAD・OPTIONS だけ。POST は失敗のまま\"] -.- CFD\n  Y[\"⚠ C: 4xx の時だけではない<br/>⚠ D: 全メソッドで切り替える<br/>⚠ E: Route 53 のヘルスチェックは関係しない\"] -.- PR\n",
+      "alt": "CloudFront のオリジングループで、プライマリが 503 を返した時の動きの図。選んだステータスコードの応答で切り替わる（B）が、切り替えるのは GET・HEAD・OPTIONS のリクエストだけなので、POST のフォームの送信は失敗のまま（A）。"
+    },
+    {
+      "id": "q-3.3-0005",
+      "source": "flowchart TB\n  FIS@{ svc: \"AWS Fault Injection Service\", label: \"実験（本物の障害を注入）\" }\n  subgraph PRE[\"✔ D: 本番前の環境\"]\n    S1[\"サーバー 1（障害を注入）\"]\n    S2[\"サーバー 2（正常）\"]\n  end\n  R@{ svc: \"Amazon Route 53\", label: \"DNS フェイルオーバー\" }\n  PROD[\"本番\"]\n  FIS == \"✔ D: 計画して、まず本番前の環境で実行\" ==> S1\n  R -- \"正常なサーバーへ\" --> S2\n  PRE -. \"結果を確かめてから\" .-> PROD\n  X[\"⚠ A: ピークの本番で直接はリスクが高い\"] -.- PROD\n  Y[\"⚠ B: 手で編集は自動切り替えの試験にならない\"] -.- R\n  Y2[\"⚠ C: FIS は本物のリソースに操作する\"] -.- FIS\n",
+      "alt": "Route 53 の DNS フェイルオーバーを AWS FIS で試す図。FIS は本物のリソースに本物の操作を行うので、実験を計画し、まず本番前の環境で実行し、結果を確かめてから本番で実行する（D）。本番のピークで直接行う案（A）は危険。"
+    },
+    {
+      "id": "q-3.3-0006",
+      "source": "flowchart TB\n  subgraph R1[\"元のリージョン\"]\n    PL@{ svc: \"AWS Backup\", label: \"✔ B: 毎日のルールのバックアッププラン\" }\n    EBS@{ svc: \"Amazon EBS\", label: \"backup=daily のボリューム\" }\n    RDS@{ svc: \"Amazon RDS\", label: \"backup=daily のデータベース\" }\n  end\n  subgraph R2[\"2 つ目のリージョン\"]\n    CP[\"バックアップのコピー\"]\n  end\n  EBS -- \"タグで割り当て（新しい物も自動）\" --> PL\n  RDS -- \"タグで割り当て\" --> PL\n  PL == \"✔ B: Copy to destination\" ==> CP\n  X[\"⚠ A: ARN を追加し続ける\"] -.- PL\n  X2[\"⚠ C: Lambda は自作\"] -.- EBS\n  X3[\"⚠ D: 各リージョンで別々のバックアップ\"] -.- CP\n",
+      "alt": "タグ付きの EBS と RDS を毎日バックアップし 2 つ目のリージョンにコピーする図。AWS Backup のプランに毎日のルールとコピー先を決め、backup=daily のタグで割り当てれば新しいリソースも設定を変えず対象になる（B）。"
+    },
+    {
+      "id": "q-3.3-0007",
+      "source": "flowchart TB\n  subgraph R[\"別リージョンのコピー\"]\n    W[\"0 日: コピー作成\"]\n    CS[\"30 日後: コールドストレージ\"]\n    DEL[\"✔ A: 保持期間 180 日で削除\"]\n  end\n  W -- \"30 日\" --> CS\n  CS -- \"✔ A: 少なくとも 90 日置く（30＋90＝120 日より長い）\" --> DEL\n  B[\"⚠ B: 30 日移行＋100 日は 120 日より短い\"] -.- CS\n  C[\"⚠ C: 60＋90＝150 日より短い 120 日\"] -.- CS\n  D[\"⚠ D: 90＋90＝180 日より短い 150 日\"] -.- CS\n  SV@{ svc: \"AWS Backup\", label: \"コピーの設定\" }\n  SV --> W\n",
+      "alt": "AWS Backup のコピーをコールドストレージに移し、できるだけ早く削除する設定の図。コールドストレージに少なくとも 90 日置く必要があるので、保持期間は移行日数に 90 日を足した日数より長くする。有効なのは 30 日移行で 180 日保持の A だけ。"
+    },
+    {
+      "id": "q-3.3-0008",
+      "source": "flowchart TB\n  AD([\"管理者を含むユーザー\"])\n  subgraph V[\"AWS Backup のボールト\"]\n    BK@{ svc: \"AWS Backup\", label: \"バックアップ\" }\n    VL[\"✔ D: コンプライアンスモードの Vault Lock（猶予期間つき）\"]\n  end\n  AD -. \"保持期間が終わるまで削除・変更は不可\" .-> BK\n  VL == \"猶予期間の間にテスト。その後は誰も変更できない\" ==> BK\n  A[\"⚠ A: ガバナンスモードは権限があれば消せる\"] -.- VL\n  B[\"⚠ B: IAM ポリシーは管理者が変えられる\"] -.- AD\n  C[\"⚠ C: 猶予期間なしはテストできない\"] -.- VL\n",
+      "alt": "ランサムウェア対策の AWS Backup のボールトの図。猶予期間つきのコンプライアンスモードの Vault Lock なら、猶予の間に設定をテストでき、ロック後は保持期間が終わるまで誰も削除や変更ができない（D）。ガバナンスモード（A）は権限があれば消せる。"
+    },
+    {
+      "id": "q-3.3-0009",
+      "source": "flowchart TB\n  subgraph SRC[\"元のリージョン\"]\n    OLD@{ svc: \"Amazon S3\", label: \"バケット（既存の数百万オブジェクト）\" }\n  end\n  subgraph DST[\"送信先のリージョン\"]\n    DS@{ svc: \"Amazon S3\", label: \"送信先のバケット\" }\n  end\n  OLD == \"✔ A: S3 バッチレプリケーションで既存の物を複製\" ==> DS\n  OLD -- \"✔ B: Replication Time Control（99.9% を 15 分以内）\" --> DS\n  X[\"⚠ C: 通常のレプリケーションは新しい物だけ\"] -.- OLD\n  Y[\"⚠ D: 同一リージョンは別のリージョンに置く要件に反する\"] -.- DS\n  Z[\"⚠ E: 全部を 1 分以内ではない\"] -.- DS\n",
+      "alt": "既存の数百万オブジェクトを持つバケットの S3 クロスリージョンレプリケーションの図。設定前からのオブジェクトは S3 バッチレプリケーションで複製し（A）、新しい物は Replication Time Control で 99.9% を 15 分以内にし複製の時間も見える（B）。"
+    },
+    {
+      "id": "q-3.3-0010",
+      "source": "flowchart TB\n  subgraph ASG[\"Auto Scaling グループ\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"✔ B: Elastic Load Balancing のヘルスチェックを有効\" }\n    EC[\"固まったインスタンス（EC2 のチェックは通る）\"]\n  end\n  TG@{ svc: \"Elastic Load Balancing\", label: \"ターゲットグループ\" }\n  AS == \"✔ A: ターゲットグループをアタッチ\" ==> TG\n  TG -- \"unhealthy の報告\" --> AS\n  AS == \"自動で入れ替え\" ==> EC\n  X[\"⚠ C: 最小容量を増やしても残る・⚠ D: 再起動は手作業\"] -.- EC\n  Y[\"⚠ E: 猶予期間を短くしても EC2 のチェックは通る\"] -.- AS\n",
+      "alt": "アプリが固まり、ロードバランサーは unhealthy とするが EC2 のチェックは通るインスタンスを自動で入れ替える図。ターゲットグループを Auto Scaling グループにアタッチし（A）、Elastic Load Balancing のヘルスチェックを有効にする（B）。"
+    }
+  ]
+}

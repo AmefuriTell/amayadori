@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0010",
+  "source": "flowchart TB\n  subgraph ADM[\"管理者のアカウント\"]\n    SS@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ B: 1 つのテンプレートを 1 回の操作で展開\" }\n  end\n  subgraph TG[\"展開先\"]\n    ST1[\"30 アカウント × 4 リージョンのスタック\"]\n  end\n  SS == \"テンプレート\" ==> ST1\n  ST1 -. \"失敗\" .-> SS\n  SS -- \"失敗の許容数を超えたら展開が止まる\" --> ST1\n  X[\"⚠ A: スクリプトを自作・⚠ C: 120 のアクション・⚠ D: 手作業\"] -.- ST1\n",
+  "alt": "同じテンプレートを 4 リージョンの 30 アカウントへ展開する図。管理者のアカウントの CloudFormation StackSets で 1 回の操作で展開し、失敗の許容数を低く設定すると失敗が多い時に自動で止まる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

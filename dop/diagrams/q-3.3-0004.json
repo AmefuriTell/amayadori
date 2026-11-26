@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0004",
+  "source": "flowchart TB\n  V([\"ビューワー\"])\n  subgraph CF[\"オリジングループ\"]\n    CFD@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション\" }\n    PR[\"プライマリのオリジン（503）\"]\n    SE[\"セカンダリのオリジン\"]\n  end\n  V -- \"GET（ページの読み込み）\" --> CFD\n  V -- \"POST（フォームの送信）\" --> CFD\n  CFD --> PR\n  CFD == \"✔ B: 503 など選んだコードで切り替え\" ==> SE\n  X[\"✔ A: 切り替えるのは GET・HEAD・OPTIONS だけ。POST は失敗のまま\"] -.- CFD\n  Y[\"⚠ C: 4xx の時だけではない<br/>⚠ D: 全メソッドで切り替える<br/>⚠ E: Route 53 のヘルスチェックは関係しない\"] -.- PR\n",
+  "alt": "CloudFront のオリジングループで、プライマリが 503 を返した時の動きの図。選んだステータスコードの応答で切り替わる（B）が、切り替えるのは GET・HEAD・OPTIONS のリクエストだけなので、POST のフォームの送信は失敗のまま（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

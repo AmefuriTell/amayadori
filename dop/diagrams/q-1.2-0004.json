@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0004",
+  "source": "flowchart TB\n  JM[\"既存の JMeter スクリプト\"]\n  subgraph R[\"AWS（サーバーの管理は要らない）\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"リリースのたびに呼び出し\" }\n    DLT[\"✔ C: Distributed Load Testing on AWS\"]\n    SCH[\"✔ C: 毎週のスケジュール\"]\n  end\n  WEB[\"Web アプリケーション\"]\n  JM -- \"そのまま使う\" --> DLT\n  CP == \"✔ C: 負荷テスト開始\" ==> DLT\n  SCH --> DLT\n  DLT -- \"数千の同時ユーザー\" --> WEB\n  A[\"⚠ A D: 負荷用サーバーを自分で管理\"] -.-> DLT\n  B[\"⚠ B: 書き直して手元から実行<br/>自動にならない\"] -.-> JM",
+  "alt": "JMeter スクリプトを流用し、サーバーを管理せずに数千ユーザーの負荷をかける図。Distributed Load Testing on AWS をデプロイし、毎週のスケジュールとパイプラインからの呼び出しの両方で動かす（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

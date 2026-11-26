@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0010",
+  "source": "flowchart TB\n  subgraph ASG[\"Auto Scaling グループ\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"✔ B: Elastic Load Balancing のヘルスチェックを有効\" }\n    EC[\"固まったインスタンス（EC2 のチェックは通る）\"]\n  end\n  TG@{ svc: \"Elastic Load Balancing\", label: \"ターゲットグループ\" }\n  AS == \"✔ A: ターゲットグループをアタッチ\" ==> TG\n  TG -- \"unhealthy の報告\" --> AS\n  AS == \"自動で入れ替え\" ==> EC\n  X[\"⚠ C: 最小容量を増やしても残る・⚠ D: 再起動は手作業\"] -.- EC\n  Y[\"⚠ E: 猶予期間を短くしても EC2 のチェックは通る\"] -.- AS\n",
+  "alt": "アプリが固まり、ロードバランサーは unhealthy とするが EC2 のチェックは通るインスタンスを自動で入れ替える図。ターゲットグループを Auto Scaling グループにアタッチし（A）、Elastic Load Balancing のヘルスチェックを有効にする（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

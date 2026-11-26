@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0007",
+  "source": "flowchart TB\n  subgraph ECS[\"Amazon ECS サービス\"]\n    SVC@{ svc: \"Amazon ECS\", label: \"タスクを増やす（ターゲット追跡）\" }\n    PEND[\"PENDING のタスク\"]\n  end\n  CP[\"✔ B: キャパシティープロバイダー（マネージドスケーリング・targetCapacity）\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループのインスタンス\" }\n  SVC -- \"タスクが空き待ち\" --> PEND\n  CP == \"タスクの必要に合わせて増減\" ==> ASG\n  PEND -- \"リソースの要求\" --> CP\n  X[\"⚠ A: 最小サイズを上げる＝山の分を一日中払う\"] -.- ASG\n  Y[\"⚠ C: 独自の Lambda は保守が要る\"] -.- ASG\n  Y2[\"⚠ D: タスクだけ増えて容量は増えない\"] -.- SVC\n",
+  "alt": "ECS のタスクが容量不足で PENDING のままになる図。Auto Scaling グループのキャパシティープロバイダーでマネージドスケーリングと targetCapacity を設定すれば、タスクの必要に合わせてインスタンスが増減し、独自のコードも不要（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

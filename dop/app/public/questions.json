@@ -1027,7 +1027,10 @@
           "quote": "A BASE_REF filter can be used with pull request events only."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Webhook のフィルターグループは中の全フィルターが真の時だけ真になる。1 グループに PR の作成・更新と BASE_REF が main を入れると、main 向けの PR だけでビルドが始まる（B）。グループを分ける A は他ブランチでも動く。"
+      }
     },
     {
       "id": "q-1.2-0002",
@@ -1084,7 +1087,10 @@
           "quote": "NUNIT3XML NUnit 3 XML"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "NUnit 3 の XML 結果を CodeBuild のテストレポートで見る図。buildspec の reports に結果ファイルと file-format NUNIT3XML を指定する（A）。形式を省くと JUNITXML 扱いになり合わない（B）。"
+      }
     },
     {
       "id": "q-1.2-0003",
@@ -1142,7 +1148,10 @@
           "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "V2 パイプライン 1 つで、main 向け PR の作成と新リビジョン、main への push で開始する図。pullRequest フィルターに Open と Update、さらに push フィルターを入れる（D）。Closed では新リビジョンで動かない（A）。"
+      }
     },
     {
       "id": "q-1.2-0004",
@@ -1208,7 +1217,10 @@
           "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "JMeter スクリプトを流用し、サーバーを管理せずに数千ユーザーの負荷をかける図。Distributed Load Testing on AWS をデプロイし、毎週のスケジュールとパイプラインからの呼び出しの両方で動かす（C）。"
+      }
     },
     {
       "id": "q-1.2-0005",
@@ -1269,7 +1281,10 @@
           "quote": "A build matrix defines tasks with different configurations that run in parallel."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "2000 件のテストを同じ設定のまま 10 個のビルドに分ける図。ビルドファンアウトのバッチビルドで parallelism を 10 にする（D）。ビルドマトリックスは設定の組み合わせごとに作るので合わない（A）。"
+      }
     },
     {
       "id": "q-1.2-0006",
@@ -1330,7 +1345,10 @@
           "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "3 つのランタイムと 2 つの OS イメージの 6 通りを並列で 1 か所に定義する図。バッチビルドのビルドマトリックスで組み合わせごとにビルドを作る（A）。ファンアウトは同じ設定のテスト分割用（B）。"
+      }
     },
     {
       "id": "q-1.2-0007",
@@ -1395,7 +1413,10 @@
           "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "起動に約 90 秒かかるコンテナが起動前に異常と判断される問題の図。startPeriod を 120 秒にすると起動中の失敗を数えず、起動後は通常どおり確かめる（C）。retries と timeout には上限があり解決しない。"
+      }
     },
     {
       "id": "q-1.2-0008",
@@ -1467,7 +1488,10 @@
           "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ログ転送のサイドカーが失敗してもアプリを動かし続ける図。サイドカーを essential false にし（A）、アプリには essential のままヘルスチェックを定義する（B）。両方 false（C）は essential が 1 つも無くなる。"
+      }
     },
     {
       "id": "q-1.2-0009",
@@ -1530,7 +1554,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い"
+      "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い",
+      "diagram": {
+        "alt": "ValidateService のポーリングが最大 4 分かかるのにタイムアウトが 60 秒で失敗する図。タイムアウトを 300 秒に増やせば確認を続けられる（D）。上限は 3600 秒（A）で、フックの削除や移動は要件に合わない。"
+      }
     },
     {
       "id": "q-1.2-0010",
@@ -1595,7 +1622,10 @@
           "quote": "JaCoCo XML"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "JaCoCo のカバレッジを CodeBuild で見る図。buildspec の reports にコードカバレッジのレポートグループと JACOCOXML の形式を指定する（B）。形式を省くと JUNITXML 扱いになる（A）。"
+      }
     },
     {
       "id": "q-1.2-0011",
@@ -1662,7 +1692,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。"
+      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。",
+      "diagram": {
+        "alt": "テストレポートは 30 日で見られなくなり、buildspec で作ったレポートグループは元ファイルをエクスポートしない。S3 にエクスポートするレポートグループを作り、buildspec で ARN を指定する（D）。"
+      }
     },
     {
       "id": "q-1.2-0012",
@@ -1735,7 +1768,10 @@
           "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "デプロイ前のテストステージで pytest の JUnit XML を CodeBuild のテストレポートにする図。Test カテゴリーの CodeBuild アクションを足し（A）、buildspec の reports で既定の形式を使う（B）。"
+      }
     },
     {
       "id": "q-1.2-0013",
@@ -1793,7 +1829,10 @@
           "quote": "Do not log the JSON event that CodePipeline sends to Lambda because this can result in user credentials being logged in CloudWatch Logs."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クロスリージョンの Lambda 呼び出しアクションで、結果を CodePipeline のリージョンへ送ると完了しない。PutJobSuccessResult と PutJobFailureResult を関数のある eu-west-1 へ送る（C）。"
+      }
     },
     {
       "id": "q-1.2-0014",
@@ -1851,7 +1890,10 @@
           "quote": "This allows the action to continue and the function to succeed even if it exceeds a fifteen-minute runtime (a limit in Lambda)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "約 40 分のテストを Lambda の 15 分制限を超えて待つ図。関数が継続トークンを返して後の呼び出しで状態を確かめ続けると、今のアクションと関数のまま待てる（A）。タイムアウトを 60 分にはできない（B）。"
+      }
     },
     {
       "id": "q-1.2-0015",
@@ -1920,7 +1962,10 @@
           "quote": "This action produces output variables that can be referenced by the action configuration of a downstream action in the pipeline."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "結合テストのワークフローの値を次のデプロイへ渡す図。Step Functions の呼び出しアクションで状態マシンを開始し（A）、その出力変数を次のアクションの設定から参照する（B）。手動や自作コードは要件に合わない。"
+      }
     },
     {
       "id": "q-1.3-0001",
@@ -7912,7 +7957,10 @@
           "quote": "Lambda initializes that number of execution environments so that they are prepared to respond immediately to Event Function requests."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "同じアカウントのバッチ用 Lambda 関数が同時実行を使い切り、決済用がスロットリングされる図。決済用に 200 の予約された同時実行（A）と、事前に初期化するプロビジョニングされた同時実行（B）が正解。バッチの制限（C）は要件に反する。"
+      }
     },
     {
       "id": "q-3.2-0002",
@@ -7973,7 +8021,10 @@
           "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "新しいインスタンスの準備に約 15 分かかる Auto Scaling グループの図。ウォームプールに準備済みのインスタンスを待機させれば、最小容量を通常分まで下げても急増に素早く応じられる（A）。最小容量を上げる案（B）は費用が増える。"
+      }
     },
     {
       "id": "q-3.2-0003",
@@ -8031,7 +8082,10 @@
           "quote": "While instances are in the warmup period, your scaling policies only scale out if the metric value from instances that are not warming up is greater than the policy's target utilization."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ターゲット追跡スケーリングで、新しいインスタンスの初期化中の高い CPU が集計に入り増やしすぎる図。インスタンスのウォームアップ時間を約 5 分にすると、その間は集計に入らず目標 50% のまま余計に増えない（C）。"
+      }
     },
     {
       "id": "q-3.2-0004",
@@ -8094,7 +8148,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "「forecast and scale」のモードの名前は sources に無いが、forecast only で増やさないことと、増やすには別のモードにすることは S1 から言える"
+      "note": "「forecast and scale」のモードの名前は sources に無いが、forecast only で増やさないことと、増やすには別のモードにすることは S1 から言える",
+      "diagram": {
+        "alt": "予測スケーリングが朝のピーク前に容量を足さない理由と直し方の図。今は予測だけで増やさないモード。予測とスケールに変え、インスタンスの事前起動を約 10 分にすれば、固定のスケジュール無しでピーク前に容量が準備される（A）。"
+      }
     },
     {
       "id": "q-3.2-0005",
@@ -8155,7 +8212,10 @@
           "quote": "Routes each individual TCP connection to a single target for the life of the connection."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "TCP のサービスをパートナーに公開する図。パートナーは AZ ごとに 1 つの固定 IP だけ許可できるので、有効な各 AZ のネットワークインターフェイスに Elastic IP を付けた Network Load Balancer を使う（C）。DNS 名（B）や 1 台の EC2（D）は合わない。"
+      }
     },
     {
       "id": "q-3.2-0006",
@@ -8231,7 +8291,10 @@
           "quote": "Node failures aren't fatal for your application."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "データベースの前の ElastiCache で古い価格が出る問題の図。書くたびにキャッシュも更新する書き込みスルー（A）に、足りないデータを埋める遅延読み込みと TTL（B）を組み合わせて、最新で無駄の少ないキャッシュにする。"
+      }
     },
     {
       "id": "q-3.2-0007",
@@ -8293,7 +8356,10 @@
           "quote": "Automatic scaling is the ability to increase or decrease the desired number of tasks in your Amazon ECS service automatically."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECS のタスクが容量不足で PENDING のままになる図。Auto Scaling グループのキャパシティープロバイダーでマネージドスケーリングと targetCapacity を設定すれば、タスクの必要に合わせてインスタンスが増減し、独自のコードも不要（B）。"
+      }
     },
     {
       "id": "q-3.2-0008",
@@ -8366,7 +8432,10 @@
           "quote": "A service with only one task is interrupted until capacity is available."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Fargate Spot でワーカーを動かす図。戦略に FARGATE_SPOT と FARGATE の両方を入れ、ほとんどを Spot に置いて、使えない時も処理を続ける（A）。回収時は SIGTERM を受け、stopTimeout の中に後片付けを収める（C）。"
+      }
     },
     {
       "id": "q-3.2-0009",
@@ -8427,7 +8496,10 @@
           "quote": "The deployment circuit breaker is the rolling update mechanism that determines if the tasks reach a steady state."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クラッシュする新しいイメージが出続ける ECS サービスの図。ローリング更新のまま、デプロイのサーキットブレーカーでロールバックを有効にすると、失敗を検知して最後に完了したデプロイへ自動で戻る（D）。"
+      }
     },
     {
       "id": "q-3.2-0010",
@@ -8488,7 +8560,10 @@
           "quote": "A lower number or percentage means that the operation performs on fewer stacks, but you are able to start troubleshooting failed operations faster."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "同じテンプレートを 4 リージョンの 30 アカウントへ展開する図。管理者のアカウントの CloudFormation StackSets で 1 回の操作で展開し、失敗の許容数を低く設定すると失敗が多い時に自動で止まる（B）。"
+      }
     },
     {
       "id": "q-3.2-0011",
@@ -8558,7 +8633,10 @@
           "quote": "CodePipeline handles the copying of artifacts from one AWS Region to the other Regions when performing cross-region actions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "us-east-1 の 1 つのパイプラインから eu-west-1 と ap-northeast-1 にも CloudFormation をデプロイする図。他リージョンのアクションをクロスリージョンのアクションとして足し（A）、各リージョンにアーティファクトバケットを作る（B）。コピーは CodePipeline が行う。"
+      }
     },
     {
       "id": "q-3.2-0012",
@@ -8620,7 +8698,10 @@
           "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "2 つのリージョンの ALB へ、利用者ごとに最もレイテンシーが低い方で応答させる図。Route 53 のホストゾーンに各ロードバランサーのレイテンシーのレコードを作る（A）。加重（B）や単一のレコード（D）は遠い利用者に不利。"
+      }
     },
     {
       "id": "q-3.2-0013",
@@ -8690,7 +8771,10 @@
           "quote": "However, none of these environments come pre-initialized."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "朝の山で Lambda のコールドスタートによるレイテンシーが出る図。Application Auto Scaling で山の時間だけプロビジョニングされた同時実行を用意すれば、レイテンシーを下げつつ他の時間の費用を抑えられる（D）。"
+      }
     },
     {
       "id": "q-3.2-0014",
@@ -8751,7 +8835,10 @@
           "quote": "Using provisioned concurrency incurs additional charges to your account."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "バッチ用の Lambda 関数が同時実行を使い切り、決済の関数がスロットリングされる図。決済の関数に予約された同時実行を設定すればその分を取っておけて、設定の料金もかからない（B）。プロビジョニング（A、C）は追加の料金がかかる。"
+      }
     },
     {
       "id": "q-3.2-0015",
@@ -8827,7 +8914,10 @@
           "quote": "Both throttles and quotas are applied on a best-effort basis and should be thought of as targets rather than guaranteed request ceilings."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "提携先の過剰な GET を抑える API Gateway の図。提携先ごとに使用量プランで速さとバーストを制限し（A）、ステージのキャッシュを TTL 600 秒で有効にして繰り返しの GET をキャッシュから返す（B）。TTL 0 や 2 時間は不可。"
+      }
     },
     {
       "id": "q-3.3-0001",
@@ -8884,7 +8974,10 @@
           "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "マルチ AZ の RDS で、アプリケーションが再接続できるか試す図。計画した時間帯に、フェイルオーバーで再起動のオプションで再起動すれば、今のインスタンスのままスタンバイへの切り替えを起こせる（C）。復元やレプリカ昇格は別のインスタンスを使う。"
+      }
     },
     {
       "id": "q-3.3-0002",
@@ -8941,7 +9034,10 @@
           "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "正常な Aurora のグローバルデータベースで、計画メンテナンス前にプライマリを us-west-2 へ移す図。スイッチオーバーは同期してから切り替えるのでデータを失わない（A）。フェイルオーバーは計画外の障害用で RPO が 0 にならない。"
+      }
     },
     {
       "id": "q-3.3-0003",
@@ -8998,7 +9094,10 @@
           "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "計画外の障害で eu-west-1 のプライマリが使えなくなった Aurora のグローバルデータベースの図。セカンダリの eu-central-1 へクロスリージョンのフェイルオーバーを行えば、数秒のデータ損失で素早く書き込みを再開できる（B）。"
+      }
     },
     {
       "id": "q-3.3-0004",
@@ -9067,7 +9166,10 @@
           "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudFront のオリジングループで、プライマリが 503 を返した時の動きの図。選んだステータスコードの応答で切り替わる（B）が、切り替えるのは GET・HEAD・OPTIONS のリクエストだけなので、POST のフォームの送信は失敗のまま（A）。"
+      }
     },
     {
       "id": "q-3.3-0005",
@@ -9129,7 +9231,10 @@
           "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Route 53 の DNS フェイルオーバーを AWS FIS で試す図。FIS は本物のリソースに本物の操作を行うので、実験を計画し、まず本番前の環境で実行し、結果を確かめてから本番で実行する（D）。本番のピークで直接行う案（A）は危険。"
+      }
     },
     {
       "id": "q-3.3-0006",
@@ -9192,7 +9297,10 @@
           "quote": "Use tags to include or exclude resources"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "タグ付きの EBS と RDS を毎日バックアップし 2 つ目のリージョンにコピーする図。AWS Backup のプランに毎日のルールとコピー先を決め、backup=daily のタグで割り当てれば新しいリソースも設定を変えず対象になる（B）。"
+      }
     },
     {
       "id": "q-3.3-0007",
@@ -9249,7 +9357,10 @@
           "quote": "This value must be greater than 90 days beyond the Transition to cold storage value."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Backup のコピーをコールドストレージに移し、できるだけ早く削除する設定の図。コールドストレージに少なくとも 90 日置く必要があるので、保持期間は移行日数に 90 日を足した日数より長くする。有効なのは 30 日移行で 180 日保持の A だけ。"
+      }
     },
     {
       "id": "q-3.3-0008",
@@ -9310,7 +9421,10 @@
           "quote": "A vault locked in Governance mode can be managed or deleted by users who have the appropriate IAM permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ランサムウェア対策の AWS Backup のボールトの図。猶予期間つきのコンプライアンスモードの Vault Lock なら、猶予の間に設定をテストでき、ロック後は保持期間が終わるまで誰も削除や変更ができない（D）。ガバナンスモード（A）は権限があれば消せる。"
+      }
     },
     {
       "id": "q-3.3-0009",
@@ -9378,7 +9492,10 @@
           "quote": "S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.9 percent of those objects within 15 minutes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "既存の数百万オブジェクトを持つバケットの S3 クロスリージョンレプリケーションの図。設定前からのオブジェクトは S3 バッチレプリケーションで複製し（A）、新しい物は Replication Time Control で 99.9% を 15 分以内にし複製の時間も見える（B）。"
+      }
     },
     {
       "id": "q-3.3-0010",
@@ -9447,7 +9564,10 @@
           "quote": "When you attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, you attach a target group rather than the load balancer itself."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アプリが固まり、ロードバランサーは unhealthy とするが EC2 のチェックは通るインスタンスを自動で入れ替える図。ターゲットグループを Auto Scaling グループにアタッチし（A）、Elastic Load Balancing のヘルスチェックを有効にする（B）。"
+      }
     },
     {
       "id": "q-3.3-0011",

@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0010",
+  "source": "flowchart TB\n  DEV[\"開発者\"]\n  subgraph R[\"CodeBuild ビルド（Java）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"テストが JaCoCo XML を出力\" }\n    RG[\"✔ B: reports にコードカバレッジのレポートグループ＋JACOCOXML\"]\n  end\n  CB -- \"カバレッジのファイル\" --> RG\n  RG == \"✔ B: 行・分岐カバレッジをビルドごとに表示\" ==> DEV\n  A[\"⚠ A: 形式を省くと JUNITXML 扱い\"] -.-> RG\n  C[\"⚠ C: S3＋自作ダッシュボードは保守が重い\"] -.-> CB\n  D[\"⚠ D: EC2 の自前サーバーは保守が重い\"] -.-> CB\n",
+  "alt": "JaCoCo のカバレッジを CodeBuild で見る図。buildspec の reports にコードカバレッジのレポートグループと JACOCOXML の形式を指定する（B）。形式を省くと JUNITXML 扱いになる（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
