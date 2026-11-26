@@ -1,0 +1,157 @@
+<title>DOP 講義 1.1 掛け合い版</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one slide card at a time — visual, bullets, then the two-voice script as chat lines; controls docked under it. Phone-first column, max 760px */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --fg: #17202a; --muted: #5b6875; --line: #d9e0e6;
+  --accent: #d4610a; --accent-ink: #ffffff; --ok: #1f7a4d; --chip: #eef1f4;
+  --teacher: #fbeee4; --teacher-ink: #9a4507; --student: #e8f4e6; --student-ink: #2f6b25;
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171c; --surface: #1b2229; --fg: #e8edf2; --muted: #9aa7b3; --line: #2c3640;
+  --accent: #f08a3c; --accent-ink: #1b1106; --ok: #5cc28e; --chip: #232c35;
+  --teacher: #2e2219; --teacher-ink: #f5b27c; --student: #1d2b1c; --student-ink: #9fd492; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1b2229; --fg: #e8edf2; --muted: #9aa7b3; --line: #2c3640;
+  --accent: #f08a3c; --accent-ink: #1b1106; --ok: #5cc28e; --chip: #232c35;
+  --teacher: #2e2219; --teacher-ink: #f5b27c; --student: #1d2b1c; --student-ink: #9fd492; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: grid; gap: 4px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+h1 { font-family: var(--font-display); font-size: clamp(20px, 4.5vw, 28px); line-height: 1.35; margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 13px; }
+.slide { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(16px, 4vw, 28px); display: grid; gap: 14px; align-content: start; min-width: 0; }
+.slide .num { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.slide h2 { font-family: var(--font-display); font-size: clamp(19px, 4vw, 26px); line-height: 1.4; margin: 0; text-wrap: balance; }
+.slide ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: clamp(15px, 3.4vw, 17px); }
+.slide li::marker { color: var(--accent); }
+.visual { display: grid; justify-items: center; min-width: 0; }
+.visual img { width: 100%; max-height: 52vh; object-fit: contain; background: #fff; border-radius: 8px; padding: 8px; box-sizing: border-box; }
+.visual .tbl { width: 100%; overflow-x: auto; }
+.visual table { width: 100%; border-collapse: collapse; font-size: clamp(13px, 3.2vw, 15px); }
+.visual th, .visual td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+.visual thead th { color: var(--accent); font-family: var(--font-display); }
+.visual tbody th { color: var(--muted); font-weight: 400; }
+.visual ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+.visual ol li { flex: 1 1 140px; min-width: 0; background: var(--chip); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.visual ol li b { font-family: var(--font-display); }
+.visual ol li .n { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+.visual ol li span { font-size: 13px; color: var(--muted); }
+.talk { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.line { display: grid; gap: 2px; max-width: 88%; padding: 8px 12px; border-radius: 12px; font-size: 15px; }
+.line.teacher { background: var(--teacher); justify-self: start; border-top-left-radius: 4px; }
+.line.student { background: var(--student); justify-self: end; border-top-right-radius: 4px; }
+.line .who { font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.line.teacher .who { color: var(--teacher-ink); }
+.line.student .who { color: var(--student-ink); }
+details { border-top: 1px solid var(--line); padding-top: 10px; font-size: 13px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--fg); }
+.ref { margin: 8px 0 0; padding: 8px 10px; background: var(--chip); border-radius: 6px; font-size: 12.5px; }
+.ref a { color: var(--accent); word-break: break-all; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; font-size: 15px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+button.play { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; min-width: 120px; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+label.auto { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.dots button { width: 30px; height: 30px; padding: 0; font-size: 12px; font-family: var(--font-mono); border-radius: 50%; }
+.dots button[aria-current="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.dots button.done { border-color: var(--ok); color: var(--ok); }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s linear; }
+footer { color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono&display=swap">
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">DOP-C02 · Task 1.1 · 掛け合い版</span>
+    <h1 id="title">講義を読み込んでいます</h1>
+    <span class="meta" id="meta"></span>
+  </header>
+  <section class="slide" id="slide" aria-live="polite">
+    <span class="num" id="num"></span>
+    <h2 id="stitle"></h2>
+    <div class="visual" id="visual"></div>
+    <ul id="bullets"></ul>
+    <div class="talk" id="talk" aria-label="台本"></div>
+    <details id="refBox"><summary>根拠（AWS 公式ドキュメントの原文）</summary><div id="refs"></div></details>
+  </section>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+  <div class="controls">
+    <button id="prev" type="button">前へ</button>
+    <button id="play" class="play" type="button">▶ 再生</button>
+    <button id="next" type="button">次へ</button>
+    <label class="auto"><input type="checkbox" id="auto" checked> 次のスライドへ自動で進む</label>
+  </div>
+  <nav class="dots" id="dots" aria-label="スライド"></nav>
+  <footer>
+    <span id="credit">音声: VOICEVOX:四国めたん、VOICEVOX:ずんだもん</span>
+    <span>試作版です。先生（めたん先生）と生徒（ずんだもん）の掛け合いにしました。根拠は AWS 公式ドキュメントの抜き出しだけです。</span>
+  </footer>
+</div>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const audio = $('audio');
+const NAMES = { teacher: 'めたん先生', student: 'ずんだもん' };
+let lec = null, i = 0, playing = false;
+const done = new Set();
+const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids.filter(Boolean)); return e; };
+
+function show(n) {
+  i = Math.max(0, Math.min(n, lec.slides.length - 1));
+  const s = lec.slides[i];
+  $('num').textContent = `${String(i + 1).padStart(2, '0')} / ${String(lec.slides.length).padStart(2, '0')}`;
+  $('stitle').textContent = s.title;
+  $('bullets').replaceChildren(...s.bullets.map((b) => el('li', { textContent: b })));
+  $('talk').replaceChildren(...(s.dialogue || []).map((l) => el('div', { className: `line ${l.who}` }, el('span', { className: 'who', textContent: NAMES[l.who] || l.who }), el('span', { textContent: l.text }))));
+  $('visual').replaceChildren(...renderVisual(s));
+  $('refs').replaceChildren(...(s.refs || []).map((r) => {
+    const d = el('div', { className: 'ref' }, el('div', { textContent: `“${r.quote}”` }));
+    if (r.url) d.append(el('a', { href: r.url, target: '_blank', rel: 'noopener', textContent: r.url }));
+    return d;
+  }));
+  $('prev').disabled = i === 0; $('next').disabled = i === lec.slides.length - 1;
+  [...$('dots').children].forEach((b, k) => { b.setAttribute('aria-current', String(k === i)); b.classList.toggle('done', done.has(k)); });
+  audio.src = `audio/${s.id}.mp3`;
+  $('bar').style.width = '0';
+  if (playing) audio.play().catch(() => setPlaying(false));
+}
+function renderVisual(s) {
+  const v = s.visual; if (!v) return [];
+  if (v.type === 'mermaid') return [el('img', { src: v.svg, alt: v.alt || '' })];
+  if (v.type === 'compare') {
+    const head = el('thead', {}, el('tr', {}, ...v.columns.map((c) => el('th', { textContent: c }))));
+    const body = el('tbody', {}, ...v.rows.map((r) => el('tr', {}, ...r.map((c, k) => el(k ? 'td' : 'th', { textContent: c })))));
+    return [el('div', { className: 'tbl' }, el('table', {}, head, body))];
+  }
+  if (v.type === 'steps') return [el('ol', {}, ...v.items.map((it, k) => el('li', {}, el('span', { className: 'n', textContent: String(k + 1).padStart(2, '0') }), el('b', { textContent: it.label }), el('span', { textContent: it.note || '' }))))];
+  return [];
+}
+function setPlaying(p) { playing = p; $('play').textContent = p ? '❚❚ 一時停止' : '▶ 再生'; }
+
+$('play').onclick = () => { if (playing) { audio.pause(); setPlaying(false); } else { setPlaying(true); audio.play().catch(() => setPlaying(false)); } };
+$('prev').onclick = () => show(i - 1);
+$('next').onclick = () => show(i + 1);
+audio.ontimeupdate = () => { if (audio.duration) $('bar').style.width = `${(audio.currentTime / audio.duration) * 100}%`; };
+audio.onended = () => { done.add(i); if ($('auto').checked && i < lec.slides.length - 1) show(i + 1); else { setPlaying(false); show(i); } };
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') show(i + 1); if (e.key === 'ArrowLeft') show(i - 1); });
+
+fetch('lecture.json').then((r) => r.json()).then((data) => {
+  lec = data;
+  $('title').textContent = lec.title;
+  $('meta').textContent = `スライド ${lec.slides.length} 枚・約 ${lec.minutes} 分`;
+  if (lec.credit) $('credit').textContent = `音声: ${lec.credit}`;
+  $('dots').replaceChildren(...lec.slides.map((s, k) => { const b = el('button', { type: 'button', textContent: k + 1 }); b.onclick = () => show(k); b.setAttribute('aria-label', `${k + 1}. ${s.title}`); return b; }));
+  show(0);
+}).catch(() => { $('title').textContent = '講義を読み込めませんでした'; });
+</script>

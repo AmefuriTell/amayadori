@@ -1,0 +1,1208 @@
+{
+  "task": "1.1",
+  "title": "CI/CD パイプラインの実装",
+  "credit": "VOICEVOX:四国めたん、VOICEVOX:ずんだもん",
+  "minutes": 13.1,
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "1 置き場 2 つなぐ 3 作る",
+        "4 守る 5 届ける",
+        "最後に条件の表とまとめ"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、試験ガイドのドメイン一にある最初のタスク、シーアイシーディーパイプラインの実装を学びます。"
+        },
+        {
+          "who": "student",
+          "text": "パイプラインって、そもそも何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ここでは、コードの変更を届けるまでの流れ、と大まかに捉えておきます。"
+        },
+        {
+          "who": "teacher",
+          "text": "画面の地図は、講義で扱う五つの部です。一つ目は置き場で、コード、イメージ、アーティファクトの三種類のリポジトリを見ます。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目はバージョン管理とパイプラインのつなぎ方、三つ目はビルドで、コードビルドを例にします。"
+        },
+        {
+          "who": "student",
+          "text": "残りの二つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "四つ目は、ビルドとデプロイの秘密情報の管理です。例として挙がる二つのサービスを見ます。五つ目は届け方、つまりデプロイ戦略で、コードデプロイを例にします。"
+        },
+        {
+          "who": "student",
+          "text": "置き場、つなぐ、作る、守る、届ける、の五つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。最後に、問題文の条件から方法を選ぶ表を見て、この地図に戻ります。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "講義の五つの部を番号順に並べた地図（矢印は無い）。1 置き場（コード・イメージ・アーティファクトのリポジトリ）、2 つなぐ（CodePipeline の source action）、3 作る（CodeBuild と buildspec）、4 守る（Secrets Manager と Parameter Store）、5 届ける（CodeDeploy のデプロイ戦略）。",
+        "svg": "visuals/s01.svg"
+      },
+      "refs": [
+        {
+          "quote": "Configuring code, image, and artifact repositories",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Using version control to integrate pipelines with application environments",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Setting up build processes (for example, AWS CodeBuild)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Determining appropriate deployment strategies (for example, AWS CodeDeploy)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        }
+      ],
+      "seconds": 54.3
+    },
+    {
+      "id": "s02",
+      "title": "試験ガイドのスキル 5 行を 5 つの部に",
+      "bullets": [
+        "スキル 5 行 → 講義の 5 つの部",
+        "挙がるサービス名は例の 1 つ",
+        "knowledge の 2 行はこの講義の外"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まず範囲を確かめます。試験ガイドのこのタスクには、スキルとして五つの行があります。画面の表の左の列です。"
+        },
+        {
+          "who": "student",
+          "text": "どんな行があるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "リポジトリの設定、バージョン管理でパイプラインとアプリケーションの環境をつなぐこと、ビルドの手順です。"
+        },
+        {
+          "who": "teacher",
+          "text": "残りは、ビルドとデプロイの秘密情報の管理と、ふさわしいデプロイ戦略の決定です。この五つを講義の五つの部に当てはめます。"
+        },
+        {
+          "who": "student",
+          "text": "秘密情報なら、行に名前のあるシークレッツマネージャーとパラメーターストアだけ覚えればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。名前は、例えば、として挙がっている例です。これだけという意味ではありません。"
+        },
+        {
+          "who": "student",
+          "text": "ビルドのコードビルドや、デプロイのコードデプロイも例、ということですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。なお、このタスクには知識の行も二つありますが、この講義の資料では扱えていないので、中身には入りません。"
+        },
+        {
+          "who": "teacher",
+          "text": "技術と概念の一覧にもロールバックの手順などが並びますが、これも全部ではありません。要点は、スキルの五つの行が講義の五つの部、挙がる名前は例、です。"
+        }
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "試験ガイドのスキルの行",
+          "この講義の部"
+        ],
+        "rows": [
+          [
+            "リポジトリの設定",
+            "1 置き場"
+          ],
+          [
+            "バージョン管理でつなぐ",
+            "2 つなぐ"
+          ],
+          [
+            "ビルド（例 CodeBuild）",
+            "3 作る"
+          ],
+          [
+            "秘密情報の管理",
+            "4 守る"
+          ],
+          [
+            "デプロイ戦略の決定",
+            "5 届ける"
+          ]
+        ]
+      },
+      "refs": [
+        {
+          "quote": "Configuring code, image, and artifact repositories",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Using version control to integrate pipelines with application environments",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Setting up build processes (for example, AWS CodeBuild)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Determining appropriate deployment strategies (for example, AWS CodeDeploy)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "The following list contains technologies and concepts that might appear on the exam. This list is non-exhaustive and is subject to change.",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-technologies-concepts.html#dop-technologies-concepts"
+        }
+      ],
+      "seconds": 64.1
+    },
+    {
+      "id": "s03",
+      "title": "範囲の一覧から関わる物",
+      "bullets": [
+        "範囲のサービス一覧から抜き出し",
+        "開発者ツールの Code の付く物",
+        "コンテナの分類に Amazon ECR"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次に、試験の範囲に入るサービスの一覧から、このタスクに関わる物を抜き出します。"
+        },
+        {
+          "who": "student",
+          "text": "どの分類から出てくるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "開発者ツールの分類からは、コードアーティファクト、コードビルド、コードデプロイ、コードパイプラインです。"
+        },
+        {
+          "who": "teacher",
+          "text": "コンテナの分類からはイーシーアール、管理とガバナンスからはシステムズマネージャー、セキュリティからはシークレッツマネージャーです。"
+        },
+        {
+          "who": "student",
+          "text": "パラメーターストアが見当たらないです。独立したサービスとして別の分類にあるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。パラメーターストアは、システムズマネージャーの中の機能です。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、一覧にあるコードスターやイーシーツーイメージビルダーも、ここで覚える物ですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "一覧にはありますが、この講義では扱いません。この講義で見るのは、いま抜き出した物です。"
+        }
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "範囲の一覧の分類",
+          "このタスクに関わる物"
+        ],
+        "rows": [
+          [
+            "開発者ツール",
+            "CodeArtifact・CodeBuild"
+          ],
+          [
+            "開発者ツール",
+            "CodeDeploy・CodePipeline"
+          ],
+          [
+            "コンテナ",
+            "Amazon ECR"
+          ],
+          [
+            "管理とガバナンス",
+            "AWS Systems Manager"
+          ],
+          [
+            "セキュリティ",
+            "AWS Secrets Manager"
+          ]
+        ]
+      },
+      "refs": [
+        {
+          "quote": "AWS CodeArtifact",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
+        },
+        {
+          "quote": "AWS CodePipeline",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
+        },
+        {
+          "quote": "Amazon ECR",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-containers"
+        },
+        {
+          "quote": "AWS Systems Manager",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-management-governance"
+        },
+        {
+          "quote": "AWS Secrets Manager",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-security-identity-compliance"
+        },
+        {
+          "quote": "Parameter Store is a centralized configuration data store for named values called parameters.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
+        },
+        {
+          "quote": "AWS CodeStar",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
+        },
+        {
+          "quote": "EC2 Image Builder",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-compute"
+        }
+      ],
+      "seconds": 47.2
+    },
+    {
+      "id": "s04",
+      "title": "1 置き場: 三種類のリポジトリ",
+      "bullets": [
+        "コード: 例として GitHub",
+        "イメージ: Amazon ECR",
+        "アーティファクト: CodeArtifact"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここから一つ目の部、置き場です。リポジトリとは、置き場のことです。このタスクでは三種類を扱います。"
+        },
+        {
+          "who": "student",
+          "text": "名前にコードと付くから、コードの置き場はコードアーティファクトなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。コードの置き場は、この講義では例としてギットハブを使い、二つ目の部でパイプラインにつなぎます。コードアーティファクトはアーティファクトの置き場です。"
+        },
+        {
+          "who": "student",
+          "text": "イメージの置き場は？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージは、大まかに言うと、コンテナを動かすもとになる物です。その置き場として範囲の一覧にあるのは、コンテナの分類のイーシーアール、つまりコンテナの登録先です。"
+        },
+        {
+          "who": "student",
+          "text": "アーティファクトの置き場のコードアーティファクトは、何を置くのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ソフトウェアのパッケージを保存し、共有するアーティファクトリポジトリです。コードは例としてギットハブ、イメージはイーシーアール、アーティファクトはコードアーティファクトです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "三種類のリポジトリを横に並べた図。コードの置き場は例として GitHub、イメージの置き場は Amazon ECR、アーティファクトの置き場は CodeArtifact。",
+        "svg": "visuals/s04.svg"
+      },
+      "refs": [
+        {
+          "quote": "Configuring code, image, and artifact repositories",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
+        },
+        {
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
+        },
+        {
+          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        },
+        {
+          "quote": "Amazon ECR",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-containers"
+        }
+      ],
+      "seconds": 49.4
+    },
+    {
+      "id": "s05",
+      "title": "1 置き場: Amazon ECR",
+      "bullets": [
+        "private repository",
+        "権限は resource-based",
+        "仕組みに AWS IAM を使う"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "イーシーアールの公式の説明には、プライベートリポジトリを扱える、と書かれています。プライベートとは、公開しない、という意味です。"
+        },
+        {
+          "who": "student",
+          "text": "使える人はどうやって決めるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "リポジトリの権限は、リソースベースのパーミッションです。リソース、ここではリポジトリを基にした権限です。画面の図でも、リポジトリの側に書いてあります。"
+        },
+        {
+          "who": "student",
+          "text": "リポジトリの側の権限なら、アイアムとは関係ないってことですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。この権限には、アイアムの仕組みを使います。"
+        },
+        {
+          "who": "student",
+          "text": "試験の問題文では、どう見分ければいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージを公開せずに置きたい、使える人を絞りたい、という条件が出たら思い出してください。"
+        },
+        {
+          "who": "teacher",
+          "text": "要点は、イーシーアールのプライベートリポジトリと、アイアムを使ったリソースベースのパーミッションの組み合わせです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "Amazon ECR は private repository を扱え、その権限は repository の側の resource-based permissions で、仕組みには AWS IAM を使う。",
+        "svg": "visuals/s05.svg"
+      },
+      "refs": [
+        {
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
+        }
+      ],
+      "seconds": 48.4
+    },
+    {
+      "id": "s06",
+      "title": "1 置き場: CodeArtifact",
+      "bullets": [
+        "マネージドのリポジトリ",
+        "パッケージを保存・共有",
+        "安全で大きく伸ばせる"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コードアーティファクトは、マネージドのアーティファクトリポジトリです。"
+        },
+        {
+          "who": "student",
+          "text": "マネージドって、どういう意味なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "大まかに言うと、仕組みの運用をサービスに任せられる、という意味です。公式の説明では、安全で、大きく伸ばせるサービスとされています。"
+        },
+        {
+          "who": "teacher",
+          "text": "役目は、組織が、アプリケーション開発のためのソフトウェアパッケージを、保存し、共有するのを助けます。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、コンテナのイメージもコードアーティファクトに置くのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。イメージの置き場として見たのはイーシーアールです。問題文に、パッケージを組織の中で保存して共有したい、と出たら、コードアーティファクトを候補にします。"
+        },
+        {
+          "who": "student",
+          "text": "イメージならイーシーアール、パッケージならコードアーティファクト、ですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。その二つを並べて覚えてください。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "CodeArtifact はマネージドのアーティファクトリポジトリ。組織がソフトウェアパッケージを保存し、アプリケーション開発のために共有するのを助ける。",
+        "svg": "visuals/s06.svg"
+      },
+      "refs": [
+        {
+          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        }
+      ],
+      "seconds": 47.6
+    },
+    {
+      "id": "s07",
+      "title": "2 つなぐ: GitHub と source action",
+      "bullets": [
+        "試験ガイド: バージョン管理でつなぐ",
+        "GitHub を source action に",
+        "GitHub Enterprise Cloud も"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目の部、バージョン管理とパイプラインのつなぎ方です。バージョン管理とは、コードの変更を、版として記録していく仕組みのことです。"
+        },
+        {
+          "who": "student",
+          "text": "試験ガイドでは、何をつなぐと書いてあったのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "バージョン管理を使って、パイプラインをアプリケーションの環境とつなぐ、という行です。この講義の資料にあるのは、その入口の所です。"
+        },
+        {
+          "who": "teacher",
+          "text": "コードパイプラインでは、ギットハブ、またはギットハブエンタープライズクラウドのリポジトリを、ソースアクションとして加えます。これでリポジトリとパイプラインがつながります。"
+        },
+        {
+          "who": "student",
+          "text": "なるほど。じゃあ、環境とつなぐ所まで、全部ソースアクションで済むのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。資料で見られるのは、リポジトリをパイプラインにつなぐ入口の所だけです。その先は、この講義では扱いません。"
+        },
+        {
+          "who": "student",
+          "text": "問題文でギットハブのリポジトリをパイプラインにつなぎたい、と出たら？"
+        },
+        {
+          "who": "teacher",
+          "text": "ソースアクションです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "GitHub か GitHub Enterprise Cloud のリポジトリを、CodePipeline に source action として加える。",
+        "svg": "visuals/s07.svg"
+      },
+      "refs": [
+        {
+          "quote": "Using version control to integrate pipelines with application environments",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
+        }
+      ],
+      "seconds": 53.5
+    },
+    {
+      "id": "s08",
+      "title": "3 作る: CodeBuild と buildspec",
+      "bullets": [
+        "buildspec: YAML 形式",
+        "ビルドのコマンドと設定",
+        "CodeBuild が使ってビルド"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目の部、ビルドです。ビルドは、大まかに言うと、コードから動かせる物を作る作業です。"
+        },
+        {
+          "who": "student",
+          "text": "試験ガイドでは、どのサービスが出てくるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ビルドの手順を作る例として、コードビルドが挙がっています。コードビルドでは、ビルドスペックという物を使います。"
+        },
+        {
+          "who": "student",
+          "text": "ビルドスペックって、コードビルドの別の呼び方ですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ビルドスペックは、ビルドのコマンドと、それに関係する設定をまとめた物です。コードビルドは、それを使ってビルドを実行します。"
+        },
+        {
+          "who": "student",
+          "text": "どんな形で書くのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ヤムルという形式です。"
+        },
+        {
+          "who": "student",
+          "text": "試験ではどう出ますか？"
+        },
+        {
+          "who": "teacher",
+          "text": "ビルドの手順をどこに書くか、が出たら、ビルドスペックです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "buildspec は YAML 形式で書く、ビルドのコマンドと関連の設定の集まり。CodeBuild は buildspec を使ってビルドを実行する。",
+        "svg": "visuals/s08.svg"
+      },
+      "refs": [
+        {
+          "quote": "Setting up build processes (for example, AWS CodeBuild)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
+        }
+      ],
+      "seconds": 40.9
+    },
+    {
+      "id": "s09",
+      "title": "4 守る: Secrets Manager",
+      "bullets": [
+        "管理・取得・ローテーション",
+        "DB・アプリの認証情報など",
+        "ハードコードが要らない"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目の部、秘密情報です。試験ガイドの行は、ビルドとデプロイの秘密情報を管理すること、でした。"
+        },
+        {
+          "who": "student",
+          "text": "秘密情報って、具体的にはどんな物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "パスワードやキーのように、ほかの人に知られてはいけない値のことです。例として挙がる一つ目が、シークレッツマネージャーです。"
+        },
+        {
+          "who": "teacher",
+          "text": "シークレッツマネージャーは、秘密情報を、作ってから使い終えるまで通して、管理し、取り出し、ローテーションするのを助けます。ローテーションとは、値を新しい物に取り替えることです。"
+        },
+        {
+          "who": "student",
+          "text": "名前からすると、データベースのパスワード専用なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。扱う秘密情報の例は、データベースやアプリケーションの認証情報、エーピーアイキーなどです。"
+        },
+        {
+          "who": "student",
+          "text": "わざわざこれを使う理由は何ですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "公式の説明は利点として、アプリケーションのソースコードに認証情報を直接書き込まなくてよくなる、と述べています。直接書き込むことを、ハードコードと呼びます。"
+        },
+        {
+          "who": "teacher",
+          "text": "問題文に、認証情報をソースコードに書き込みたくない、と出たら、まずシークレッツマネージャーです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "Secrets Manager は、データベースやアプリケーションの認証情報、OAuth トークン、API キーなどの秘密情報を管理・取得・ローテーションする。アプリケーションのソースコードに認証情報をハードコードしなくてよくなる。",
+        "svg": "visuals/s09.svg"
+      },
+      "refs": [
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        },
+        {
+          "quote": "Secrets Manager helps you improve your security posture, because you no longer need hard-coded credentials in application source code.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        }
+      ],
+      "seconds": 64.2
+    },
+    {
+      "id": "s10",
+      "title": "4 守る: Parameter Store と比べる",
+      "bullets": [
+        "Parameter Store: 設定の置き場",
+        "置く物は名前付きの値",
+        "どちらも秘密情報を管理する例"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "例として挙がる二つ目が、パラメーターストアです。システムズマネージャーの中の機能です。"
+        },
+        {
+          "who": "student",
+          "text": "どんな物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "公式の説明では、設定データを一か所に集めて置く場所です。置く物は名前の付いた値で、これをパラメーターと呼びます。"
+        },
+        {
+          "who": "student",
+          "text": "設定の置き場なら、秘密情報の管理には使わないのですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。試験ガイドでは、パラメーターストアもシークレッツマネージャーも、どちらもビルドとデプロイの秘密情報を管理する例です。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、パラメーターストアはローテーションができない、ということなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうは言えません。言えるのは、公式の説明にローテーションという言葉が出てくるのは、シークレッツマネージャーの方だ、という事だけです。"
+        },
+        {
+          "who": "student",
+          "text": "問題文ではどう見分けるのですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "ローテーションが出たら、シークレッツマネージャーの説明と合います。画面の表で、二つを比べておいてください。"
+        }
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "Secrets Manager",
+          "Parameter Store"
+        ],
+        "rows": [
+          [
+            "公式の説明",
+            "秘密情報の管理",
+            "設定データの置き場"
+          ],
+          [
+            "置く物",
+            "秘密情報",
+            "名前付きの値"
+          ],
+          [
+            "説明にある言葉",
+            "ローテーション",
+            "パラメーター"
+          ],
+          [
+            "試験ガイド",
+            "秘密情報管理の例",
+            "秘密情報管理の例"
+          ]
+        ]
+      },
+      "refs": [
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "Parameter Store is a centralized configuration data store for named values called parameters.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
+        },
+        {
+          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        }
+      ],
+      "seconds": 53.4
+    },
+    {
+      "id": "s11",
+      "title": "5 届ける: blue/green（task set の場合）",
+      "bullets": [
+        "新しい版を replacement task set に",
+        "本番トラフィックを移す",
+        "task set を使う場合の説明"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "五つ目の部、デプロイ戦略です。デプロイとは、新しい版を届けることです。"
+        },
+        {
+          "who": "student",
+          "text": "試験ガイドの例は何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ふさわしいデプロイ戦略を決める例として、コードデプロイが挙がっています。戦略の一つに、ブルーグリーンデプロイメントがあります。"
+        },
+        {
+          "who": "teacher",
+          "text": "公式の説明の一つでは、タスクセットという単位を使う場合について書かれています。まず、新しい版を、置き換え用の新しいタスクセットとして入れます。"
+        },
+        {
+          "who": "teacher",
+          "text": "そして、元の一式から新しい一式へ、本番のトラフィックを移します。英語の名前は画面に置きました。"
+        },
+        {
+          "who": "student",
+          "text": "ブルーグリーンなら、いつもタスクセットを使うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。いま話したのは、タスクセットを使う場合の説明です。ブルーグリーンがいつもそうだ、という意味ではありません。"
+        },
+        {
+          "who": "student",
+          "text": "問題文に、新しいタスクセットへ本番のトラフィックを移す、と出たら？"
+        },
+        {
+          "who": "teacher",
+          "text": "ブルーグリーンです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "task set を使う場合の CodeDeploy の blue/green。新しい版を replacement task set として入れ、本番トラフィックを original task set から replacement task set へ移す。",
+        "svg": "visuals/s11.svg"
+      },
+      "refs": [
+        {
+          "quote": "Determining appropriate deployment strategies (for example, AWS CodeDeploy)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
+        }
+      ],
+      "seconds": 52.7
+    },
+    {
+      "id": "s12",
+      "title": "5 届ける: deployment configuration",
+      "bullets": [
+        "deployment configuration",
+        "規則と成功・失敗の条件",
+        "デプロイ中に CodeDeploy が使う"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、デプロイメントコンフィギュレーションを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "ブルーグリーンの話の続きなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ここでは、ブルーグリーンとは別の物として見ます。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、どういう物ですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "公式の説明では、規則と、成功の条件、失敗の条件の集まりです。コードデプロイが、デプロイの間に使います。"
+        },
+        {
+          "who": "student",
+          "text": "問題文ではどう出るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "デプロイの成功や失敗の条件を、規則としてまとめておきたい、と出たら、デプロイメントコンフィギュレーションです。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "deployment configuration は、規則と、成功の条件・失敗の条件の集まりで、CodeDeploy がデプロイの間に使う。",
+        "svg": "visuals/s12.svg"
+      },
+      "refs": [
+        {
+          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
+        }
+      ],
+      "seconds": 31.6
+    },
+    {
+      "id": "s13",
+      "title": "5 届ける: rollback",
+      "bullets": [
+        "rollback: 自動か手動",
+        "自動で戻す設定ができる",
+        "設定先: deployment group か deployment"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ロールバックとは、デプロイを戻すことです。コードデプロイのデプロイは、自動でも、手動でもロールバックできます。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、失敗したら必ず自動で戻ってくれるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。言えるのは、自動でロールバックするように設定することもできる、という事です。何をきっかけに戻すかは、この講義では扱いません。"
+        },
+        {
+          "who": "student",
+          "text": "設定するのは、さっきのデプロイメントコンフィギュレーションですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。名前が似ていますが、設定できる先は二つです。"
+        },
+        {
+          "who": "teacher",
+          "text": "デプロイメントグループという、グループごとの設定か、一回ごとのデプロイメントです。"
+        },
+        {
+          "who": "teacher",
+          "text": "問題文に、自動で戻せるようにしたい、と出たら、デプロイメントグループか、デプロイメントの設定です。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "CodeDeploy のデプロイは自動でも手動でも rollback できる。deployment group か deployment に、自動で rollback するよう設定できる。",
+        "svg": "visuals/s13.svg"
+      },
+      "refs": [
+        {
+          "quote": "Deployments can be rolled back automatically or manually.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        },
+        {
+          "quote": "You can configure a deployment group or deployment to automatically roll back when a",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        },
+        {
+          "quote": "Rollback procedures",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-technologies-concepts.html#dop-technologies-concepts"
+        }
+      ],
+      "seconds": 43.2
+    },
+    {
+      "id": "s14",
+      "title": "条件から方法を選ぶ 1: 置き場・つなぐ・作る",
+      "bullets": [
+        "問題文の条件 → 方法・確かめる所"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここから二枚で、問題文の条件から選ぶ方法を引けるように、表にまとめます。一枚目は、置き場、つなぐ、作るの三つの部です。"
+        },
+        {
+          "who": "student",
+          "text": "イメージを公開せずに置きたい、なら、イーシーアールなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。確かめる所は、プライベートリポジトリと、リソースベースのパーミッションです。"
+        },
+        {
+          "who": "student",
+          "text": "パッケージを組織で共有したい、なら？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードアーティファクトです。"
+        },
+        {
+          "who": "student",
+          "text": "ギットハブのリポジトリをパイプラインにつなぎたい、は、コードビルドでしたっけ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。コードパイプラインのソースアクションです。コードビルドは、ビルドの手順を書く場所、のほうで、確かめる所はビルドスペックです。"
+        },
+        {
+          "who": "student",
+          "text": "つなぐのがコードパイプライン、作るのがコードビルド、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。それが一枚目の要点です。"
+        }
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "イメージを公開せず置く",
+            "Amazon ECR",
+            "private・resource-based"
+          ],
+          [
+            "パッケージを組織で共有",
+            "CodeArtifact",
+            "保存と共有"
+          ],
+          [
+            "GitHub をパイプラインへ",
+            "CodePipeline",
+            "source action"
+          ],
+          [
+            "ビルドの手順を書く",
+            "CodeBuild",
+            "buildspec（YAML）"
+          ]
+        ]
+      },
+      "refs": [
+        {
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
+        },
+        {
+          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        },
+        {
+          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
+        },
+        {
+          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
+        }
+      ],
+      "seconds": 48.3
+    },
+    {
+      "id": "s15",
+      "title": "条件から方法を選ぶ 2: 守る・届ける",
+      "bullets": [
+        "問題文の条件 → 方法・確かめる所"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二枚目は、守る、届けるの二つの部です。"
+        },
+        {
+          "who": "student",
+          "text": "認証情報をソースコードに書き込みたくない、なら、シークレッツマネージャーだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。シークレッツマネージャーですが、パラメーターストアも、試験ガイドで秘密情報を管理する例に挙がっています。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、二つのうちどちらかで迷ったら？"
+        },
+        {
+          "who": "teacher",
+          "text": "ローテーションも要るなら、説明にローテーションがあるシークレッツマネージャーです。"
+        },
+        {
+          "who": "student",
+          "text": "届けるの方はどうですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "新しいタスクセットへ本番のトラフィックを移すならブルーグリーン、成功と失敗の条件をまとめるなら、デプロイメントコンフィギュレーションです。"
+        },
+        {
+          "who": "student",
+          "text": "自動で戻したい、は？"
+        },
+        {
+          "who": "teacher",
+          "text": "デプロイメントグループかデプロイメントに、ロールバックの設定をします。"
+        },
+        {
+          "who": "student",
+          "text": "条件の言葉を見つけて、表で方法を引く、ですね。"
+        }
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "認証情報を書き込まない",
+            "Secrets Manager",
+            "Parameter Store も例"
+          ],
+          [
+            "ローテーションも要る",
+            "Secrets Manager",
+            "説明にローテーション"
+          ],
+          [
+            "新しい task set へ移す",
+            "blue/green",
+            "task set の場合"
+          ],
+          [
+            "成功・失敗の条件",
+            "deployment configuration",
+            "規則と条件の集まり"
+          ],
+          [
+            "自動で戻したい",
+            "rollback",
+            "deployment group 等"
+          ]
+        ]
+      },
+      "refs": [
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        },
+        {
+          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
+        },
+        {
+          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
+        },
+        {
+          "quote": "You can configure a deployment group or deployment to automatically roll back when a",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        }
+      ],
+      "seconds": 48.5
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "1 置き場 2 つなぐ 3 作る",
+        "4 守る 5 届ける",
+        "迷ったら条件から方法を選ぶ表へ"
+      ],
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。最初の地図に戻ります。"
+        },
+        {
+          "who": "student",
+          "text": "五つの部、もう一度お願いしたいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目の置き場では、コードは例としてギットハブ、イメージはイーシーアール、アーティファクトはコードアーティファクトを見ました。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目のつなぎ方では、コードパイプラインのソースアクション、三つ目のビルドでは、コードビルドとビルドスペックを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "守ると届けるは？"
+        },
+        {
+          "who": "teacher",
+          "text": "四つ目の秘密情報では、シークレッツマネージャーとパラメーターストアを見ました。"
+        },
+        {
+          "who": "teacher",
+          "text": "五つ目のデプロイでは、ブルーグリーン、デプロイメントコンフィギュレーション、ロールバックを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "問題で迷ったら、どうすればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "条件から方法を選ぶ、の二枚の表に戻ってください。"
+        }
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "最初の地図に戻る（矢印は無い）。1 置き場、2 つなぐ（source action）、3 作る（buildspec）、4 守る（Secrets Manager と Parameter Store）、5 届ける（blue/green・deployment configuration・rollback）。",
+        "svg": "visuals/s16.svg"
+      },
+      "refs": [
+        {
+          "quote": "Configuring code, image, and artifact repositories",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
+        },
+        {
+          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
+        },
+        {
+          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+        },
+        {
+          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
+        },
+        {
+          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
+        },
+        {
+          "quote": "Deployments can be rolled back automatically or manually.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        }
+      ],
+      "seconds": 41.5
+    }
+  ]
+}
