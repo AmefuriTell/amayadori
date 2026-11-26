@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0004",
+  "source": "flowchart TB\n  subgraph H[\"過去最大 14 日のメトリクス\"]\n    CWM@{ svc: \"Amazon CloudWatch\", label: \"毎日のパターン\" }\n  end\n  PS[\"予測スケーリングポリシー\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループ\" }\n  CWM -- \"メトリクス\" --> PS\n  PS -. \"⚠ B: 予測のみ（forecast only）は予測を作るだけ\" .-> ASG\n  PS == \"✔ A: 予測とスケール＋事前起動 約 10 分\" ==> ASG\n  C[\"⚠ C: 固定の cron は形が変わるたびに直す\"] -.- PS\n  D[\"⚠ D: 作り直しても最初は予測のみ\"] -.- PS\n",
+  "alt": "予測スケーリングが朝のピーク前に容量を足さない理由と直し方の図。今は予測だけで増やさないモード。予測とスケールに変え、インスタンスの事前起動を約 10 分にすれば、固定のスケジュール無しでピーク前に容量が準備される（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

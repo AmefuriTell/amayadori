@@ -1,0 +1,8 @@
+{
+  "id": "q-3.2-0005",
+  "source": "flowchart TB\n  P([\"パートナーのファイアウォール\"])\n  subgraph NLB[\"Network Load Balancer\"]\n    subgraph AZA[\"AZ-a\"]\n      NA@{ svc: \"Elastic Load Balancing\", label: \"✔ C: ノード（Elastic IP 1 つ）\" }\n    end\n    subgraph AZB[\"AZ-b\"]\n      NB@{ svc: \"Elastic Load Balancing\", label: \"✔ C: ノード（Elastic IP 1 つ）\" }\n    end\n  end\n  T[\"バックエンドのターゲット\"]\n  P == \"✔ C: ゾーンごとの固定 IP だけ許可\" ==> NA\n  P == \"TCP\" ==> NB\n  NA -- \"1 接続は 1 ターゲット\" --> T\n  NB -- \"1 接続は 1 ターゲット\" --> T\n  W[\"⚠ B: DNS 名は不可（IP の一覧だけ許可）\"] -.- P\n  W2[\"⚠ A: ALB は要件外・⚠ D: 1 台は単一障害点\"] -.- T\n",
+  "alt": "TCP のサービスをパートナーに公開する図。パートナーは AZ ごとに 1 つの固定 IP だけ許可できるので、有効な各 AZ のネットワークインターフェイスに Elastic IP を付けた Network Load Balancer を使う（C）。DNS 名（B）や 1 台の EC2（D）は合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
