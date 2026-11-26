@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 146,
+  "count": 149,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -518,6 +518,214 @@
         {
           "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
           "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0009",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds its application with AWS CodeBuild. The buildspec file in the source repository currently defines the database password and an internal service endpoint as plaintext environment variables, and the password appears in build logs. The security team requires that no credentials are stored in source code, that the database password is rotated on a schedule, and that secret values are hidden in CodeBuild logs. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は AWS CodeBuild でアプリケーションをビルドしています。ソースリポジトリにある buildspec ファイルでは、データベースのパスワードと社内サービスのエンドポイントを平文の環境変数として定義しており、パスワードがビルドログに表示されています。セキュリティチームは、ソースコードに認証情報を置かないこと、データベースのパスワードを定期的にローテーションすること、シークレットの値を CodeBuild のログで隠すことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Store both values as SecureString parameters in Parameter Store and reference them in the env parameter-store section. Write an AWS Lambda function that runs on a schedule to change the database password and update the parameter.",
+          "text_ja": "両方の値を Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。データベースのパスワードを変更してパラメータを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "B",
+          "text": "Encrypt the password with an AWS KMS key, commit the ciphertext to the buildspec file, and decrypt it in the build commands. Change the password and the ciphertext manually each quarter.",
+          "text_ja": "パスワードを AWS KMS キーで暗号化し、暗号文を buildspec ファイルにコミットして、ビルドのコマンドで復号する。パスワードと暗号文を四半期ごとに手作業で変更する。"
+        },
+        {
+          "key": "C",
+          "text": "Store the password in AWS Secrets Manager with automatic rotation and reference it in the buildspec env secrets-manager section. Store the endpoint as a SecureString parameter in Parameter Store and reference it in the env parameter-store section. Grant the CodeBuild service role read access.",
+          "text_ja": "パスワードを自動ローテーションを設定した AWS Secrets Manager に保存し、buildspec の env の secrets-manager セクションで参照する。エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。CodeBuild のサービスロールに読み取り権限を与える。"
+        },
+        {
+          "key": "D",
+          "text": "Move both values from the buildspec file to plaintext environment variables in the CodeBuild project settings. Restrict console access to the project and change the password manually on a schedule.",
+          "text_ja": "両方の値を buildspec ファイルから CodeBuild プロジェクトの設定にある平文の環境変数へ移す。プロジェクトへのコンソールアクセスを制限し、パスワードはスケジュールに沿って手作業で変更する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager はシークレットの自動ローテーションを設定でき、buildspec の env の secrets-manager や parameter-store で指定した値は CodeBuild のログで隠されます。認証情報は Secrets Manager、暗号化が要る設定値は Parameter Store の SecureString という AWS の勧める分け方にも合い、自前のコードも要りません。",
+        "per_choice": {
+          "A": "ソースから消えログでも隠れますが、ローテーションの Lambda 関数を自分で書いて保守する必要があり、オーバーヘッドが大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+          "B": "暗号文とはいえ認証情報をソースコードに置いており要件に反します。手作業の変更も手間がかかります。",
+          "C": "正しい。ソースから認証情報が消え、Secrets Manager の自動ローテーションで定期変更を自前のコード無しで満たし、env の secrets-manager・parameter-store で指定した値はログで隠されます。",
+          "D": "ソースからは消えますが平文のままで、ログでも隠されず、ローテーションも手作業です。AWS は機密の値を Parameter Store などに置くことを勧めています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "In Secrets Manager, you can set up automatic rotation for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "To protect sensitive information, the following are hidden in CodeBuild logs:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "For secrets such as database credentials, API keys, or tokens, we recommend AWS Secrets Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0010",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A DevOps engineer is removing hard-coded values from a CodeBuild buildspec file. The build needs a third-party API key that is stored together with several other keys in one JSON secret, and the build must receive only that one key. The build also needs a service endpoint that is not a credential but must be stored encrypted. The engineer must follow AWS storage recommendations and must not add custom parsing scripts to the build. Which actions should the engineer take? (Choose TWO.)",
+      "stem_ja": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the API key in the AWS Secrets Manager secret and reference it in the buildspec env secrets-manager section with the secret ID and the json-key for the API key.",
+          "text_ja": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。"
+        },
+        {
+          "key": "B",
+          "text": "Store the endpoint as a SecureString parameter in Parameter Store, reference it in the env parameter-store section, and add the ssm:GetParameters action to the CodeBuild service role.",
+          "text_ja": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Copy the API key into a SecureString parameter in Parameter Store and reference that parameter in the env parameter-store section of the buildspec file.",
+          "text_ja": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。"
+        },
+        {
+          "key": "D",
+          "text": "Reference the whole Secrets Manager secret in the env secrets-manager section without a json-key, and extract the API key with a jq command in the build phase.",
+          "text_ja": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。"
+        },
+        {
+          "key": "E",
+          "text": "Define the endpoint as a plaintext variable in the env variables section of the buildspec file because the endpoint is not a credential.",
+          "text_ja": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "secrets-manager の参照では json-key を指定すると、その キーの値だけを取り出せます（指定しなければシークレットの全文）。認証情報ではないが暗号化が要る値は Parameter Store の SecureString に置き、CodeBuild のサービスロールに ssm:GetParameters を与えて parameter-store で参照します。",
+        "per_choice": {
+          "A": "正しい。json-key を指定すれば、その キーの値だけがビルドに渡り、解析のスクリプトも要りません。",
+          "B": "正しい。暗号化が要る設定値には SecureString が勧められており、parameter-store で取るにはサービスロールに ssm:GetParameters が必要です。",
+          "C": "動きますが、AWS は API キーなどのシークレットには Secrets Manager を勧めており、推奨に従うという要件に合いません。",
+          "D": "json-key を付けないとシークレットの全文が渡り、1 つのキーだけ渡す要件に反し、jq による独自の解析も加わります。",
+          "E": "暗号化して保存するという要件に反します。平文の値はソースに残ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0011",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS Secrets Manager",
+        "AWS CodePipeline",
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company deploys an application through AWS CodePipeline. During the build stage, AWS CodeBuild writes the database credentials into a configuration file that is packaged with the application. Every credential change therefore requires a full pipeline run and a redeployment. The company wants to change the credentials on a regular schedule without redeploying the application. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は AWS CodePipeline でアプリケーションをデプロイしています。ビルドステージで AWS CodeBuild がデータベースの認証情報を設定ファイルに書き込み、そのファイルはアプリケーションと一緒にパッケージされます。そのため、認証情報を変えるたびにパイプライン全体の実行と再デプロイが必要です。会社は、アプリケーションを再デプロイせずに、認証情報を定期的に変更したいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the credentials in AWS Secrets Manager and inject them through the CodeBuild env secrets-manager section. Configure automatic rotation and start the pipeline after every rotation.",
+          "text_ja": "認証情報を AWS Secrets Manager に置き、CodeBuild の env の secrets-manager セクションで注入する。自動ローテーションを設定し、ローテーションのたびにパイプラインを開始する。"
+        },
+        {
+          "key": "B",
+          "text": "Store the credentials in AWS Secrets Manager with automatic rotation. Change the application to retrieve the credentials from Secrets Manager at runtime and remove them from the build.",
+          "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存する。アプリケーションを実行時に Secrets Manager から認証情報を取得するように変更し、ビルドからは取り除く。"
+        },
+        {
+          "key": "C",
+          "text": "Store the credentials as a SecureString parameter in Parameter Store. Write a scheduled AWS Lambda function that changes the database password and the parameter, and read the parameter at runtime.",
+          "text_ja": "認証情報を Parameter Store の SecureString パラメータとして保存する。データベースのパスワードとパラメータを変更する AWS Lambda 関数を書いてスケジュールで実行し、実行時にパラメータを読む。"
+        },
+        {
+          "key": "D",
+          "text": "Store the credentials in AWS Secrets Manager with automatic rotation, and add a deployment hook that copies the current secret into the configuration file on each application deployment.",
+          "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存し、アプリケーションをデプロイするたびに現在のシークレットを設定ファイルへコピーするデプロイのフックを追加する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager では、ハードコードした認証情報を実行時の呼び出しに置き換えるため、認証情報をローテーションしてもアプリケーションの更新やデプロイが要りません。自動ローテーションのスケジュールも Secrets Manager で設定できます。",
+        "per_choice": {
+          "A": "ローテーションは自動ですが、ビルド時に注入するので、変更のたびにパイプラインの実行と再デプロイが必要なままです。",
+          "B": "正しい。実行時に取得するので再デプロイが要らず、定期的な変更は Secrets Manager の自動ローテーションで行えます。",
+          "C": "再デプロイは要りませんが、ローテーションの Lambda 関数とスケジュールを自分で作って保守する必要があり、手間が大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+          "D": "シークレットは自動で変わりますが、設定ファイルに反映するにはデプロイが必要で、再デプロイ無しという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "Since the credentials are no longer stored with the application, rotating credentials no longer requires updating your applications and deploying changes to application clients."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
       "low_confidence": false

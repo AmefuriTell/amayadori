@@ -1,0 +1,73 @@
+{
+  "id": "q-1.1-0011",
+  "task": "1.1",
+  "services": [
+    "AWS Secrets Manager",
+    "AWS CodePipeline",
+    "AWS CodeBuild"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company deploys an application through AWS CodePipeline. During the build stage, AWS CodeBuild writes the database credentials into a configuration file that is packaged with the application. Every credential change therefore requires a full pipeline run and a redeployment. The company wants to change the credentials on a regular schedule without redeploying the application. Which solution meets these requirements with the LEAST operational effort?",
+  "stem_ja": "ある会社は AWS CodePipeline でアプリケーションをデプロイしています。ビルドステージで AWS CodeBuild がデータベースの認証情報を設定ファイルに書き込み、そのファイルはアプリケーションと一緒にパッケージされます。そのため、認証情報を変えるたびにパイプライン全体の実行と再デプロイが必要です。会社は、アプリケーションを再デプロイせずに、認証情報を定期的に変更したいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the credentials in AWS Secrets Manager and inject them through the CodeBuild env secrets-manager section. Configure automatic rotation and start the pipeline after every rotation.",
+      "text_ja": "認証情報を AWS Secrets Manager に置き、CodeBuild の env の secrets-manager セクションで注入する。自動ローテーションを設定し、ローテーションのたびにパイプラインを開始する。"
+    },
+    {
+      "key": "B",
+      "text": "Store the credentials in AWS Secrets Manager with automatic rotation. Change the application to retrieve the credentials from Secrets Manager at runtime and remove them from the build.",
+      "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存する。アプリケーションを実行時に Secrets Manager から認証情報を取得するように変更し、ビルドからは取り除く。"
+    },
+    {
+      "key": "C",
+      "text": "Store the credentials as a SecureString parameter in Parameter Store. Write a scheduled AWS Lambda function that changes the database password and the parameter, and read the parameter at runtime.",
+      "text_ja": "認証情報を Parameter Store の SecureString パラメータとして保存する。データベースのパスワードとパラメータを変更する AWS Lambda 関数を書いてスケジュールで実行し、実行時にパラメータを読む。"
+    },
+    {
+      "key": "D",
+      "text": "Store the credentials in AWS Secrets Manager with automatic rotation, and add a deployment hook that copies the current secret into the configuration file on each application deployment.",
+      "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存し、アプリケーションをデプロイするたびに現在のシークレットを設定ファイルへコピーするデプロイのフックを追加する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Secrets Manager では、ハードコードした認証情報を実行時の呼び出しに置き換えるため、認証情報をローテーションしてもアプリケーションの更新やデプロイが要りません。自動ローテーションのスケジュールも Secrets Manager で設定できます。",
+    "per_choice": {
+      "A": "ローテーションは自動ですが、ビルド時に注入するので、変更のたびにパイプラインの実行と再デプロイが必要なままです。",
+      "B": "正しい。実行時に取得するので再デプロイが要らず、定期的な変更は Secrets Manager の自動ローテーションで行えます。",
+      "C": "再デプロイは要りませんが、ローテーションの Lambda 関数とスケジュールを自分で作って保守する必要があり、手間が大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+      "D": "シークレットは自動で変わりますが、設定ファイルに反映するにはデプロイが必要で、再デプロイ無しという要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+      "source_id": "S6",
+      "quote": "Since the credentials are no longer stored with the application, rotating credentials no longer requires updating your applications and deploying changes to application clients."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+      "source_id": "S6",
+      "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+      "source_id": "S6",
+      "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+      "source_id": "S8",
+      "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
