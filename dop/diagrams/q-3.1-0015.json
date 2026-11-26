@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0015",
+  "source": "flowchart TB\n  USER[\"利用者\"]\n  LB@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー（✔ A: ゾーンシフトにオプトイン）\" }\n  ARC@{ svc: \"Amazon Application Recovery Controller\", label: \"Amazon Application Recovery Controller<br/>ゾーンシフト（一時的・最長 72 時間）\" }\n  subgraph AZA[\"損なわれたゾーン\"]\n    BAD[\"ヘルスチェックでは分からない\"]\n  end\n  subgraph AZB[\"正常なゾーン\"]\n    OK[\"✔ B: 事前に拡張して容量がある\"]\n  end\n  X1[\"⚠ C: 期限の無いシフトは不可\"]\n  X2[\"⚠ D・E: 別リージョンや手作業では遅い・合わない\"]\n  USER --> LB\n  LB -. \"今は届いてしまう\" .-> BAD\n  ARC == \"トラフィックを移す\" ==> OK\n  LB --- ARC\n  X1 -.-> ARC\n  X2 -.-> LB\n",
+  "alt": "損なわれたゾーンから同じリージョンの正常なゾーンへ、ARC のゾーンシフトで一時的にトラフィックを移す図。ロードバランサーのオプトイン（A）と、移し先に十分な容量を事前に用意する（B）が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
