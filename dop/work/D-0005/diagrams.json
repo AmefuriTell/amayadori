@@ -1,30 +1,30 @@
 {
- "item": "D-0005",
- "diagrams": [
-  {
-   "id": "q-1.2-0011",
-   "source": "flowchart TB\n  AUD[\"監査人（元ファイルを 1 年）\"]\n  subgraph R[\"アカウント\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（buildspec の reports）\" }\n    RG[\"✔ D: S3 へエクスポートするレポートグループ（ARN を指定）\"]\n  S3@{ svc: \"Amazon S3\", label: \"元のテスト結果ファイル\" }\n  end\n  CB -- \"結果\" --> RG\n  RG == \"✔ D: 元ファイルをエクスポート\" ==> S3\n  S3 --> AUD\n  A[\"⚠ 今: buildspec 作成のグループは約 30 日で見られなくなる・エクスポートもしない\"] -.-> CB\n  C[\"⚠ C: コピー用スクリプトの保守が要る\"] -.-> S3\n",
-   "alt": "テストレポートは 30 日で見られなくなり、buildspec で作ったレポートグループは元ファイルをエクスポートしない。S3 にエクスポートするレポートグループを作り、buildspec で ARN を指定する（D）。"
-  },
-  {
-   "id": "q-1.2-0012",
-   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン\" }\n    ST[\"✔ A: Test カテゴリーの CodeBuild アクション（デプロイの前）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"pytest 実行（JUnit XML）\" }\n    RP[\"✔ B: reports セクション（形式は既定の JUNITXML）\"]\n  end\n  CP --> ST\n  ST == \"✔ A: テストのステージ\" ==> CB\n  CB -- \"結果ファイル\" --> RP\n  RP == \"✔ B: テストレポート\" ==> OUT[\"レポートを見る\"]\n  C[\"⚠ C: CLOVERXML はカバレッジ形式\"] -.-> RP\n  D[\"⚠ D: BatchEnabled は複数ビルド用 / E: 出力変数はレポートでない\"] -.-> ST\n",
-   "alt": "デプロイ前のテストステージで pytest の JUnit XML を CodeBuild のテストレポートにする図。Test カテゴリーの CodeBuild アクションを足し（A）、buildspec の reports で既定の形式を使う（B）。"
-  },
-  {
-   "id": "q-1.2-0013",
-   "source": "flowchart TB\n  subgraph USE1[\"us-east-1\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n    EP1[\"⚠ 今: ここへ結果を報告 → アクションが完了しない\"]\n  end\n  subgraph EUW1[\"eu-west-1\"]\n  LF@{ svc: \"AWS Lambda\", label: \"スモークテストの関数\" }\n    EP2[\"✔ C: PutJobSuccessResult / PutJobFailureResult の送り先\"]\n  end\n  CP -- \"クロスリージョン呼び出し\" --> LF\n  LF -. \"⚠ 結果\" .-> EP1\n  LF == \"✔ C: 結果を関数のリージョンへ\" ==> EP2\n  EP2 -- \"成功か失敗に\" --> CP\n  X[\"⚠ A: 時間延長 / B: ログに認証情報が残る / D: 手動化\"] -.-> LF\n",
-   "alt": "クロスリージョンの Lambda 呼び出しアクションで、結果を CodePipeline のリージョンへ送ると完了しない。PutJobSuccessResult と PutJobFailureResult を関数のある eu-west-1 へ送る（C）。"
-  },
-  {
-   "id": "q-1.2-0014",
-   "source": "flowchart TB\n  EXT[\"外部のテストシステム（約 40 分）\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n  LF@{ svc: \"AWS Lambda\", label: \"同じ関数（上限 15 分）\" }\n    CT[\"✔ A: 継続トークンを返す（continue_job_later）\"]\n  end\n  CP -- \"呼び出し\" --> LF\n  LF -- \"テスト開始\" --> EXT\n  LF == \"✔ A: トークンを返す\" ==> CT\n  CT == \"✔ A: 再呼び出しで状態確認\" ==> LF\n  B[\"⚠ B: タイムアウトの上限は 15 分\"] -.-> LF\n  C[\"⚠ C: 手動承認は自動でない / D: 今のアクションをやめる\"] -.-> CP\n",
-   "alt": "約 40 分のテストを Lambda の 15 分制限を超えて待つ図。関数が継続トークンを返して後の呼び出しで状態を確かめ続けると、今のアクションと関数のまま待てる（A）。タイムアウトを 60 分にはできない（B）。"
-  },
-  {
-   "id": "q-1.2-0015",
-   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"テスト環境へのデプロイ\" }\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ A: 呼び出しアクションで状態マシン開始\" }\n    OV[\"✔ B: 出力変数（確かめた URL など）\"]\n  DP@{ svc: \"AWS CodePipeline\", label: \"次のデプロイのアクション\" }\n  end\n  CP --> SF\n  SF -- \"手順と分岐を実行\" --> OV\n  OV == \"✔ B: アクションの設定から参照\" ==> DP\n  C[\"⚠ C: 手動で URL を入力\"] -.-> DP\n  D[\"⚠ D: Device Farm は端末テスト用 / E: 自作コード・認証情報がログに残る\"] -.-> SF\n",
-   "alt": "結合テストのワークフローの値を次のデプロイへ渡す図。Step Functions の呼び出しアクションで状態マシンを開始し（A）、その出力変数を次のアクションの設定から参照する（B）。手動や自作コードは要件に合わない。"
-  }
- ]
+  "item": "D-0005",
+  "diagrams": [
+    {
+      "id": "q-1.2-0011",
+      "source": "flowchart TB\n  AUD[\"監査人（元ファイルを 1 年）\"]\n  subgraph R[\"アカウント\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（buildspec の reports）\" }\n    RG[\"✔ D: S3 へエクスポートするレポートグループ（ARN を指定）\"]\n  S3@{ svc: \"Amazon S3\", label: \"元のテスト結果ファイル\" }\n  end\n  CB -- \"結果\" --> RG\n  RG == \"✔ D: 元ファイルをエクスポート\" ==> S3\n  S3 --> AUD\n  A[\"⚠ 今: buildspec 作成のグループは約 30 日で見られなくなる・エクスポートもしない\"] -.-> CB\n  C[\"⚠ C: コピー用スクリプトの保守が要る\"] -.-> S3\n",
+      "alt": "テストレポートは 30 日で見られなくなり、buildspec で作ったレポートグループは元ファイルをエクスポートしない。S3 にエクスポートするレポートグループを作り、buildspec で ARN を指定する（D）。"
+    },
+    {
+      "id": "q-1.2-0012",
+      "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン\" }\n    ST[\"✔ A: Test カテゴリーの CodeBuild アクション（デプロイの前）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"pytest 実行（JUnit XML）\" }\n    RP[\"✔ B: reports セクション（形式は既定の JUNITXML）\"]\n  end\n  CP --> ST\n  ST == \"✔ A: テストのステージ\" ==> CB\n  CB -- \"結果ファイル\" --> RP\n  RP == \"✔ B: テストレポート\" ==> OUT[\"レポートを見る\"]\n  C[\"⚠ C: CLOVERXML はカバレッジ形式\"] -.-> RP\n  D[\"⚠ D: BatchEnabled は複数ビルド用 / E: 出力変数はレポートでない\"] -.-> ST\n",
+      "alt": "デプロイ前のテストステージで pytest の JUnit XML を CodeBuild のテストレポートにする図。Test カテゴリーの CodeBuild アクションを足し（A）、buildspec の reports で既定の形式を使う（B）。"
+    },
+    {
+      "id": "q-1.2-0013",
+      "source": "flowchart TB\n  subgraph USE1[\"us-east-1\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n    EP1[\"⚠ 今: ここへ結果を報告 → アクションが完了しない\"]\n  end\n  subgraph EUW1[\"eu-west-1\"]\n  LF@{ svc: \"AWS Lambda\", label: \"スモークテストの関数\" }\n    EP2[\"✔ C: PutJobSuccessResult / PutJobFailureResult の送り先\"]\n  end\n  CP -- \"クロスリージョン呼び出し\" --> LF\n  LF -. \"⚠ 結果\" .-> EP1\n  LF == \"✔ C: 結果を関数のリージョンへ\" ==> EP2\n  EP2 -- \"成功か失敗に\" --> CP\n  X[\"⚠ A: 時間延長<br/>⚠ B: ログに認証情報が残る\"] -.-> LF\n  D[\"⚠ D: 手動の承認に置き換える\"] -.-> CP\n",
+      "alt": "クロスリージョンの Lambda 呼び出しアクションで、結果を CodePipeline のリージョンへ送ると完了しない。PutJobSuccessResult と PutJobFailureResult を関数のある eu-west-1 へ送る（C）。"
+    },
+    {
+      "id": "q-1.2-0014",
+      "source": "flowchart TB\n  EXT[\"外部のテストシステム（約 40 分）\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n  LF@{ svc: \"AWS Lambda\", label: \"同じ関数（上限 15 分）\" }\n    CT[\"✔ A: 継続トークンを返す（continue_job_later）\"]\n  end\n  CP -- \"呼び出し\" --> LF\n  LF -- \"テスト開始\" --> EXT\n  LF == \"✔ A: トークンを返す\" ==> CT\n  CT == \"✔ A: 再呼び出しで状態確認\" ==> LF\n  B[\"⚠ B: タイムアウトの上限は 15 分\"] -.-> LF\n  C[\"⚠ C: 手動承認は自動でない / D: 今のアクションをやめる\"] -.-> CP\n",
+      "alt": "約 40 分のテストを Lambda の 15 分制限を超えて待つ図。関数が継続トークンを返して後の呼び出しで状態を確かめ続けると、今のアクションと関数のまま待てる（A）。タイムアウトを 60 分にはできない（B）。"
+    },
+    {
+      "id": "q-1.2-0015",
+      "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"テスト環境へのデプロイ\" }\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ A: 呼び出しアクションで状態マシン開始\" }\n    OV[\"✔ B: 出力変数（確かめた URL など）\"]\n  DP@{ svc: \"AWS CodePipeline\", label: \"次のデプロイのアクション\" }\n  end\n  CP --> SF\n  SF -- \"手順と分岐を実行\" --> OV\n  OV == \"✔ B: アクションの設定から参照\" ==> DP\n  C[\"⚠ C: 手動で URL を入力\"] -.-> DP\n  D[\"⚠ D: Device Farm は端末テスト用 / E: 自作コード・認証情報がログに残る\"] -.-> SF\n",
+      "alt": "結合テストのワークフローの値を次のデプロイへ渡す図。Step Functions の呼び出しアクションで状態マシンを開始し（A）、その出力変数を次のアクションの設定から参照する（B）。手動や自作コードは要件に合わない。"
+    }
+  ]
 }
