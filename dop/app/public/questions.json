@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 261,
+  "count": 264,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -8576,6 +8576,213 @@
         {
           "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator",
           "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0013",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS Lambda",
+        "Application Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function behind an API has high latency every weekday from 08:00 to 10:00 because many new execution environments start at once. Traffic is low at other times. The company wants to reduce this latency during the morning peak while keeping costs as low as possible. Which solution meets these requirements MOST cost-effectively?",
+      "stem_ja": "API の後ろの Lambda 関数が、平日の 08:00 から 10:00 に、多くの新しい実行環境が一度に起動するため、高いレイテンシーになります。それ以外の時間はトラフィックが少ないです。会社は、費用をできるだけ低く保ちつつ、朝の山のレイテンシーを下げたいと考えています。これらの要件を最も費用対効果よく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set reserved concurrency for the function to the number of instances needed at the peak.",
+          "text_ja": "関数の予約された同時実行数を、山で必要なインスタンスの数に設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Keep provisioned concurrency at the peak level all day and every day.",
+          "text_ja": "プロビジョニングされた同時実行数を、毎日一日中、山の水準に保つ。"
+        },
+        {
+          "key": "C",
+          "text": "Request a higher account concurrency limit so that more environments can start at the same time.",
+          "text_ja": "より多くの環境が同時に起動できるよう、アカウントの同時実行数の上限を上げてもらう。"
+        },
+        {
+          "key": "D",
+          "text": "Use Application Auto Scaling to schedule provisioned concurrency for the peak hours only.",
+          "text_ja": "Application Auto Scaling で、山の時間だけプロビジョニングされた同時実行数をスケジュールする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "新しい実行環境を初期化することをコールドスタートといい、それを抑えるにはプロビジョニングされた同時実行数（前もって初期化した実行環境）を使います。これは追加の料金がかかり、使われなくても動き続けて課金されるので、予測できる負荷の変化には Application Auto Scaling のスケジュールで必要な時間だけ増やします。その時は最初の値を先に設定しておきます。",
+        "per_choice": {
+          "A": "予約された同時実行数は同時実行の最大と最小を割り当てるだけで、環境は前もって初期化されず、コールドスタートは減りません。",
+          "B": "レイテンシーは下がりますが、使わない時間も課金され続け、費用を低く保つ要件に反します。",
+          "C": "起動できる数が増えるだけで、各環境の初期化は変わらず、コールドスタートは減りません。",
+          "D": "正しい。山の時間だけ前もって初期化した環境を用意し、それ以外の時間の費用を抑えられます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "To mitigate cold starts, you can use provisioned concurrency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurrency-targeting",
+          "quote": "With Application Auto Scaling, you can set your own scaling schedule according to predictable load changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurency",
+          "quote": "ensure that you configure an initial provisioned concurrency value first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#pc-logging-behavior",
+          "quote": "Provisioned concurrency runs continually and incurs separate billing from initialization and invocation costs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "However, none of these environments come pre-initialized."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0014",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Many Lambda functions share an account's concurrency in one Region. When a batch-processing function receives a burst of events, it uses most of the available concurrency, and a customer-facing payment function starts to be throttled. The company must make sure that the payment function always has enough concurrency, without paying extra for idle environments. Which solution BEST meets these requirements?",
+      "stem_ja": "1 つのリージョンで、多くの Lambda 関数がアカウントの同時実行数を分け合っています。バッチ処理の関数にイベントが一度に届くと、その関数が使える同時実行数のほとんどを使い、利用者向けの決済の関数がスロットリングされ始めます。会社は、使われない環境のために余計に払わずに、決済の関数が常に十分な同時実行数を持てるようにする必要があります。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure provisioned concurrency for the batch-processing function.",
+          "text_ja": "バッチ処理の関数に、プロビジョニングされた同時実行数を設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Configure reserved concurrency for the payment function.",
+          "text_ja": "決済の関数に、予約された同時実行数を設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Configure provisioned concurrency for the payment function at its peak level all day.",
+          "text_ja": "決済の関数に、一日中その山の水準のプロビジョニングされた同時実行数を設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Put an API Gateway cache in front of the batch-processing function.",
+          "text_ja": "バッチ処理の関数の前に、API Gateway のキャッシュを置く。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "予約された同時実行数は、関数に割り当てる同時実行のインスタンスの最大と最小を決め、アカウントの同時実行数の一部をその関数のために取っておきます。予約していない関数は、残りの共有の同時実行数を分け合います。予約された同時実行数の設定に料金はかかりません。",
+        "per_choice": {
+          "A": "バッチの関数の環境を前もって初期化するだけで、決済の関数の分は確保されず、追加の料金もかかります。",
+          "B": "正しい。決済の関数の分を取っておけるので、ほかの関数に使い切られず、料金もかかりません。",
+          "C": "前もって初期化した環境を一日中持つため、使われない時間も課金され、要件に反します。",
+          "D": "バッチ処理のイベントは API の応答のキャッシュの対象ではなく、同時実行数の取り合いは変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-and-provisioned",
+          "quote": "Use reserved concurrency to set both the maximum and minimum number of concurrent instances to reserve a portion of your account's concurrency for an Event Function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-concurrency-concept",
+          "quote": "There is no charge for configuring reserved concurrency for an Event Function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "Using provisioned concurrency incurs additional charges to your account."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0015",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "Amazon API Gateway"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A REST API in Amazon API Gateway serves several partner companies. One partner sometimes sends so many requests that the backend is overloaded, and most requests are repeated GET calls for the same product data, which changes about once every 10 minutes. The company wants to limit each partner's request rate and reduce the number of repeated calls that reach the backend. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "Amazon API Gateway の REST API が、いくつかの提携先の会社に使われています。ある提携先がときどき多すぎるリクエストを送ってバックエンドに負荷をかけすぎ、そのほとんどは、約 10 分に 1 回変わる同じ商品のデータへの繰り返しの GET の呼び出しです。会社は、各提携先のリクエストの速さを制限し、バックエンドに届く繰り返しの呼び出しを減らしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create usage plans with throttling rates and burst limits for each partner.",
+          "text_ja": "各提携先に、スロットリングの速さとバーストの上限を持つ使用量プランを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Enable caching for the stage with a time-to-live (TTL) of up to 600 seconds.",
+          "text_ja": "ステージのキャッシュを、最大 600 秒の TTL で有効にする。"
+        },
+        {
+          "key": "C",
+          "text": "Enable caching for the stage with a TTL of 0 seconds so that responses are always fresh.",
+          "text_ja": "応答が常に新しいよう、ステージのキャッシュを 0 秒の TTL で有効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Enable caching for the stage with a TTL of 2 hours to reduce backend calls as much as possible.",
+          "text_ja": "バックエンドへの呼び出しをできるだけ減らすよう、ステージのキャッシュを 2 時間の TTL で有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Rely on the account-level throttling limits, which guarantee a fixed ceiling for each partner.",
+          "text_ja": "各提携先に決まった上限を保証する、アカウントレベルのスロットリングの上限に任せる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "使用量プランを使うと、決めたリクエストの速さとクォータでクライアントのリクエストにスロットリングをかけられ、速さ（トークンを足す速さ）とバースト（トークンのバケットの大きさ）を指定できます。ステージのキャッシュを有効にすると、API Gateway は決めた TTL の間エンドポイントの応答をキャッシュし、既定では GET のメソッドがキャッシュされます。TTL の最大は 3600 秒で、0 はキャッシュの無効を意味します。",
+        "per_choice": {
+          "A": "正しい。提携先ごとに速さの上限を決められます。",
+          "B": "正しい。データが変わる間隔に合わせた TTL で、繰り返しの GET をキャッシュから返せます。",
+          "C": "TTL が 0 だとキャッシュは無効になり、呼び出しは減りません。",
+          "D": "TTL の最大は 3600 秒で、2 時間は設定できません。データも古くなりすぎます。",
+          "E": "アカウントレベルの制限は全 API の合計に対するもので、スロットリングも確実な上限ではなく目標として扱われます。提携先ごとには分けられません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling",
+          "quote": "Alternatively, you can enable usage plans to set throttles on client request submissions based on specified requests rates and quotas."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "When you enable caching for a stage, API Gateway caches responses from your endpoint for a specified time-to-live (TTL) period, in seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "The maximum TTL value is 3600 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "TTL=0 means caching is disabled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling",
+          "quote": "Both throttles and quotas are applied on a best-effort basis and should be thought of as targets rather than guaranteed request ceilings."
         }
       ],
       "low_confidence": false
