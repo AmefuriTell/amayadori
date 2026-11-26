@@ -1,0 +1,173 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "図の箱「mutable: in-place / immutable: 置き換え」と台本「今ある環境をその場で書き換えるミュータブル」「新しい物に置き換えるイミュータブル」が、言い切りの対応づけになっている。根拠（S8・S9）には mutable という語も、in-place を mutable の例とする記述も無い。S9 の immutable は Beanstalk の環境の更新に限った話で、「置き換え」という定義も根拠に無い。s03 の台本は「この講義では…例として扱います」とことわっているが、地図の図と s16 のまとめはことわり無しに言い切っている。",
+          "suggest": "図の箱を「in-place: その場で更新 / immutable 更新: Beanstalk の例」のように根拠の語で書く。mutable/immutable の対応を残すなら、根拠の外の講義の整理だと分かる言い方にそろえる（地図・s03・s16 の 3 か所すべて）。"
+        },
+        {
+          "kind": "flow",
+          "severity": "中",
+          "detail": "台本は、EC2・ECS・Lambda・EKS の「それぞれで、トラフィックの移し方と、失敗したときの調べ方や戻し方を見ます」と予告している。しかし EKS（s12）ではトラフィックの移し方も失敗の調べ方・戻し方も扱っていない。EC2 も戻し方は扱わず、ECS も失敗の調べ方は扱っていない。予告が本文と合っていない。",
+          "suggest": "予告を本文に合わせて書き直す。例:「EC2・ECS・Lambda ではトラフィックの移し方と失敗時の扱いを、EKS では配り方を見ます」。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本の「この戻しやすさの差が、二つを選び分ける手がかりになります」は、根拠（S9）に無い評価の言い切り。S9 は失敗時の戻し方の違いを述べているだけ。オートスケーリンググループの説明（「インスタンスをまとめて増やしたり減らしたりする単位」）も根拠に無い。",
+          "suggest": "「失敗したときの戻し方が違います」で止める。Auto Scaling group は根拠の範囲で「失敗したら終了するだけのまとまり」程度にとどめる。"
+        },
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "表と bullets の「Immutable」（頭が大文字）が、s01・s16 の「immutable」と表記がそろっていない。",
+          "suggest": "全スライドで「immutable」にそろえる（Beanstalk の更新方式名として出すなら、そうだと分かる書き方にする）。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "重",
+          "detail": "台本の「ブルーグリーンでは、今の環境と置き換え用の環境を分けて、トラフィックを一度に全部切り替えます」は、ブルーグリーン全般の定義として言い切っている。この根拠は Lambda の weighted alias のページ（S18）で、canary との対比で書かれた物。EC2 のブルーグリーンの根拠（S19）には、一度に全部という記述は無い。そのうえ、次の s07 では S20 が ECS の blue/green に canary（2 回に分けて）と linear の移し方があると書いている。受験者は「blue/green は必ず一度に全部」と覚え、ECS の blue/green の canary・linear と食い違う。",
+          "suggest": "s06 から「一度に全部切り替えます」を外し、S19 の範囲（元の環境を決める → 置き換え用へトラフィックが移る → 元は登録解除）で説明する。ブルーグリーンと canary の対比は s09 の Lambda の weighted alias の文脈だけに置き、「ラムダのエイリアスの説明では」とことわる。s06 の refs から S18 を外す。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "steps と bullets の「replacement を用意」「replacement」という語は、S19 の引用に無い（S19 は original environment と instances you want to replace だけ）。何から登録解除されるのか（ロードバランサー）も根拠の引用に無いので、そこに踏み込まない点はよい。",
+          "suggest": "「置き換え用のインスタンス」と日本語で書くか、根拠に replacement の語を足す。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「タスクセットは、同じ版で動くタスクのまとまり」という説明は根拠に無い（S20・S22 は original/updated/replacement task set と言うだけ）。",
+          "suggest": "「元のタスクセット」「更新したタスクセット」のように、根拠の言い方で、版ごとの組だと分かる程度にとどめる。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "表の列は「移し方 / トラフィックの動き」なのに、4 行目に「前提 / ALB か NLB」が入っていて、列の意味と合わない。",
+          "suggest": "前提の行は表から外して bullets に置くか、表の下に注として書く。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "表の「段階」の列に、CodeDeploy の AppSpec の hook（BeforeInstall・AfterInstall、S22 は CodeDeploy のユーザーガイド）と、ECS が NLB 構成で 10 分の待ちを足すライフサイクルの段階（TEST_TRAFFIC_SHIFT・PRODUCTION_TRAFFIC_SHIFT、S21 は ECS のデベロッパーガイドで「Amazon ECS adds」）が並んでいる。これだと、一つのデプロイの続いた段階のように見える。根拠は、この 4 つが同じ仕組みの段階の並びだとは言っていない。受験者は、CodeDeploy の hook の名前に TEST_TRAFFIC_SHIFT があると誤って覚えるおそれがある。",
+          "suggest": "表を 2 つに分ける（CodeDeploy の hook: BeforeInstall・AfterInstall / ECS の段階で NLB なら 10 分: TEST_TRAFFIC_SHIFT・PRODUCTION_TRAFFIC_SHIFT）。台本でも、待ちを足すのは ECS の段階だと分けて言う。"
+        },
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "「ターゲットグループ」を説明せずに使っている（表の target group も同じ）。",
+          "suggest": "根拠の範囲で、ロードバランサーがトラフィックを送る先のまとまり、と一言添えるか、「ターゲットグループの一つを結び付けた後」だけに絞る。"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "bullets の「blue/green は一度に全部」が、条件の無い一般則として画面に出ている。S18 は Lambda の weighted alias の文脈での対比で、s07（S20）では ECS の blue/green の移し方に canary・linear がある。s06 の指摘と合わせて、同じ講義の中で blue/green の意味が食い違う。",
+          "suggest": "bullets を「canary: 一部のリクエストだけ」のように canary 側の説明にする。対比を残すなら、台本で「ラムダのエイリアスの説明では」とことわる。"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本の「デプロイが原因を言わずに一時間で失敗したら」は根拠に無い言い方（S16 は、一時間以内に知らせが無ければ失敗とみなす、だけ）。",
+          "suggest": "「一時間で失敗とみなされたら、検証の関数が結果を返しているかを確かめます」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "図の箱と bullets は、自動ロールバックの条件を「失敗か alarm のしきい値」の 2 つだけのように見せている。S4 は including（例）で挙げており、ほかの条件を除いていない。台本の「や」は例の言い方なので問題ない。",
+          "suggest": "箱を「デプロイの失敗・alarm のしきい値など」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "台本の「試験ガイドでは、その例にコードアーティファクトが挙がっています」は、sources.md に無い（試験ガイドは根拠に含まれていない）。CodeArtifact を「成果物の置き場」と呼ぶ事も、S11（認証とトークン）には書かれていない。",
+          "suggest": "試験ガイドへの言及を外す。CodeArtifact は根拠の範囲で「使うには認可のトークンで認証が要るサービス」と説明する。「成果物の置き場」と呼ぶなら、根拠を足すまで言い切らない。"
+        },
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "台本の「コードを配る道具と、権限です。コードデプロイのほかに、配る道具として、イーシーツーイメージビルダー」は、Image Builder がコードを配るように聞こえる。S10 では、配るのはサーバーのイメージ。「イメージとは、サーバーを起動する元になるひな形」も根拠に無い。",
+          "suggest": "「サーバーのイメージを作って配る道具」と言い分ける。イメージの説明は「サーバーのイメージ」までにとどめる。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "台本は「少しの割合で試す」の答えを「ラムダなら重み付きのエイリアス、イーシーエスならカナリアの移し方」としているが、ECS の canary は blue/green の中の移し方（s07）で、Lambda の canary は blue/green と対比される物（s09）。この表だけ読むと、canary と blue/green の関係がつかめない（s06・s09 の指摘と同じ根）。",
+          "suggest": "s06・s09 を直したうえで、表の「canary」のセルを「Lambda: weighted alias / ECS: blue/green の canary」のように書き分ける。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "1 の考え方の言い方が s01 と違う。s01 は「mutable / immutable」、s16 は「in-place / immutable」と「書き換えか置き換えか」。まとめが地図と同じ語に戻っていない。",
+          "suggest": "s01 の地図とまとめの 1 を同じ語にそろえる（s01 の指摘を直したときの語を使う）。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "重",
+      "detail": "blue/green と canary の関係が、スライドごとに違う。s06・s09 は「blue/green = 一度に全部、canary はそれと違う」と言い、s07・s08・s15 は「ECS の blue/green の移し方の一つが canary」と言う。根拠どうしの文脈（S18 は Lambda の weighted alias、S20 は CodeDeploy の ECS blue/green）の違いを講義がことわっていないため、受験者が「blue/green は必ず一度に全部」と誤って覚えるおそれがある。",
+      "suggest": "blue/green を一般に定義する文を外し、各スライドでどの根拠の文脈かをことわる（EC2: S19 の手順、ECS: blue/green の 3 つの移し方、Lambda: weighted alias の canary を、alias の説明での blue/green と対比）。"
+    },
+    {
+      "severity": "中",
+      "detail": "mutable / immutable という分類の軸を、根拠に無いまま講義の柱（地図・まとめ）にしている。決まりの「根拠に無い独自の分類の軸を立てない」に当たる。",
+      "suggest": "柱は根拠にある語（in-place の更新と、Beanstalk の immutable 更新の戻し方）で立てる。task_info に mutable/immutable があるなら、根拠に試験ガイドの該当の文を足してから使う。"
+    }
+  ]
+}
