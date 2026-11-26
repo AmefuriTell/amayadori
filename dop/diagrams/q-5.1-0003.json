@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0003",
+  "source": "flowchart TB\n  M1[\"メンバーアカウント 1\"]\n  M2[\"メンバーアカウント 2\"]\n  subgraph OPS[\"運用アカウント\"]\n    H@{ svc: \"AWS Health\", label: \"組織ビュー（委任管理者）\" }\n    EB@{ svc: \"Amazon EventBridge\", label: \"ルール（今は運用アカウントの分だけ）\" }\n  end\n  M1 -- \"Health のイベント\" --> H\n  M2 -- \"Health のイベント\" --> H\n  H == \"✔ D: 全アカウントを 1 か所に集約\" ==> EB\n  A[\"⚠ A: 今のルールのまま（自分の分しか受けない）\"]\n  A -.-> EB\n  B[\"⚠ B: 全メンバーにルールをデプロイ\"]\n  B -.-> M2\n  C[\"⚠ C: 所有者が毎日確認して転送\"]\n  C -.-> M1\n",
+  "alt": "組織の全アカウントの AWS Health イベントを 1 か所で受ける図。運用アカウントを委任管理者にして Health の組織ビューを使う（D）。EventBridge ルールだけでは自分のアカウントの分しか受けない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

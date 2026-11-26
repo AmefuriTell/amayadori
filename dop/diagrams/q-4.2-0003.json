@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0003",
+  "source": "flowchart TB\n  ENG[\"エンジニア\"]\n  DASH@{ svc: \"Amazon CloudWatch\", label: \"ダッシュボード（コードで管理）\" }\n  W[\"ログウィジェット\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"別アカウントの app-a・app-b\" }\n  OA[\"✔ A: accountId に<br/>ロググループのあるアカウントの ID\"]\n  OB[\"✔ B: クエリは<br/>SOURCE 'app-a' | SOURCE 'app-b' | 構文\"]\n  WC[\"⚠ C: カンマ区切りは使えない\"]\n  WD[\"⚠ D・E: API でも作れる<br/>view を省くと表になる\"]\n  ENG -- \"API で定義\" --> DASH\n  DASH --> W\n  W -- \"Logs Insights のクエリ\" --> LG\n  OA -.- W\n  OB -.- W\n  WC -.- W\n  WD -.- DASH\n",
+  "alt": "別アカウントのロググループを Logs Insights で表示するダッシュボードのログウィジェットの図。accountId にそのアカウントの ID を設定し（A）、クエリは SOURCE をパイプでつないでから構文を書く（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

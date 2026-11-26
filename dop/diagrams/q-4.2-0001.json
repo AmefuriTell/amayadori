@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0001",
+  "source": "flowchart TB\n  subgraph SRC[\"ソースアカウント（30 個）\"]\n    SM@{ svc: \"Amazon CloudWatch\", label: \"選んだ名前空間のメトリクス\" }\n    SL@{ svc: \"Amazon CloudWatch Logs\", label: \"選んだロググループ\" }\n  end\n  subgraph MON[\"監視アカウント\"]\n    MA@{ svc: \"Amazon CloudWatch\", label: \"ソースのメトリクスのアラーム\" }\n    Q@{ svc: \"Amazon CloudWatch Logs\", label: \"1 回の Logs Insights のクエリ\" }\n  end\n  OK[\"✔ B: クロスアカウントのオブザーバビリティ<br/>共有する物を絞れる\"]\n  WA[\"⚠ A: アカウントごとの作業\"]\n  WC[\"⚠ C・D: 自前のコピーや<br/>各ソースでのアラーム\"]\n  SM -- \"共有\" --> MA\n  SL -- \"共有\" --> Q\n  OK -.- MON\n  WA -.- SRC\n  WC -.- SRC\n",
+  "alt": "30 個のアカウントを監視アカウントでまとめて見る図。クロスアカウントのオブザーバビリティで、選んだ名前空間とロググループだけを共有し、監視アカウントでアラームと複数アカウントにまたがるクエリを実行する（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

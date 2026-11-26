@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0007",
+  "source": "flowchart TB\n  subgraph KDS[\"データストリーム\"]\n    S@{ svc: \"Amazon Kinesis Data Streams\", label: \"4 つのシャード（変えない）\" }\n  end\n  ESM[\"イベントソースマッピング\"]\n  FN@{ svc: \"AWS Lambda\", label: \"関数\" }\n  S -- \"シャードごとのレコード\" --> ESM\n  ESM --> FN\n  A[\"✔ A: ParallelizationFactor を 10 に\"]\n  A == \"各シャードから同時に 10 バッチまで\" ==> ESM\n  O[\"同じパーティションキーの順序は保たれる\"]\n  O -.- FN\n  B[\"⚠ B: 20 に（最大は 10）\"]\n  B -.-> ESM\n  C[\"⚠ C: シャードを足す（ストリームを変える）\"]\n  C -.-> S\n  D[\"⚠ D: SQS 標準キューへ移す（作り直し）\"]\n  D -.-> S\n",
+  "alt": "Kinesis のストリームを処理する Lambda の遅れを直す図。イベントソースマッピングの ParallelizationFactor を最大の 10 にすると、各シャードから同時に処理するバッチが増え、キーごとの順序も保たれる（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

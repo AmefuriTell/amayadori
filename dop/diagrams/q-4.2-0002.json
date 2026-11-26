@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0002",
+  "source": "flowchart TB\n  subgraph SH[\"共有アカウント（4 つ）\"]\n    R1@{ svc: \"Amazon CloudWatch\", label: \"us-east-1 のグラフ・アラーム・ログ\" }\n    R2@{ svc: \"Amazon CloudWatch\", label: \"ap-northeast-1 の同じ物\" }\n  end\n  subgraph MG[\"監視アカウント\"]\n    DASH@{ svc: \"Amazon CloudWatch\", label: \"✔ C: 1 つのダッシュボード\" }\n  end\n  WA[\"⚠ A: オブザーバビリティは<br/>1 リージョンの中だけ\"]\n  WB[\"⚠ B: ダッシュボードが 8 つに分かれる\"]\n  WD[\"⚠ D: データをコピーする\"]\n  R1 -- \"表示（コピーなし）\" --> DASH\n  R2 -- \"表示（コピーなし）\" --> DASH\n  WA -.- DASH\n  WB -.- SH\n  WD -.- DASH\n",
+  "alt": "4 つのアカウントと 2 つのリージョンを 1 つのダッシュボードで見る図。共有アカウントとマネージャーの監視アカウントを決め、クロスアカウント・クロスリージョンのダッシュボードを作る（C）。コピーはしない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

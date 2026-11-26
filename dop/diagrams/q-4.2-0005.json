@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0005",
+  "source": "flowchart TB\n  API[\"決済 API\"]\n  LAT@{ svc: \"Amazon CloudWatch\", label: \"レイテンシー（高解像度の生データ）\" }\n  ERR@{ svc: \"Amazon CloudWatch\", label: \"エラー数・リクエスト数\" }\n  A1[\"✔ A: p99 のアラーム（10 秒の期間）\"]\n  A2[\"✔ B: エラー数 ÷ リクエスト数 の<br/>数式にアラーム\"]\n  WC[\"⚠ C: 統計セットではパーセンタイルが使えない\"]\n  WD[\"⚠ D: 標準解像度は 10 秒の期間にできない\"]\n  WE[\"⚠ E: SEARCH にはアラームを作れない\"]\n  API --> LAT\n  API --> ERR\n  LAT --> A1\n  ERR --> A2\n  WC -.- LAT\n  WD -.- LAT\n  WE -.- ERR\n",
+  "alt": "決済 API の 2 つのアラームの図。高解像度の生データを発行して 10 秒の期間で p99 にアラームを付け（A）、エラー率はエラー数をリクエスト数で割る数式にアラームを付ける（B）。SEARCH の式にはアラームを付けられない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0002",
+  "source": "flowchart TB\n  H1@{ svc: \"AWS Health\", label: \"標準の各リージョン<br/>アカウント固有のイベント\" }\n  IAM@{ svc: \"AWS IAM\", label: \"リージョンに属さないイベント\" }\n  R1@{ svc: \"Amazon EventBridge\", label: \"米国西部（オレゴン）<br/>✔ A: 中央のルール 1 つ\" }\n  R2@{ svc: \"Amazon EventBridge\", label: \"バージニア北部<br/>✔ B: グローバルなイベントのルール\" }\n  H1 == \"✔ A: 全リージョンの分\" ==> R1\n  IAM == \"✔ B\" ==> R2\n  CDE[\"⚠ C: 各リージョンにルール（数が増え IAM は受けられない）<br/>⚠ D: 簡素化された統合（公開イベントは対象外）<br/>⚠ E: 主なリージョンのルールだけ（他は集まらない）\"]\n  CDE -.-> R1",
+  "alt": "リージョンごとの AWS Health イベントは米国西部（オレゴン）の中央ルール 1 つで集め、IAM のようなグローバルなイベントは米国東部（バージニア北部）のルールで受ける図（A と B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

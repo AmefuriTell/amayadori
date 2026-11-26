@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0006",
+  "source": "flowchart TB\n  Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n  FN@{ svc: \"AWS Lambda\", label: \"関数（バッチサイズ 10）<br/>✔ C: batchItemFailures に<br/>失敗の ID だけ返す\" }\n  M[\"イベントソースマッピング:<br/>ReportBatchItemFailures を有効\"]\n  Q -- \"10 件のバッチ\" --> FN\n  M -.- FN\n  A[\"⚠ A: 例外を投げると<br/>バッチ全体が失敗\"]\n  A -.-> FN\n  D[\"⚠ D: バッチサイズを 1 に<br/>（要件に反する）\"]\n  D -.-> FN\n  B[\"⚠ B: 可視性タイムアウトを長く<br/>（待つだけ）\"]\n  B -.-> Q",
+  "alt": "SQS のバッチ処理で 1 件の失敗が全件の再処理になる問題の図。イベントソースマッピングで ReportBatchItemFailures を有効にし、失敗したメッセージの ID を batchItemFailures で返せば失敗分だけやり直せる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

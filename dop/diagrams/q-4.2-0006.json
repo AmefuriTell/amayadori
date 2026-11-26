@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0006",
+  "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"ライセンスサーバー（1 台）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム<br/>StatusCheckFailed_System\" }\n  WB[\"⚠ B: Instance のチェックでは<br/>復旧のアクションが使えない\"]\n  WC[\"⚠ C: 終了すると別のインスタンスになる\"]\n  WD[\"⚠ D: 停止して人が起動するのは自動でない\"]\n  AL == \"✔ A: 復旧のアクション\" ==> EC2\n  WB -.- AL\n  WC -.- AL\n  WD -.- AL\n",
+  "alt": "ハードウェアの問題で EC2 を自動で復旧する図。StatusCheckFailed_System のアラームに復旧のアクションを付けると、同じインスタンスとして復旧する（A）。Instance のチェックでは復旧できず、終了や停止では要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

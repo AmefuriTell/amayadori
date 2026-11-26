@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0007",
+  "source": "flowchart TB\n  EB[\"EventBridge のスケジュール\"]\n  AL[\"エイリアス prod\"]\n  V12@{ svc: \"AWS Lambda\", label: \"バージョン 12（公開済み）\" }\n  UN@{ svc: \"AWS Lambda\", label: \"未公開（Active tracing 有効）\" }\n  V13@{ svc: \"AWS Lambda\", label: \"新しいバージョン\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>トレース\" }\n  WB[\"⚠ B: 公開済みのバージョンは<br/>トレースのモードを変えられない\"]\n  EB -- \"呼び出し\" --> AL\n  AL -. \"⚠ 今: トレースなし\" .-> V12\n  UN -- \"✔ A: 公開\" --> V13\n  AL == \"✔ A: 新しい版へ更新\" ==> V13\n  V13 -- \"トレース\" --> XR\n  WB -.- V12\n",
+  "alt": "エイリアス prod 経由の Lambda 関数を X-Ray でトレースする図。トレースのモードは公開済みのバージョンでは変えられないので、Active tracing を有効にした未公開のバージョンから新しいバージョンを公開し、prod を向ける（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

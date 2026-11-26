@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0013",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ（構造の無い行）\" }\n  Q@{ svc: \"Amazon CloudWatch Logs\", label: \"✔ C: 保存したクエリ（parse と stats）\" }\n  ENG[\"同じリージョンのエンジニア\"]\n  WA[\"⚠ A: S3 へ移して Athena<br/>手間と遅れが出る\"]\n  WB[\"⚠ B: Lambda のコードを保守する\"]\n  WD[\"⚠ D: 手作業で素早くできない\"]\n  APP -- \"GET /orders took 532 ms\" --> LG\n  LG -- \"ログはそのまま\" --> Q\n  Q -- \"パスごとの平均・最大\" --> ENG\n  WA -.- LG\n  WB -.- LG\n  WD -.- ENG\n",
+  "alt": "構造の無いログ行からパスごとの平均と最大の応答時間を出す図。Logs Insights の parse と stats のクエリを保存すれば、ログを移さずコードも書かずに、同じリージョンの誰でも再実行できる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

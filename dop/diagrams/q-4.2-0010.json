@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0010",
+  "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"忙しいロググループ\" }\n  KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"ストリーム（シャードは合計で足りる）\" }\n  WA[\"⚠ A: 保持期間は送る量と関係ない\"]\n  WB[\"⚠ B: 再試行は最大 24 時間<br/>その後は落とされる\"]\n  WD[\"⚠ D: 読み出しを速くしても<br/>スロットリングは減らない\"]\n  LG -. \"⚠ 既定: ログストリームごとに分配（偏る）\" .-> KDS\n  LG == \"✔ C: random に分配\" ==> KDS\n  WA -.- LG\n  WB -.- KDS\n  WD -.- KDS\n",
+  "alt": "CloudWatch Logs から Kinesis Data Streams へ送る時の DeliveryThrottling の図。既定のログストリームごとの分配は偏るので、サブスクリプションフィルターの分配を random にするとスロットリングが減る（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

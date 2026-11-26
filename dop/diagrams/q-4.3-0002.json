@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0002",
+  "source": "flowchart TB\n  subgraph ECS[\"ECS クラスター\"]\n    CP@{ svc: \"Amazon ECS\", label: \"キャパシティープロバイダー（targetCapacity 90%）\" }\n    T[\"タスク\"]\n  end\n  subgraph ASG[\"Auto Scaling グループ\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"希望する容量\" }\n    MP[\"ECS 管理の target tracking ポリシー\"]\n    OWN[\"チーム独自の CPU ポリシー\"]\n  end\n  T -- \"使う資源\" --> CP\n  CP --> MP\n  MP --> AS\n  OWN -. \"ぶつかり合い\" .-> AS\n  B[\"✔ B: 独自ポリシーを削除し、ECS 管理のポリシーだけにする\"]\n  B == \"削除\" ==> OWN\n  A[\"⚠ A: ステップスケーリングを足す（ぶつかりが増える）\"]\n  A -.-> AS\n  C[\"⚠ C: MaximumCapacity を 0 にする（増えない）\"]\n  C -.-> AS\n  D[\"⚠ D: マネージドスケーリングを無効にし手で設定\"]\n  D -.-> CP\n",
+  "alt": "ECS のマネージドスケーリングと独自の CPU ポリシーが同じ Auto Scaling グループを動かしてぶつかる図。正解 B は独自ポリシーを削除し、ECS が管理するターゲット追跡ポリシーだけに希望する容量を任せること。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

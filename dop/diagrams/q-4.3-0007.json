@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0007",
+  "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"インスタンスの状態変化\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"既存のトピック\" }\n  M[\"運用チームのメール\"]\n  EC2 -- \"状態変化の通知\" --> EB\n  EB == \"✔ B: state が terminated のパターン\" ==> SNS\n  SNS -- \"メール\" --> M\n  EB -. \"⚠ A: Lambda で絞る（コードの保守）\" .-> SNS\n  W2[\"⚠ C: 5 分ごとにポーリングする Lambda\"]\n  W2 -.-> EC2\n  W3[\"⚠ D: 全状態変化を送る（停止・開始も通知）\"]\n  W3 -.-> EB\n",
+  "alt": "EC2 インスタンスの終了だけを SNS のメールで知らせる図。EventBridge のイベントパターンで状態が terminated のものだけに絞り、SNS をターゲットにする（B）。Lambda や定期確認は手間が増える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

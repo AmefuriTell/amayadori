@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0001",
+  "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"Describe* などの読み取り専用の管理 API\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"デフォルトのバスのルール<br/>✔ A: 状態を ENABLED_WITH_ALL_<br/>CLOUDTRAIL_MANAGEMENT_EVENTS に\" }\n  WF[\"調査のワークフロー\"]\n  CT -- \"管理イベント\" --> EB\n  EB == \"✔ A\" ==> WF\n  C[\"⚠ C: ただの ENABLED では<br/>読み取り専用に一致しない\"]\n  C -.-> EB\n  PB[\"⚠ B: パートナーのイベントバスは<br/>AWS のイベントを受けない\"]\n  PB -.-> WF\n  D[\"⚠ D: S3 のログを読む Lambda<br/>（コードを書く）\"]\n  D -.-> WF",
+  "alt": "読み取り専用の管理 API の呼び出しで調査を始める EventBridge ルールの図。ルールの状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると読み取り専用の管理イベントにも一致する（A）。ただの有効では一致しない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

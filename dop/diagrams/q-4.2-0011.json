@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0011",
+  "source": "flowchart TB\n  subgraph APPA[\"アプリケーションのアカウント\"]\n    LU@{ svc: \"Amazon CloudWatch Logs\", label: \"us-east-1 のロググループ\" }\n    LE@{ svc: \"Amazon CloudWatch Logs\", label: \"eu-west-1 のロググループ\" }\n  end\n  subgraph SEC[\"セキュリティのアカウント\"]\n    DU[\"送信先（us-east-1）\"]\n    DE[\"✔ A: 送信先（eu-west-1）\"]\n    KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"中央のストリーム（us-east-1）\" }\n  end\n  WC[\"⚠ C: 別リージョンの送信先は使えない\"]\n  LU -- \"✔ B: 同じリージョンの送信先\" --> DU\n  LE == \"✔ B: 同じリージョンの送信先\" ==> DE\n  DU --> KDS\n  DE == \"ストリームを指す\" ==> KDS\n  LE -. \"⚠ C\" .-> DU\n  WC -.- LE\n",
+  "alt": "2 つのリージョンのロググループのログを us-east-1 の中央のストリームへ送る図。セキュリティのアカウントに各リージョンの送信先を作り（A）、ロググループと同じリージョンの送信先を使うサブスクリプションフィルターを作る（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

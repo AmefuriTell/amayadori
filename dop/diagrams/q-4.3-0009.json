@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0009",
+  "source": "flowchart TB\n  subgraph REG[\"1 つのリージョン\"]\n    EC2@{ svc: \"Amazon EC2\", label: \"300 台（IMDSv2・SSM Agent 3.2.582.0 以降）\" }\n    SSM@{ svc: \"AWS Systems Manager\", label: \"マネージドノード\" }\n  end\n  DH[\"✔ C: Default Host Management Configuration を有効\"]\n  DH == \"既定のロール（今と今後のすべて）\" ==> EC2\n  EC2 == \"マネージドノードに\" ==> SSM\n  W1[\"⚠ A: プロファイルを 1 台ずつ作る・付ける\"]\n  W2[\"⚠ B: 受信ルールを足す（不要）\"]\n  W3[\"⚠ D: IMDSv1 に切り替える（非対応）\"]\n  W1 -.-> EC2\n  W2 -.-> EC2\n  W3 -.-> EC2\n",
+  "alt": "インスタンスプロファイル無しで EC2 を Systems Manager のマネージドノードにする図。リージョンで Default Host Management Configuration を有効にすれば、IMDSv2 と新しい SSM Agent の今と今後の全インスタンスが対象になる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

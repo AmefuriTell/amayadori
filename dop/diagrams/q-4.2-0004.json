@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0004",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  M1@{ svc: \"Amazon CloudWatch\", label: \"Latency（Service + InstanceId）\" }\n  M2@{ svc: \"Amazon CloudWatch\", label: \"Latency（Service だけ）\" }\n  AL[\"アラーム Service=checkout\"]\n  WA[\"⚠ A: 組ごとに別のメトリクス<br/>自動ではまとまらない\"]\n  WD[\"⚠ D: SEARCH の式には<br/>アラームを作れない\"]\n  APP -- \"今の発行\" --> M1\n  APP == \"✔ B: Service だけの組も発行\" ==> M2\n  AL == \"✔ B: 組が合ってデータあり\" ==> M2\n  AL -. \"⚠ 今: 組が違いデータなし\" .-> M1\n  WA -.- M1\n  WD -.- AL\n",
+  "alt": "ディメンションの組ごとに別のメトリクスになる図。アラームは Service だけの組を見るので、Service だけのディメンションの Latency も発行すればデータが入る（B）。自動でまとまることも、SEARCH の式へのアラームもない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

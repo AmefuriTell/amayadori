@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0008",
+  "source": "flowchart TB\n  CL[\"クライアント\"]\n  API@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>REST API（ステージで X-Ray 有効）\" }\n  FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>⚠ A: ここだけ有効でも<br/>API Gateway から始まらない\" }\n  XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サンプリングルール\" }\n  OK[\"✔ C: /orders は 10%・その他は 1%<br/>コンソールで変えられる\"]\n  WBD[\"⚠ B: SDK のコードが要る<br/>⚠ D: 既定では割合が合わない\"]\n  CL --> API\n  API --> FN\n  API -- \"トレース\" --> XR\n  OK -.- XR\n  WBD -.- API\n",
+  "alt": "API Gateway から X-Ray のトレースを始める図。ステージで X-Ray を有効にして再デプロイし、/orders 用とそれ以外用のサンプリングルールを X-Ray のコンソールで作ると、割合を後から変えられる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
