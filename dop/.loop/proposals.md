@@ -164,3 +164,13 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>C2 の「事典の書き方」に足す: ① exam_points は出典の文の言い換えに限り、出典に無い目的・程度・理由の言葉を足さない。② 専門用語は初めて出る所で、出典の言葉か、その文の中で分かる言い方で短く添える。出典に定義が無い語は、添える説明も出典の言葉の範囲にする（添えすぎると unsupported になる）。③ g validate の前に、全ての exam_points を出典の文と 1 つずつ見比べる。人が決める</change>
 </proposal>
 ```
+
+## C-0059（2026-11-26）から
+
+```xml
+<proposal id="P-019" from="C-0059" status="proposed">
+  <issue>検証役（dop-verifier）が verify.json を書いた後、進行役の仕事の q verdict まで自分で呼んだ。今回は結果が pass で、進行役が呼び直しても同じだったが、fix の時に重い fix の回数（history）を 2 回数えるおそれがある</issue>
+  <kind>tool</kind>
+  <change>q・g・dg の verdict を、同じ verify.json に対して 2 回目は何もしない（verify.json の時刻か中身の hash を verdict.json に控え、同じなら前の結論をそのまま出す）。あわせて .claude/agents/dop-verifier.md に「verdict は呼ばない」を足す。人が決める</change>
+</proposal>
+```
