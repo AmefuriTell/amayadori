@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0007",
+  "source": "flowchart TB\n  subgraph R[\"Amazon ECS サービス\"]\n  T@{ svc: \"Amazon ECS\", label: \"新しいタスク（読み込みに約 90 秒）\" }\n    HC[\"コンテナのヘルスチェック\"]\n    SP[\"✔ C: startPeriod = 120 秒\"]\n  end\n  HC -- \"起動中の失敗\" --> T\n  SP == \"✔ C: 起動中の失敗を数えない・その後は通常\" ==> HC\n  A[\"⚠ A: retries は 10 回まで\"] -.-> HC\n  B[\"⚠ B: interval は 300 秒まで・起動後も弱くなる\"] -.-> HC\n  D[\"⚠ D: timeout は 60 秒まで・遅さを解決しない\"] -.-> HC\n",
+  "alt": "起動に約 90 秒かかるコンテナが起動前に異常と判断される問題の図。startPeriod を 120 秒にすると起動中の失敗を数えず、起動後は通常どおり確かめる（C）。retries と timeout には上限があり解決しない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

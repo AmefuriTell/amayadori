@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0005",
+  "source": "flowchart TB\n  subgraph R[\"CodeBuild プロジェクト 1 つ\"]\n  B0@{ svc: \"AWS CodeBuild\", label: \"バッチビルド（ビルドファンアウト）\" }\n    P[\"✔ D: parallelism = 10\"]\n  B1@{ svc: \"AWS CodeBuild\", label: \"ビルド 1: テスト塊 1\" }\n  B2@{ svc: \"AWS CodeBuild\", label: \"ビルド 2〜10: 各テスト塊\" }\n  end\n  P == \"✔ D: 同じ設定で 2000 件を 10 個に分割\" ==> B0\n  B0 --> B1\n  B0 --> B2\n  A[\"⚠ A: マトリックスは設定の組み合わせごとに作る\"] -.-> B0\n  C[\"⚠ C: 10 回動かすだけで分割されない\"] -.-> B0\n",
+  "alt": "2000 件のテストを同じ設定のまま 10 個のビルドに分ける図。ビルドファンアウトのバッチビルドで parallelism を 10 にする（D）。ビルドマトリックスは設定の組み合わせごとに作るので合わない（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1027,7 +1027,10 @@
           "quote": "A BASE_REF filter can be used with pull request events only."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Webhook のフィルターグループは中の全フィルターが真の時だけ真になる。1 グループに PR の作成・更新と BASE_REF が main を入れると、main 向けの PR だけでビルドが始まる（B）。グループを分ける A は他ブランチでも動く。"
+      }
     },
     {
       "id": "q-1.2-0002",
@@ -1084,7 +1087,10 @@
           "quote": "NUNIT3XML NUnit 3 XML"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "NUnit 3 の XML 結果を CodeBuild のテストレポートで見る図。buildspec の reports に結果ファイルと file-format NUNIT3XML を指定する（A）。形式を省くと JUNITXML 扱いになり合わない（B）。"
+      }
     },
     {
       "id": "q-1.2-0003",
@@ -1142,7 +1148,10 @@
           "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "V2 パイプライン 1 つで、main 向け PR の作成と新リビジョン、main への push で開始する図。pullRequest フィルターに Open と Update、さらに push フィルターを入れる（D）。Closed では新リビジョンで動かない（A）。"
+      }
     },
     {
       "id": "q-1.2-0004",
@@ -1208,7 +1217,10 @@
           "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "JMeter スクリプトを流用し、サーバーを管理せずに数千ユーザーの負荷をかける図。Distributed Load Testing on AWS をデプロイし、毎週のスケジュールとパイプラインからの呼び出しの両方で動かす（C）。"
+      }
     },
     {
       "id": "q-1.2-0005",
@@ -1269,7 +1281,10 @@
           "quote": "A build matrix defines tasks with different configurations that run in parallel."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "2000 件のテストを同じ設定のまま 10 個のビルドに分ける図。ビルドファンアウトのバッチビルドで parallelism を 10 にする（D）。ビルドマトリックスは設定の組み合わせごとに作るので合わない（A）。"
+      }
     },
     {
       "id": "q-1.2-0006",
@@ -1330,7 +1345,10 @@
           "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "3 つのランタイムと 2 つの OS イメージの 6 通りを並列で 1 か所に定義する図。バッチビルドのビルドマトリックスで組み合わせごとにビルドを作る（A）。ファンアウトは同じ設定のテスト分割用（B）。"
+      }
     },
     {
       "id": "q-1.2-0007",
@@ -1395,7 +1413,10 @@
           "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "起動に約 90 秒かかるコンテナが起動前に異常と判断される問題の図。startPeriod を 120 秒にすると起動中の失敗を数えず、起動後は通常どおり確かめる（C）。retries と timeout には上限があり解決しない。"
+      }
     },
     {
       "id": "q-1.2-0008",
@@ -1467,7 +1488,10 @@
           "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ログ転送のサイドカーが失敗してもアプリを動かし続ける図。サイドカーを essential false にし（A）、アプリには essential のままヘルスチェックを定義する（B）。両方 false（C）は essential が 1 つも無くなる。"
+      }
     },
     {
       "id": "q-1.2-0009",
@@ -1530,7 +1554,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い"
+      "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い",
+      "diagram": {
+        "alt": "ValidateService のポーリングが最大 4 分かかるのにタイムアウトが 60 秒で失敗する図。タイムアウトを 300 秒に増やせば確認を続けられる（D）。上限は 3600 秒（A）で、フックの削除や移動は要件に合わない。"
+      }
     },
     {
       "id": "q-1.2-0010",
@@ -1595,7 +1622,10 @@
           "quote": "JaCoCo XML"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "JaCoCo のカバレッジを CodeBuild で見る図。buildspec の reports にコードカバレッジのレポートグループと JACOCOXML の形式を指定する（B）。形式を省くと JUNITXML 扱いになる（A）。"
+      }
     },
     {
       "id": "q-1.2-0011",

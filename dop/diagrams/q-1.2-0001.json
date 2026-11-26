@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0001",
+  "source": "flowchart TB\n  GH[\"GitHub のプルリクエスト\"]\n  subgraph R[\"アカウント\"]\n    G1[\"フィルターグループ（1 つ）<br/>✔ B: EVENT＝PR の作成・更新<br/>かつ BASE_REF＝main\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"ユニットテストのビルド\" }\n  end\n  GH -- \"Webhook イベント\" --> G1\n  G1 == \"✔ B: main 向けの PR だけ開始\" ==> CB\n  A[\"⚠ A: グループを 2 つに分ける<br/>どれかが真で開始する\"] -. \"他ブランチ向けでも動く\" .-> CB\n  CD[\"⚠ C: EVENT に PR の更新が無い<br/>⚠ D: MERGED では更新に動かない\"] -. \"コミット追加で動かない\" .-> CB",
+  "alt": "Webhook のフィルターグループは中の全フィルターが真の時だけ真になる。1 グループに PR の作成・更新と BASE_REF が main を入れると、main 向けの PR だけでビルドが始まる（B）。グループを分ける A は他ブランチでも動く。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

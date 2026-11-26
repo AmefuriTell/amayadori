@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0008",
+  "source": "flowchart TB\n  subgraph R[\"Amazon ECS タスク\"]\n    APP@{ svc: \"Amazon ECS\", label: \"アプリのコンテナ<br/>✔ B: essential＋ヘルスチェック\" }\n    SC@{ svc: \"Amazon ECS\", label: \"ログ転送のサイドカー<br/>✔ A: essential = false\" }\n  end\n  H[\"タスクのヘルス\"]\n  SC -. \"✔ A: クラッシュしてもタスクは止まらない\" .-> APP\n  APP == \"✔ B: アプリの正常性だけを反映\" ==> H\n  C[\"⚠ C: 両方を false にすると<br/>essential のコンテナが無くなる\"] -.-> APP\n  DE[\"⚠ D: サイドカーの状態もヘルスに入る<br/>⚠ E: 省略すると essential になる\"] -.-> SC",
+  "alt": "ログ転送のサイドカーが失敗してもアプリを動かし続ける図。サイドカーを essential false にし（A）、アプリには essential のままヘルスチェックを定義する（B）。両方 false（C）は essential が 1 つも無くなる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

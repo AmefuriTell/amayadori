@@ -17,6 +17,11 @@
       "alt": "V2 パイプライン 1 つで、main 向け PR の作成と新リビジョン、main への push で開始する図。pullRequest フィルターに Open と Update、さらに push フィルターを入れる（D）。Closed では新リビジョンで動かない（A）。"
     },
     {
+      "id": "q-1.2-0004",
+      "source": "flowchart TB\n  JM[\"既存の JMeter スクリプト\"]\n  subgraph R[\"AWS（サーバーの管理は要らない）\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"リリースのたびに呼び出し\" }\n    DLT[\"✔ C: Distributed Load Testing on AWS\"]\n    SCH[\"✔ C: 毎週のスケジュール\"]\n  end\n  WEB[\"Web アプリケーション\"]\n  JM -- \"そのまま使う\" --> DLT\n  CP == \"✔ C: 負荷テスト開始\" ==> DLT\n  SCH --> DLT\n  DLT -- \"数千の同時ユーザー\" --> WEB\n  A[\"⚠ A D: 負荷用サーバーを自分で管理\"] -.-> DLT\n  B[\"⚠ B: 書き直して手元から実行<br/>自動にならない\"] -.-> JM",
+      "alt": "JMeter スクリプトを流用し、サーバーを管理せずに数千ユーザーの負荷をかける図。Distributed Load Testing on AWS をデプロイし、毎週のスケジュールとパイプラインからの呼び出しの両方で動かす（C）。"
+    },
+    {
       "id": "q-1.2-0005",
       "source": "flowchart TB\n  subgraph R[\"CodeBuild プロジェクト 1 つ\"]\n  B0@{ svc: \"AWS CodeBuild\", label: \"バッチビルド（ビルドファンアウト）\" }\n    P[\"✔ D: parallelism = 10\"]\n  B1@{ svc: \"AWS CodeBuild\", label: \"ビルド 1: テスト塊 1\" }\n  B2@{ svc: \"AWS CodeBuild\", label: \"ビルド 2〜10: 各テスト塊\" }\n  end\n  P == \"✔ D: 同じ設定で 2000 件を 10 個に分割\" ==> B0\n  B0 --> B1\n  B0 --> B2\n  A[\"⚠ A: マトリックスは設定の組み合わせごとに作る\"] -.-> B0\n  C[\"⚠ C: 10 回動かすだけで分割されない\"] -.-> B0\n",
       "alt": "2000 件のテストを同じ設定のまま 10 個のビルドに分ける図。ビルドファンアウトのバッチビルドで parallelism を 10 にする（D）。ビルドマトリックスは設定の組み合わせごとに作るので合わない（A）。"
