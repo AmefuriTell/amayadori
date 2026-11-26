@@ -7957,7 +7957,10 @@
           "quote": "Lambda initializes that number of execution environments so that they are prepared to respond immediately to Event Function requests."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "同じアカウントのバッチ用 Lambda 関数が同時実行を使い切り、決済用がスロットリングされる図。決済用に 200 の予約された同時実行（A）と、事前に初期化するプロビジョニングされた同時実行（B）が正解。バッチの制限（C）は要件に反する。"
+      }
     },
     {
       "id": "q-3.2-0002",
@@ -8018,7 +8021,10 @@
           "quote": "Until its specified warmup time has expired, an instance is not counted toward the aggregated EC2 instance metrics of the Auto Scaling group."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "新しいインスタンスの準備に約 15 分かかる Auto Scaling グループの図。ウォームプールに準備済みのインスタンスを待機させれば、最小容量を通常分まで下げても急増に素早く応じられる（A）。最小容量を上げる案（B）は費用が増える。"
+      }
     },
     {
       "id": "q-3.2-0003",
@@ -8076,7 +8082,10 @@
           "quote": "While instances are in the warmup period, your scaling policies only scale out if the metric value from instances that are not warming up is greater than the policy's target utilization."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ターゲット追跡スケーリングで、新しいインスタンスの初期化中の高い CPU が集計に入り増やしすぎる図。インスタンスのウォームアップ時間を約 5 分にすると、その間は集計に入らず目標 50% のまま余計に増えない（C）。"
+      }
     },
     {
       "id": "q-3.2-0004",
@@ -8139,7 +8148,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "「forecast and scale」のモードの名前は sources に無いが、forecast only で増やさないことと、増やすには別のモードにすることは S1 から言える"
+      "note": "「forecast and scale」のモードの名前は sources に無いが、forecast only で増やさないことと、増やすには別のモードにすることは S1 から言える",
+      "diagram": {
+        "alt": "予測スケーリングが朝のピーク前に容量を足さない理由と直し方の図。今は予測だけで増やさないモード。予測とスケールに変え、インスタンスの事前起動を約 10 分にすれば、固定のスケジュール無しでピーク前に容量が準備される（A）。"
+      }
     },
     {
       "id": "q-3.2-0005",
@@ -8200,7 +8212,10 @@
           "quote": "Routes each individual TCP connection to a single target for the life of the connection."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "TCP のサービスをパートナーに公開する図。パートナーは AZ ごとに 1 つの固定 IP だけ許可できるので、有効な各 AZ のネットワークインターフェイスに Elastic IP を付けた Network Load Balancer を使う（C）。DNS 名（B）や 1 台の EC2（D）は合わない。"
+      }
     },
     {
       "id": "q-3.2-0006",
@@ -8276,7 +8291,10 @@
           "quote": "Node failures aren't fatal for your application."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "データベースの前の ElastiCache で古い価格が出る問題の図。書くたびにキャッシュも更新する書き込みスルー（A）に、足りないデータを埋める遅延読み込みと TTL（B）を組み合わせて、最新で無駄の少ないキャッシュにする。"
+      }
     },
     {
       "id": "q-3.2-0007",
@@ -8338,7 +8356,10 @@
           "quote": "Automatic scaling is the ability to increase or decrease the desired number of tasks in your Amazon ECS service automatically."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECS のタスクが容量不足で PENDING のままになる図。Auto Scaling グループのキャパシティープロバイダーでマネージドスケーリングと targetCapacity を設定すれば、タスクの必要に合わせてインスタンスが増減し、独自のコードも不要（B）。"
+      }
     },
     {
       "id": "q-3.2-0008",
@@ -8411,7 +8432,10 @@
           "quote": "A service with only one task is interrupted until capacity is available."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Fargate Spot でワーカーを動かす図。戦略に FARGATE_SPOT と FARGATE の両方を入れ、ほとんどを Spot に置いて、使えない時も処理を続ける（A）。回収時は SIGTERM を受け、stopTimeout の中に後片付けを収める（C）。"
+      }
     },
     {
       "id": "q-3.2-0009",
@@ -8472,7 +8496,10 @@
           "quote": "The deployment circuit breaker is the rolling update mechanism that determines if the tasks reach a steady state."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クラッシュする新しいイメージが出続ける ECS サービスの図。ローリング更新のまま、デプロイのサーキットブレーカーでロールバックを有効にすると、失敗を検知して最後に完了したデプロイへ自動で戻る（D）。"
+      }
     },
     {
       "id": "q-3.2-0010",
@@ -8533,7 +8560,10 @@
           "quote": "A lower number or percentage means that the operation performs on fewer stacks, but you are able to start troubleshooting failed operations faster."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "同じテンプレートを 4 リージョンの 30 アカウントへ展開する図。管理者のアカウントの CloudFormation StackSets で 1 回の操作で展開し、失敗の許容数を低く設定すると失敗が多い時に自動で止まる（B）。"
+      }
     },
     {
       "id": "q-3.2-0011",
