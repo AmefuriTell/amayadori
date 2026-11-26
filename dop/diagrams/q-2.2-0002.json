@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0002",
+  "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet（自動デプロイ・対象は Prod OU）\" }\n  subgraph PROD[\"Prod OU（対象）\"]\n    SBX[\"サンドボックスのアカウント（フィルターで除外したのに展開された）\"]\n    PA[\"本番のアカウント\"]\n  end\n  OTH@{ svc: \"AWS Organizations\", label: \"✔ B: 対象でない別の OU\" }\n  BADA[\"⚠ A: 除外フィルターに足してもアカウント単位の絞り込みは効かない\"]\n  BADC[\"⚠ C: 自動デプロイを切ると本番の自動デプロイも止まる\"]\n  BADD[\"⚠ D: 自動デプロイは StackSet 単位。アカウントごとには切り替えられない\"]\n  SS -- \"自動デプロイ\" --> PA\n  SS -- \"自動デプロイ\" --> SBX\n  SBX == \"✔ B: 別の OU に置く\" ==> OTH\n  BADA -.-> SBX\n  BADC -.-> SS\n  BADD -.-> SS",
+  "alt": "Prod OU が対象の自動デプロイの StackSet は、アカウント単位のフィルターを考えないので、サンドボックスのアカウントにも展開される。対象でない別の OU に置けば展開されない（B）。A と D は効かない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

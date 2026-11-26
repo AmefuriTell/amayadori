@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0004",
+  "source": "flowchart TB\n  TEAM([\"チーム\"])\n  AF@{ svc: \"AWS Control Tower\", label: \"✔ D: Account Factory（承認済みのテンプレート）\" }\n  SC@{ svc: \"AWS Service Catalog\", label: \"プロビジョニングされた製品\" }\n  NEW[\"新しいアカウント（登録済み・コントロール適用済み）\"]\n  TEAM -- \"アカウントを依頼\" --> AF\n  AF -- \"上に作られている\" --> SC\n  AF == \"✔ D: 作成・登録・コントロールを自動\" ==> NEW\n  BADA[\"⚠ A: CreateAccount とスクリプトで適用し続ける\"]\n  BADB[\"⚠ B: コンソールで作り、登録が手作業\"]\n  BADC[\"⚠ C: Lambda の独自コード。登録もコントロールも付かない\"]\n  BADA -.-> NEW\n  BADB -.-> NEW\n  BADC -.-> NEW\n",
+  "alt": "Control Tower の Account Factory で、承認済みのテンプレートから新しいアカウントを作ると、作成・登録・コントロールの適用まで自動で行われる図（D）。A はスクリプトを持ち続け、B は登録が手作業。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
