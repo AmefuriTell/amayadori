@@ -15,6 +15,7 @@ import { iconMap, renderAll } from './lib/diagram.mjs';
 import { parseSources } from './lib/text.mjs';
 import { synthesize, creditOf, linesOf, VOICES } from './lib/tts.mjs';
 import { readability } from './dg.mjs';
+import { buildYomi, yomiHash, sayErrors, sayMap } from './lib/yomi.mjs';
 
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
@@ -157,6 +158,20 @@ export async function renderVisuals(lec, { previewDir } = {}) {
   return { errors, results };
 }
 
+/** よみ台本（work/<ID>/yomi.json）が今の台本に合い、確かめ終えているか。誤りの文の配列 */
+function yomiErrors(id, lec) {
+  const yomi = readJSON(paths.work(id, 'yomi.json'), null);
+  if (!yomi) return ['よみ台本が無い。lec yomi で作り、読みを確かめてから lec yomi --done'];
+  const errs = [];
+  const want = lec.slides.map((s) => linesOf(s).map((l) => `${l.who}\t${l.text}`).join('\n')).join('\n--\n');
+  const have = yomi.slides.map((s) => s.lines.map((l) => `${l.who}\t${l.text}`).join('\n')).join('\n--\n');
+  if (want !== have) errs.push('よみ台本が今の台本と合わない（台本を書き換えた）。lec yomi で作り直して確かめる');
+  for (const s of yomi.slides) s.lines.forEach((l, k) => { if (l.say) for (const e of sayErrors(l.text, l.say)) errs.push(`${s.id} の ${k + 1} 行目: ${e}`); });
+  if (yomi.hash !== yomiHash(yomi.slides)) errs.push('say を書き換えた後に読みを作り直していない。lec yomi を呼ぶ');
+  else if (yomi.checked !== yomi.hash) errs.push('読みを確かめ終えていない（lec yomi --done が無い）');
+  return errs;
+}
+
 async function gateLecture(id) {
   const lec = loadLecture(id);
   const fails = checkLecture(id, lec).map((e) => ({ check: 'form', ...e }));
@@ -166,6 +181,7 @@ async function gateLecture(id) {
   if (verdict && fs.statSync(paths.work(id, 'lecture.json')).mtimeMs > fs.statSync(vfile).mtimeMs + 1) {
     fails.push({ check: 'verified', id: null, message: '検証（lec verdict）の後に lecture.json を書き換えた。C3 からやり直す' });
   }
+  if (process.env.DOP_TTS !== 'skip') for (const m of yomiErrors(id, lec)) fails.push({ check: 'yomi', id: null, message: m });
   let results = [];
   if (!fails.some((f) => f.check === 'form')) {
     const r = await renderVisuals(lec, { previewDir: paths.work(id, 'preview') });
@@ -240,6 +256,30 @@ const commands = {
       items: errors.map((e) => `${e.id ?? '(全体)'}: ${e.message}`),
       details_path: details,
       repeatKey: `kvalidate:${id}`,
+    });
+  },
+
+  // C3（検証の後）: よみ台本を作る。--done で、読みを確かめ終えた印を付ける
+  async yomi(args) {
+    const id = itemIdOf(args._[0]);
+    const lec = loadLecture(id);
+    const file = paths.work(id, 'yomi.json');
+    const prev = readJSON(file, null);
+    if (args.done) {
+      const errs = yomiErrors(id, lec).filter((m) => !m.startsWith('読みを確かめ終えていない'));
+      if (errs.length) return emit({ ok: false, summary: `確かめ終えた印を付けられない（${errs.length} 件）`, items: errs, repeatKey: `kyomi:${id}` });
+      writeJSON(file, { ...prev, checked: prev.hash });
+      return emit({ ok: true, summary: `読みを確かめ終えた印を付けた（say ${prev.slides.flatMap((s) => s.lines).filter((l) => l.say).length} 行）`, items: [] });
+    }
+    for (const s of prev?.slides ?? []) s.lines.forEach((l, k) => { if (l.say) { const e = sayErrors(l.text, l.say); if (e.length) throw new ToolError(`${s.id} の ${k + 1} 行目の say: ${e.join('、')}`); } });
+    const { slides, hash } = await buildYomi(lec, prev);
+    writeJSON(file, { hash, checked: prev?.checked === hash ? hash : null, slides });
+    const lines = slides.flatMap((s) => s.lines);
+    emit({
+      ok: true,
+      summary: `よみ台本を作った（${lines.length} 行、say ${lines.filter((l) => l.say).length} 行）→ 読みを台本と照らし、読み違いは say で直して lec yomi をもう一度。終えたら lec yomi --done`,
+      items: [],
+      details_path: rel(file),
     });
   },
 
@@ -319,7 +359,7 @@ const commands = {
     if (!skipTTS) {
       const tmp = paths.work(id, 'audio');
       fs.rmSync(tmp, { recursive: true, force: true });
-      audio = { dir: tmp, ...(await synthesize(lec, tmp)) };
+      audio = { dir: tmp, ...(await synthesize(lec, tmp, { says: sayMap(readJSON(paths.work(id, 'yomi.json'), null)) })) };
     }
     const minutes = audio ? audio.minutes : Math.round((chars / CHARS_PER_MINUTE) * 10) / 10;
 

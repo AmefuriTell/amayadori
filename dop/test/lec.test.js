@@ -170,3 +170,13 @@ test('lec publish: 掛け合いなら 2 人の声のクレジットを付け、�
   assert.deepEqual(app.slides[0].dialogue.slice(0, 2), talk(2));
   assert.equal('narration' in app.slides[0], false);
 });
+
+test('よみ台本: say は漢字をひらがなにしただけの文に限り、hash は台本と say で変わる', async () => {
+  const { sayErrors, yomiHash } = await import('../tools/lib/yomi.mjs');
+  assert.deepEqual(sayErrors('名前の付いた値で、パラメーターと呼びます。', '名前の付いたあたいで、パラメーターと呼びます。'), []);
+  assert.match(sayErrors('名前の付いた値で、パラメーター。', '名前の付いたあたいで、ぱらめーたー。').join(), /カタカナ・句読点は変えない/);
+  assert.match(sayErrors('値で。', '値を値で。').join(), /多い漢字/);
+  const a = [{ id: 's01', lines: [{ who: 'teacher', text: '値です。' }] }];
+  const b = [{ id: 's01', lines: [{ who: 'teacher', text: '値です。', say: 'あたいです。' }] }];
+  assert.notEqual(yomiHash(a), yomiHash(b));
+});

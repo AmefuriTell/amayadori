@@ -47,7 +47,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q publish <ID>` | C4 | work/<ID>/ | bank に入れた問題 ID | 並べ替え・番号の振り方 | 済 |
 | `node dop/tools/g.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（G-） | work/<ID>/glossary.json・verify.json | 誤り・結論・入れたページ | スキーマ・根拠の照合・名前の重複 | 済 |
 | `node dop/tools/dg.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（D-） | work/<ID>/diagrams.json・verify.json | 誤り・結論・入れた図 | Mermaid・アイコン・ブラウザで描くこと | 済 |
-| `node dop/tools/lec.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（K-） | work/<ID>/lecture.json・review-*.json | 誤り・結論・公開した講義 | 図を描く・VOICEVOX（Docker）で音声・アクセント辞書（config/accents.json） | 済 |
+| `node dop/tools/lec.mjs validate\|verdict\|yomi [--done]\|gate\|publish <ID>` | C2〜C4（K-） | work/<ID>/lecture.json・review-*.json・yomi.json | 誤り・結論・公開した講義 | 図を描く・VOICEVOX（Docker）で音声・アクセント辞書（config/accents.json） | 済 |
 | `node dop/tools/dg.mjs icons --from <dir>` | 人（公式のアイコン集の更新時） | config/icon-map.json | 写した数 | 公式の集の中身 | 済 |
 | `node dop/tools/g.mjs list` | いつでも | なし | 事典のページと名前 | glossary/ の全体 | 済 |
 | `Q find [--task --service --text --id]` | どこでも | 条件 | id・task・services・問題文の先頭 | bank の全体 | 済 |

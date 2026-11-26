@@ -123,7 +123,7 @@ function tool(cmd, args) {
  * スライドごとに outDir/<slide id>.mp3 を作る。
  * @returns {{ files: { id: string, seconds: number }[], minutes: number }}
  */
-export async function synthesize(lecture, outDir, { speaker = SPEAKER, speed = 1.1 } = {}) {
+export async function synthesize(lecture, outDir, { speaker = SPEAKER, speed = 1.1, says = null } = {}) {
   await ensureEngine();
   await installAccents();
   fs.mkdirSync(outDir, { recursive: true });
@@ -134,7 +134,9 @@ export async function synthesize(lecture, outDir, { speaker = SPEAKER, speed = 1
     const wavs = [];
     for (const [k, line] of lines.entries()) {
       const who = Array.isArray(s.dialogue) ? (VOICES[line.who]?.speaker ?? speaker) : speaker;
-      const q = await fetch(`${ENGINE}/audio_query?speaker=${who}&text=${encodeURIComponent(line.text)}`, { method: 'POST' });
+      // says（よみ台本で読み違いを直した文）があればそれを読む
+      const text = says?.get(s.id)?.[k] ?? line.text;
+      const q = await fetch(`${ENGINE}/audio_query?speaker=${who}&text=${encodeURIComponent(text)}`, { method: 'POST' });
       if (!q.ok) throw new ToolError(`読み上げの準備（audio_query）に失敗: ${s.id} の ${k + 1} 行目: ${q.status}`);
       const query = await q.json();
       query.speedScale = speed;
