@@ -1,0 +1,74 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0011",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "Amazon Kinesis Data Streams"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A security account in us-east-1 runs a central Amazon Kinesis Data Streams stream for log analysis. Application accounts have log groups in us-east-1 and eu-west-1 whose events must be sent to that central stream in real time. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "us-east-1 にあるセキュリティのアカウントが、ログの分析のための中央の Amazon Kinesis Data Streams のストリームを動かしています。アプリケーションのアカウントには us-east-1 と eu-west-1 のロググループがあり、そのイベントをリアルタイムに中央のストリームへ送る必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "In the security account, create a CloudWatch Logs destination in each Region that has source log groups, and point each destination to the central stream in us-east-1.",
+      "text_ja": "セキュリティのアカウントで、送り元のロググループがある各リージョンに CloudWatch Logs の送信先を作り、それぞれを us-east-1 の中央のストリームに向ける。"
+    },
+    {
+      "key": "B",
+      "text": "In the application accounts, create subscription filters on the log groups that use the destination in the same Region as each log group.",
+      "text_ja": "アプリケーションのアカウントで、各ロググループと同じリージョンの送信先を使うサブスクリプションフィルターをロググループに作る。"
+    },
+    {
+      "key": "C",
+      "text": "Create subscription filters on the eu-west-1 log groups that use the destination that is in us-east-1.",
+      "text_ja": "eu-west-1 のロググループに、us-east-1 にある送信先を使うサブスクリプションフィルターを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Create a daily export task in each application account that writes the logs to an S3 bucket in the security account.",
+      "text_ja": "各アプリケーションのアカウントで、セキュリティのアカウントの S3 バケットへログを書く毎日のエクスポートのタスクを作る。"
+    },
+    {
+      "key": "E",
+      "text": "Create a separate Kinesis Data Streams stream in each application account, and have the analysis team poll every stream.",
+      "text_ja": "各アプリケーションのアカウントに別の Kinesis Data Streams のストリームを作り、分析チームがすべてのストリームを読みに行く。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "別のアカウントのログイベントを、中央の Kinesis のストリームで受け取れます（クロスアカウントのデータ共有）。ロググループと送信先は同じリージョンにある必要がありますが、送信先が指す AWS のリソースは別のリージョンにあってもかまいません。",
+    "per_choice": {
+      "A": "正しい。各リージョンに送信先を作れば、ロググループと同じリージョンに置けて、送信先は us-east-1 の中央のストリームを指せます。",
+      "B": "正しい。各ロググループは同じリージョンの送信先を使うサブスクリプションフィルターで、イベントをリアルタイムに送ります。",
+      "C": "ロググループと送信先は同じリージョンにある必要があり、eu-west-1 のロググループから us-east-1 の送信先は使えません。",
+      "D": "毎日のエクスポートはリアルタイムではなく、要件を満たしません。",
+      "E": "中央のストリームで受け取る要件に合わず、読みに行くストリームも増えます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+      "source_id": "S11",
+      "quote": "this log event data can be read from a centralized Amazon Kinesis Data Streams or Firehose stream to perform custom processing and analysis."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+      "source_id": "S12",
+      "quote": "The log group and the destination must be in the same AWS Region. However, the AWS resource that the destination points to can be located in a different Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+      "source_id": "S1",
+      "quote": "You can use subscriptions to get access to a real-time feed of log events from CloudWatch Logs"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
