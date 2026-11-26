@@ -1,0 +1,64 @@
+{
+  "id": "parameter-store",
+  "name": "AWS Systems Manager Parameter Store",
+  "aliases": [
+    "AWS Systems Manager Parameter Store"
+  ],
+  "reading": "パラメータストア",
+  "summary": "設定の値（パラメータと呼ぶ名前付きの値。AMI ID やライセンスキーなど）を 1 か所にまとめて保存し、取り出せる Systems Manager の機能。暗号化が要る値は SecureString（AWS KMS で暗号化して保存する形）にできる。",
+  "features": [
+    {
+      "title": "SecureString",
+      "text": "暗号化が要る設定の値（サービスのエンドポイントやアカウント ID など）に使う形。値は AWS Key Management Service（KMS、暗号の鍵を管理するサービス）で暗号化される。",
+      "source_id": "S4"
+    },
+    {
+      "title": "パラメータの階層",
+      "text": "/dev/webserver/linux/approved-ami のように / で区切った名前で、関係するパラメータをまとめる。/dev/webserver のような途中までの道筋で、まとめて取り出せる。",
+      "source_id": "S5"
+    },
+    {
+      "title": "バージョンと IAM での権限",
+      "text": "各パラメータの直近 100 の版を残す。IAM のポリシーで、どのアプリが読み書き・一覧・削除できるかを、名前の先頭（例 /myapp/prod/*）で分けられる。",
+      "source_id": "S5"
+    },
+    {
+      "title": "Standard と Advanced の階層",
+      "text": "パラメータごとに standard か advanced を選び、数と大きさの上限が変わる。1 つのアカウントとリージョンで混ぜて使える。",
+      "source_id": "S6"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "データベースの認証情報・API キー・トークンのようなシークレットには、自動ローテーション（定期的な入れ替え）などを持つ AWS Secrets Manager が勧められている。Parameter Store は暗号化の要る設定の値に使う。",
+      "source_id": "S4"
+    }
+  ],
+  "compare": [
+    {
+      "with": "AWS Secrets Manager",
+      "text": "シークレットには自動ローテーションやリージョンをまたぐ複製を持つ Secrets Manager が勧められている。Parameter Store は設定の値をまとめて置く場所。",
+      "source_id": "S4"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+      "source_id": "S4",
+      "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-features",
+      "source_id": "S5",
+      "quote": "Use parameter hierarchies to group related parameters, making it easier to discover, manage, and filter them across environments and applications."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-tiers-introduction",
+      "source_id": "S6",
+      "quote": "Configure each parameter individually to use either the standard tier or advanced tier. You can mix standard and advanced parameters."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,179 @@
+{
+  "item": "G-0013",
+  "entries": [
+    {
+      "id": "ec2-image-builder",
+      "name": "EC2 Image Builder",
+      "aliases": [
+        "EC2 Image Builder"
+      ],
+      "reading": "イーシーツー イメージビルダー",
+      "summary": "サーバーのイメージ（EC2 インスタンスの元になる AMI や、コンテナイメージ）を作る・管理する・配る作業を自動にする、AWS が運用まで受け持つサービス。作ったイメージのパッチ当て（不具合や弱点の修正の適用）もパイプラインで自動にできる。",
+      "features": [
+        {
+          "title": "イメージパイプライン",
+          "text": "AMI とコンテナイメージを作る流れを自動にする仕組み。イメージレシピかコンテナレシピと結び付け、ビルド・確認・テストの段階を決める。",
+          "source_id": "S2"
+        },
+        {
+          "title": "インフラストラクチャ設定",
+          "text": "イメージをどこで作るかを決める設定。インスタンスタイプ、サブネット、セキュリティグループ、ログなどを指定する。",
+          "source_id": "S2"
+        },
+        {
+          "title": "配布設定",
+          "text": "できたイメージをどう配るかを決める設定で、パイプラインに結び付ける。",
+          "source_id": "S2"
+        },
+        {
+          "title": "コンポーネント",
+          "text": "イメージを作る前にインスタンスを整える手順（ビルドコンポーネント）か、作ったイメージから起動したインスタンスを試す手順（テストコンポーネント）を、YAML か JSON の文書で書いたもの。レシピで 1 つ以上をまとめて使う。",
+          "source_id": "S3"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "AMI のパッチ当てや更新を手作業ではなく、パイプラインで自動にする方法として使われる。",
+          "source_id": "S1"
+        },
+        {
+          "text": "ビルド用とテスト用のコンポーネントの違い（作る前に整えるか、作った物を試すか）を押さえる。",
+          "source_id": "S3"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder",
+          "source_id": "S1",
+          "quote": "You can configure pipelines to automate updates and system patching for the images that you own."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+          "source_id": "S2",
+          "quote": "An image pipeline provides an automation framework for building secure AMIs and container images on AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+          "source_id": "S3",
+          "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "parameter-store",
+      "name": "AWS Systems Manager Parameter Store",
+      "aliases": [
+        "AWS Systems Manager Parameter Store"
+      ],
+      "reading": "パラメータストア",
+      "summary": "設定の値（パラメータと呼ぶ名前付きの値。AMI ID やライセンスキーなど）を 1 か所にまとめて保存し、取り出せる Systems Manager の機能。暗号化が要る値は SecureString（AWS KMS で暗号化して保存する形）にできる。",
+      "features": [
+        {
+          "title": "SecureString",
+          "text": "暗号化が要る設定の値（サービスのエンドポイントやアカウント ID など）に使う形。値は AWS Key Management Service（KMS、暗号の鍵を管理するサービス）で暗号化される。",
+          "source_id": "S4"
+        },
+        {
+          "title": "パラメータの階層",
+          "text": "/dev/webserver/linux/approved-ami のように / で区切った名前で、関係するパラメータをまとめる。/dev/webserver のような途中までの道筋で、まとめて取り出せる。",
+          "source_id": "S5"
+        },
+        {
+          "title": "バージョンと IAM での権限",
+          "text": "各パラメータの直近 100 の版を残す。IAM のポリシーで、どのアプリが読み書き・一覧・削除できるかを、名前の先頭（例 /myapp/prod/*）で分けられる。",
+          "source_id": "S5"
+        },
+        {
+          "title": "Standard と Advanced の階層",
+          "text": "パラメータごとに standard か advanced を選び、数と大きさの上限が変わる。1 つのアカウントとリージョンで混ぜて使える。",
+          "source_id": "S6"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "データベースの認証情報・API キー・トークンのようなシークレットには、自動ローテーション（定期的な入れ替え）などを持つ AWS Secrets Manager が勧められている。Parameter Store は暗号化の要る設定の値に使う。",
+          "source_id": "S4"
+        }
+      ],
+      "compare": [
+        {
+          "with": "AWS Secrets Manager",
+          "text": "シークレットには自動ローテーションやリージョンをまたぐ複製を持つ Secrets Manager が勧められている。Parameter Store は設定の値をまとめて置く場所。",
+          "source_id": "S4"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "source_id": "S4",
+          "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-features",
+          "source_id": "S5",
+          "quote": "Use parameter hierarchies to group related parameters, making it easier to discover, manage, and filter them across environments and applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-tiers-introduction",
+          "source_id": "S6",
+          "quote": "Configure each parameter individually to use either the standard tier or advanced tier. You can mix standard and advanced parameters."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "state-manager",
+      "name": "AWS Systems Manager State Manager",
+      "aliases": [
+        "AWS Systems Manager State Manager"
+      ],
+      "reading": "ステートマネージャー",
+      "summary": "マネージドノード（Systems Manager で管理するサーバー）などの AWS のリソースを、自分で決めた状態に保つ作業を自動にする、Systems Manager の構成管理の機能。",
+      "features": [
+        {
+          "title": "関連付け（association）",
+          "text": "リソースに割り当てる設定で、保ちたい状態を決める。例: ウイルス対策のソフトを入れて動かしておく、特定のポートを閉じておく。",
+          "source_id": "S8"
+        },
+        {
+          "title": "スケジュール",
+          "text": "関連付けで、設定をいつ適用するかを決める。例: アカウントのすべてのマネージドノードで 1 日 1 回動かす。",
+          "source_id": "S8"
+        },
+        {
+          "title": "対象の指定",
+          "text": "タグ、AWS Resource Groups、ノードの ID、またはそのリージョンとアカウントのすべてのマネージドノードで、対象を選べる。",
+          "source_id": "S9"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "多くのサーバーを決めた状態に保つ方法として使われる。関連付けで、設定を適用するスケジュールと対象（タグなど）を決める点を押さえる。",
+          "source_id": "S8"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "source_id": "S7",
+          "quote": "State Manager is a secure and scalable configuration management service that automates the process of keeping your managed nodes and other AWS resources in a state that you define."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-features",
+          "source_id": "S8",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-features",
+          "source_id": "S9",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}
