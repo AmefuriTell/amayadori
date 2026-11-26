@@ -55,3 +55,22 @@ test('P-022 図の読みにくさ: 長い線のラベル・長い題・同じ 2 
   assert.match(all, /subgraph の題が長い/);
   assert.match(all, /A と B の間にラベル付きの線が 2 本/);
 });
+
+test('見直し（recheck）を閉じると、付いている図の点検の項目が足され、今の図を束に写して C2 から始まる', () => {
+  const sb = sandbox();
+  sb.write('bank/1.1/q-1.1-0001.json', question({ status: 'verified' }));
+  sb.write('bank/1.1/q-1.1-0002.json', question({ id: 'q-1.1-0002', status: 'retired' }));
+  const current = { id: 'q-1.1-0001', source: 'flowchart TB\n  A@{ svc: "AWS CodeDeploy", label: "x" }', alt: '今の図の説明を二十文字以上の日本語で書いておく', status: 'verified' };
+  sb.write('diagrams/q-1.1-0001.json', current);
+  sb.write('diagrams/q-1.1-0002.json', { ...current, id: 'q-1.1-0002' });
+  sb.write('.loop/backlog.json', [{ id: 'R-0001', kind: 'recheck', task: '1.1', question_ids: ['q-1.1-0001', 'q-1.1-0002'], status: 'doing', attempts: 0, priority: 1 }]);
+  sb.write('.loop/state.json', { state: 'S9_close', item: 'R-0001', prev: null, session: { active: true, started: null, closed: 0 } });
+  const c = sb.run('loop', 'close');
+  assert.equal(c.diagrams_added.length, 1); // 捨てた q-1.1-0002 は点検しない
+  const d = sb.read('.loop/backlog.json').find((b) => b.id === c.diagrams_added[0]);
+  assert.deepEqual([d.kind, d.check, d.question_ids], ['diagram', true, ['q-1.1-0001']]);
+  const next = sb.run('loop', 'next');
+  assert.equal(next.state, 'C2_author');
+  assert.equal(sb.read(`work/${d.id}/diagrams.json`).diagrams[0].source, current.source);
+  assert.equal(sb.read(`work/${d.id}/context.json`).questions[0].id, 'q-1.1-0001');
+});

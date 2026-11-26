@@ -124,6 +124,26 @@ export function autoSeedDiagrams() {
   return addDiagramItems().map((a) => a.id);
 }
 
+// 問題を見直した（recheck）後、もう付いている図を点検する項目を足す。点検は C2 で今の図を描き直さずに validate し、C3 で検証役が新しい問題と照らす。
+// 合っていればそのまま入れ直し（last_checked を進める）、合わなければ fix で C2 に戻って書き直す。捨てた（retired）問題の図は点検しない
+export function seedDiagramChecks(ids) {
+  const backlog = loadBacklog();
+  const live = new Set(loadBank().filter((q) => q.status === 'verified').map((q) => q.id));
+  const want = (ids ?? []).filter((qid) => live.has(qid) && fs.existsSync(path.join(paths.diagrams(), `${qid}.json`)));
+  if (!want.length) return [];
+  const item = { kind: 'diagram', check: true, task: want[0].match(/^q-([1-6]\.[0-9]+)-/)[1], question_ids: want, priority: 1, source: 'recheck', title: `構成図の点検（${want.join(', ')}）` };
+  item.id = nextId(backlog, 'diagram'); item.status = 'todo'; item.attempts = 0;
+  backlog.push(item);
+  saveBacklog(backlog);
+  return [item.id];
+}
+
+// 点検の項目は、今の図を束に写してから始める（C2 で書き直さず dg validate だけ呼ぶ）
+export function copyCurrentDiagrams(item) {
+  const diagrams = (item.question_ids ?? []).map((qid) => readJSON(path.join(paths.diagrams(), `${qid}.json`), null)).filter(Boolean).map((d) => ({ id: d.id, source: d.source, alt: d.alt }));
+  writeJSON(paths.work(item.id, 'diagrams.json'), { item: item.id, check: true, diagrams });
+}
+
 // 図を描く人が読む問題の中身（日本語の問題文・選択肢・答え・解説・補足）。bank は読ませない
 export function copyContext(item) {
   const qs = [];

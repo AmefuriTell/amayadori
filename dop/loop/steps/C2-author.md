@@ -15,6 +15,7 @@
     <a>translate の項目（"translate": true）では、bank の問題に日本語版（stem_ja と choices[].text_ja）を足すだけ。英語・答え・解説・出典・選択肢の順は変えない（q validate が bank と比べて止める）。sources.md は要らない。</a>
     <a>事典の項目（G-、P-014）では問題ではなく、下の「事典の書き方」で item.services の各サービスの 1 ページを work/&lt;ID&gt;/glossary.json に { "item", "entries": [ … ] } の形で書き、q validate の代わりに g validate を呼ぶ。</a>
     <a>図の項目（D-、P-015）では、work/&lt;ID&gt;/context.json（問題・答え・解説）だけを読み、下の「図の書き方」で 1 問 1 枚を work/&lt;ID&gt;/diagrams.json に書き、q validate の代わりに dg validate を呼ぶ（描いた絵は work/&lt;ID&gt;/preview/ に出る。1 枚は自分の目で見る）。</a>
+    <a>図の点検の項目（item.json の check: true。問題を見直した後に loop close が足す）では、diagrams.json に今の図が写してある。初めは書き直さず dg validate だけ呼び、C3 の点検に回す。validate が落ちた所と、C3 から fix で戻った図だけを書き直す。</a>
     <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/questions.json（status は draft）</file></outputs>

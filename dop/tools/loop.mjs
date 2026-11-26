@@ -8,7 +8,7 @@ import { validate } from './lib/schema.mjs';
 import { coverage, exam } from './lib/bank.mjs';
 import { addToBacklog, recordBase } from './refactor.mjs';
 import { loadBacklog, saveBacklog, nextId } from './lib/backlog.mjs';
-import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, autoSeedDiagrams, copyForRecheck, copyContext } from './lib/seeds.mjs';
+import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, autoSeedDiagrams, seedDiagramChecks, copyCurrentDiagrams, copyForRecheck, copyContext } from './lib/seeds.mjs';
 
 // P-016: コードを測ってリファクタリングの項目を足す（本物の置き場の時だけ。試験の置き場 DOP_DATA ではしない）
 const autoScan = () => (process.env.DOP_DATA ? { added: [] } : addToBacklog());
@@ -93,6 +93,7 @@ const commands = {
     writeJSON(paths.work(item.id, 'item.json'), { ...item, task_info: taskInfo(item.task) });
     if (item.kind === 'recheck' || item.kind === 'translate') copyForRecheck(item);
     if (item.kind === 'diagram') copyContext(item);
+    if (item.kind === 'diagram' && item.check) copyCurrentDiagrams(item);
     if (item.kind === 'refactor') recordBase(item.id);
 
     s.state = FIRST_STATE[item.kind];
@@ -193,6 +194,8 @@ const commands = {
     if (item.kind === 'app' || item.kind === 'refactor') autoScan();
     // 公開した問題に図を付ける（2026-11-26 利用者の決定）。図の無い問題があれば図の項目を足す
     const diagramsAdded = outcome === 'done' && (item.kind === 'content' || item.kind === 'recheck') ? autoSeedDiagrams() : [];
+    // 見直した問題に図が付いていれば、書き直す前に点検する項目を足す（2026-11-26 利用者の決定）
+    if (outcome === 'done' && item.kind === 'recheck') diagramsAdded.push(...seedDiagramChecks(item.question_ids));
     s.state = 'S0_pick'; s.item = null; s.session.closed += 1;
     saveState(s);
     emit({
