@@ -1,0 +1,107 @@
+{
+  "item": "G-0017",
+  "entries": [
+    {
+      "id": "acm",
+      "name": "AWS Certificate Manager",
+      "aliases": [
+        "AWS Certificate Manager"
+      ],
+      "reading": "サーティフィケートマネージャー",
+      "status": "draft",
+      "created": "2026-11-26",
+      "summary": "Web サイトやアプリを守る SSL/TLS の証明書（通信を暗号化し、相手が本物かを示すための電子的な証明書）とそのキーを、作る・保存する・更新する手間を引き受けるサービス。",
+      "features": [
+        {
+          "title": "発行と取り込み",
+          "text": "証明書は ACM で直接発行するほか、他社の証明書を ACM に取り込んで、統合された AWS のサービスで使える。",
+          "source_id": "S1"
+        },
+        {
+          "title": "ドメインの範囲",
+          "text": "1 つのドメイン名、複数の決まったドメイン名、ワイルドカードのドメイン、またはその組み合わせを守れる。ワイルドカードの証明書はサブドメインをいくつでも守れる。",
+          "source_id": "S1"
+        },
+        {
+          "title": "マネージド更新",
+          "text": "Amazon が発行した証明書を、DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせる。",
+          "source_id": "S2"
+        },
+        {
+          "title": "サービスとの統合",
+          "text": "Elastic Load Balancing のロードバランサーや CloudFront のディストリビューションに、ACM の証明書を直接置ける。",
+          "source_id": "S3"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "証明書の期限切れを防ぐには、DNS 検証にして ACM の自動の更新に任せる使い方を押さえる。",
+          "source_id": "S2"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview",
+          "source_id": "S1",
+          "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "source_id": "S2",
+          "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-services.html#acm-services",
+          "source_id": "S3",
+          "quote": "ACM is integrated with Elastic Load Balancing to deploy ACM certificates on the load balancer."
+        }
+      ]
+    },
+    {
+      "id": "cloudhsm",
+      "name": "AWS CloudHSM",
+      "aliases": [
+        "AWS CloudHSM"
+      ],
+      "reading": "クラウドエイチエスエム",
+      "status": "draft",
+      "created": "2026-11-26",
+      "summary": "ハードウェアセキュリティモジュール（HSM。暗号の処理をし、暗号のキーを安全に保管する専用の機器）を AWS のクラウドで使えるサービス。使うアルゴリズムとキーを利用者が完全に管理する。",
+      "features": [
+        {
+          "title": "HSM の管理の自動化",
+          "text": "可用性の高い HSM を完全に管理でき、バックアップ・用意・設定・保守などの HSM の管理は自動で行われる。",
+          "source_id": "S4"
+        },
+        {
+          "title": "キーの操作",
+          "text": "セッションキー・トークンキー・対称キー・非対称のキーペアなどの暗号のキーを、作る・保存する・取り込む・取り出す・管理する・使うことができる。",
+          "source_id": "S4"
+        },
+        {
+          "title": "使う場面",
+          "text": "企業のセキュリティの標準に合わせる必要がある会社が、とても機密性の高いデータや、通信中・保存時の暗号化を守る秘密鍵の管理に使う。",
+          "source_id": "S5"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "キーとアルゴリズムを完全に自分で管理する必要がある時の、専用の HSM の選択肢として押さえる。",
+          "source_id": "S4"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "source_id": "S4",
+          "quote": "AWS CloudHSM gives you full control of the algorithms and keys you use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/use-cases.html#use-cases",
+          "source_id": "S5",
+          "quote": "Use AWS CloudHSM to manage private keys that protect highly confidential data, encryption in transit, and encryption at rest."
+        }
+      ]
+    }
+  ]
+}
