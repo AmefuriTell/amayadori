@@ -3,6 +3,8 @@
     "AWS AppConfig": "appconfig",
     "Amazon Aurora": "aurora",
     "AWS Backup": "backup",
+    "AWS CDK": "cdk",
+    "AWS Cloud Development Kit (AWS CDK)": "cdk",
     "AWS CloudFormation StackSets": "cloudformation-stacksets",
     "AWS CloudFormation": "cloudformation",
     "Amazon CloudFront": "cloudfront",
@@ -29,6 +31,9 @@
     "Elastic Load Balancing": "elastic-load-balancing",
     "Amazon ElastiCache": "elasticache",
     "Amazon EventBridge": "eventbridge",
+    "AWS Fargate": "fargate",
+    "AWS Fault Injection Service": "fault-injection-service",
+    "AWS Fault Injection Service (AWS FIS)": "fault-injection-service",
     "Amazon GuardDuty": "guardduty",
     "AWS Health": "health",
     "IAM Access Analyzer": "iam-access-analyzer",
@@ -45,6 +50,8 @@
     "Amazon RDS": "rds",
     "AWS Regions": "regions",
     "AWS リージョンとアベイラビリティーゾーン": "regions",
+    "AWS Resilience Hub": "resilience-hub",
+    "Amazon Route 53": "route-53",
     "Amazon S3": "s3",
     "AWS Security Hub CSPM": "security-hub-cspm",
     "Amazon SNS": "sns",
@@ -162,6 +169,44 @@
         {
           "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html#vault-lock",
           "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+        }
+      ]
+    },
+    "cdk": {
+      "id": "cdk",
+      "name": "AWS Cloud Development Kit (AWS CDK)",
+      "reading": "シーディーケー",
+      "summary": "AWS の上にアプリケーションを作ってデプロイするための、オープンソースのライブラリとコマンドラインの道具の集まり。インフラストラクチャ（サーバーやネットワークなどの土台）をプログラムのコードで書ける。",
+      "features": [
+        {
+          "title": "コンストラクト",
+          "text": "あらかじめ書かれた、組み立てて使い回せるコードの部品。そのまま使ったり、変えたり、組み合わせたりして、インフラストラクチャを早く作れる。"
+        },
+        {
+          "title": "CloudFormation でデプロイ",
+          "text": "CDK は AWS CloudFormation を通じてインフラストラクチャを用意する。誤りの時は元に戻しつつ、決まった形で何度でもデプロイできる。"
+        },
+        {
+          "title": "ブートストラップ",
+          "text": "CDK が使うリソース（Lambda 関数のコードやアセットを置く S3 バケットなど）を、環境に用意する準備のこと。cdk bootstrap コマンドで行う。環境は互いに独立しているので、CDK で使う環境ごとに先に行う必要がある。"
+        }
+      ],
+      "exam_points": [
+        "CDK で使う環境（デプロイ先）は互いに独立しているので、環境ごとに、使う前に cdk bootstrap を行う必要がある。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/home.html#home",
+          "quote": "The AWS Cloud Development Kit (AWS CDK) is an open-source set of libraries and command-line tools for building and deploying applications on AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/home.html#home-benefits",
+          "quote": "AWS CDK integrates with AWS CloudFormation to deploy and provision your infrastructure on AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html#bootstrapping-what",
+          "quote": "Each environment that you want to use with the AWS CDK must first be bootstrapped."
         }
       ]
     },
@@ -1187,6 +1232,74 @@
         }
       ]
     },
+    "fargate": {
+      "id": "fargate",
+      "name": "AWS Fargate",
+      "reading": "ファーゲート",
+      "summary": "Amazon ECS と一緒に使い、サーバーや EC2 インスタンスのクラスターを管理せずにコンテナを動かせる技術。仮想マシンのクラスターの用意・設定・拡張をしなくてよい。",
+      "features": [
+        {
+          "title": "サーバーを選ばなくてよい",
+          "text": "サーバーの種類を選ぶことも、クラスター（EC2 インスタンスのまとまり）をいつ広げるか決めることも、クラスターへの詰め方を工夫することも要らない。"
+        },
+        {
+          "title": "タスクごとに分かれる",
+          "text": "Fargate で動く各タスク（ECS でコンテナを動かす単位）は自分だけの境界を持ち、CPU・メモリ・ネットワークのインターフェイスなどをほかのタスクと共有しない。タスク定義の requiresCompatibilities を FARGATE にして使う。"
+        }
+      ],
+      "exam_points": [
+        "コンテナを動かすサーバーの管理や拡張をしたくない場面では、ECS と Fargate の組み合わせを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/userguide/what-is-fargate.html#AWS_Fargate",
+          "quote": "AWS Fargate is a technology that you can use with Amazon ECS to run containers without having to manage"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/userguide/what-is-fargate.html#AWS_Fargate",
+          "quote": "Each Fargate task has its own isolation boundary and does not share the underlying kernel, CPU resources,"
+        }
+      ]
+    },
+    "fault-injection-service": {
+      "id": "fault-injection-service",
+      "name": "AWS Fault Injection Service (AWS FIS)",
+      "reading": "フォールト インジェクション サービス",
+      "summary": "AWS で動く仕組みにわざと障害を起こす実験（障害注入の実験）を行うための、AWS が管理するサービス。カオスエンジニアリング（わざと障害を起こして強さを確かめるやり方）の考えにもとづく。",
+      "features": [
+        {
+          "title": "テンプレートと安全のための仕組み",
+          "text": "障害を起こすためのテンプレートと、本番で実験するのに要る制御（条件を満たしたら自動で戻す・止める、など）を用意している。"
+        },
+        {
+          "title": "停止条件",
+          "text": "CloudWatch のアラームで決めたしきい値に達したら、実験を止める仕組み。実験の途中で停止条件が鳴ると、FIS は実験を止める。"
+        },
+        {
+          "title": "アクションとターゲット",
+          "text": "アクションは、実験の間に FIS が AWS のリソースに行う操作。ターゲットは、そのアクションを行う 1 つ以上のリソース。"
+        }
+      ],
+      "exam_points": [
+        "障害の実験で影響が大きくなりすぎたら自動で止めたい場面では、CloudWatch のアラームを使った停止条件を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is",
+          "quote": "Fault injection is based on the principles of chaos engineering."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is-stop-conditions",
+          "quote": "If a stop condition is triggered while the experiment is running, AWS FIS stops the"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html#what-is-actions",
+          "quote": "An action is an activity that AWS FIS performs on an AWS"
+        }
+      ]
+    },
     "guardduty": {
       "id": "guardduty",
       "name": "Amazon GuardDuty",
@@ -1665,6 +1778,75 @@
         {
           "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones",
           "quote": "By launching EC2 instances in multiple Availability Zones, you can protect your applications from the failure of a single location in the Region."
+        }
+      ]
+    },
+    "resilience-hub": {
+      "id": "resilience-hub",
+      "name": "AWS Resilience Hub",
+      "reading": "レジリエンスハブ",
+      "summary": "AWS のアプリケーションの回復力（障害から立ち直る力）を、1 か所で管理して高めるためのサービス。回復力の目標を決め、目標に照らして評価し、AWS Well-Architected Framework にもとづく改善の勧めを示す。",
+      "features": [
+        {
+          "title": "レジリエンシーポリシー",
+          "text": "目標として RTO（recovery time objective、復旧時間の目標）と RPO（recovery point objective、復旧時点の目標）を決める。アプリがポリシーを満たすかは、この目標で決まる。"
+        },
+        {
+          "title": "回復力の評価",
+          "text": "アプリにポリシーを付けて評価を動かすと、アプリの構成をポリシーと照らし、復旧の目標に対してどうかを示す。"
+        },
+        {
+          "title": "FIS の実験",
+          "text": "Resilience Hub の中から、AWS Fault Injection Service の実験を作って動かし、実際に近い障害でアプリを確かめられる。"
+        }
+      ],
+      "exam_points": [
+        "決めた RTO と RPO を今の構成が満たすかを確かめたい場面では、Resilience Hub のレジリエンシーポリシーと評価を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/what-is.html#what-is",
+          "quote": "AWS Resilience Hub is a central location for you to manage and improve the resilience posture of your"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/resiliency-policies.html#resiliency-policies",
+          "quote": "When you create a resiliency policy, you define the target objectives: recovery time"
+        }
+      ]
+    },
+    "route-53": {
+      "id": "route-53",
+      "name": "Amazon Route 53",
+      "reading": "ルートフィフティースリー",
+      "summary": "可用性が高く、規模を広げやすい DNS（ドメイン名と IP アドレスを結び付ける仕組み）の Web サービス。ドメインの登録・DNS のルーティング・ヘルスチェックの 3 つを、好きな組み合わせで使える。",
+      "features": [
+        {
+          "title": "ヘルスチェック",
+          "text": "Web サーバーなどのリソースにインターネット越しに自動で要求を送り、届くか・使えるか・動いているかを確かめる。使えなくなったら通知を受けたり、正常でないリソースから通信をそらしたりできる。"
+        },
+        {
+          "title": "ルーティングポリシー",
+          "text": "レコード（Route 53 に作る DNS の設定）を作る時に、Route 53 の答え方（ルーティングポリシー）を選ぶ。フェイルオーバーは、片方が動き、もう片方が待つ（アクティブ・パッシブの）切り替えに使う。加重は、決めた割合で複数のリソースに通信を分ける。"
+        }
+      ],
+      "exam_points": [
+        "正常でないリソースから通信をそらしたい場面では、Route 53 のヘルスチェックを考える。",
+        "新しい環境に通信の一部だけを送りたい場面では、決めた割合で分ける加重のルーティングを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html#Welcome",
+          "quote": "Amazon Route 53 is a highly available and scalable Domain Name System (DNS) web service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html#Welcome",
+          "quote": "You can also route internet traffic away from unhealthy resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy",
+          "quote": "Use to route traffic to multiple resources in proportions that you specify."
         }
       ]
     },
