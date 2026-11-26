@@ -1,0 +1,72 @@
+{
+  "task": "4.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.3-0009",
+  "services": [
+    "AWS Systems Manager",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An account has 300 EC2 instances in one Region. All instances use IMDSv2 and run SSM Agent 3.2.582.0 or later, but many of them have no IAM instance profile, so they do not appear as Systems Manager managed nodes. The company wants all current and future instances in the Region to become managed nodes without creating or attaching instance profiles. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "あるアカウントの 1 つのリージョンに 300 台の EC2 インスタンスがあります。すべてのインスタンスが IMDSv2 を使い、SSM Agent 3.2.582.0 以降を動かしていますが、多くに IAM インスタンスプロファイルが無いため、Systems Manager のマネージドノードとして表示されません。会社は、インスタンスプロファイルを作ったりアタッチしたりせずに、そのリージョンの今と今後のすべてのインスタンスをマネージドノードにしたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an instance profile with the AmazonSSMManagedInstanceCore policy, and attach it to every instance that lacks one.",
+      "text_ja": "AmazonSSMManagedInstanceCore ポリシーを持つインスタンスプロファイルを作り、持っていない各インスタンスにアタッチする。"
+    },
+    {
+      "key": "B",
+      "text": "Add an inbound rule for HTTPS on port 443 to each instance's security group so that Systems Manager can connect to SSM Agent.",
+      "text_ja": "Systems Manager が SSM Agent に接続できるよう、各インスタンスのセキュリティグループに 443 番ポートの HTTPS の受信のルールを足す。"
+    },
+    {
+      "key": "C",
+      "text": "Turn on Default Host Management Configuration in the Region, and use the default role that it provides.",
+      "text_ja": "そのリージョンで Default Host Management Configuration を有効にし、それが用意する既定のロールを使う。"
+    },
+    {
+      "key": "D",
+      "text": "Turn on Default Host Management Configuration, and switch the instances to IMDSv1 so that they can get the role's credentials.",
+      "text_ja": "Default Host Management Configuration を有効にし、ロールの認証情報を得られるようインスタンスを IMDSv1 に切り替える。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Default Host Management Configuration を有効にすると、インスタンスプロファイルを手作業で作らなくても、そのアカウントとリージョンで IMDSv2 を使い SSM Agent 3.2.582.0 以降を入れたすべてのインスタンスが自動でマネージドインスタンスになります。既定のロールは、Systems Manager で管理するのに必要な最小の権限を持ちます。",
+    "per_choice": {
+      "A": "マネージドノードにはなりますが、インスタンスプロファイルを作ってアタッチしないという要件に反し、今後のインスタンスにも作業が要ります。",
+      "B": "SSM Agent が Systems Manager への接続をすべて始めるので、受信のルールは要らず、権限の問題も解決しません。",
+      "C": "正しい。条件を満たす今と今後のインスタンスが、インスタンスプロファイル無しで自動で管理されます。",
+      "D": "Default Host Management Configuration は IMDSv1 に対応しておらず、IMDSv2 が必要です。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#fleet-manager-default-host-management-configuration",
+      "source_id": "S2",
+      "quote": "Using Default Host Management Configuration, you can manage EC2 instances without having to manually create an AWS Identity and Access Management (IAM) instance profile."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-permissions.html#default-host-management",
+      "source_id": "S5",
+      "quote": "all instances using Instance Metadata Service Version 2 (IMDSv2) in the AWS Region and AWS account with SSM Agent version 3.2.582.0 or later installed automatically become managed instances."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#dhmc-prerequisites",
+      "source_id": "S3",
+      "quote": "Default Host Management Configuration doesn't support Instance Metadata Service Version 1."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+      "source_id": "S7",
+      "quote": "you don't need to configure your firewall to allow inbound traffic to your instances for Systems Manager."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

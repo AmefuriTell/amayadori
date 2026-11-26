@@ -1,0 +1,67 @@
+{
+  "item": "C-0060",
+  "questions": [
+    {
+      "id": "q-4.3-0003",
+      "task": "4.3",
+      "services": [
+        "AWS Systems Manager",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "あるアカウントの 1 つのリージョンに 300 台の EC2 インスタンスがあります。すべてのインスタンスが IMDSv2 を使い、SSM Agent 3.2.582.0 以降を動かしていますが、多くに IAM インスタンスプロファイルが無いため、Systems Manager のマネージドノードとして表示されません。会社は、インスタンスプロファイルを作ったりアタッチしたりせずに、そのリージョンの今と今後のすべてのインスタンスをマネージドノードにしたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "AmazonSSMManagedInstanceCore ポリシーを持つインスタンスプロファイルを作り、持っていない各インスタンスにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "そのリージョンで Default Host Management Configuration を有効にし、それが用意する既定のロールを使う。"
+        },
+        {
+          "key": "C",
+          "text": "Systems Manager が SSM Agent に接続できるよう、各インスタンスのセキュリティグループに 443 番ポートの HTTPS の受信のルールを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Default Host Management Configuration を有効にし、ロールの認証情報を得られるようインスタンスを IMDSv1 に切り替える。"
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0004",
+      "task": "4.3",
+      "services": [
+        "AWS Systems Manager",
+        "Amazon VPC"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "プライベートサブネットの EC2 インスタンスには SSM Agent と必要な IAM の権限がありますが、Systems Manager のマネージドノードとして表示されません。サブネットにはインターネットへのルートが無く、セキュリティチームは外向きのインターネットのアクセスを許しません。インスタンスを Systems Manager で管理できるようにするために、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "VPC に、ssm、ssmmessages、ec2messages のサービスの VPC エンドポイントを作る。"
+        },
+        {
+          "key": "B",
+          "text": "インスタンスから VPC エンドポイントへの、443 番ポートの外向きの HTTPS の通信を許す。"
+        },
+        {
+          "key": "C",
+          "text": "インスタンスのセキュリティグループに、Systems Manager からの 443 番ポートの受信のルールを足す。"
+        },
+        {
+          "key": "D",
+          "text": "SSM Agent が公開のエンドポイントに届くよう、NAT ゲートウェイとインターネットへのルートを足す。"
+        },
+        {
+          "key": "E",
+          "text": "状態を Systems Manager へ報告するよう、インスタンスに CloudWatch エージェントを入れる。"
+        }
+      ]
+    }
+  ]
+}
