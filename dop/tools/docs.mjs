@@ -42,6 +42,29 @@ export function tocLinks(url) {
 }
 
 /** sources.md の検査（C1 の終わり）。rawText を渡すと原文のままかも確かめる。[{ id, message }] */
+/**
+ * P-020: 形の誤り。読み取りが黙って抜け落ちる書き方（後の q・g validate で「原文に無い」「S0 が無い」と落ちる）を先に返す。
+ * ① S<番号> の見出しは「## 」で始める。② 見出しの後、空行までの行は「url:」「fetched:」「> 」のどれかで始める（引用の続きの行も「> 」）
+ */
+export function formatErrors(md) {
+  const errors = [];
+  const lines = md.split('\n');
+  let cur = null;
+  lines.forEach((line, i) => {
+    const h = line.match(/^(#+)\s*(S\d+)\b/);
+    if (h) {
+      if (h[1] !== '##') errors.push({ id: h[2], message: `${i + 1} 行目: 見出しは「## ${h[2]} …」（# の数が ${h[1].length}）` });
+      cur = h[2];
+      return;
+    }
+    if (/^#/.test(line)) { cur = null; return; }
+    if (!cur) return;
+    if (!line.trim()) { cur = null; return; }
+    if (!/^(url:|fetched:|>)/.test(line)) errors.push({ id: cur, message: `${i + 1} 行目: 見出しの下の行は url: / fetched: / > のどれかで始める（引用の続きも「> 」）: ${line.slice(0, 40)}` });
+  });
+  return errors;
+}
+
 export function checkSources(md, rawText) {
   const list = parseSources(md);
   const errors = [];
@@ -60,6 +83,7 @@ export function checkSources(md, rawText) {
       for (const x of notInRaw(s.quote, rawText)) errors.push({ id, message: `原文の控えに無い文（写し間違い・言い換え・別の所の文をつないだ）: ${x.slice(0, 80)}` });
     }
   }
+  errors.push(...formatErrors(md));
   if (rawText === undefined) errors.push({ id: '(全体)', message: '原文の控え（work/<ID>/raw/*.md）が無い。docs fetch で取るか、WebFetch で取った本文を raw/ に .md で置く' });
   // S0 は廃止などの告知の欄なので、根拠の数には入れない
   const n = list.filter((s) => s.id && s.id !== 'S0').length;

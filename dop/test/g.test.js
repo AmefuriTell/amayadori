@@ -92,3 +92,17 @@ test('P-014 事典: 2 回の fact で drop、全部 drop なら drop', () => {
   sb.write(`work/${id}/verify.json`, bad);
   assert.equal(sb.run('g', 'verdict', id).result, 'drop');
 });
+
+test('P-017・P-021 事典: 指摘 0 件の fix は直しに回す。ok なのに重い指摘があれば判定しない', () => {
+  const sb = sandbox();
+  const id = toGlossaryAuthor(sb);
+  sb.write(`work/${id}/glossary.json`, { item: id, entries: [page()] });
+  sb.run('g', 'validate', id);
+  sb.run('loop', 'advance', '--result', 'ok');
+  sb.write(`work/${id}/verify.json`, { item: id, entries: [{ id: 'codedeploy', issues: [{ kind: 'fact', detail: 'x' }], verdict: 'ok' }] });
+  const bad = sb.run('g', 'verdict', id);
+  assert.equal(bad.ok, false);
+  assert.match(bad.summary, /食い違っている.*codedeploy.*fact/);
+  sb.write(`work/${id}/verify.json`, { item: id, entries: [{ id: 'codedeploy', issues: [], verdict: 'fix' }] });
+  assert.equal(sb.run('g', 'verdict', id).result, 'fix');
+});

@@ -15,6 +15,7 @@
     <a>translate の項目（"translate": true）では、bank の問題に日本語版（stem_ja と choices[].text_ja）を足すだけ。英語・答え・解説・出典・選択肢の順は変えない（q validate が bank と比べて止める）。sources.md は要らない。</a>
     <a>事典の項目（G-、P-014）では問題ではなく、下の「事典の書き方」で item.services の各サービスの 1 ページを work/&lt;ID&gt;/glossary.json に { "item", "entries": [ … ] } の形で書き、q validate の代わりに g validate を呼ぶ。</a>
     <a>図の項目（D-、P-015）では、work/&lt;ID&gt;/context.json（問題・答え・解説）だけを読み、下の「図の書き方」で 1 問 1 枚を work/&lt;ID&gt;/diagrams.json に書き、q validate の代わりに dg validate を呼ぶ（描いた絵は work/&lt;ID&gt;/preview/ に出る。1 枚は自分の目で見る）。</a>
+    <a>図の点検の項目（item.json の check: true。問題を見直した後に loop close が足す）では、diagrams.json に今の図が写してある。初めは書き直さず dg validate だけ呼び、C3 の点検に回す。validate が落ちた所と、C3 から fix で戻った図だけを書き直す。</a>
     <a>q validate を呼ぶ（書くたびに hook でも動く）。ok でなければ直して呼び直す（形の間違いはここで消す）。</a>
   </actions>
   <outputs><file>work/&lt;ID&gt;/questions.json（status は draft）</file></outputs>
@@ -84,6 +85,8 @@
   <r>サービスの箱は X@{ svc: "&lt;問題の services の名前&gt;", label: "&lt;短い役割&gt;" } と書く。道具が公式のアイコンを付け、押すと事典が開く。人・外のシステムは普通の箱 X["…"]。リージョン・アカウント・VPC・AZ は subgraph で囲む。</r>
   <r>線には何が流れるかを短く書く（"成果物" "イベント" "ログ" など）。選択肢の問題点は、その場所の線か箱に「⚠ A: …」、正解は「✔ C: …」と書く（全選択肢でなくてよい。大事な 2〜3 個）。</r>
   <r>context.json の問題文・選択肢・解説に無い構成や事実を足さない（図は解説を絵にする物で、新しい知識の置き場ではない）。</r>
-  <r>1 枚の箱は 8 個まで、線の文字は 20 字くらいまで。重なって読めない時は箱を減らすか分ける。</r>
+  <r>1 枚の箱は 8 個まで。重なって読めない時は箱を減らすか分ける。dg validate が次を落とす（P-022。幅は全角 1・半角 0.5）: 線のラベルが 20 字を超える（説明は箱のラベルへ `&lt;br/&gt;` で入れ、線には「✔ A」など短い印）、同じ 2 つの箱の間にラベル付きの線が 2 本以上（行きと帰りは 1 本にまとめる）、subgraph の題が 14 字を超える（短くするか枠をやめる）。</r>
+  <r>⚠ は、その選択肢が使う物・変える物を指す。正解の ✔ の箱を指すと正解の欠点に見える。問題・解説に無い物（サービス・構成・説明の文）は描かない。</r>
+  <r>アイコンの無いサービス（config/icon-map.json に無い物）は、svc の箱のままラベルの頭にサービス名を書く（例 X@{ svc: "Amazon Athena", label: "Amazon Athena&lt;br/&gt;クエリ" }）。名前が無いと何の箱か分からない。</r>
 </diagram_rules>
 ```

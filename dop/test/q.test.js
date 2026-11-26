@@ -69,6 +69,16 @@ test('reveal は答えを見ずに解いた後だけ。verdict は答えが割�
   assert.ok(sb.read(`work/${id}/feedback.json`).questions['q-1.1-0002']);
   assert.equal(sb.read(`work/${id}/questions.json`).questions[0].low_confidence, true);
 
+  // P-019: 同じ verify.json にもう一度 verdict を呼んでも、重い fix を数え直さない
+  const again = sb.run('q', 'verdict', id);
+  assert.equal(again.result, 'fix');
+  assert.equal(sb.read(`work/${id}/questions.json`).questions.length, 2);
+
+  // 次の回で検証役が同じ指摘をもう一度書いたら、2 回目の重い fix で drop
+  const verifyFile = `work/${id}/verify.json`;
+  const later = Date.now() / 1000 + 5;
+  sb.write(verifyFile, sb.read(verifyFile));
+  await_utimes(sb, verifyFile, later);
   const v2 = sb.run('q', 'verdict', id);
   assert.equal(v2.result, 'pass');
   assert.equal(sb.read(`work/${id}/questions.json`).questions.length, 1);

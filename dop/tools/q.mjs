@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, rel, seeded, setResult, writeReport } from './lib/io.mjs';
 import { normalize, ngrams, jaccard, questionText } from './lib/text.mjs';
-import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, judge } from './lib/step.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, judge, sameVerdict, verifyHash } from './lib/step.mjs';
 import { loadBank, coverage as bankCoverage } from './lib/bank.mjs';
 import { loadBatch, checkBatch, lengthBias, gateBatch, linkFailures, DUP_FAIL, DUP_WARN } from './lib/qcheck.mjs';
 
@@ -84,6 +84,8 @@ const commands = {
   verdict(args) {
     const id = itemIdOf(args._[0]);
     requireState(id, 'C3_verify');
+    const again = sameVerdict(id); // P-019: 同じ verify.json での 2 回目は数え直さない
+    if (again) return emit({ ok: true, summary: `前と同じ verify.json なので前の結論のまま（${again.result}）→ loop advance --result ${again.result}`, extra: { result: again.result } });
     const batch = loadBatch(id);
     const v = readJSON(paths.work(id, 'verify.json'));
     const qhist = readJSON(paths.work(id, 'qhistory.json'), {});
@@ -141,7 +143,7 @@ const commands = {
     else fs.rmSync(paths.work(id, 'feedback.json'), { force: true });
     appendLine(paths.work(id, 'history.jsonl'), { step: 'C3_verify', kinds: [...kinds] });
     // verdict.json は questions.json の後に書く（gate が「検証の後に書き換えたか」を時刻で見る）
-    writeJSON(paths.work(id, 'verdict.json'), { at: new Date().toISOString(), questions: Object.fromEntries(Object.entries(results).filter(([, r]) => r !== 'drop')) });
+    writeJSON(paths.work(id, 'verdict.json'), { at: new Date().toISOString(), questions: Object.fromEntries(Object.entries(results).filter(([, r]) => r !== 'drop')), result, verify_hash: verifyHash(id) });
     setResult(id, 'C3_verify', result, { count: result !== 'fix' || anyCounted });
     emit({
       ok: true,

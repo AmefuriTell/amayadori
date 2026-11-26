@@ -6,7 +6,7 @@
   <actions>
     <a>loop close を呼ぶ。app・refactor の項目では、ツールがコードを測り直し（refactor.mjs scan）、決まり（config/refactor.json）を超えた所をリファクタリングの項目（F-）として足す（loop start の時も同じ。P-016）。</a>
     <a>loop close を呼ぶ。ツールが runs.jsonl に 1 行足し（項目・終わり方・attempts）、work/&lt;ID&gt;/ を .loop/archive/ へ移し、S0_pick へ進める。</a>
-    <a>content・recheck の項目を done で閉じると、ツールが図の無い問題の図の項目（D-）を足す（出力の diagrams_added）。人は足さなくてよい。</a>
+    <a>content・recheck の項目を done で閉じると、ツールが図の無い問題の図の項目（D-）を足す。recheck では、見直した問題にもう付いている図の点検の項目（D-、check: true）も足す（どちらも出力の diagrams_added）。人は足さなくてよい。</a>
     <a>この項目で、同じ種類の指摘が 2 回以上出たか確かめる（loop close の出力の repeated_issues）。</a>
     <a>出ていれば、その再発を防ぐ決まりを 1 行、該当する工程の文書に足す案を .loop/proposals.md に書く。<b>工程の文書は直接書き換えない</b>（人が週に 1 回まとめて採否を決める）。</a>
     <a>機械で確かめられる指摘なら、文書でなくツールの検査を足す案にする（AI が覚えるより確実）。</a>

@@ -17,4 +17,6 @@ model: sonnet
 
 図の項目（D-）では 1〜2 は無い。`dop/work/<ID>/context.json` と `diagrams.json`、`preview/<問題 ID>.png`（Read で絵を見る）を照らし、`dop/loop/steps/C3-verify.md` の「図の項目の検証」の形で verify.json を書く。
 
+verdict が ok なら、issues には軽い種類（style・unclear など。工程の文書の決まり）だけを書く。重い種類（fact・unsupported・unreadable など）が 1 つでもあれば fix にする（食い違うとツールが判定しない。P-021）。`q verdict`・`g verdict`・`dg verdict` は呼ばない（進行役が呼ぶ。P-019）。
+
 Web は使わない。sources.md に無いが正しいと思う事は、issues に kind: unsupported で書く。書いてよいのは verify.json だけ。
