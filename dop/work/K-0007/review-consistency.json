@@ -1,81 +1,13 @@
 {
   "slides": [
     {
-      "id": "s02",
-      "issues": [
-        {
-          "kind": "fact",
-          "severity": "軽",
-          "detail": "図の矢印が「Amazon S3 →(問い合わせ)→ 組み込みの道具で調べる」と、S3 が道具へ問い合わせる向きに読める。S1 は保存したデータを組み込みの道具で問い合わせる（道具が S3 のデータを調べる）と言っている。",
-          "suggest": "矢印を「組み込みの道具 →(問い合わせ)→ S3」にするか、ラベルを「データを調べる」など向きに依らない言い方にする。"
-        }
-      ]
-    },
-    {
-      "id": "s03",
+      "id": "s04",
       "issues": [
         {
           "kind": "mismatch",
           "severity": "軽",
-          "detail": "表の行「時間の軸」で Inventory の欄が「更新が要るか」になっており、時間の軸（履歴）の比較になっていない。Inventory にも何らかの履歴の働きがあるように読める余地がある。台本は Inventory の履歴に触れていない。",
-          "suggest": "行の名前を「時間の軸」以外（例: 「調べたい事」）にするか、Inventory 側は根拠の範囲で「—」とし、履歴は AWS Config の特徴だと分かる形にする。"
-        }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        {
-          "kind": "fact",
-          "severity": "軽",
-          "detail": "bullet「承認されたパッチが全部入れば準拠」は、S4 の「利用できて（available）かつ承認された」の「利用できて」が落ちている。図と台本には入っている。",
-          "suggest": "「利用できて承認されたパッチが全部入れば準拠」とする。"
-        }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "台本「ステートマネージャーと似た事ができる機能が、二つあります。メンテナンスウィンドウとランコマンドです」。S11 が State Manager と似た更新ができると言うのは Maintenance Windows だけで、Run Command が State Manager と似ているという根拠は無い。また「二つあります」と数を言い切っている。",
-          "suggest": "「ドキュメントは、ステートマネージャーとメンテナンスウィンドウが似た種類の更新をできると述べています。あわせて、一度きりの変更に使うランコマンドとも比べます」のように、根拠のある比較と講義側の並べ方を分け、「二つあります」の言い切りを外す。スライド名も「State Manager と比べる機能」程度にする。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "表の「例に挙がる事」で State Manager の欄が「決めた状態を保つ」になっているが、これは根拠で例として挙がった事ではなく機能の説明。",
-          "suggest": "State Manager の欄は「—」にするか、行の名前を「中身」などに変える。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "表の Run Command「コンソール・CLI・SDK」は、S10 の挙げる 4 つ（コンソール、CLI、Tools for Windows PowerShell、SDK）から PowerShell が落ちており、これだけのように見える。台本は「など」が付いている。s14 の表も同じ。",
-          "suggest": "「コンソール・CLI・SDK など」とする（s14 も）。"
-        },
-        {
-          "kind": "terms",
-          "severity": "軽",
-          "detail": "Maintenance Windows の選ぶ時が、この表では「急ぎの作業を時間内に」、s14 では「急ぎの作業を時間帯に」、台本では「決めた時間帯に」。「時間内に」は締め切りまでに、とも読め、S11 の during periods you specify とずれる。",
-          "suggest": "「急ぎの作業を決めた時間帯に」にそろえる。"
-        }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "bullets が「Config Rules が評価する → 修復は Automation の文書で → executeAwsApi で API を呼ぶ」と並び、修復が executeAwsApi で行われる手順のように読める。根拠（S9・S19）は修復と executeAwsApi を結び付けていない。図と台本は「アクションの一つ」と書いており、そこは問題ない。",
-          "suggest": "3 つ目の bullet を「Automation のアクションの一つ: executeAwsApi」などにし、修復の手順ではないと分かる形にする。"
-        },
-        {
-          "kind": "fact",
-          "severity": "軽",
-          "detail": "図で「修復する」の矢印が Automation のドキュメントから出ており、AWS Config が修復する事が図から読めない。S9 は AWS Config が Automation のドキュメントを使って修復を適用すると言っている（alt はそう書いている）。",
-          "suggest": "AWS Config（Rules とは別の箱でもよい）から「Automation の文書で修復」の矢印を出すか、矢印のラベルを「Config が使って修復」にする。"
+          "detail": "表の 2 行目は方法の欄が空で「アカウントとリージョンへ」だけが入る。画面だけ見ると 4 つ目の行（名前の無い方法）があるように見え、bullet と台本の「方法は 3 つ」と数が合って見えない。",
+          "suggest": "patch policy の説明を 1 行に縮める（例: 「1 つのポリシーで複数アカウント・リージョン」）か、2 行目の方法の欄に「（続き）」と入れる。"
         }
       ]
     },
@@ -85,19 +17,8 @@
         {
           "kind": "terms",
           "severity": "軽",
-          "detail": "bullet「default で再試行」と表「再試行（default）」が英語の default、台本と s08 の画面は「既定」。",
-          "suggest": "画面も「既定」にそろえる。"
-        }
-      ]
-    },
-    {
-      "id": "s11",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "台本は Step Functions の AWS SDK integrations（ステートマシンから直接サービスを呼ぶ）を説明した直後に「なお、エスディーケーは多くのプログラミング言語向けにあり…」と S15（Lambda のコードから使う AWS SDK）の話を続けている。二つを区別しておらず、SDK integrations が言語向け SDK のことだと誤って結び付けかねない。",
-          "suggest": "S15 の話は「ラムダの関数のコードからは、言語ごとのエーダブリューエスエスディーケーを使えます」と、Lambda 側の話だと明示して s10 か s11 の Lambda の箇所に移す。または「ステートマシンの SDK の統合とは別に」と前置きする。"
+          "detail": "s10 の終わりは「ラムダは、多くのプログラミング言語向けのエスディーケーと一緒に使えます」、s11 はそれを「ラムダのコードから使うエスディーケー」と受ける。s10 では「コードから使う」とは言っておらず、受け方が少しずれる。根拠（S15）との食い違いではない。",
+          "suggest": "s10 を「ラムダの関数のコードからは、多くのプログラミング言語向けのエスディーケーを使えます」とし、s11 の言い方とそろえる。"
         }
       ]
     },
@@ -107,25 +28,8 @@
         {
           "kind": "mismatch",
           "severity": "軽",
-          "detail": "表の行「例に挙がる事」で Standard の欄が「最長 1 年まで」。例ではなく長さの上限で、行名と合わない。",
-          "suggest": "「最長 1 年」は「向く処理」の行へ入れ、Standard の「例に挙がる事」は「—」にする。"
-        },
-        {
-          "kind": "mismatch",
-          "severity": "軽",
-          "detail": "台本は Run a Job のパターンを名前で説明するが、画面（bullets・表）に「Run a Job」の語が無い（表は「Request Response ほか」）。s15 の画面は「Run a Job（.sync）」を前提に使う。",
-          "suggest": "s12 の表か bullets に「Batch・ECS の完了を待つ = Run a Job（.sync）」を 1 行入れる。"
-        }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        {
-          "kind": "terms",
-          "severity": "軽",
-          "detail": "「Automation の文書」（s09 bullet、s14 表、s16 図）と「Automation のドキュメント」（s09 図、台本）、「SSM document」（s06 図）が混在する。",
-          "suggest": "画面も「ドキュメント」（または SSM document）にそろえる。"
+          "detail": "表の行「長さ・例」で Standard は長さ（最長 1 年）、Express は例（IoT・ストリーム・モバイル）と、同じ行で違う物を比べている。",
+          "suggest": "許される行数の中なら「長さ」と「例に挙がる事」を分けるか、Standard の欄を「最長 1 年（長く動く）」、Express の欄を「例: IoT・ストリーム・モバイル」と頭に印を付ける。"
         }
       ]
     }
@@ -133,13 +37,8 @@
   "global": [
     {
       "severity": "軽",
-      "detail": "Maintenance Windows の表記が s04 の表では小文字の「maintenance window」、s07・s14 では「Maintenance Windows」。",
-      "suggest": "機能名として「Maintenance Windows」にそろえる（patch policy の方法の一つとして言うときも）。"
-    },
-    {
-      "severity": "軽",
-      "detail": "1 つ目のまとまりの呼び方が、地図（s01・s16）では「棚卸しと構成」、台本（s01・s02）では「今の状態を知る方法」、s13 では「棚卸しとパッチ」と揺れる。",
-      "suggest": "台本で「棚卸しと構成、つまり今の状態を知る方法です」と地図の名前を一度言う。"
+      "detail": "前回の中 2 つは直っている。s07 は S11 の比較（State Manager と Maintenance Windows）と講義側で並べた Run Command を分けて言い、「二つあります」の言い切りも消えた。s11 は SDK integrations を「ラムダのコードから使うエスディーケーとは別の、ステップファンクションズの機能」と区別し、S15 の話は s10 に移った。前回の軽（s02 の矢印の向き、s03 の行名、s05 の「利用できて」、s09 の bullet と図、s10 の「既定」、s12 の Run a Job、s14 の「ドキュメント」の表記、Maintenance Windows の表記）もそろっている。notes の採らなかった理由（S10 に「すぐ」が無い、Step Functions のエラー処理の中身が根拠に無い、executeAwsApi と修復の結び付けが根拠に無い、Standard の統合パターンの一覧が根拠に無い）はどれも sources.md の範囲と合っており妥当。",
+      "suggest": "対応不要（記録として残す）。"
     }
   ]
 }

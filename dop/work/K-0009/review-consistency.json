@@ -1,79 +1,61 @@
 {
-  "slides": [
+ "slides": [
+  {
+   "id": "s04",
+   "issues": [
     {
-      "id": "s03",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "表の列名が「ドキュメントの条件」だが、「取れる間隔 1 分以下」は S2 では must ではなく recommend（勧め）。条件と勧めが同じ列に並ぶ。セルは「勧める」と書いてあるので誤解は小さい。", "suggest": "列名を「ドキュメントの条件と勧め」にするか、間隔の行だけ「（勧め）」と分かるようにする。" }
-      ]
+     "kind": "unsupported",
+     "severity": "軽",
+     "detail": "台本の「コンテナインスタンスは、タスクを動かすイーシーツーインスタンスです」は言い切り。S4 は container instance resources と言うだけで定義は無い。notes では「と考えてください」と弱めて書いたとあるが、この文は弱まっていない（desired count の方だけ弱めてある）。",
+     "suggest": "「コンテナインスタンスは、ここでは、タスクを動かすイーシーツーインスタンスと考えてください」にそろえる。"
     },
     {
-      "id": "s05",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "bullet「100% ではタスクが PENDING」は、S6 の条件「スケールアウトの間（during the scale-out）」を落としている。100% だと常に PENDING になる、と読める。図と台本は「増やす間」と書いている。", "suggest": "「既定の 100% では増やす間 PENDING」にする。" },
-        { "kind": "fact", "severity": "軽", "detail": "図で「ECS 新しいタスク」の箱から「台数を管理」の矢印が Auto Scaling group へ出ており、新しいタスクが台数を管理するように見える。S5 で台数を管理するのは ECS（cluster auto scaling）。", "suggest": "ECS の箱のラベルを「ECS（cluster auto scaling）」にし、「新しいタスク」は PENDING の注記の側へ移す。" },
-        { "kind": "terms", "severity": "軽", "detail": "台本は「クラスターオートスケーリング」と名前を付けるが、画面には出てこない。s13 の表では「cluster auto scaling」が選ぶ方法として出てくる。", "suggest": "s05 の図か bullets に「cluster auto scaling」の語を入れる。" }
-      ]
-    },
-    {
-      "id": "s06",
-      "issues": [
-        { "kind": "fact", "severity": "重", "detail": "Fargate と Fargate Spot を比べる表に、「クラスター: 両方を混ぜて置ける」「strategy: どちらか一方だけ」とある。bullet も「strategy にはどちらか一方」。この流れだと「両方」「どちらか一方」は Fargate と Fargate Spot を指すと読める。S7 が言うのは「Fargate の capacity provider と Auto Scaling group の capacity provider」であり、Fargate と Fargate Spot ではない。台本は正しいので画面と台本も食い違う（mismatch）。受験者が「Fargate と Fargate Spot は一つの strategy に混ぜられない」と誤って覚える。", "suggest": "この 2 行を「Fargate と Auto Scaling group の capacity provider」と明記した別の表か行にする（例: 「クラスター: Fargate と ASG の capacity provider を混ぜて置ける」「strategy: Fargate か ASG のどちらか一方」）。bullet も「strategy に Fargate と ASG は混ぜない」にする。" },
-        { "kind": "terms", "severity": "軽", "detail": "台本は「キャパシティプロバイダー」を説明するが、画面には「capacity provider」の語が無く「strategy」だけ。s14 の表は「capacity provider」を使う。", "suggest": "表の行名を「capacity provider strategy」にする。" }
-      ]
-    },
-    {
-      "id": "s08",
-      "issues": [
-        { "kind": "mismatch", "severity": "中", "detail": "表の「非同期は多く要らない」は、「量が少なくてよい」とも読める。台本と S10 は「非同期の処理には、ふつう provisioned concurrency が要らない（do not usually need）」で、要否の話。", "suggest": "「非同期の処理にはふつう要らない」にする。" }
-      ]
-    },
-    {
-      "id": "s10",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "S13 は REST API の throttling のページ。講義は API Gateway 全般の話として言い切っている。", "suggest": "台本か画面に「REST API の場合」と一言入れる。" }
-      ]
-    },
-    {
-      "id": "s11",
-      "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "画面に「lazy loading」の語が無い（台本だけ）。s15 の表では「lazy loading」が選ぶ方法として出る。", "suggest": "図の ElastiCache の箱か bullet に「lazy loading」を入れる。" },
-        { "kind": "fact", "severity": "軽", "detail": "図で「健全な先だけ」のラベルは T1 への矢印だけにあり、T2 への矢印にはラベルが無い。T2 には健康と関係なく流すように見える。", "suggest": "ラベルを両方の矢印に付けるか、ロードバランサーの箱のラベルを「健全なターゲットにだけ流す」にする。" }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "Global Accelerator の列で、行名「前提」の値が「standard accelerator」。S18 では standard accelerator は前提ではなく、「standard accelerator では」という条件。", "suggest": "行名を「前提・条件」にするか、値を「standard accelerator の場合」にする。" }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        { "kind": "unsupported", "severity": "中", "detail": "条件「ECS の増やし過ぎ」に対して、選ぶ方法が「Service Auto Scaling」。これでは Service Auto Scaling を入れれば増やし過ぎが直る、と読める。S4 が言うのは、Service Auto Scaling が実際に動くタスク数を起点にするので runaway scaling を防ぐ、という仕組みの説明。対策として選ぶ話ではない。", "suggest": "条件を「増やし過ぎを防ぐ仕組み」にして、方法の列を「Service Auto Scaling の起点（実際に動くタスク数）」とする。または仕組みの確認の行として分けて示す。" },
-        { "kind": "flow", "severity": "軽", "detail": "列名は「選ぶ方法」だが、「使用率の指標」「CloudWatch」は方法ではない（指標の種類、サービス名）。", "suggest": "列名を「方法・見る物」にする。" }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        { "kind": "mismatch", "severity": "中", "detail": "タイトルは「第 2 部の後半と第 3 部」だが、台本は「第三部の前半」と言う。s15 は「第 3 部の後半から」で始まるので、タイトルどおりだと第 3 部が重なる。", "suggest": "タイトルを「第 2 部の後半と第 3 部の前半」にする。" },
-        { "kind": "terms", "severity": "軽", "detail": "条件「Fargate と EC2 を併用」。s06 と S7 の言い方は「Auto Scaling group の capacity provider」。", "suggest": "「Fargate と Auto Scaling group（EC2）を併用」にする。" }
-      ]
-    },
-    {
-      "id": "s15",
-      "issues": [
-        { "kind": "fact", "severity": "重", "detail": "条件「近いリージョンで応答」を Route 53 latency と Global Accelerator の両方に当てている。台本でも「利用者に近い所から応答させたいなら」と言う。S17 の Route 53 latency が選ぶのは「待ち時間が最短（lowest latency）」のリージョンで、近さ（地理）ではない。s12 の表もここを分けている。受験者が「近さで選ぶ＝latency routing」と誤って覚えやすい。", "suggest": "条件を「待ち時間の短いリージョン／近いリージョンで応答」に分け、Route 53 は「待ち時間が最短」、Global Accelerator は「最も近いリージョン（standard）」と書き分ける。台本も同じに直す。" },
-        { "kind": "unsupported", "severity": "軽", "detail": "lazy loading の行の「無ければデータストア」は、S16 の「期限切れ（has expired）」を落としている。s11 の図には「無い・期限切れ」とある。", "suggest": "「無い・期限切れならデータストア」にする。" },
-        { "kind": "terms", "severity": "軽", "detail": "bullet の「配置」は、負荷分散・キャッシュ・複数リージョンをまとめて呼んだ語だが、本文には出てこない。", "suggest": "「SQS・API Gateway・ELB・キャッシュ・リージョン」のように、部の名前で書く。" }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        { "kind": "mismatch", "severity": "軽", "detail": "bullet「次は問題集で練習」に当たる台本が無い。", "suggest": "台本の最後に一文足すか、bullet を削る。" }
-      ]
+     "kind": "fact",
+     "severity": "軽",
+     "detail": "図の CloudWatch の箱「届くまで指標もアラームも無い」。S3 は「無い指標にはアラームを作れない」で、bullets・台本もそう言う。図だけ「アラームが無い」になり少しずれる。",
+     "suggest": "「届くまで指標は無く アラームも作れない」にする。"
     }
-  ],
-  "global": []
+   ]
+  },
+  {
+   "id": "s06",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "severity": "軽",
+     "detail": "前回の重（Fargate と Fargate Spot の混同）は表・台本とも「Fargate と Auto Scaling group」に直っている。ただ bullet「strategy に Auto Scaling group を混ぜない」は、何と混ぜないかが画面に無く、「strategy に ASG は入れられない」とも読める。",
+     "suggest": "「strategy に Fargate と ASG を混ぜない」とする。"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "severity": "軽",
+     "detail": "1 行目の確かめる所「使用率・比例・1 分以下」は、s03 で「条件ではなく勧め」と分けた 1 分以下を、条件と同列に並べている。この表の台本は 1 分以下に触れない。",
+     "suggest": "「使用率・比例（1 分以下は勧め）」にするか、1 分以下を外す。"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "issues": [
+    {
+     "kind": "terms",
+     "severity": "軽",
+     "detail": "条件「Auto Scaling group と併用」は、何と併用するか（Fargate）が表に無い。台本は「ファーゲートとオートスケーリンググループの容量を併せて使う」と言う。また s06 の中身が s13（Fargate Spot）と s14（strategy）に分かれ、「第 2 部の前半／後半」の境目が s06 の中にある。",
+     "suggest": "条件を「Fargate と ASG を併用」にする。タイトルの前半・後半はそのままでよいが、気になるなら Fargate Spot の行を s14 に移す。"
+    }
+   ]
+  }
+ ],
+ "global": [
+  {
+   "severity": "軽",
+   "detail": "前回の重・中 5 件（s06 の Fargate／ASG、s08 の「ふつう要らない」、s13 の Service Auto Scaling の行、s14 のタイトル、s15 の Route 53 latency と Global Accelerator の書き分け）はすべて直っている。s12・s15 の書き分けは S17（lowest latency・レコードの値）と S18（AWS global network・nearest Region）に合う。notes の採らなかった理由（根拠に無い言い換えを避けた）は妥当。新しい重・中は見当たらない。",
+   "suggest": "上の軽だけ、余裕があれば直す。"
+  }
+ ]
 }

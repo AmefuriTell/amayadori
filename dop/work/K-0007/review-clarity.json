@@ -1,137 +1,13 @@
 {
   "slides": [
     {
-      "id": "s01",
-      "issues": [
-        {
-          "kind": "visual",
-          "severity": "中",
-          "detail": "地図が縦一列に 5 つの箱を積んだ極端に縦長の図（約 500x3000）で、横長のスライドに収めると文字がとても小さくなり読めない。",
-          "suggest": "5 つのまとまりを横一列（または 3+2 の 2 段）に並べ直す。各箱の説明は 1 行に縮める。"
-        },
-        {
-          "kind": "visual",
-          "severity": "軽",
-          "detail": "「複雑な処理」は Step Functions のアイコンだけで Lambda のアイコンが無い。「State Manager ほかの実行方法と比べる」は機能の説明になっておらず、比べる相手（Maintenance Windows・Run Command）も地図に出てこない。",
-          "suggest": "Lambda の箱を Step Functions と並べて置く。State Manager の説明を「決めた状態を保つ（Maintenance Windows・Run Command と比べる）」に言い換える。"
-        }
-      ]
-    },
-    {
-      "id": "s02",
-      "issues": [
-        {
-          "kind": "jargon",
-          "severity": "軽",
-          "detail": "「組み込みの道具」「ソフトウェアの方針」が何を指すか分からない。",
-          "suggest": "「方針」は「自分たちが決めた、入っているべきソフトウェアと設定」と一度言い換える。「組み込みの道具」は「Systems Manager に用意された調べる道具」など、どこの道具かを添える。"
-        }
-      ]
-    },
-    {
-      "id": "s03",
-      "issues": [
-        {
-          "kind": "leap",
-          "severity": "中",
-          "detail": "比べる表の「時間の軸」の行で、Inventory 側が「更新が要るか」になっていて、時間の軸の比較になっていない。Inventory にも履歴の機能があるかのように読め、AWS Config との違い（履歴を追えるのは Config）がぼやける。",
-          "suggest": "行名を「過去が分かるか」にし、Inventory 側は「—（今の状態を調べる）」、Config 側は「過去の構成と変化」とする。「更新が要るか」は「分かる事」の行へ移す。"
-        }
-      ]
-    },
-    {
-      "id": "s04",
-      "issues": [
-        {
-          "kind": "leap",
-          "severity": "中",
-          "detail": "方法が 3 つと言いながら、台本は patch policy しか説明せず、maintenance window と Patch now は表にあるだけ。いつ maintenance window を選び、いつ Patch now を選ぶのかが耳では分からない。表も patch policy が 3 行を占め、3 つを並べて比べる形になっていない。",
-          "suggest": "表を「方法 / いつ使う」の 3 行に組み直す（patch policy: 1 つのポリシーで複数アカウント・リージョン、maintenance window: 実行の時間帯を決める、Patch now: その場で）。台本でも 3 つを一文ずつ言う。"
-        },
-        {
-          "kind": "leap",
-          "severity": "軽",
-          "detail": "ここの maintenance window と s07 の Maintenance Windows（機能）が同じ物だと結び付かない。",
-          "suggest": "s04 で「時間帯を決める機能は、あとで State Manager と比べます」と一言予告する。"
-        }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        {
-          "kind": "listen",
-          "severity": "軽",
-          "detail": "冒頭「パッチの準拠、つまりコンプライアンスの考え方」の「コンプライアンス」が、s08 の機能名 Compliance と耳では区別できない。",
-          "suggest": "冒頭は「パッチの準拠、つまり、決めたパッチが入っているかの考え方です」とし、「コンプライアンス」は s08 の機能名だけに使う。"
-        }
-      ]
-    },
-    {
-      "id": "s06",
-      "issues": [
-        {
-          "kind": "visual",
-          "severity": "中",
-          "detail": "association の箱が State Manager とも SSM document ともつながらず浮いている。「使う」と「割り当てる」の矢印が交差し、association・document・ノードの関係（何が何を使って何に割り当てられるのか）が図から読めない。",
-          "suggest": "State Manager → association（保ちたい状態・日程・対象）→ 管理対象のノード を縦の一本の流れにし、SSM document は association の横に「使う」で付ける。Automation は脇に分けて「ノード以外のリソース」と書く。"
-        },
-        {
-          "kind": "leap",
-          "severity": "軽",
-          "detail": "台本で association を説明した後に document が出てくるため、association が何を使って状態を保つのかの順が逆になっている。bullet「ほかのリソースは Automation と」も短すぎて意味が取れない。",
-          "suggest": "document の説明を association の前に移す。bullet は「ノード以外のずれ → Automation と一緒に」に言い換える。"
-        }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        {
-          "kind": "exam",
-          "severity": "重",
-          "detail": "Maintenance Windows を「急ぎの作業を時間内に」「急ぎで時間が大事な作業」と言っている。根拠の high-priority, time-sensitive は「優先度が高く、行う時刻が大事」であり、「急ぎ」と覚えると「すぐ実行したい」問題で Maintenance Windows を選ぶ誤りにつながる（すぐなら Run Command や Patch now）。",
-          "suggest": "「急ぎ」をやめ「止まる恐れがあり、行う時刻を決めておきたい作業」「優先度が高く時刻が大事な作業を、決めた時間帯に」と言い換える。表の「選ぶ時」も「時間帯を決めて行う」にする。"
-        },
-        {
-          "kind": "visual",
-          "severity": "軽",
-          "detail": "表の Maintenance Windows の「例に挙がる事」が「OS のパッチ・ソフト導入」、台本では「パッチやドライバーの更新」で、画面と耳で例が違う。",
-          "suggest": "表と台本の例をそろえる（例: OS のパッチ・ドライバーの更新）。"
-        }
-      ]
-    },
-    {
-      "id": "s08",
-      "issues": [
-        {
-          "kind": "leap",
-          "severity": "軽",
-          "detail": "「スキャンして調べる」と「Patch Manager と State Manager のデータを表示する」の関係が分からず、Compliance が自分で調べるのか、ほかの機能の結果を集めるのかがあいまい。",
-          "suggest": "「既定では、Patch Manager と State Manager の 2 つの結果を、一か所にまとめて見せる」を先に言い、スキャンの話はその後に置く。"
-        }
-      ]
-    },
-    {
       "id": "s09",
       "issues": [
         {
           "kind": "visual",
-          "severity": "中",
-          "detail": "AWS Config Rules と Automation のドキュメントの間に線が無く、「Config が Automation の文書を使って直す」という一番言いたいつながりが図に無い。Automation が勝手に修復しているように見える。",
-          "suggest": "AWS Config Rules →（合わないと評価）→ ルールに合わないリソース、AWS Config →（修復に使う）→ Automation のドキュメント →（修復する）→ リソース、の一本の流れに描き直す。executeAwsApi は Automation の下に小さく添える。"
-        },
-        {
-          "kind": "listen",
-          "severity": "中",
-          "detail": "「エーダブリューエスエグゼキュートエーダブリューエスエーピーアイ」は耳で一語として追えない。",
-          "suggest": "先に「AWS の API を呼び出すアクション」と役目を言い、名前は「エグゼキュート・エーダブリューエス・エーピーアイ、という名前です」と区切って後から添える。"
-        },
-        {
-          "kind": "exam",
           "severity": "軽",
-          "detail": "executeAwsApi が試験の判断で何のために出てくるのか（なぜ紹介するのか）が分からない。",
-          "suggest": "「Automation から AWS の API を直接呼べるので、修復の中身を API の操作として書ける」と、修復とのつながりで一言述べる。"
+          "detail": "図で AWS Config Rules と AWS Config（修復を適用）が別々の箱で、間に線が無い。「Rules が合わないと評価した物を、Config が Automation のドキュメントで直す」という順番は台本で分かるが、図だけだと二つの流れが並んでいるように見える。",
+          "suggest": "AWS Config Rules から AWS Config へ「合わない物を渡す」などの線を 1 本足すか、ルールに合わないリソースの箱を真ん中に置き、左から評価、右から修復の矢印が入る形にする。"
         }
       ]
     },
@@ -139,22 +15,10 @@
       "id": "s10",
       "issues": [
         {
-          "kind": "listen",
-          "severity": "中",
-          "detail": "待つ時間を「画面の表のとおりです」で済ませており、耳だけでは 1 分・2 分が分からない。",
-          "suggest": "台本で「一回目と二回目の間に一分、二回目と三回目の間に二分待ちます」と読み上げる。"
-        },
-        {
           "kind": "leap",
-          "severity": "中",
-          "detail": "「待つ時間は表のとおりです。そのため…重複したイベントを扱えるように」と続き、待つ時間が理由で重複に備えるように聞こえる。再試行で同じイベントが何度も届き得るから、というつながりが言われていない。",
-          "suggest": "重複の話を再試行の直後に移し、「再試行で同じイベントがもう一度届く事があるので」と、すでに述べた再試行を理由として言い直す。"
-        },
-        {
-          "kind": "jargon",
           "severity": "軽",
-          "detail": "「同時実行の余裕」が説明なしで出る。",
-          "suggest": "「同時に動かせる関数の数に余裕を持つ」と言い換える。"
+          "detail": "最後の「なお、ラムダは、多くのプログラミング言語向けのエスディーケーと一緒に使えます」が、非同期の呼び出しの失敗の話と無関係に置かれ、なぜここで言うのかが分からない。エスディーケーが何かの説明も無い。",
+          "suggest": "「次のステップファンクションズの話と区別するため、先に言っておきます。ラムダの関数のコードからは、言語ごとのエスディーケー、つまり AWS を呼ぶための部品を使えます」のように、置く理由を一言添える。"
         }
       ]
     },
@@ -162,78 +26,10 @@
       "id": "s11",
       "issues": [
         {
-          "kind": "leap",
-          "severity": "中",
-          "detail": "冒頭で「Step Functions はより凝ったエラーの扱い」と言い、bullet にも「複雑な流れのエラー処理」とあるのに、その後エラーの扱いについて何も出てこず、図にも無い。なぜ Lambda だけでなく Step Functions を使うのかが宙に浮く。",
-          "suggest": "冒頭の対比を「複雑な流れ（何段もの処理）のエラーは Step Functions で扱う」と結論として言い切り、図の Step Functions の箱に「流れ全体のエラーの扱い」と添える。"
-        },
-        {
-          "kind": "jargon",
-          "severity": "中",
-          "detail": "Optimized integrations を「対応するサービスを使うための独自の選択肢」としか言っておらず、SDK integrations との違いが分からない。bullet「Optimized integrations」は名前だけ。",
-          "suggest": "図で SDK integrations と Optimized を左右に並べ、「SDK: ほぼ全サービスの API を直接 / Optimized: 一部のサービス向けに、使いやすい選択肢が足してある」と対にして書く。bullet も「Optimized → 一部のサービス向けの選択肢」にする。"
-        },
-        {
-          "kind": "leap",
-          "severity": "中",
-          "detail": "最後の「SDK は多くのプログラミング言語向けにあり…」は Step Functions の AWS SDK integrations と別の話で、受験者が両者を同じ物と取り違える。",
-          "suggest": "この一文はこのスライドから外す（Lambda の関数のコードから AWS を呼ぶ話として s10 側に置くか、「関数のコードから使う SDK とは別の、Step Functions の機能名です」と区別を明示する）。"
-        }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        {
-          "kind": "jargon",
-          "severity": "中",
-          "detail": "Run a Job が台本の終わりにだけ出て、表には「Request Response ほか」としか無い。s15 では「Run a Job（.sync）」として選ぶ方法になるが、.sync はどこでも説明されていない。",
-          "suggest": "表の「統合のパターン」を、Request Response（応答が来たら次へ）と Run a Job（.sync、完了を待って次へ）の 2 行に分け、Standard / Express のどちらで使えるかを書く（Standard の欄は根拠の範囲で）。.sync は「Run a Job の目印」と一度言う。"
-        },
-        {
           "kind": "exam",
           "severity": "軽",
-          "detail": "表の Standard の「実行の回数」が「—」で、受験者には「Standard も 2 回動き得るのか不明」と読める。",
-          "suggest": "比べたいのは Express の at-least-once なので、行を「注意点」とし、Express 側だけ「1 つの実行が 2 回以上動き得る」と書く。"
-        }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        {
-          "kind": "exam",
-          "severity": "中",
-          "detail": "s04 で 3 つの方法と言ったのに、表に maintenance window の行が無く、「パッチを時間帯を決めて当てる」場合の判断が覆われていない。patch policy・maintenance window・Patch now の選び分けが表から作れない。",
-          "suggest": "「パッチを決めた時間帯に当てる → maintenance window」の行を足し、パッチの 3 行を並べて置く。"
-        }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        {
-          "kind": "exam",
-          "severity": "重",
-          "detail": "s07 と同じく「急ぎの作業を時間帯に」「止まる恐れのある急ぎの作業」と言っており、Maintenance Windows を「すぐ実行する」物と誤って覚えさせる。",
-          "suggest": "「止まる恐れがあり、時刻を決めて行いたい作業 → Maintenance Windows」と言い換え、「すぐ一度だけ → Run Command」と並べて対比させる。"
-        },
-        {
-          "kind": "jargon",
-          "severity": "軽",
-          "detail": "「確かめる所」の「既定で 2 つのデータ」「他は Automation と」が略しすぎで意味が取れない。",
-          "suggest": "「Patch Manager と State Manager の結果」「ノード以外は Automation と一緒に」と書く。"
-        }
-      ]
-    },
-    {
-      "id": "s15",
-      "issues": [
-        {
-          "kind": "exam",
-          "severity": "軽",
-          "detail": "s11 で出た Optimized integrations が表に無く、SDK integrations との選び分けが残らない。最初の行の「選ぶ方法: 再試行と送り先」は方法の名前になっていない。",
-          "suggest": "s11 の言い換えに合わせ、Optimized を入れるか、s11 から外して講義全体でそろえる。1 行目は「Lambda の既定の再試行＋失敗の送り先」とする。"
+          "detail": "SDK integrations と Optimized integrations の対は図・bullet で並んだが、問題文でどちらを選ぶかの手掛かりは無く、s15 の表にも SDK integrations しか無い。notes のとおり根拠と行数の制約によるもので、誤って覚える恐れは小さい。",
+          "suggest": "台本の最後に「この講義の表では、流れから直接 API を呼ぶ場面だけを扱います」と一言添えて、Optimized を覚える対象から外す事を明示する。"
         }
       ]
     },
@@ -242,9 +38,9 @@
       "issues": [
         {
           "kind": "visual",
-          "severity": "中",
-          "detail": "s01 と同じく縦一列の極端に縦長な図で、スライドに収めると読めない。「既定で 2 つのデータ」は何の 2 つか図だけでは分からない。",
-          "suggest": "s01 と同じく横並びに作り直し、Compliance の説明は「パッチと association の準拠を一か所で」とする。"
+          "severity": "軽",
+          "detail": "「5 複雑な処理」の箱は Step Functions のアイコンだけで、ラベルの「Lambda の再試行」と絵が合わない（s01 も同じ）。notes のとおり箱の上限による。",
+          "suggest": "ラベルを「Lambda の再試行 → Step Functions の Standard と Express」と流れが分かる書き方にする程度でよい。"
         }
       ]
     }
@@ -252,13 +48,8 @@
   "global": [
     {
       "severity": "軽",
-      "detail": "台本の長い英語名のカタカナ読み（エーダブリューエスコンフィグ、エーダブリューエスエスディーケー など）が続き、耳で区切りが取りにくい。",
-      "suggest": "2 回目以降は「コンフィグ」「エスディーケー」と短い呼び方にそろえ、初出だけ中黒で区切った読み（エーダブリューエス・コンフィグ）にする。"
-    },
-    {
-      "severity": "軽",
-      "detail": "maintenance window（s04・s13）と Maintenance Windows（s07・s14）、ドキュメント・文書・SSM document が混在し、同じ物か初学者には分からない。",
-      "suggest": "画面の表記を 1 つにそろえ、初出で「SSM document（Systems Manager のドキュメント）」と結び付ける。"
+      "detail": "前回の重 2 つ（s07・s14 の「急ぎ」）は直っている。s07 は「優先度が高く、行う時刻が大事な作業を、決めた時間帯に」「急ぎという意味ではなく、時刻を決めておく」と言い、s04・s13・s14 も「時刻・時間帯を決めて」でそろった。前回の中 14 も直っている: 地図（s01・s16）は 5 つのまとまりを番号付きで横に並べ読める大きさになった。s03 の行名、s04 の 3 つの方法、s06 の図と説明の順、s09 の図と読み上げ、s10 の待つ時間と重複の理由、s11 の結論・Optimized の対比・SDK の区別、s12 の Run a Job（.sync）、s13 の Maintenance Windows の行が入り、条件の表（s13〜s15）は本文の判断（Inventory・Config・パッチ 3 方法・State Manager・Maintenance Windows・Run Command・Compliance・Config の修復・Lambda の再試行・SDK integrations・Standard・Express・Run a Job）を覆っている。notes の採らなかった理由（箱の上限、根拠に無い中身、中黒が読み上げで崩れる）も妥当。",
+      "suggest": "対応不要（記録として残す）。"
     }
   ]
 }
