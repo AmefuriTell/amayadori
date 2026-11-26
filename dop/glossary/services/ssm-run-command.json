@@ -1,0 +1,57 @@
+{
+  "id": "ssm-run-command",
+  "name": "AWS Systems Manager Run Command",
+  "aliases": [
+    "AWS Systems Manager Run Command"
+  ],
+  "reading": "ランコマンド",
+  "status": "verified",
+  "created": "2026-11-26",
+  "summary": "Systems Manager で管理するサーバー（マネージドノード。EC2 インスタンスや、設定済みの EC2 以外のマシン）の構成を、離れた所から安全に管理する Systems Manager の機能。決まった管理の作業や 1 回きりの構成の変更を、多くのノードにまとめて行える。",
+  "features": [
+    {
+      "title": "1 回きりの変更をまとめて",
+      "text": "よくある管理の作業を自動にし、1 回きりの構成の変更を多くのノードに対して行える。",
+      "source_id": "S5"
+    },
+    {
+      "title": "同時実行の数（max-concurrency）",
+      "text": "同時にコマンドを実行するノードの数を max-concurrency で決める。",
+      "source_id": "S7"
+    },
+    {
+      "title": "エラーの上限（max-errors）",
+      "text": "何件のエラーまで許すかを max-errors で決め、超えるとそれ以上のノードへのコマンドの送信を止める。",
+      "source_id": "S8"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "数百・数千台に送る時に、同時に処理するノードの数と、取り消すまでに許すエラーの数を決めて、誤った変更の影響を抑える方法を押さえる。",
+      "source_id": "S6"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+      "source_id": "S5",
+      "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-multiple",
+      "source_id": "S6",
+      "quote": "You can limit how many nodes process a request simultaneously and how many errors can occur before the command is canceled."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+      "source_id": "S7",
+      "quote": "You can control the number of managed nodes that run a command simultaneously by using the max-concurrency parameter"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+      "source_id": "S8",
+      "quote": "The parameter specifies how many errors are allowed before the system stops sending the command to additional managed nodes."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
