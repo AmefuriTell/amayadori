@@ -1,0 +1,67 @@
+{
+  "task": "4.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.3-0011",
+  "services": [
+    "AWS Config",
+    "AWS Systems Manager Automation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS Config rule uses automatic remediation with a Systems Manager Automation document. The remediation occasionally fails because of short-lived errors, and the affected resources stay noncompliant until an engineer notices. The company wants failed remediations to be tried again automatically within a few minutes and wants to see the detailed status of each remediation run. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "AWS Config のルールが、Systems Manager Automation のドキュメントで自動修復を行っています。修復は短い間のエラーでときどき失敗し、エンジニアが気づくまで対象のリソースは準拠していないままになります。会社は、失敗した修復を数分以内に自動でやり直し、各修復の実行の詳しい状態を見たいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Change the rule to manual remediation, and have an engineer start the remediation when a resource is noncompliant.",
+      "text_ja": "ルールを手動の修復に変え、リソースが準拠していない時にエンジニアが修復を始める。"
+    },
+    {
+      "key": "B",
+      "text": "Set retries and a time period for the automatic remediation, such as 5 retries in 300 seconds, and check DescribeRemediationExecutionStatus for details.",
+      "text_ja": "自動修復にやり直しの回数と期間（例えば 300 秒で 5 回）を設定し、詳細は DescribeRemediationExecutionStatus で確かめる。"
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that runs every minute, finds failed remediations, and starts the Automation document again.",
+      "text_ja": "毎分動いて失敗した修復を探し、Automation のドキュメントを再び始める AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "D",
+      "text": "Delete and re-create the AWS Config rule every hour so that all resources are evaluated and remediated again.",
+      "text_ja": "すべてのリソースが評価・修復し直されるよう、AWS Config のルールを 1 時間ごとに消して作り直す。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "自動修復の後もリソースが準拠していない時は、やり直しの回数と秒数を入れて、ルールに自動修復をやり直させられます。やり直しは修復が失敗した時だけ、決めた期間の中で行われます（例: 300 秒で 5 回）。DescribeRemediationExecutionStatus は、修復の実行の状態や手順の時刻、失敗した手順のエラーを詳しく示します。",
+    "per_choice": {
+      "A": "手作業が増え、自動でやり直す要件に反します。",
+      "B": "正しい。組み込みのやり直しで短い間のエラーをしのぎ、API で実行の状態を確かめられます。",
+      "C": "動きますが、組み込みの機能で済む仕組みを自分で作って保守することになります。",
+      "D": "手間が大きく、作り直しの間は評価も修復も止まります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+      "source_id": "S1",
+      "quote": "If a resource is still noncompliant after auto remediation, you can set the rule to try auto remediation again. Enter the desired retries and seconds."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+      "source_id": "S1",
+      "quote": "Retries only occur if remediation fails and work within the specified time period; for example, 5 retries in 300 seconds."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+      "source_id": "S2",
+      "quote": "DescribeRemediationExecutionStatus, provides a detailed view of a Remediation Execution for a set of resources"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

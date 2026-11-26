@@ -1,0 +1,67 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0013",
+  "services": [
+    "AWS Config",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company with 150 accounts in AWS Organizations wants the same set of AWS Config rules in every account, including accounts that join the organization later, with a few sandbox accounts excluded. AWS Config recording is already on in all accounts. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "AWS Organizations に 150 のアカウントを持つ会社は、後から組織に入るアカウントも含め、いくつかのサンドボックスのアカウントを除くすべてのアカウントに同じ一組の AWS Config ルールを置きたいと考えています。AWS Config の記録はすべてのアカウントで既に有効です。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use PutOrganizationConfigRule from the management account or a delegated administrator, and list the sandbox accounts as excluded accounts.",
+      "text_ja": "管理アカウントか委任管理者から PutOrganizationConfigRule を使い、サンドボックスのアカウントを除外するアカウントとして指定する。"
+    },
+    {
+      "key": "B",
+      "text": "Create an AWS Config aggregator for the organization and deploy the rules to the source accounts through the aggregator.",
+      "text_ja": "組織の AWS Config アグリゲーターを作り、アグリゲーターを通して送り元のアカウントへルールをデプロイする。"
+    },
+    {
+      "key": "C",
+      "text": "Ask each account owner to create the rules in their own account, and send the list of rules to new accounts when they join.",
+      "text_ja": "各アカウントの所有者が自分のアカウントでルールを作り、新しいアカウントが入った時にはルールの一覧を送る。"
+    },
+    {
+      "key": "D",
+      "text": "Write an AWS Lambda function that runs daily, finds accounts without the rules, and creates the rules in each one.",
+      "text_ja": "毎日動き、ルールが無いアカウントを探して、それぞれにルールを作る AWS Lambda 関数を書く。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "AWS Config では、組織のすべてのアカウントの Config ルールを中央で作成・更新・削除でき、共通のルールを配りつつ、作らないアカウントを指定できます。新しいアカウントが組織に入ると、ルールはそのアカウントにもデプロイされます。組織のルールは API か CLI で作ります。",
+    "per_choice": {
+      "A": "正しい。1 か所から全アカウントへ配り、除外も指定でき、新しいアカウントにも自動で配られます。",
+      "B": "アグリゲーターは送り元のアカウントを読むだけの仕組みで、アグリゲーターを通してルールをデプロイすることはできません。",
+      "C": "手作業が多く、ルールがそろう保証もありません。",
+      "D": "動きますが、独自の関数を保守する必要があります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment",
+      "source_id": "S1",
+      "quote": "Deploy a common set of AWS Config rules across all accounts and specify accounts where AWS Config rules should not be created."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations",
+      "source_id": "S2",
+      "quote": "If a new account joins an organization, the rule or conformance pack is deployed to that account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+      "source_id": "S5",
+      "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

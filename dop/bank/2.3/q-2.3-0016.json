@@ -1,0 +1,67 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0016",
+  "services": [
+    "AWS Systems Manager Inventory",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security advisory lists a vulnerable version of a third-party agent. The company runs 2,000 managed nodes and must quickly find which nodes have that version installed, and must keep doing this check for future advisories. The company does not want to log in to nodes or write collection scripts. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "セキュリティの勧告が、サードパーティのエージェントの脆弱なバージョンを挙げています。会社は 2,000 台のマネージドノードを動かしており、どのノードにそのバージョンが入っているかを素早く見つけ、今後の勧告でも同じ確認を続ける必要があります。会社は、ノードにログインしたり収集のスクリプトを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use Patch Manager compliance reports to find which nodes have the vulnerable agent version installed.",
+      "text_ja": "Patch Manager の準拠のレポートで、脆弱なエージェントのバージョンが入ったノードを探す。"
+    },
+    {
+      "key": "B",
+      "text": "Write a Run Command script that lists installed software on each node and writes the output to a bucket for analysts to search.",
+      "text_ja": "各ノードの入っているソフトウェアを一覧して出力をバケットに書くスクリプトを Run Command で作り、分析担当が探す。"
+    },
+    {
+      "key": "C",
+      "text": "Use Systems Manager Inventory to collect metadata from the nodes into a central Amazon S3 bucket, and query it with the built-in tools.",
+      "text_ja": "Systems Manager Inventory でノードのメタデータを中央の Amazon S3 バケットに集め、組み込みのツールでクエリする。"
+    },
+    {
+      "key": "D",
+      "text": "Have engineers sign in to each node and check the agent version by hand.",
+      "text_ja": "エンジニアが各ノードにサインインし、エージェントのバージョンを手作業で確かめる。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Systems Manager Inventory は、マネージドノードからメタデータを集めて、AWS の環境を見えるようにします。集めたメタデータを中央の S3 バケットに保存し、組み込みのツールでクエリすれば、どのノードが決まったソフトウェアや構成を動かしているか、どのノードを更新する必要があるかを素早く見分けられます。",
+    "per_choice": {
+      "A": "Patch Manager の準拠は、パッチベースラインで承認したパッチが入っているかを示すもので、サードパーティのエージェントのバージョンを探す仕組みではありません。",
+      "B": "動きますが、収集のスクリプトを書いて保守することになり、要件に反します。",
+      "C": "正しい。スクリプト無しでメタデータを集め、今後の勧告でも同じクエリで確かめられます。",
+      "D": "2,000 台への手作業は時間がかかり、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+      "source_id": "S8",
+      "quote": "You can use Inventory to collect metadata from your managed nodes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+      "source_id": "S8",
+      "quote": "use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance",
+      "source_id": "S2",
+      "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

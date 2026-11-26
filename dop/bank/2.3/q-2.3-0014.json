@@ -1,0 +1,66 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0014",
+  "services": [
+    "AWS Systems Manager Patch Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company's security policy says that critical operating system updates must be applied, but only after they have been publicly released for one week, so that the company can watch for problems reported by others. New critical updates are released several times each month. Which solution meets this requirement with the LEAST operational effort?",
+  "stem_ja": "ある会社のセキュリティのポリシーでは、OS の重要な更新を適用する必要がありますが、ほかの人が報告する問題を見られるよう、公開されてから 1 週間たった後にだけ適用することになっています。新しい重要な更新は毎月何度も公開されます。運用の手間が最も少なくこの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Edit the predefined patch baseline so that it waits 7 days before approving critical updates.",
+      "text_ja": "事前定義のパッチベースラインを編集し、重要な更新を承認する前に 7 日待つようにする。"
+    },
+    {
+      "key": "B",
+      "text": "Create a custom patch baseline with an approval rule for critical updates that uses an auto-approval delay of 7 days.",
+      "text_ja": "重要な更新の承認ルールで 7 日の自動承認の遅延を使う、独自のパッチベースラインを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Create a custom patch baseline with an approval rule that uses a fixed patch approval cutoff date, and update the date by hand every week.",
+      "text_ja": "決まったパッチ承認の締め切り日を使う承認ルールの独自のパッチベースラインを作り、その日付を毎週手作業で更新する。"
+    },
+    {
+      "key": "D",
+      "text": "Have an engineer review new critical updates every week and approve each one by hand.",
+      "text_ja": "エンジニアが毎週新しい重要な更新を確かめ、1 つずつ手作業で承認する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "独自のパッチベースラインでは、どのパッチを承認するかをより細かく決められ、承認ルールごとに自動承認の遅延か承認の締め切り日を指定できます。自動承認の遅延は、パッチが公開されてから自動で承認されるまで待つ日数です。事前定義のベースラインはそのまま使うもので、変えられません。",
+    "per_choice": {
+      "A": "事前定義のパッチベースラインは変えられません。",
+      "B": "正しい。公開から 7 日たった重要な更新が、手作業無しで自動で承認されます。",
+      "C": "締め切り日を毎週手作業で動かす必要があり、手間がかかります。",
+      "D": "毎週の手作業が必要です。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+      "source_id": "S5",
+      "quote": "An auto-approval delay is the number of days to wait after the patch was released or last updated, before the patch is automatically approved for patching."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#patch-manager-predefined-and-custom-patch-baselines",
+      "source_id": "S3",
+      "quote": "You can use these baselines as they are currently configured (you can't customize them) or you can create your own custom patch baselines."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+      "source_id": "S5",
+      "quote": "For each approval rule that you create, you can choose to specify an auto-approval delay or specify a patch approval cutoff date."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

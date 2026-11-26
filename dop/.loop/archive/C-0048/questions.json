@@ -1,0 +1,145 @@
+{
+  "item": "C-0048",
+  "questions": [
+    {
+      "task": "4.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.1-0005",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Data Firehose"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company created an account-level subscription filter policy that sends all log groups to Amazon Data Firehose for central processing. Soon afterward, CloudWatch Logs ingestion charges rose sharply because log groups that receive logs from the delivery workflow's own resources were also being subscribed, causing a recursive loop. Which change will MOST effectively stop the loop while keeping the central processing?",
+      "stem_ja": "ある会社は、すべてのロググループを中央で処理するため Amazon Data Firehose へ送るアカウントレベルのサブスクリプションフィルターのポリシーを作りました。その後すぐ、配信の仕組み自身のリソースからログを受け取るロググループまで対象になり、再帰のループが起きて、CloudWatch Logs の取り込みの料金が急に上がりました。中央の処理を続けながら、ループを最も効果的に止める変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add selection criteria to the account-level policy that exclude log groups which ingest logs from resources in the delivery workflow.",
+          "text_ja": "アカウントレベルのポリシーに、配信の仕組みのリソースからログを取り込むロググループを除外する選択の条件を足す。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the Firehose buffer size and buffer interval so that fewer deliveries are made.",
+          "text_ja": "配信の回数が減るよう、Firehose のバッファーのサイズと間隔を大きくする。"
+        },
+        {
+          "key": "C",
+          "text": "Delete the account-level policy and ask each team to create its own log group subscription filters.",
+          "text_ja": "アカウントレベルのポリシーを消し、各チームに自分のロググループのサブスクリプションフィルターを作ってもらう。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on decompression in Firehose so that the logs are smaller when they are delivered.",
+          "text_ja": "配信の時にログが小さくなるよう、Firehose で解凍の機能を有効にする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "サブスクリプションフィルターでは、再帰のループが起きて取り込みの料金が大きく増えることがあります。これを防ぐには、アカウントレベルのサブスクリプションフィルターの選択の条件で、配信の仕組みに含まれるリソースからログを取り込むロググループを除外することが勧められています。",
+        "per_choice": {
+          "A": "正しい。ループのもとになるロググループだけを外し、ほかのロググループの中央の処理は続けられます。",
+          "B": "配信の回数は減っても、ループで取り込まれるログの量は減りません。",
+          "C": "ループは止まりますが、中央でまとめて処理する仕組みが崩れ、各チームの手間が増えます。",
+          "D": "解凍してもループは止まらず、取り込みの料金も減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "source_id": "S7",
+          "quote": "There is a risk of causing an infinite recursive loop with subscription filters that can lead to a large increase in ingestion billing if not addressed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "source_id": "S7",
+          "quote": "we recommend that you use selection criteria in your account-level subscription filters to exclude log groups that ingest log data from resources that are part of the subscription delivery workflow."
+        }
+      ]
+    },
+    {
+      "task": "4.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.1-0006",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon OpenSearch Service",
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team wants to stream logs from a CloudWatch Logs log group to an Amazon OpenSearch Service domain that uses VPC access. The streaming setup uses a Lambda function that writes to the domain, but the function cannot reach the domain endpoint. Which actions should a DevOps engineer take to make the streaming work? (Choose TWO.)",
+      "stem_ja": "あるチームは、CloudWatch Logs のロググループのログを、VPC アクセスを使う Amazon OpenSearch Service のドメインへ流したいと考えています。流す仕組みはドメインへ書き込む Lambda 関数を使いますが、関数がドメインのエンドポイントに届きません。流せるようにするために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use a Lambda execution role that trusts lambda.amazonaws.com and has the AWSLambdaVPCAccessExecutionRole policy attached.",
+          "text_ja": "lambda.amazonaws.com を信頼し、AWSLambdaVPCAccessExecutionRole ポリシーをアタッチした Lambda の実行ロールを使う。"
+        },
+        {
+          "key": "B",
+          "text": "Make sure that the source log group uses the Standard log class.",
+          "text_ja": "送り元のロググループが Standard のログクラスを使っていることを確かめる。"
+        },
+        {
+          "key": "C",
+          "text": "Change the existing OpenSearch Service domain from VPC access to public access.",
+          "text_ja": "既存の OpenSearch Service のドメインを、VPC アクセスからパブリックアクセスへ変える。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on gzip compression for the subscription so that the data fits through the VPC.",
+          "text_ja": "データが VPC を通れるよう、サブスクリプションで gzip の圧縮を有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Add logs.amazonaws.com to the trust relationship of the Lambda execution role instead of lambda.amazonaws.com.",
+          "text_ja": "Lambda の実行ロールの信頼関係に、lambda.amazonaws.com の代わりに logs.amazonaws.com を入れる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "OpenSearch Service へ流す時、Lambda の実行ロールは信頼関係に lambda.amazonaws.com を持つ必要があり、VPC アクセスのドメインでは AWSLambdaVPCAccessExecutionRole ポリシーが要ります。このポリシーが、Lambda が VPC の中の OpenSearch のエンドポイントへ書き込めるようにします。また、OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+        "per_choice": {
+          "A": "正しい。Lambda が VPC に入り、ドメインのエンドポイントへ書き込めるようになります。",
+          "B": "正しい。OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+          "C": "ドメインを作った後に、アクセスの種類は変えられません。",
+          "D": "サブスクリプションで送るログはもともと gzip で圧縮されており、届かない問題の原因ではありません。",
+          "E": "実行ロールの信頼関係には lambda.amazonaws.com が必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "source_id": "S6",
+          "quote": "It must have lambda.amazonaws.com in the trust relationship."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "source_id": "S6",
+          "quote": "This Amazon-managed policy grants Lambda access to the customer's VPC, enabling Lambda to write to the OpenSearch endpoint in the VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream",
+          "source_id": "S4",
+          "quote": "Streaming to OpenSearch Service is supported only for log groups in the Standard log class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Domain",
+          "source_id": "S5",
+          "quote": "The domain can have either public access or VPC access, but you can't then modify the type of access after the domain is created."
+        }
+      ]
+    }
+  ]
+}

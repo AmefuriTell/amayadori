@@ -1,0 +1,67 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0013",
+  "services": [
+    "AWS Systems Manager Patch Manager",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company with 40 accounts in AWS Organizations runs managed nodes in four Regions. The company wants one central patching configuration for all of them, with a daily scan for missing patches and a separate weekly schedule for installing patches. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "AWS Organizations に 40 のアカウントを持つ会社が、4 つのリージョンでマネージドノードを動かしています。会社は、すべてに対する 1 つの中央のパッチ適用の設定を求めており、足りないパッチの毎日のスキャンと、パッチのインストールの別の毎週のスケジュールを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create one Patch Manager patch policy in Quick Setup for the organization, with separate scan and install schedules.",
+      "text_ja": "組織に対して Quick Setup で Patch Manager のパッチポリシーを 1 つ作り、スキャンとインストールのスケジュールを別々に決める。"
+    },
+    {
+      "key": "B",
+      "text": "Create a maintenance window in each account and Region, and register a patching task with the scan and install schedules.",
+      "text_ja": "各アカウントとリージョンでメンテナンスウィンドウを作り、スキャンとインストールのスケジュールでパッチ適用のタスクを登録する。"
+    },
+    {
+      "key": "C",
+      "text": "Add cron jobs to every node that check for updates every day and install them every week.",
+      "text_ja": "すべてのノードに、毎日更新を確かめ、毎週インストールする cron ジョブを足す。"
+    },
+    {
+      "key": "D",
+      "text": "Ask each account owner to scan and patch their nodes by hand and report the results every week.",
+      "text_ja": "各アカウントの所有者が自分のノードを手作業でスキャンしてパッチを当て、毎週結果を報告する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "AWS はパッチ適用の設定にパッチポリシーを使うことを勧めています。パッチポリシーは Quick Setup で作る設定で、AWS Organizations を使えば、すべてのアカウントのすべてのリージョンのマネージドノードに 1 つのパッチポリシーを当てられ、スキャンとインストールで別のスケジュールを決められます。",
+    "per_choice": {
+      "A": "正しい。1 つの設定で組織全体に当てられ、スキャンとインストールのスケジュールも分けられます。",
+      "B": "動きますが、40 のアカウントと 4 つのリージョンのそれぞれで設定を作って保守する必要があります。",
+      "C": "各ノードの設定を保守する必要があり、中央の設定になりません。",
+      "D": "手作業が多く、中央の設定になりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+      "source_id": "S6",
+      "quote": "However, if you use AWS Organizations, you can set up one patch policy that applies to all your managed nodes in all AWS Regions in all your AWS accounts."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+      "source_id": "S6",
+      "quote": "Using a patch policy, you can specify different schedules for scanning and installing."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager",
+      "source_id": "S1",
+      "quote": "Using patch policies is the recommended method for configuring your patching operations."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

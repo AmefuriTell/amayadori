@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 235,
+  "count": 247,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -5301,6 +5301,265 @@
       "low_confidence": false
     },
     {
+      "id": "q-2.2-0013",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company with 150 accounts in AWS Organizations wants the same set of AWS Config rules in every account, including accounts that join the organization later, with a few sandbox accounts excluded. AWS Config recording is already on in all accounts. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "AWS Organizations に 150 のアカウントを持つ会社は、後から組織に入るアカウントも含め、いくつかのサンドボックスのアカウントを除くすべてのアカウントに同じ一組の AWS Config ルールを置きたいと考えています。AWS Config の記録はすべてのアカウントで既に有効です。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use PutOrganizationConfigRule from the management account or a delegated administrator, and list the sandbox accounts as excluded accounts.",
+          "text_ja": "管理アカウントか委任管理者から PutOrganizationConfigRule を使い、サンドボックスのアカウントを除外するアカウントとして指定する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Config aggregator for the organization and deploy the rules to the source accounts through the aggregator.",
+          "text_ja": "組織の AWS Config アグリゲーターを作り、アグリゲーターを通して送り元のアカウントへルールをデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Ask each account owner to create the rules in their own account, and send the list of rules to new accounts when they join.",
+          "text_ja": "各アカウントの所有者が自分のアカウントでルールを作り、新しいアカウントが入った時にはルールの一覧を送る。"
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that runs daily, finds accounts without the rules, and creates the rules in each one.",
+          "text_ja": "毎日動き、ルールが無いアカウントを探して、それぞれにルールを作る AWS Lambda 関数を書く。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS Config では、組織のすべてのアカウントの Config ルールを中央で作成・更新・削除でき、共通のルールを配りつつ、作らないアカウントを指定できます。新しいアカウントが組織に入ると、ルールはそのアカウントにもデプロイされます。組織のルールは API か CLI で作ります。",
+        "per_choice": {
+          "A": "正しい。1 か所から全アカウントへ配り、除外も指定でき、新しいアカウントにも自動で配られます。",
+          "B": "アグリゲーターは送り元のアカウントを読むだけの仕組みで、アグリゲーターを通してルールをデプロイすることはできません。",
+          "C": "手作業が多く、ルールがそろう保証もありません。",
+          "D": "動きますが、独自の関数を保守する必要があります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment",
+          "quote": "Deploy a common set of AWS Config rules across all accounts and specify accounts where AWS Config rules should not be created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations",
+          "quote": "If a new account joins an organization, the rule or conformance pack is deployed to that account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0014",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security auditor needs one place to view the AWS Config resource configuration and compliance data from every account in the company's organization. The auditor must not be able to change anything in the source accounts, and the company does not want to request authorization from each account. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティの監査担当は、会社の組織のすべてのアカウントの AWS Config のリソースの構成と準拠のデータを、1 か所で見る必要があります。監査担当は送り元のアカウントで何も変えられてはならず、会社は各アカウントに承認を求めたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Give the auditor an IAM role with administrator permissions in every account.",
+          "text_ja": "監査担当に、すべてのアカウントで管理者の権限を持つ IAM ロールを与える。"
+        },
+        {
+          "key": "B",
+          "text": "Deploy organization Config rules from the audit account so that results appear there.",
+          "text_ja": "結果がそこに出るよう、監査のアカウントから組織の Config ルールをデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS Config aggregator for the organization in an audit account.",
+          "text_ja": "監査のアカウントに、組織の AWS Config アグリゲーターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Export each account's AWS Config data to a spreadsheet every week and send it to the auditor.",
+          "text_ja": "毎週、各アカウントの AWS Config のデータを表計算シートに出して監査担当に送る。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "アグリゲーターは、組織とそのすべてのアカウントから AWS Config の構成と準拠のデータを集めるリソースです。組織に入っているアカウントを集める時は承認が要らず、アグリゲーターは送り元のアカウントを読むだけで、変更はできません。",
+        "per_choice": {
+          "A": "見られますが、送り元のアカウントを変えられる強すぎる権限になります。",
+          "B": "組織のルールはルールを配る仕組みで、全アカウントの構成と準拠のデータを 1 か所で見る仕組みではありません。",
+          "C": "正しい。承認無しで組織全体のデータを 1 か所で読めて、送り元を変える権限も持ちません。",
+          "D": "手作業で、データも最大 1 週間古くなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregate-data",
+          "quote": "An aggregator is an AWS Config resource type that collects AWS Config configuration and compliance data from the following:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Aggregators do not provide mutating access into a source account or region."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0015",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "Amazon GuardDuty",
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company wants to manage Amazon GuardDuty for all member accounts in its organization from a central security account. GuardDuty must cover us-east-1, eu-west-1, and ap-northeast-1. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "ある会社は、組織のすべてのメンバーアカウントの Amazon GuardDuty を、中央のセキュリティのアカウントから管理したいと考えています。GuardDuty は us-east-1、eu-west-1、ap-northeast-1 を対象にする必要があります。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "From the management account, designate the security account as the delegated GuardDuty administrator in each of the three Regions.",
+          "text_ja": "管理アカウントから、3 つのリージョンのそれぞれで、セキュリティのアカウントを GuardDuty の委任管理者に指定する。"
+        },
+        {
+          "key": "B",
+          "text": "From the delegated administrator account, enable and manage GuardDuty for the member accounts in each Region.",
+          "text_ja": "委任管理者のアカウントから、各リージョンでメンバーアカウントの GuardDuty を有効にして管理する。"
+        },
+        {
+          "key": "C",
+          "text": "Designate a different delegated administrator account in each Region so that each Region is managed separately.",
+          "text_ja": "各リージョンを別々に管理するよう、リージョンごとに別の委任管理者のアカウントを指定する。"
+        },
+        {
+          "key": "D",
+          "text": "Designate the delegated administrator only in us-east-1, because GuardDuty settings apply to all Regions.",
+          "text_ja": "GuardDuty の設定はすべてのリージョンに効くので、委任管理者は us-east-1 でだけ指定する。"
+        },
+        {
+          "key": "E",
+          "text": "Ask each member account owner to turn on GuardDuty in every Region and invite the security account.",
+          "text_ja": "各メンバーアカウントの所有者が、すべてのリージョンで GuardDuty を有効にし、セキュリティのアカウントを招待する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "管理アカウントは、組織の任意のアカウントを GuardDuty の委任管理者に指定でき、委任管理者はそのリージョンで組織のすべてのメンバーアカウントの GuardDuty を有効にして管理できます。GuardDuty はリージョンのサービスなので、使う各リージョンで指定が必要で、どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+        "per_choice": {
+          "A": "正しい。GuardDuty はリージョンのサービスなので、各リージョンで同じアカウントを指定します。",
+          "B": "正しい。委任管理者は、そのリージョンのメンバーアカウントの GuardDuty を有効にして管理できます。",
+          "C": "どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+          "D": "GuardDuty はリージョンのサービスで、各リージョンでの指定が必要です。",
+          "E": "手作業が多く、中央から管理する要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "It is required that you use the same account as delegated GuardDuty administrator account in all other Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0016",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "Amazon Detective",
+        "Amazon GuardDuty"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Security analysts receive GuardDuty findings about suspicious activity but spend hours collecting logs from many sources to understand what happened. The company wants a service that collects log data from AWS resources automatically and helps analysts investigate and identify the root cause of findings quickly. Which solution BEST meets these requirements?",
+      "stem_ja": "セキュリティの分析担当は、不審な活動についての GuardDuty の検出結果を受け取りますが、何が起きたかを理解するために、多くの元からログを集めるのに何時間もかけています。会社は、AWS のリソースからログのデータを自動で集め、分析担当が検出結果を調べて根本の原因を素早く見つけるのを助けるサービスを求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config aggregator so that analysts can see resource configurations from all accounts.",
+          "text_ja": "分析担当がすべてのアカウントのリソースの構成を見られるよう、AWS Config アグリゲーターを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on Amazon Detective and use it to investigate the findings.",
+          "text_ja": "Amazon Detective を有効にし、検出結果の調査に使う。"
+        },
+        {
+          "key": "C",
+          "text": "Deploy AWS Control Tower detective controls to every organizational unit.",
+          "text_ja": "すべての組織単位（OU）に、AWS Control Tower の検出のコントロールを適用する。"
+        },
+        {
+          "key": "D",
+          "text": "Have analysts download CloudTrail and VPC flow logs for each finding and search them by hand.",
+          "text_ja": "分析担当が、検出結果ごとに CloudTrail と VPC フローログをダウンロードし、手作業で探す。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Amazon Detective は、セキュリティの検出結果や不審な活動を分析・調査し、根本の原因を素早く見つけるのを助けるサービスで、AWS のリソースからログのデータを自動で集めます。",
+        "per_choice": {
+          "A": "アグリゲーターは構成と準拠のデータを集めるもので、検出結果の調査を助ける仕組みではありません。",
+          "B": "正しい。ログを自動で集め、検出結果の調査と根本の原因の特定を助けます。",
+          "C": "コントロールは組織単位の継続的なガバナンスのための決まりで、個々の検出結果の調査には使いません。",
+          "D": "手作業で、今の何時間もかかる調査と変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Amazon Detective helps you analyze, investigate, and quickly identify the root cause of security findings or suspicious activities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Detective automatically collects log data from your AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls",
+          "quote": "A control is a high-level rule that provides ongoing governance for your overall AWS environment."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-2.3-0001",
       "task": "2.3",
       "domain": 2,
@@ -6082,6 +6341,253 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
           "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0013",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Patch Manager",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company with 40 accounts in AWS Organizations runs managed nodes in four Regions. The company wants one central patching configuration for all of them, with a daily scan for missing patches and a separate weekly schedule for installing patches. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "AWS Organizations に 40 のアカウントを持つ会社が、4 つのリージョンでマネージドノードを動かしています。会社は、すべてに対する 1 つの中央のパッチ適用の設定を求めており、足りないパッチの毎日のスキャンと、パッチのインストールの別の毎週のスケジュールを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create one Patch Manager patch policy in Quick Setup for the organization, with separate scan and install schedules.",
+          "text_ja": "組織に対して Quick Setup で Patch Manager のパッチポリシーを 1 つ作り、スキャンとインストールのスケジュールを別々に決める。"
+        },
+        {
+          "key": "B",
+          "text": "Create a maintenance window in each account and Region, and register a patching task with the scan and install schedules.",
+          "text_ja": "各アカウントとリージョンでメンテナンスウィンドウを作り、スキャンとインストールのスケジュールでパッチ適用のタスクを登録する。"
+        },
+        {
+          "key": "C",
+          "text": "Add cron jobs to every node that check for updates every day and install them every week.",
+          "text_ja": "すべてのノードに、毎日更新を確かめ、毎週インストールする cron ジョブを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each account owner to scan and patch their nodes by hand and report the results every week.",
+          "text_ja": "各アカウントの所有者が自分のノードを手作業でスキャンしてパッチを当て、毎週結果を報告する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS はパッチ適用の設定にパッチポリシーを使うことを勧めています。パッチポリシーは Quick Setup で作る設定で、AWS Organizations を使えば、すべてのアカウントのすべてのリージョンのマネージドノードに 1 つのパッチポリシーを当てられ、スキャンとインストールで別のスケジュールを決められます。",
+        "per_choice": {
+          "A": "正しい。1 つの設定で組織全体に当てられ、スキャンとインストールのスケジュールも分けられます。",
+          "B": "動きますが、40 のアカウントと 4 つのリージョンのそれぞれで設定を作って保守する必要があります。",
+          "C": "各ノードの設定を保守する必要があり、中央の設定になりません。",
+          "D": "手作業が多く、中央の設定になりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+          "quote": "However, if you use AWS Organizations, you can set up one patch policy that applies to all your managed nodes in all AWS Regions in all your AWS accounts."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+          "quote": "Using a patch policy, you can specify different schedules for scanning and installing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager",
+          "quote": "Using patch policies is the recommended method for configuring your patching operations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0014",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Patch Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company's security policy says that critical operating system updates must be applied, but only after they have been publicly released for one week, so that the company can watch for problems reported by others. New critical updates are released several times each month. Which solution meets this requirement with the LEAST operational effort?",
+      "stem_ja": "ある会社のセキュリティのポリシーでは、OS の重要な更新を適用する必要がありますが、ほかの人が報告する問題を見られるよう、公開されてから 1 週間たった後にだけ適用することになっています。新しい重要な更新は毎月何度も公開されます。運用の手間が最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Edit the predefined patch baseline so that it waits 7 days before approving critical updates.",
+          "text_ja": "事前定義のパッチベースラインを編集し、重要な更新を承認する前に 7 日待つようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Create a custom patch baseline with an approval rule for critical updates that uses an auto-approval delay of 7 days.",
+          "text_ja": "重要な更新の承認ルールで 7 日の自動承認の遅延を使う、独自のパッチベースラインを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a custom patch baseline with an approval rule that uses a fixed patch approval cutoff date, and update the date by hand every week.",
+          "text_ja": "決まったパッチ承認の締め切り日を使う承認ルールの独自のパッチベースラインを作り、その日付を毎週手作業で更新する。"
+        },
+        {
+          "key": "D",
+          "text": "Have an engineer review new critical updates every week and approve each one by hand.",
+          "text_ja": "エンジニアが毎週新しい重要な更新を確かめ、1 つずつ手作業で承認する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "独自のパッチベースラインでは、どのパッチを承認するかをより細かく決められ、承認ルールごとに自動承認の遅延か承認の締め切り日を指定できます。自動承認の遅延は、パッチが公開されてから自動で承認されるまで待つ日数です。事前定義のベースラインはそのまま使うもので、変えられません。",
+        "per_choice": {
+          "A": "事前定義のパッチベースラインは変えられません。",
+          "B": "正しい。公開から 7 日たった重要な更新が、手作業無しで自動で承認されます。",
+          "C": "締め切り日を毎週手作業で動かす必要があり、手間がかかります。",
+          "D": "毎週の手作業が必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+          "quote": "An auto-approval delay is the number of days to wait after the patch was released or last updated, before the patch is automatically approved for patching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#patch-manager-predefined-and-custom-patch-baselines",
+          "quote": "You can use these baselines as they are currently configured (you can't customize them) or you can create your own custom patch baselines."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+          "quote": "For each approval rule that you create, you can choose to specify an auto-approval delay or specify a patch approval cutoff date."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0015",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Maintenance Windows",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Installing patches during business hours has caused outages. The company now wants disruptive updates on a group of managed nodes to run only on Sunday between 02:00 and 05:00. Before patching, a Lambda function must remove the nodes from a load balancer, and then a Run Command task must install the patches. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "業務時間中のパッチのインストールが障害を起こしています。会社は、一群のマネージドノードへの止まる可能性のある更新を、日曜の 02:00 から 05:00 の間にだけ行いたいと考えています。パッチ適用の前に Lambda 関数がノードをロードバランサーから外し、その後 Run Command のタスクがパッチを入れる必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a State Manager association that runs the patch document every Sunday on the nodes.",
+          "text_ja": "毎週日曜にノードでパッチのドキュメントを動かす、State Manager の関連付けを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Add a cron job on each node that removes itself from the load balancer and installs patches on Sunday.",
+          "text_ja": "各ノードに、日曜に自分をロードバランサーから外してパッチを入れる cron ジョブを足す。"
+        },
+        {
+          "key": "C",
+          "text": "Ask an on-call engineer to run the Lambda function and the Run Command task by hand every Sunday morning.",
+          "text_ja": "当番のエンジニアが毎週日曜の朝に、Lambda 関数と Run Command のタスクを手作業で実行する。"
+        },
+        {
+          "key": "D",
+          "text": "Create a Sunday maintenance window with a maximum duration, the nodes as targets, and the Lambda and Run Command tasks.",
+          "text_ja": "日曜のメンテナンスウィンドウに最大の長さ、ターゲットのノード、Lambda と Run Command のタスクを登録する。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "メンテナンスウィンドウは、OS のパッチ適用のような止まる可能性のある操作をいつ行うかのスケジュールを決めるもので、スケジュール・最大の長さ・登録したターゲット・登録したタスクを持ちます。タスクには Run Command のコマンド、Automation のワークフロー、Lambda の関数などを使えます。State Manager は構成の準拠を自動にするのに向き、決めた時間帯の優先度の高い作業にはメンテナンスウィンドウを選びます。",
+        "per_choice": {
+          "A": "構成の準拠を保つための仕組みで、最大の長さを持つ時間帯の中で複数の種類のタスクを動かす要件に合いません。",
+          "B": "各ノードの設定を保守する必要があり、手間がかかります。",
+          "C": "毎週の手作業が必要です。",
+          "D": "正しい。決めた時間帯の中だけで、Lambda と Run Command のタスクを順に動かせます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Each maintenance window has a schedule, a maximum duration, a set of registered targets (the managed nodes or other AWS resources that are acted upon), and a set of registered tasks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Which one you choose depends on whether you need to automate system compliance or perform high-priority, time-sensitive tasks during periods you specify."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0016",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Inventory",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security advisory lists a vulnerable version of a third-party agent. The company runs 2,000 managed nodes and must quickly find which nodes have that version installed, and must keep doing this check for future advisories. The company does not want to log in to nodes or write collection scripts. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティの勧告が、サードパーティのエージェントの脆弱なバージョンを挙げています。会社は 2,000 台のマネージドノードを動かしており、どのノードにそのバージョンが入っているかを素早く見つけ、今後の勧告でも同じ確認を続ける必要があります。会社は、ノードにログインしたり収集のスクリプトを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use Patch Manager compliance reports to find which nodes have the vulnerable agent version installed.",
+          "text_ja": "Patch Manager の準拠のレポートで、脆弱なエージェントのバージョンが入ったノードを探す。"
+        },
+        {
+          "key": "B",
+          "text": "Write a Run Command script that lists installed software on each node and writes the output to a bucket for analysts to search.",
+          "text_ja": "各ノードの入っているソフトウェアを一覧して出力をバケットに書くスクリプトを Run Command で作り、分析担当が探す。"
+        },
+        {
+          "key": "C",
+          "text": "Use Systems Manager Inventory to collect metadata from the nodes into a central Amazon S3 bucket, and query it with the built-in tools.",
+          "text_ja": "Systems Manager Inventory でノードのメタデータを中央の Amazon S3 バケットに集め、組み込みのツールでクエリする。"
+        },
+        {
+          "key": "D",
+          "text": "Have engineers sign in to each node and check the agent version by hand.",
+          "text_ja": "エンジニアが各ノードにサインインし、エージェントのバージョンを手作業で確かめる。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Systems Manager Inventory は、マネージドノードからメタデータを集めて、AWS の環境を見えるようにします。集めたメタデータを中央の S3 バケットに保存し、組み込みのツールでクエリすれば、どのノードが決まったソフトウェアや構成を動かしているか、どのノードを更新する必要があるかを素早く見分けられます。",
+        "per_choice": {
+          "A": "Patch Manager の準拠は、パッチベースラインで承認したパッチが入っているかを示すもので、サードパーティのエージェントのバージョンを探す仕組みではありません。",
+          "B": "動きますが、収集のスクリプトを書いて保守することになり、要件に反します。",
+          "C": "正しい。スクリプト無しでメタデータを集め、今後の勧告でも同じクエリで確かめられます。",
+          "D": "2,000 台への手作業は時間がかかり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance",
+          "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline."
         }
       ],
       "low_confidence": false
@@ -9159,6 +9665,138 @@
       "low_confidence": false
     },
     {
+      "id": "q-4.1-0011",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Data Firehose"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company created an account-level subscription filter policy that sends all log groups to Amazon Data Firehose for central processing. Soon afterward, CloudWatch Logs ingestion charges rose sharply because log groups that receive logs from the delivery workflow's own resources were also being subscribed, causing a recursive loop. Which change will MOST effectively stop the loop while keeping the central processing?",
+      "stem_ja": "ある会社は、すべてのロググループを中央で処理するため Amazon Data Firehose へ送るアカウントレベルのサブスクリプションフィルターのポリシーを作りました。その後すぐ、配信の仕組み自身のリソースからログを受け取るロググループまで対象になり、再帰のループが起きて、CloudWatch Logs の取り込みの料金が急に上がりました。中央の処理を続けながら、ループを最も効果的に止める変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add selection criteria to the account-level policy that exclude log groups which ingest logs from resources in the delivery workflow.",
+          "text_ja": "アカウントレベルのポリシーに、配信の仕組みのリソースからログを取り込むロググループを除外する選択の条件を足す。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the Firehose buffer size and buffer interval so that fewer deliveries are made.",
+          "text_ja": "配信の回数が減るよう、Firehose のバッファーのサイズと間隔を大きくする。"
+        },
+        {
+          "key": "C",
+          "text": "Delete the account-level policy and ask each team to create its own log group subscription filters.",
+          "text_ja": "アカウントレベルのポリシーを消し、各チームに自分のロググループのサブスクリプションフィルターを作ってもらう。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on decompression in Firehose so that the logs are smaller when they are delivered.",
+          "text_ja": "配信の時にログが小さくなるよう、Firehose で解凍の機能を有効にする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "サブスクリプションフィルターでは、再帰のループが起きて取り込みの料金が大きく増えることがあります。これを防ぐには、アカウントレベルのサブスクリプションフィルターの選択の条件で、配信の仕組みに含まれるリソースからログを取り込むロググループを除外することが勧められています。",
+        "per_choice": {
+          "A": "正しい。ループのもとになるロググループだけを外し、ほかのロググループの中央の処理は続けられます。",
+          "B": "配信の回数は減っても、ループで取り込まれるログの量は減りません。",
+          "C": "ループは止まりますが、中央でまとめて処理する仕組みが崩れ、各チームの手間が増えます。",
+          "D": "解凍してもループは止まらず、取り込みの料金も減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "quote": "There is a risk of causing an infinite recursive loop with subscription filters that can lead to a large increase in ingestion billing if not addressed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "quote": "we recommend that you use selection criteria in your account-level subscription filters to exclude log groups that ingest log data from resources that are part of the subscription delivery workflow."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0012",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon OpenSearch Service",
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team wants to stream logs from a CloudWatch Logs log group to an Amazon OpenSearch Service domain that uses VPC access. The streaming setup uses a Lambda function that writes to the domain, but the function cannot reach the domain endpoint. Which actions should a DevOps engineer take to make the streaming work? (Choose TWO.)",
+      "stem_ja": "あるチームは、CloudWatch Logs のロググループのログを、VPC アクセスを使う Amazon OpenSearch Service のドメインへ流したいと考えています。流す仕組みはドメインへ書き込む Lambda 関数を使いますが、関数がドメインのエンドポイントに届きません。流せるようにするために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use a Lambda execution role that trusts lambda.amazonaws.com and has the AWSLambdaVPCAccessExecutionRole policy attached.",
+          "text_ja": "lambda.amazonaws.com を信頼し、AWSLambdaVPCAccessExecutionRole ポリシーをアタッチした Lambda の実行ロールを使う。"
+        },
+        {
+          "key": "B",
+          "text": "Make sure that the source log group uses the Standard log class.",
+          "text_ja": "送り元のロググループが Standard のログクラスを使っていることを確かめる。"
+        },
+        {
+          "key": "C",
+          "text": "Change the existing OpenSearch Service domain from VPC access to public access.",
+          "text_ja": "既存の OpenSearch Service のドメインを、VPC アクセスからパブリックアクセスへ変える。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on gzip compression for the subscription so that the data fits through the VPC.",
+          "text_ja": "データが VPC を通れるよう、サブスクリプションで gzip の圧縮を有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Add logs.amazonaws.com to the trust relationship of the Lambda execution role instead of lambda.amazonaws.com.",
+          "text_ja": "Lambda の実行ロールの信頼関係に、lambda.amazonaws.com の代わりに logs.amazonaws.com を入れる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "OpenSearch Service へ流す時、Lambda の実行ロールは信頼関係に lambda.amazonaws.com を持つ必要があり、VPC アクセスのドメインでは AWSLambdaVPCAccessExecutionRole ポリシーが要ります。このポリシーが、Lambda が VPC の中の OpenSearch のエンドポイントへ書き込めるようにします。また、OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+        "per_choice": {
+          "A": "正しい。Lambda が VPC に入り、ドメインのエンドポイントへ書き込めるようになります。",
+          "B": "正しい。OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+          "C": "ドメインを作った後に、アクセスの種類は変えられません。",
+          "D": "サブスクリプションで送るログはもともと gzip で圧縮されており、届かない問題の原因ではありません。",
+          "E": "実行ロールの信頼関係には lambda.amazonaws.com が必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "quote": "It must have lambda.amazonaws.com in the trust relationship."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "quote": "This Amazon-managed policy grants Lambda access to the customer's VPC, enabling Lambda to write to the OpenSearch endpoint in the VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream",
+          "quote": "Streaming to OpenSearch Service is supported only for log groups in the Standard log class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Domain",
+          "quote": "The domain can have either public access or VPC access, but you can't then modify the type of access after the domain is created."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-4.2-0001",
       "task": "4.2",
       "domain": 4,
@@ -10540,6 +11178,141 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html#ssm-agent",
           "quote": "SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Gateway Service (ssmmessages)."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0011",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "AWS Config",
+        "AWS Systems Manager Automation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An AWS Config rule uses automatic remediation with a Systems Manager Automation document. The remediation occasionally fails because of short-lived errors, and the affected resources stay noncompliant until an engineer notices. The company wants failed remediations to be tried again automatically within a few minutes and wants to see the detailed status of each remediation run. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "AWS Config のルールが、Systems Manager Automation のドキュメントで自動修復を行っています。修復は短い間のエラーでときどき失敗し、エンジニアが気づくまで対象のリソースは準拠していないままになります。会社は、失敗した修復を数分以内に自動でやり直し、各修復の実行の詳しい状態を見たいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the rule to manual remediation, and have an engineer start the remediation when a resource is noncompliant.",
+          "text_ja": "ルールを手動の修復に変え、リソースが準拠していない時にエンジニアが修復を始める。"
+        },
+        {
+          "key": "B",
+          "text": "Set retries and a time period for the automatic remediation, such as 5 retries in 300 seconds, and check DescribeRemediationExecutionStatus for details.",
+          "text_ja": "自動修復にやり直しの回数と期間（例えば 300 秒で 5 回）を設定し、詳細は DescribeRemediationExecutionStatus で確かめる。"
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that runs every minute, finds failed remediations, and starts the Automation document again.",
+          "text_ja": "毎分動いて失敗した修復を探し、Automation のドキュメントを再び始める AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "Delete and re-create the AWS Config rule every hour so that all resources are evaluated and remediated again.",
+          "text_ja": "すべてのリソースが評価・修復し直されるよう、AWS Config のルールを 1 時間ごとに消して作り直す。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "自動修復の後もリソースが準拠していない時は、やり直しの回数と秒数を入れて、ルールに自動修復をやり直させられます。やり直しは修復が失敗した時だけ、決めた期間の中で行われます（例: 300 秒で 5 回）。DescribeRemediationExecutionStatus は、修復の実行の状態や手順の時刻、失敗した手順のエラーを詳しく示します。",
+        "per_choice": {
+          "A": "手作業が増え、自動でやり直す要件に反します。",
+          "B": "正しい。組み込みのやり直しで短い間のエラーをしのぎ、API で実行の状態を確かめられます。",
+          "C": "動きますが、組み込みの機能で済む仕組みを自分で作って保守することになります。",
+          "D": "手間が大きく、作り直しの間は評価も修復も止まります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "If a resource is still noncompliant after auto remediation, you can set the rule to try auto remediation again. Enter the desired retries and seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "Retries only occur if remediation fails and work within the specified time period; for example, 5 retries in 300 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "DescribeRemediationExecutionStatus, provides a detailed view of a Remediation Execution for a set of resources"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0012",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "AWS Config",
+        "AWS Systems Manager Automation"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A security team needs a custom AWS Config rule that checks a company-specific setting whenever a resource's configuration changes, and wants noncompliant resources to be fixed automatically. The team does not want to develop or maintain Lambda functions in Java or Python. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "セキュリティチームは、リソースの構成が変わるたびに会社独自の設定を確かめる独自の AWS Config ルールを必要としており、準拠していないリソースを自動で直したいと考えています。チームは、Java や Python で Lambda 関数を開発・保守したくありません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config Custom Policy rule for the check.",
+          "text_ja": "確認のために、AWS Config の Custom Policy ルールを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Use PutRemediationConfigurations to associate an automatic remediation action that uses a Systems Manager Automation document with the rule.",
+          "text_ja": "PutRemediationConfigurations で、Systems Manager Automation のドキュメントを使う自動の修復のアクションをルールに関連付ける。"
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS Config Custom Lambda rule with a Python function that evaluates the configuration.",
+          "text_ja": "構成を評価する Python の関数で、AWS Config の Custom Lambda ルールを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Associate the remediation action with a service-linked AWS Config rule that another AWS service created.",
+          "text_ja": "ほかの AWS のサービスが作ったサービスにリンクされた AWS Config ルールに、修復のアクションを関連付ける。"
+        },
+        {
+          "key": "E",
+          "text": "Choose manual remediation so that the security team starts each fix from the console.",
+          "text_ja": "セキュリティチームがコンソールから各修正を始めるよう、手動の修復を選ぶ。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS Config の Custom Policy ルールは構成の変化で動き、Java や Python で Lambda 関数を作らずに独自のルールを作れます。PutRemediationConfigurations で、選んだアクションの修復の設定をルールに足せば、Systems Manager Automation のドキュメントで準拠していないリソースを直せます。",
+        "per_choice": {
+          "A": "正しい。Lambda 関数を作らずに、構成の変化で動く独自のルールを作れます。",
+          "B": "正しい。ルールに Automation のドキュメントを使う自動の修復を関連付けられます。",
+          "C": "動きますが、Python の Lambda 関数を開発・保守することになり、要件に反します。",
+          "D": "修復を管理できるのは、サービスにリンクされていない AWS Config ルールだけです。",
+          "E": "手作業になり、自動で直す要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules.html#evaluate-config_develop-rules-policy",
+          "quote": "AWS Config Custom Policy rules are initiated by configuration changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules.html#evaluate-config_develop-rules-policy",
+          "quote": "AWS Config Custom Policy rules allow you to create AWS Config Custom rules without needing to use Java or Python to develop Lambda functions to manage your custom rules."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "PutRemediationConfigurations, adds or updates the remediation configuration with a specific AWS Config rule with the selected target or action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "You can only manage remediations for non-service linked AWS Config rules."
         }
       ],
       "low_confidence": false

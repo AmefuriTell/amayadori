@@ -174,3 +174,13 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>q・g・dg の verdict を、同じ verify.json に対して 2 回目は何もしない（verify.json の時刻か中身の hash を verdict.json に控え、同じなら前の結論をそのまま出す）。あわせて .claude/agents/dop-verifier.md に「verdict は呼ばない」を足す。人が決める</change>
 </proposal>
 ```
+
+## C-0048・G-0015（2026-11-26）から
+
+```xml
+<proposal id="P-020" from="C-0048,G-0015" status="proposed">
+  <issue>資料集め役の sources.md で、引用の続きの行が「> 」で始まっていなかったり（C-0048）、S0 の見出しが「# 」だったり（G-0015）した。docs check は ok を返したが、q・g validate が「quote が原文に無い」「S0 が無い」と落ち、進行役が形だけ直した</issue>
+  <kind>tool</kind>
+  <change>docs check に検査を足す: ① 「## S」の見出しの後、空行までの行は「url:」「fetched:」「> 」のどれかで始まること。② 「S<番号>」の見出しは必ず「## 」で始まること。どちらも落ちたら ok にしない。人が決める</change>
+</proposal>
+```
