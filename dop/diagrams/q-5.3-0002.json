@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0002",
+  "source": "flowchart TB\n  ENG[\"チーム\"]\n  subgraph STK[\"スタックの状態\"]\n    F@{ svc: \"AWS CloudFormation\", label: \"UPDATE_ROLLBACK_FAILED\" }\n    C@{ svc: \"AWS CloudFormation\", label: \"UPDATE_ROLLBACK_COMPLETE\" }\n    U@{ svc: \"AWS CloudFormation\", label: \"更新を適用\" }\n  end\n  X[\"スタックを削除\"]\n  ENG -- \"原因を手で修正\" --> F\n  F == \"✔ C: ロールバックを続行\" ==> C\n  C == \"もう一度更新\" ==> U\n  A[\"⚠ A: この状態のまま更新（できない）\"]\n  A -.-> U\n  B[\"⚠ B: 自動の再試行を待つ（続行は操作が要る）\"]\n  B -.-> F\n  D[\"⚠ D: 削除して作り直す（要件に反する）\"]\n  D -.-> X\n",
+  "alt": "更新のロールバックに失敗したスタックは、原因を直した後でロールバックを続行して UPDATE_ROLLBACK_COMPLETE にし、そこから再更新する。A の更新やD の削除は不適切で、C が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

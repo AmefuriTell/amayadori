@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0007",
+  "source": "flowchart TB\n  ENG[\"当番のエンジニア\"]\n  subgraph ECSX[\"Amazon ECS\"]\n    SV@{ svc: \"Amazon ECS\", label: \"サービス（タスクを入れ替え続ける）\" }\n    TK[\"停止したタスク（PENDING の後に消える）<br/>stopCode・stoppedReason\"]\n  end\n  SV -- \"タスクを起動\" --> TK\n  ENG == \"✔ A: イベントを確認\" ==> SV\n  ENG == \"✔ B: describe\" ==> TK\n  C[\"⚠ C: 1 日待つ（情報が消える）\"]\n  C -.-> TK\n  D[\"⚠ D: タスクの数を増やす（理由が分からない）\"]\n  D -.-> SV\n  E[\"⚠ E: ロードバランサーのログを待つ（遅く、理由が出るとは限らない）\"]\n  E -.-> TK\n",
+  "alt": "タスクが入れ替わり続ける時は、サービスのイベントで ECS の動きを見て(A)、停止したタスクの stopCode と stoppedReason を読む(B)。停止したタスクは早く確認しないと消える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

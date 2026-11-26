@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0008",
+  "source": "flowchart TB\n  subgraph ASGX[\"ASG\"]\n    ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"起動時ライフサイクルフック\" }\n    INS@{ svc: \"Amazon EC2\", label: \"新しいインスタンス\" }\n    SC[\"インストールのスクリプト（誤りあり）\"]\n  end\n  ASG -- \"起動\" --> INS\n  INS -- \"実行\" --> SC\n  SC -- \"abandon で完了\" --> TERM[\"インスタンス終了・入れ替え\"]\n  TERM -. \"続くと起動が遅くなる\" .-> ASG\n  SC == \"✔ A: continue\" ==> OK[\"サービスに入る\"]\n  B[\"⚠ B: フックのタイムアウトを延ばす（時間切れではない）\"]\n  B -.-> ASG\n  C[\"⚠ C: 最大容量を増やす（失敗が増えるだけ）\"]\n  C -.-> ASG\n  D[\"⚠ D: 失敗しても continue（壊れた状態で動く）\"]\n  D -.-> SC\n",
+  "alt": "起動時フックのスクリプトが失敗して abandon になると、インスタンスが入れ替わり起動も遅くなる。スクリプトの誤りを直して continue で完了させる A が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

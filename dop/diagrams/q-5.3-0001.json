@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0001",
+  "source": "flowchart TB\n  ENG[\"チーム\"]\n  subgraph EC2G[\"EC2 インスタンス\"]\n    AG@{ svc: \"Amazon EC2\", label: \"CodeDeploy エージェント\" }\n    OLD[\"前に成功したデプロイの ApplicationStop（バグあり）\"]\n  end\n  CD@{ svc: \"AWS CodeDeploy\", label: \"新しいデプロイ（修正したリビジョン）<br/>--ignore-application-stop-failures\" }\n  ENG -- \"✔ A: オプションを付ける\" --> CD\n  CD -- \"リビジョン\" --> AG\n  AG -- \"前の物を実行\" --> OLD\n  B[\"⚠ B: 同じリビジョンをもう一度デプロイ（同じ失敗）\"]\n  B -.-> CD\n  C[\"⚠ C: 前のリビジョンへロールバック（壊れたスクリプトが動く）\"]\n  C -.-> OLD\n  D[\"⚠ D: エージェントを入れ直す（変わらない）\"]\n  D -.-> AG\n",
+  "alt": "CodeDeploy のエージェントは ApplicationStop を前に成功したデプロイのスクリプトから実行するため、修正したリビジョンでも失敗する。失敗を無視するオプション付きでデプロイする A が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

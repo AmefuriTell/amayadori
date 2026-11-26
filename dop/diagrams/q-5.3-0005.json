@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0005",
+  "source": "flowchart TB\n  USER[\"顧客\"]\n  A[\"⚠ A: 新しいバージョンのまま調べる<br/>（影響が続く）\"]\n  APP[\"新しいバージョンのアプリ\"]\n  OLD[\"前のバージョン\"]\n  USER -- \"影響が出る\" --> APP\n  A -.-> APP\n  APP == \"✔ D: まずロールバック\" ==> OLD\n  B[\"⚠ B: 1 時間 SuccessPercent を見て判断<br/>（影響が続く）\"]\n  CN@{ svc: \"Amazon CloudWatch Synthetics\", label: \"チェックアウトの Canary\" }\n  ART[\"失敗した回のスクリーンショット・<br/>ログ・ステップ報告\"]\n  CAUSE[\"根本原因\"]\n  C[\"⚠ C: 成果物を削除<br/>（原因を調べられない）\"]\n  B -.-> CN\n  CN -- \"テスト\" --> APP\n  CN -- \"成果物\" --> ART\n  ART == \"✔ D: 成功した回と比較\" ==> CAUSE\n  C -.-> ART",
+  "alt": "新バージョンで Canary が失敗した時は、まずロールバックして顧客への影響を止め、失敗した回のスクリーンショットやログを成功した回と比べて原因を調べる(D)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

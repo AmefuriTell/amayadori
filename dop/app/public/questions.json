@@ -14512,7 +14512,10 @@
           "quote": "Use the AWS CLI to call the create-deployment command and include the --ignore-application-stop-failures option."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy のエージェントは ApplicationStop を前に成功したデプロイのスクリプトから実行するため、修正したリビジョンでも失敗する。失敗を無視するオプション付きでデプロイする A が正解。"
+      }
     },
     {
       "id": "q-5.3-0002",
@@ -14570,7 +14573,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 A・C の「できない」は、S3 の手順（まずロールバックを続ける）から言える範囲で書いた"
+      "note": "選択肢 A・C の「できない」は、S3 の手順（まずロールバックを続ける）から言える範囲で書いた",
+      "diagram": {
+        "alt": "更新のロールバックに失敗したスタックは、原因を直した後でロールバックを続行して UPDATE_ROLLBACK_COMPLETE にし、そこから再更新する。A の更新やD の削除は不適切で、C が正解。"
+      }
     },
     {
       "id": "q-5.3-0003",
@@ -14638,7 +14644,10 @@
           "quote": "You can retry a stage that has failed without having to run a pipeline again from the beginning."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "並列テストの 1 つが失敗した時、失敗したアクションだけを再試行し(A)、ステージの自動再試行は 1 回だけ設定する(B)。ステージ全体や最初からのやり直しは要件に反する。"
+      }
     },
     {
       "id": "q-5.3-0004",
@@ -14695,7 +14704,10 @@
           "quote": "your pipeline stage will auto-rollback only after there is a successful pipeline execution in the pipeline stage."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "自動ロールバックは、そのステージに戻り先となる成功した実行が 1 回以上ある時だけ動く。最初の実行が失敗した新しいパイプラインでは戻れない。正解は C。"
+      }
     },
     {
       "id": "q-5.3-0005",
@@ -14752,7 +14764,10 @@
           "quote": "Finally, you can compare these artifacts with the artifacts from a successful canary run to pinpoint the issue."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "新バージョンで Canary が失敗した時は、まずロールバックして顧客への影響を止め、失敗した回のスクリーンショットやログを成功した回と比べて原因を調べる(D)。"
+      }
     },
     {
       "id": "q-5.3-0006",
@@ -14816,7 +14831,10 @@
           "quote": "For tasks with EC2, this is the container instance role."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Fargate でイメージをプルするのはタスク実行ロール。そこに ECR のプル権限だけを足すのが最小権限で正解(D)。タスクロールやインスタンスロールでは直らない。"
+      }
     },
     {
       "id": "q-5.3-0007",
@@ -14884,7 +14902,10 @@
           "quote": "StoppedReason - The reason the task stopped."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "タスクが入れ替わり続ける時は、サービスのイベントで ECS の動きを見て(A)、停止したタスクの stopCode と stoppedReason を読む(B)。停止したタスクは早く確認しないと消える。"
+      }
     },
     {
       "id": "q-5.3-0008",
@@ -14941,7 +14962,10 @@
           "quote": "Amazon EC2 Auto Scaling limits the rate at which it allows instances to launch if the lifecycle hooks are failing consistently"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "起動時フックのスクリプトが失敗して abandon になると、インスタンスが入れ替わり起動も遅くなる。スクリプトの誤りを直して continue で完了させる A が正解。"
+      }
     },
     {
       "id": "q-5.3-0009",
@@ -14999,7 +15023,10 @@
           "quote": "If any of the health checks fail, the instance is replaced."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アプリの起動に 4 分かかるのに ELB のヘルスチェックで入れ替えられてしまう。猶予期間を起動時間より長くすれば、ヘルスチェックを残したまま解決する(D)。"
+      }
     },
     {
       "id": "q-5.3-0010",
@@ -15061,7 +15088,10 @@
           "quote": "Ensure that nodes deployed in public subnets are assigned a public IP address."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ステージングから複製したノードのスタックで ClusterName が本番クラスターの名前と一致しないと、ノードは参加できない。最初に確かめるのは B。"
+      }
     },
     {
       "id": "q-6.1-0001",
