@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0005",
+  "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"スケールインで終了の対象に\" }\n  HOOK[\"終了のライフサイクルフック<br/>（Terminating:Wait）\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  CPY[\"ログのコピー（最大 3 時間）<br/>✔ A: コピー中はハートビートを記録<br/>終わったらアクションを完了\"]\n  S3@{ svc: \"Amazon S3\", label: \"ログのコピー先\" }\n  ASG --> HOOK\n  HOOK -- \"イベント\" --> EB\n  EB -- \"コピーを開始\" --> CPY\n  CPY --> S3\n  CPY == \"✔ A: 待ち時間を延長\" ==> HOOK\n  W1[\"⚠ B: 既定の 1 時間を超えると終了へ進む\"]\n  W2[\"⚠ C: ABANDON ですぐ終了\"]\n  W3[\"⚠ D: 毎時の cron コピー<br/>（最後の 1 時間のログを失う）\"]\n  W1 -.-> HOOK\n  W2 -.-> HOOK\n  W3 -.-> ASG",
+  "alt": "スケールインの終了の前にログを S3 へコピーする図。終了のライフサイクルフックで止め、EventBridge でコピーを始め、ハートビートで待ち時間を延ばしてから完了させる（A）。既定のままや ABANDON ではコピー前に終了する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

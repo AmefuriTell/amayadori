@@ -13664,7 +13664,10 @@
           "quote": "using a combination of AWS AppConfig deployment strategies and automatic rollbacks based on Amazon CloudWatch alarms."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "コードを再デプロイせずに新機能を段階的に出す図。AppConfig の機能フラグをベイク時間付きの段階的デプロイで配り、CloudWatch のアラームをロールバックのモニターにすれば、鳴った時に自動で戻る（B）。"
+      }
     },
     {
       "id": "q-5.2-0002",
@@ -13734,7 +13737,10 @@
           "quote": "This setting specifies the amount of time AWS AppConfig monitors for Amazon CloudWatch alarms after the configuration has been deployed to 100% of its targets"
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "AppConfig のロールバックの仕組みの図。配信中にモニターのアラームが ALARM か INSUFFICIENT_DATA になると自動で前の設定データに戻り（A）、そのためには先に権限の設定が要る（B）。人の承認やコードの再デプロイは無い。"
+      }
     },
     {
       "id": "q-5.2-0003",
@@ -13796,7 +13802,10 @@
           "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Parameter Store の更新で、承認後にアプリを再起動する図。更新イベントの EventBridge ルールで、aws:approve の手順を含む Automation ランブックを始める（D）。コード無しで、承認を待ってから再起動する。"
+      }
     },
     {
       "id": "q-5.2-0004",
@@ -13857,7 +13866,10 @@
           "quote": "Adaptive concurrency automatically scales your automation quota from 100 concurrently running automations up to 500."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "400 台への Automation をレート制御で実行する図。同時実行数を 20、エラーのしきい値を 5 にすれば、20 台ずつ進み、失敗が 5 台を超えると残りへの送信を止める（B）。適応型の同時実行は 20 台の制限に合わない。"
+      }
     },
     {
       "id": "q-5.2-0005",
@@ -13920,7 +13932,10 @@
           "quote": "If a termination lifecycle hook times out, or is abandoned, Amazon EC2 Auto Scaling proceeds with terminating the instance immediately."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "スケールインの終了の前にログを S3 へコピーする図。終了のライフサイクルフックで止め、EventBridge でコピーを始め、ハートビートで待ち時間を延ばしてから完了させる（A）。既定のままや ABANDON ではコピー前に終了する。"
+      }
     },
     {
       "id": "q-5.2-0006",
@@ -13981,7 +13996,10 @@
           "quote": "To replace all instances at once, set a minimum healthy percentage of 0 percent."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "希望する容量 20 台の Auto Scaling グループのインスタンスの更新の図。最小正常率 90・最大正常率 100 にすると、容量の 10%（2 台）ずつ置き換えながら 90% 以上を保つ（D）。他の組み合わせは 1 台・全部・10 台ずつになる。"
+      }
     },
     {
       "id": "q-5.2-0007",
@@ -14055,7 +14073,10 @@
           "quote": "You can't roll it back after it's finished."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インスタンスの更新で 20% 時点の通知と自動ロールバックを設定する図。20% と 100% にチェックポイントを置き EventBridge から SNS へ送り（A）、自動ロールバックでアラームを指定する（B）。取り消しでは元に戻らない。"
+      }
     },
     {
       "id": "q-5.2-0008",
@@ -14113,7 +14134,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 B・C・D の説明は、この束の sources に直接の原文は無い（C-0018 の change sets の出典 S1 で B を言える）"
+      "note": "選択肢 B・C・D の説明は、この束の sources に直接の原文は無い（C-0018 の change sets の出典 S1 で B を言える）",
+      "diagram": {
+        "alt": "CloudFormation の外で変更されたセキュリティグループを見つける図。スタックでドリフトの検出を実行すれば、リソースを変えずに、ドリフトしたリソースとテンプレートと違うプロパティが分かる（B）。"
+      }
     },
     {
       "id": "q-5.2-0009",
@@ -14171,7 +14195,10 @@
           "quote": "AWS Config provides a set of managed automation documents with remediation actions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "非準拠の S3 バケットを自動で直す図。AWS が用意する Systems Manager Automation のドキュメントを AWS Config ルールの自動の修復のアクションに関連付ける（A）。コードも手作業も要らない。"
+      }
     },
     {
       "id": "q-5.2-0010",
@@ -14234,7 +14261,10 @@
           "quote": "automatically recovers the instance if it becomes impaired due to an underlying hardware failure or a problem that requires AWS involvement to repair."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Auto Scaling の外の 1 台の EC2 を、基盤のハードウェア障害から自動復旧する図。StatusCheckFailed_System の CloudWatch アラームに復旧のアクションと SNS の通知を付ける（D）。Instance のアラームには付けられない。"
+      }
     },
     {
       "id": "q-5.2-0011",

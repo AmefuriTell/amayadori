@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0007",
+  "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"エラーのアラーム\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"インスタンスの更新<br/>✔ A: チェックポイント 20% と 100%\" }\n  OLD[\"置き換えた分を元の状態へ\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"チェックポイントのルール\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"通知\" }\n  W1[\"⚠ C: アラームで取り消す<br/>（置き換えた分は戻らない）\"]\n  W3[\"⚠ E: 20% だけにチェックポイント<br/>（全部は置き換わらない）\"]\n  W2[\"⚠ D: 終了後にロールバックする<br/>（できない）\"]\n  CW -- \"ALARM\" --> ASG\n  W1 -.-> ASG\n  W3 -.-> ASG\n  ASG == \"✔ B: 自動ロールバック\" ==> OLD\n  ASG -- \"20% のイベント\" --> EB\n  EB --> SNS\n  W2 -.-> OLD",
+  "alt": "インスタンスの更新で 20% 時点の通知と自動ロールバックを設定する図。20% と 100% にチェックポイントを置き EventBridge から SNS へ送り（A）、自動ロールバックでアラームを指定する（B）。取り消しでは元に戻らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

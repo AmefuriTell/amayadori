@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0009",
+  "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"ルール\" }\n  B[\"準拠していない S3 バケット\"]\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation ドキュメント（AWS 用意）\" }\n  B -- \"非準拠\" --> CFG\n  CFG == \"✔ A: 自動修復\" ==> AUT\n  AUT -- \"決めた一連の操作で修復\" --> B\n  W1[\"⚠ B: 修復の Lambda を書く\"]\n  W2[\"⚠ C: エンジニアが手作業で直す\"]\n  W3[\"⚠ D: 週 1 回のスクリプト\"]\n  W1 -.-> CFG\n  W2 -.-> B\n  W3 -.-> B\n",
+  "alt": "非準拠の S3 バケットを自動で直す図。AWS が用意する Systems Manager Automation のドキュメントを AWS Config ルールの自動の修復のアクションに関連付ける（A）。コードも手作業も要らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
