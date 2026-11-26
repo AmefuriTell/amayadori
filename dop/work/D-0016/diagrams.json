@@ -28,7 +28,7 @@
     },
     {
       "id": "q-3.1-0007",
-      "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    PU[\"プレイヤー（米国）\"]\n    T1@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    PE[\"プレイヤー（欧州）\"]\n    T2@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  X1[\"⚠ A: Aurora は書き込みがプライマリだけ\"]\n  X2[\"⚠ B: コピーの仕組みを自作して保守\"]\n  X3[\"⚠ C: リードレプリカは読み取り用\"]\n  PU -- \"読み書き\" --> T1\n  PE -- \"読み書き\" --> T2\n  T1 <== \"✔ D: 自動で複製\" ==> T2\n  X1 -.-> PE\n  X2 -.-> PU\n  X3 -.-> PE\n",
+      "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    PU[\"プレイヤー（米国）\"]\n    T1@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    PE[\"プレイヤー（欧州）\"]\n    T2@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  X1[\"⚠ A: Aurora は書き込みがプライマリだけ\"]\n  X2[\"⚠ B: コピーの仕組みを自作して保守\"]\n  X3[\"⚠ C: リードレプリカは読み取り用\"]\n  PU -- \"読み書き\" --> T1\n  PE -- \"読み書き\" --> T2\n  T1 <== \"✔ D: 自動で複製\" ==> T2\n  X1 -.-> PE\n  X2 -. \"自前のコピー\" .-> T1\n  X3 -.-> PE\n",
       "alt": "us-east-1 と eu-west-1 の DynamoDB グローバルテーブルのレプリカに、プレイヤーが自分のリージョンで読み書きする図。複製は自動でマルチアクティブな D が正解で、A や C は書き込みがプライマリだけ、B は自作が要る。"
     },
     {
