@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0002",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"ECS の blue/green デプロイ\" }\n  NLB[\"⚠ A・B: Network Load Balancer では ECSAllAtOnce しか使えない\"]\n  LB@{ svc: \"Elastic Load Balancing\", label: \"✔ D: Application Load Balancer に替える\" }\n  OLD@{ svc: \"Amazon ECS\", label: \"旧タスクセット\" }\n  NEW@{ svc: \"Amazon ECS\", label: \"新タスクセット\" }\n  BADC[\"⚠ C: 承認を足しても一度に全部移る\"]\n  CD -- \"ECSCanary10Percent5Minutes\" --> LB\n  LB == \"✔ D: 10% を 5 分、その後に残り\" ==> NEW\n  LB -- \"最初は 90%\" --> OLD\n  NLB -.-> CD\n  BADC -.-> CD",
+  "alt": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと ECSAllAtOnce しか使えない。Application Load Balancer に替えて ECSCanary10Percent5Minutes を使うと、10% を 5 分流してから残りを移せる（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

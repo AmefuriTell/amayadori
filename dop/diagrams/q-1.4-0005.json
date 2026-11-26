@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0005",
+  "source": "flowchart TB\n  USERS[\"ユーザー\"]\n  subgraph BL[\"今の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョン\" }\n  end\n  subgraph GR[\"別の環境\"]\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョン（専用の URL で試験）\" }\n  end\n  BADAB[\"⚠ A・B: 同じ環境の更新 → 別の URL で先に試験できない\"]\n  BADD[\"⚠ D: すぐ古い環境を終了 → 戻せない\"]\n  USERS -- \"本番の URL\" --> OLD\n  USERS == \"✔ C: 環境 URL のスワップで切り替え\" ==> NEW\n  NEW -. \"戻す時も入れ替えるだけ\" .-> OLD\n  BADAB -.-> OLD\n  BADD -.-> OLD",
+  "alt": "Elastic Beanstalk の blue/green。新バージョンを別の環境に置き、専用の URL で試験してから環境 URL のスワップで即座に切り替え、もう一度入れ替えれば戻せる（C）。インプレースの更新（A・B）や、すぐ終了（D）は合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -2913,7 +2913,10 @@
           "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy の LambdaCanary10Percent5Minutes は、最初に 10% を新バージョンへ送り、5 分後に残り 90% を移す（A）。linear（B）は全部移るまで約 10 分、AllAtOnce（C）は一度に全部で要件に合わない。"
+      }
     },
     {
       "id": "q-1.4-0002",
@@ -2972,7 +2975,10 @@
           "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと ECSAllAtOnce しか使えない。Application Load Balancer に替えて ECSCanary10Percent5Minutes を使うと、10% を 5 分流してから残りを移せる（D）。"
+      }
     },
     {
       "id": "q-1.4-0003",
@@ -3038,7 +3044,10 @@
           "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "置き換え先のインスタンスは、再ルーティングを手で選ぶ設定（B）にすると切り替えるまでロードバランサーに登録されず、QA が先に試験できる。元のインスタンスは動かしたままにする（D）。すぐ切り替え（A）や自動終了（C）は合わない。"
+      }
     },
     {
       "id": "q-1.4-0004",
@@ -3095,7 +3104,10 @@
           "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Elastic Beanstalk のデプロイポリシーを TrafficSplitting にして割合 10%、評価時間 30 分にすると、新バージョンへ 10% を 30 分流し、問題なければ全部を移して旧インスタンスを削除する（B）。"
+      }
     },
     {
       "id": "q-1.4-0005",
@@ -3152,7 +3164,10 @@
           "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Elastic Beanstalk の blue/green。新バージョンを別の環境に置き、専用の URL で試験してから環境 URL のスワップで即座に切り替え、もう一度入れ替えれば戻せる（C）。インプレースの更新（A・B）や、すぐ終了（D）は合わない。"
+      }
     },
     {
       "id": "q-1.4-0006",
@@ -3215,7 +3230,10 @@
           "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeBuild が CodeArtifact の認可トークンを取るには、codeartifact の権限に加えて sts:GetServiceBearerToken が要る。足りないこの権限だけを追加するのが最小権限の解決（A）。"
+      }
     },
     {
       "id": "q-1.4-0007",
@@ -3272,7 +3290,10 @@
           "quote": "When the lifetime expires, you must fetch another token."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeArtifact の認可トークンの寿命は最大 12 時間で自動では延びないので、14 時間のジョブは開始時の 1 回だけだと終盤に切れる。期限が切れる前に新しいトークンを取り直す（D）。"
+      }
     },
     {
       "id": "q-1.4-0008",
@@ -3344,7 +3365,10 @@
           "quote": "but they aren't directly accessible by the containers in the task."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECR からイメージを取るのはエージェントで、権限はタスク実行ロールに付ける（A）。コンテナ内のアプリが S3 に書く権限はタスクの IAM ロールに付ける（B）。ロールを逆にすると届かない（C・D）。"
+      }
     },
     {
       "id": "q-1.4-0009",
@@ -3404,7 +3428,10 @@
           "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy エージェントは、インスタンスプロファイルのロールの権限で S3 からリビジョンを取る。deploy-artifacts からの読み取りだけを許すロールを付けるのが最小権限（B）。"
+      }
     },
     {
       "id": "q-1.4-0010",
@@ -3466,7 +3493,10 @@
           "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Systems Manager でスケジュールを組み、AWSCodeDeployAgentV2 のパッケージを EC2 とオンプレミスの全サーバーに、ログイン無しで入れて新バージョンにも更新する（C）。手作業や cron は手間が増える。"
+      }
     },
     {
       "id": "q-1.4-0011",

@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0010",
+  "source": "flowchart TB\n  SSM@{ svc: \"AWS Systems Manager\", label: \"✔ C: パッケージの配布（スケジュール）\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"AWSCodeDeployAgentV2 のパッケージ\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 200 台\" }\n  ONP[\"オンプレミス 50 台\"]\n  BADA[\"⚠ A: ユーザーデータは EC2 だけ。オンプレは手作業\"]\n  BADB[\"⚠ B: 1 回だけ。新バージョンは手作業\"]\n  BADD[\"⚠ D: cron ジョブを作って保守\"]\n  CD -- \"パッケージ\" --> SSM\n  SSM == \"インストール + 新版へ更新\" ==> EC2\n  SSM == \"インストール + 新版へ更新\" ==> ONP\n  BADA -.-> ONP\n  BADB -.-> SSM\n  BADD -.-> EC2",
+  "alt": "Systems Manager でスケジュールを組み、AWSCodeDeployAgentV2 のパッケージを EC2 とオンプレミスの全サーバーに、ログイン無しで入れて新バージョンにも更新する（C）。手作業や cron は手間が増える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0008",
+  "source": "flowchart TB\n  subgraph TASK[\"ECS タスク\"]\n    AG@{ svc: \"AWS Fargate\", label: \"エージェント（イメージを取得）\" }\n    APP@{ svc: \"Amazon ECS\", label: \"コンテナのアプリ\" }\n  end\n  ER@{ svc: \"AWS IAM\", label: \"✔ A: タスク実行ロール\" }\n  TR@{ svc: \"AWS IAM\", label: \"✔ B: タスクの IAM ロール\" }\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ\" }\n  S3@{ svc: \"Amazon S3\", label: \"バケット\" }\n  BADC[\"⚠ C: 取得の権限をタスクロールに付けても、取るのはエージェント\"]\n  BADD[\"⚠ D: S3 の権限を実行ロールに付けてもコンテナは使えない\"]\n  BADE[\"⚠ E: ECR を公開 → 権限の問題の答えにならない\"]\n  ER -- \"取得の権限\" --> AG\n  AG == \"イメージの取得\" ==> ECR\n  TR -- \"S3 への書き込み\" --> APP\n  APP == \"オブジェクトを書く\" ==> S3\n  BADC -.-> TR\n  BADD -.-> ER\n  BADE -.-> ECR",
+  "alt": "ECR からイメージを取るのはエージェントで、権限はタスク実行ロールに付ける（A）。コンテナ内のアプリが S3 に書く権限はタスクの IAM ロールに付ける（B）。ロールを逆にすると届かない（C・D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
