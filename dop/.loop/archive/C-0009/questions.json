@@ -1,0 +1,225 @@
+{
+  "item": "C-0009",
+  "questions": [
+    {
+      "task": "1.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.2-0001",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Java team builds with AWS CodeBuild. The tests already produce a JaCoCo XML coverage file, but developers must download build artifacts to see the coverage. The team wants line and branch coverage for every build to appear in CodeBuild, and does not want to run or maintain any extra reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある Java のチームは AWS CodeBuild でビルドしています。テストは既に JaCoCo XML のカバレッジのファイルを出していますが、開発者はカバレッジを見るためにビルドのアーティファクトをダウンロードする必要があります。チームは、すべてのビルドの行カバレッジと分岐カバレッジを CodeBuild で見られるようにしたく、追加のレポートのツールを動かしたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a reports section to the buildspec file with a code coverage report group, the JaCoCo XML file location, and the JACOCOXML file format.",
+          "text_ja": "buildspec ファイルに reports セクションを足し、コードカバレッジのレポートグループ、JaCoCo XML のファイルの場所、JACOCOXML のファイル形式を指定する。"
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the buildspec file with the JaCoCo XML file location, and leave the file format unspecified.",
+          "text_ja": "buildspec ファイルに reports セクションを足して JaCoCo XML のファイルの場所を指定し、ファイル形式は指定しない。"
+        },
+        {
+          "key": "C",
+          "text": "Upload the JaCoCo XML file to an Amazon S3 bucket after each build and host a static dashboard that parses it.",
+          "text_ja": "ビルドのたびに JaCoCo XML のファイルを Amazon S3 バケットへアップロードし、それを解析する静的なダッシュボードを公開する。"
+        },
+        {
+          "key": "D",
+          "text": "Run a self-hosted code quality server on Amazon EC2 and send the JaCoCo XML file to it from the build.",
+          "text_ja": "Amazon EC2 で自前のコード品質のサーバーを動かし、ビルドから JaCoCo XML のファイルを送る。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CodeBuild はテストのコードカバレッジのレポートを作れ、行カバレッジと分岐カバレッジを示します。buildspec にコードカバレッジのレポートグループを設定してビルドを動かすと、ビルドごとにレポートが作られます。JaCoCo XML は対応する形式で、ファイル形式を指定しないと JUNITXML として扱われます。",
+        "per_choice": {
+          "A": "正しい。対応する形式を指定したレポートグループで、ビルドごとのカバレッジのレポートが CodeBuild に出ます。",
+          "B": "ファイル形式を指定しないと JUNITXML として扱われ、JaCoCo のカバレッジのレポートとして読まれません。",
+          "C": "動きますが、解析とダッシュボードを自分で作って保守する必要があります。",
+          "D": "動きますが、追加のツールを動かして保守することになり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "source_id": "S2",
+          "quote": "CodeBuild allows you to generate code coverage reports for your tests."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report-create",
+          "source_id": "S3",
+          "quote": "To create a code coverage report, you run a build project that is configured with at least one code coverage report group in its buildspec file."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "source_id": "S6",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "source_id": "S2",
+          "quote": "JaCoCo XML"
+        }
+      ]
+    },
+    {
+      "task": "1.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.2-0002",
+      "services": [
+        "AWS CodeBuild",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team uses a report group that was created automatically from the reports section of a CodeBuild buildspec file. Auditors now require the raw test result files from every build to be kept for one year. The team notices that test reports can no longer be viewed after about a month. Which solution meets the audit requirement with the LEAST operational overhead?",
+      "stem_ja": "あるチームは、CodeBuild の buildspec ファイルの reports セクションから自動で作られたレポートグループを使っています。監査人は、すべてのビルドのテスト結果の元のファイルを 1 年間残すことを新たに求めています。チームは、テストのレポートが約 1 か月後に見られなくなることに気づきました。運用上のオーバーヘッドが最も少なく監査の要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the current report group, and save screenshots of each test report before it expires.",
+          "text_ja": "今のレポートグループのまま、各テストのレポートが期限切れになる前に画面を保存する。"
+        },
+        {
+          "key": "B",
+          "text": "Create a report group that exports raw results to Amazon S3, and reference its ARN in the buildspec.",
+          "text_ja": "元の結果を Amazon S3 へエクスポートするレポートグループを作り、buildspec でその ARN を指定する。"
+        },
+        {
+          "key": "C",
+          "text": "Keep the current report group, and rerun old builds whenever the auditors ask for results.",
+          "text_ja": "今のレポートグループのまま、監査人が結果を求めるたびに古いビルドを実行し直す。"
+        },
+        {
+          "key": "D",
+          "text": "Add a post_build command that runs a team-maintained script to copy result files to Amazon S3.",
+          "text_ja": "チームが保守するスクリプトで結果のファイルを Amazon S3 へコピーする post_build のコマンドを足す。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "テストのレポートは作られてから 30 日で期限切れになり、見られなくなります。buildspec で作ったレポートグループは元のテスト結果のファイルをエクスポートしないため、コンソールか AWS CLI で作ったレポートグループを使い、buildspec ではその ARN を指定します。",
+        "per_choice": {
+          "A": "手作業で、元のテスト結果のファイルも残りません。",
+          "B": "正しい。エクスポートするレポートグループをコンソールか AWS CLI で作り、buildspec から既存のレポートグループとして ARN で指定します。",
+          "C": "実行し直しても当時の結果にはならず、すべてのビルドの元のファイルを残すことになりません。",
+          "D": "動きますが、コピーのスクリプトを保守する必要があり、レポートグループの機能を使うより手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+          "source_id": "S1",
+          "quote": "A report expires 30 days after it was created. You cannot view an expired test report."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#test-report-group-create-buildspec",
+          "source_id": "S5",
+          "quote": "A report group created using the buildspec does not export raw test result files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "source_id": "S6",
+          "quote": "Specify the ARN of an existing report group, or the name of a new report group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#report-group-create",
+          "source_id": "S4",
+          "quote": "You can use the CodeBuild console, the AWS CLI, or a buildspec file to create a report group."
+        }
+      ],
+      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。"
+    },
+    {
+      "task": "1.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.2-0003",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeBuild"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Python service is deployed by AWS CodePipeline. The team wants a separate stage that runs the unit tests before deployment, and wants each run's pytest results, which are written in JUnit XML, to be shown as test reports in AWS CodeBuild. The team wants to use managed features only. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "ある Python のサービスは AWS CodePipeline でデプロイされています。チームは、デプロイの前に単体テストを実行する別のステージを置き、JUnit XML で書かれる各回の pytest の結果を、AWS CodeBuild のテストのレポートとして見たいと考えています。チームはマネージドの機能だけを使いたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a stage with a CodeBuild action in the Test category that runs the CodeBuild project for the unit tests.",
+          "text_ja": "単体テストの CodeBuild プロジェクトを実行する、Test のカテゴリーの CodeBuild のアクションを持つステージを足す。"
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the project's buildspec that points to the JUnit XML result files, using the default file format.",
+          "text_ja": "プロジェクトの buildspec に、JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式は既定のものを使う。"
+        },
+        {
+          "key": "C",
+          "text": "Add a reports section that points to the JUnit XML result files and set the file format to CLOVERXML.",
+          "text_ja": "JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式を CLOVERXML にする。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on the BatchEnabled parameter of the CodeBuild action so that test reports are created.",
+          "text_ja": "テストのレポートが作られるよう、CodeBuild のアクションの BatchEnabled パラメータを有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Export the test results as environment variables and read them from the action's output variables.",
+          "text_ja": "テストの結果を環境変数としてエクスポートし、アクションの出力変数から読む。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "CodePipeline の CodeBuild のアクションは Build か Test のカテゴリーで、パイプラインの中でビルドやテストを実行できます。テストのレポートは buildspec の reports セクションで結果のファイルの場所を指定して作り、ファイル形式を指定しなければ JUNITXML として扱われます。",
+        "per_choice": {
+          "A": "正しい。Test のカテゴリーの CodeBuild のアクションで、デプロイの前にテストのステージを置けます。",
+          "B": "正しい。JUnit XML は既定の形式なので、reports セクションで場所を指定すればテストのレポートが作られます。",
+          "C": "CLOVERXML はコードカバレッジの形式で、JUnit XML の結果を正しく読めません。",
+          "D": "BatchEnabled は同じ実行の中で複数のビルドを動かすためのもので、レポートを作る設定ではありません。",
+          "E": "出力変数はビルドでエクスポートした環境変数を出すもので、テストのレポートにはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "source_id": "S7",
+          "quote": "Allows you to run builds and tests as part of your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "source_id": "S7",
+          "quote": "Category: Build or Test"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "source_id": "S6",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild-config",
+          "source_id": "S8",
+          "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
+        }
+      ]
+    }
+  ]
+}
