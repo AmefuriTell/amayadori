@@ -1,0 +1,82 @@
+{
+ "slides": [
+  {
+   "id": "s02",
+   "issues": [
+    { "kind": "flow", "severity": "軽", "detail": "台本の「この点は、後半で効いてきます」の予告に、後半ではっきり戻らない。s10・s11 の冪等の話が結果整合や重複の扱いにつながる事が台本で言われていない。", "suggest": "s10 か s11 の台本で「s02 の重複の扱いが難しい点が、ここで効きます」と一言つなぐか、予告を消す。" }
+   ]
+  },
+  {
+   "id": "s04",
+   "issues": [
+    { "kind": "fact", "severity": "軽", "detail": "図の矢印の札が「少なくとも 1 回」だけで、根拠（S2）の「届けようとする（attempts）」が落ちている。bullets と台本は「届けようとする」なので画面の中でもずれる。", "suggest": "札を「少なくとも 1 回 届けようとする」にする。" }
+   ]
+  },
+  {
+   "id": "s05",
+   "issues": [
+    { "kind": "unsupported", "severity": "軽", "detail": "表の行「simplified ｜ 複数 Region を 1 つで」で、根拠（S7）と台本にある「アカウントに固有のイベントを」という条件が落ちている。", "suggest": "「複数 Region のアカウント固有イベントを 1 つで」とする。" },
+    { "kind": "mismatch", "severity": "軽", "detail": "台本は「制限が二つ」として public 不可と action-required の推奨を並べるが、表は「制限」と「推奨」を分けている。根拠（S7）でも後者は推奨（only recommended）で、制限ではない。", "suggest": "台本を「制限が一つと、すすめられる使い方が一つ」のように表と根拠に合わせる。" },
+    { "kind": "terms", "severity": "軽", "detail": "bullets は「us-east-1」、表は「US East」、台本は「米国東部、バージニア北部」で、同じ物の呼び方が 1 枚の中でそろわない。us-east-1 という書き方は根拠に無い。", "suggest": "「US East (N. Virginia)」にそろえる（s13 も同じ）。" }
+   ]
+  },
+  {
+   "id": "s06",
+   "issues": [
+    { "kind": "flow", "severity": "中", "detail": "台本の「ルールの状態の設定を確かめます」は、有効以外の『状態』がある事を前提にしているが、どんな状態を選べば読み取りだけの管理イベントを拾えるかは説明も根拠（S3）も無い。s13 の表でも「確かめる所: 有効だけでは除く」で止まり、受験者は何を選べばよいか分からない。", "suggest": "読み取りだけの管理イベントも照らし合わせるルールの状態を示す根拠を sources に足して名前を出すか、根拠が無いなら「有効にしただけでは照らし合わせない」までに留め、「状態の設定を確かめる」という言い方を消す。" }
+   ]
+  },
+  {
+   "id": "s07",
+   "issues": [
+    { "kind": "flow", "severity": "軽", "detail": "台本の「両方を受け手を作るときに設定する」の『両方』が何と何か（RetryPolicy と dead-letter queue）言われていない。", "suggest": "「再試行の設定とデッドレターキューの両方を」と書く。" },
+    { "kind": "terms", "severity": "軽", "detail": "ここだけ subscriber を「受け手」と訳しており、同じ物を他の所では「ターゲット」と呼んでいる。", "suggest": "「ターゲットを設定するときに」のようにそろえる。" }
+   ]
+  },
+  {
+   "id": "s08",
+   "issues": [
+    { "kind": "terms", "severity": "軽", "detail": "bullets は「多くの購読者へ」、台本と根拠（S5）は「複数の購読者（multiple subscribers）」。s14 も「多くの受け手」。", "suggest": "「複数の購読者へ」にそろえる。" }
+   ]
+  },
+  {
+   "id": "s10",
+   "issues": [
+    { "kind": "flow", "severity": "中", "detail": "ここの queue consumer は Kinesis Data Streams のドキュメント（S6）が分ける読み方の一つだが、地図（s01「Kinesis・SQS 読み手」）とまとめ（s16）は Kinesis と SQS を一つに束ねており、「キューの読み手 = SQS」と受け取れる。台本の「キューは、各記録を少なくとも一回は届けますが、書いた順とは限りません」も SQS 一般の話に聞こえる。", "suggest": "台本と表の見出しで「Kinesis のドキュメントが言う queue consumer」と明示し、SQS と Lambda の冪等の話（s11、S9 が根拠）とは根拠が別である事を分けて言う。" },
+    { "kind": "mismatch", "severity": "軽", "detail": "表の「作り方」行の stream consumer 欄が「表には無し」で、何が無いのか（ドキュメントに記載が無い）が画面から分からない。", "suggest": "「ドキュメントに記載無し」か「—」にする。" },
+    { "kind": "mismatch", "severity": "軽", "detail": "台本の最後の Lambda で Kinesis を処理する話（標準のイテレーター、shard ごとの polling、1 バッチ 1 shard）が、この画面の bullets にも表にも無い。", "suggest": "表に 1 行足すか、この話を s15 だけに回す。" }
+   ]
+  },
+  {
+   "id": "s13",
+   "issues": [
+    { "kind": "unsupported", "severity": "中", "detail": "行「複数 Region を 1 つで → simplified ｜ public は不可」で、s05 の本文にある二つの条件が落ちている。一つは「アカウント固有のイベント」、もう一つは「action-required のイベントを取り込む場合だけすすめられる」（S7）。表だけ覚えると、条件なしで simplified を選ぶと誤って覚える。台本も推奨の条件を言わない。", "suggest": "確かめる所を「public 不可・action-required 向け」とし、条件の列を「複数 Region のアカウント固有イベントを 1 つで」にする。台本にも推奨の条件を足す。" },
+    { "kind": "unsupported", "severity": "軽", "detail": "行「public イベントも要る → Region ごとのルール」は、根拠（S7）が直接言う事ではなく、simplified が public を受けられない事からの推論。", "suggest": "台本で「simplified では受けられないので、Region ごとのルールを使う」と推論の形で言うか、直接の根拠を sources に足す。" },
+    { "kind": "terms", "severity": "軽", "detail": "表の「default bus」が s06 の「default event bus」と、「US East」が s05 bullets の「us-east-1」と表記がそろわない。", "suggest": "「default event bus」「US East (N. Virginia)」にそろえる。" }
+   ]
+  },
+  {
+   "id": "s14",
+   "issues": [
+    { "kind": "unsupported", "severity": "軽", "detail": "bullet「失いたくない → dead-letter queue」は、本文（s07）の「EventBridge が target への呼び出しに失敗し、再試行を使い切った時」という条件が落ち、どんな場合でも dead-letter queue と読める。表は「届かない物を残す」で少し近い。", "suggest": "「target に届かない → dead-letter queue」にする。" }
+   ]
+  },
+  {
+   "id": "s15",
+   "issues": [
+    { "kind": "unsupported", "severity": "軽", "detail": "表の「SQS を Lambda で ｜ エラーで全部戻る」で本文（s11）の「既定では」が落ちている（次の行で partial batch を示すので誤解は小さい）。同じく「Kinesis を Lambda で ｜ shard ごとに polling」で「標準のイテレーターでは」（S11）が落ちている。", "suggest": "「既定はエラーで全部戻る」「標準 iterator は shard ごと」とする。" },
+    { "kind": "terms", "severity": "軽", "detail": "bullet「順序と状態 → stream consumer」の『状態』は、s10 では言っていない（s10 は「前の記録に依る処理」）。", "suggest": "「前の記録に依る → stream consumer」とそろえる。" }
+   ]
+  },
+  {
+   "id": "s16",
+   "issues": [
+    { "kind": "unsupported", "severity": "中", "detail": "まとめの箱「Kinesis・SQS 冪等に作る」と台本「キューの読み手はべきとうに作る」は、Kinesis の stream consumer まで冪等に作ると読める。根拠で冪等が言われているのは queue consumer（S6）と SQS を読む Lambda（S9）だけで、条件が落ちている。", "suggest": "箱を「queue consumer と SQS の Lambda は冪等に」とし、stream consumer は「shard を順に」と分けて書く。" },
+    { "kind": "flow", "severity": "軽", "detail": "地図（s01）で予告した「filter policy」が、まとめの箱にも台本にも無い。", "suggest": "SNS の箱を「SQS へ fan out・filter policy」にし、台本に一言足す。" }
+   ]
+  }
+ ],
+ "global": [
+  { "severity": "軽", "detail": "Region の呼び方が us-east-1・US East・米国東部、バージニア北部と、bus の呼び方が event bus・bus・default bus・default event bus と、スライドをまたいで揺れる。", "suggest": "画面は「US East (N. Virginia)」「default event bus」にそろえ、略す時は初出で断る。" }
+ ]
+}

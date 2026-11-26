@@ -1,0 +1,765 @@
+{
+ "task": "5.1",
+ "title": "イベントを受け取り、処理し、知らせ、対応する",
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "受け取る部: イベントの元",
+    "処理する部: 届け方と読み手",
+    "最後に条件から選ぶ表"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph R[\"受け取る部\"]\n    direction LR\n    EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>event bus・<br/>別アカウント\" }\n    HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>対応と Region\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>読み取りだけの<br/>管理イベント\" }\n    EB ~~~ HE ~~~ CT\n  end\n  subgraph P[\"処理する部\"]\n    direction LR\n    DL[\"target に<br/>届かない時\"]\n    SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>fan out・<br/>filter policy\" }\n    RD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis・SQS<br/>読み手と Lambda\" }\n    SF@{ svc: \"AWS Step Functions\", label: \"Pipes と<br/>Step Functions\" }\n    DL ~~~ SN ~~~ RD ~~~ SF\n  end\n  R ~~~ P\n",
+    "alt": "講義の地図。扱う順に箱を並べた物で、矢印は無く、処理の流れではない。上の段は受け取る部で、EventBridge の event bus と別アカウントからの送り方、AWS Health の対応と Region、CloudTrail の読み取りだけの管理イベントを扱う。下の段は処理する部で、target に届かない時、SNS の fan out と filter policy、Kinesis と SQS の読み手と Lambda、Pipes と Step Functions を扱う。"
+   },
+   "narration": "この講義では、イベントを受け取り、それに応じて処理し、知らせ、対応する仕組みを学びます。講義は二つの部に分けます。画面の地図は扱う順に並べた物で、処理の流れではありません。前半の受け取る部では、イベントブリッジのイベントバスと、別のアカウントからの送り方、エーダブリューエスヘルスと、クラウドトレイルのイベントの受け方を見ます。後半の処理する部では、ターゲットに届かないときの備え、エスエヌエスのファンアウトとフィルターポリシー、キネシスとエスキューエスの読み手とラムダ、最後にパイプスとステップファンクションズです。締めに、条件から方法を選ぶ表を三枚見ます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Amazon EventBridge is a serverless service that uses events to connect application components together, making it easier for you to build scalable event-driven applications.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S2",
+     "quote": "You can use Amazon EventBridge to detect and react to AWS Health events.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html#cloudwatch-events-health"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "受け取る部 1: EventBridge の event bus",
+   "bullets": [
+    "イベントでつなぐ疎結合",
+    "event bus は 0 個以上の target へ",
+    "結果整合になりやすい"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  SRC[\"イベントの元\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>event bus<br/>振り分け役\" }\n  T1[\"target\"]\n  T2[\"target\"]\n  SRC -- \"イベント\" --> EB\n  EB -- \"届ける\" --> T1\n  EB --> T2\n",
+    "alt": "イベントの元が出したイベントを EventBridge の event bus が受け取り、target へ届ける。event bus は振り分け役で、届ける先の target は 0 個以上。図の target 2 つは例。"
+   },
+   "narration": "イベント駆動のアーキテクチャとは、イベントを出したり、イベントに応じたりして動く、疎結合な部品で組む作り方です。疎結合とは、部品どうしが強く結び付いていないことです。イベントブリッジは、イベントで部品をつなぐ、サーバーレスのサービスです。中心になるのがイベントバスです。イベントバスは振り分け役で、イベントを受け取り、ゼロ個以上のターゲットへ届けます。ターゲットとは、イベントを届ける先のことです。ポーリングやウェブフックの仕組みも、イベントで置き換えられます。一方で、こうした作りは、全体の状態が後からそろう、結果整合になることが多いとされます。そのため、重複の扱いや、全体の正確な状態をつかむことが難しくなります。この点は、後半で効いてきます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Event-driven architecture is a style of building loosely-coupled software systems that work together by emitting and responding to events.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S1",
+     "quote": "Event buses are routers that receive events and delivers them to zero or more targets.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S17",
+     "quote": "Both of these mechanisms can be replaced by events, which can be filtered, routed, and pushed downstream to consuming microservices.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#polling-webhooks-events"
+    },
+    {
+     "source_id": "S16",
+     "quote": "This makes it more complex to process transactions, handle duplicates, or determine the exact overall state of a system.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#eventual-consistency"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "受け取る部 2: 別アカウントから event bus へ",
+   "bullets": [
+    "受け取る側の bus にポリシー",
+    "resource-based policy",
+    "例は source と detail-type で絞る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph A1[\"送る側のアカウント\"]\n    SND[\"イベントを送る物\"]\n  end\n  subgraph A2[\"受け取る側のアカウント\"]\n    CB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>central-event-bus\" }\n    POL[\"resource-based policy<br/>例: source と detail-type<br/>が決まった物だけ\"]\n  end\n  SND -- \"イベントを送る\" --> CB\n  POL -. \"bus に付ける\" .-> CB\n",
+    "alt": "送る側のアカウントから、受け取る側のアカウントの central-event-bus へイベントを送る。許可は resource-based policy で書き、受け取る側の bus に付ける。例のポリシーは、source と detail-type の値が決まったイベントだけを許す。"
+   },
+   "narration": "イベントバスへは、別のアカウントからイベントを送ることもできます。ドキュメントの例では、あるアカウントに、別のアカウントにある、セントラルイベントバスという名前のバスへ、イベントを送る許可を与えています。許可は、リソースベースのポリシー、つまりリソースの側に付けるポリシーで書きます。付ける先は、イベントを受け取る側のアカウントの、そのバスです。送る側ではありません。この例では、さらに、ソースとディテールタイプの値が決まったイベントだけに絞っています。この絞り方は例の書き方で、いつも絞らなければならない、という意味ではありません。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html#eb-event-bus-example-policy-cross-account-custom-bus-source"
+    },
+    {
+     "source_id": "S8",
+     "quote": "The following example policy grants the account 111122223333 permission to publish events to the central-event-bus in account 123456789012, but only for events with a source value set to com.exampleCorp.webStore and a detail-type set to newOrderCreated.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html#eb-event-bus-example-policy-cross-account-custom-bus-source"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "受け取る部 3: AWS Health のイベント",
+   "bullets": [
+    "ルールで検知して対応",
+    "少なくとも 1 回届けようとする",
+    "public は最大 1 時間後から"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>のイベント\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>のルール\" }\n  AC[\"対応の例<br/>記録・通知・是正など\"]\n  HE -- \"少なくとも 1 回\" --> RU\n  RU -- \"当てはまれば\" --> AC\n",
+    "alt": "AWS Health はイベントを少なくとも 1 回 EventBridge へ届けようとする。EventBridge のルールに当てはまったイベントに応じて、情報の記録、通知、是正の対応などをとる。これらは例。"
+   },
+   "narration": "エーダブリューエスヘルスのイベントは、イベントブリッジで検知し、それに応じて動けます。そのために、ルールを作ります。ルールとは、届いたイベントを照らし合わせて、当てはまる物を選ぶための決まりです。イベントの種類に応じて、情報を記録する、別のイベントを起こす、通知を送る、是正の対応をとる、といったことができます。これらは例で、ほかの対応もとれます。届け方では、二つ押さえます。一つ目、ヘルスはイベントを、少なくとも一回は届けようとします。二つ目、ヘルスダッシュボードに出る公開のイベントは、ルールを作ってから送られ始めるまで、最大で一時間かかることがあります。",
+   "refs": [
+    {
+     "source_id": "S2",
+     "quote": "Depending on the type of event, you can capture event information, initiate additional events, send notifications, take corrective action, or perform other actions.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html#cloudwatch-events-health"
+    },
+    {
+     "source_id": "S2",
+     "quote": "AWS Health delivers events on a durable basis and attempts to successfully deliver events to EventBridge at least once.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html#cloudwatch-events-health"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Public health events might take up to one hour to start sending after you create an EventBridge rule.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html#cloudwatch-events-health"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "受け取る部 4: AWS Health と Region",
+   "bullets": [
+    "Region ごとにルールを作れる",
+    "simplified integration は 1 つ",
+    "global イベントは us-east-1"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "項目",
+     "ドキュメントの説明"
+    ],
+    "rows": [
+     [
+      "Region ごとのルール",
+      "受けたい Region に作る"
+     ],
+     [
+      "simplified",
+      "複数 Region を 1 つで"
+     ],
+     [
+      "simplified の制限",
+      "public は受けられない"
+     ],
+     [
+      "simplified の推奨",
+      "action-required だけ"
+     ],
+     [
+      "global イベント",
+      "US East にルール"
+     ]
+    ]
+   },
+   "narration": "ヘルスのイベントは、リージョンとの関係に気をつけます。一つのやり方は、受けたいリージョンごとにルールを作ることです。複数のリージョンから、アカウントに固有のイベントを集めたいが、ルールは一つにしたい、という場合は、シンプリファイドインテグレーション、つまり簡単にした連携が合います。ただし、制限が二つあります。公開のイベントは、この連携では受けられません。また、この連携がすすめられるのは、対応が必要な種類のイベントを取り込む場合だけです。もう一つ、リージョンに属さないイベントもあります。こうしたグローバルなイベントを受けるには、米国東部、バージニア北部のリージョンに、ルールを作る必要があります。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S7",
+     "quote": "If you want to capture account-specific events from multiple AWS Regions, but prefer to configure only a single rule, then simplified integration is the appropriate option.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Simplified integration doesn't allow you to receive public events that are shown in the AWS Health Dashboard.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Simplified integration is only recommended for ingesting action-required AWS Health events.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S7",
+     "quote": "To receive global events, you must create a rule for the US East (N. Virginia) Region.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "受け取る部 5: CloudTrail の管理イベント",
+   "bullets": [
+    "default event bus のルールで",
+    "管理の操作が見えるイベント",
+    "有効にしただけでは読み取りは除く"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  SV[\"AWS のサービスへの<br/>管理の操作\"]\n  CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>を通して届く\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>default event bus<br/>のルール\" }\n  NOTE[\"有効にしただけの<br/>ルールは、読み取り<br/>だけの管理イベントを<br/>照らし合わせない\"]\n  SV -- \"管理イベント\" --> CT\n  CT --> RU\n  RU ~~~ NOTE\n",
+    "alt": "AWS のサービスへの管理の操作が、管理イベントとして CloudTrail を通して EventBridge の default event bus に届き、そこのルールで受ける。ルールを有効にしただけの状態では、CloudTrail を通して届く読み取りだけの管理イベントは照らし合わせない。"
+   },
+   "narration": "クラウドトレイルを通して、エーダブリューエスのサービスの管理イベントを受けることもできます。管理イベントとは、アカウントのリソースに対して行われた、管理の操作を見えるようにするイベントです。ここで取り上げるのは、そのうちの、読み取りだけの管理イベントです。これを受けるルールは、デフォルトのイベントバスに置けます。気をつけたいのは、ルールの状態です。ルールをただ有効にしただけでは、イベントブリッジは、クラウドトレイルを通して届く、読み取りだけの管理イベントを照らし合わせません。読み取りだけの操作まで拾いたい、という問題文なら、ルールの状態の設定を確かめます。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "You can set up rules on your default event bus to receive read-only management events from AWS services via CloudTrail.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html#eb-service-event-cloudtrail-management"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Management events provide visibility into management operations that are performed on resources in your AWS account.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html#eb-service-event-cloudtrail-management"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Enable the rule so that EventBridge matches events against the rule, except for read-only AWS management events delivered through CloudTrail.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html#eb-service-event-cloudtrail-management"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "処理する部 1: target に届かない時",
+   "bullets": [
+    "RetryPolicy の上限まで再試行",
+    "尽きたら SQS の dead-letter queue",
+    "無いとイベントは捨てられる"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "ドキュメントの説明"
+    ],
+    "rows": [
+     [
+      "再試行の上限",
+      "既定 5 回か 300 秒"
+     ],
+     [
+      "上限に達した後",
+      "SQS のキューに記録"
+     ],
+     [
+      "キューの指定",
+      "OnFailureConfiguration"
+     ],
+     [
+      "キューが無い時",
+      "イベントは捨てられる"
+     ],
+     [
+      "残る跡",
+      "EventsDropped だけ"
+     ]
+    ]
+   },
+   "narration": "ここから、処理する部です。まず、イベントブリッジがターゲットの呼び出しに失敗したときです。イベントブリッジは、リトライポリシーにある二つの上限、回数と時間の、どちらかに達するまで再試行します。上限に達すると、エスキューエスのキューに記録を書きます。このように、届けられなかった物を残すキューを、デッドレターキューと呼びます。デッドレターキューが無いと、再試行を使い切ったイベントは捨てられ、残る跡は、イベンツドロップトというメトリクスだけです。メトリクスとは、数で表した観測の値です。ドキュメントは、両方を受け手を作るときに設定するよう述べています。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "When a target call fails, EventBridge retries it until one of the two limits in RetryPolicy is reached, by default 5 attempts or 300 seconds, then writes a record to the Amazon SQS queue in OnFailureConfiguration.Arn.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus-retry.html#eb-custom-bus-retry"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Set both when you create the subscriber: without a dead-letter queue, an event that exhausts its retries is dropped, and the only trace is the EventsDropped metric.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus-retry.html#eb-custom-bus-retry"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "処理する部 2: SNS から SQS への fan out",
+   "bullets": [
+    "SNS: push で多くの購読者へ",
+    "SQS: polling で受け取る",
+    "キューに残り後から処理"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  PUB[\"発行する側\"]\n  SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>topic\" }\n  Q1@{ svc: \"Amazon SQS\", label: \"SQS<br/>queue\" }\n  Q2@{ svc: \"Amazon SQS\", label: \"SQS<br/>queue\" }\n  A1[\"アプリケーション\"]\n  A2[\"アプリケーション\"]\n  PUB -- \"発行\" --> SN\n  SN -- \"push\" --> Q1\n  SN --> Q2\n  Q1 -. \"polling で受ける\" .-> A1\n  Q2 -.-> A2\n",
+    "alt": "発行する側が SNS の topic にメッセージを発行すると、SNS は購読している SQS の queue それぞれへ push で送る。メッセージは queue に残り、アプリケーションが polling で受け取って、後から処理できる。点線は polling で受ける向き。queue 2 つは例。"
+   },
+   "narration": "ここでは、一つのメッセージを、複数の受け手に広げて配る形を、ファンアウトと呼びます。エスエヌエスは、急ぎのメッセージを、プッシュの仕組みで、複数の購読者へ送るサービスです。エスキューエスは、分散したアプリケーションがメッセージをやり取りするキューのサービスで、受け手がポーリング、つまり取りに行く形で受けます。エスキューエスのキューを、エスエヌエスのトピックに購読させます。トピックは、メッセージを発行する先です。すると、トピックに発行するだけで、エスエヌエスが、購読したキューへメッセージを送ります。メッセージはキューに残るので、ほかのアプリケーションが後から処理できます。",
+   "refs": [
+    {
+     "source_id": "S5",
+     "quote": "Amazon SNS lets applications send time-critical messages to multiple subscribers through a push mechanism.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber"
+    },
+    {
+     "source_id": "S5",
+     "quote": "Amazon SQS is a message queue service that distributed applications use to exchange messages through a polling model.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber"
+    },
+    {
+     "source_id": "S5",
+     "quote": "When you subscribe an Amazon SQS queue to an Amazon SNS topic, you can publish a message to the topic and Amazon SNS sends an Amazon SQS message to the subscribed queue.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The messages also persist in an Amazon SQS queue for other applications to process later.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "処理する部 3: filter policy で絞る",
+   "bullets": [
+    "何もしなければ全部を受ける",
+    "購読に filter policy を付ける",
+    "変えたら反映に最大 15 分"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>topic\" }\n  SA[\"購読 A<br/>filter policy 無し\"]\n  SB[\"購読 B<br/>filter policy あり\"]\n  SN -- \"全部届く\" --> SA\n  SN -- \"条件に合う物だけ\" --> SB\n",
+    "alt": "SNS の topic の購読のうち、filter policy の無い購読 A には全てのメッセージが届く。filter policy を付けた購読 B には、条件を全て満たすメッセージだけが届く。"
+   },
+   "narration": "エスエヌエスのトピックの購読者は、何もしなければ、トピックに発行された全てのメッセージを受けます。一部のメッセージだけを受けたいときは、購読に、フィルターポリシーを付けます。フィルターポリシーでは、プロパティの名前ごとに、値の一覧を書きます。メッセージの属性、または本文の中のプロパティが、ポリシーの条件を全て満たしたときだけ、エスエヌエスはその購読者へ送ります。気をつけたいのは、変えた後です。フィルターポリシーを足したり変えたりしても、すっかり効くまでに、最大で十五分かかります。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "By default, an Amazon SNS topic subscriber receives every message that's published to the topic.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html#sns-message-filtering"
+    },
+    {
+     "source_id": "S12",
+     "quote": "To receive only a subset of the messages, a subscriber must assign a filter policy to the topic subscription.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html#sns-message-filtering"
+    },
+    {
+     "source_id": "S12",
+     "quote": "If all of the message attributes or message body properties satisfy the conditions specified in the filter policy, Amazon SNS sends the message to the subscriber.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html#sns-message-filtering"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Additions or changes to a subscription filter policy require up to 15 minutes to fully take effect.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html#sns-subscription-filter-policies"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "処理する部 4: stream と queue の読み手",
+   "bullets": [
+    "stream consumer: shard を順に",
+    "queue consumer: 1 件ずつ独立",
+    "queue consumer は冪等に作る"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "stream consumer",
+     "queue consumer"
+    ],
+    "rows": [
+     [
+      "読み方",
+      "shard を順に読む",
+      "1 件ずつ独立"
+     ],
+     [
+      "向く処理",
+      "前の記録に依る処理",
+      "記録ごとの処理"
+     ],
+     [
+      "例",
+      "分析・異常の検知",
+      "注文の処理"
+     ],
+     [
+      "届き方",
+      "shard の中は順に",
+      "少なくとも 1 回"
+     ],
+     [
+      "作り方",
+      "表には無し",
+      "冪等にする"
+     ]
+    ]
+   },
+   "narration": "キネシスデータストリームズのドキュメントは、ストリームのデータを読む物を、二つに分けて説明しています。ストリームの読み手は、シャードの記録を順に読みます。シャードは、ストリームの中の区切りと考えてください。順に読むので、前の記録に依る処理に向きます。例は、その場での分析や、異常の検知です。キューの読み手は、記録を一つずつ独立して受け、記録ごとの処理に向きます。例は注文の処理です。キューは、各記録を少なくとも一回は届けますが、書いた順とは限りません。そのため、べきとうに作ります。べきとうとは、同じ記録を二回以上処理しても困らないことです。なお、ラムダでキネシスを処理するとき、標準のイテレーターでは、ラムダがシャードごとにポーリングし、一つのバッチには一つのシャードの記録だけが入ります。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing, where processing one record depends on the records before it, for use cases such as live analytics, personalization, and anomaly and pattern detection.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S6",
+     "quote": "A queue consumer receives each record independently, which suits stateless processing, for use cases such as microservice integration, order processing, and per-record inference.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S6",
+     "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream, so design your queue consumer to be idempotent, so that processing the same record more than once is safe.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S11",
+     "quote": "For standard iterators, Lambda polls each shard in your Kinesis stream for records using HTTP protocol.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#kinesis-polling-and-batching"
+    },
+    {
+     "source_id": "S11",
+     "quote": "Each batch contains records from a single shard/data stream.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#kinesis-polling-and-batching"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "処理する部 5: Lambda で SQS を読む",
+   "bullets": [
+    "push と pull の 2 通り",
+    "pull は event source mapping",
+    "既定はエラーでバッチ全部が戻る"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "SQS の event source mapping"
+    ],
+    "rows": [
+     [
+      "取り方",
+      "Lambda が polling"
+     ],
+     [
+      "呼び方",
+      "関数を同期で呼ぶ"
+     ],
+     [
+      "処理の間",
+      "visibility timeout で隠れる"
+     ],
+     [
+      "エラーの時（既定）",
+      "バッチ全部が再び見える"
+     ],
+     [
+      "扱いを変える",
+      "partial batch responses"
+     ]
+    ]
+   },
+   "narration": "ラムダの関数をイベントで動かす方法は二つあります。直接呼び出すプッシュの形と、イベントソースマッピングによるプルの形です。プルの形では、ラムダの側が、キューやストリームからイベントを取りに行きます。エスキューエスの場合、ラムダがキューをポーリングし、関数を同期で呼び出します。バッチを受け取っても、メッセージはキューに残ったまま、可視性タイムアウトの間だけ隠れます。既定では、関数がバッチの処理でエラーになると、タイムアウトが切れた後、そのバッチの全てのメッセージが、またキューに見えるようになります。そのため、関数は、同じメッセージを何度処理しても、意図しない副作用が出ないように書きます。部分的なバッチレスポンスを返すように設定して、エラーの扱いを変えることもできます。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "Events can trigger a Lambda function in two ways: through direct invocation (push) and event source mappings (pull).",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#concepts-event-driven-architectures"
+    },
+    {
+     "source_id": "S9",
+     "quote": "When Lambda receives a batch, the messages stay in the queue but are hidden for the length of the queue's visibility timeout.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-polling-behavior"
+    },
+    {
+     "source_id": "S9",
+     "quote": "By default, if your function encounters an error while processing a batch, all messages in that batch become visible in the queue again after the visibility timeout expires.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-polling-behavior"
+    },
+    {
+     "source_id": "S10",
+     "quote": "You can also customize error handling behavior by configuring your SQS event source mapping to return partial batch responses.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html#services-sqs-errorhandling"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "処理する部 6: Pipes と Step Functions",
+   "bullets": [
+    "Pipes: 1 つの元から 1 つの先",
+    "Step Functions: 流れを調整",
+    "関数は仕事ごとに分ける"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph G1[\"Pipes: 1 対 1\"]\n    SRC[\"source 1 つ\"]\n    PI@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>Pipes\" }\n    TGT[\"target 1 つ\"]\n  end\n  subgraph G2[\"ワークフロー\"]\n    SF@{ svc: \"AWS Step Functions\", label: \"Step Functions<br/>段ごとにエラーを扱う\" }\n    F1@{ svc: \"AWS Lambda\", label: \"Lambda<br/>仕事 A\" }\n    F2@{ svc: \"AWS Lambda\", label: \"Lambda<br/>仕事 B\" }\n  end\n  G1 ~~~ G2\n  SRC --> PI\n  PI -- \"処理して届ける\" --> TGT\n  SF -- \"調整する\" --> F1\n  SF --> F2\n",
+    "alt": "上は EventBridge Pipes で、1 つの source からイベントを受け、処理して 1 つの target へ届ける。下は Step Functions のワークフローで、仕事ごとに分けた Lambda の関数の間のデータの流れを調整し、段ごとにエラーを扱う。"
+   },
+   "narration": "最後は、処理をつなぐ二つの形です。イベントブリッジパイプスは、一対一の連携のための物です。一つのパイプは、一つのソースからイベントを受け、処理して、一つのターゲットへ届けます。ゼロ個以上のターゲットへ届けるイベントバスとは、ここが違います。ステップファンクションズは、ラムダの関数とほかのサービスとの連携を、目に見えるワークフローとして調整するサービスです。関数の間のデータの流れを調整し、それぞれの段でエラーを扱います。ドキュメントは、仕事ごとに別々のラムダ関数を書き、ワークフローの管理はステップファンクションズに任せるよう述べています。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Pipes EventBridge Pipes is intended for point-to-point integrations; each pipe receives events from a single source for processing and delivery to a single target.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Step Functions coordinates the flow of data between your functions and handles errors at each step.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-step-functions"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Write separate Lambda Event Functions for each task and use Step Functions to manage the workflow.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-step-functions"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "条件から選ぶ 1: 受け取る部",
+   "bullets": [
+    "別アカウント → 受け取る側の bus",
+    "1 つのルールで → simplified",
+    "読み取りだけ → ルールの状態"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "別アカウントから送る",
+      "受け取る側の bus",
+      "resource-based"
+     ],
+     [
+      "複数 Region を 1 つで",
+      "simplified",
+      "public は不可"
+     ],
+     [
+      "public イベントも要る",
+      "Region ごとのルール",
+      "最大 1 時間後から"
+     ],
+     [
+      "Region に属さない",
+      "US East にルール",
+      "global イベント"
+     ],
+     [
+      "読み取りだけの管理",
+      "default bus のルール",
+      "有効だけでは除く"
+     ]
+    ]
+   },
+   "narration": "ここからは、問題文に出る条件から方法を選ぶ表です。一枚目は、受け取る部です。別のアカウントからイベントを送りたいなら、受け取る側のバスに、リソースベースのポリシーを付けます。複数のリージョンのアカウント固有のイベントを、一つのルールで受けたいなら、簡単にした連携です。ただし、公開のイベントは受けられないので、公開のイベントも要るなら選べません。リージョンごとにルールを作り、届き始めるまで最大で一時間かかることも覚えておきます。リージョンに属さないグローバルなイベントなら、米国東部、バージニア北部にルールです。読み取りだけの管理イベントなら、デフォルトのイベントバスのルールで、有効にしただけでは除かれる点を確かめます。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html#eb-event-bus-example-policy-cross-account-custom-bus-source"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Simplified integration doesn't allow you to receive public events that are shown in the AWS Health Dashboard.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S7",
+     "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Public health events might take up to one hour to start sending after you create an EventBridge rule.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html#cloudwatch-events-health"
+    },
+    {
+     "source_id": "S7",
+     "quote": "To receive global events, you must create a rule for the US East (N. Virginia) Region.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Enable the rule so that EventBridge matches events against the rule, except for read-only AWS management events delivered through CloudTrail.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html#eb-service-event-cloudtrail-management"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から選ぶ 2: 処理する部の届け方",
+   "bullets": [
+    "失いたくない → dead-letter queue",
+    "多くの受け手 → SNS と SQS",
+    "1 対 1 → Pipes"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "届かない物を残す",
+      "dead-letter queue",
+      "無いと捨てられる"
+     ],
+     [
+      "1 つを多くの受け手へ",
+      "SNS に SQS を購読",
+      "キューに残る"
+     ],
+     [
+      "一部のメッセージだけ",
+      "filter policy",
+      "反映に最大 15 分"
+     ],
+     [
+      "1 つの元から 1 つの先",
+      "EventBridge Pipes",
+      "bus は 0 個以上"
+     ],
+     [
+      "複数の関数を段でつなぐ",
+      "Step Functions",
+      "段ごとのエラー"
+     ]
+    ]
+   },
+   "narration": "二枚目は、処理する部のうち、届け方です。ターゲットに届かなかったイベントを失いたくないなら、エスキューエスのデッドレターキューです。無いと、イベントは捨てられます。一つのメッセージを多くの受け手へ配り、後から処理させたいなら、エスエヌエスのトピックに、エスキューエスのキューを購読させます。一部のメッセージだけを受けたいなら、購読のフィルターポリシーで、効くまで最大で十五分かかります。一つのソースから一つのターゲットへつなぐなら、イベントブリッジパイプスです。複数のラムダ関数を段に分けてつなぎ、段ごとにエラーを扱いたいなら、ステップファンクションズです。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "Set both when you create the subscriber: without a dead-letter queue, an event that exhausts its retries is dropped, and the only trace is the EventsDropped metric.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus-retry.html#eb-custom-bus-retry"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The messages also persist in an Amazon SQS queue for other applications to process later.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Additions or changes to a subscription filter policy require up to 15 minutes to fully take effect.",
+     "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html#sns-subscription-filter-policies"
+    },
+    {
+     "source_id": "S1",
+     "quote": "Pipes EventBridge Pipes is intended for point-to-point integrations; each pipe receives events from a single source for processing and delivery to a single target.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Step Functions coordinates the flow of data between your functions and handles errors at each step.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-step-functions"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から選ぶ 3: 処理する部の読み手",
+   "bullets": [
+    "順序と状態 → stream consumer",
+    "1 件ずつ独立 → queue consumer",
+    "SQS を Lambda で → 冪等に"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法",
+     "確かめる所"
+    ],
+    "rows": [
+     [
+      "前の記録に依る処理",
+      "stream consumer",
+      "shard を順に"
+     ],
+     [
+      "記録ごとに独立",
+      "queue consumer",
+      "冪等にする"
+     ],
+     [
+      "Kinesis を Lambda で",
+      "shard ごとに polling",
+      "1 バッチ 1 shard"
+     ],
+     [
+      "SQS を Lambda で",
+      "event source mapping",
+      "エラーで全部戻る"
+     ],
+     [
+      "エラーの扱いを変える",
+      "partial batch",
+      "SQS の mapping"
+     ]
+    ]
+   },
+   "narration": "三枚目は、処理する部のうち、読み手です。ある記録の処理が前の記録に依るなら、ストリームの読み手です。シャードの記録を順に読みます。記録ごとに独立して処理するなら、キューの読み手で、べきとうに作ります。キネシスをラムダで処理するなら、標準のイテレーターでは、ラムダがシャードごとにポーリングし、一つのバッチは一つのシャードの記録です。エスキューエスをラムダで処理するなら、イベントソースマッピングです。既定では、エラーでバッチ全部がまた見えるようになるので、同じメッセージを何度処理しても困らないように書きます。そのエラーの扱いを変えたいなら、部分的なバッチレスポンスを返す設定にします。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing, where processing one record depends on the records before it, for use cases such as live analytics, personalization, and anomaly and pattern detection.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S6",
+     "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream, so design your queue consumer to be idempotent, so that processing the same record more than once is safe.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S11",
+     "quote": "Each batch contains records from a single shard/data stream.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#kinesis-polling-and-batching"
+    },
+    {
+     "source_id": "S9",
+     "quote": "For this reason, your function code must be able to process the same message multiple times without unintended side effects.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-polling-behavior"
+    },
+    {
+     "source_id": "S10",
+     "quote": "You can also customize error handling behavior by configuring your SQS event source mapping to return partial batch responses.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html#services-sqs-errorhandling"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "受け取る部: bus・Health・CloudTrail",
+    "処理する部: 届け方と読み手",
+    "迷ったら 3 枚の表に戻る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph R[\"受け取る部\"]\n    direction LR\n    EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>受け取る側の<br/>bus に policy\" }\n    HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>Region と global\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>有効だけでは<br/>読み取りを除く\" }\n    EB ~~~ HE ~~~ CT\n  end\n  subgraph P[\"処理する部\"]\n    direction LR\n    DL[\"target に<br/>届かない時<br/>dead-letter queue\"]\n    SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>SQS へ fan out\" }\n    RD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis・SQS<br/>冪等に作る\" }\n    SF@{ svc: \"AWS Step Functions\", label: \"Pipes は 1 対 1<br/>Step Functions<br/>は段\" }\n    DL ~~~ SN ~~~ RD ~~~ SF\n  end\n  R ~~~ P\n",
+    "alt": "講義の地図に戻ったまとめ。扱った順に並べた物で、処理の流れではない。受け取る部は、EventBridge で受け取る側の bus に policy を付けること、AWS Health の Region と global イベント、CloudTrail のルールは有効にしただけでは読み取りだけの管理イベントを除くこと。処理する部は、target に届かない時の dead-letter queue、SNS から SQS への fan out、Kinesis と SQS の読み手を冪等に作ること、Pipes は 1 対 1、Step Functions は段ごとにつなぐこと。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。並びは扱った順で、処理の流れではありません。受け取る部では、別のアカウントから送るとき、受け取る側のバスにポリシーを付けました。ヘルスでは、リージョンごとのルール、簡単にした連携、グローバルなイベントの置き場所を区別しました。クラウドトレイルの読み取りだけの管理イベントは、ルールを有効にしただけでは照らし合わされません。処理する部では、届かないイベントをデッドレターキューに残すこと、エスエヌエスからエスキューエスへのファンアウト、キューの読み手はべきとうに作ること、パイプスは一対一、ステップファンクションズは段ごとにつなぐことを見ました。問題文で迷ったら、三枚の表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "Event buses are routers that receive events and delivers them to zero or more targets.",
+     "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
+    },
+    {
+     "source_id": "S6",
+     "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream, so design your queue consumer to be idempotent, so that processing the same record more than once is safe.",
+     "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    }
+   ]
+  }
+ ]
+}

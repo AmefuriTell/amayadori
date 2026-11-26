@@ -1,179 +1,27 @@
 {
   "slides": [
     {
-      "id": "s01",
+      "id": "s10",
       "issues": [
         {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "地図では NAT gateway を「2 AZ をまたぐ」の「計算の層」に入れているが、本文では s03（「単一障害点の例」、AZ をまたぐ構成が始まる s04 より前）で、1 つ目の「要件を数字に」の単一障害点の話として扱っている。予告と本文の並びが合わない。",
-          "suggest": "NAT gateway を 1 つ目の枠（「単一障害点を探す」の例）へ移すか、s03 を s04 の後ろ（AZ をまたぐ構成の中）へ移して地図とそろえる。"
-        },
-        {
-          "kind": "unsupported",
+          "kind": "mismatch",
           "severity": "軽",
-          "detail": "NAT gateway を「計算の層」と呼んでいる。S18 には NAT gateway が計算の層だという記述は無く、根拠に無い分類になっている。",
-          "suggest": "「計算の層」のラベルから NAT gateway を外し、上の flow の直し方に合わせて単一障害点の例として置く。"
-        },
+          "detail": "前回の中（RDS の行の暗号化の条件）は「暗号化なら元も暗号化」で直り、S5・台本・s14 と合う。RTC の行も「新しいオブジェクトの 99.99%」になった。残るのは、台本は RDS を先に話し、表は RDS が最後の行という順の違いだけ。",
+          "suggest": "RDS の行を表の先頭へ移すか、台本で S3 を先に話す。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
         {
           "kind": "terms",
           "severity": "軽",
-          "detail": "地図では「ELB」と書いているが、本文（s05・s13）では「ロードバランサー」「ALB」「cross-zone」と呼んでいて、ELB は二度と出てこない。",
-          "suggest": "地図のラベルを「ロードバランサー（cross-zone）」など、本文と同じ呼び方にする。"
-        }
-      ]
-    },
-    {
-      "id": "s02",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "bullet の「RPO: データを失える幅」は、台本では「と考えると分かりやすい」と弱く言っている読みかえなのに、画面では定義として言い切っている。表の根拠どおりの説明（最後の復旧点からの上限）とずれて見える。",
-          "suggest": "bullet を「RPO: 最後の復旧点からの許せる時間」のように S14 に近い形にするか、表と同じ言い方にそろえる。"
-        }
-      ]
-    },
-    {
-      "id": "s03",
-      "issues": [
-        {
-          "kind": "fact",
-          "severity": "軽",
-          "detail": "bullet の「共有すると AZ 障害で外へ出られない」では、どの AZ の障害かが分からない。S18 の条件は「NAT gateway のある AZ が止まると、ほかの AZ のリソースが」インターネットへ出られなくなる、である。",
-          "suggest": "「共有すると、NAT のある AZ の障害でほかの AZ も外へ出られない」とする。"
-        }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "台本で「エーアールシーのゾーナルシフト」と言うが、ARC が何かを説明していない。画面には ARC が無い。",
-          "suggest": "台本から「エーアールシーの」を外すか、画面にも ARC と書き、ゾーナルシフトを持つ機能の名前だと一言そえる（正式名は根拠に無いので展開はしない）。"
-        }
-      ]
-    },
-    {
-      "id": "s06",
-      "issues": [
-        {
-          "kind": "terms",
-          "severity": "中",
-          "detail": "s06 では「standby」を Multi-AZ DB instance の読めない予備だけに使い、DB cluster の側は「reader」と呼んでいる。ところが s14 では「standby も読ませる → DB cluster」と、cluster の reader を standby と呼んでいる。受験者は「standby は読めない」と「standby も読ませる」のどちらが正しいのか迷う。",
-          "suggest": "s06 で、cluster の reader も S3 の言い方では standby（切り替えの予備）だと一言そえる。または s14 の条件を「予備にも読み取りを受けさせる」「reader が読み取りも受ける」とする。"
-        }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        {
-          "kind": "mismatch",
-          "severity": "軽",
-          "detail": "bullet は「無効なら主を作り直す」だが、表と台本は「主を外し、新しく用意」（S10: takes the primary offline and provisions a new primary node）。「作り直す」では、同じノードを直すように読める。",
-          "suggest": "bullet を「無効なら主を外し、新しい主を用意」にする。"
-        }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        {
-          "kind": "terms",
-          "severity": "中",
-          "detail": "画面（bullets・表）では「一貫性のモード」、台本では「整合性のモード」と、同じスライドで呼び方が違う。s14 の bullet は「強い整合性」。",
-          "suggest": "「整合性のモード」にそろえる（s09 の bullets と表、s14）。"
-        }
-      ]
-    },
-    {
-      "id": "s11",
-      "issues": [
-        {
-          "kind": "mismatch",
-          "severity": "軽",
-          "detail": "台本では「アクティブパッシブでは、図の上のように」と言うが、図の枠名は「Route 53 の切り替え」で、active-passive の形だとは書いていない。また、矢印の「健全な時／健全でない時」が何についての健全さか（primary のリソース）が図だけでは分からず、Route 53 自身の状態にも読める。",
-          "suggest": "枠名を「Route 53 の active-passive」にし、矢印のラベルを「primary が健全な時／primary が健全でない時」にする。"
-        },
-        {
-          "kind": "mismatch",
-          "severity": "軽",
-          "detail": "CloudFront の矢印は「使えない時」だけだが、台本と alt は、失敗を示す決まった状態コードを返した時も切り替わると言う。",
-          "suggest": "矢印のラベルを「使えない・失敗の状態コードの時」にする。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "「オリジンは、クラウドフロントが中身を取りに行く先です」と言い切っているが、sources.md にはオリジンの定義が無い。",
-          "suggest": "ほかの用語と同じく「と考えてください」の弱い言い方にする。"
-        }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "「パイロットライトの考えを広げた物」と言うが、パイロットライトはこの講義のどこでも説明していない。",
-          "suggest": "この一文を外すか、「別の方式を広げた物」程度にとどめる。"
-        }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "表の「確かめる所」が「ALB は常にオン」になり、s05 にあった「ロードバランサーの単位で」という条件が落ちている。S17 は target group の属性のページで、言っているのは load balancer level で常にオンという事だけ。条件付きの話を一般の話にしているので、「ALB では cross-zone をどこでも切れない」と誤って覚えるおそれがある。台本にもこの点が無い。",
-          "suggest": "「ALB は LB 単位で常にオン」と s05 と同じ書き方にし、台本でも一言触れる。"
-        }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        {
-          "kind": "mismatch",
-          "severity": "中",
-          "detail": "bullet の「強い整合性 → 作る時に MRSC」は、表にも台本にも無い。表の行は「どの Region でも書く → DynamoDB global tables／モードは作成時に」で、台本も強い整合性で MRSC を選ぶ話はしていない。",
-          "suggest": "bullet を表の行に合わせて「どこでも書く → global tables（モードは作成時に）」にする。または、表と台本に MRSC を選ぶ条件を足す（S9 の範囲の事実で）。"
-        }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "台本で「クロスゾーン負荷分散が全てのゾーンに振り分けます」と、オンの時の動きを無条件に言っている。S17 ではオフなら自分の AZ だけに振り分ける。",
-          "suggest": "「クロスゾーン負荷分散がオンなら、全てのゾーンに振り分けます」とする。"
-        },
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "「最初の地図に戻ります」と言うが、s01 の地図にあった warm standby、RDS の read replica、S3 の複製（CRR）がまとめの図と台本から抜けている。また、地図では「単一障害点を直す」、台本では「探しました」とずれている。bullet の「AZ をまたぐ: 一か所に寄せない」も、本文にこの言い方は出てこない。",
-          "suggest": "まとめの図と台本に warm standby と read replica・CRR を戻し、「探して直す」にそろえる。bullet を「AZ をまたぐ: 計算とデータ」など本文の見出しにそろえる。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "「十五分の約束があるエススリーアールティーシー」と、図の「15 分・SLA」では、99.99% という条件が落ちて、全てのオブジェクトが 15 分以内に複製されるように聞こえる。",
-          "suggest": "「新しいオブジェクトの 99.99% を 15 分以内」と条件を残す。"
+          "detail": "表の S3 RTC の行が「99.99% を 15 分」で、「新しいオブジェクトの」が無い（s10 の表と台本、S7 は new objects）。台本では言っているので誤解は小さい。",
+          "suggest": "セルを「新規の 99.99% を 15 分」にする。"
         }
       ]
     }
   ],
-  "global": [
-    {
-      "severity": "軽",
-      "detail": "Route 53・CloudFront をまとめて「健全でなければ予備へ」（s16）と言うが、CloudFront の切り替えの条件は、health check ではなく、origin が使えない時か失敗の状態コードを返した時（S11）。",
-      "suggest": "まとめでは「Route 53 は health check、CloudFront は使えない・失敗の状態コードで予備へ」と分けて言う。"
-    }
-  ]
+  "global": []
 }

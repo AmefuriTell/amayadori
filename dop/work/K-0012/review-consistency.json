@@ -1,35 +1,41 @@
 {
   "slides": [
     {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "まとめの図の Kinesis Data Streams のラベルが「シャードを順に読む」だけで、stream consumer の条件が落ちている（前回 s16 で軽として挙げ、直っていない）。S9 では順に読むのは stream consumer で、queue consumer はレコードを 1 つずつ別々に受け取る。s07 の図と s14 の表は 2 つの読み手を分けたのに、最後に見る図だけが「Kinesis Data Streams は順に読む」と言い切り、本文と食い違う。前回 s14 を中にしたのと同じ型。",
+          "suggest": "図のラベルを「Kinesis Data Streams<br/>stream consumer・<br/>queue consumer」か「stream consumer は<br/>シャードを順に読む」にする。図だけの直しなので台本の字数は変わらない。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "bullets の「資料に無い物は各ドキュメントで」が台本で一度も言われない。メトリクスの部の図のラベルにも、台本の「アラームが評価する物」（metric math・Metrics Insights）が無い。",
+          "suggest": "bullet を「部ごとに見た物を確かめる」など台本にある内容に替える（台本の字数は増やさない）。"
+        }
+      ]
+    },
+    {
       "id": "s01",
       "issues": [
         {
           "kind": "flow",
           "severity": "軽",
-          "detail": "予告と本文がずれている。台本ではメトリクスの部を「アラーム、異常検出、ダッシュボード」と予告するが、本文には名前空間（s02）とアラームの動作（s05）もある。図のラベルは「アラーム・ダッシュボード」だけで、異常検出も入っていない。s16 のまとめの図は「anomaly detection・アラームの動作・ダッシュボード」で、地図とそろっていない。",
-          "suggest": "地図の CloudWatch のラベルと台本の予告を、本文の 5 枚（名前空間・アラームが評価する物・異常検出・アラームの動作・ダッシュボード）にそろえる。s16 のラベルとも同じ並びにする。"
+          "detail": "地図の CloudWatch のラベルが「アラーム・ダッシュボード」で、台本の予告（アラーム、異常検出、ダッシュボード）と s16 の図（anomaly detection・アラームの動作・ダッシュボード）とそろっていない（前回の軽が残る）。",
+          "suggest": "s01 の図のラベルを s16 と同じ並びにする。"
         }
       ]
     },
     {
-      "id": "s06",
+      "id": "s02",
       "issues": [
         {
-          "kind": "fact",
+          "kind": "terms",
           "severity": "軽",
-          "detail": "図で「リージョン A／B のリソース」が「監視のアカウント」の枠の外に置かれていて、別のアカウントのリソースのように見える。S6 が言うのは、同じアカウントでもリージョンをまたいで 1 つの画面で見られる、という事。",
-          "suggest": "リージョン A・B のリソースを「監視のアカウント」の枠の中に入れる。枠の外は「ほかのアカウントのリソース」だけにする。"
-        }
-      ]
-    },
-    {
-      "id": "s08",
-      "issues": [
-        {
-          "kind": "fact",
-          "severity": "中",
-          "detail": "図で「gzip で送る」のラベルが Kinesis Data Streams への矢印にしか付いていない。S10 では、subscription filter で送るログはどの送り先でも gzip で圧縮される。図を見ると、Kinesis Data Streams の時だけ gzip になるように読める（台本と alt は正しい）。",
-          "suggest": "矢印のラベルは「送る」だけにし、「gzip で圧縮」はロググループの node に書く。または 4 本の矢印すべてに同じラベルを付ける。"
+          "detail": "図の箱「メトリクス 1 つ／例 AWS/EC2 の名前空間」は、メトリクスの例として名前空間を挙げており、メトリクスと名前空間が同じ物に読める（alt は「AWS/EC2 の名前空間のメトリクス」と正しい）。",
+          "suggest": "箱を「メトリクス 1 つ<br/>例 AWS/EC2 の中の物」などにする。"
         }
       ]
     },
@@ -38,48 +44,31 @@
       "issues": [
         {
           "kind": "unsupported",
-          "severity": "中",
-          "detail": "bullets が「しきい値無し → anomaly detection」になっていて、本文（s04）と表で付けた「固定の」（S1 の static threshold）が落ちている。異常検出にはしきい値が全く無い、と覚えさせてしまう。",
-          "suggest": "bullets を「固定のしきい値無し → anomaly detection」にする。"
-        },
-        {
-          "kind": "unsupported",
           "severity": "軽",
-          "detail": "台本が「アカウントをまたぐときは、クロスアカウントオブザーバビリティの設定が要ります」と言い切っている。S6 にあるのは「設定でき、そのうえで作れる」（you can set up ... and then create）まで。",
-          "suggest": "「クロスアカウントオブザーバビリティを設定したうえで、監視のアカウントに作れます」と、s06 と同じ言い方にする。"
+          "detail": "台本の「クロスアカウントオブザーバビリティの設定が先に要り」と s05 の bullets「アカウントをまたぐなら設定が要る」は、S6 の「set up ... and then create」より少し強い（前回の軽が残る）。s05 の台本は「設定が要ると書かれているのは、こちらだけ」とも言う。",
+          "suggest": "直すなら s05 の台本と同じ「設定したうえで作れる」に寄せる。字数が増えるなら見送ってよい。"
         }
       ]
     },
     {
-      "id": "s14",
+      "id": "s09",
       "issues": [
         {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "表の「選ぶ方法」と bullets（「順に処理 → Kinesis Data Streams」）が、サービス名だけになっている。台本と s08 では stream consumer（シャードを順に読む）に限った話。S9 では、Kinesis Data Streams の queue consumer は状態を持たない処理に向くとしている。条件が落ちて、Kinesis Data Streams なら必ず順に処理する、と覚えさせてしまう。",
-          "suggest": "表の「選ぶ方法」を「Kinesis Data Streams の stream consumer」に、bullets を「順に処理 → stream consumer」にする。"
-        }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        {
-          "kind": "flow",
+          "kind": "mismatch",
           "severity": "軽",
-          "detail": "台本の「資料に無かった物」に挙がるのが、メトリクスの名前と Inspector だけ。s06 で断った Amazon Quick Sight が抜けている。また、図の Kinesis Data Streams のラベル「シャードを順に読む」も、stream consumer の条件が落ちている（s14 と同じ）。",
-          "suggest": "台本に「クイックサイトの可視化」を足す。図のラベルを「stream consumer はシャードを順に読む」にする。"
+          "detail": "台本は「エスディーケーとデーモンは保守モード」と言うが、図は X-Ray SDK の箱にだけ「保守モード」がある。s08・s15 の ECS の daemon のコンテナには注意が無い。",
+          "suggest": "図の注記を「SDK・daemon は保守モード」にする（図だけの直し）。"
         }
       ]
     },
     {
-      "id": "s12",
+      "id": "s11",
       "issues": [
         {
           "kind": "terms",
           "severity": "軽",
-          "detail": "画面は「Event history」、台本は「イベント履歴」で、対応を一度も言っていない。s15 も、画面は「Event history」、台本は「イベント履歴」。",
-          "suggest": "s12 の台本で最初に出る所を「イベント履歴、英語でイベントヒストリー」とし、s04 の「異常検出、英語でアノマリーディテクション」と同じ形にする。"
+          "detail": "画面は「Event history」、台本は「イベント履歴」で、対応を言っていない（前回の軽が残る）。s14 の表も「Event history」。",
+          "suggest": "字数に余裕が無いので、図のラベルを「Event history（イベント履歴）」にする。"
         }
       ]
     }
@@ -87,8 +76,8 @@
   "global": [
     {
       "severity": "軽",
-      "detail": "表やまとめで短くした所で、本文の条件（「固定の」しきい値、stream consumer）が落ちる型が、くり返し出ている（s13・s14・s16）。",
-      "suggest": "条件の表 3 枚と s16 を直す時、短くした語ごとに本文の条件が残っているかを確かめる。"
+      "detail": "前回の中 3 件は直っている。gzip は s07 の図でロググループの node に「どの送り先にも gzip」と書かれ、台本・s14 の表とそろった。「固定の」しきい値は s03・s12 の bullets・表・台本にある。stream consumer の条件は s07・s14 で直った（s16 の図だけ残る、上の中）。SEARCH 式・metric math と Metrics Insights・リージョンとアカウントの分け方・anomaly の対象の違い・SDK の保守モードの扱いも根拠と合う。条件の表 4 枚は本文の判断と食い違わない。notes の採らなかった理由（Logs Insights と Athena の基準、リージョンの設定、active tracing の定義）は根拠に無い事を足さない判断で妥当。",
+      "suggest": "なし。"
     }
   ]
 }

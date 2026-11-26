@@ -1,0 +1,785 @@
+{
+  "task": "2.3",
+  "title": "複雑な作業と大きな環境の自動化",
+  "credit": "VOICEVOX:四国めたん",
+  "audio": true,
+  "minutes": 11.3,
+  "last_checked": "2026-11-27",
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "5 つのまとまりを番号の順に",
+        "多くは Systems Manager の機能",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "講義の地図。5 つのまとまりを番号を付けて並べる。1 棚卸しと構成は Inventory と AWS Config。2 パッチは Patch Manager の方法と準拠。3 あるべき状態は State Manager を似た機能と比べる。4 準拠を保つは Compliance と、AWS Config でルールに合わない物を直す方法。5 複雑な処理は Lambda と Step Functions。並びは講義の順で、処理の流れではない。",
+        "svg": "visuals/s01.svg"
+      },
+      "narration": "この講義では、複雑な作業や大きな環境を、自動で扱う方法を学びます。画面の五つのまとまりを、番号の順に進みます。図の並びは講義の順番で、処理の流れではありません。一つ目は棚卸しと構成で、インベントリーとエーダブリューエスコンフィグを使って、今の状態を知る方法です。二つ目はパッチマネージャー、三つ目はステートマネージャーで、似た機能とも比べます。四つ目は、コンプライアンスと、コンフィグのルールに合わない物を直す方法です。五つ目は、ラムダとステップファンクションズで、複雑な処理を組む方法です。締めに、問題文の条件から方法を選ぶ表を置きます。なお、試験ガイドの例にはオプスワークスの名前もありますが、この講義の根拠には含まれていないので扱いません。",
+      "refs": [
+        {
+          "quote": "You can use Inventory to collect metadata from your managed nodes.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        },
+        {
+          "quote": "State Manager is a secure and scalable service that automates the process of keeping managed nodes in a hybrid and multicloud infrastructure in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance"
+        },
+        {
+          "quote": "While Lambda provides retry capabilities for asynchronous invocations and event source mappings, Step Functions offers more sophisticated error handling for complex workflows.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-step-functions"
+        }
+      ],
+      "audio": "audio/s01.mp3",
+      "seconds": 47.4
+    },
+    {
+      "id": "s02",
+      "title": "Inventory: ノードの情報を集める",
+      "bullets": [
+        "管理対象のノードのメタデータ",
+        "中央の S3 バケットに保存できる",
+        "更新が要るノードを調べる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "Inventory が管理対象のノードからメタデータを集める。集めたメタデータは中央の Amazon S3 バケットに保存できる。組み込みの道具でそのデータに問い合わせると、方針どおりのソフトウェアと設定が動いているノードと、更新が要るノードが分かる。",
+        "svg": "visuals/s02.svg"
+      },
+      "narration": "一つ目の棚卸しと構成、つまり今の状態を知る方法です。インベントリーは、システムズマネージャーの機能の一つです。管理対象のノードとは、大まかに言うと、システムズマネージャーで管理するサーバーのことです。インベントリーは、このノードからメタデータを集めます。メタデータは、大まかに言うと、ノードについての情報です。集めたメタデータは、中央のエススリーのバケットに保存できます。そのデータに、組み込みの道具で問い合わせると、二つの事がすぐに分かります。自分たちのソフトウェアの方針が求めるソフトウェアと設定が、動いているノードはどれか。そして、更新が要るノードはどれかです。",
+      "refs": [
+        {
+          "quote": "You can use Inventory to collect metadata from your managed nodes.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        },
+        {
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        }
+      ],
+      "audio": "audio/s02.mp3",
+      "seconds": 39.1
+    },
+    {
+      "id": "s03",
+      "title": "AWS Config: リソースの構成と履歴",
+      "bullets": [
+        "アカウントの AWS リソースの構成",
+        "リソースどうしの関係",
+        "過去の構成と変化"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "Inventory",
+          "AWS Config"
+        ],
+        "rows": [
+          [
+            "見る物",
+            "管理対象のノード",
+            "AWS のリソース"
+          ],
+          [
+            "分かる事",
+            "方針どおり・更新要否",
+            "構成と互いの関係"
+          ],
+          [
+            "過去が分かるか",
+            "—",
+            "過去の構成と変化"
+          ]
+        ]
+      },
+      "narration": "次は、エーダブリューエスコンフィグです。コンフィグは、アカウントの中にあるエーダブリューエスのリソースについて、構成を詳しく見せてくれます。そこには、リソースどうしがどう関係しているかも含まれます。さらに、過去にどう構成されていたかも分かります。そのため、構成と関係が、時間とともにどう変わってきたかを追えます。画面の表で、インベントリーと比べてみます。インベントリーが見るのは管理対象のノードで、方針どおりか、更新が要るかを調べます。コンフィグが見るのはアカウントの中のリソースの構成で、過去の構成と変化まで分かります。",
+      "refs": [
+        {
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "quote": "This includes how the resources are related to one another and how they were configured in the past so that you can see how the configurations and relationships change over time.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "quote": "You can use Inventory to collect metadata from your managed nodes.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        }
+      ],
+      "audio": "audio/s03.mp3",
+      "seconds": 35.4
+    },
+    {
+      "id": "s04",
+      "title": "Patch Manager 1: パッチを当てる方法",
+      "bullets": [
+        "方法は 3 つから選ぶ",
+        "patch policy は複数アカウントへ",
+        "Patch now はその場で"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "方法",
+          "ドキュメントの説明"
+        ],
+        "rows": [
+          [
+            "patch policy",
+            "1 つのポリシーで複数の"
+          ],
+          [
+            "",
+            "アカウントとリージョンへ"
+          ],
+          [
+            "Maintenance Windows",
+            "実行の時間帯を決める"
+          ],
+          [
+            "Patch now",
+            "その場で（on-demand）"
+          ]
+        ]
+      },
+      "narration": "二つ目のまとまりは、パッチです。パッチマネージャーでは、パッチを当てる方法を三つから選べます。一つ目はパッチポリシーです。エーダブリューエスオーガニゼーションズと連携し、一つのポリシーで、複数のアカウントとリージョンにまたがるパッチの作業を設定できます。オーガニゼーションズは、大まかに言うと、複数のアカウントをまとめて扱うサービスです。二つ目はメンテナンスウィンドウです。止まる恐れのある作業を、いつ行うかの予定を決める機能で、あとでステートマネージャーと比べます。三つ目はパッチナウで、求めに応じて、その場でパッチの作業を動かします。",
+      "refs": [
+        {
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#what-are-the-main-features-of-patch-manager"
+        },
+        {
+          "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#what-are-the-main-features-of-patch-manager"
+        },
+        {
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system, updating drivers, or installing software or patches.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        }
+      ],
+      "audio": "audio/s04.mp3",
+      "seconds": 36.3
+    },
+    {
+      "id": "s05",
+      "title": "Patch Manager 2: patch baseline と準拠",
+      "bullets": [
+        "patch baseline で承認の条件",
+        "利用できて承認された物が全部入る",
+        "判定の物差しは baseline"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "patch baseline で承認の条件を決める。条件に合い、利用できて承認されたパッチが、管理対象のノードに全部入っているかを見る。全部入っていれば、そのノードは patch compliant と判定される。",
+        "svg": "visuals/s05.svg"
+      },
+      "narration": "パッチの準拠、つまり、決めたパッチが入っているかの考え方です。パッチベースラインとは、どのパッチを承認するかの条件を、自分で決めた物です。管理対象のノードは、ベースラインで決めた承認の条件に合うパッチが、全部当たっているときに、パッチに準拠している、とされます。言い換えると、ベースラインが定めるパッチのうち、利用できて、しかも承認されている物が、そのノードに入っていれば準拠です。大事なのは、準拠かどうかの物差しが、ベースラインだという点です。",
+      "refs": [
+        {
+          "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance"
+        },
+        {
+          "quote": "Compliant means that the patches defined by the patch baseline that are both available and approved have been installed on the node.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance"
+        }
+      ],
+      "audio": "audio/s05.mp3",
+      "seconds": 32.5
+    },
+    {
+      "id": "s06",
+      "title": "State Manager: 決めた状態を保つ",
+      "bullets": [
+        "SSM document を使う",
+        "association で状態・日程・対象",
+        "ノード以外のずれ → Automation と"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "State Manager は、あらかじめ用意された SSM document を使う。State Manager の association は、保ちたい状態と、適用の日程と対象を定めた設定で、管理対象のノードに割り当てる。ノードはハイブリッドやマルチクラウドの環境にあってもよい。ノード以外の AWS リソースの構成のずれには、Automation を State Manager と一緒に使える。",
+        "svg": "visuals/s06.svg"
+      },
+      "narration": "三つ目のまとまりは、あるべき状態です。ステートマネージャーは、管理対象のノードを、自分で決めた状態に保つ作業を自動にする機能です。ノードは、ハイブリッドやマルチクラウドの環境にあっても構いません。ステートマネージャーは、あらかじめ用意された、システムズマネージャーのドキュメントを使います。ドキュメントは、大まかに言うと、行う事を書いた定義です。中心になる設定が、アソシエーションです。アソシエーションは、リソースに割り当てる設定で、保ちたい状態を定めます。さらに、いつ適用するかの日程と、どこに適用するかの対象も持ちます。ノード以外のリソースで、構成のずれを扱いたいときは、システムズマネージャーのオートメーションを、ステートマネージャーと一緒に使えます。",
+      "refs": [
+        {
+          "quote": "State Manager is a secure and scalable service that automates the process of keeping managed nodes in a hybrid and multicloud infrastructure in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "quote": "By using pre-configured Systems Manager documents (SSM documents), State Manager offers the following benefits for managing your nodes:",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-benefits"
+        },
+        {
+          "quote": "The configuration defines the state that you want to maintain on your resources.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-features"
+        },
+        {
+          "quote": "To manage configuration drift across other AWS resources, you can use Automation, a tool in Systems Manager, with State Manager to perform the following types of tasks:",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-benefits"
+        }
+      ],
+      "audio": "audio/s06.mp3",
+      "seconds": 45.2
+    },
+    {
+      "id": "s07",
+      "title": "State Manager と比べる機能",
+      "bullets": [
+        "準拠を自動で → State Manager",
+        "時刻を決めて → Maintenance Windows",
+        "一度きりの変更 → Run Command"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "State Manager",
+          "Maintenance Windows",
+          "Run Command"
+        ],
+        "rows": [
+          [
+            "選ぶ時",
+            "準拠を自動で保つ",
+            "時刻を決めて行う",
+            "一度きりの変更"
+          ],
+          [
+            "例に挙がる事",
+            "—",
+            "OS のパッチ・ドライバー",
+            "よくある管理作業"
+          ],
+          [
+            "使い方",
+            "association の日程",
+            "実行の時間帯を決める",
+            "コンソール・CLI・SDK など"
+          ]
+        ]
+      },
+      "narration": "ドキュメントは、ステートマネージャーとメンテナンスウィンドウが、似た種類の更新をできると述べています。メンテナンスウィンドウは、止まる恐れのある作業を、いつ行うかの予定を決める機能です。例として、オペレーティングシステムのパッチや、ドライバーの更新が挙がっています。どちらを選ぶかは、システムの準拠を自動で保ちたいのか、優先度が高く、行う時刻が大事な作業を、決めた時間帯に行いたいのかで決まります。前者がステートマネージャー、後者がメンテナンスウィンドウです。急ぎという意味ではなく、時刻を決めておく、と覚えてください。あわせて、ランコマンドとも比べます。ランコマンドは、ノードの構成を、離れた所から安全に管理する機能です。よくある管理の作業を自動にしたり、一度きりの構成の変更を、多くのノードにまとめて行ったりできます。コンソールやエスディーケーなどから使えます。",
+      "refs": [
+        {
+          "quote": "State Manager and Maintenance Windows can perform some similar types of updates on your managed nodes.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        },
+        {
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system, updating drivers, or installing software or patches.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        },
+        {
+          "quote": "Which one you choose depends on whether you need to automate system compliance or perform high-priority, time-sensitive tasks during periods you specify.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        },
+        {
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command"
+        },
+        {
+          "quote": "You can use Run Command from the AWS Management Console, the AWS Command Line Interface (AWS CLI), AWS Tools for Windows PowerShell, or the AWS SDKs.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command"
+        }
+      ],
+      "audio": "audio/s07.mp3",
+      "seconds": 52.2
+    },
+    {
+      "id": "s08",
+      "title": "Compliance: 準拠をまとめて見る",
+      "bullets": [
+        "既定で 2 つの機能の準拠を表示",
+        "パッチと association の準拠",
+        "ノードをスキャンして調べる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "Compliance は、既定では、Patch Manager のパッチの準拠と、State Manager の association の準拠について、今のデータを表示する。また、多くの管理対象のノードをスキャンして、パッチの準拠と構成の食い違いを調べる。",
+        "svg": "visuals/s08.svg"
+      },
+      "narration": "四つ目のまとまりは、準拠を保つ話です。コンプライアンスは、既定では、二つの機能の今の準拠のデータを、まとめて表示します。パッチマネージャーのパッチの準拠と、ステートマネージャーのアソシエーションの準拠です。つまり、ここまでに見た二つの機能の結果を、一か所で見られます。また、コンプライアンスを使って、多くの管理対象のノードをスキャンし、パッチの準拠と、構成の食い違いを調べられます。問題文で、多くのノードについて、パッチと設定の準拠をまとめて見たい、とあれば、コンプライアンスを思い出してください。",
+      "refs": [
+        {
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance"
+        },
+        {
+          "quote": "You can use Compliance to scan your fleet of managed nodes for patch compliance and configuration inconsistencies.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance"
+        }
+      ],
+      "audio": "audio/s08.mp3",
+      "seconds": 35.3
+    },
+    {
+      "id": "s09",
+      "title": "AWS Config: ルールに合わない物を直す",
+      "bullets": [
+        "Config Rules が評価する",
+        "Config が Automation のドキュメントで修復",
+        "Automation のアクション: executeAwsApi"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "AWS Config Rules がリソースを評価し、ルールに合わないリソースが見つかる。AWS Config は Systems Manager の Automation のドキュメントを使って、そのリソースを修復する。別に、Automation のアクションの一つ aws:executeAwsApi は、AWS の API 操作を呼び出して実行する。",
+        "svg": "visuals/s09.svg"
+      },
+      "narration": "もう一つの準拠の守り方は、コンフィグの修復です。コンフィグのルールは、リソースを評価します。ルールに合わないと評価されたリソースを、コンフィグで修復できます。このときコンフィグは、システムズマネージャーのオートメーションのドキュメントを使って、修復を適用します。オートメーションには、エーダブリューエスのエーピーアイの操作を呼び出して実行する、アクションもあります。名前は、エグゼキュート、エーダブリューエス、エーピーアイ、です。ほとんどの操作に対応していますが、全ての操作が試されているわけではない、とドキュメントにあります。",
+      "refs": [
+        {
+          "quote": "AWS Config allows you to remediate noncompliant resources that are evaluated by AWS Config Rules.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        },
+        {
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        },
+        {
+          "quote": "Most API operations are supported, although not all API operations have been tested.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-action-executeAwsApi.html#automation-action-executeAwsApi"
+        }
+      ],
+      "audio": "audio/s09.mp3",
+      "seconds": 34.7
+    },
+    {
+      "id": "s10",
+      "title": "Lambda: 非同期の呼び出しの失敗",
+      "bullets": [
+        "エラーなら既定で再試行",
+        "再試行に備え重複を扱う",
+        "成功と失敗で送り先を分ける"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "ドキュメントの説明"
+        ],
+        "rows": [
+          [
+            "再試行（既定）",
+            "さらに 2 回"
+          ],
+          [
+            "待つ時間",
+            "1 分、次に 2 分"
+          ],
+          [
+            "コードの注意",
+            "重複イベントを扱う"
+          ],
+          [
+            "送り先",
+            "成功と失敗で別々"
+          ],
+          [
+            "記録の中身",
+            "要求と応答（JSON）"
+          ]
+        ]
+      },
+      "narration": "五つ目のまとまりは、複雑な処理です。まずラムダです。非同期の呼び出しとは、大まかに言うと、呼んだ側が関数の結果を待たない呼び方です。このとき、ラムダは関数のイベントの待ち行列を管理し、エラーが起きると再試行します。関数がエラーを返すと、既定では、さらに二回実行を試みます。一回目と二回目の間に一分、二回目と三回目の間に二分待ちます。再試行があるので、ドキュメントは、関数のコードが重複したイベントをうまく扱えるようにすることを求めています。全ての呼び出しを扱えるだけ、同時に動かせる数に余裕を持つことも求めています。また、呼び出しの記録を、ほかのサービスに送れます。送り先は、うまく処理できたイベントと、全ての試行で失敗したイベントとで、別々に設定できます。なお、ラムダは、多くのプログラミング言語向けのエスディーケーと一緒に使えます。",
+      "refs": [
+        {
+          "quote": "If the function returns an error, by default Lambda attempts to run it two more times, with a one-minute wait between the first two attempts, and two minutes between the second and third attempts.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html#invocation-async-error-handling"
+        },
+        {
+          "quote": "Ensure that your function code gracefully handles duplicate events, and that you have enough concurrency available to handle all invocations.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html#invocation-async-error-handling"
+        },
+        {
+          "quote": "You can configure separate destinations for events that are processed successfully, and events that fail all processing attempts.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html#invocation-async-retain-records"
+        },
+        {
+          "quote": "The invocation record contains details about the request and response in JSON format.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html#invocation-async-retain-records"
+        },
+        {
+          "quote": "AWS software development kits (SDKs) are available for many popular programming languages.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/sdk-general-information-section.html#sdk-general-information-section"
+        }
+      ],
+      "audio": "audio/s10.mp3",
+      "seconds": 54.5
+    },
+    {
+      "id": "s11",
+      "title": "Step Functions: 流れを組んでサービスを呼ぶ",
+      "bullets": [
+        "複雑な流れのエラーは Step Functions",
+        "SDK integrations: どのサービスも",
+        "Optimized: 対応サービスに独自の選択肢"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "Step Functions の state machine は、複雑な流れのエラー処理を受け持ち、Lambda の関数を組み合わせて動かす。AWS SDK integrations では、どの AWS サービスも直接呼べ、数千の API アクションが使える。Optimized integrations は、対応するサービスを使うための独自の選択肢を用意する。",
+        "svg": "visuals/s11.svg"
+      },
+      "narration": "次はステップファンクションズです。ラムダの再試行は、非同期の呼び出しなどに用意された仕組みです。ドキュメントは、複雑な流れについては、ステップファンクションズの方が、より高度なエラーの扱いを用意している、と述べています。何段もの処理をつなぐなら、エラーの扱いも流れの側に任せる、という位置づけです。ステップファンクションズでは、流れをステートマシンとして書きます。ステートマシンは、大まかに言うと、状態のつながりで書いた流れの定義です。サービスとのつなぎ方は二つ見ます。エーダブリューエスエスディーケーの統合は、ステートマシンから、どのサービスでも直接呼べるつなぎ方で、数千のエーピーアイの操作が使えます。ラムダのコードから使うエスディーケーとは別の、ステップファンクションズの機能です。最適化された統合は、対応するサービスに限って、使うための独自の選択肢を足したつなぎ方です。",
+      "refs": [
+        {
+          "quote": "While Lambda provides retry capabilities for asynchronous invocations and event source mappings, Step Functions offers more sophisticated error handling for complex workflows.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-step-functions"
+        },
+        {
+          "quote": "AWS SDK integrations provide a way to call any AWS service directly from your state machine, giving you access to thousands of API actions.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-service-integrations"
+        },
+        {
+          "quote": "Optimized integrations provide custom options for using those services in your state machines.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-service-integrations"
+        }
+      ],
+      "audio": "audio/s11.mp3",
+      "seconds": 52.5
+    },
+    {
+      "id": "s12",
+      "title": "Step Functions: Standard と Express",
+      "bullets": [
+        "Request Response: 応答で次へ",
+        "Run a Job（.sync）: 完了を待つ",
+        "Express は Request Response だけ"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "Standard",
+          "Express"
+        ],
+        "rows": [
+          [
+            "向く処理",
+            "長く動く・監査できる",
+            "大量のイベント処理"
+          ],
+          [
+            "長さ・例",
+            "最長 1 年",
+            "IoT・ストリーム・モバイル"
+          ],
+          [
+            "注意点",
+            "—",
+            "2 回以上動き得る"
+          ],
+          [
+            "統合のパターン",
+            "Express と同じでない",
+            "Request Response だけ"
+          ]
+        ]
+      },
+      "narration": "ステップファンクションズには、ワークフローの種類が二つあります。スタンダードとエクスプレスです。スタンダードは、長く動き、確実で、監査できる流れに向きます。長さは最長で一年です。エクスプレスは、大量のイベントを処理する仕事に向きます。例として、アイオーティーのデータの取り込みや、モバイルアプリの裏側が挙がっています。エクスプレスは、少なくとも一回は実行する、という考え方なので、一つの実行が二回以上動く事があります。統合のパターン、つまりサービスを呼んだ後の進み方も違います。リクエストレスポンスでは、応答を受け取ったらすぐ次の状態に進みます。ランアジョブでは、バッチやイーシーエスなどの要求が終わるのを待ってから次に進めます。ドキュメントの見出しでは、ランアジョブにドットシンクという印が添えられています。エクスプレスが使えるのは、リクエストレスポンスだけです。",
+      "refs": [
+        {
+          "quote": "Standard Workflows are ideal for long-running (up to one year), durable, and auditable workflows.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        },
+        {
+          "quote": "Express Workflows are ideal for high-volume, event-processing workloads such as IoT data ingestion, streaming data processing and transformation, and mobile application backends.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        },
+        {
+          "quote": "Express Workflows use an at-least-once model, so an execution could potentially run more than once.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        },
+        {
+          "quote": "Express Workflows only support Request Response integrations.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-service-integrations"
+        },
+        {
+          "quote": "Request Response - Call a service and Step Functions will progress to the next state immediately after it receives an HTTP response.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html#connect-to-resource"
+        },
+        {
+          "quote": "For integrated services such as AWS Batch and Amazon ECS, Step Functions can wait for a request to complete before progressing to the next state.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html#connect-to-resource"
+        }
+      ],
+      "audio": "audio/s12.mp3",
+      "seconds": 52
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 1: 棚卸しと構成、パッチ",
+      "bullets": [
+        "ノードの中身 → Inventory",
+        "構成の履歴 → AWS Config",
+        "パッチは 3 つの方法から"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "ノードのソフトと設定",
+            "Inventory",
+            "S3 に集めて調べる"
+          ],
+          [
+            "構成の関係と履歴",
+            "AWS Config",
+            "過去の構成"
+          ],
+          [
+            "多アカウントのパッチ",
+            "patch policy",
+            "Organizations 連携"
+          ],
+          [
+            "パッチを時間帯を決めて",
+            "Maintenance Windows",
+            "実行の時間帯"
+          ],
+          [
+            "パッチをその場で",
+            "Patch now",
+            "on-demand"
+          ]
+        ]
+      },
+      "narration": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、棚卸しと構成、そしてパッチです。ノードのソフトウェアと設定を集めて調べたいなら、インベントリーです。リソースどうしの関係や、過去の構成と変化を見たいなら、コンフィグです。パッチは三つの方法から選びます。複数のアカウントとリージョンにまたがるパッチを、一つの設定で行いたいなら、パッチポリシーです。止まる恐れのあるパッチの作業を、決めた時間帯に行いたいなら、メンテナンスウィンドウです。求めに応じて、その場で当てたいなら、パッチナウです。",
+      "refs": [
+        {
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        },
+        {
+          "quote": "This includes how the resources are related to one another and how they were configured in the past so that you can see how the configurations and relationships change over time.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#what-are-the-main-features-of-patch-manager"
+        },
+        {
+          "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#what-are-the-main-features-of-patch-manager"
+        },
+        {
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system, updating drivers, or installing software or patches.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        }
+      ],
+      "audio": "audio/s13.mp3",
+      "seconds": 35.2
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 2: あるべき状態と準拠",
+      "bullets": [
+        "準拠を自動で → State Manager",
+        "時刻を決めて → Maintenance Windows",
+        "一度きり → Run Command"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "決めた状態を自動で保つ",
+            "State Manager",
+            "ノード以外は Automation と"
+          ],
+          [
+            "止まる作業を時刻を決めて",
+            "Maintenance Windows",
+            "実行の時間帯"
+          ],
+          [
+            "一度きりの変更を多数へ",
+            "Run Command",
+            "コンソール・CLI・SDK など"
+          ],
+          [
+            "パッチと設定の準拠を一覧",
+            "Compliance",
+            "パッチは baseline で判定"
+          ],
+          [
+            "ルールに合わない物を直す",
+            "AWS Config の修復",
+            "Automation のドキュメント"
+          ]
+        ]
+      },
+      "narration": "二枚目は、あるべき状態と準拠です。ノードを、決めた状態に自動で保ちたいなら、ステートマネージャーのアソシエーションです。ノード以外のリソースの構成のずれなら、オートメーションと一緒に使います。止まる恐れがあり、優先度が高く、時刻を決めて行いたい作業なら、メンテナンスウィンドウです。一方、一度きりの構成の変更を、多くのノードにまとめて行いたいなら、ランコマンドです。多くのノードのパッチとアソシエーションの準拠を、一か所で見たいなら、コンプライアンスです。パッチの準拠は、ベースラインに照らして判定される事も確かめます。コンフィグのルールに合わないリソースを直したいなら、コンフィグの修復で、オートメーションのドキュメントを使います。",
+      "refs": [
+        {
+          "quote": "Which one you choose depends on whether you need to automate system compliance or perform high-priority, time-sensitive tasks during periods you specify.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows"
+        },
+        {
+          "quote": "To manage configuration drift across other AWS resources, you can use Automation, a tool in Systems Manager, with State Manager to perform the following types of tasks:",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-benefits"
+        },
+        {
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command"
+        },
+        {
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance"
+        },
+        {
+          "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance"
+        },
+        {
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        }
+      ],
+      "audio": "audio/s14.mp3",
+      "seconds": 42.9
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 3: Lambda と Step Functions",
+      "bullets": [
+        "重複イベントに備える",
+        "長く動く → Standard",
+        "完了を待つ → Run a Job"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "非同期の呼び出しの失敗",
+            "既定の再試行と送り先",
+            "重複・失敗の送り先"
+          ],
+          [
+            "流れから API を直接",
+            "SDK integrations",
+            "数千の API アクション"
+          ],
+          [
+            "長く動き監査が要る",
+            "Standard",
+            "最長 1 年"
+          ],
+          [
+            "大量のイベント処理",
+            "Express",
+            "2 回以上動き得る"
+          ],
+          [
+            "Batch・ECS の完了を待つ",
+            "Run a Job（.sync）",
+            "Express では不可"
+          ]
+        ]
+      },
+      "narration": "三枚目は、ラムダとステップファンクションズです。非同期の呼び出しで関数が失敗する場面なら、既定の再試行があることを思い出します。コードが重複したイベントを扱えるか、そして失敗したイベントの送り先を設定しているかを確かめます。流れの中から、サービスを直接呼びたいなら、エスディーケーの統合です。長く動き、監査が要る流れなら、スタンダードのワークフローです。大量のイベントを処理するなら、エクスプレスです。ただし、一つの実行が二回以上動く事があります。バッチやイーシーエスなどの処理が終わるのを待ってから次に進みたいなら、ランアジョブのパターンです。エクスプレスはリクエストレスポンスだけなので、この場合は使えません。",
+      "refs": [
+        {
+          "quote": "Ensure that your function code gracefully handles duplicate events, and that you have enough concurrency available to handle all invocations.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html#invocation-async-error-handling"
+        },
+        {
+          "quote": "You can configure separate destinations for events that are processed successfully, and events that fail all processing attempts.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html#invocation-async-retain-records"
+        },
+        {
+          "quote": "AWS SDK integrations provide a way to call any AWS service directly from your state machine, giving you access to thousands of API actions.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-service-integrations"
+        },
+        {
+          "quote": "Standard Workflows are ideal for long-running (up to one year), durable, and auditable workflows.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        },
+        {
+          "quote": "Express Workflows use an at-least-once model, so an execution could potentially run more than once.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        },
+        {
+          "quote": "Express Workflows only support Request Response integrations.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-service-integrations"
+        },
+        {
+          "quote": "For integrated services such as AWS Batch and Amazon ECS, Step Functions can wait for a request to complete before progressing to the next state.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html#connect-to-resource"
+        }
+      ],
+      "audio": "audio/s15.mp3",
+      "seconds": 41.8
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "5 つのまとまりに戻る",
+        "多くは Systems Manager の機能",
+        "迷ったら条件の表に戻る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "alt": "講義の地図に戻ったまとめ。1 棚卸しと構成では、Inventory が S3 に集めて調べ、AWS Config が関係と履歴を見る。2 パッチでは Patch Manager の準拠の物差しが patch baseline。3 あるべき状態では State Manager が association で保つ。4 準拠を保つでは、Compliance がパッチと association の準拠を一か所で見せ、AWS Config が Automation のドキュメントで修復する。5 複雑な処理では Lambda の再試行と、Step Functions の Standard と Express。並びは講義の順で、処理の流れではない。",
+        "svg": "visuals/s16.svg"
+      },
+      "narration": "まとめです。最初の地図に戻ります。今の状態を知るには、インベントリーでノードの情報を集めて調べ、コンフィグでリソースの構成の関係と履歴を見ます。パッチは、パッチマネージャーの三つの方法から選び、準拠の物差しはパッチベースラインでした。決めた状態は、ステートマネージャーのアソシエーションで保ちます。準拠は、コンプライアンスでまとめて見て、コンフィグのルールに合わない物は、オートメーションのドキュメントで修復します。複雑な処理では、ラムダの再試行と重複に気をつけ、ステップファンクションズでは、スタンダードとエクスプレスを使い分けます。問題文で迷ったら、さっきの三つの表に戻ってください。",
+      "refs": [
+        {
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory"
+        },
+        {
+          "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance"
+        },
+        {
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#state-manager-features"
+        },
+        {
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        },
+        {
+          "quote": "Ensure that your function code gracefully handles duplicate events, and that you have enough concurrency available to handle all invocations.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html#invocation-async-error-handling"
+        },
+        {
+          "quote": "Standard Workflows are ideal for long-running (up to one year), durable, and auditable workflows.",
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html#choosing-workflow-type"
+        }
+      ],
+      "audio": "audio/s16.mp3",
+      "seconds": 40
+    }
+  ]
+}
