@@ -1,0 +1,58 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0011",
+  "services": [
+    "AWS CodeDeploy",
+    "AWS Lambda",
+    "Amazon ECS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company is moving its applications from EC2 instances to AWS Lambda functions and Amazon ECS services, and will keep using AWS CodeDeploy for deployments on the new compute platforms. The platform team asks how the CodeDeploy agent should be set up for the new platforms. Which approach requires the LEAST operational effort while keeping deployments working?",
+  "stem_ja": "ある会社は、アプリケーションを EC2 インスタンスから AWS Lambda 関数と Amazon ECS のサービスへ移しており、新しいコンピューティングプラットフォームでも AWS CodeDeploy でデプロイし続けます。プラットフォームチームは、新しいプラットフォームで CodeDeploy エージェントをどう用意すべきかを尋ねています。デプロイを動かし続けつつ、運用の手間が最も少ない方法はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Do not install the CodeDeploy agent for the Lambda and ECS deployments, because the agent is required only for the EC2/On-Premises compute platform.",
+      "text_ja": "CodeDeploy エージェントは EC2/オンプレミスのコンピューティングプラットフォームでだけ必要なので、Lambda と ECS のデプロイでは入れない。"
+    },
+    {
+      "key": "B",
+      "text": "Add the CodeDeploy agent as a sidecar container to every ECS task definition, and package it in a Lambda layer for every function.",
+      "text_ja": "すべての ECS のタスク定義に CodeDeploy エージェントをサイドカーのコンテナとして足し、すべての関数で Lambda レイヤーにまとめる。"
+    },
+    {
+      "key": "C",
+      "text": "Keep a small fleet of EC2 instances with the CodeDeploy agent so that the agent can deploy to Lambda and ECS.",
+      "text_ja": "エージェントが Lambda と ECS へデプロイできるよう、CodeDeploy エージェントを入れた EC2 インスタンスを少し残しておく。"
+    },
+    {
+      "key": "D",
+      "text": "Install the CodeDeploy agent on the ECS container instances only, and use the EC2 compute platform for the Lambda functions.",
+      "text_ja": "ECS のコンテナインスタンスにだけ CodeDeploy エージェントを入れ、Lambda 関数には EC2 のコンピューティングプラットフォームを使う。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "CodeDeploy エージェントは、EC2/オンプレミスのコンピューティングプラットフォームにデプロイする時だけ必要です。Amazon ECS や AWS Lambda のコンピューティングプラットフォームを使うデプロイでは要りません。",
+    "per_choice": {
+      "A": "正しい。ECS と Lambda のデプロイにはエージェントが要らないので、用意する作業がありません。",
+      "B": "エージェントは ECS と Lambda のデプロイでは要らないので、作業が増えるだけです。",
+      "C": "ECS と Lambda のデプロイにエージェントは要らず、EC2 を残す費用と手間が増えるだけです。",
+      "D": "ECS のデプロイにエージェントは要らず、Lambda 関数を EC2 のプラットフォームでデプロイすることもできません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html",
+      "source_id": "S1",
+      "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
