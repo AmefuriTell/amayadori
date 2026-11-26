@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 235,
+  "count": 239,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -5296,6 +5296,265 @@
         {
           "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps.html#orgs_manage_policies_rcps",
           "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0013",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company with 150 accounts in AWS Organizations wants the same set of AWS Config rules in every account, including accounts that join the organization later, with a few sandbox accounts excluded. AWS Config recording is already on in all accounts. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "AWS Organizations に 150 のアカウントを持つ会社は、後から組織に入るアカウントも含め、いくつかのサンドボックスのアカウントを除くすべてのアカウントに同じ一組の AWS Config ルールを置きたいと考えています。AWS Config の記録はすべてのアカウントで既に有効です。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use PutOrganizationConfigRule from the management account or a delegated administrator, and list the sandbox accounts as excluded accounts.",
+          "text_ja": "管理アカウントか委任管理者から PutOrganizationConfigRule を使い、サンドボックスのアカウントを除外するアカウントとして指定する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Config aggregator for the organization and deploy the rules to the source accounts through the aggregator.",
+          "text_ja": "組織の AWS Config アグリゲーターを作り、アグリゲーターを通して送り元のアカウントへルールをデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Ask each account owner to create the rules in their own account, and send the list of rules to new accounts when they join.",
+          "text_ja": "各アカウントの所有者が自分のアカウントでルールを作り、新しいアカウントが入った時にはルールの一覧を送る。"
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that runs daily, finds accounts without the rules, and creates the rules in each one.",
+          "text_ja": "毎日動き、ルールが無いアカウントを探して、それぞれにルールを作る AWS Lambda 関数を書く。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS Config では、組織のすべてのアカウントの Config ルールを中央で作成・更新・削除でき、共通のルールを配りつつ、作らないアカウントを指定できます。新しいアカウントが組織に入ると、ルールはそのアカウントにもデプロイされます。組織のルールは API か CLI で作ります。",
+        "per_choice": {
+          "A": "正しい。1 か所から全アカウントへ配り、除外も指定でき、新しいアカウントにも自動で配られます。",
+          "B": "アグリゲーターは送り元のアカウントを読むだけの仕組みで、アグリゲーターを通してルールをデプロイすることはできません。",
+          "C": "手作業が多く、ルールがそろう保証もありません。",
+          "D": "動きますが、独自の関数を保守する必要があります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment",
+          "quote": "Deploy a common set of AWS Config rules across all accounts and specify accounts where AWS Config rules should not be created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations",
+          "quote": "If a new account joins an organization, the rule or conformance pack is deployed to that account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0014",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Config",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security auditor needs one place to view the AWS Config resource configuration and compliance data from every account in the company's organization. The auditor must not be able to change anything in the source accounts, and the company does not want to request authorization from each account. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティの監査担当は、会社の組織のすべてのアカウントの AWS Config のリソースの構成と準拠のデータを、1 か所で見る必要があります。監査担当は送り元のアカウントで何も変えられてはならず、会社は各アカウントに承認を求めたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Give the auditor an IAM role with administrator permissions in every account.",
+          "text_ja": "監査担当に、すべてのアカウントで管理者の権限を持つ IAM ロールを与える。"
+        },
+        {
+          "key": "B",
+          "text": "Deploy organization Config rules from the audit account so that results appear there.",
+          "text_ja": "結果がそこに出るよう、監査のアカウントから組織の Config ルールをデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS Config aggregator for the organization in an audit account.",
+          "text_ja": "監査のアカウントに、組織の AWS Config アグリゲーターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Export each account's AWS Config data to a spreadsheet every week and send it to the auditor.",
+          "text_ja": "毎週、各アカウントの AWS Config のデータを表計算シートに出して監査担当に送る。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "アグリゲーターは、組織とそのすべてのアカウントから AWS Config の構成と準拠のデータを集めるリソースです。組織に入っているアカウントを集める時は承認が要らず、アグリゲーターは送り元のアカウントを読むだけで、変更はできません。",
+        "per_choice": {
+          "A": "見られますが、送り元のアカウントを変えられる強すぎる権限になります。",
+          "B": "組織のルールはルールを配る仕組みで、全アカウントの構成と準拠のデータを 1 か所で見る仕組みではありません。",
+          "C": "正しい。承認無しで組織全体のデータを 1 か所で読めて、送り元を変える権限も持ちません。",
+          "D": "手作業で、データも最大 1 週間古くなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregate-data",
+          "quote": "An aggregator is an AWS Config resource type that collects AWS Config configuration and compliance data from the following:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Aggregators do not provide mutating access into a source account or region."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0015",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "Amazon GuardDuty",
+        "AWS Organizations"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company wants to manage Amazon GuardDuty for all member accounts in its organization from a central security account. GuardDuty must cover us-east-1, eu-west-1, and ap-northeast-1. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "ある会社は、組織のすべてのメンバーアカウントの Amazon GuardDuty を、中央のセキュリティのアカウントから管理したいと考えています。GuardDuty は us-east-1、eu-west-1、ap-northeast-1 を対象にする必要があります。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "From the management account, designate the security account as the delegated GuardDuty administrator in each of the three Regions.",
+          "text_ja": "管理アカウントから、3 つのリージョンのそれぞれで、セキュリティのアカウントを GuardDuty の委任管理者に指定する。"
+        },
+        {
+          "key": "B",
+          "text": "From the delegated administrator account, enable and manage GuardDuty for the member accounts in each Region.",
+          "text_ja": "委任管理者のアカウントから、各リージョンでメンバーアカウントの GuardDuty を有効にして管理する。"
+        },
+        {
+          "key": "C",
+          "text": "Designate a different delegated administrator account in each Region so that each Region is managed separately.",
+          "text_ja": "各リージョンを別々に管理するよう、リージョンごとに別の委任管理者のアカウントを指定する。"
+        },
+        {
+          "key": "D",
+          "text": "Designate the delegated administrator only in us-east-1, because GuardDuty settings apply to all Regions.",
+          "text_ja": "GuardDuty の設定はすべてのリージョンに効くので、委任管理者は us-east-1 でだけ指定する。"
+        },
+        {
+          "key": "E",
+          "text": "Ask each member account owner to turn on GuardDuty in every Region and invite the security account.",
+          "text_ja": "各メンバーアカウントの所有者が、すべてのリージョンで GuardDuty を有効にし、セキュリティのアカウントを招待する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "管理アカウントは、組織の任意のアカウントを GuardDuty の委任管理者に指定でき、委任管理者はそのリージョンで組織のすべてのメンバーアカウントの GuardDuty を有効にして管理できます。GuardDuty はリージョンのサービスなので、使う各リージョンで指定が必要で、どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+        "per_choice": {
+          "A": "正しい。GuardDuty はリージョンのサービスなので、各リージョンで同じアカウントを指定します。",
+          "B": "正しい。委任管理者は、そのリージョンのメンバーアカウントの GuardDuty を有効にして管理できます。",
+          "C": "どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+          "D": "GuardDuty はリージョンのサービスで、各リージョンでの指定が必要です。",
+          "E": "手作業が多く、中央から管理する要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "It is required that you use the same account as delegated GuardDuty administrator account in all other Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0016",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "Amazon Detective",
+        "Amazon GuardDuty"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Security analysts receive GuardDuty findings about suspicious activity but spend hours collecting logs from many sources to understand what happened. The company wants a service that collects log data from AWS resources automatically and helps analysts investigate and identify the root cause of findings quickly. Which solution BEST meets these requirements?",
+      "stem_ja": "セキュリティの分析担当は、不審な活動についての GuardDuty の検出結果を受け取りますが、何が起きたかを理解するために、多くの元からログを集めるのに何時間もかけています。会社は、AWS のリソースからログのデータを自動で集め、分析担当が検出結果を調べて根本の原因を素早く見つけるのを助けるサービスを求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS Config aggregator so that analysts can see resource configurations from all accounts.",
+          "text_ja": "分析担当がすべてのアカウントのリソースの構成を見られるよう、AWS Config アグリゲーターを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on Amazon Detective and use it to investigate the findings.",
+          "text_ja": "Amazon Detective を有効にし、検出結果の調査に使う。"
+        },
+        {
+          "key": "C",
+          "text": "Deploy AWS Control Tower detective controls to every organizational unit.",
+          "text_ja": "すべての組織単位（OU）に、AWS Control Tower の検出のコントロールを適用する。"
+        },
+        {
+          "key": "D",
+          "text": "Have analysts download CloudTrail and VPC flow logs for each finding and search them by hand.",
+          "text_ja": "分析担当が、検出結果ごとに CloudTrail と VPC フローログをダウンロードし、手作業で探す。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Amazon Detective は、セキュリティの検出結果や不審な活動を分析・調査し、根本の原因を素早く見つけるのを助けるサービスで、AWS のリソースからログのデータを自動で集めます。",
+        "per_choice": {
+          "A": "アグリゲーターは構成と準拠のデータを集めるもので、検出結果の調査を助ける仕組みではありません。",
+          "B": "正しい。ログを自動で集め、検出結果の調査と根本の原因の特定を助けます。",
+          "C": "コントロールは組織単位の継続的なガバナンスのための決まりで、個々の検出結果の調査には使いません。",
+          "D": "手作業で、今の何時間もかかる調査と変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Amazon Detective helps you analyze, investigate, and quickly identify the root cause of security findings or suspicious activities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Detective automatically collects log data from your AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls",
+          "quote": "A control is a high-level rule that provides ongoing governance for your overall AWS environment."
         }
       ],
       "low_confidence": false

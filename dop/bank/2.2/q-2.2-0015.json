@@ -1,0 +1,79 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0015",
+  "services": [
+    "Amazon GuardDuty",
+    "AWS Organizations"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company wants to manage Amazon GuardDuty for all member accounts in its organization from a central security account. GuardDuty must cover us-east-1, eu-west-1, and ap-northeast-1. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "ある会社は、組織のすべてのメンバーアカウントの Amazon GuardDuty を、中央のセキュリティのアカウントから管理したいと考えています。GuardDuty は us-east-1、eu-west-1、ap-northeast-1 を対象にする必要があります。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "From the management account, designate the security account as the delegated GuardDuty administrator in each of the three Regions.",
+      "text_ja": "管理アカウントから、3 つのリージョンのそれぞれで、セキュリティのアカウントを GuardDuty の委任管理者に指定する。"
+    },
+    {
+      "key": "B",
+      "text": "From the delegated administrator account, enable and manage GuardDuty for the member accounts in each Region.",
+      "text_ja": "委任管理者のアカウントから、各リージョンでメンバーアカウントの GuardDuty を有効にして管理する。"
+    },
+    {
+      "key": "C",
+      "text": "Designate a different delegated administrator account in each Region so that each Region is managed separately.",
+      "text_ja": "各リージョンを別々に管理するよう、リージョンごとに別の委任管理者のアカウントを指定する。"
+    },
+    {
+      "key": "D",
+      "text": "Designate the delegated administrator only in us-east-1, because GuardDuty settings apply to all Regions.",
+      "text_ja": "GuardDuty の設定はすべてのリージョンに効くので、委任管理者は us-east-1 でだけ指定する。"
+    },
+    {
+      "key": "E",
+      "text": "Ask each member account owner to turn on GuardDuty in every Region and invite the security account.",
+      "text_ja": "各メンバーアカウントの所有者が、すべてのリージョンで GuardDuty を有効にし、セキュリティのアカウントを招待する。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "管理アカウントは、組織の任意のアカウントを GuardDuty の委任管理者に指定でき、委任管理者はそのリージョンで組織のすべてのメンバーアカウントの GuardDuty を有効にして管理できます。GuardDuty はリージョンのサービスなので、使う各リージョンで指定が必要で、どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+    "per_choice": {
+      "A": "正しい。GuardDuty はリージョンのサービスなので、各リージョンで同じアカウントを指定します。",
+      "B": "正しい。委任管理者は、そのリージョンのメンバーアカウントの GuardDuty を有効にして管理できます。",
+      "C": "どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+      "D": "GuardDuty はリージョンのサービスで、各リージョンでの指定が必要です。",
+      "E": "手作業が多く、中央から管理する要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+      "source_id": "S8",
+      "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+      "source_id": "S8",
+      "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+      "source_id": "S9",
+      "quote": "It is required that you use the same account as delegated GuardDuty administrator account in all other Regions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+      "source_id": "S9",
+      "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,67 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0014",
+  "services": [
+    "AWS Config",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security auditor needs one place to view the AWS Config resource configuration and compliance data from every account in the company's organization. The auditor must not be able to change anything in the source accounts, and the company does not want to request authorization from each account. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "セキュリティの監査担当は、会社の組織のすべてのアカウントの AWS Config のリソースの構成と準拠のデータを、1 か所で見る必要があります。監査担当は送り元のアカウントで何も変えられてはならず、会社は各アカウントに承認を求めたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Give the auditor an IAM role with administrator permissions in every account.",
+      "text_ja": "監査担当に、すべてのアカウントで管理者の権限を持つ IAM ロールを与える。"
+    },
+    {
+      "key": "B",
+      "text": "Deploy organization Config rules from the audit account so that results appear there.",
+      "text_ja": "結果がそこに出るよう、監査のアカウントから組織の Config ルールをデプロイする。"
+    },
+    {
+      "key": "C",
+      "text": "Create an AWS Config aggregator for the organization in an audit account.",
+      "text_ja": "監査のアカウントに、組織の AWS Config アグリゲーターを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Export each account's AWS Config data to a spreadsheet every week and send it to the auditor.",
+      "text_ja": "毎週、各アカウントの AWS Config のデータを表計算シートに出して監査担当に送る。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "アグリゲーターは、組織とそのすべてのアカウントから AWS Config の構成と準拠のデータを集めるリソースです。組織に入っているアカウントを集める時は承認が要らず、アグリゲーターは送り元のアカウントを読むだけで、変更はできません。",
+    "per_choice": {
+      "A": "見られますが、送り元のアカウントを変えられる強すぎる権限になります。",
+      "B": "組織のルールはルールを配る仕組みで、全アカウントの構成と準拠のデータを 1 か所で見る仕組みではありません。",
+      "C": "正しい。承認無しで組織全体のデータを 1 か所で読めて、送り元を変える権限も持ちません。",
+      "D": "手作業で、データも最大 1 週間古くなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregate-data",
+      "source_id": "S4",
+      "quote": "An aggregator is an AWS Config resource type that collects AWS Config configuration and compliance data from the following:"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+      "source_id": "S5",
+      "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+      "source_id": "S5",
+      "quote": "Aggregators do not provide mutating access into a source account or region."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
