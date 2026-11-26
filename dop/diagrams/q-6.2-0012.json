@@ -1,6 +1,6 @@
 {
   "id": "q-6.2-0012",
-  "source": "flowchart TB\n  subgraph ACM1[\"AWS Certificate Manager\"]\n    CERT@{ svc: \"AWS Certificate Manager\", label: \"✔ A: DNS 検証の新しい証明書\" }\n  end\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  MAIL[\"⚠ B: メール検証<br/>毎年人が承認する\"]\n  ACME[\"⚠ C: ACME で発行した証明書<br/>ACM の自動更新の対象外\"]\n  CW[\"⚠ D: 期限のアラームだけ<br/>付け替えは手作業\"]\n  CERT == \"最初の 1 回だけ付ける\" ==> ALB\n  CERT -- \"自動で更新（ARN は同じ）\" --> CERT\n  MAIL -.- CERT\n  ACME -.- ALB\n  CW -.- ALB\n",
+  "source": "flowchart TB\n  subgraph ACM1[\"AWS Certificate Manager\"]\n    CERT@{ svc: \"AWS Certificate Manager\", label: \"AWS Certificate Manager<br/>✔ A: DNS 検証の新しい証明書\" }\n  end\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  MAIL[\"⚠ B: メール検証<br/>毎年人が承認する\"]\n  ACME[\"⚠ C: ACME で発行した証明書<br/>ACM の自動更新の対象外\"]\n  CW[\"⚠ D: 期限のアラームだけ<br/>付け替えは手作業\"]\n  CERT == \"最初の 1 回だけ付ける\" ==> ALB\n  CERT -- \"自動で更新（ARN は同じ）\" --> CERT\n  MAIL -.- CERT\n  ACME -.- ALB\n  CW -.- ALB\n",
   "alt": "ALB の証明書を人の操作なしで更新する構成。DNS 検証の ACM 証明書を最初に 1 回付ければ（A）、ACM が自動で更新し ARN も変わらない。メール検証や手作業の付け替えは手間が残る。",
   "status": "verified",
   "created": "2026-11-26",

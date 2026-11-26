@@ -1,6 +1,6 @@
 {
   "id": "q-1.2-0003",
-  "source": "flowchart TB\n  GH[\"GitHub\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"V2 パイプライン 1 つ\" }\n    TR[\"✔ D: トリガー pullRequest（main の Open と Update）＋ push（main）\"]\n  end\n  GH -- \"PR 作成・新リビジョン\" --> TR\n  GH -- \"main への push\" --> TR\n  TR == \"✔ D: 開始\" ==> CP\n  A[\"⚠ A: Closed は PR が閉じた時。新リビジョンで動かない\"] -.-> TR\n  B[\"⚠ B: CodeBuild の Webhook ではパイプラインは始まらない\"] -.-> CP\n  C[\"⚠ C: パイプラインが 2 つになる\"] -.-> CP\n",
+  "source": "flowchart TB\n  GH@{ svc: \"GitHub\", label: \"GitHub\" }\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"V2 パイプライン 1 つ\" }\n    TR[\"✔ D: トリガー pullRequest（main の Open と Update）＋ push（main）\"]\n  end\n  GH -- \"PR 作成・新リビジョン\" --> TR\n  GH -- \"main への push\" --> TR\n  TR == \"✔ D: 開始\" ==> CP\n  A[\"⚠ A: Closed は PR が閉じた時。新リビジョンで動かない\"] -.-> TR\n  B[\"⚠ B: CodeBuild の Webhook ではパイプラインは始まらない\"] -.-> CP\n  C[\"⚠ C: パイプラインが 2 つになる\"] -.-> CP\n",
   "alt": "V2 パイプライン 1 つで、main 向け PR の作成と新リビジョン、main への push で開始する図。pullRequest フィルターに Open と Update、さらに push フィルターを入れる（D）。Closed では新リビジョンで動かない（A）。",
   "status": "verified",
   "created": "2026-11-26",

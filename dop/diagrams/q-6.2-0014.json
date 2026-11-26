@@ -1,6 +1,6 @@
 {
   "id": "q-6.2-0014",
-  "source": "flowchart TB\n  REG([\"規制当局<br/>FIPS 140-3 レベル 3 と<br/>IAM の外での利用者管理\"])\n  subgraph ACC[\"会社のアカウント\"]\n    HSM@{ svc: \"AWS CloudHSM\", label: \"✔ B: FIPS モードのクラスター\" }\n    USR[\"HSM の利用者<br/>クラスターの中で自分で管理\"]\n    KMS@{ svc: \"AWS KMS\", label: \"カスタマーマネージドキー\" }\n  end\n  OWN[\"⚠ C: AWS 所有のキー<br/>AWS が管理する\"]\n  USR == \"✔ B: IAM の外で管理\" ==> HSM\n  REG -. \"要件\" .-> HSM\n  KMS -. \"⚠ A・D: シングルテナントの HSM でも、IAM の外の管理でもない\" .- HSM\n  OWN -.- KMS\n",
+  "source": "flowchart TB\n  REG([\"規制当局<br/>FIPS 140-3 レベル 3 と<br/>IAM の外での利用者管理\"])\n  subgraph ACC[\"会社のアカウント\"]\n    HSM@{ svc: \"AWS CloudHSM\", label: \"AWS CloudHSM<br/>✔ B: FIPS モードのクラスター\" }\n    USR[\"HSM の利用者<br/>クラスターの中で自分で管理\"]\n    KMS@{ svc: \"AWS KMS\", label: \"カスタマーマネージドキー\" }\n  end\n  OWN[\"⚠ C: AWS 所有のキー<br/>AWS が管理する\"]\n  USR == \"✔ B: IAM の外で管理\" ==> HSM\n  REG -. \"要件\" .-> HSM\n  KMS -. \"⚠ A・D: シングルテナントの HSM でも、IAM の外の管理でもない\" .- HSM\n  OWN -.- KMS\n",
   "alt": "決済の会社がシングルテナントの検証済み HSM と IAM の外での利用者管理を求められる図。FIPS モードの CloudHSM クラスターで利用者を自分で管理する（B）。KMS のキーや AWS 所有のキーは要件に合わない。",
   "status": "verified",
   "created": "2026-11-26",
