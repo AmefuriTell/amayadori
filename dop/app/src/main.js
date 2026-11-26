@@ -112,11 +112,29 @@ async function load() {
     state.domains = data.domains ?? {};
     useQuestions(state.retry);
     Object.assign(state, resume(state.questions, loadProgress())); // A-0010: 読み込み直しても続きから
+    openFromUrl();
     render();
   } catch (e) {
     progress.textContent = '';
     app.replaceChildren(el('p', { class: 'error', 'data-testid': 'load-error', text: `問題を読み込めません（${e.message}）。時間をおいて開き直してください。` }));
   }
+}
+
+// ---- URL の ?q=<問題 ID> で、その問題を直接開く（A-0015） ----
+function openFromUrl() {
+  const url = new URL(location.href);
+  const id = url.searchParams.get('q');
+  if (id === null) return;
+  url.searchParams.delete('q');
+  history.replaceState(null, '', url.pathname + url.search + url.hash); // 読み込み直した時は続きの記録で開く
+  if (!state.allQuestions.some((q) => q.id === id)) { state.qlinkMissing = id; return; }
+  if (!state.questions.some((q) => q.id === id)) { saveRetry(null); useQuestions(null); }
+  Object.assign(state, resume(state.questions, { id, selected: [], answered: false, correct: 0 }), { view: 'solve', report: null });
+}
+
+function renderQlinkMissing() {
+  if (!state.qlinkMissing) return null;
+  return el('p', { class: 'notice', 'data-testid': 'qlink-missing', text: `指定の問題 ${state.qlinkMissing} は見つかりません。続きから開きました。` });
 }
 
 function render() {
@@ -136,6 +154,7 @@ function render() {
   progress.textContent = `${state.index + 1} / ${state.questions.length}`;
 
   const meta = el('div', { class: 'meta' },
+    el('span', { class: 'qid muted', 'data-testid': 'qid', text: q.id }),
     el('span', { text: `タスク ${q.task}` }),
     el('span', { class: 'svcs' }, q.services.flatMap((s, i) => (i ? ['・', serviceLabel(s)] : [serviceLabel(s)]))),
     q.low_confidence ? el('span', { class: 'badge warn', 'data-testid': 'low-confidence', title: '検証役の AI が迷った問題です。解説と出典を確かめてください', text: 'AI の確信が低い' }) : null,
@@ -180,7 +199,7 @@ function render() {
   } else {
     card.append(renderAnswer(q));
   }
-  app.replaceChildren(...[renderRetryBar(), card].filter(Boolean));
+  app.replaceChildren(...[renderQlinkMissing(), renderRetryBar(), card].filter(Boolean));
   autoSpeak(q, view);
 }
 
