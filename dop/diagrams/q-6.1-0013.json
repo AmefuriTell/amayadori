@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0013",
+  "source": "flowchart TB\n  ADM[\"管理者（MFA デバイスあり）<br/>シリアル番号と MFA コードを渡す\"]\n  STS@{ svc: \"AWS STS\", label: \"GetSessionToken<br/>（一時的な認証情報を返す）\" }\n  POL@{ svc: \"AWS IAM\", label: \"MultiFactorAuthPresent が true の時だけ許可\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"TerminateInstances\" }\n  ADM -- \"✔ D: MFA コード\" --> STS\n  ADM == \"一時的な認証情報で要求\" ==> POL\n  POL --> EC2\n  A[\"⚠ A: アクセスキーのまま MFA コードを足す（条件キーが入らない）\"]\n  A -.-> POL\n  B[\"⚠ B: ルートユーザーの認証情報を使う（不可）\"]\n  B -.-> ADM\n  C[\"⚠ C: 条件を MultiFactorAuthAge に変える（通らない）\"]\n  C -.-> POL\n",
+  "alt": "MFA の条件キーは AssumeRole や GetSessionToken で得た一時的な認証情報にだけ入る。MFA の情報を付けて GetSessionToken を呼び、その認証情報で要求する(D)。アクセスキーでは通らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

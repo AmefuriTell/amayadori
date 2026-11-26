@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0015",
+  "source": "flowchart TB\n  subgraph CI[\"外部の CI サービス\"]\n    JOB[\"デプロイのジョブ\"]\n    IDP[\"OIDC 対応の IdP\"]\n  end\n  subgraph AWSA[\"AWS アカウント\"]\n    OIDC@{ svc: \"AWS IAM\", label: \"IAM OIDC ID プロバイダー（IdP を信頼）\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"ジョブが引き受けるロール\" }\n    STS@{ svc: \"AWS STS\", label: \"一時的な認証情報\" }\n  end\n  IDP -- \"OIDC トークン\" --> JOB\n  JOB -- \"ロールを引き受ける\" --> OIDC\n  OIDC --> ROLE\n  ROLE == \"✔ B: 一時的な認証情報\" ==> STS\n  STS --> JOB\n  A[\"⚠ A: キーを毎週ローテーション（長期のキーが残る）\"]\n  A -.-> JOB\n  C[\"⚠ C: 新しい CA ＋ Roles Anywhere（運用が増える）\"]\n  C -.-> JOB\n  D[\"⚠ D: プロジェクトごとの IAM ユーザー（長期のキーが増える）\"]\n  D -.-> JOB\n",
+  "alt": "CI の OIDC トークンを信頼する IAM OIDC ID プロバイダーとロールを作れば、ジョブは長期のキー無しで一時的な認証情報を得られる(B)。Roles Anywhere は CA の運用が増える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

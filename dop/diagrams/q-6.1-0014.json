@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0014",
+  "source": "flowchart TB\n  subgraph DC[\"自前のデータセンター\"]\n    CA[\"自前の CA\"]\n    SRV[\"バックアップのサーバー\"]\n  end\n  RA@{ svc: \"IAM Roles Anywhere\", label: \"IAM Roles Anywhere<br/>トラストアンカー（会社の CA を参照）<br/>サーバーが証明書で認証\" }\n  S3B@{ svc: \"Amazon S3\", label: \"バックアップ先のバケット\" }\n  CA -- \"X.509 証明書\" --> SRV\n  RA == \"✔ C: 一時的な認証情報\" ==> SRV\n  SRV -- \"アップロード\" --> S3B\n  A[\"⚠ A: 30 日ごとにキーをローテーション（長期のキーが残る）\"]\n  A -.-> SRV\n  B[\"⚠ B: サーバーごとに IAM ユーザー（長期のキーが増える）\"]\n  B -.-> SRV\n  D[\"⚠ D: 暗号化ファイルにキーを保存（長期のキーが残る）\"]\n  D -.-> SRV\n",
+  "alt": "IAM Roles Anywhere のトラストアンカーに会社の CA を登録すると、サーバーは証明書と引き換えに一時的な認証情報を得られ、長期の認証情報の管理をやめられる(C)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

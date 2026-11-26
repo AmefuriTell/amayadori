@@ -15816,7 +15816,10 @@
           "quote": "If rotation fails, for example because Steps 3 and 4 are not yet completed, Secrets Manager retries the rotation process multiple times."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Lambda のローテーション関数は Secrets Manager とデータベースの両方にネットワークで届く必要がある。データベースと同じ VPC とセキュリティグループに置いて両方に届くようにする(A)。"
+      }
     },
     {
       "id": "q-6.1-0012",
@@ -15877,7 +15880,10 @@
           "quote": "Secrets Manager rotates your secret at any time during the rotation window."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "日本時間 02:00 は UTC の 17:00 で、cron の分は 0 にし、ウィンドウは 1 時間にする。cron(0 17 * * ? *) と 1 時間のウィンドウの組み合わせ(C)が、少ない時間帯の外で動くおそれが最小。"
+      }
     },
     {
       "id": "q-6.1-0013",
@@ -15943,7 +15949,10 @@
           "quote": "You cannot use MFA-protected API access with AWS account root user credentials."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "MFA の条件キーは AssumeRole や GetSessionToken で得た一時的な認証情報にだけ入る。MFA の情報を付けて GetSessionToken を呼び、その認証情報で要求する(D)。アクセスキーでは通らない。"
+      }
     },
     {
       "id": "q-6.1-0014",
@@ -16004,7 +16013,10 @@
           "quote": "Your workloads outside of AWS authenticate with the trust anchor using certificates issued by the trusted CA in exchange for temporary AWS credentials."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "IAM Roles Anywhere のトラストアンカーに会社の CA を登録すると、サーバーは証明書と引き換えに一時的な認証情報を得られ、長期の認証情報の管理をやめられる(C)。"
+      }
     },
     {
       "id": "q-6.1-0015",
@@ -16066,7 +16078,10 @@
           "quote": "you don't have to distribute long-term security credentials, such as IAM user access keys, with your application."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CI の OIDC トークンを信頼する IAM OIDC ID プロバイダーとロールを作れば、ジョブは長期のキー無しで一時的な認証情報を得られる(B)。Roles Anywhere は CA の運用が増える。"
+      }
     },
     {
       "id": "q-6.1-0016",
@@ -16128,7 +16143,10 @@
           "quote": "You can remove the existing role and then add a different role to an instance profile."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インスタンスプロファイルに入れられるロールは 1 つだけで上限は上げられない。既存のロールのポリシーに SQS の権限を足せば、両方の権限を持たせられる(C)。"
+      }
     },
     {
       "id": "q-6.2-0001",
