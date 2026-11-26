@@ -1,0 +1,56 @@
+{
+  "id": "iam-access-analyzer",
+  "name": "IAM Access Analyzer",
+  "aliases": [
+    "IAM Access Analyzer"
+  ],
+  "reading": "アイアム アクセスアナライザー",
+  "summary": "組織やアカウントの中で、外の相手（外部のエンティティ）と共有されているリソースを見つけたり、使われた操作からポリシーを作ったりして、アクセスの許可を見直すのを助ける IAM の機能。",
+  "features": [
+    {
+      "title": "外部と共有されたリソースの検出",
+      "text": "S3 バケットや IAM ロールなど、外の相手と共有されたリソースを見つける。リソースベースのポリシーを論理で分析し、アカウントの外に共有されたリソースごとに検出結果を作る。",
+      "source_id": "S4"
+    },
+    {
+      "title": "信頼ゾーン",
+      "text": "有効にする時に、組織全体かアカウントの分析器（アナライザー）を作る。選んだ組織かアカウントが信頼ゾーンになり、その中のプリンシパル（ユーザーやロールなど）からのアクセスは信頼された物とみなす。",
+      "source_id": "S5"
+    },
+    {
+      "title": "ポリシーの生成",
+      "text": "CloudTrail のログから、IAM のユーザーやロールが決めた期間に使った操作とサービスを調べ、それをもとに IAM ポリシーを作る。",
+      "source_id": "S6"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "組織の外からアクセスできるリソースを見つけたい場面では、組織を信頼ゾーンにした分析器を考える。",
+      "source_id": "S5"
+    },
+    {
+      "text": "実際に使った操作だけを許すポリシーにしたい場面では、CloudTrail のログからのポリシーの生成を考える。",
+      "source_id": "S6"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-resource-identification",
+      "source_id": "S4",
+      "quote": "For each instance of a resource shared outside of your account, IAM Access Analyzer generates a finding."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-resource-identification",
+      "source_id": "S5",
+      "quote": "The organization or account you choose is known as the zone of trust for the analyzer."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-policy-generation",
+      "source_id": "S6",
+      "quote": "It then generates an IAM policy that is based on that access activity."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

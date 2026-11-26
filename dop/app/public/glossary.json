@@ -5,8 +5,10 @@
     "AWS Backup": "backup",
     "AWS CloudFormation StackSets": "cloudformation-stacksets",
     "AWS CloudFormation": "cloudformation",
+    "Amazon CloudFront": "cloudfront",
     "AWS CloudTrail": "cloudtrail",
     "Amazon CloudWatch Logs": "cloudwatch-logs",
+    "Amazon CloudWatch Synthetics": "cloudwatch-synthetics",
     "Amazon CloudWatch": "cloudwatch",
     "AWS CodeArtifact": "codeartifact",
     "AWS CodeBuild": "codebuild",
@@ -15,6 +17,7 @@
     "AWS CodePipeline": "codepipeline",
     "AWS Config": "config",
     "AWS Control Tower": "control-tower",
+    "Amazon Data Firehose": "data-firehose",
     "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
     "Amazon EC2": "ec2",
     "Amazon ECR": "ecr",
@@ -25,6 +28,7 @@
     "Amazon EventBridge": "eventbridge",
     "Amazon GuardDuty": "guardduty",
     "AWS Health": "health",
+    "IAM Access Analyzer": "iam-access-analyzer",
     "AWS IAM Identity Center": "iam-identity-center",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
@@ -41,6 +45,8 @@
     "Amazon SNS": "sns",
     "Amazon SQS": "sqs",
     "AWS Step Functions": "step-functions",
+    "AWS STS": "sts",
+    "AWS Security Token Service (AWS STS)": "sts",
     "AWS Systems Manager": "systems-manager",
     "Amazon VPC": "vpc"
   },
@@ -241,6 +247,40 @@
         }
       ]
     },
+    "cloudfront": {
+      "id": "cloudfront",
+      "name": "Amazon CloudFront",
+      "reading": "クラウドフロント",
+      "summary": ".html・.css・.js・画像などの Web の中身を、利用者へ速く届ける Web サービス。エッジロケーションと呼ばれる世界中のデータセンターの網から届ける。",
+      "features": [
+        {
+          "title": "オリジン",
+          "text": "S3 バケットや自分の HTTP サーバーなど、元のファイルを置く所（オリジン）を決める。CloudFront はそこからファイルを取り、世界中のエッジロケーションから配る。"
+        },
+        {
+          "title": "オリジングループのフェイルオーバー",
+          "text": "オリジンを、主のオリジンと予備の 2 つ目のオリジンの組（オリジングループ）にできる。予備のオリジンに切り替える（フェイルオーバーする）のは、見る人の要求の HTTP のメソッドが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。"
+        }
+      ],
+      "exam_points": [
+        "オリジングループで予備のオリジンに切り替えたい場面では、切り替わるのが GET・HEAD・OPTIONS の要求だけで、POST などのデータを送る要求は切り替わらないことに注意する。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html#Introduction",
+          "quote": "CloudFront delivers your content through a worldwide network of data centers called edge locations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html#HowCloudFrontWorksOverview",
+          "quote": "An origin server stores the original, definitive version of your objects."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/RequestAndResponseBehaviorOriginGroups.html#RequestAndResponseBehaviorOriginGroups",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        }
+      ]
+    },
     "cloudtrail": {
       "id": "cloudtrail",
       "name": "AWS CloudTrail",
@@ -328,6 +368,40 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#cloudwatch-logs-features",
           "quote": "CloudWatch Logs can track the number of errors that occur in your application logs and send you a notification whenever the rate of errors exceeds a threshold you specify."
+        }
+      ]
+    },
+    "cloudwatch-synthetics": {
+      "id": "cloudwatch-synthetics",
+      "name": "Amazon CloudWatch Synthetics",
+      "reading": "クラウドウォッチ シンセティクス",
+      "summary": "決まった時間に動くスクリプト（Canary）で、エンドポイントや API を見張る機能。Canary は利用者と同じ道をたどり、同じ操作をするので、利用者がいない時でも使い心地を確かめられる。",
+      "features": [
+        {
+          "title": "Canary",
+          "text": "Node.js・Python・Java で書くスクリプトで、アカウントに Lambda 関数を作って動く。HTTP と HTTPS の両方で使える。"
+        },
+        {
+          "title": "実行の頻度",
+          "text": "1 回だけ、または決まった間隔で動かせる。一番短いと 1 分に 1 回。"
+        }
+      ],
+      "exam_points": [
+        "利用者より先に問題を見つけたい場面では、利用者と同じ操作をする Canary で見張ることを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html#CloudWatch_Synthetics_Canaries",
+          "quote": "By using canaries, you can discover issues before your customers do."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html#CloudWatch_Synthetics_Canaries",
+          "quote": "Canaries work over both HTTP and HTTPS protocols."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries.html#CloudWatch_Synthetics_Canaries",
+          "quote": "Canaries can run as often as once per minute."
         }
       ]
     },
@@ -643,6 +717,40 @@
         {
           "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features",
           "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        }
+      ]
+    },
+    "data-firehose": {
+      "id": "data-firehose",
+      "name": "Amazon Data Firehose",
+      "reading": "データ ファイアホース",
+      "summary": "途切れずに流れてくるデータ（ストリーミングデータ）を、S3・Redshift・OpenSearch・HTTP のエンドポイントなどの届け先へ、リアルタイムに届けるフルマネージドのサービス。アプリを書いたりリソースを管理したりしなくてよい。",
+      "features": [
+        {
+          "title": "Firehose ストリーム",
+          "text": "Firehose ストリームを作り、そこへデータを送ると、決めた届け先へ自動で届ける。"
+        },
+        {
+          "title": "データの変換",
+          "text": "Lambda 関数を呼んで、入ってきたデータの形を変えてから届けられる。ストリームを作る時に有効にする。"
+        }
+      ],
+      "exam_points": [
+        "流れてくるデータを形を変えてから S3 などに届けたい場面では、Firehose と Lambda によるデータの変換を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html#what-is-this-service",
+          "quote": "With Amazon Data Firehose, you don't need to write applications or manage resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html#key-concepts",
+          "quote": "You use Amazon Data Firehose by creating a Firehose stream and then sending data to it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation",
+          "quote": "Amazon Data Firehose can invoke your Lambda function to transform incoming source data and deliver the transformed data to destinations."
         }
       ]
     },
@@ -1032,6 +1140,45 @@
         {
           "url": "https://docs.aws.amazon.com/health/latest/ug/enable-organizational-view.html#enable-organizational-view",
           "quote": "You must sign in to the management account of your AWS organization."
+        }
+      ]
+    },
+    "iam-access-analyzer": {
+      "id": "iam-access-analyzer",
+      "name": "IAM Access Analyzer",
+      "reading": "アイアム アクセスアナライザー",
+      "summary": "組織やアカウントの中で、外の相手（外部のエンティティ）と共有されているリソースを見つけたり、使われた操作からポリシーを作ったりして、アクセスの許可を見直すのを助ける IAM の機能。",
+      "features": [
+        {
+          "title": "外部と共有されたリソースの検出",
+          "text": "S3 バケットや IAM ロールなど、外の相手と共有されたリソースを見つける。リソースベースのポリシーを論理で分析し、アカウントの外に共有されたリソースごとに検出結果を作る。"
+        },
+        {
+          "title": "信頼ゾーン",
+          "text": "有効にする時に、組織全体かアカウントの分析器（アナライザー）を作る。選んだ組織かアカウントが信頼ゾーンになり、その中のプリンシパル（ユーザーやロールなど）からのアクセスは信頼された物とみなす。"
+        },
+        {
+          "title": "ポリシーの生成",
+          "text": "CloudTrail のログから、IAM のユーザーやロールが決めた期間に使った操作とサービスを調べ、それをもとに IAM ポリシーを作る。"
+        }
+      ],
+      "exam_points": [
+        "組織の外からアクセスできるリソースを見つけたい場面では、組織を信頼ゾーンにした分析器を考える。",
+        "実際に使った操作だけを許すポリシーにしたい場面では、CloudTrail のログからのポリシーの生成を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-resource-identification",
+          "quote": "For each instance of a resource shared outside of your account, IAM Access Analyzer generates a finding."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-resource-identification",
+          "quote": "The organization or account you choose is known as the zone of trust for the analyzer."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html#what-is-access-analyzer-policy-generation",
+          "quote": "It then generates an IAM policy that is based on that access activity."
         }
       ]
     },
@@ -1522,6 +1669,41 @@
         {
           "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#application",
           "quote": "You can retry failed tasks, or catch failed tasks and automatically run alternative steps."
+        }
+      ]
+    },
+    "sts": {
+      "id": "sts",
+      "name": "AWS Security Token Service (AWS STS)",
+      "reading": "エスティーエス",
+      "summary": "ユーザーのために、期限つきで権限を絞った一時的な認証情報（AWS を使うための鍵の一式）を発行する Web サービス。",
+      "features": [
+        {
+          "title": "一時的な認証情報",
+          "text": "長く使うアクセスキーとほぼ同じように働くが、数分から数時間の短い期限がある。期限が切れると、その認証情報での API の要求は一切認められない。"
+        },
+        {
+          "title": "アカウントをまたぐロール",
+          "text": "ロールとアカウント間のアクセスを使うと、1 つのアカウントで決めたユーザーの ID で、組織のほかのアカウントのリソースを使える（一時的なアクセスの委任）。"
+        }
+      ],
+      "exam_points": [
+        "長く使うアクセスキーを持たせたくない場面では、期限のある一時的な認証情報を使う形を考える。",
+        "別のアカウントのリソースを使わせたい場面では、ロールを使ったアカウント間のアクセスを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html",
+          "quote": "enables you to request temporary, limited-privilege credentials for users."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id_credentials_temp",
+          "quote": "They can be configured to last for anywhere from a few minutes to several hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#role_cross-account",
+          "quote": "Using roles and cross-account access, you can define user identities in one account, and use those identities to access AWS resources in other accounts"
         }
       ]
     },
