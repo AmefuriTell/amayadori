@@ -48,7 +48,7 @@
   },
   {
    "id": "q-5.3-0010",
-   "source": "flowchart TB\n  subgraph VPCX[\"Amazon VPC のプライベートサブネット\"]\n    ND@{ svc: \"Amazon EC2\", label: \"新しいノード（ステータスチェックは正常）\" }\n  end\n  CF@{ svc: \"AWS CloudFormation\", label: \"ノードのスタック（ステージングから複製）\" }\n  EKS@{ svc: \"Amazon EKS\", label: \"本番クラスター\" }\n  CF -- \"ClusterName パラメータ\" --> ND\n  ND -. \"⚠ 名前が違うと kubeconfig が誤り参加できない\" .-> EKS\n  CF == \"✔ B: ClusterName を本番の名前に\" ==> EKS\n  ND -. \"⚠ C: パブリック IP は原因でない\" .-> EKS\n  ND -. \"⚠ D: ステータスチェックは通っている\" .-> CF\n",
+   "source": "flowchart TB\n  subgraph VPCX[\"プライベートサブネット\"]\n    ND@{ svc: \"Amazon EC2\", label: \"新しいノード（ステータスチェックは正常）\" }\n  end\n  CF@{ svc: \"AWS CloudFormation\", label: \"ノードのスタック（ステージングから複製）\" }\n  EKS@{ svc: \"Amazon EKS\", label: \"本番クラスター\" }\n  CF -- \"ClusterName パラメータ\" --> ND\n  ND -. \"⚠ 名前の不一致で参加できない\" .-> EKS\n  CF == \"✔ B: 名前を本番に合わせる\" ==> EKS\n  ND -. \"⚠ C: 原因でない\" .-> EKS\n  ND -. \"⚠ D: 通っている\" .-> CF\n",
    "alt": "ステージングから複製したノードのスタックで ClusterName が本番クラスターの名前と一致しないと、ノードは参加できない。最初に確かめるのは B。"
   }
  ]

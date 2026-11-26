@@ -1,0 +1,25 @@
+{
+ "item": "D-0003",
+ "diagrams": [
+  {
+   "id": "q-1.1-0011",
+   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"✔ B: 認証情報（自動ローテーション）\" }\n    APP[\"アプリケーション（実行中）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"⚠ 今: 設定ファイルに書き込む\" }\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン\" }\n  end\n  SM == \"✔ B: 実行時に取得\" ==> APP\n  CB -. \"⚠ A D: ビルド・デプロイ時に反映 → 再デプロイが要る\" .-> APP\n  CP --> CB\n  C[\"⚠ C: Lambda とスケジュールを自作\"] -.-> SM\n",
+   "alt": "認証情報を変えても再デプロイしたくない。Secrets Manager の自動ローテーションを使い、アプリが実行時に取得する（B）。ビルド時の注入（A）やデプロイ時のコピー（D）は変更のたびに再デプロイが要る。"
+  },
+  {
+   "id": "q-1.1-0012",
+   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  LB@{ svc: \"Elastic Load Balancing\", label: \"✔ D: ALB（NLB は ECSAllAtOnce のみ）\" }\n  OLD@{ svc: \"Amazon ECS\", label: \"旧タスクセット\" }\n  NEW@{ svc: \"Amazon ECS\", label: \"新タスクセット\" }\n  end\n  CD -- \"デプロイ設定\" --> LB\n  LB -- \"90%\" --> OLD\n  LB == \"✔ D: Canary10Percent5Minutes 10% → 5 分後に残り\" ==> NEW\n  A[\"⚠ A C: NLB では Canary/Linear は使えない\"] -.-> LB\n  B[\"⚠ B: 承認を足しても一度に全部移る\"] -.-> CD\n",
+   "alt": "ECS の Blue/Green で一部のトラフィックを先に新版へ送る図。NLB では ECSAllAtOnce しか使えないので、ALB に移して Canary10Percent5Minutes を使う（D）。A と C は NLB のままなので使えない。"
+  },
+  {
+   "id": "q-1.1-0013",
+   "source": "flowchart TB\n  subgraph R[\"CodeDeploy インプレースデプロイ（12 台）\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"✔ C: 最小正常ホスト 75% の独自設定\" }\n  E1@{ svc: \"Amazon EC2\", label: \"デプロイ中 3 台\" }\n  E2@{ svc: \"Amazon EC2\", label: \"トラフィック処理 9 台を維持\" }\n  end\n  CD == \"✔ C: 3 台ずつ同時に\" ==> E1\n  CD -- \"残す\" --> E2\n  A[\"⚠ A: OneAtATime は遅い\"] -.-> CD\n  B[\"⚠ B: HalfAtATime は 6 台が止まり 75% を割る\"] -.-> CD\n  D[\"⚠ D: AllAtOnce は全台が止まる\"] -.-> CD\n",
+   "alt": "12 台のうち 4 分の 3 を残しつつ最速で進めるには、最小正常ホスト数 75% の独自設定にして 9 台を残し 3 台ずつデプロイする（C）。OneAtATime は遅く、HalfAtATime と AllAtOnce は要件を割る。"
+  },
+  {
+   "id": "q-1.1-0014",
+   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイグループ（カナリア）\" }\n  LF@{ svc: \"AWS Lambda\", label: \"新しい版の関数\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"✔ A: エラー率のアラーム\" }\n    RB[\"✔ B: アラームでの自動ロールバックを有効\"]\n  end\n  CD -- \"トラフィックを移す\" --> LF\n  LF -- \"エラー率\" --> CW\n  CW == \"✔ A: しきい値超えで停止\" ==> CD\n  RB == \"✔ B: 最後に正常な版へ戻す\" ==> CD\n  X[\"⚠ C: アラームを無視 / ⚠ D: 先に CloudWatch で作る必要 / ⚠ E: 手作業\"] -.-> CD\n",
+   "alt": "Lambda のカナリアデプロイでエラー率がしきい値を超えたら止めて戻す図。CloudWatch アラームをデプロイグループに足し（A）、アラームでの自動ロールバックを有効にする（B）。"
+  }
+ ]
+}

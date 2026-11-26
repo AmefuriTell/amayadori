@@ -1,0 +1,55 @@
+{
+ "item": "D-0034",
+ "diagrams": [
+  {
+   "id": "q-6.2-0001",
+   "source": "flowchart TB\n  subgraph USE1[\"us-east-1（ホームリージョン）\"]\n    HUB@{ svc: \"AWS Security Hub CSPM\", label: \"集約された検出結果（確認は 1 か所）\" }\n  end\n  subgraph EUW1[\"eu-west-1（リンク済み）\"]\n    EU@{ svc: \"AWS Security Hub CSPM\", label: \"有効\" }\n  end\n  subgraph APS1[\"ap-south-1（新しいワークロード）\"]\n    AP@{ svc: \"AWS Security Hub CSPM\", label: \"✔ B: ここで有効にする\" }\n  end\n  EU -- \"検出結果\" --> HUB\n  AP == \"有効にすると集まる\" ==> HUB\n  AP -. \"⚠ A: 集約は自動で有効にしない\" .-> HUB\n  HUB -. \"⚠ C: ホームを変えても集まらない\" .-> AP\n",
+   "alt": "クロスリージョン集約は Security Hub CSPM を有効にしたリージョンのデータだけを集める。新しい ap-south-1 で Security Hub CSPM を有効にすれば、検出結果がホームリージョンに集まる(B)。"
+  },
+  {
+   "id": "q-6.2-0002",
+   "source": "flowchart TB\n  MGT[\"管理アカウント\"]\n  subgraph ORG[\"AWS Organizations\"]\n    SEC@{ svc: \"AWS Security Hub CSPM\", label: \"✔ A: セキュリティアカウント（委任管理者）\" }\n    POL@{ svc: \"AWS Organizations\", label: \"✔ B: 宣言型ポリシー（ルートにアタッチ）\" }\n    MEM@{ svc: \"AWS Security Hub CSPM\", label: \"メンバーアカウント（後から加わる分も）\" }\n  end\n  MGT -- \"委任管理者に指定\" --> SEC\n  MGT -- \"ポリシーをアタッチ\" --> POL\n  POL == \"有効化と設定を引き継ぐ\" ==> MEM\n  SEC -- \"組織を管理\" --> MEM\n  SEC -. \"⚠ C・D: アカウントごとの作業\" .-> MEM\n",
+   "alt": "管理アカウントがセキュリティアカウントを委任管理者に指定し(A)、Security Hub CSPM の宣言型ポリシーを組織のルートにアタッチする(B)と、後から加わるアカウントも自動で有効化・設定される。"
+  },
+  {
+   "id": "q-6.2-0003",
+   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations\"]\n    subgraph WL[\"Workloads OU（検出コントロール有効）\"]\n      A1@{ svc: \"AWS Control Tower\", label: \"ほかのアカウント（コントロール適用）\" }\n      LEG[\"古いシステムのアカウント\"]\n    end\n    subgraph OTH[\"別の OU（コントロールなし）\"]\n      NEW[\"✔ C: 古いシステムのアカウントを移す\"]\n    end\n  end\n  LEG == \"✔ C: OU を移す\" ==> NEW\n  A1 -. \"コントロールは OU 全体に当たる\" .-> LEG\n  LEG -. \"⚠ A: 1 つのアカウントだけ外せない\" .-> A1\n  LEG -. \"⚠ D: 毎週の手作業になる\" .-> A1\n",
+   "alt": "Control Tower のコントロールは OU 全体に当たり、1 アカウントだけ外せない。古いシステムのアカウントをコントロールのない別の OU に移す(C)のが最も手間が少ない。"
+  },
+  {
+   "id": "q-6.2-0004",
+   "source": "flowchart TB\n  BAD[\"悪意のある IP 範囲\"]\n  GOOD[\"通常のユーザー（HTTPS）\"]\n  subgraph VPC[\"パブリックサブネット\"]\n    NACL@{ svc: \"Amazon VPC\", label: \"✔ B: ネットワーク ACL（小さい番号の拒否）\" }\n    SG@{ svc: \"Amazon VPC\", label: \"セキュリティグループ（許可のみ）\" }\n    WEB[\"Web サーバー\"]\n  end\n  BAD -- \"拒否が先に合う\" --> NACL\n  GOOD -- \"HTTPS の許可\" --> NACL\n  NACL --> SG\n  SG --> WEB\n  SG -. \"⚠ A: 拒否ルールは書けない\" .-> BAD\n  NACL -. \"⚠ C: 大きい番号だと許可が先に合う\" .-> BAD\n",
+   "alt": "セキュリティグループは許可しか書けず、ネットワーク ACL は番号の小さい順に評価する。HTTPS の許可より小さい番号で悪意のある範囲を拒否するルールを置く(B)。"
+  },
+  {
+   "id": "q-6.2-0005",
+   "source": "flowchart TB\n  CLI[\"クライアント\"]\n  subgraph SUB[\"サブネット\"]\n    NACL@{ svc: \"Amazon VPC\", label: \"カスタムのネットワーク ACL（ステートレス）\" }\n    SG@{ svc: \"Amazon VPC\", label: \"セキュリティグループ（ステートフル）\" }\n    SRV[\"サーバー\"]\n  end\n  CLI -- \"HTTPS 要求（インバウンド許可）\" --> NACL\n  NACL --> SG\n  SG --> SRV\n  SRV -- \"応答\" --> SG\n  SG -- \"応答\" --> NACL\n  NACL == \"✔ A: アウトバウンドで戻りを許可\" ==> CLI\n  NACL -. \"⚠ 今: アウトバウンドは既定の拒否\" .-> CLI\n  SG -. \"⚠ B: SG は応答を既に通す\" .-> NACL\n",
+   "alt": "ネットワーク ACL はステートレスなので、戻りの通信をアウトバウンドのルールで許可する必要がある(A)。セキュリティグループはステートフルで応答を自動で通すため、そこを変えても直らない。"
+  },
+  {
+   "id": "q-6.2-0006",
+   "source": "flowchart TB\n  ATK[\"攻撃者（変化する IP の集合）\"]\n  USR[\"通常のユーザー\"]\n  subgraph AWSA[\"AWS\"]\n    WAF@{ svc: \"AWS WAF\", label: \"✔ D: レートベースのルールのウェブ ACL\" }\n    ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n    API[\"ログインの API\"]\n  end\n  ATK -- \"大量のリクエスト\" --> WAF\n  USR -- \"通常のリクエスト\" --> WAF\n  WAF == \"速すぎる送信元を自動で制限\" ==> ALB\n  ALB --> API\n  WAF -. \"⚠ A・B・C: IP を手で更新・コードが要る\" .-> ATK\n",
+   "alt": "AWS WAF のレートベースのルールを持つウェブ ACL を ALB に関連付けると、速すぎる送信元を自動で制限できる。IP の一覧を手で更新したりコードを書いたりしなくてよい(D)。"
+  },
+  {
+   "id": "q-6.2-0007",
+   "source": "flowchart TB\n  MGT[\"管理アカウント\"]\n  subgraph ORG[\"AWS Organizations\"]\n    SEC@{ svc: \"Amazon GuardDuty\", label: \"✔ A: セキュリティアカウント（委任管理者）\" }\n    MEM@{ svc: \"Amazon GuardDuty\", label: \"メンバーアカウント（有効化）\" }\n    DET@{ svc: \"Amazon Detective\", label: \"✔ B: 根本原因の調査\" }\n  end\n  MGT -- \"委任管理者に指定\" --> SEC\n  SEC -- \"メンバーで有効化\" --> MEM\n  MEM -- \"脅威の検出結果\" --> SEC\n  SEC == \"検出結果から調査\" ==> DET\n  MEM -. \"⚠ C: フローログを自分で作る必要なし\" .-> SEC\n  SEC -. \"⚠ D: 検出は Detective の役目でない\" .-> DET\n",
+   "alt": "管理アカウントがセキュリティアカウントを GuardDuty の委任管理者にしてメンバーで有効化し(A)、検出結果の根本原因は Amazon Detective で調べる(B)。VPC フローログを自分で作る必要はない。"
+  },
+  {
+   "id": "q-6.2-0008",
+   "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    ALL[\"数千の S3 バケット\"]\n    REG@{ svc: \"Amazon S3\", label: \"規制対象の 3 つのバケット\" }\n    AUTO@{ svc: \"Amazon Macie\", label: \"✔ A: 自動化された機密データ検出\" }\n    JOB@{ svc: \"Amazon Macie\", label: \"✔ B: 定期的な検出ジョブ（毎月）\" }\n  end\n  AUTO == \"継続的に広く（サンプリング）\" ==> ALL\n  JOB == \"独自の条件で深く\" ==> REG\n  JOB -. \"⚠ C: 1 回限りは継続監視しない\" .-> ALL\n  AUTO -. \"⚠ D: 全オブジェクトは深く調べない\" .-> REG\n",
+   "alt": "自動化された機密データ検出で全バケットを継続的に広く把握し(A)、規制対象の 3 バケットには独自の条件を付けた定期的な検出ジョブで深く分析する(B)。"
+  },
+  {
+   "id": "q-6.2-0009",
+   "source": "flowchart TB\n  subgraph BKT[\"S3 バケット\"]\n    EMP[\"従業員 ID（EMP- と 6 桁）\"]\n    TEST[\"テスト用のサンプルのカード番号\"]\n    REAL[\"本物のカード番号\"]\n  end\n  subgraph MAC[\"Amazon Macie\"]\n    CDI@{ svc: \"Amazon Macie\", label: \"✔ C: カスタムデータ識別子（正規表現）\" }\n    ALW@{ svc: \"Amazon Macie\", label: \"✔ C: 許可リスト（サンプルの番号）\" }\n    MDI@{ svc: \"Amazon Macie\", label: \"マネージドデータ識別子（カード番号）\" }\n  end\n  EMP -- \"報告する\" --> CDI\n  REAL -- \"報告する\" --> MDI\n  TEST -- \"報告しない\" --> ALW\n  ALW -. \"⚠ B: 許可リストは逆の使い方\" .-> CDI\n  MDI -. \"⚠ D: 無効にすると本物も漏れる\" .-> REAL\n",
+   "alt": "従業員 ID は正規表現のカスタムデータ識別子で見つけ、サンプルのカード番号だけを許可リストに入れて報告から外す(C)。本物のカード番号はマネージドデータ識別子が引き続き報告する。"
+  },
+  {
+   "id": "q-6.2-0010",
+   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations（50 メンバーアカウント）\"]\n    SEC@{ svc: \"Amazon Macie\", label: \"✔ D: セキュリティアカウント（Macie の管理者）\" }\n    MEM@{ svc: \"Amazon Macie\", label: \"メンバーアカウント（Macie を有効化）\" }\n    S3B@{ svc: \"Amazon S3\", label: \"メンバーの S3 バケット\" }\n  end\n  SEC == \"Organizations 連携で有効化\" ==> MEM\n  MEM -- \"バケットの情報\" --> S3B\n  S3B -- \"確認できる\" --> SEC\n  SEC -. \"⚠ A: 招待の承諾が必要\" .-> MEM\n  SEC -. \"⚠ B: 各アカウントにサインイン\" .-> MEM\n  SEC -. \"⚠ C: 自動ではスキャンされない\" .-> S3B\n",
+   "alt": "Macie を Organizations と統合してセキュリティアカウントを管理者に指定すれば、各アカウントにサインインせずにメンバーで Macie を有効にし、バケットの情報を確認できる(D)。"
+  }
+ ]
+}

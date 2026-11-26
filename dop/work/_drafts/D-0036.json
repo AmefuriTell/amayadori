@@ -1,0 +1,55 @@
+{
+ "item": "D-0036",
+ "diagrams": [
+  {
+   "id": "q-6.3-0001",
+   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations\"]\n    MGT[\"管理アカウント<br/>委任管理者を決める\"]\n    SEC[\"セキュリティアカウント\"]\n    MEM[\"メンバーアカウント<br/>後から加わる分も含む\"]\n  end\n  CT@{ svc: \"AWS CloudTrail\", label: \"✔ D: 組織の証跡\" }\n  MGT -- \"✔ D: 委任管理者に指定\" --> SEC\n  SEC == \"組織の証跡を作る・管理\" ==> CT\n  CT -- \"全アカウントのイベント\" --> MGT\n  CT -- \"イベント\" --> MEM\n  MGT -. \"⚠ B: 管理アカウントにサインインが要る\" .- SEC\n  MEM -. \"⚠ A: 証跡がアカウントごとで追加が要る\" .- CT\n",
+   "alt": "Organizations で全アカウントのイベントを記録する構成。管理アカウントがセキュリティアカウントを CloudTrail の委任管理者にし、そこから組織の証跡を作る（D）。管理アカウントにサインインせずに済む。"
+  },
+  {
+   "id": "q-6.3-0002",
+   "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"証跡（整合性の検証を有効）\" }\n  subgraph BKT[\"ログのバケット\"]\n    LOG@{ svc: \"Amazon S3\", label: \"ログファイル\" }\n    DG@{ svc: \"Amazon S3\", label: \"ダイジェストファイル（毎時）\" }\n  end\n  AUD([\"監査人\"])\n  CT -- \"ログ\" --> LOG\n  CT == \"✔ A: ハッシュを並べた署名付きの物\" ==> DG\n  AUD -. \"✔ A: ログをダイジェストと照らす\" .-> DG\n  VER[\"⚠ B: バージョニングは<br/>届けたままの証明にならない\"]\n  VER -.- LOG\n",
+   "alt": "CloudTrail のログが届いた後に変更・削除されていないことを示す図。整合性の検証を有効にすると毎時の署名付きダイジェストが届き（A）、ログと照らして変更や届かなかった期間を証明できる。"
+  },
+  {
+   "id": "q-6.3-0003",
+   "source": "flowchart TB\n  subgraph BKT[\"S3 オブジェクトロックのバケット\"]\n    OBJ@{ svc: \"Amazon S3\", label: \"監査ログのオブジェクト\" }\n    COMP[\"✔ A: コンプライアンスモード<br/>既定の保持期間 7 年\"]\n    LH[\"✔ C: リーガルホールド<br/>調査対象だけ・期間なし\"]\n  end\n  INV([\"調査チーム<br/>s3:PutObjectLegalHold\"])\n  COMP == \"ルートも 7 年は削除できない\" ==> OBJ\n  LH == \"外すまで保管\" ==> OBJ\n  INV -- \"付け外し\" --> LH\n  GOV[\"⚠ B: ガバナンスモードは<br/>権限があれば削除できる\"]\n  GOV -.- COMP\n",
+   "alt": "S3 オブジェクトロックで 7 年はルートも削除できず、調査対象は調査が終わるまで残す図。バケットにコンプライアンスモード 7 年（A）、調査対象にリーガルホールドを付け調査チームが外せる（C）。"
+  },
+  {
+   "id": "q-6.3-0004",
+   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations（40 アカウント・4 リージョン）\"]\n    SRC[\"ソースのアカウントとリージョン<br/>AWS Config が記録\"]\n  end\n  subgraph SECA[\"セキュリティアカウント\"]\n    AGG@{ svc: \"AWS Config\", label: \"✔ A: 組織をソースとするアグリゲーター\" }\n    VIEW[\"1 つのビュー<br/>読むだけ\"]\n  end\n  SRC == \"設定とコンプライアンスのデータ\" ==> AGG\n  AGG --> VIEW\n  AGG -. \"⚠ B: アカウントごとの承認が要る\" .- SRC\n  VIEW -. \"⚠ C: 書き込み権限は要件に反する\" .- SRC\n",
+   "alt": "40 アカウント・4 リージョンの AWS Config のデータを 1 つのビューで見る図。セキュリティアカウントに組織をソースとするアグリゲーターを作ると（A）、各アカウントの承認なしで読むだけの集約ができる。"
+  },
+  {
+   "id": "q-6.3-0005",
+   "source": "flowchart TB\n  subgraph ACC[\"アカウント\"]\n    TR@{ svc: \"AWS CloudTrail\", label: \"証跡（Insights を有効）\" }\n    RD[\"今: 読み取りの管理イベントだけ\"]\n    WR[\"✔ B: 書き込みの管理イベントも記録\"]\n    INS[\"Insights のイベント<br/>通常から外れた時に出る\"]\n  end\n  S3@{ svc: \"Amazon S3\", label: \"ログの保存先\" }\n  RD -- \"これだけでは出ない\" --> TR\n  WR == \"✔ B: 書き込みの呼び出しの割合を見る\" ==> TR\n  TR == \"最大 36 時間待つ\" ==> INS\n  TR -- \"ログ\" --> S3\n  ALM[\"⚠ A: 静的なしきい値のアラームは要件に反する\"]\n  ALM -.- TR\n",
+   "alt": "リソースを作る API 呼び出しの割合の急な上昇を CloudTrail Insights で知る図。証跡が読み取りだけだと出ないので、書き込みの管理イベントも記録し、最大 36 時間待つ（B）。"
+  },
+  {
+   "id": "q-6.3-0006",
+   "source": "flowchart TB\n  M[\"サインインの失敗の回数<br/>時間帯と曜日で大きく変わる\"]\n  subgraph CWS[\"CloudWatch\"]\n    AD@{ svc: \"Amazon CloudWatch\", label: \"異常検出（予想される値のバンド）\" }\n    AL[\"✔ C: バンドより上で鳴るアラーム\"]\n  end\n  M -- \"メトリクス\" --> AD\n  AD == \"その時間の期待値と比べる\" ==> AL\n  W1[\"⚠ A: 静的なしきい値は夜間の攻撃を見逃す\"]\n  W2[\"⚠ B: 上か下のどちらでも鳴る\"]\n  W3[\"⚠ D: 下で鳴る・多すぎる時に鳴らない\"]\n  W1 -.- AD\n  W2 -.- AL\n  W3 -.- AL\n",
+   "alt": "時間帯で変わる失敗回数のメトリクスに、異常に多い時だけ鳴らす図。異常検出のアラームを予想される値のバンドより上で鳴るようにする（C）。静的なしきい値や下・両側のアラームは要件に合わない。"
+  },
+  {
+   "id": "q-6.3-0007",
+   "source": "flowchart TB\n  subgraph ADM[\"委任管理者アカウント\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"検出結果\" }\n    FQ[\"✔ B: 後続の発生の頻度を 15 分に<br/>管理者アカウントだけが変えられる\"]\n    EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: 検出結果のルール\" }\n    SNS@{ svc: \"Amazon SNS\", label: \"メールのサブスクリプション\" }\n  end\n  TEAM([\"セキュリティチーム\"])\n  GD -- \"検出結果のイベント\" --> EB\n  FQ -.- GD\n  EB -- \"ターゲット\" --> SNS\n  SNS -- \"メール\" --> TEAM\n  W[\"⚠ C: メンバーでは変えられない<br/>⚠ D: 新しい検出結果の頻度は変えられない\"]\n  W -.- GD\n",
+   "alt": "GuardDuty の新しい検出結果をメールで受け、繰り返しを 15 分ごとにする図。EventBridge のルールで SNS トピックへ送り（A）、管理者アカウントで後続の発生の頻度を 15 分にする（B）。"
+  },
+  {
+   "id": "q-6.3-0008",
+   "source": "flowchart TB\n  AUD([\"監査人<br/>誰がダウンロードしたか\"])\n  subgraph ACC[\"アカウント\"]\n    TR@{ svc: \"AWS CloudTrail\", label: \"証跡（管理イベントだけ）\" }\n    SEL[\"✔ A: 高度なイベントセレクター<br/>そのバケットと GetObject だけ\"]\n    B1@{ svc: \"Amazon S3\", label: \"機密のバケット\" }\n    B2@{ svc: \"Amazon S3\", label: \"利用の多い他のバケット（数百）\" }\n  end\n  B1 == \"データイベント\" ==> SEL\n  SEL --> TR\n  AUD -.-> TR\n  B2 -. \"⚠ B: 全バケットは費用が増える\" .-> TR\n  W[\"⚠ C: GetObject は既定では記録されない\"]\n  W -.- TR\n",
+   "alt": "機密の S3 バケットのダウンロードの記録を安く取る図。高度なイベントセレクターでそのバケットと GetObject だけのデータイベントを記録する（A）。全バケットの記録や管理イベントだけでは合わない。"
+  },
+  {
+   "id": "q-6.3-0009",
+   "source": "flowchart TB\n  subgraph VPC[\"VPC\"]\n    SUB@{ svc: \"Amazon VPC\", label: \"対象のサブネット\" }\n    FL[\"✔ A: フローログ<br/>拒否だけを記録\"]\n    AGG[\"✔ B: 最大集約間隔 1 分\"]\n  end\n  S3@{ svc: \"Amazon S3\", label: \"後で照会するための保存先\" }\n  SUB -- \"通信\" --> FL\n  AGG -.- FL\n  FL == \"ログ\" ==> S3\n  W1[\"⚠ C: 選べるのは 10 分か 1 分\"]\n  W2[\"⚠ D: 全トラフィックは受け入れも記録する\"]\n  W1 -.- AGG\n  W2 -.- FL\n",
+   "alt": "サブネットの拒否された接続の記録を S3 に残す図。拒否だけを記録して S3 に発行するフローログを作り（A）、最大集約間隔を最も短い 1 分にする（B）。30 秒は選べず、既定は 10 分。"
+  },
+  {
+   "id": "q-6.3-0010",
+   "source": "flowchart TB\n  CLI([\"クライアント\"])\n  subgraph VPC[\"VPC\"]\n    ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"インスタンス（CloudWatch エージェント）\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"✔ A: アクセスログの保存先\" }\n  CWL@{ svc: \"Amazon CloudWatch Logs\", label: \"✔ B: アプリケーションのログ\" }\n  CLI -- \"HTTP リクエスト\" --> ALB --> EC2\n  ALB == \"✔ A: アクセスログ（既定は無効）\" ==> S3\n  EC2 == \"✔ B: ログファイル\" ==> CWL\n  W[\"⚠ D: フローログは IP の通信だけ<br/>⚠ E: CloudTrail はログファイルを集めない\"]\n  W -.- VPC\n",
+   "alt": "ALB のリクエストの記録と EC2 のアプリケーションログを集める図。ALB のアクセスログを有効にして S3 へ（A）、CloudWatch エージェントでログファイルを CloudWatch Logs へ送る（B）。"
+  }
+ ]
+}

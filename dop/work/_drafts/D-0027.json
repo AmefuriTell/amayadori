@@ -1,0 +1,25 @@
+{
+ "item": "D-0027",
+ "diagrams": [
+  {
+   "id": "q-4.3-0011",
+   "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"ルール（非準拠を検出）\" }\n  AUT@{ svc: \"AWS Systems Manager Automation\", label: \"修復の Automation ドキュメント\" }\n  R[\"対象のリソース\"]\n  CFG -- \"自動修復\" --> AUT\n  AUT -- \"修復\" --> R\n  AUT -. \"短いエラーで失敗\" .-> CFG\n  CFG == \"✔ B: やり直し（例: 300 秒で 5 回）\" ==> AUT\n  API[\"DescribeRemediationExecutionStatus\"]\n  API -- \"✔ B: 実行の詳しい状態\" --> AUT\n  W[\"⚠ A: 手動 / ⚠ C: Lambda を作る / ⚠ D: 作り直しは手間\"]\n  W -.- CFG",
+   "alt": "AWS Config の自動修復が短いエラーで失敗する図。自動修復にやり直しの回数と期間（例: 300 秒で 5 回）を設定し、実行の状態は DescribeRemediationExecutionStatus で見る（B）。"
+  },
+  {
+   "id": "q-4.3-0012",
+   "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: Custom Policy ルール\" }\n  R[\"構成が変わったリソース\"]\n  AUT@{ svc: \"AWS Systems Manager Automation\", label: \"Automation ドキュメント\" }\n  R -- \"構成の変化\" --> CFG\n  CFG -- \"非準拠\" --> AUT\n  AUT == \"✔ B: 自動の修復のアクション\" ==> R\n  PUT[\"PutRemediationConfigurations\"]\n  PUT -. \"ルールへ関連付け\" .-> CFG\n  W1[\"⚠ C: Python の Lambda を保守する\"]\n  W2[\"⚠ D: サービスにリンクされたルールは対象外\"]\n  W3[\"⚠ E: 手動の修復\"]\n  W1 -.- CFG\n  W2 -.- CFG\n  W3 -.- AUT",
+   "alt": "Lambda を作らずに独自の AWS Config ルールで検出し、自動で直す図。Custom Policy ルールを作り（A）、PutRemediationConfigurations で Automation ドキュメントの自動修復を関連付ける（B）。"
+  },
+  {
+   "id": "q-4.3-0013",
+   "source": "flowchart TB\n  subgraph HC[\"既存の 3 つのヘルスチェック\"]\n    H1[\"Web のフロントエンド\"]\n    H2[\"API\"]\n    H3[\"画像のサービス\"]\n  end\n  CALC@{ svc: \"Amazon Route 53\", label: \"✔ C: 計算されたヘルスチェック（親）\" }\n  REC@{ svc: \"Amazon Route 53\", label: \"フェイルオーバーのレコード\" }\n  H1 -- \"状態\" --> CALC\n  H2 -- \"状態\" --> CALC\n  H3 -- \"状態\" --> CALC\n  CALC == \"アプリ全体の 1 つの状態\" ==> REC\n  W1[\"⚠ A: フロントエンドだけでは全体が分からない\"]\n  W2[\"⚠ B: N 個中 M 個のアラームは非対応\"]\n  W1 -.- H1\n  W2 -.- CALC",
+   "alt": "3 つの既存ヘルスチェックを 1 つの状態にまとめてフェイルオーバーのレコードに使う図。子のヘルスチェックを監視する計算されたヘルスチェックを作る（C）。1 つだけ見る方法や N 個中 M 個のアラームは不適切。"
+  },
+  {
+   "id": "q-4.3-0014",
+   "source": "flowchart TB\n  subgraph VPC[\"VPC（インターネットに公開しない）\"]\n    SVC[\"社内のサービス\"]\n    PHC@{ svc: \"Amazon Route 53\", label: \"✔ A: プライベートエンドポイントのヘルスチェック\" }\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"サービスのヘルスのアラーム（同じアカウント）\" }\n  HC2@{ svc: \"Amazon Route 53\", label: \"✔ B: アラームを監視するヘルスチェック\" }\n  REC@{ svc: \"Amazon Route 53\", label: \"フェイルオーバーのレコード\" }\n  PHC -- \"VPC 内の送り元から確認\" --> SVC\n  SVC -- \"メトリクス\" --> CW\n  CW -- \"アラームの状態\" --> HC2\n  PHC == \"ヘルス状態\" ==> REC\n  HC2 == \"ヘルス状態\" ==> REC\n  W[\"⚠ C: 公開の確認は届かない / ⚠ D: 別アカウントは不可 / ⚠ E: 参照できない\"]\n  W -.- REC",
+   "alt": "公開できない社内サービスに Route 53 のフェイルオーバーを使う図。VPC 内の送り元で確認するプライベートエンドポイントのヘルスチェック（A）と、同じアカウントの CloudWatch アラームを監視するヘルスチェック（B）が使える。"
+  }
+ ]
+}

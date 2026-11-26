@@ -16134,7 +16134,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。"
+      "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。",
+      "diagram": {
+        "alt": "S3 の機密のオブジェクトを暗号化するキーの選び方。自分のアカウントで作り自分のキーポリシーで管理するカスタマーマネージドキー（D）なら、使う人の制御・無効化・監査ができ、ハードウェアも不要。"
+      }
     },
     {
       "id": "q-6.2-0012",
@@ -16196,7 +16199,10 @@
           "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB の証明書を人の操作なしで更新する構成。DNS 検証の ACM 証明書を最初に 1 回付ければ（A）、ACM が自動で更新し ARN も変わらない。メール検証や手作業の付け替えは手間が残る。"
+      }
     },
     {
       "id": "q-6.2-0013",
@@ -16262,7 +16268,10 @@
           "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SSE-KMS の S3 バケットで KMS のリクエスト費用を減らす図。同じカスタマーマネージドキーのままバケットに S3 バケットキーを設定すると（B）、S3 から KMS へのリクエストが減る。ローテーションやキー分割では減らない。"
+      }
     },
     {
       "id": "q-6.2-0014",
@@ -16320,7 +16329,10 @@
           "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "決済の会社がシングルテナントの検証済み HSM と IAM の外での利用者管理を求められる図。FIPS モードの CloudHSM クラスターで利用者を自分で管理する（B）。KMS のキーや AWS 所有のキーは要件に合わない。"
+      }
     },
     {
       "id": "q-6.3-0001",
