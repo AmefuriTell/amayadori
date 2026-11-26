@@ -1,0 +1,276 @@
+{
+  "item": "C-0013",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company creates its hardened Amazon Linux AMI by hand each month. An engineer launches an EC2 instance, runs patch and hardening scripts, creates an AMI, and then launches another instance to run checks. The company wants patched AMIs to be produced every week, wants each AMI to pass the checks before teams can use it, and does not want to maintain custom orchestration code. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an EC2 Image Builder pipeline with a weekly schedule. Use an image recipe with build components for the patching and hardening steps and test components for the checks, and add a distribution configuration."
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function each week. The function launches an instance with the scripts in user data, calls CreateImage, and launches a second instance to run the checks."
+        },
+        {
+          "key": "C",
+          "text": "Create an EC2 Image Builder pipeline that uses manual builds. Use an image recipe with build and test components, and have an engineer start the pipeline each week."
+        },
+        {
+          "key": "D",
+          "text": "Create an EC2 Image Builder pipeline with a weekly schedule and an image recipe that has only build components. Ask each team to test the AMI after it is distributed."
+        }
+      ],
+      "explanation": {
+        "summary": "Image Builder のパイプラインはスケジュールで自動ビルドでき、レシピのビルドコンポーネントでカスタマイズし、テストコンポーネントでイメージを確かめます。設定したテストがすべて成功した時だけイメージを配布するので、確認に合格した AMI だけがチームに渡ります。",
+        "per_choice": {
+          "A": "正しい。毎週のスケジュール、コンポーネントによる手順、テストに合格した時だけの配布が、独自のコード無しでそろいます。",
+          "B": "動きますが、インスタンスの起動・AMI の作成・確認を Lambda 関数で組み立てる独自のコードを保守する必要があります。",
+          "C": "テストで止まる仕組みはありますが、毎週の開始が手作業で、自動化の要件に合いません。",
+          "D": "自動ではありますが、配布の前にテストしないため、確認に合格する前の AMI がチームに渡ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "source_id": "S1",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "source_id": "S1",
+          "quote": "You can automate your builds by providing your build execution schedule preference."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+          "source_id": "S3",
+          "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company builds a custom AMI with an EC2 Image Builder pipeline in us-east-1. Application teams in us-east-1, eu-west-1, and ap-southeast-2 launch instances from an EC2 launch template in each Region and always use the template's default version. After each build, an engineer copies the AMI to the other Regions and creates new launch template versions by hand. The company wants each new AMI to be available in all three Regions and used for new launches without manual steps. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add a distribution for each of the three Regions to the pipeline's distribution configuration. In each distribution, specify the Region's launch template in launchTemplateConfigurations and keep setDefaultVersion set to true."
+        },
+        {
+          "key": "B",
+          "text": "Add a distribution for each of the three Regions to the distribution configuration. In each distribution, specify the Region's launch template in launchTemplateConfigurations and set setDefaultVersion to false."
+        },
+        {
+          "key": "C",
+          "text": "Create a separate Image Builder pipeline in each Region with the same recipe and schedule, and have each Region's team update its launch template after every build."
+        },
+        {
+          "key": "D",
+          "text": "Keep distribution to us-east-1 only. Use an AWS Lambda function that runs after each build to copy the AMI to the other Regions and create a new default launch template version in each Region."
+        }
+      ],
+      "explanation": {
+        "summary": "配布設定は 1 つの配布が 1 つのリージョンに対応し、ビルドがテストに合格した後にイメージを各リージョンへ配布します。launchTemplateConfigurations を指定すると新しい AMI ID を入れた起動テンプレートの新しいバージョンが作られ、setDefaultVersion（既定は true）でそれがデフォルトバージョンになります。",
+        "per_choice": {
+          "A": "正しい。3 つのリージョンへの配布と、新しい AMI を入れたデフォルトバージョンの作成が、Image Builder の設定だけで行われます。",
+          "B": "新しいバージョンは作られますが、デフォルトバージョンは変わらないため、デフォルトを使うチームの起動は古い AMI のままです。",
+          "C": "各リージョンでビルドはできますが、同じビルドを 3 回行い、起動テンプレートの更新も手作業のままです。",
+          "D": "動きますが、コピーとテンプレートの更新を Lambda 関数で作って保守する必要があり、組み込みの配布設定より手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "source_id": "S7",
+          "quote": "Each distribution applies to exactly one target Region and defines the outputs for that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "source_id": "S8",
+          "quote": "Image Builder creates a new version of the launch template that includes all of the original settings from the template, and the new AMI ID from the build."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "source_id": "S8",
+          "quote": "setDefaultVersion controls whether Image Builder makes the new launch template version the default version. This optional field defaults to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "source_id": "S4",
+          "quote": "The pipeline automatically distributes your image to the Region where it runs the build, and you can add image distribution for other Regions."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A security team requires that AMIs built by an EC2 Image Builder pipeline must not be produced if they contain software vulnerabilities above an allowed severity. The team also wants to be notified automatically about every vulnerability finding. The DevOps engineer must not build or maintain a custom vulnerability scanner. Which actions should the engineer take to meet these requirements? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Enable Amazon Inspector scanning for the Image Builder images, and set a scan result condition that fails the image when findings are more severe than allowed."
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge rule that matches Amazon Inspector finding events and sends them to an Amazon SNS topic that the security team subscribes to."
+        },
+        {
+          "key": "C",
+          "text": "Add a test component that runs an open source scanner installed by the engineer and returns a failing exit code when it finds a severe vulnerability."
+        },
+        {
+          "key": "D",
+          "text": "Distribute every AMI, and run a weekly AWS Lambda function that launches each new AMI, scans it, and deregisters AMIs that have severe vulnerabilities."
+        },
+        {
+          "key": "E",
+          "text": "Ask the security team to review the Amazon Inspector console each week and to delete AMIs that have severe findings."
+        }
+      ],
+      "explanation": {
+        "summary": "Image Builder は Amazon Inspector と連携してイメージの脆弱性をスキャンし、許容より重大な検出結果がある時にイメージを失敗させるスキャン結果の条件を設定できます。Inspector は検出結果ごとに Amazon EventBridge へイベントを送るので、ルールで通知先へ流せば自動で通知できます。",
+        "per_choice": {
+          "A": "正しい。組み込みのスキャンと、重大度の条件でイメージを失敗させる設定で、基準を超える AMI を作りません。",
+          "B": "正しい。Inspector は検出結果ごとに EventBridge へイベントを送るので、ルールで SNS に流せば自動で通知できます。",
+          "C": "テストで止めることはできますが、独自のスキャナーを入れて保守することになり、要件に反します。",
+          "D": "基準を超える AMI もいったん配布されてしまい、スキャンの仕組みも自分で作る必要があります。",
+          "E": "手作業で、確認するまで基準を超える AMI が残り、自動の通知にもなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "source_id": "S9",
+          "quote": "Image Builder integrates with Amazon Inspector to scan the images that you build for software vulnerabilities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "source_id": "S9",
+          "quote": "You can set a scan result condition that fails the image if the AMI has findings that are more severe than you allow."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "source_id": "S9",
+          "quote": "Sends an event to Amazon EventBridge for each finding."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An EC2 Image Builder pipeline has produced a new AMI every week for two years. The snapshot storage cost for old output AMIs keeps growing. The company wants images to be marked as deprecated after 90 days and removed after 180 days, and the rules must apply to the images that already exist. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Update the pipeline's distribution configuration so that it keeps only the AMIs from the last 180 days in each Region."
+        },
+        {
+          "key": "B",
+          "text": "Create an Image Builder lifecycle policy with a rule that deprecates images after 90 days and a rule that deletes images after 180 days."
+        },
+        {
+          "key": "C",
+          "text": "Schedule an AWS Lambda function that lists the AMIs, deprecates AMIs older than 90 days, and deregisters AMIs and deletes their snapshots after 180 days."
+        },
+        {
+          "key": "D",
+          "text": "Ask an engineer to review the AMIs every month, deprecate the old ones in the console, and delete those that are older than 180 days."
+        }
+      ],
+      "explanation": {
+        "summary": "Image Builder のライフサイクルポリシーは、イメージを非推奨にするルールや、年数・数でイメージのリソースを削除するルールを持ち、AMI のスナップショットなどの費用を減らします。配布設定の変更はその後に作るイメージにだけ効き、既に配布したイメージは手作業かライフサイクルポリシーで消すまで残ります。",
+        "per_choice": {
+          "A": "配布設定の変更は更新後に作るイメージにだけ適用され、既にあるイメージは残るため要件に合いません。",
+          "B": "正しい。非推奨と削除をルールで決められ、既にあるイメージにも適用されます。",
+          "C": "動きますが、一覧・非推奨・削除の独自のコードを保守する必要があり、組み込みのライフサイクルポリシーより手間がかかります。",
+          "D": "毎月の手作業が必要で、オーバーヘッドが大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "source_id": "S10",
+          "quote": "Lifecycle rules keep your images fresh and reduce infrastructure costs, such as snapshot storage for output AMIs and Amazon ECR repository storage for containers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "source_id": "S10",
+          "quote": "For example, you can configure a policy to deprecate images after 90 days, disable them after 120 days, and delete them after 180 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "source_id": "S7",
+          "quote": "When you update a distribution configuration, the changes apply only to images that Image Builder creates after the update."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0005",
+      "answer": [
+        "D"
+      ],
+      "stem_en": "Developers build a service's container image from a Dockerfile on their laptops and push it to an Amazon ECR repository in us-east-1. The company wants the image to be rebuilt on a schedule so it picks up updates, wants the image to be tested before it is published, and needs a copy in eu-central-1. The company does not want to write or maintain build scripts. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an EC2 Image Builder pipeline with an image recipe that installs Docker and the service, and distribute the output AMI to both Regions on a schedule."
+        },
+        {
+          "key": "B",
+          "text": "Create an EC2 Image Builder pipeline with a container recipe, test components, and a schedule. Distribute the image only to the us-east-1 ECR repository and have developers push a copy to eu-central-1."
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS CodeBuild project with a buildspec that builds the image, runs test commands, and pushes the image to repositories in both Regions. Start it with an Amazon EventBridge schedule."
+        },
+        {
+          "key": "D",
+          "text": "Create an EC2 Image Builder pipeline with a container recipe that uses the Dockerfile and targets the ECR repository, add test components and a schedule, and add container distribution for eu-central-1."
+        }
+      ],
+      "explanation": {
+        "summary": "Image Builder のコンテナレシピは Dockerfile と出力先の Amazon ECR リポジトリを定め、パイプラインはスケジュールで自動ビルドし、テストに合格した時だけ配布します。配布設定にはリージョンごとのコンテナの配布を入れられるので、別のリージョンへのコピーも組み込みで行えます。",
+        "per_choice": {
+          "A": "出力が AMI になり、コンテナイメージを ECR に公開するという目的に合いません。",
+          "B": "スケジュールとテストは満たしますが、eu-central-1 へのコピーが手作業のままです。",
+          "C": "動きますが、ビルド・テスト・プッシュの buildspec を書いて保守する必要があり、要件に反します。",
+          "D": "正しい。スケジュールでの作り直し、公開前のテスト、別リージョンへの配布が、スクリプト無しの設定でそろいます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "source_id": "S4",
+          "quote": "Container recipes additionally define Dockerfiles, and the target Amazon ECR repository for your output Docker container image."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#image-builder-distribution",
+          "source_id": "S6",
+          "quote": "EC2 Image Builder can distribute AMIs or container images to any AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "source_id": "S7",
+          "quote": "The available outputs are AMI distribution, container distribution,"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "source_id": "S1",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        }
+      ]
+    }
+  ]
+}

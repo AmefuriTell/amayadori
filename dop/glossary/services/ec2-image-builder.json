@@ -1,0 +1,61 @@
+{
+  "id": "ec2-image-builder",
+  "name": "EC2 Image Builder",
+  "aliases": [
+    "EC2 Image Builder"
+  ],
+  "reading": "イーシーツー イメージビルダー",
+  "summary": "サーバーのイメージ（EC2 インスタンスの元になる AMI や、コンテナイメージ）を作る・管理する・配る作業を自動にする、AWS が運用まで受け持つサービス。作ったイメージのパッチ当て（不具合や弱点の修正の適用）もパイプラインで自動にできる。",
+  "features": [
+    {
+      "title": "イメージパイプライン",
+      "text": "AMI とコンテナイメージを作る流れを自動にする仕組み。イメージレシピかコンテナレシピと結び付け、ビルド・確認・テストの段階を決める。",
+      "source_id": "S2"
+    },
+    {
+      "title": "インフラストラクチャ設定",
+      "text": "イメージをどこで作るかを決める設定。インスタンスタイプ、サブネット、セキュリティグループ、ログなどを指定する。",
+      "source_id": "S2"
+    },
+    {
+      "title": "配布設定",
+      "text": "できたイメージをどう配るかを決める設定で、パイプラインに結び付ける。",
+      "source_id": "S2"
+    },
+    {
+      "title": "コンポーネント",
+      "text": "イメージを作る前にインスタンスを整える手順（ビルドコンポーネント）か、作ったイメージから起動したインスタンスを試す手順（テストコンポーネント）を、YAML か JSON の文書で書いたもの。レシピで 1 つ以上をまとめて使う。",
+      "source_id": "S3"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "AMI のパッチ当てや更新を手作業ではなく、パイプラインで自動にする方法として使われる。",
+      "source_id": "S1"
+    },
+    {
+      "text": "ビルド用とテスト用のコンポーネントの違い（作る前に整えるか、作った物を試すか）を押さえる。",
+      "source_id": "S3"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder",
+      "source_id": "S1",
+      "quote": "You can configure pipelines to automate updates and system patching for the images that you own."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+      "source_id": "S2",
+      "quote": "An image pipeline provides an automation framework for building secure AMIs and container images on AWS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+      "source_id": "S3",
+      "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

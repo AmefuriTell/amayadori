@@ -1,0 +1,75 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0010",
+  "services": [
+    "AWS AppConfig",
+    "AWS Lambda",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An application reads a JSON configuration file from an Amazon S3 bucket. Last month, a malformed file caused an outage. The company wants each configuration change to be checked against its JSON Schema, which is written in JSON Schema draft-07, before the change reaches the application. The file must stay in the existing S3 bucket because other tools write to it. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "あるアプリケーションは Amazon S3 バケットから JSON の設定ファイルを読み込みます。先月、形の崩れたファイルが原因で障害が起きました。会社は、設定の変更がアプリケーションに届く前に、JSON Schema draft-07 で書かれた JSON Schema に照らして各変更を確かめたいと考えています。ほかのツールが書き込むため、ファイルは既存の S3 バケットに置いたままにする必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an AWS AppConfig configuration profile that uses the existing S3 object as its source, and deliver the configuration to the application through AWS AppConfig.",
+      "text_ja": "既存の S3 オブジェクトをソースにする AWS AppConfig の設定プロファイルを作り、AWS AppConfig を通して設定をアプリケーションへ届ける。"
+    },
+    {
+      "key": "B",
+      "text": "Create an AWS Lambda function that validates the data against the draft-07 schema, and add it as a validator before creating the configuration profile.",
+      "text_ja": "draft-07 のスキーマに照らしてデータを確かめる AWS Lambda 関数を作り、設定プロファイルを作る前にそれをバリデーターとして追加する。"
+    },
+    {
+      "key": "C",
+      "text": "Add the draft-07 schema directly to the configuration profile as an inline JSON Schema validator.",
+      "text_ja": "draft-07 のスキーマを、インラインの JSON Schema バリデーターとして設定プロファイルに直接追加する。"
+    },
+    {
+      "key": "D",
+      "text": "Move the configuration into the AWS AppConfig hosted configuration store and remove the file from the S3 bucket.",
+      "text_ja": "設定を AWS AppConfig のホスト型設定ストアへ移し、S3 バケットからファイルを削除する。"
+    },
+    {
+      "key": "E",
+      "text": "Turn on S3 Versioning for the bucket and restore the previous object version by hand when the application fails.",
+      "text_ja": "バケットの S3 バージョニングを有効にし、アプリケーションが失敗した時に前のオブジェクトのバージョンを手作業で戻す。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "AWS AppConfig は S3 などに既にある設定データをソースにして、検証・デプロイ・管理ができ、デプロイの時にバリデーターで確かめて失敗すれば変更を戻します。インラインのスキーマは JSON Schema 4.X だけに対応するため、別のバージョンのスキーマで確かめるには Lambda のバリデーターを作る必要があります。",
+    "per_choice": {
+      "A": "正しい。ファイルを S3 に置いたまま、AppConfig のデプロイを通して届ける前に確かめられます。",
+      "B": "正しい。4.X 以外のスキーマには Lambda のバリデーターが必要で、バリデーターは設定プロファイルより先に作ります。",
+      "C": "インラインのスキーマは JSON Schema 4.X に対応するもので、draft-07 のスキーマで確かめるという要件には Lambda のバリデーターが必要です。",
+      "D": "確かめることはできますが、ファイルを既存の S3 バケットに置いたままにするという要件に反します。",
+      "E": "壊れたファイルが届いた後に戻すだけで、届く前に確かめるという要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-how-it-works",
+      "source_id": "S4",
+      "quote": "If your configuration data already exists in cloud services such as SSM Parameter Store or Amazon S3, you can use AWS AppConfig to validate, deploy, and manage that data more effectively."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+      "source_id": "S5",
+      "quote": "AWS AppConfig supports JSON Schema version 4.X for inline schema. If your application configuration requires a different version of JSON Schema, then you must create a Lambda validator."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+      "source_id": "S5",
+      "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

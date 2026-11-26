@@ -1,0 +1,99 @@
+{
+  "item": "C-0004",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "task": "1.1",
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は AWS CodeBuild でアプリケーションをビルドしています。ソースリポジトリにある buildspec ファイルでは、データベースのパスワードと社内サービスのエンドポイントを平文の環境変数として定義しており、パスワードがビルドログに表示されています。セキュリティチームは、ソースコードに認証情報を置かないこと、データベースのパスワードを定期的にローテーションすること、シークレットの値を CodeBuild のログで隠すことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "パスワードを自動ローテーションを設定した AWS Secrets Manager に保存し、buildspec の env の secrets-manager セクションで参照する。エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。CodeBuild のサービスロールに読み取り権限を与える。"
+        },
+        {
+          "key": "B",
+          "text": "両方の値を Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。データベースのパスワードを変更してパラメータを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "C",
+          "text": "パスワードを AWS KMS キーで暗号化し、暗号文を buildspec ファイルにコミットして、ビルドのコマンドで復号する。パスワードと暗号文を四半期ごとに手作業で変更する。"
+        },
+        {
+          "key": "D",
+          "text": "両方の値を buildspec ファイルから CodeBuild プロジェクトの設定にある平文の環境変数へ移す。プロジェクトへのコンソールアクセスを制限し、パスワードはスケジュールに沿って手作業で変更する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "task": "1.1",
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。"
+        },
+        {
+          "key": "B",
+          "text": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。"
+        },
+        {
+          "key": "D",
+          "text": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。"
+        },
+        {
+          "key": "E",
+          "text": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "task": "1.1",
+      "services": [
+        "AWS Secrets Manager",
+        "AWS CodePipeline",
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は AWS CodePipeline でアプリケーションをデプロイしています。ビルドステージで AWS CodeBuild がデータベースの認証情報を設定ファイルに書き込み、そのファイルはアプリケーションと一緒にパッケージされます。そのため、認証情報を変えるたびにパイプライン全体の実行と再デプロイが必要です。会社は、アプリケーションを再デプロイせずに、認証情報を定期的に変更したいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "認証情報を AWS Secrets Manager に置き、CodeBuild の env の secrets-manager セクションで注入する。自動ローテーションを設定し、ローテーションのたびにパイプラインを開始する。"
+        },
+        {
+          "key": "B",
+          "text": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存する。アプリケーションを実行時に Secrets Manager から認証情報を取得するように変更し、ビルドからは取り除く。"
+        },
+        {
+          "key": "C",
+          "text": "認証情報を Parameter Store の SecureString パラメータとして保存する。データベースのパスワードとパラメータを変更する AWS Lambda 関数を書いてスケジュールで実行し、実行時にパラメータを読む。"
+        },
+        {
+          "key": "D",
+          "text": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存し、アプリケーションをデプロイするたびに現在のシークレットを設定ファイルへコピーするデプロイのフックを追加する。"
+        }
+      ]
+    }
+  ]
+}

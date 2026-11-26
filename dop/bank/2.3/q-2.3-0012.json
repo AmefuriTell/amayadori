@@ -1,0 +1,63 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0012",
+  "services": [
+    "AWS Systems Manager Compliance",
+    "AWS Systems Manager State Manager",
+    "Amazon EventBridge"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company keeps its managed nodes configured with State Manager associations and patches them with Patch Manager. The security team wants one place to see which nodes are out of compliance with the associations or with patching, and wants noncompliant nodes to be remediated automatically. The team does not want to build a custom reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、State Manager の関連付けでマネージドノードの構成を保ち、Patch Manager でパッチを当てています。セキュリティチームは、関連付けやパッチに準拠していないノードを 1 か所で確認し、準拠していないノードを自動で修復したいと考えています。チームは独自のレポートのツールを作りたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use Systems Manager Compliance to view association and patch compliance, and use an Amazon EventBridge rule to start remediation for noncompliant nodes.",
+      "text_ja": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、準拠していないノードの修復を Amazon EventBridge のルールで開始する。"
+    },
+    {
+      "key": "B",
+      "text": "Write an AWS Lambda function that connects to each node every day, compares its settings and patches with the baseline, and stores the results in an Amazon S3 report.",
+      "text_ja": "毎日各ノードに接続し、設定とパッチを基準と比べ、結果を Amazon S3 のレポートに保存する AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "C",
+      "text": "Use Systems Manager Compliance to view association and patch compliance, and have an engineer fix each noncompliant node by hand every week.",
+      "text_ja": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、エンジニアが毎週、準拠していない各ノードを手作業で直す。"
+    },
+    {
+      "key": "D",
+      "text": "Run a weekly Run Command script that collects each node's settings into a spreadsheet, and ask the security team to review it.",
+      "text_ja": "各ノードの設定を表計算シートに集める Run Command のスクリプトを毎週実行し、セキュリティチームに確認してもらう。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "Systems Manager Compliance は、既定で Patch Manager のパッチと State Manager の関連付けの準拠のデータを表示します。問題は Run Command、State Manager、Amazon EventBridge を使って修復できます。",
+    "per_choice": {
+      "A": "正しい。組み込みの表示で 1 か所から確認でき、EventBridge で修復を自動で始められます。",
+      "B": "動きますが、確認とレポートの独自のツールを作って保守することになり、要件に反します。",
+      "C": "確認はできますが、修復が手作業で、自動で修復するという要件に合いません。",
+      "D": "独自の集計と人の確認が必要で、自動の修復もありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+      "source_id": "S7",
+      "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+      "source_id": "S7",
+      "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

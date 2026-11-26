@@ -1,0 +1,62 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0010",
+  "services": [
+    "AWS Organizations",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "In a company's organization, the root has the FullAWSAccess SCP. An OU named Sandbox has FullAWSAccess removed and instead has an SCP that allows only Amazon S3 and Amazon EC2 actions. A member account in the Sandbox OU has FullAWSAccess attached. A developer in that account has an IAM policy that allows all Amazon DynamoDB actions, but every DynamoDB request is denied. What should a DevOps engineer do to allow the developer to use DynamoDB with the LEAST change to the organization?",
+  "stem_ja": "ある会社の組織では、ルートに FullAWSAccess の SCP があります。Sandbox という OU では FullAWSAccess が外され、代わりに Amazon S3 と Amazon EC2 のアクションだけを許す SCP があります。Sandbox OU のメンバーアカウントには FullAWSAccess がアタッチされています。そのアカウントの開発者には Amazon DynamoDB のすべてのアクションを許す IAM ポリシーがありますが、DynamoDB へのリクエストはすべて拒否されます。組織への変更を最も少なくして、開発者が DynamoDB を使えるようにするために、DevOps エンジニアは何をすべきですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach a new IAM policy to the developer that explicitly allows all DynamoDB actions on all resources.",
+      "text_ja": "すべてのリソースへの DynamoDB のすべてのアクションを明示的に許す新しい IAM ポリシーを開発者にアタッチする。"
+    },
+    {
+      "key": "B",
+      "text": "Add the DynamoDB actions to the Allow statement of the SCP that is attached to the Sandbox OU.",
+      "text_ja": "Sandbox OU にアタッチされた SCP の Allow ステートメントに、DynamoDB のアクションを追加する。"
+    },
+    {
+      "key": "C",
+      "text": "Attach an SCP that allows DynamoDB actions directly to the member account.",
+      "text_ja": "DynamoDB のアクションを許す SCP を、メンバーアカウントに直接アタッチする。"
+    },
+    {
+      "key": "D",
+      "text": "Attach an SCP that allows DynamoDB actions to the management account of the organization.",
+      "text_ja": "DynamoDB のアクションを許す SCP を、組織の管理アカウントにアタッチする。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "SCP で許されるには、ルートからアカウントまでの経路のすべての段（各 OU とアカウント自身）に明示的な Allow が要ります。Sandbox OU の SCP が DynamoDB を許していないため、IAM ポリシーで許していても拒否されます。",
+    "per_choice": {
+      "A": "IAM ポリシーは既に許しています。SCP で許されていないアクションは、IAM ポリシーで許しても実行できません。",
+      "B": "正しい。経路の中で Allow が欠けている Sandbox OU の段に DynamoDB を足せば、すべての段で許されます。",
+      "C": "アカウントの段はすでに FullAWSAccess で許しています。Sandbox OU の段に Allow が無いので拒否されたままです。",
+      "D": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントの評価の経路にも入らないため、変わりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+      "source_id": "S3",
+      "quote": "there must be an explicit Allow statement at every level from the root through each OU in the direct path to the account (including the target account itself)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+      "source_id": "S2",
+      "quote": "If a user or role has an IAM permission policy that grants access to an action that is either not allowed or explicitly denied by the applicable SCPs, the user or role can't perform that action."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

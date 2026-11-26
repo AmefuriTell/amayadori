@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 146,
+  "count": 166,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -518,6 +518,214 @@
         {
           "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
           "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0009",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds its application with AWS CodeBuild. The buildspec file in the source repository currently defines the database password and an internal service endpoint as plaintext environment variables, and the password appears in build logs. The security team requires that no credentials are stored in source code, that the database password is rotated on a schedule, and that secret values are hidden in CodeBuild logs. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は AWS CodeBuild でアプリケーションをビルドしています。ソースリポジトリにある buildspec ファイルでは、データベースのパスワードと社内サービスのエンドポイントを平文の環境変数として定義しており、パスワードがビルドログに表示されています。セキュリティチームは、ソースコードに認証情報を置かないこと、データベースのパスワードを定期的にローテーションすること、シークレットの値を CodeBuild のログで隠すことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Store both values as SecureString parameters in Parameter Store and reference them in the env parameter-store section. Write an AWS Lambda function that runs on a schedule to change the database password and update the parameter.",
+          "text_ja": "両方の値を Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。データベースのパスワードを変更してパラメータを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "B",
+          "text": "Encrypt the password with an AWS KMS key, commit the ciphertext to the buildspec file, and decrypt it in the build commands. Change the password and the ciphertext manually each quarter.",
+          "text_ja": "パスワードを AWS KMS キーで暗号化し、暗号文を buildspec ファイルにコミットして、ビルドのコマンドで復号する。パスワードと暗号文を四半期ごとに手作業で変更する。"
+        },
+        {
+          "key": "C",
+          "text": "Store the password in AWS Secrets Manager with automatic rotation and reference it in the buildspec env secrets-manager section. Store the endpoint as a SecureString parameter in Parameter Store and reference it in the env parameter-store section. Grant the CodeBuild service role read access.",
+          "text_ja": "パスワードを自動ローテーションを設定した AWS Secrets Manager に保存し、buildspec の env の secrets-manager セクションで参照する。エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。CodeBuild のサービスロールに読み取り権限を与える。"
+        },
+        {
+          "key": "D",
+          "text": "Move both values from the buildspec file to plaintext environment variables in the CodeBuild project settings. Restrict console access to the project and change the password manually on a schedule.",
+          "text_ja": "両方の値を buildspec ファイルから CodeBuild プロジェクトの設定にある平文の環境変数へ移す。プロジェクトへのコンソールアクセスを制限し、パスワードはスケジュールに沿って手作業で変更する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager はシークレットの自動ローテーションを設定でき、buildspec の env の secrets-manager や parameter-store で指定した値は CodeBuild のログで隠されます。認証情報は Secrets Manager、暗号化が要る設定値は Parameter Store の SecureString という AWS の勧める分け方にも合い、自前のコードも要りません。",
+        "per_choice": {
+          "A": "ソースから消えログでも隠れますが、ローテーションの Lambda 関数を自分で書いて保守する必要があり、オーバーヘッドが大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+          "B": "暗号文とはいえ認証情報をソースコードに置いており要件に反します。手作業の変更も手間がかかります。",
+          "C": "正しい。ソースから認証情報が消え、Secrets Manager の自動ローテーションで定期変更を自前のコード無しで満たし、env の secrets-manager・parameter-store で指定した値はログで隠されます。",
+          "D": "ソースからは消えますが平文のままで、ログでも隠されず、ローテーションも手作業です。AWS は機密の値を Parameter Store などに置くことを勧めています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "In Secrets Manager, you can set up automatic rotation for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "To protect sensitive information, the following are hidden in CodeBuild logs:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "For secrets such as database credentials, API keys, or tokens, we recommend AWS Secrets Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0010",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A DevOps engineer is removing hard-coded values from a CodeBuild buildspec file. The build needs a third-party API key that is stored together with several other keys in one JSON secret, and the build must receive only that one key. The build also needs a service endpoint that is not a credential but must be stored encrypted. The engineer must follow AWS storage recommendations and must not add custom parsing scripts to the build. Which actions should the engineer take? (Choose TWO.)",
+      "stem_ja": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the API key in the AWS Secrets Manager secret and reference it in the buildspec env secrets-manager section with the secret ID and the json-key for the API key.",
+          "text_ja": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。"
+        },
+        {
+          "key": "B",
+          "text": "Store the endpoint as a SecureString parameter in Parameter Store, reference it in the env parameter-store section, and add the ssm:GetParameters action to the CodeBuild service role.",
+          "text_ja": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Copy the API key into a SecureString parameter in Parameter Store and reference that parameter in the env parameter-store section of the buildspec file.",
+          "text_ja": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。"
+        },
+        {
+          "key": "D",
+          "text": "Reference the whole Secrets Manager secret in the env secrets-manager section without a json-key, and extract the API key with a jq command in the build phase.",
+          "text_ja": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。"
+        },
+        {
+          "key": "E",
+          "text": "Define the endpoint as a plaintext variable in the env variables section of the buildspec file because the endpoint is not a credential.",
+          "text_ja": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "secrets-manager の参照では json-key を指定すると、その キーの値だけを取り出せます（指定しなければシークレットの全文）。認証情報ではないが暗号化が要る値は Parameter Store の SecureString に置き、CodeBuild のサービスロールに ssm:GetParameters を与えて parameter-store で参照します。",
+        "per_choice": {
+          "A": "正しい。json-key を指定すれば、その キーの値だけがビルドに渡り、解析のスクリプトも要りません。",
+          "B": "正しい。暗号化が要る設定値には SecureString が勧められており、parameter-store で取るにはサービスロールに ssm:GetParameters が必要です。",
+          "C": "動きますが、AWS は API キーなどのシークレットには Secrets Manager を勧めており、推奨に従うという要件に合いません。",
+          "D": "json-key を付けないとシークレットの全文が渡り、1 つのキーだけ渡す要件に反し、jq による独自の解析も加わります。",
+          "E": "暗号化して保存するという要件に反します。平文の値はソースに残ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0011",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS Secrets Manager",
+        "AWS CodePipeline",
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company deploys an application through AWS CodePipeline. During the build stage, AWS CodeBuild writes the database credentials into a configuration file that is packaged with the application. Every credential change therefore requires a full pipeline run and a redeployment. The company wants to change the credentials on a regular schedule without redeploying the application. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は AWS CodePipeline でアプリケーションをデプロイしています。ビルドステージで AWS CodeBuild がデータベースの認証情報を設定ファイルに書き込み、そのファイルはアプリケーションと一緒にパッケージされます。そのため、認証情報を変えるたびにパイプライン全体の実行と再デプロイが必要です。会社は、アプリケーションを再デプロイせずに、認証情報を定期的に変更したいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the credentials in AWS Secrets Manager and inject them through the CodeBuild env secrets-manager section. Configure automatic rotation and start the pipeline after every rotation.",
+          "text_ja": "認証情報を AWS Secrets Manager に置き、CodeBuild の env の secrets-manager セクションで注入する。自動ローテーションを設定し、ローテーションのたびにパイプラインを開始する。"
+        },
+        {
+          "key": "B",
+          "text": "Store the credentials in AWS Secrets Manager with automatic rotation. Change the application to retrieve the credentials from Secrets Manager at runtime and remove them from the build.",
+          "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存する。アプリケーションを実行時に Secrets Manager から認証情報を取得するように変更し、ビルドからは取り除く。"
+        },
+        {
+          "key": "C",
+          "text": "Store the credentials as a SecureString parameter in Parameter Store. Write a scheduled AWS Lambda function that changes the database password and the parameter, and read the parameter at runtime.",
+          "text_ja": "認証情報を Parameter Store の SecureString パラメータとして保存する。データベースのパスワードとパラメータを変更する AWS Lambda 関数を書いてスケジュールで実行し、実行時にパラメータを読む。"
+        },
+        {
+          "key": "D",
+          "text": "Store the credentials in AWS Secrets Manager with automatic rotation, and add a deployment hook that copies the current secret into the configuration file on each application deployment.",
+          "text_ja": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存し、アプリケーションをデプロイするたびに現在のシークレットを設定ファイルへコピーするデプロイのフックを追加する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager では、ハードコードした認証情報を実行時の呼び出しに置き換えるため、認証情報をローテーションしてもアプリケーションの更新やデプロイが要りません。自動ローテーションのスケジュールも Secrets Manager で設定できます。",
+        "per_choice": {
+          "A": "ローテーションは自動ですが、ビルド時に注入するので、変更のたびにパイプラインの実行と再デプロイが必要なままです。",
+          "B": "正しい。実行時に取得するので再デプロイが要らず、定期的な変更は Secrets Manager の自動ローテーションで行えます。",
+          "C": "再デプロイは要りませんが、ローテーションの Lambda 関数とスケジュールを自分で作って保守する必要があり、手間が大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+          "D": "シークレットは自動で変わりますが、設定ファイルに反映するにはデプロイが必要で、再デプロイ無しという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "Since the credentials are no longer stored with the application, rotating credentials no longer requires updating your applications and deploying changes to application clients."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
       "low_confidence": false
@@ -1618,6 +1826,330 @@
       "low_confidence": false
     },
     {
+      "id": "q-1.3-0009",
+      "task": "1.3",
+      "domain": 1,
+      "services": [
+        "EC2 Image Builder"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company creates its hardened Amazon Linux AMI by hand each month. An engineer launches an EC2 instance, runs patch and hardening scripts, creates an AMI, and then launches another instance to run checks. The company wants patched AMIs to be produced every week, wants each AMI to pass the checks before teams can use it, and does not want to maintain custom orchestration code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、強化した Amazon Linux の AMI を毎月手作業で作っています。エンジニアが EC2 インスタンスを起動し、パッチ適用と強化のスクリプトを実行して AMI を作り、さらに別のインスタンスを起動して確認を行います。会社は、パッチを当てた AMI を毎週作り、各 AMI が確認に合格してからチームが使えるようにしたいと考えており、独自のオーケストレーションのコードは保守したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function each week. The function launches an instance with the scripts in user data, calls CreateImage, and launches a second instance to run the checks.",
+          "text_ja": "毎週 AWS Lambda 関数を呼び出す Amazon EventBridge のスケジュールを作る。関数は、ユーザーデータにスクリプトを入れたインスタンスを起動し、CreateImage を呼び、確認を行う 2 台目のインスタンスを起動する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an EC2 Image Builder pipeline that uses manual builds. Use an image recipe with build and test components, and have an engineer start the pipeline each week.",
+          "text_ja": "手動ビルドを使う EC2 Image Builder のパイプラインを作る。ビルドとテストのコンポーネントを入れたイメージレシピを使い、エンジニアが毎週パイプラインを開始する。"
+        },
+        {
+          "key": "C",
+          "text": "Create an EC2 Image Builder pipeline with a weekly schedule. Use an image recipe with build components for the patching and hardening steps and test components for the checks, and add a distribution configuration.",
+          "text_ja": "毎週のスケジュールを設定した EC2 Image Builder のパイプラインを作る。パッチ適用と強化の手順にはビルドコンポーネント、確認にはテストコンポーネントを入れたイメージレシピを使い、配布設定を追加する。"
+        },
+        {
+          "key": "D",
+          "text": "Create an EC2 Image Builder pipeline with a weekly schedule and an image recipe that has only build components. Ask each team to test the AMI after it is distributed.",
+          "text_ja": "毎週のスケジュールと、ビルドコンポーネントだけのイメージレシピを持つ EC2 Image Builder のパイプラインを作る。配布された後に各チームが AMI をテストする。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Image Builder のパイプラインはスケジュールで自動ビルドでき、レシピのビルドコンポーネントでカスタマイズし、テストコンポーネントでイメージを確かめます。設定したテストがすべて成功した時だけイメージを配布するので、確認に合格した AMI だけがチームに渡ります。",
+        "per_choice": {
+          "A": "動きますが、インスタンスの起動・AMI の作成・確認を Lambda 関数で組み立てる独自のコードを保守する必要があります。",
+          "B": "テストで止まる仕組みはありますが、毎週の開始が手作業で、自動化の要件に合いません。",
+          "C": "正しい。毎週のスケジュール、コンポーネントによる手順、テストに合格した時だけの配布が、独自のコード無しでそろいます。",
+          "D": "自動ではありますが、配布の前にテストしないため、確認に合格する前の AMI がチームに渡ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "You can automate your builds by providing your build execution schedule preference."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+          "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.3-0010",
+      "task": "1.3",
+      "domain": 1,
+      "services": [
+        "EC2 Image Builder",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company builds a custom AMI with an EC2 Image Builder pipeline in us-east-1. Application teams in us-east-1, eu-west-1, and ap-southeast-2 launch instances from an EC2 launch template in each Region and always use the template's default version. After each build, an engineer copies the AMI to the other Regions and creates new launch template versions by hand. The company wants each new AMI to be available in all three Regions and used for new launches without manual steps. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は、us-east-1 の EC2 Image Builder のパイプラインでカスタム AMI を作っています。us-east-1、eu-west-1、ap-southeast-2 のアプリケーションチームは、各リージョンの EC2 起動テンプレートからインスタンスを起動しており、常にテンプレートのデフォルトバージョンを使います。ビルドのたびに、エンジニアが AMI をほかのリージョンへコピーし、起動テンプレートの新しいバージョンを手作業で作っています。会社は、新しい AMI を 3 つのリージョンすべてで使えるようにし、手作業無しで新しい起動に使われるようにしたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a distribution for each of the three Regions to the distribution configuration. In each distribution, specify the Region's launch template in launchTemplateConfigurations and set setDefaultVersion to false.",
+          "text_ja": "配布設定に、3 つのリージョンそれぞれの配布を追加する。各配布の launchTemplateConfigurations にそのリージョンの起動テンプレートを指定し、setDefaultVersion を false にする。"
+        },
+        {
+          "key": "B",
+          "text": "Create a separate Image Builder pipeline in each Region with the same recipe and schedule, and have each Region's team update its launch template after every build.",
+          "text_ja": "同じレシピとスケジュールで、リージョンごとに別の Image Builder パイプラインを作り、ビルドのたびに各リージョンのチームが起動テンプレートを更新する。"
+        },
+        {
+          "key": "C",
+          "text": "Keep distribution to us-east-1 only. Use an AWS Lambda function that runs after each build to copy the AMI to the other Regions and create a new default launch template version in each Region.",
+          "text_ja": "配布は us-east-1 だけのままにする。各ビルドの後に動く AWS Lambda 関数で、AMI をほかのリージョンへコピーし、各リージョンで起動テンプレートの新しいデフォルトバージョンを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Add a distribution for each of the three Regions to the pipeline's distribution configuration. In each distribution, specify the Region's launch template in launchTemplateConfigurations and keep setDefaultVersion set to true.",
+          "text_ja": "パイプラインの配布設定に、3 つのリージョンそれぞれの配布を追加する。各配布の launchTemplateConfigurations にそのリージョンの起動テンプレートを指定し、setDefaultVersion は true のままにする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "配布設定は 1 つの配布が 1 つのリージョンに対応し、ビルドがテストに合格した後にイメージを各リージョンへ配布します。launchTemplateConfigurations を指定すると新しい AMI ID を入れた起動テンプレートの新しいバージョンが作られ、setDefaultVersion（既定は true）でそれがデフォルトバージョンになります。",
+        "per_choice": {
+          "A": "新しいバージョンは作られますが、デフォルトバージョンは変わらないため、デフォルトを使うチームの起動は古い AMI のままです。",
+          "B": "各リージョンでビルドはできますが、同じビルドを 3 回行い、起動テンプレートの更新も手作業のままです。",
+          "C": "動きますが、コピーとテンプレートの更新を Lambda 関数で作って保守する必要があり、組み込みの配布設定より手間がかかります。",
+          "D": "正しい。3 つのリージョンへの配布と、新しい AMI を入れたデフォルトバージョンの作成が、Image Builder の設定だけで行われます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "Each distribution applies to exactly one target Region and defines the outputs for that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "quote": "Image Builder creates a new version of the launch template that includes all of the original settings from the template, and the new AMI ID from the build."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "quote": "setDefaultVersion controls whether Image Builder makes the new launch template version the default version. This optional field defaults to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "quote": "The pipeline automatically distributes your image to the Region where it runs the build, and you can add image distribution for other Regions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.3-0011",
+      "task": "1.3",
+      "domain": 1,
+      "services": [
+        "EC2 Image Builder",
+        "Amazon Inspector",
+        "Amazon EventBridge"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A security team requires that AMIs built by an EC2 Image Builder pipeline must not be produced if they contain software vulnerabilities above an allowed severity. The team also wants to be notified automatically about every vulnerability finding. The DevOps engineer must not build or maintain a custom vulnerability scanner. Which actions should the engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "セキュリティチームは、EC2 Image Builder のパイプラインで作る AMI に、許容する重大度を超えるソフトウェアの脆弱性がある場合、その AMI を作らないことを求めています。チームは、すべての脆弱性の検出結果について自動で通知を受けたいとも考えています。DevOps エンジニアは独自の脆弱性スキャナーを作ったり保守したりしてはいけません。これらの要件を満たすためにエンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Enable Amazon Inspector scanning for the Image Builder images, and set a scan result condition that fails the image when findings are more severe than allowed.",
+          "text_ja": "Image Builder のイメージに対して Amazon Inspector のスキャンを有効にし、許容より重大な検出結果がある時にイメージを失敗させるスキャン結果の条件を設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge rule that matches Amazon Inspector finding events and sends them to an Amazon SNS topic that the security team subscribes to.",
+          "text_ja": "Amazon Inspector の検出結果のイベントに一致する Amazon EventBridge のルールを作り、セキュリティチームがサブスクライブする Amazon SNS トピックへ送る。"
+        },
+        {
+          "key": "C",
+          "text": "Add a test component that runs an open source scanner installed by the engineer and returns a failing exit code when it finds a severe vulnerability.",
+          "text_ja": "エンジニアがインストールしたオープンソースのスキャナーを実行し、重大な脆弱性を見つけた時に失敗の終了コードを返すテストコンポーネントを追加する。"
+        },
+        {
+          "key": "D",
+          "text": "Distribute every AMI, and run a weekly AWS Lambda function that launches each new AMI, scans it, and deregisters AMIs that have severe vulnerabilities.",
+          "text_ja": "すべての AMI を配布し、毎週動く AWS Lambda 関数で新しい各 AMI を起動してスキャンし、重大な脆弱性のある AMI の登録を解除する。"
+        },
+        {
+          "key": "E",
+          "text": "Ask the security team to review the Amazon Inspector console each week and to delete AMIs that have severe findings.",
+          "text_ja": "セキュリティチームに毎週 Amazon Inspector のコンソールを確認してもらい、重大な検出結果のある AMI を削除してもらう。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Image Builder は Amazon Inspector と連携してイメージの脆弱性をスキャンし、許容より重大な検出結果がある時にイメージを失敗させるスキャン結果の条件を設定できます。Inspector は検出結果ごとに Amazon EventBridge へイベントを送るので、ルールで通知先へ流せば自動で通知できます。",
+        "per_choice": {
+          "A": "正しい。組み込みのスキャンと、重大度の条件でイメージを失敗させる設定で、基準を超える AMI を作りません。",
+          "B": "正しい。Inspector は検出結果ごとに EventBridge へイベントを送るので、ルールで SNS に流せば自動で通知できます。",
+          "C": "テストで止めることはできますが、独自のスキャナーを入れて保守することになり、要件に反します。",
+          "D": "基準を超える AMI もいったん配布されてしまい、スキャンの仕組みも自分で作る必要があります。",
+          "E": "手作業で、確認するまで基準を超える AMI が残り、自動の通知にもなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "Image Builder integrates with Amazon Inspector to scan the images that you build for software vulnerabilities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "You can set a scan result condition that fails the image if the AMI has findings that are more severe than you allow."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "Sends an event to Amazon EventBridge for each finding."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.3-0012",
+      "task": "1.3",
+      "domain": 1,
+      "services": [
+        "EC2 Image Builder"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An EC2 Image Builder pipeline has produced a new AMI every week for two years. The snapshot storage cost for old output AMIs keeps growing. The company wants images to be marked as deprecated after 90 days and removed after 180 days, and the rules must apply to the images that already exist. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "EC2 Image Builder のパイプラインが 2 年間、毎週新しい AMI を作ってきました。古い出力 AMI のスナップショットのストレージ費用が増え続けています。会社は、イメージを 90 日後に非推奨にし、180 日後に削除したいと考えており、その決まりは既にあるイメージにも適用する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Update the pipeline's distribution configuration so that it keeps only the AMIs from the last 180 days in each Region.",
+          "text_ja": "パイプラインの配布設定を更新し、各リージョンで直近 180 日の AMI だけを残すようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Create an Image Builder lifecycle policy with a rule that deprecates images after 90 days and a rule that deletes images after 180 days.",
+          "text_ja": "90 日後にイメージを非推奨にするルールと、180 日後にイメージを削除するルールを持つ Image Builder のライフサイクルポリシーを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Schedule an AWS Lambda function that lists the AMIs, deprecates AMIs older than 90 days, and deregisters AMIs and deletes their snapshots after 180 days.",
+          "text_ja": "AMI を一覧し、90 日を超えた AMI を非推奨にし、180 日を超えた AMI の登録解除とスナップショットの削除を行う AWS Lambda 関数をスケジュールで実行する。"
+        },
+        {
+          "key": "D",
+          "text": "Ask an engineer to review the AMIs every month, deprecate the old ones in the console, and delete those that are older than 180 days.",
+          "text_ja": "エンジニアが毎月 AMI を確認し、古いものをコンソールで非推奨にし、180 日を超えたものを削除する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Image Builder のライフサイクルポリシーは、イメージを非推奨にするルールや、年数・数でイメージのリソースを削除するルールを持ち、AMI のスナップショットなどの費用を減らします。配布設定の変更はその後に作るイメージにだけ効き、既に配布したイメージは手作業かライフサイクルポリシーで消すまで残ります。",
+        "per_choice": {
+          "A": "配布設定の変更は更新後に作るイメージにだけ適用され、既にあるイメージは残るため要件に合いません。",
+          "B": "正しい。非推奨と削除をルールで決められ、既にあるイメージにも適用されます。",
+          "C": "動きますが、一覧・非推奨・削除の独自のコードを保守する必要があり、組み込みのライフサイクルポリシーより手間がかかります。",
+          "D": "毎月の手作業が必要で、オーバーヘッドが大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "quote": "Lifecycle rules keep your images fresh and reduce infrastructure costs, such as snapshot storage for output AMIs and Amazon ECR repository storage for containers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "quote": "For example, you can configure a policy to deprecate images after 90 days, disable them after 120 days, and delete them after 180 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "When you update a distribution configuration, the changes apply only to images that Image Builder creates after the update."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.3-0013",
+      "task": "1.3",
+      "domain": 1,
+      "services": [
+        "EC2 Image Builder",
+        "Amazon ECR"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Developers build a service's container image from a Dockerfile on their laptops and push it to an Amazon ECR repository in us-east-1. The company wants the image to be rebuilt on a schedule so it picks up updates, wants the image to be tested before it is published, and needs a copy in eu-central-1. The company does not want to write or maintain build scripts. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "開発者は、サービスのコンテナイメージをノートパソコン上で Dockerfile からビルドし、us-east-1 の Amazon ECR リポジトリへプッシュしています。会社は、更新を取り込むためにイメージをスケジュールで作り直し、公開する前にイメージをテストし、eu-central-1 にもコピーを置きたいと考えています。会社はビルドのスクリプトを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an EC2 Image Builder pipeline with a container recipe that uses the Dockerfile and targets the ECR repository, add test components and a schedule, and add container distribution for eu-central-1.",
+          "text_ja": "Dockerfile を使い ECR リポジトリを出力先にするコンテナレシピと、テストコンポーネントとスケジュールを持つ EC2 Image Builder のパイプラインを作り、eu-central-1 へのコンテナの配布を追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an EC2 Image Builder pipeline with an image recipe that installs Docker and the service, and distribute the output AMI to both Regions on a schedule.",
+          "text_ja": "Docker とサービスをインストールするイメージレシピを持つ EC2 Image Builder のパイプラインを作り、出力の AMI をスケジュールで両方のリージョンへ配布する。"
+        },
+        {
+          "key": "C",
+          "text": "Create an EC2 Image Builder pipeline with a container recipe, test components, and a schedule. Distribute the image only to the us-east-1 ECR repository and have developers push a copy to eu-central-1.",
+          "text_ja": "コンテナレシピ、テストコンポーネント、スケジュールを持つ EC2 Image Builder のパイプラインを作る。イメージは us-east-1 の ECR リポジトリにだけ配布し、開発者が eu-central-1 へコピーをプッシュする。"
+        },
+        {
+          "key": "D",
+          "text": "Create an AWS CodeBuild project with a buildspec that builds the image, runs test commands, and pushes the image to repositories in both Regions. Start it with an Amazon EventBridge schedule.",
+          "text_ja": "イメージをビルドし、テストのコマンドを実行し、両方のリージョンのリポジトリへイメージをプッシュする buildspec を持つ AWS CodeBuild プロジェクトを作る。Amazon EventBridge のスケジュールで開始する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Image Builder のコンテナレシピは Dockerfile と出力先の Amazon ECR リポジトリを定め、パイプラインはスケジュールで自動ビルドし、テストに合格した時だけ配布します。配布設定にはリージョンごとのコンテナの配布を入れられるので、別のリージョンへのコピーも組み込みで行えます。",
+        "per_choice": {
+          "A": "正しい。スケジュールでの作り直し、公開前のテスト、別リージョンへの配布が、スクリプト無しの設定でそろいます。",
+          "B": "出力が AMI になり、コンテナイメージを ECR に公開するという目的に合いません。",
+          "C": "スケジュールとテストは満たしますが、eu-central-1 へのコピーが手作業のままです。",
+          "D": "動きますが、ビルド・テスト・プッシュの buildspec を書いて保守する必要があり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "quote": "Container recipes additionally define Dockerfiles, and the target Amazon ECR repository for your output Docker container image."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#image-builder-distribution",
+          "quote": "EC2 Image Builder can distribute AMIs or container images to any AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "The available outputs are AMI distribution, container distribution,"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-1.4-0001",
       "task": "1.4",
       "domain": 1,
@@ -2678,6 +3210,260 @@
       "low_confidence": true
     },
     {
+      "id": "q-2.1-0009",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS AppConfig",
+        "Amazon CloudWatch"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a web application on Amazon ECS. The product team wants to turn on a new checkout feature for a small share of users first and then for everyone, without deploying new application code. If the error-rate alarm in Amazon CloudWatch fires during the rollout, the change must be reverted automatically. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は Amazon ECS でウェブアプリケーションを動かしています。プロダクトチームは、新しいチェックアウトの機能を、新しいアプリケーションのコードをデプロイせずに、まず一部の利用者に、その後すべての利用者に有効にしたいと考えています。展開中に Amazon CloudWatch のエラー率のアラームが発生した場合は、変更を自動で元に戻す必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Store the flag in AWS AppConfig and deploy it all at once. Have an operator call the StopDeployment API if the CloudWatch alarm fires.",
+          "text_ja": "フラグを AWS AppConfig に保存し、一度にすべてデプロイする。CloudWatch アラームが発生したら、運用担当者が StopDeployment API を呼ぶ。"
+        },
+        {
+          "key": "B",
+          "text": "Store the flag in AWS AppConfig. Deploy it with a gradual deployment strategy to an AppConfig environment that lists the CloudWatch alarm for automatic rollback.",
+          "text_ja": "フラグを AWS AppConfig に保存する。自動ロールバック用に CloudWatch アラームを指定した AppConfig の環境へ、段階的なデプロイ戦略でデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Store the flag in Systems Manager Parameter Store. Change the value by hand for each user group and change it back by hand when the CloudWatch alarm fires.",
+          "text_ja": "フラグを Systems Manager Parameter Store に保存する。利用者のグループごとに値を手作業で変え、CloudWatch アラームが発生したら手作業で戻す。"
+        },
+        {
+          "key": "D",
+          "text": "Put the flag in the application's configuration file and release it with an ECS rolling deployment. Roll back the deployment when the CloudWatch alarm fires.",
+          "text_ja": "フラグをアプリケーションの設定ファイルに入れ、ECS のローリングデプロイでリリースする。CloudWatch アラームが発生したらデプロイをロールバックする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS AppConfig は、コードを再デプロイせずに機能フラグで本番の振る舞いを変えられ、デプロイ戦略で変更を段階的に展開します。環境に CloudWatch アラームを指定しておくと、デプロイ中にアラームが ALARM になった時に、設定を前のバージョンへ自動でロールバックします。",
+        "per_choice": {
+          "A": "コードの再デプロイは要りませんが、一度にすべての利用者へ届き、戻すのも人の操作が必要です。",
+          "B": "正しい。コードの再デプロイ無し、段階的な展開、アラームによる自動ロールバックがすべて組み込みでそろいます。",
+          "C": "コードの再デプロイは要りませんが、段階的な展開も戻しも手作業で、自動のロールバックになりません。",
+          "D": "設定ファイルを変えるためアプリケーションのデプロイが必要で、新しいコードをデプロイしないという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-benefits-overview",
+          "quote": "Deployment strategies: Gradually roll out changes over a defined period of time to reduce risk."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html#monitoring-deployments",
+          "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0010",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS AppConfig",
+        "AWS Lambda",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application reads a JSON configuration file from an Amazon S3 bucket. Last month, a malformed file caused an outage. The company wants each configuration change to be checked against its JSON Schema, which is written in JSON Schema draft-07, before the change reaches the application. The file must stay in the existing S3 bucket because other tools write to it. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "あるアプリケーションは Amazon S3 バケットから JSON の設定ファイルを読み込みます。先月、形の崩れたファイルが原因で障害が起きました。会社は、設定の変更がアプリケーションに届く前に、JSON Schema draft-07 で書かれた JSON Schema に照らして各変更を確かめたいと考えています。ほかのツールが書き込むため、ファイルは既存の S3 バケットに置いたままにする必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS AppConfig configuration profile that uses the existing S3 object as its source, and deliver the configuration to the application through AWS AppConfig.",
+          "text_ja": "既存の S3 オブジェクトをソースにする AWS AppConfig の設定プロファイルを作り、AWS AppConfig を通して設定をアプリケーションへ届ける。"
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Lambda function that validates the data against the draft-07 schema, and add it as a validator before creating the configuration profile.",
+          "text_ja": "draft-07 のスキーマに照らしてデータを確かめる AWS Lambda 関数を作り、設定プロファイルを作る前にそれをバリデーターとして追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Add the draft-07 schema directly to the configuration profile as an inline JSON Schema validator.",
+          "text_ja": "draft-07 のスキーマを、インラインの JSON Schema バリデーターとして設定プロファイルに直接追加する。"
+        },
+        {
+          "key": "D",
+          "text": "Move the configuration into the AWS AppConfig hosted configuration store and remove the file from the S3 bucket.",
+          "text_ja": "設定を AWS AppConfig のホスト型設定ストアへ移し、S3 バケットからファイルを削除する。"
+        },
+        {
+          "key": "E",
+          "text": "Turn on S3 Versioning for the bucket and restore the previous object version by hand when the application fails.",
+          "text_ja": "バケットの S3 バージョニングを有効にし、アプリケーションが失敗した時に前のオブジェクトのバージョンを手作業で戻す。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS AppConfig は S3 などに既にある設定データをソースにして、検証・デプロイ・管理ができ、デプロイの時にバリデーターで確かめて失敗すれば変更を戻します。インラインのスキーマは JSON Schema 4.X だけに対応するため、別のバージョンのスキーマで確かめるには Lambda のバリデーターを作る必要があります。",
+        "per_choice": {
+          "A": "正しい。ファイルを S3 に置いたまま、AppConfig のデプロイを通して届ける前に確かめられます。",
+          "B": "正しい。4.X 以外のスキーマには Lambda のバリデーターが必要で、バリデーターは設定プロファイルより先に作ります。",
+          "C": "インラインのスキーマは JSON Schema 4.X に対応するもので、draft-07 のスキーマで確かめるという要件には Lambda のバリデーターが必要です。",
+          "D": "確かめることはできますが、ファイルを既存の S3 バケットに置いたままにするという要件に反します。",
+          "E": "壊れたファイルが届いた後に戻すだけで、届く前に確かめるという要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-how-it-works",
+          "quote": "If your configuration data already exists in cloud services such as SSM Parameter Store or Amazon S3, you can use AWS AppConfig to validate, deploy, and manage that data more effectively."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "AWS AppConfig supports JSON Schema version 4.X for inline schema. If your application configuration requires a different version of JSON Schema, then you must create a Lambda validator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0011",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs 400 Amazon EC2 instances that are managed nodes in AWS Systems Manager. Engineers sometimes change agent settings on the instances by hand, and the instances drift from the approved configuration. The company wants the approved configuration to be reapplied on a schedule to every instance that has the tag Env=prod, including instances launched later, and does not want to pay for an additional service. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は、AWS Systems Manager のマネージドノードである 400 台の Amazon EC2 インスタンスを動かしています。エンジニアがときどきインスタンス上のエージェントの設定を手作業で変え、インスタンスが承認済みの構成からずれていきます。会社は、タグ Env=prod を持つすべてのインスタンス（後から起動するインスタンスも含む）に、承認済みの構成をスケジュールで適用し直したいと考えており、追加のサービスに費用を払いたくありません。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a cron job to the instances' user data that downloads and applies the approved configuration every night.",
+          "text_ja": "承認済みの構成を毎晩ダウンロードして適用する cron ジョブを、インスタンスのユーザーデータに追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function to connect to each tagged instance over SSH and apply the configuration.",
+          "text_ja": "タグの付いた各インスタンスへ SSH で接続して構成を適用する AWS Lambda 関数を呼ぶ Amazon EventBridge のスケジュールを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a Systems Manager State Manager association that applies the approved configuration on a schedule and targets managed nodes by the tag Env=prod.",
+          "text_ja": "承認済みの構成をスケジュールで適用し、タグ Env=prod でマネージドノードを対象にする Systems Manager State Manager の関連付けを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Ask the operations team to compare each instance's settings with the approved configuration every week and fix any differences by hand.",
+          "text_ja": "運用チームが毎週、各インスタンスの設定を承認済みの構成と比べ、違いを手作業で直す。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "State Manager は、マネージドノードなどを定めた状態に保つ構成管理のサービスで、関連付けで適用のスケジュールと対象（タグなど）を指定します。構成のずれを減らす用途に向き、追加の料金はかかりません。",
+        "per_choice": {
+          "A": "動きますが、既に動いているインスタンスには入らず、構成を変えるたびに起動の設定を直す必要があります。",
+          "B": "動きますが、接続と適用の Lambda 関数を作って保守する必要があり、手間がかかります。",
+          "C": "正しい。タグで対象を決めるので後から起動したインスタンスも入り、スケジュールで適用し直します。追加の料金もかかりません。",
+          "D": "手作業で、400 台では手間が大きく、次の確認までずれが残ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager is available at no additional charge."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0012",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS Config"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team must know whether the company's Amazon S3 buckets and security groups follow internal standards. The team needs a record of how each resource is configured, must be notified when a resource breaks a standard, and wants to deploy and monitor the full set of checks as a single unit in each account. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティチームは、会社の Amazon S3 バケットとセキュリティグループが社内の基準に従っているかを把握する必要があります。チームには、各リソースがどう構成されているかの記録が必要で、リソースが基準に反した時に通知を受ける必要があり、確認の一式を各アカウントで 1 つの単位としてデプロイして監視したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on AWS Config recording for the resource types, and deploy the AWS Config rules for the standards together as a conformance pack.",
+          "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、基準に対応する AWS Config ルールをまとめてコンフォーマンスパックとしてデプロイする。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on AWS Config recording for the resource types, and create each AWS Config rule one at a time in every account.",
+          "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、各 AWS Config ルールを、すべてのアカウントで 1 つずつ作る。"
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that runs daily, reads the bucket and security group settings through the APIs, and emails the team about any problems.",
+          "text_ja": "毎日動き、API でバケットとセキュリティグループの設定を読み、問題があればチームにメールする AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "Export the bucket and security group settings to a spreadsheet each month, and have the team compare them with the standards.",
+          "text_ja": "毎月バケットとセキュリティグループの設定を表計算シートに出力し、チームが基準と比べる。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS Config はリソースの構成を詳しく記録し、ルールで構成を評価して、反するリソースを非準拠にして通知します。コンフォーマンスパックはルールの集まりで、1 つの単位としてデプロイして監視できます。",
+        "per_choice": {
+          "A": "正しい。構成の記録、ルールによる評価と通知、一式を 1 つの単位としてデプロイして監視することがそろいます。",
+          "B": "記録・評価・通知はそろいますが、ルールを 1 つずつ作るため、一式を 1 つの単位として扱えず手間が増えます。",
+          "C": "動きますが、確認のコードを書いて保守する必要があり、構成の記録も残りません。",
+          "D": "手作業で、反した時にすぐ通知されず、オーバーヘッドも大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-2.2-0001",
       "task": "2.2",
       "domain": 2,
@@ -3182,6 +3968,260 @@
         {
           "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
           "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0009",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations with all features enabled. Workload accounts are in an OU named Workloads, and new accounts are added to that OU every month. The company must prevent every IAM user and role in those accounts, including each account's root user, from using AWS services outside two approved Regions. Administrators of each account must not be able to remove the restriction. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、すべての機能を有効にした AWS Organizations を使っています。ワークロードのアカウントは Workloads という OU にあり、毎月新しいアカウントがその OU に追加されます。会社は、それらのアカウントのすべての IAM ユーザーとロール（各アカウントのルートユーザーも含む）が、承認済みの 2 つのリージョン以外で AWS のサービスを使えないようにする必要があります。各アカウントの管理者がこの制限を外せないようにする必要もあります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an IAM policy that denies requests outside the two approved Regions, and attach it to every IAM user and role in each workload account.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する IAM ポリシーを作り、各ワークロードのアカウントのすべての IAM ユーザーとロールにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the management account.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、管理アカウントにアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "Set a permissions boundary that allows only the two approved Regions on every IAM role in the workload accounts, and check new accounts each month.",
+          "text_ja": "ワークロードのアカウントのすべての IAM ロールに、承認済みの 2 つのリージョンだけを許す permissions boundary を設定し、毎月新しいアカウントを確認する。"
+        },
+        {
+          "key": "D",
+          "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the Workloads OU.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、Workloads OU にアタッチする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "SCP はメンバーアカウントの IAM ユーザーとロール（ルートユーザーも含む）の権限を制限し、OU に付けた Deny はその下のすべてのアカウントに効きます。後から OU に入ったアカウントにも効き、アカウントの IAM の権限では SCP を超えられません。",
+        "per_choice": {
+          "A": "アカウントごとの IAM ポリシーは、そのアカウントの管理者が外せます。ルートユーザーにも付けられず、新しいアカウントごとの作業も要ります。",
+          "B": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントにだけ効くため、ワークロードのアカウントを制限できません。",
+          "C": "ロールにしか効かずルートユーザーは制限できず、アカウントの管理者が外せます。毎月の確認の手間もかかります。",
+          "D": "正しい。OU の Deny は配下のすべてのアカウントとルートユーザーに効き、新しいアカウントにも自動で効きます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "when they are applied at the root or the OU-level they affect all the accounts under it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs don't affect users or roles in the management account. They affect only the member accounts in your organization."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0010",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "In a company's organization, the root has the FullAWSAccess SCP. An OU named Sandbox has FullAWSAccess removed and instead has an SCP that allows only Amazon S3 and Amazon EC2 actions. A member account in the Sandbox OU has FullAWSAccess attached. A developer in that account has an IAM policy that allows all Amazon DynamoDB actions, but every DynamoDB request is denied. What should a DevOps engineer do to allow the developer to use DynamoDB with the LEAST change to the organization?",
+      "stem_ja": "ある会社の組織では、ルートに FullAWSAccess の SCP があります。Sandbox という OU では FullAWSAccess が外され、代わりに Amazon S3 と Amazon EC2 のアクションだけを許す SCP があります。Sandbox OU のメンバーアカウントには FullAWSAccess がアタッチされています。そのアカウントの開発者には Amazon DynamoDB のすべてのアクションを許す IAM ポリシーがありますが、DynamoDB へのリクエストはすべて拒否されます。組織への変更を最も少なくして、開発者が DynamoDB を使えるようにするために、DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach a new IAM policy to the developer that explicitly allows all DynamoDB actions on all resources.",
+          "text_ja": "すべてのリソースへの DynamoDB のすべてのアクションを明示的に許す新しい IAM ポリシーを開発者にアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Add the DynamoDB actions to the Allow statement of the SCP that is attached to the Sandbox OU.",
+          "text_ja": "Sandbox OU にアタッチされた SCP の Allow ステートメントに、DynamoDB のアクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Attach an SCP that allows DynamoDB actions directly to the member account.",
+          "text_ja": "DynamoDB のアクションを許す SCP を、メンバーアカウントに直接アタッチする。"
+        },
+        {
+          "key": "D",
+          "text": "Attach an SCP that allows DynamoDB actions to the management account of the organization.",
+          "text_ja": "DynamoDB のアクションを許す SCP を、組織の管理アカウントにアタッチする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "SCP で許されるには、ルートからアカウントまでの経路のすべての段（各 OU とアカウント自身）に明示的な Allow が要ります。Sandbox OU の SCP が DynamoDB を許していないため、IAM ポリシーで許していても拒否されます。",
+        "per_choice": {
+          "A": "IAM ポリシーは既に許しています。SCP で許されていないアクションは、IAM ポリシーで許しても実行できません。",
+          "B": "正しい。経路の中で Allow が欠けている Sandbox OU の段に DynamoDB を足せば、すべての段で許されます。",
+          "C": "アカウントの段はすでに FullAWSAccess で許しています。Sandbox OU の段に Allow が無いので拒否されたままです。",
+          "D": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントの評価の経路にも入らないため、変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "there must be an explicit Allow statement at every level from the root through each OU in the direct path to the account (including the target account itself)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "If a user or role has an IAM permission policy that grants access to an action that is either not allowed or explicitly denied by the applicable SCPs, the user or role can't perform that action."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0011",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company is adopting a third-party monitoring service that runs in the vendor's AWS account and serves many customers. The service needs to read metrics from the company's AWS account. The company does not want to give the vendor long-term credentials and wants to prevent the confused deputy problem. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "ある会社は、ベンダーの AWS アカウントで動き、多くの顧客に提供されているサードパーティの監視サービスを導入しようとしています。サービスは会社の AWS アカウントからメトリクスを読む必要があります。会社は、ベンダーに長期の認証情報を渡したくなく、混乱した代理（confused deputy）の問題を防ぎたいと考えています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an IAM role with read permissions for metrics, and in its trust policy allow the vendor's account and require the external ID that the vendor provides for the company.",
+          "text_ja": "メトリクスを読む権限を持つ IAM ロールを作り、その信頼ポリシーでベンダーのアカウントを許し、ベンダーが会社用に示す外部 ID を必須にする。"
+        },
+        {
+          "key": "B",
+          "text": "Ask the vendor to specify the company's external ID in every AssumeRole API call that it makes for the company's role.",
+          "text_ja": "ベンダーに、会社のロールに対して行うすべての AssumeRole API の呼び出しで、会社の外部 ID を指定するよう求める。"
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM user with read permissions for metrics, and give the vendor an access key that is rotated every 90 days.",
+          "text_ja": "メトリクスを読む権限を持つ IAM ユーザーを作り、90 日ごとにローテーションするアクセスキーをベンダーに渡す。"
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM role whose trust policy allows the vendor's account without any condition, and rely on the vendor to restrict which customer data it reads.",
+          "text_ja": "信頼ポリシーで条件を付けずにベンダーのアカウントを許す IAM ロールを作り、どの顧客のデータを読むかの制限はベンダーに任せる。"
+        },
+        {
+          "key": "E",
+          "text": "Create an SCP that allows the vendor's account to read metrics, and attach it to the company's account.",
+          "text_ja": "ベンダーのアカウントにメトリクスの読み取りを許す SCP を作り、会社のアカウントにアタッチする。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "外部 ID の主な役目は混乱した代理の問題を防ぐことで、ロールの信頼ポリシーに指定し、AssumeRole の呼び出しで毎回指定します。ロールを引き受けさせれば、ベンダーに長期の認証情報を渡さずに済みます。",
+        "per_choice": {
+          "A": "正しい。信頼ポリシーで外部 ID を必須にすると、会社用の外部 ID を示した時だけロールを引き受けられます。",
+          "B": "正しい。外部 ID は AssumeRole の呼び出しで常に指定するものとされています。",
+          "C": "アクセスキーは長期の認証情報で、ローテーションしても要件に反します。",
+          "D": "ロールで長期の認証情報は避けられますが、外部 ID が無いと混乱した代理の問題を防げません。",
+          "E": "SCP は権限を与えないため、ベンダーにアクセスを許すことはできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "The primary function of the external ID is to address and prevent The confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You must specify this ID when you define the trust policy for the role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You should always specify the external ID in your AssumeRole API calls."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "No permissions are granted by an SCP."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0012",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS IAM",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "In a member account, developers must be able to create IAM roles for their AWS Lambda functions. A platform team in the same account must keep its full administrative permissions. The security team requires that any role a developer creates can never have permissions beyond a defined set, even if the developer attaches a broader policy to it. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるメンバーアカウントでは、開発者が自分の AWS Lambda 関数用の IAM ロールを作れる必要があります。同じアカウントのプラットフォームチームは、完全な管理者権限を保つ必要があります。セキュリティチームは、開発者が作るロールが、開発者がより広いポリシーをアタッチしたとしても、決めた範囲を超える権限を持てないことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an SCP to the member account that limits all IAM principals in the account to the defined set of permissions.",
+          "text_ja": "アカウントのすべての IAM プリンシパルを決めた範囲の権限に制限する SCP を、メンバーアカウントにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Attach an RCP to the member account that limits the permissions of roles that developers create.",
+          "text_ja": "開発者が作るロールの権限を制限する RCP を、メンバーアカウントにアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "Create a managed policy for the defined set, and allow developers to create roles only when that policy is set as the role's permissions boundary.",
+          "text_ja": "決めた範囲の管理ポリシーを作り、そのポリシーをロールの permissions boundary に設定する場合にだけ、開発者がロールを作れるようにする。"
+        },
+        {
+          "key": "D",
+          "text": "Allow developers to create roles freely, and have the security team review each new role's policies every week.",
+          "text_ja": "開発者が自由にロールを作れるようにし、セキュリティチームが毎週、新しい各ロールのポリシーを確認する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "permissions boundary は管理ポリシーで、アイデンティティベースのポリシーがエンティティに与えられる最大の権限を決めます。開発者が作るロールに境界を必須にすれば、広いポリシーを付けても境界を超えられず、プラットフォームチームには影響しません。",
+        "per_choice": {
+          "A": "SCP はアカウントのすべてのユーザーとロールの上限になるため、プラットフォームチームの管理者権限まで制限されます。",
+          "B": "RCP は、組織の外のプリンシパルが組織のリソースへアクセスするのを制限するためのもので、開発者が作るロールの権限の上限にはなりません。",
+          "C": "正しい。開発者が作るロールだけに上限が付き、プラットフォームチームの権限は変わりません。",
+          "D": "確認するまでの間、範囲を超えた権限を持つロールが使えてしまい、要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs offer central control over the maximum available permissions for the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps.html#orgs_manage_policies_rcps",
+          "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
         }
       ],
       "low_confidence": false
@@ -3714,6 +4754,260 @@
         {
           "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
           "quote": "Express Workflows only support Request Response integrations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0009",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company configures its Amazon Linux managed nodes with an Ansible playbook bundle that contains a main playbook, several roles, and template files. The company wants the configuration to be applied to all nodes with the tag Role=web when they are first targeted and then every day, so that manual changes are corrected. The company wants to use the document that AWS currently recommends. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、メインのプレイブック、複数のロール、テンプレートファイルを含む Ansible のプレイブックの一式で、Amazon Linux のマネージドノードを構成しています。会社は、タグ Role=web を持つすべてのノードに、最初に対象になった時と、その後は毎日、構成を適用して、手作業の変更が直されるようにしたいと考えています。会社は、AWS が今勧めているドキュメントを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a State Manager association that uses the AWS-ApplyAnsiblePlaybooks document, targets the tag Role=web, and runs on a daily schedule.",
+          "text_ja": "AWS-ApplyAnsiblePlaybooks ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create a State Manager association that uses the AWS-RunAnsiblePlaybook document, targets the tag Role=web, and runs on a daily schedule.",
+          "text_ja": "AWS-RunAnsiblePlaybook ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Run the AWS-ApplyAnsiblePlaybooks document with Run Command against the tag Role=web, and have an operator repeat the command every day.",
+          "text_ja": "Run Command でタグ Role=web に対して AWS-ApplyAnsiblePlaybooks ドキュメントを実行し、運用担当者が毎日そのコマンドを繰り返す。"
+        },
+        {
+          "key": "D",
+          "text": "Add a cron job to each web node's user data that downloads the bundle and runs ansible-playbook locally every day.",
+          "text_ja": "各ウェブのノードのユーザーデータに、一式をダウンロードして毎日ローカルで ansible-playbook を実行する cron ジョブを追加する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "State Manager の関連付けは、作った時に実行され、その後はスケジュールどおりに実行されるので、決めた状態を保てます。Ansible のプレイブックには AWS-ApplyAnsiblePlaybooks が勧められており、ファイルの構造ごとローカルに写してから実行するため、まとめた複雑なプレイブックにも対応します。",
+        "per_choice": {
+          "A": "正しい。勧められているドキュメントで一式を実行し、作った時とその後の毎日の適用を関連付けが自動で行います。",
+          "B": "関連付けとスケジュールは合っていますが、AWS-RunAnsiblePlaybook は非推奨で、今勧められているドキュメントを使うという要件に反します。",
+          "C": "勧められているドキュメントですが、Run Command は 1 回きりの実行で、毎日の繰り返しが手作業になります。",
+          "D": "動きますが、既に動いているノードには入らず、ノードごとの設定の保守が要ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "quote": "We recommend that you use the AWS-ApplyAnsiblePlaybooks document because of the enhancements described here."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "quote": "The AWS-ApplyAnsiblePlaybooks document supports bundled, complex playbooks because it copies the entire file structure to a local directory before executing the specified main playbook."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about-scheduling",
+          "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0010",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Distributor",
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company has built an internal monitoring agent and wants a specific version of it to be installed on all of its Systems Manager managed nodes. Nodes are launched and replaced every week, and the agent is sometimes removed by mistake. The company wants every node to keep the approved version installed without engineers running commands by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は社内の監視エージェントを作っており、その特定のバージョンを Systems Manager のすべてのマネージドノードにインストールしたいと考えています。ノードは毎週起動され、入れ替わり、エージェントが誤って削除されることもあります。会社は、エンジニアが手作業でコマンドを実行せずに、すべてのノードに承認済みのバージョンがインストールされた状態を保ちたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Package the agent in Systems Manager Distributor, and install the approved version once on the current nodes by using Run Command.",
+          "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、Run Command で今あるノードに承認済みのバージョンを 1 回インストールする。"
+        },
+        {
+          "key": "B",
+          "text": "Store the installer in Amazon S3, and have an engineer run an installation script on new nodes and on nodes that lost the agent each week.",
+          "text_ja": "インストーラーを Amazon S3 に置き、エンジニアが毎週、新しいノードとエージェントが消えたノードでインストールのスクリプトを実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Package the agent in Systems Manager Distributor, and ask each team to install the package version that they prefer on their nodes.",
+          "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、各チームがそれぞれ好きなパッケージのバージョンを自分のノードにインストールする。"
+        },
+        {
+          "key": "D",
+          "text": "Package the agent in Systems Manager Distributor, and create a State Manager association that installs the approved version on a schedule on all managed nodes.",
+          "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、すべてのマネージドノードに承認済みのバージョンをスケジュールでインストールする State Manager の関連付けを作る。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "Distributor はソフトウェアをパッケージにしてマネージドノードへ公開し、パッケージを作ると SSM ドキュメントができます。State Manager を使えばスケジュールでインストールでき、どのノードにどのバージョンを入れるかも決められるので、入れ替わったノードや消えたエージェントにも自動で対応できます。",
+        "per_choice": {
+          "A": "今あるノードには入りますが、Run Command は 1 回きりで、後から起動したノードや消えたエージェントには対応できません。",
+          "B": "毎週の手作業が必要で、次の作業までエージェントの無いノードが残ります。",
+          "C": "チームごとにバージョンがばらつき、承認済みのバージョンを保つという要件に反します。",
+          "D": "正しい。スケジュールで承認済みのバージョンを入れ直すので、新しいノードにも誤って消えたノードにも手作業無しで対応します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "Distributor helps you package and publish software to AWS Systems Manager managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "On a schedule by using AWS Systems Manager State Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0011",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Run Command"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A DevOps engineer must make a one-time configuration change on 200 managed nodes by using AWS Systems Manager Run Command. To limit the impact of a bad change, no more than one tenth of the nodes may run the command at the same time, and the system must stop sending the command to more nodes as soon as any node reports an error. Which settings should the engineer use? (Choose TWO.)",
+      "stem_ja": "DevOps エンジニアは、AWS Systems Manager Run Command を使って、200 台のマネージドノードで 1 回きりの構成の変更を行う必要があります。誤った変更の影響を抑えるため、同時にコマンドを実行するノードは全体の 10 分の 1 以下にし、どれかのノードがエラーを返したらすぐに、ほかのノードへのコマンドの送信を止める必要があります。エンジニアが使うべき設定はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set max-concurrency to 10%.",
+          "text_ja": "max-concurrency を 10% にする。"
+        },
+        {
+          "key": "B",
+          "text": "Leave max-concurrency at its default value.",
+          "text_ja": "max-concurrency を既定の値のままにする。"
+        },
+        {
+          "key": "C",
+          "text": "Set max-errors to 0.",
+          "text_ja": "max-errors を 0 にする。"
+        },
+        {
+          "key": "D",
+          "text": "Set max-errors to 10%.",
+          "text_ja": "max-errors を 10% にする。"
+        },
+        {
+          "key": "E",
+          "text": "Create a State Manager association with a daily schedule instead of using Run Command.",
+          "text_ja": "Run Command を使う代わりに、毎日のスケジュールの State Manager の関連付けを作る。"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "max-concurrency は同時にコマンドを実行するノードの数を、10 のような数か 10% のような割合で決めます。max-errors を 0 にすると、最初のエラーが返った後、ほかのノードへのコマンドの送信を止めます。",
+        "per_choice": {
+          "A": "正しい。対象の 10% を上限にすると、200 台のうち同時に動くのは 10 分の 1 以下になります。",
+          "B": "既定の値は 50 で、200 台の 4 分の 1 が同時に動き、10 分の 1 以下という要件を満たしません。",
+          "C": "正しい。0 にすると最初のエラーで、ほかのノードへの送信を止めます。",
+          "D": "エラーを全体の 10% まで許すため、最初のエラーで止めるという要件を満たしません。",
+          "E": "1 回きりの変更なのに毎日繰り返し適用され、同時実行とエラーの要件にも答えていません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "quote": "You can specify either an absolute number of managed nodes, for example 10, or a percentage of the target set, for example 10%."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "quote": "The default for value max-concurrency is 50."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+          "quote": "If you specify 0, then the system stops sending the command to additional managed nodes after the first error result is returned."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.3-0012",
+      "task": "2.3",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager Compliance",
+        "AWS Systems Manager State Manager",
+        "Amazon EventBridge"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company keeps its managed nodes configured with State Manager associations and patches them with Patch Manager. The security team wants one place to see which nodes are out of compliance with the associations or with patching, and wants noncompliant nodes to be remediated automatically. The team does not want to build a custom reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、State Manager の関連付けでマネージドノードの構成を保ち、Patch Manager でパッチを当てています。セキュリティチームは、関連付けやパッチに準拠していないノードを 1 か所で確認し、準拠していないノードを自動で修復したいと考えています。チームは独自のレポートのツールを作りたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use Systems Manager Compliance to view association and patch compliance, and use an Amazon EventBridge rule to start remediation for noncompliant nodes.",
+          "text_ja": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、準拠していないノードの修復を Amazon EventBridge のルールで開始する。"
+        },
+        {
+          "key": "B",
+          "text": "Write an AWS Lambda function that connects to each node every day, compares its settings and patches with the baseline, and stores the results in an Amazon S3 report.",
+          "text_ja": "毎日各ノードに接続し、設定とパッチを基準と比べ、結果を Amazon S3 のレポートに保存する AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "C",
+          "text": "Use Systems Manager Compliance to view association and patch compliance, and have an engineer fix each noncompliant node by hand every week.",
+          "text_ja": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、エンジニアが毎週、準拠していない各ノードを手作業で直す。"
+        },
+        {
+          "key": "D",
+          "text": "Run a weekly Run Command script that collects each node's settings into a spreadsheet, and ask the security team to review it.",
+          "text_ja": "各ノードの設定を表計算シートに集める Run Command のスクリプトを毎週実行し、セキュリティチームに確認してもらう。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Systems Manager Compliance は、既定で Patch Manager のパッチと State Manager の関連付けの準拠のデータを表示します。問題は Run Command、State Manager、Amazon EventBridge を使って修復できます。",
+        "per_choice": {
+          "A": "正しい。組み込みの表示で 1 か所から確認でき、EventBridge で修復を自動で始められます。",
+          "B": "動きますが、確認とレポートの独自のツールを作って保守することになり、要件に反します。",
+          "C": "確認はできますが、修復が手作業で、自動で修復するという要件に合いません。",
+          "D": "独自の集計と人の確認が必要で、自動の修復もありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
         }
       ],
       "low_confidence": false

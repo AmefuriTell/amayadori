@@ -1,0 +1,124 @@
+{
+  "item": "C-0028",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は、メインのプレイブック、複数のロール、テンプレートファイルを含む Ansible のプレイブックの一式で、Amazon Linux のマネージドノードを構成しています。会社は、タグ Role=web を持つすべてのノードに、最初に対象になった時と、その後は毎日、構成を適用して、手作業の変更が直されるようにしたいと考えています。会社は、AWS が今勧めているドキュメントを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "AWS-RunAnsiblePlaybook ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Run Command でタグ Role=web に対して AWS-ApplyAnsiblePlaybooks ドキュメントを実行し、運用担当者が毎日そのコマンドを繰り返す。"
+        },
+        {
+          "key": "C",
+          "text": "AWS-ApplyAnsiblePlaybooks ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+        },
+        {
+          "key": "D",
+          "text": "各ウェブのノードのユーザーデータに、一式をダウンロードして毎日ローカルで ansible-playbook を実行する cron ジョブを追加する。"
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager Distributor",
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は社内の監視エージェントを作っており、その特定のバージョンを Systems Manager のすべてのマネージドノードにインストールしたいと考えています。ノードは毎週起動され、入れ替わり、エージェントが誤って削除されることもあります。会社は、エンジニアが手作業でコマンドを実行せずに、すべてのノードに承認済みのバージョンがインストールされた状態を保ちたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "エージェントを Systems Manager Distributor でパッケージにし、Run Command で今あるノードに承認済みのバージョンを 1 回インストールする。"
+        },
+        {
+          "key": "B",
+          "text": "エージェントを Systems Manager Distributor でパッケージにし、すべてのマネージドノードに承認済みのバージョンをスケジュールでインストールする State Manager の関連付けを作る。"
+        },
+        {
+          "key": "C",
+          "text": "インストーラーを Amazon S3 に置き、エンジニアが毎週、新しいノードとエージェントが消えたノードでインストールのスクリプトを実行する。"
+        },
+        {
+          "key": "D",
+          "text": "エージェントを Systems Manager Distributor でパッケージにし、各チームがそれぞれ好きなパッケージのバージョンを自分のノードにインストールする。"
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager Run Command"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "DevOps エンジニアは、AWS Systems Manager Run Command を使って、200 台のマネージドノードで 1 回きりの構成の変更を行う必要があります。誤った変更の影響を抑えるため、同時にコマンドを実行するノードは全体の 10 分の 1 以下にし、どれかのノードがエラーを返したらすぐに、ほかのノードへのコマンドの送信を止める必要があります。エンジニアが使うべき設定はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "max-concurrency を 10% にする。"
+        },
+        {
+          "key": "B",
+          "text": "max-concurrency を既定の値のままにする。"
+        },
+        {
+          "key": "C",
+          "text": "max-errors を 0 にする。"
+        },
+        {
+          "key": "D",
+          "text": "max-errors を 10% にする。"
+        },
+        {
+          "key": "E",
+          "text": "Run Command を使う代わりに、毎日のスケジュールの State Manager の関連付けを作る。"
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "task": "2.3",
+      "services": [
+        "AWS Systems Manager Compliance",
+        "AWS Systems Manager State Manager",
+        "Amazon EventBridge"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は、State Manager の関連付けでマネージドノードの構成を保ち、Patch Manager でパッチを当てています。セキュリティチームは、関連付けやパッチに準拠していないノードを 1 か所で確認し、準拠していないノードを自動で修復したいと考えています。チームは独自のレポートのツールを作りたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "毎日各ノードに接続し、設定とパッチを基準と比べ、結果を Amazon S3 のレポートに保存する AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "B",
+          "text": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、準拠していないノードの修復を Amazon EventBridge のルールで開始する。"
+        },
+        {
+          "key": "C",
+          "text": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、エンジニアが毎週、準拠していない各ノードを手作業で直す。"
+        },
+        {
+          "key": "D",
+          "text": "各ノードの設定を表計算シートに集める Run Command のスクリプトを毎週実行し、セキュリティチームに確認してもらう。"
+        }
+      ]
+    }
+  ]
+}

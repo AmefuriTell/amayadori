@@ -1,0 +1,80 @@
+{
+  "id": "q-1.1-0010",
+  "task": "1.1",
+  "services": [
+    "AWS CodeBuild",
+    "AWS Secrets Manager",
+    "AWS Systems Manager Parameter Store"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A DevOps engineer is removing hard-coded values from a CodeBuild buildspec file. The build needs a third-party API key that is stored together with several other keys in one JSON secret, and the build must receive only that one key. The build also needs a service endpoint that is not a credential but must be stored encrypted. The engineer must follow AWS storage recommendations and must not add custom parsing scripts to the build. Which actions should the engineer take? (Choose TWO.)",
+  "stem_ja": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the API key in the AWS Secrets Manager secret and reference it in the buildspec env secrets-manager section with the secret ID and the json-key for the API key.",
+      "text_ja": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。"
+    },
+    {
+      "key": "B",
+      "text": "Store the endpoint as a SecureString parameter in Parameter Store, reference it in the env parameter-store section, and add the ssm:GetParameters action to the CodeBuild service role.",
+      "text_ja": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。"
+    },
+    {
+      "key": "C",
+      "text": "Copy the API key into a SecureString parameter in Parameter Store and reference that parameter in the env parameter-store section of the buildspec file.",
+      "text_ja": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。"
+    },
+    {
+      "key": "D",
+      "text": "Reference the whole Secrets Manager secret in the env secrets-manager section without a json-key, and extract the API key with a jq command in the build phase.",
+      "text_ja": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。"
+    },
+    {
+      "key": "E",
+      "text": "Define the endpoint as a plaintext variable in the env variables section of the buildspec file because the endpoint is not a credential.",
+      "text_ja": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "secrets-manager の参照では json-key を指定すると、その キーの値だけを取り出せます（指定しなければシークレットの全文）。認証情報ではないが暗号化が要る値は Parameter Store の SecureString に置き、CodeBuild のサービスロールに ssm:GetParameters を与えて parameter-store で参照します。",
+    "per_choice": {
+      "A": "正しい。json-key を指定すれば、その キーの値だけがビルドに渡り、解析のスクリプトも要りません。",
+      "B": "正しい。暗号化が要る設定値には SecureString が勧められており、parameter-store で取るにはサービスロールに ssm:GetParameters が必要です。",
+      "C": "動きますが、AWS は API キーなどのシークレットには Secrets Manager を勧めており、推奨に従うという要件に合いません。",
+      "D": "json-key を付けないとシークレットの全文が渡り、1 つのキーだけ渡す要件に反し、jq による独自の解析も加わります。",
+      "E": "暗号化して保存するという要件に反します。平文の値はソースに残ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+      "source_id": "S2",
+      "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+      "source_id": "S1",
+      "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+      "source_id": "S7",
+      "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+      "source_id": "S8",
+      "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+    }
+  ],
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
