@@ -1,0 +1,30 @@
+{
+  "pass": true,
+  "issues": [
+    {
+      "id": "s12",
+      "severity": "中",
+      "detail": "review-2 の中（CodePipeline が画面に出ない）は、表に『CodePipeline の段 → CodeDeployToECS』が入り、台本も『コードデプロイを通してイーシーエスへデプロイするアクション』と言うので、『CodeDeploy で ECS にデプロイすると 3 MB』という誤りは防げている。ただし直した結果、bullet 3 が『CodePipeline: 3 MB まで』になり、bullet だけ見ると『CodePipeline の成果物はすべて 3 MB まで』と広げて覚える恐れが新しく生まれた。根拠（C-0016 S14）は『The maximum artifact ZIP size in the CodeDeployToECS deploy action is 3 MB』で、CodeDeployToECS アクションに限った上限。また CodePipeline が何をするサービスかは、今も台本で一言も説明されない（review-2 の提案の『ビルドからデプロイまでをつなぐサービス』は入っていない）。",
+      "suggest": "bullet 3 を『CodeDeployToECS: ZIP 3 MB まで』か『CodePipeline の ECS 向けの段: 3 MB』にし、範囲を CodeDeployToECS アクションに限る。台本の『もう一つは、コードパイプラインの制約です。』の後に『コードパイプラインは、ビルドからデプロイまでの段をつなぐサービスです。』のような一言を足す。"
+    },
+    {
+      "id": "s15",
+      "severity": "軽",
+      "detail": "表の Lambda 行『blue/green の入口: alias』と台本『ラムダはエイリアスです』は、CodeDeploy が Lambda のデプロイで alias を使うこと、Lambda のデプロイを blue/green と呼ぶことを前提にしているが、抜き出し（C-0017 S1・S4）はこの二つをつないでいない（S1 は『新しい版へトラフィックを移す』、S4 は『alias で二つの版に分けられる』と別々に言うだけ）。s13 では『つなぎ』を言わないよう直してあるのに、まとめで言い切っている。実際の挙動とは合うので誤って覚える恐れは小さいが、根拠に無い言い切り。",
+      "suggest": "列名を『新しい版へ向ける所』などにし、Lambda 行を『alias（版を指す目印）』のままにするか、根拠に CodeDeploy の Lambda デプロイが alias を移す旨の抜き出しを足す。"
+    },
+    {
+      "id": "s06",
+      "severity": "軽",
+      "detail": "review-2 の中（CodeArtifact がどの場面の話か）は直った。台本が『ここからは、コードデプロイとは別の場面です』と切り分け、図もパッケージマネージャーの囲みに分かれた。ただ bullet 3『CodeArtifact: 取る側に権限 2 つ』は題『成果物を取りに行く権限』の下に並ぶので、画面だけ見ると EC2 の話の続きに見える。",
+      "suggest": "bullet 3 を『別の場面: CodeArtifact の token に権限 2 つ』のようにする。"
+    },
+    {
+      "id": "s03",
+      "severity": "軽",
+      "detail": "台本『デプロイポリシーが五つあります。何も指定しないときは、オールアットワンスです。そのうちの一つが、イミュータブルです。』は、『そのうちの一つ』が直前の文（オールアットワンス）を受けるように聞こえ、文の順がねじれている。内容は根拠（C-0017 S5）と合う。",
+      "suggest": "『既定はオールアットワンスです』の文を『そのうちの一つが…』の後ろか、ポリシーの説明の最後に回す。"
+    }
+  ],
+  "summary": "review-2 の重い指摘（s13 の ECS と Lambda の数字の比べ方）は直った。表は『Lambda の設定の例』になり、台本も『ドキュメントに例として挙がっている設定』と言うので、Lambda の一覧として比べさせる形は無くなった。中の指摘は、s06（CodeArtifact を別の場面と切り分け）、s09（3 つの event を画面・bullet・台本でそろえた）、s10（『デプロイグループの tag』とデプロイグループの説明）の三つが直った。s12 は CodePipeline が画面に出るようになったが、bullet が『CodePipeline: 3 MB まで』と広すぎ、CodeDeployToECS アクションに限った上限を CodePipeline 全体の上限と覚える恐れがある（中）。ほかに抜き出しと食い違う所、受験者が誤って覚える重い所は見当たらない。図（s01・s02・s03・s05・s06・s07・s09・s11）は bullets・台本と合っている。残る中は 1 件で bullet 一行の直しで済むため pass とする。"
+}

@@ -13,10 +13,10 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph P1[\"前半: 考え方\"]\n    EB@{ svc: \"AWS Elastic Beanstalk\", label: \"Beanstalk<br/>in-place・blue/green・canary\" }\n  end\n  subgraph P2[\"後半: 当てはめ\"]\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2: インスタンス\" }\n    ECS@{ svc: \"Amazon ECS\", label: \"ECS: コンテナ\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda: 関数\" }\n  end\n  EB -- \"同じ考え方で\" --> CD\n  CD --> EC2\n  CD --> ECS\n  CD --> L\n",
-    "alt": "講義の二部構成。前半は Elastic Beanstalk で in-place・blue/green・canary の考え方を見る。後半は同じ考え方を CodeDeploy で EC2・ECS・Lambda に当てはめる。"
+    "source": "flowchart TB\n  subgraph P1[\"前半: 考え方\"]\n    EB@{ svc: \"AWS Elastic Beanstalk\", label: \"Beanstalk<br/>in-place・blue/green<br/>Immutable・canary\" }\n  end\n  subgraph P2[\"後半: 当てはめ\"]\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2: インスタンス\" }\n    ECS@{ svc: \"Amazon ECS\", label: \"ECS: コンテナ\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda: 関数\" }\n  end\n  EB -- \"同じ考え方で\" --> CD\n  CD --> EC2\n  CD --> ECS\n  CD --> L\n",
+    "alt": "講義の二部構成。前半は Elastic Beanstalk で in-place・blue/green・Immutable・canary の考え方を見る。後半は同じ考え方を CodeDeploy で EC2・ECS・Lambda に当てはめる。"
    },
-   "narration": "この講義では、アプリケーションの新しい版を、どう入れ替えるかを学びます。講義は二部に分かれます。前半は、入れ替えの考え方を、エラスティックビーンストークという一つのサービスで見ます。インプレースとブルーグリーン、そしてカナリアです。後半は、コードデプロイというサービスで、同じ考え方を三つのデプロイ先に当てはめます。イーシーツーのインスタンス、イーシーエスのコンテナ、ラムダの関数です。それぞれで、トラフィックの移し方、要る準備と権限、失敗したときの調べ方を押さえます。設定の名前や数字などの細かい所は、画面の表に置きます。耳では、考え方を追ってください。",
+   "narration": "この講義では、アプリケーションの新しい版を、どう入れ替えるかを学びます。講義は二部に分かれます。前半は、入れ替えの考え方を、エラスティックビーンストークという一つのサービスで見ます。インプレースとブルーグリーン、イミュータブル、そしてカナリアです。後半は、コードデプロイというサービスで、同じ考え方を三つのデプロイ先に当てはめます。イーシーツーのインスタンス、イーシーエスのコンテナ、ラムダの関数です。中心はトラフィックの移し方です。イーシーツーとイーシーエスでは、要る準備と権限も見ます。失敗したときの調べ方は、イーシーツーで見ます。名前や数字などの細かい所は、画面に置きます。",
    "refs": [
     {
      "file": "C-0017",
@@ -47,6 +47,12 @@
      "source": "S1",
      "quote": "The AWS CodeDeploy agent is a software package that, when installed and configured on an instance, makes it possible for that instance to be used in CodeDeploy deployments.",
      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html"
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "Immutable deployments can prevent issues caused by partially completed rolling deployments.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html"
     }
    ]
   },
@@ -56,14 +62,14 @@
    "bullets": [
     "in-place: 今の環境を更新",
     "blue/green: CNAME を入れ替え",
-    "古い DNS レコードの期限切れまで残す"
+    "古い環境は DNS レコード期限切れまで"
    ],
    "visual": {
     "type": "mermaid",
     "source": "flowchart TB\n  subgraph BG[\"blue/green\"]\n    direction TB\n    EB@{ svc: \"AWS Elastic Beanstalk\", label: \"Beanstalk<br/>Swap environment URLs\" }\n    URL[\"環境 URL（CNAME）\"]\n    OLD[\"古い環境<br/>古い DNS レコードの<br/>期限切れまで残す\"]\n    NEW[\"新しい環境<br/>新しい版\"]\n  end\n  subgraph IP[\"in-place\"]\n    direction TB\n    E1[\"今の環境<br/>その場で新しい版に更新<br/>短い間、使えないことも\"]\n  end\n  EB -- \"CNAME を入れ替え\" --> URL\n  URL -. \"入れ替え前\" .-> OLD\n  URL -- \"入れ替え後\" --> NEW\n",
     "alt": "in-place は今の環境をその場で新しい版に更新し、短い間使えないことがある。blue/green は Beanstalk が二つの環境の CNAME（環境 URL）を入れ替え、トラフィックを古い環境から新しい環境へ向ける。古い環境は古い DNS レコードが期限切れになるまで残す。"
    },
-   "narration": "前半です。まず、入れ替え方の二つの型を見ます。この違いは、エラスティックビーンストークで見ると分かりやすいので、ビーンストークを例にします。一つ目はインプレースです。いま動いている環境の上で、そのまま新しい版に更新するやり方です。ビーンストークでは、インプレースで更新すると、短い間、利用者からアプリケーションが使えなくなることがあります。それを避けるのが、二つ目のブルーグリーンです。新しい版を別の環境に入れ、二つの環境のシーネーム、つまり環境のユーアールエルを入れ替えます。これで、トラフィックはすぐに新しい版へ向きます。ただし、古い環境は、ディーエヌエスの変更が行き渡り、古いレコードが期限切れになるまで残します。",
+   "narration": "前半です。まず、入れ替え方の二つの型を見ます。この違いは、エラスティックビーンストークで見ると分かりやすいので、ビーンストークを例にします。一つ目はインプレースです。いま動いている環境の上で、そのまま新しい版に更新するやり方です。ビーンストークでは、インプレースで更新すると、短い間、利用者からアプリケーションが使えなくなることがあります。それを避けるのが、二つ目のブルーグリーンです。新しい版を別の環境に入れ、二つの環境のシーネーム、つまり環境のユーアールエルを入れ替えます。これで、トラフィックはすぐに新しい版へ向きます。ただし、この切り替えはディーエヌエスの変更です。変更が行き渡り、古いレコードが期限切れになるまで、古い環境は残します。",
    "refs": [
     {
      "file": "C-0017",
@@ -110,7 +116,7 @@
     "source": "flowchart TB\n  EB@{ svc: \"AWS Elastic Beanstalk\", label: \"Beanstalk<br/>Immutable ポリシー\" }\n  OLD@{ svc: \"Amazon EC2\", label: \"古い版のインスタンス<br/>横で動き続ける\" }\n  NEW@{ svc: \"Amazon EC2 Auto Scaling\", label: \"別の Auto Scaling group<br/>新しい版の一式\" }\n  BAD[\"health check 不合格<br/>新しい方だけ終了\"]\n  EB -. \"手を付けない\" .-> OLD\n  EB -- \"新しい一式を起動\" --> NEW\n  NEW -. \"不合格のとき\" .-> BAD\n",
     "alt": "Beanstalk の Immutable ポリシー。新しい版のインスタンスを一式、別の Auto Scaling group に起動し、古い版のインスタンスは横で動き続ける。新しいインスタンスが health check に通らなければ、新しい方だけを終了し、元のインスタンスには手を付けない。"
    },
-   "narration": "ビーンストークには、デプロイの進め方を決める、デプロイポリシーが五つあります。そのうちの一つが、イミュータブルです。イミュータブルでは、新しい版のインスタンスを一式、別のオートスケーリンググループに立ち上げます。古い版のインスタンスは、その横で動き続けます。新しいインスタンスがヘルスチェックに通らなければ、新しい方だけが終了されます。元のインスタンスには手が付きません。ローリングというポリシーで、デプロイが途中で止まったときの問題も、防げると説明されています。ブルーグリーンは別の環境を用意しました。イミュータブルは、環境のポリシーとして、新しい一式を横に並べます。",
+   "narration": "ビーンストークには、デプロイの進め方を決める、デプロイポリシーが五つあります。何も指定しないときは、オールアットワンスです。そのうちの一つが、イミュータブルです。イミュータブルでは、新しい版のインスタンスを一式、別のオートスケーリンググループに立ち上げます。古い版のインスタンスは、その横で動き続けます。新しいインスタンスがヘルスチェックに通らなければ、新しい方だけが終了されます。元のインスタンスには手が付きません。ブルーグリーンは別の環境を用意しました。イミュータブルは、環境のポリシーとして、新しい一式を横に並べます。",
    "refs": [
     {
      "file": "C-0017",
@@ -135,12 +141,6 @@
      "source": "S5",
      "quote": "If the new instances don't pass health checks, Elastic Beanstalk terminates them, leaving the original instances untouched.",
      "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S5",
-     "quote": "Immutable deployments can prevent issues caused by partially completed rolling deployments.",
-     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html"
     }
    ]
   },
@@ -149,7 +149,7 @@
    "title": "前半 3: canary と Traffic splitting",
    "bullets": [
     "canary: 一部で試してから全部",
-    "設定: Traffic split と評価時間",
+    "設定: 割合と評価時間",
     "Immutable との違いは試す時間"
    ],
    "visual": {
@@ -161,11 +161,11 @@
      },
      {
       "label": "一部を新しい版へ",
-      "note": "Traffic split（最初の割合）"
+      "note": "Traffic split（割合）"
      },
      {
       "label": "評価時間だけ待つ",
-      "note": "evaluation time（分で指定）"
+      "note": "評価時間（分で指定）"
      },
      {
       "label": "全トラフィックを移す",
@@ -177,7 +177,7 @@
      }
     ]
    },
-   "narration": "カナリアとは、新しい版に、まず一部のトラフィックだけを流して、様子を見るやり方です。ビーンストークで、これをするポリシーが、トラフィックスプリッティングです。始めは、イミュータブルと同じように、新しいインスタンスを一式立ち上げます。次に、入ってくるトラフィックのうち、決めた割合だけを新しい版へ送ります。そして、決めた時間だけ様子を見ます。その間、新しいインスタンスが健全なままなら、すべてのトラフィックを新しい方へ送り、古いインスタンスを終了します。イミュータブルとの違いは、全部を移す前に、一部のトラフィックで試す時間を挟むことです。この形は、後半のコードデプロイでも、カナリアとして出てきます。",
+   "narration": "カナリアとは、新しい版に、まず一部のトラフィックだけを流して、様子を見るやり方です。ビーンストークで、これをするポリシーが、トラフィックスプリッティングです。始めは、イミュータブルと同じように、新しいインスタンスを一式立ち上げます。次に、入ってくるトラフィックのうち、決めた割合だけを新しい版へ送ります。そして、決めた時間だけ様子を見ます。その間、新しいインスタンスが健全なままなら、すべてのトラフィックを新しい方へ送り、古いインスタンスを終了します。イミュータブルとの違いは、全部を移す前に、一部のトラフィックで試す時間を挟むことです。この形は、後半でも出てきます。",
    "refs": [
     {
      "file": "C-0017",
@@ -276,14 +276,14 @@
    "bullets": [
     "instance profile で権限",
     "agent の置き場の S3 にも権限",
-    "CodeArtifact: 2 つの権限が要る"
+    "CodeArtifact: 取る側に権限 2 つ"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph C[\"CodeArtifact\"]\n    direction TB\n    R@{ svc: \"AWS IAM\", label: \"IAM user・role<br/>codeartifact:GetAuthorizationToken<br/>sts:GetServiceBearerToken<br/>両方が要る\" }\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact: token<br/>既定 12 時間<br/>15 分〜12 時間で設定\" }\n  end\n  subgraph P[\"EC2 の成果物\"]\n    direction TB\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2: instance profile<br/>s3:Get*・s3:List*\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3: 成果物と agent\" }\n    GH[\"GitHub: 成果物\"]\n  end\n  EC2 -- \"取りに行く\" --> S3\n  EC2 -- \"取りに行く\" --> GH\n  R -- \"token を取る\" --> CA\n",
-    "alt": "EC2 は instance profile の権限で、S3 か GitHub から成果物を取りに行く。S3 なら s3:Get* と s3:List* が要り、agent が置かれたバケットへの権限も要る。CodeArtifact の token を取る IAM user・role には、codeartifact:GetAuthorizationToken と sts:GetServiceBearerToken の両方が要る。token の有効期間は既定 12 時間で、15 分から 12 時間の間で設定できる。"
+    "source": "flowchart TB\n  subgraph C[\"パッケージマネージャー\"]\n    direction TB\n    R@{ svc: \"AWS IAM\", label: \"token を取る側の IAM user・role<br/>codeartifact:GetAuthorizationToken<br/>sts:GetServiceBearerToken<br/>両方が要る\" }\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact: token<br/>既定 12 時間<br/>15 分〜12 時間で設定\" }\n  end\n  subgraph P[\"EC2 の成果物\"]\n    direction TB\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2: instance profile<br/>s3:Get*・s3:List*\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3: 成果物\" }\n    S3A@{ svc: \"Amazon S3\", label: \"S3: agent の置き場\" }\n    GH[\"GitHub: 成果物\"]\n  end\n  EC2 -- \"取りに行く\" --> S3\n  EC2 -- \"取りに行く\" --> GH\n  EC2 -- \"導入・更新で使う\" --> S3A\n  R -- \"token を取る\" --> CA\n",
+    "alt": "EC2 は instance profile の権限で、S3 か GitHub から成果物を取りに行く。S3 なら s3:Get* と s3:List* が要り、agent が置かれた S3 バケットへの権限も要る。これとは別の場面として、パッケージマネージャーで CodeArtifact を使うとき、token を取る側の IAM user・role には codeartifact:GetAuthorizationToken と sts:GetServiceBearerToken の両方が要る。token の有効期間は既定 12 時間で、15 分から 12 時間の間で設定できる。"
    },
-   "narration": "次は、成果物を取りに行く権限です。イーシーツーのインスタンスは、成果物の置き場にアクセスできなければなりません。置き場は、エススリーのバケットか、ギットハブのリポジトリです。その権限は、インスタンスプロファイル、つまりインスタンスに付けるアイアムのロールで与えます。エススリーなら、ゲットとリストの権限が要ります。エージェントが置かれたバケットへの権限も要ります。無いと、エージェントの導入や更新で、エラーになることがあります。パッケージの置き場であるコードアーティファクトを使うときは、トークンが要ります。トークンを取るユーザーやロールには、二つの権限が両方とも要ります。トークンには期限があり、切れたら取り直します。",
+   "narration": "次は、成果物を取りに行く権限です。イーシーツーのインスタンスは、成果物の置き場にアクセスできなければなりません。置き場は、エススリーのバケットか、ギットハブのリポジトリです。その権限は、インスタンスプロファイル、つまりインスタンスに付けるアイアムのロールで与えます。エススリーなら、ゲットとリストの権限が要ります。エージェントが置かれたバケットへの権限も要ります。無いと、導入や更新でエラーになることがあります。ここからは、コードデプロイとは別の場面です。パッケージマネージャーで、パッケージの置き場であるコードアーティファクトを使うときは、トークンが要ります。トークンを取る側のユーザーやロールには、二つの権限が両方とも要ります。トークンには期限があり、切れたら取り直します。",
    "refs": [
     {
      "file": "C-0014",
@@ -407,14 +407,14 @@
     "items": [
      {
       "label": "新しい版を入れる",
-      "note": "replacement environment のインスタンス"
+      "note": "replacement（置き換え用）environment のインスタンス"
      },
      {
-      "label": "LB に登録して移す",
+      "label": "LB（ロードバランサー）に登録して移す",
       "note": "すぐ自動か手動か。手動で待ち時間を過ぎると Stopped"
      },
      {
-      "label": "original を登録解除",
+      "label": "original（元の）を登録解除",
       "note": "deployment configuration に関係なく一度に"
      },
      {
@@ -468,35 +468,15 @@
    "title": "後半 5: EC2 の失敗の調べ方",
    "bullets": [
     "View events → View logs",
-    "3 つの event は前回の AppSpec",
+    "この 3 つだけ前回の AppSpec",
     "症状ごとに疑う所が決まる"
    ],
    "visual": {
-    "type": "compare",
-    "columns": [
-     "症状",
-     "まず疑う所"
-    ],
-    "rows": [
-     [
-      "全 event が skip",
-      "agent・ロールの権限"
-     ],
-     [
-      "ApplicationStop",
-      "前回の AppSpec"
-     ],
-     [
-      "前回スクリプト破損",
-      "失敗を無視し再実行"
-     ],
-     [
-      "AllowTraffic",
-      "health check 設定"
-     ]
-    ]
+    "type": "mermaid",
+    "source": "flowchart TB\n  S1[\"全 event が skip\"]\n  A[\"agent が入っていない<br/>agent が止まった<br/>service role の権限\"]\n  S2[\"ApplicationStop<br/>BeforeBlockTraffic<br/>AfterBlockTraffic で失敗\"]\n  B[\"View events → View logs<br/>壊れていたら<br/>失敗を無視して再実行\"]\n  S3[\"blue/green の AllowTraffic が失敗<br/>ログに原因なし\"]\n  C[\"LB の health check 設定\"]\n  S1 -- \"疑う\" --> A\n  S2 -- \"前回の AppSpec\" --> B\n  S3 -- \"疑う\" --> C\n",
+    "alt": "症状ごとに疑う所。全 event が skip なら agent と CodeDeploy の service role の権限。ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic の失敗は前回の AppSpec のスクリプトなので、View events から View logs を見て、壊れていたら失敗を無視して再実行する。blue/green の AllowTraffic がログに原因なく失敗したら、LB の health check 設定を疑う。"
    },
-   "narration": "イーシーツーで失敗したときの調べ方です。ライフサイクルイベントは、デプロイの段階のことです。アップスペックファイルは、段階ごとに動かすスクリプトを書いたファイルです。すべての段階がスキップされたら、エージェントが入っていないか、動いていないことを疑います。メモリやディスクが足りなくて、エージェントが止まることもあります。コードデプロイというサービスが使う、サービスロールの権限も疑います。アプリケーションストップなどの三つの段階は、前回成功したデプロイのアップスペックで動きます。ここで失敗したら、デプロイのイベントから、インスタンスのログを見ます。前回のスクリプトが壊れているなら、三つの失敗を無視する指定で、デプロイし直します。ブルーグリーンのアロートラフィックが失敗し、ログに原因が無ければ、ロードバランサーのヘルスチェックの設定を疑います。",
+   "narration": "イーシーツーで失敗したときの調べ方です。ライフサイクルイベントは、デプロイの段階のことです。アップスペックファイルは、段階ごとに動かすスクリプトを書いたファイルです。すべての段階がスキップされたら、エージェントが入っていないか、動いていないことを疑います。メモリやディスクの不足で、止まることもあります。コードデプロイというサービスが使う、サービスロールの権限も疑います。次の三つの段階だけは、前回成功したデプロイのアップスペックで動きます。アプリケーションストップ、ビフォーブロックトラフィック、アフターブロックトラフィックです。ほかは今回のアップスペックです。ここで失敗したら、デプロイのイベントから、インスタンスのログを見ます。前回のスクリプトが壊れているなら、三つの失敗を無視する指定で、デプロイし直します。ブルーグリーンのアロートラフィックが失敗し、ログに原因が無ければ、ロードバランサーのヘルスチェックの設定を疑います。",
    "refs": [
     {
      "file": "C-0016",
@@ -545,6 +525,12 @@
      "source": "S3",
      "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing",
      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs"
+    },
+    {
+     "file": "C-0016",
+     "source": "S1",
+     "quote": "(All other scripts are run from the AppSpec file in the current deployment.)",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures"
     }
    ]
   },
@@ -564,23 +550,27 @@
     "rows": [
      [
       "自動デプロイが止まる",
-      "hook の名前"
+      "hook の名前の一致"
      ],
      [
       "作成と終了のくり返し",
-      "health check・版"
+      "health check 失敗"
+     ],
+     [
+      "同じくり返し",
+      "版の中のエラー"
      ],
      [
       "再起動に 5 分超",
-      "timeout で失敗"
+      "今と今後が失敗"
      ],
      [
       "インスタンスが無い",
-      "group の tag 設定"
+      "デプロイグループの tag"
      ]
     ]
    },
-   "narration": "イーシーツーのオートスケーリンググループと組み合わせるときです。オートスケーリングとコードデプロイは、ライフサイクルフックでつながっています。フックは、起動したインスタンスに、どの版を入れるかを決めるための仕組みです。だから、フックの名前は、両方で一致していなければなりません。違うと、自動のデプロイが止まったり、失敗したりします。インスタンスが作られてはすぐ終了される、というくり返しが起きたら、グループのヘルスチェックの失敗か、版の誤りを疑います。再起動して、起動に時間がかかりすぎると、タイムアウトとして扱われます。デプロイ先のインスタンスが見つからないと言われたら、デプロイグループのタグを確かめます。",
+   "narration": "イーシーツーのオートスケーリンググループと組み合わせるときです。オートスケーリングとコードデプロイは、ライフサイクルフックでつながっています。フックは、起動したインスタンスに、どの版を入れるかを決めるための仕組みです。だから、フックの名前は、両方で一致していなければなりません。違うと、自動のデプロイが止まったり、失敗したりします。作られてはすぐ終了される、くり返しが起きたら、グループのヘルスチェックの失敗か、版の中のエラーを疑います。再起動して、起動に時間がかかりすぎると、タイムアウトになります。そのインスタンスへの、今と今後のデプロイが失敗します。デプロイ先が見つからないと言われたら、デプロイグループのタグを確かめます。デプロイグループは、デプロイ先をタグなどで決める設定です。",
    "refs": [
     {
      "file": "C-0016",
@@ -623,6 +613,12 @@
      "source": "S9",
      "quote": "Check your deployment group settings to make sure the tags for your EC2 instances or Auto Scaling groups correctly identify the instances you want to deploy to, and then try again.",
      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-auto-scaling.html#troubleshooting-deployment-failed-because-no-instances-found"
+    },
+    {
+     "file": "C-0016",
+     "source": "S9",
+     "quote": "Your deployment group settings include tags for EC2 instances, on-premises instances, or Auto Scaling groups that are not correct.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-auto-scaling.html#troubleshooting-deployment-failed-because-no-instances-found"
     }
    ]
   },
@@ -639,7 +635,7 @@
     "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>移し方を決める\" }\n  LB@{ svc: \"Elastic Load Balancing\", label: \"ALB か NLB\" }\n  O@{ svc: \"Amazon ECS\", label: \"original task set<br/>古い版\" }\n  R@{ svc: \"Amazon ECS\", label: \"replacement task set<br/>新しい版\" }\n  CD -- \"本番トラフィックを移す\" --> LB\n  LB -. \"移す前\" .-> O\n  LB -- \"移した後\" --> R\n",
     "alt": "ECS の blue/green。CodeDeploy が、ALB か NLB を通る本番トラフィックを、original task set（古い版）から replacement task set（新しい版）へ移す。"
    },
-   "narration": "次はコンテナ、イーシーエスです。コードデプロイでイーシーエスにデプロイするときは、ブルーグリーンの形を取ります。古い版が動く元のタスクセットから、新しい版が動く置き換え用のタスクセットへ、本番のトラフィックを移します。サービスには、アプリケーションロードバランサーか、ネットワークロードバランサーが要ります。移し方の形は三つです。オールアットワンスは、一度に全部を移します。カナリアは、まず一部を移し、時間を置いて残りを移す、二段の形です。リニアは、同じ割合ずつ、決まった間隔で、階段のように移します。ネットワークロードバランサーなら、オールアットワンスしか選べません。なお、イーシーエスのドキュメントは、イーシーエス自身のブルーグリーンデプロイを勧めています。この講義では、コードデプロイの形を扱います。",
+   "narration": "次はコンテナ、イーシーエスです。コードデプロイで、イーシーエスにブルーグリーンでデプロイする場合です。古い版が動く元のタスクセットから、新しい版が動く置き換え用のタスクセットへ、本番のトラフィックを移します。サービスには、アプリケーションロードバランサーか、ネットワークロードバランサーが要ります。移し方の形は三つです。オールアットワンスは、一度に全部を移します。カナリアは、まず一部を移し、時間を置いて残りを移す、二段の形です。リニアは、同じ割合ずつ、決まった間隔で、階段のように移します。ネットワークロードバランサーなら、オールアットワンスしか選べません。",
    "refs": [
     {
      "file": "C-0017",
@@ -676,12 +672,6 @@
      "source": "S3",
      "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported.",
      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "We recommend that you use the Amazon ECS blue/green deployment.",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
     }
    ]
   },
@@ -691,7 +681,7 @@
    "bullets": [
     "image を取る: タスク実行ロール",
     "アプリの権限: タスク IAM ロール",
-    "CodeDeployToECS: 3 MB"
+    "CodePipeline: 3 MB まで"
    ],
    "visual": {
     "type": "compare",
@@ -709,16 +699,20 @@
       "タスク IAM ロール"
      ],
      [
-      "CodeDeployToECS",
+      "CodePipeline の段",
+      "CodeDeployToECS"
+     ],
+     [
+      "その成果物",
       "タスク定義ファイル必須"
      ],
      [
-      "その成果物 ZIP",
+      "成果物の ZIP",
       "3 MB まで"
      ]
     ]
    },
-   "narration": "イーシーエスの権限は、ロールが二つに分かれます。一つ目は、タスク実行ロールです。イーシーエスの側が、利用者に代わって、イーシーアールからコンテナのイメージを取ってくるための権限です。二つ目は、タスクアイアムロールです。コンテナの中のアプリケーションが動くのに要る権限は、こちらで考えます。イメージを取る権限は、タスク実行ロールの方に入れます。もう一つは、コードパイプラインの制約です。コードデプロイを通してイーシーエスへデプロイするアクションでは、タスク定義のファイルが、成果物に必ず要ります。その成果物のジップの大きさには、上限があります。上限は画面に示しました。",
+   "narration": "イーシーエスの権限は、ロールが二つに分かれます。一つ目は、タスク実行ロールです。イーシーエスの側が、利用者に代わって、イーシーアールからコンテナのイメージを取ってくるための権限です。二つ目は、タスクアイアムロールです。コンテナの中のアプリケーションが動くのに要る権限は、こちらで考えます。イメージを取る権限は、タスク実行ロールの方に入れます。もう一つは、コードパイプラインの制約です。コードパイプラインには、デプロイアクションという段があります。コードデプロイを通してイーシーエスへデプロイするアクションでは、タスク定義のファイルが、成果物に必ず要ります。その成果物のジップの大きさには、上限があります。上限は画面に示しました。",
    "refs": [
     {
      "file": "C-0014",
@@ -764,39 +758,30 @@
    "bullets": [
     "alias: 版を指す目印",
     "alias で 2 つの版に分けられる",
-    "形は ECS と同じ、数字が違う"
+    "形は ECS と同じ 3 つ"
    ],
    "visual": {
     "type": "compare",
     "columns": [
-     "用意された設定",
-     "ECS",
-     "Lambda"
+     "形",
+     "Lambda の設定の例"
     ],
     "rows": [
      [
-      "1 回に移す割合",
-      "10%",
-      "10%"
+      "canary",
+      "10%、5 分後に残り"
      ],
      [
-      "canary の残り",
-      "5 分か 15 分後",
-      "5 分後"
-     ],
-     [
-      "linear の間隔",
-      "1 分か 3 分ごと",
-      "1 分ごと"
+      "linear",
+      "1 分ごとに 10%"
      ],
      [
       "all-at-once",
-      "一度に全部",
       "一度に全部"
      ]
     ]
    },
-   "narration": "最後はラムダです。ラムダでは、エイリアスが鍵になります。エイリアスは、関数の版を指す目印で、あとから向き先を変えられます。新しい版を出したら、エイリアスを新しい版に向け直すか、二つの版の間でトラフィックを分けます。コードデプロイでラムダにデプロイするときは、デプロイ設定が、新しい版へのトラフィックの移し方を決めます。形は、イーシーエスと同じく、カナリア、リニア、オールアットワンスの三つです。違うのは、あらかじめ用意された設定の、時間の数字です。似た数字が並ぶので、画面の表で、イーシーエスとラムダを見比べてください。",
+   "narration": "最後はラムダです。ラムダでは、エイリアスが鍵になります。エイリアスは、関数の版を指す目印で、あとから向き先を変えられます。新しい版を出したら、エイリアスを新しい版に向け直すか、二つの版の間でトラフィックを分けます。コードデプロイでラムダにデプロイするときは、デプロイ設定が、新しい版へのトラフィックの移し方を決めます。形は、イーシーエスと同じく、カナリア、リニア、オールアットワンスの三つです。画面の表は、ドキュメントに例として挙がっている設定です。",
    "refs": [
     {
      "file": "C-0017",
@@ -839,36 +824,6 @@
      "source": "S1",
      "quote": "CodeDeployDefault.LambdaAllAtOnce: Shifts all traffic to the updated Lambda functions at once.",
      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "CodeDeployDefault.ECSCanary10Percent15Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later.",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "CodeDeployDefault.ECSLinear10PercentEvery1Minutes: Shifts 10 percent of traffic every minute until all traffic is shifted.",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "CodeDeployDefault.ECSLinear10PercentEvery3Minutes: Shifts 10 percent of traffic every 3 minutes until all traffic is shifted.",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
-    },
-    {
-     "file": "C-0017",
-     "source": "S3",
-     "quote": "CodeDeployDefault.ECSAllAtOnce: Shifts all traffic to the updated Amazon ECS container at once",
-     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html"
     }
    ]
   },
@@ -886,7 +841,7 @@
     ],
     "rows": [
      [
-      "使えない時間を避ける",
+      "Beanstalk で止めない",
       "blue/green"
      ],
      [
@@ -907,7 +862,7 @@
      ]
     ]
    },
-   "narration": "最後に、問題文の条件から、選ぶ方法を引く表です。利用者から使えなくなる時間を避けたいなら、ブルーグリーンです。新しいインスタンスが失敗しても、元のインスタンスに手を付けたくないなら、ビーンストークのイミュータブルです。一部のトラフィックで試してから移したいなら、カナリアです。ビーンストークなら、トラフィックスプリッティングです。イーシーエスとラムダなら、コードデプロイのカナリアの設定です。イーシーエスでネットワークロードバランサーを使うなら、オールアットワンスしか選べません。デプロイが失敗したら、エージェント、ロールの権限、ヘルスチェック、タグ、フックの名前を、症状に合わせて確かめます。",
+   "narration": "問題文の条件から、方法を選ぶ表です。ビーンストークで、利用者から使えなくなる時間を避けたいなら、ブルーグリーンです。新しいインスタンスが失敗しても、元のインスタンスに手を付けたくないなら、ビーンストークのイミュータブルです。一部のトラフィックで試してから移したいなら、カナリアです。ビーンストークなら、トラフィックスプリッティングです。イーシーエスとラムダなら、コードデプロイのカナリアの設定です。イーシーエスでネットワークロードバランサーを使うなら、オールアットワンスしか選べません。デプロイが失敗したら、エージェント、ロールの権限、ヘルスチェック、タグ、フックの名前を、症状に合わせて確かめます。",
    "refs": [
     {
      "file": "C-0017",
@@ -971,7 +926,7 @@
     "type": "compare",
     "columns": [
      "デプロイ先",
-     "新しい版への入口",
+     "blue/green の入口",
      "前提"
     ],
     "rows": [
@@ -993,11 +948,11 @@
      [
       "Lambda",
       "alias",
-      "版を指す目印"
+      "agent は要らない"
      ]
     ]
    },
-   "narration": "まとめです。前半では、ビーンストークで、インプレースとブルーグリーン、そしてカナリアの考え方を見ました。後半では、同じ考え方を、コードデプロイで三つのデプロイ先に当てはめました。新しい版への入口は、デプロイ先ごとに違います。ビーンストークは環境のユーアールエル、イーシーツーはロードバランサーへの登録です。イーシーエスはタスクセットの間の移し替え、ラムダはエイリアスです。イーシーツーには、エージェントとインスタンスプロファイルが要ります。イーシーエスでイメージを取るのは、タスク実行ロールです。問題文に、止めたくない、一部で試したい、といった言葉が出たら、さっきの表を思い出してください。",
+   "narration": "まとめです。前半では、ビーンストークで、インプレースとブルーグリーン、そしてカナリアの考え方を見ました。後半では、同じ考え方を、コードデプロイで三つのデプロイ先に当てはめました。ブルーグリーンで新しい版へ向ける入口は、デプロイ先ごとに違います。ビーンストークは環境のユーアールエル、イーシーツーはロードバランサーへの登録です。イーシーエスはタスクセットの間の移し替え、ラムダはエイリアスです。イーシーツーには、エージェントとインスタンスプロファイルが要ります。イーシーエスでイメージを取るのは、タスク実行ロールです。問題文に、止めたくない、一部で試したい、といった言葉が出たら、さっきの表を思い出してください。",
    "refs": [
     {
      "file": "C-0017",
@@ -1052,6 +1007,12 @@
      "source": "S6",
      "quote": "The task execution role should have these permissions to allow the Amazon ECS container and Fargate agents to pull container images on your behalf.",
      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html#task-execution-ecr-permissions"
+    },
+    {
+     "file": "C-0015",
+     "source": "S1",
+     "quote": "The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html"
     }
    ]
   }
