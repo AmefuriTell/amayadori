@@ -49,3 +49,13 @@ test('notInRaw: 表の行を「名前: 説明」と写すのは通し、言い�
   assert.deepEqual(notInRaw('CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.', raw), []);
   assert.equal(notInRaw('Moves ten percent of the traffic first and the rest later on.', raw).length, 1);
 });
+
+test('P-020 docs check: 見出しの # の数と、引用の続きの行の「> 」の抜けを返す', async () => {
+  const { formatErrors } = await import('../tools/docs.mjs');
+  const good = '## S1 A — B\nurl: https://docs.aws.amazon.com/x\nfetched: 2026-01-01\n> line one\n> line two\n';
+  assert.deepEqual(formatErrors(good), []);
+  const bad = '# S0 Notice\nurl: https://docs.aws.amazon.com/y\n\n## S1 A — B\nurl: https://docs.aws.amazon.com/x\n> line one\nline two without marker\n';
+  const msgs = formatErrors(bad).map((e) => `${e.id} ${e.message}`).join('\n');
+  assert.match(msgs, /S0 .*見出しは「## S0/);
+  assert.match(msgs, /S1 .*7 行目.*「> 」/);
+});

@@ -81,3 +81,5 @@
 
 - `fact`（問題・解説と食い違う。⚠・✔ の付け所の誤りも）・`unsupported`（問題・解説に無い構成や事実）・`unreadable`（絵で文字や線が重なって読めない）→ fix。同じ図が 2 回 fix → drop。
 - `unclear`・`style` だけ → 検証役が fix なら fix（attempts を数えない）、ok なら記録だけ。
+- verdict が ok の図に重い種類（fact・unsupported・unreadable）を書くと、dg verdict は判定せずに止まる（P-021）。検証役に直してもらう。
+- 同じ verify.json に dg verdict を 2 回呼んでも、2 回目は前の結論を返すだけ（P-019）。

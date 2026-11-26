@@ -21,6 +21,30 @@ function loadBatch(id) {
   return b;
 }
 
+// P-022: 読めなくなりやすい書き方。幅は全角 1・半角 0.5 で数える
+const LABEL_MAX = 20;
+const TITLE_MAX = 14;
+const width = (t) => [...t].reduce((n, c) => n + (c.charCodeAt(0) < 128 ? 0.5 : 1), 0);
+const EDGE = /^\s*(\w+)\s*(?:(?:--|==|-\.)\s*"([^"]*)"\s*(?:-->|==>|\.->|---|\.-)|(?:<?-->|<?==>|-\.->|---|-\.-))\s*(\w+)/;
+
+/** 線のラベルが長い・subgraph の題が長い・同じ 2 つの箱の間にラベル付きの線が 2 本以上、を返す（P-022） */
+export function readability(source) {
+  const out = [];
+  const pairs = {};
+  for (const line of source.split('\n')) {
+    const e = line.match(EDGE);
+    if (e) {
+      const [, a, label, b] = e;
+      if (label && width(label) > LABEL_MAX) out.push(`線のラベルが長い（${label}）。${LABEL_MAX} 字までにして、説明は箱のラベルへ`);
+      if (label) { const k = [a, b].sort().join(' と '); pairs[k] = (pairs[k] ?? 0) + 1; }
+    }
+    const t = line.match(/^\s*subgraph\s+\w+\s*\["([^"]*)"\]/);
+    if (t && width(t[1]) > TITLE_MAX) out.push(`subgraph の題が長い（${t[1]}）。${TITLE_MAX} 字までにするか、枠をやめて箱のラベルへ`);
+  }
+  for (const [k, n] of Object.entries(pairs)) if (n > 1) out.push(`${k} の間にラベル付きの線が ${n} 本（ラベルが重なる）。1 本にして、残りは箱のラベルへ`);
+  return out;
+}
+
 /** 描かずに見られる誤り */
 export function checkDiagrams(id, batch = loadBatch(id)) {
   const item = readJSON(paths.work(id, 'item.json'), {});
@@ -36,6 +60,7 @@ export function checkDiagrams(id, batch = loadBatch(id)) {
     if (typeof d.source === 'string' && !/@\{\s*svc:/.test(d.source)) add('サービスの箱（X@{ svc: "…" }）が 1 つも無い');
     if (typeof d.alt !== 'string' || d.alt.length < 20 || !/[぀-ヿ一-鿿]/.test(d.alt)) add('alt（図の説明、日本語 20 字以上）が要る');
   });
+  batch.diagrams.forEach((d) => { if (typeof d?.source === 'string') for (const m of readability(d.source)) errors.push({ id: d.id, message: m }); });
   const missing = want.filter((q) => !seen.has(q));
   if (missing.length) errors.push({ id: null, message: `図の無い問題: ${missing.join(', ')}` });
   return errors;

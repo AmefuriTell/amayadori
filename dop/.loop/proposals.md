@@ -146,7 +146,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ## F-0004（2026-11-26）から
 
 ```xml
-<proposal id="P-017" from="F-0004" status="proposed">
+<proposal id="P-017" from="F-0004" status="adopted" decided="2026-11-26" by="利用者（ループの不具合を直す指示）">
   <issue>検証役が fix と言い指摘を 1 つも書かなかった時、q（問題）は直しに回すが、g（事典）・dg（図）は通してしまう。g・dg を q から写した時の違いで、意図した物ではない。リファクタリングでは振る舞いを変えないので残した（step.mjs の judge の emptyFixSevere）</issue>
   <kind>tool</kind>
   <change>g・dg も q と同じく直しに回す（emptyFixSevere を true にする）。試験を 1 つ足す。人が決める</change>
@@ -168,7 +168,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ## C-0059（2026-11-26）から
 
 ```xml
-<proposal id="P-019" from="C-0059" status="proposed">
+<proposal id="P-019" from="C-0059" status="adopted" decided="2026-11-26" by="利用者（ループの不具合を直す指示）">
   <issue>検証役（dop-verifier）が verify.json を書いた後、進行役の仕事の q verdict まで自分で呼んだ。今回は結果が pass で、進行役が呼び直しても同じだったが、fix の時に重い fix の回数（history）を 2 回数えるおそれがある</issue>
   <kind>tool</kind>
   <change>q・g・dg の verdict を、同じ verify.json に対して 2 回目は何もしない（verify.json の時刻か中身の hash を verdict.json に控え、同じなら前の結論をそのまま出す）。あわせて .claude/agents/dop-verifier.md に「verdict は呼ばない」を足す。人が決める</change>
@@ -178,7 +178,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ## C-0048・G-0015（2026-11-26）から
 
 ```xml
-<proposal id="P-020" from="C-0048,G-0015" status="proposed">
+<proposal id="P-020" from="C-0048,G-0015" status="adopted" decided="2026-11-26" by="利用者（ループの不具合を直す指示）">
   <issue>資料集め役の sources.md で、引用の続きの行が「> 」で始まっていなかったり（C-0048）、S0 の見出しが「# 」だったり（G-0015）した。docs check は ok を返したが、q・g validate が「quote が原文に無い」「S0 が無い」と落ち、進行役が形だけ直した</issue>
   <kind>tool</kind>
   <change>docs check に検査を足す: ① 「## S」の見出しの後、空行までの行は「url:」「fetched:」「> 」のどれかで始まること。② 「S<番号>」の見出しは必ず「## 」で始まること。どちらも落ちたら ok にしない。人が決める</change>
@@ -186,7 +186,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ```
 
 ```xml
-<proposal id="P-021" from="D-0004" status="proposed">
+<proposal id="P-021" from="D-0004" status="adopted" decided="2026-11-26" by="利用者（ループの不具合を直す指示）">
   <issue>図の検証で、verdict を ok にしたまま issues に kind "unsupported" を書いた図を、dg verdict が重い指摘として数えて drop にし、図が抜けて C4 の form 検査に落ちた</issue>
   <kind>tool</kind>
   <change>dg verdict（と q verdict）で、verdict が ok の図に style 以外の kind があれば、判定せずに「verify.json が食い違っている」と返す。C3 の文書に「ok の図の issues は style だけ」を 1 行足す</change>
@@ -194,7 +194,7 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
 ```
 
 ```xml
-<proposal id="P-022" from="D-0024,D-0026,D-0027,D-0028" status="proposed">
+<proposal id="P-022" from="D-0024,D-0026,D-0027,D-0028" status="adopted" decided="2026-11-26" by="利用者（ループの不具合を直す指示）">
   <issue>図の検証の fix の多くが unreadable だった。長い線のラベル、同じ 2 つの箱の間の複数の線（行きと帰り）、subgraph の題に重なる矢印で、文字が隠れたり切れたりした</issue>
   <kind>tool</kind>
   <change>dg validate に検査を足す: ① 線のラベルは 15 文字まで（長い説明は箱のラベルへ）。② 同じ 2 つの箱の間の線は 1 本まで。③ subgraph の題は 12 文字まで。C2 の図の決まりにも同じ 3 行を足す。人が決める</change>

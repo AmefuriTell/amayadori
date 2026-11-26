@@ -1,4 +1,6 @@
 // 工程の共通の処理（F-0004 で q・g・dg からまとめた）: 項目 ID・工程の確認・直しの指示・検証の判定・出典の照合・束の結論。
+import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { paths, readJSON, writeJSON, appendLine, emit, ToolError, ITEM_ID, setResult } from './io.mjs';
 import { normalize } from './text.mjs';
 
@@ -27,10 +29,13 @@ export function failToFeedback(id, step, fails, { idField = 'id', key }) {
 /**
  * 検証役の判定（said）と指摘（issues）から、1 つの結論を出す。
  * severe: 重い指摘の種類、mild: 言い回しの指摘の種類、extraSevere: 呼ぶ側の重い理由（q の答えの外れ）。
- * emptyFixSevere: 検証役が fix と言い指摘が 0 件の時に重いとみなすか（q は true、g・dg は false）。
+ * emptyFixSevere: 検証役が fix と言い指摘が 0 件の時に重いとみなすか（P-017 で q・g・dg とも true）。
  * hist（id → 重い fix の回数）を進め、2 回目の重い fix は drop。{ verdict, severe, counted }
  */
 export function judge({ id, issues, said, severe: SEVERE, mild: MILD, hist, extraSevere = false, emptyFixSevere = true }) {
+  // P-021: ok と言いながら重い指摘を書いた verify.json は、どちらが本当か分からない。判定せずに検証役へ戻す
+  const contradict = said === 'ok' ? issues.filter((i) => SEVERE.has(i.kind)) : [];
+  if (contradict.length) throw new ToolError(`verify.json が食い違っている: ${id} は verdict が ok なのに重い指摘（${[...new Set(contradict.map((i) => i.kind))].join('・')}）がある。検証役に、ok なら指摘を軽い物だけに、重いなら fix に直してもらう`);
   const mildOnly = issues.length > 0 && issues.every((i) => MILD.has(i.kind));
   const lightFix = mildOnly || (issues.length === 0 && !emptyFixSevere);
   const severe = extraSevere || issues.some((i) => SEVERE.has(i.kind)) || (said === 'fix' && !lightFix);
@@ -61,10 +66,29 @@ export function referenceErrors(refs, sources, add, id) {
 }
 
 /**
+ * P-019: 同じ verify.json に 2 回目の verdict を呼んでも、重い fix を数え直さない。
+ * 前の verdict.json に控えた verify.json の中身と同じなら、前の結論をそのまま返す（null なら初めて）。
+ */
+export function sameVerdict(id) {
+  const vfile = paths.work(id, 'verify.json');
+  const dfile = paths.work(id, 'verdict.json');
+  const raw = readRaw(vfile);
+  const prev = readJSON(dfile, null);
+  if (raw === null || !prev?.result || prev.verify_hash !== hashOf(raw)) return null;
+  // 次の回で検証役が同じ中身を書き直した時（同じ指摘がもう一度出た）は数える。verdict の後に書かれていないかを時刻で見る
+  return fs.statSync(vfile).mtimeMs <= fs.statSync(dfile).mtimeMs ? prev : null;
+}
+export const verifyHash = (id) => hashOf(readRaw(paths.work(id, 'verify.json')) ?? '');
+function readRaw(file) { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } }
+function hashOf(text) { return crypto.createHash('sha256').update(text).digest('hex').slice(0, 16); }
+
+/**
  * 事典（g）・図（dg）の C3: verify.json の判定から束の結論を出して書き出す。
  * batchFile: 束のファイル名、key: 束の中の一覧の鍵（entries / diagrams）、histFile: 重い fix の回数のファイル、keepDropped: 捨てた物を dropped.json に残すか
  */
 export function concludeBatch({ id, batch, batchFile, key, histFile, severe, mild, keepDropped = false }) {
+  const again = sameVerdict(id);
+  if (again) return emit({ ok: true, summary: `前と同じ verify.json なので前の結論のまま（${again.result}）→ loop advance --result ${again.result}`, extra: { result: again.result } });
   const v = readJSON(paths.work(id, 'verify.json'), null);
   if (!v || !Array.isArray(v[key])) throw new ToolError(`work/${id}/verify.json が無い（検証役が書く）`);
   const hist = readJSON(paths.work(id, histFile), {});
@@ -77,7 +101,7 @@ export function concludeBatch({ id, batch, batchFile, key, histFile, severe, mil
     if (!said) throw new ToolError(`verify.json に ${x.id} が無い`);
     const issues = Array.isArray(said.issues) ? said.issues : [];
     issues.forEach((i) => kinds.add(i.kind));
-    const j = judge({ id: x.id, issues, said: said.verdict, severe, mild, hist, emptyFixSevere: false });
+    const j = judge({ id: x.id, issues, said: said.verdict, severe, mild, hist });
     if (j.counted) anyCounted = true;
     results[x.id] = j.verdict;
     if (j.verdict === 'fix') feedback[x.id] = issues;
@@ -89,7 +113,7 @@ export function concludeBatch({ id, batch, batchFile, key, histFile, severe, mil
   writeJSON(paths.work(id, batchFile), { ...batch, [key]: kept });
   const result = !kept.length ? 'drop' : Object.keys(feedback).length ? 'fix' : 'pass';
   if (result === 'fix') writeJSON(paths.work(id, 'feedback.json'), { from: 'C3_verify', [key]: feedback });
-  writeJSON(paths.work(id, 'verdict.json'), { [key]: results });
+  writeJSON(paths.work(id, 'verdict.json'), { [key]: results, result, verify_hash: verifyHash(id) });
   appendLine(paths.work(id, 'history.jsonl'), { step: 'C3_verify', result, kinds: [...kinds] });
   setResult(id, 'C3_verify', result, { count: anyCounted });
   const n = (k) => Object.values(results).filter((r) => r === k).length;

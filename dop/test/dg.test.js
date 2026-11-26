@@ -44,3 +44,14 @@ test('P-015 図の項目: seed --ids で作り、C2 から始め、問題の中�
   assert.match(all, /alt/);
   assert.match(all, /図の無い問題: q-1.1-0001/);
 });
+
+test('P-022 図の読みにくさ: 長い線のラベル・長い題・同じ 2 つの箱の間のラベル付きの線 2 本を返す', async () => {
+  const { readability } = await import('../tools/dg.mjs');
+  const ok = 'flowchart TB\n  subgraph R["us-east-1"]\n    A@{ svc: "AWS Lambda", label: "x" }\n  end\n  A -- "✔ B: 短い" --> B\n  B --> A';
+  assert.deepEqual(readability(ok), []);
+  const bad = 'flowchart TB\n  subgraph R["マネージャーのアカウント（監視）"]\n  end\n  A -- "とても長い線のラベルでラベルが重なってしまう例です" --> B\n  B -. "戻る" .-> A';
+  const all = readability(bad).join('\n');
+  assert.match(all, /線のラベルが長い/);
+  assert.match(all, /subgraph の題が長い/);
+  assert.match(all, /A と B の間にラベル付きの線が 2 本/);
+});
