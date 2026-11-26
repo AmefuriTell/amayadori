@@ -8974,7 +8974,10 @@
           "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "マルチ AZ の RDS で、アプリケーションが再接続できるか試す図。計画した時間帯に、フェイルオーバーで再起動のオプションで再起動すれば、今のインスタンスのままスタンバイへの切り替えを起こせる（C）。復元やレプリカ昇格は別のインスタンスを使う。"
+      }
     },
     {
       "id": "q-3.3-0002",
@@ -9031,7 +9034,10 @@
           "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "正常な Aurora のグローバルデータベースで、計画メンテナンス前にプライマリを us-west-2 へ移す図。スイッチオーバーは同期してから切り替えるのでデータを失わない（A）。フェイルオーバーは計画外の障害用で RPO が 0 にならない。"
+      }
     },
     {
       "id": "q-3.3-0003",
@@ -9088,7 +9094,10 @@
           "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "計画外の障害で eu-west-1 のプライマリが使えなくなった Aurora のグローバルデータベースの図。セカンダリの eu-central-1 へクロスリージョンのフェイルオーバーを行えば、数秒のデータ損失で素早く書き込みを再開できる（B）。"
+      }
     },
     {
       "id": "q-3.3-0004",
@@ -9157,7 +9166,10 @@
           "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudFront のオリジングループで、プライマリが 503 を返した時の動きの図。選んだステータスコードの応答で切り替わる（B）が、切り替えるのは GET・HEAD・OPTIONS のリクエストだけなので、POST のフォームの送信は失敗のまま（A）。"
+      }
     },
     {
       "id": "q-3.3-0005",
@@ -9219,7 +9231,10 @@
           "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Route 53 の DNS フェイルオーバーを AWS FIS で試す図。FIS は本物のリソースに本物の操作を行うので、実験を計画し、まず本番前の環境で実行し、結果を確かめてから本番で実行する（D）。本番のピークで直接行う案（A）は危険。"
+      }
     },
     {
       "id": "q-3.3-0006",
@@ -9282,7 +9297,10 @@
           "quote": "Use tags to include or exclude resources"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "タグ付きの EBS と RDS を毎日バックアップし 2 つ目のリージョンにコピーする図。AWS Backup のプランに毎日のルールとコピー先を決め、backup=daily のタグで割り当てれば新しいリソースも設定を変えず対象になる（B）。"
+      }
     },
     {
       "id": "q-3.3-0007",
@@ -9339,7 +9357,10 @@
           "quote": "This value must be greater than 90 days beyond the Transition to cold storage value."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Backup のコピーをコールドストレージに移し、できるだけ早く削除する設定の図。コールドストレージに少なくとも 90 日置く必要があるので、保持期間は移行日数に 90 日を足した日数より長くする。有効なのは 30 日移行で 180 日保持の A だけ。"
+      }
     },
     {
       "id": "q-3.3-0008",
@@ -9400,7 +9421,10 @@
           "quote": "A vault locked in Governance mode can be managed or deleted by users who have the appropriate IAM permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ランサムウェア対策の AWS Backup のボールトの図。猶予期間つきのコンプライアンスモードの Vault Lock なら、猶予の間に設定をテストでき、ロック後は保持期間が終わるまで誰も削除や変更ができない（D）。ガバナンスモード（A）は権限があれば消せる。"
+      }
     },
     {
       "id": "q-3.3-0009",
@@ -9468,7 +9492,10 @@
           "quote": "S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.9 percent of those objects within 15 minutes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "既存の数百万オブジェクトを持つバケットの S3 クロスリージョンレプリケーションの図。設定前からのオブジェクトは S3 バッチレプリケーションで複製し（A）、新しい物は Replication Time Control で 99.9% を 15 分以内にし複製の時間も見える（B）。"
+      }
     },
     {
       "id": "q-3.3-0010",
@@ -9537,7 +9564,10 @@
           "quote": "When you attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, you attach a target group rather than the load balancer itself."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アプリが固まり、ロードバランサーは unhealthy とするが EC2 のチェックは通るインスタンスを自動で入れ替える図。ターゲットグループを Auto Scaling グループにアタッチし（A）、Elastic Load Balancing のヘルスチェックを有効にする（B）。"
+      }
     },
     {
       "id": "q-3.3-0011",

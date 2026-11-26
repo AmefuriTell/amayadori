@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0002",
+  "source": "flowchart TB\n  subgraph GDB[\"グローバルデータベース\"]\n    subgraph E[\"us-east-1\"]\n      PR@{ svc: \"Amazon Aurora\", label: \"プライマリクラスター（正常）\" }\n    end\n    subgraph W[\"us-west-2\"]\n      SC@{ svc: \"Amazon Aurora\", label: \"セカンダリクラスター（正常）\" }\n    end\n  end\n  PR -. \"レプリケーション\" .-> SC\n  PR == \"✔ A: スイッチオーバー（同期してから切り替え。RPO 0）\" ==> SC\n  F[\"⚠ B・D: フェイルオーバーは RPO が秒単位で 0 でない\"] -.- PR\n  C[\"⚠ C: スナップショットの復元は作り直しで、後のデータも失う\"] -.- SC\n",
+  "alt": "正常な Aurora のグローバルデータベースで、計画メンテナンス前にプライマリを us-west-2 へ移す図。スイッチオーバーは同期してから切り替えるのでデータを失わない（A）。フェイルオーバーは計画外の障害用で RPO が 0 にならない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

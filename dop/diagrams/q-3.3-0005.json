@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0005",
+  "source": "flowchart TB\n  FIS@{ svc: \"AWS Fault Injection Service\", label: \"実験（本物の障害を注入）\" }\n  subgraph PRE[\"✔ D: 本番前の環境\"]\n    S1[\"サーバー 1（障害を注入）\"]\n    S2[\"サーバー 2（正常）\"]\n  end\n  R@{ svc: \"Amazon Route 53\", label: \"DNS フェイルオーバー\" }\n  PROD[\"本番\"]\n  FIS == \"✔ D: 計画して、まず本番前の環境で実行\" ==> S1\n  R -- \"正常なサーバーへ\" --> S2\n  PRE -. \"結果を確かめてから\" .-> PROD\n  X[\"⚠ A: ピークの本番で直接はリスクが高い\"] -.- PROD\n  Y[\"⚠ B: 手で編集は自動切り替えの試験にならない\"] -.- R\n  Y2[\"⚠ C: FIS は本物のリソースに操作する\"] -.- FIS\n",
+  "alt": "Route 53 の DNS フェイルオーバーを AWS FIS で試す図。FIS は本物のリソースに本物の操作を行うので、実験を計画し、まず本番前の環境で実行し、結果を確かめてから本番で実行する（D）。本番のピークで直接行う案（A）は危険。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0003",
+  "source": "flowchart TB\n  subgraph GDB[\"グローバルデータベース\"]\n    subgraph E[\"eu-west-1\"]\n      PR@{ svc: \"Amazon Aurora\", label: \"プライマリクラスター（障害で使えない）\" }\n    end\n    subgraph C[\"eu-central-1\"]\n      SC@{ svc: \"Amazon Aurora\", label: \"セカンダリクラスター\" }\n    end\n  end\n  PR -. \"レプリケーション（途切れた）\" .-> SC\n  PR == \"✔ B: クロスリージョンのフェイルオーバー（失うのは数秒）\" ==> SC\n  A[\"⚠ A: スイッチオーバーは全て正常な時の計画した操作\"] -.- SC\n  W[\"⚠ C: 待つと書き込みの再開が遅れる\"] -.- PR\n  D[\"⚠ D: スナップショットの復元は時間がかかる\"] -.- SC\n",
+  "alt": "計画外の障害で eu-west-1 のプライマリが使えなくなった Aurora のグローバルデータベースの図。セカンダリの eu-central-1 へクロスリージョンのフェイルオーバーを行えば、数秒のデータ損失で素早く書き込みを再開できる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

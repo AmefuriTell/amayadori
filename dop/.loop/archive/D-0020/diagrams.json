@@ -18,7 +18,7 @@
     },
     {
       "id": "q-3.3-0004",
-      "source": "flowchart TB\n  V([\"ビューワー\"])\n  subgraph CF[\"オリジングループ\"]\n    CFD@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション\" }\n    PR[\"プライマリのオリジン（503）\"]\n    SE[\"セカンダリのオリジン\"]\n  end\n  V -- \"GET（ページの読み込み）\" --> CFD\n  V -- \"POST（フォームの送信）\" --> CFD\n  CFD --> PR\n  CFD == \"✔ B: 503 など選んだコードで切り替え\" ==> SE\n  X[\"✔ A: 切り替えるのは GET・HEAD・OPTIONS だけ。POST は失敗のまま\"] -.- CFD\n  Y[\"⚠ D: 全メソッドで切り替える・⚠ E: Route 53 のヘルスチェックは関係しない\"] -.- PR\n",
+      "source": "flowchart TB\n  V([\"ビューワー\"])\n  subgraph CF[\"オリジングループ\"]\n    CFD@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション\" }\n    PR[\"プライマリのオリジン（503）\"]\n    SE[\"セカンダリのオリジン\"]\n  end\n  V -- \"GET（ページの読み込み）\" --> CFD\n  V -- \"POST（フォームの送信）\" --> CFD\n  CFD --> PR\n  CFD == \"✔ B: 503 など選んだコードで切り替え\" ==> SE\n  X[\"✔ A: 切り替えるのは GET・HEAD・OPTIONS だけ。POST は失敗のまま\"] -.- CFD\n  Y[\"⚠ C: 4xx の時だけではない<br/>⚠ D: 全メソッドで切り替える<br/>⚠ E: Route 53 のヘルスチェックは関係しない\"] -.- PR\n",
       "alt": "CloudFront のオリジングループで、プライマリが 503 を返した時の動きの図。選んだステータスコードの応答で切り替わる（B）が、切り替えるのは GET・HEAD・OPTIONS のリクエストだけなので、POST のフォームの送信は失敗のまま（A）。"
     },
     {
@@ -38,7 +38,7 @@
     },
     {
       "id": "q-3.3-0008",
-      "source": "flowchart TB\n  AD([\"管理者を含むユーザー\"])\n  subgraph V[\"AWS Backup のボールト\"]\n    BK@{ svc: \"AWS Backup\", label: \"バックアップ\" }\n    VL[\"✔ D: コンプライアンスモードの Vault Lock（猶予期間つき）\"]\n  end\n  AD -. \"⚠ 保持期間が終わるまで削除・変更は不可\" .-> BK\n  VL == \"猶予期間の間にテスト。その後は誰も変更できない\" ==> BK\n  A[\"⚠ A: ガバナンスモードは権限があれば消せる\"] -.- VL\n  B[\"⚠ B: IAM ポリシーは管理者が変えられる\"] -.- AD\n  C[\"⚠ C: 猶予期間なしはテストできない\"] -.- VL\n",
+      "source": "flowchart TB\n  AD([\"管理者を含むユーザー\"])\n  subgraph V[\"AWS Backup のボールト\"]\n    BK@{ svc: \"AWS Backup\", label: \"バックアップ\" }\n    VL[\"✔ D: コンプライアンスモードの Vault Lock（猶予期間つき）\"]\n  end\n  AD -. \"保持期間が終わるまで削除・変更は不可\" .-> BK\n  VL == \"猶予期間の間にテスト。その後は誰も変更できない\" ==> BK\n  A[\"⚠ A: ガバナンスモードは権限があれば消せる\"] -.- VL\n  B[\"⚠ B: IAM ポリシーは管理者が変えられる\"] -.- AD\n  C[\"⚠ C: 猶予期間なしはテストできない\"] -.- VL\n",
       "alt": "ランサムウェア対策の AWS Backup のボールトの図。猶予期間つきのコンプライアンスモードの Vault Lock なら、猶予の間に設定をテストでき、ロック後は保持期間が終わるまで誰も削除や変更ができない（D）。ガバナンスモード（A）は権限があれば消せる。"
     },
     {
