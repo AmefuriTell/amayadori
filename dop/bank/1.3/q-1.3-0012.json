@@ -1,0 +1,66 @@
+{
+  "task": "1.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.3-0012",
+  "services": [
+    "EC2 Image Builder"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An EC2 Image Builder pipeline has produced a new AMI every week for two years. The snapshot storage cost for old output AMIs keeps growing. The company wants images to be marked as deprecated after 90 days and removed after 180 days, and the rules must apply to the images that already exist. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "EC2 Image Builder のパイプラインが 2 年間、毎週新しい AMI を作ってきました。古い出力 AMI のスナップショットのストレージ費用が増え続けています。会社は、イメージを 90 日後に非推奨にし、180 日後に削除したいと考えており、その決まりは既にあるイメージにも適用する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Update the pipeline's distribution configuration so that it keeps only the AMIs from the last 180 days in each Region.",
+      "text_ja": "パイプラインの配布設定を更新し、各リージョンで直近 180 日の AMI だけを残すようにする。"
+    },
+    {
+      "key": "B",
+      "text": "Create an Image Builder lifecycle policy with a rule that deprecates images after 90 days and a rule that deletes images after 180 days.",
+      "text_ja": "90 日後にイメージを非推奨にするルールと、180 日後にイメージを削除するルールを持つ Image Builder のライフサイクルポリシーを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Schedule an AWS Lambda function that lists the AMIs, deprecates AMIs older than 90 days, and deregisters AMIs and deletes their snapshots after 180 days.",
+      "text_ja": "AMI を一覧し、90 日を超えた AMI を非推奨にし、180 日を超えた AMI の登録解除とスナップショットの削除を行う AWS Lambda 関数をスケジュールで実行する。"
+    },
+    {
+      "key": "D",
+      "text": "Ask an engineer to review the AMIs every month, deprecate the old ones in the console, and delete those that are older than 180 days.",
+      "text_ja": "エンジニアが毎月 AMI を確認し、古いものをコンソールで非推奨にし、180 日を超えたものを削除する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Image Builder のライフサイクルポリシーは、イメージを非推奨にするルールや、年数・数でイメージのリソースを削除するルールを持ち、AMI のスナップショットなどの費用を減らします。配布設定の変更はその後に作るイメージにだけ効き、既に配布したイメージは手作業かライフサイクルポリシーで消すまで残ります。",
+    "per_choice": {
+      "A": "配布設定の変更は更新後に作るイメージにだけ適用され、既にあるイメージは残るため要件に合いません。",
+      "B": "正しい。非推奨と削除をルールで決められ、既にあるイメージにも適用されます。",
+      "C": "動きますが、一覧・非推奨・削除の独自のコードを保守する必要があり、組み込みのライフサイクルポリシーより手間がかかります。",
+      "D": "毎月の手作業が必要で、オーバーヘッドが大きくなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+      "source_id": "S10",
+      "quote": "Lifecycle rules keep your images fresh and reduce infrastructure costs, such as snapshot storage for output AMIs and Amazon ECR repository storage for containers."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+      "source_id": "S10",
+      "quote": "For example, you can configure a policy to deprecate images after 90 days, disable them after 120 days, and delete them after 180 days."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+      "source_id": "S7",
+      "quote": "When you update a distribution configuration, the changes apply only to images that Image Builder creates after the update."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

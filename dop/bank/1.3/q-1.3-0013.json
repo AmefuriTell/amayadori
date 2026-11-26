@@ -1,0 +1,72 @@
+{
+  "task": "1.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.3-0013",
+  "services": [
+    "EC2 Image Builder",
+    "Amazon ECR"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Developers build a service's container image from a Dockerfile on their laptops and push it to an Amazon ECR repository in us-east-1. The company wants the image to be rebuilt on a schedule so it picks up updates, wants the image to be tested before it is published, and needs a copy in eu-central-1. The company does not want to write or maintain build scripts. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "開発者は、サービスのコンテナイメージをノートパソコン上で Dockerfile からビルドし、us-east-1 の Amazon ECR リポジトリへプッシュしています。会社は、更新を取り込むためにイメージをスケジュールで作り直し、公開する前にイメージをテストし、eu-central-1 にもコピーを置きたいと考えています。会社はビルドのスクリプトを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an EC2 Image Builder pipeline with a container recipe that uses the Dockerfile and targets the ECR repository, add test components and a schedule, and add container distribution for eu-central-1.",
+      "text_ja": "Dockerfile を使い ECR リポジトリを出力先にするコンテナレシピと、テストコンポーネントとスケジュールを持つ EC2 Image Builder のパイプラインを作り、eu-central-1 へのコンテナの配布を追加する。"
+    },
+    {
+      "key": "B",
+      "text": "Create an EC2 Image Builder pipeline with an image recipe that installs Docker and the service, and distribute the output AMI to both Regions on a schedule.",
+      "text_ja": "Docker とサービスをインストールするイメージレシピを持つ EC2 Image Builder のパイプラインを作り、出力の AMI をスケジュールで両方のリージョンへ配布する。"
+    },
+    {
+      "key": "C",
+      "text": "Create an EC2 Image Builder pipeline with a container recipe, test components, and a schedule. Distribute the image only to the us-east-1 ECR repository and have developers push a copy to eu-central-1.",
+      "text_ja": "コンテナレシピ、テストコンポーネント、スケジュールを持つ EC2 Image Builder のパイプラインを作る。イメージは us-east-1 の ECR リポジトリにだけ配布し、開発者が eu-central-1 へコピーをプッシュする。"
+    },
+    {
+      "key": "D",
+      "text": "Create an AWS CodeBuild project with a buildspec that builds the image, runs test commands, and pushes the image to repositories in both Regions. Start it with an Amazon EventBridge schedule.",
+      "text_ja": "イメージをビルドし、テストのコマンドを実行し、両方のリージョンのリポジトリへイメージをプッシュする buildspec を持つ AWS CodeBuild プロジェクトを作る。Amazon EventBridge のスケジュールで開始する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "Image Builder のコンテナレシピは Dockerfile と出力先の Amazon ECR リポジトリを定め、パイプラインはスケジュールで自動ビルドし、テストに合格した時だけ配布します。配布設定にはリージョンごとのコンテナの配布を入れられるので、別のリージョンへのコピーも組み込みで行えます。",
+    "per_choice": {
+      "A": "正しい。スケジュールでの作り直し、公開前のテスト、別リージョンへの配布が、スクリプト無しの設定でそろいます。",
+      "B": "出力が AMI になり、コンテナイメージを ECR に公開するという目的に合いません。",
+      "C": "スケジュールとテストは満たしますが、eu-central-1 へのコピーが手作業のままです。",
+      "D": "動きますが、ビルド・テスト・プッシュの buildspec を書いて保守する必要があり、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+      "source_id": "S4",
+      "quote": "Container recipes additionally define Dockerfiles, and the target Amazon ECR repository for your output Docker container image."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#image-builder-distribution",
+      "source_id": "S6",
+      "quote": "EC2 Image Builder can distribute AMIs or container images to any AWS Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+      "source_id": "S7",
+      "quote": "The available outputs are AMI distribution, container distribution,"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+      "source_id": "S1",
+      "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

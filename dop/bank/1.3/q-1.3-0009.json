@@ -1,0 +1,66 @@
+{
+  "task": "1.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.3-0009",
+  "services": [
+    "EC2 Image Builder"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company creates its hardened Amazon Linux AMI by hand each month. An engineer launches an EC2 instance, runs patch and hardening scripts, creates an AMI, and then launches another instance to run checks. The company wants patched AMIs to be produced every week, wants each AMI to pass the checks before teams can use it, and does not want to maintain custom orchestration code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、強化した Amazon Linux の AMI を毎月手作業で作っています。エンジニアが EC2 インスタンスを起動し、パッチ適用と強化のスクリプトを実行して AMI を作り、さらに別のインスタンスを起動して確認を行います。会社は、パッチを当てた AMI を毎週作り、各 AMI が確認に合格してからチームが使えるようにしたいと考えており、独自のオーケストレーションのコードは保守したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function each week. The function launches an instance with the scripts in user data, calls CreateImage, and launches a second instance to run the checks.",
+      "text_ja": "毎週 AWS Lambda 関数を呼び出す Amazon EventBridge のスケジュールを作る。関数は、ユーザーデータにスクリプトを入れたインスタンスを起動し、CreateImage を呼び、確認を行う 2 台目のインスタンスを起動する。"
+    },
+    {
+      "key": "B",
+      "text": "Create an EC2 Image Builder pipeline that uses manual builds. Use an image recipe with build and test components, and have an engineer start the pipeline each week.",
+      "text_ja": "手動ビルドを使う EC2 Image Builder のパイプラインを作る。ビルドとテストのコンポーネントを入れたイメージレシピを使い、エンジニアが毎週パイプラインを開始する。"
+    },
+    {
+      "key": "C",
+      "text": "Create an EC2 Image Builder pipeline with a weekly schedule. Use an image recipe with build components for the patching and hardening steps and test components for the checks, and add a distribution configuration.",
+      "text_ja": "毎週のスケジュールを設定した EC2 Image Builder のパイプラインを作る。パッチ適用と強化の手順にはビルドコンポーネント、確認にはテストコンポーネントを入れたイメージレシピを使い、配布設定を追加する。"
+    },
+    {
+      "key": "D",
+      "text": "Create an EC2 Image Builder pipeline with a weekly schedule and an image recipe that has only build components. Ask each team to test the AMI after it is distributed.",
+      "text_ja": "毎週のスケジュールと、ビルドコンポーネントだけのイメージレシピを持つ EC2 Image Builder のパイプラインを作る。配布された後に各チームが AMI をテストする。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Image Builder のパイプラインはスケジュールで自動ビルドでき、レシピのビルドコンポーネントでカスタマイズし、テストコンポーネントでイメージを確かめます。設定したテストがすべて成功した時だけイメージを配布するので、確認に合格した AMI だけがチームに渡ります。",
+    "per_choice": {
+      "A": "動きますが、インスタンスの起動・AMI の作成・確認を Lambda 関数で組み立てる独自のコードを保守する必要があります。",
+      "B": "テストで止まる仕組みはありますが、毎週の開始が手作業で、自動化の要件に合いません。",
+      "C": "正しい。毎週のスケジュール、コンポーネントによる手順、テストに合格した時だけの配布が、独自のコード無しでそろいます。",
+      "D": "自動ではありますが、配布の前にテストしないため、確認に合格する前の AMI がチームに渡ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+      "source_id": "S1",
+      "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+      "source_id": "S1",
+      "quote": "You can automate your builds by providing your build execution schedule preference."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+      "source_id": "S3",
+      "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
