@@ -1,0 +1,67 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0007",
+  "services": [
+    "Amazon ECS",
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon ECS service runs on EC2 instances in an Auto Scaling group. Service Auto Scaling with target tracking adds tasks during traffic peaks, but many new tasks stay in the PENDING state because the instances have no free capacity. The company wants the number of instances to grow and shrink automatically with the tasks' resource needs, without paying for idle peak capacity all day and without writing custom code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "Amazon ECS のサービスが、Auto Scaling グループの EC2 インスタンスで動いています。ターゲット追跡のサービスの自動スケーリングがトラフィックの山でタスクを増やしますが、インスタンスに空きの容量が無いため、多くの新しいタスクが PENDING の状態のままになります。会社は、タスクが必要とするリソースに合わせてインスタンスの数を自動で増減させたいと考えており、山の分の使われない容量の費用を一日中払うことも、独自のコードを書くことも避けたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Raise the Auto Scaling group's minimum size to the number of instances needed at the daily peak.",
+      "text_ja": "Auto Scaling グループの最小サイズを、毎日の山で必要なインスタンスの数まで上げる。"
+    },
+    {
+      "key": "B",
+      "text": "Create an Auto Scaling group capacity provider with managed scaling and a targetCapacity, and use it for the service.",
+      "text_ja": "マネージドスケーリングと targetCapacity を設定した Auto Scaling グループのキャパシティープロバイダーを作り、サービスで使う。"
+    },
+    {
+      "key": "C",
+      "text": "Schedule an AWS Lambda function that counts PENDING tasks every minute and changes the Auto Scaling group's desired capacity.",
+      "text_ja": "1 分ごとに PENDING のタスクを数えて Auto Scaling グループの希望する容量を変える AWS Lambda 関数をスケジュールで実行する。"
+    },
+    {
+      "key": "D",
+      "text": "Change the service's target tracking policy to a lower CPU target so that tasks are added earlier during traffic peaks.",
+      "text_ja": "サービスのターゲット追跡ポリシーの CPU の目標を下げ、トラフィックの山でタスクが早めに増えるようにする。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Auto Scaling グループのキャパシティープロバイダーでマネージドスケーリングを有効にし、targetCapacity を設定すると、タスクが使うリソースに合わせて ECS がインスタンスのスケールアウトとスケールインを管理します。インスタンスの数がタスクの必要に追いつき、独自のコードも要りません。",
+    "per_choice": {
+      "A": "PENDING は減りますが、山の分のインスタンスを一日中動かすことになり、費用の要件に反します。",
+      "B": "正しい。ECS がタスクのリソースの使用に基づいてインスタンスを増減するので、PENDING のタスクが解消し、使われない容量も減らせます。",
+      "C": "動きますが、インスタンスの数を調整する独自のコードを作って保守する必要があります。",
+      "D": "タスクが早く増えるだけで、インスタンスの容量は増えないため、PENDING のタスクは解消しません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#cluster-auto-scaling",
+      "source_id": "S2",
+      "quote": "You turn on managed scaling when you create the Amazon ECS Auto Scaling group capacity provider."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#cluster-auto-scaling",
+      "source_id": "S2",
+      "quote": "Amazon ECS then manages the scale-in and scale-out actions based on the resource utilization that your tasks use."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts",
+      "source_id": "S1",
+      "quote": "Automatic scaling is the ability to increase or decrease the desired number of tasks in your Amazon ECS service automatically."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

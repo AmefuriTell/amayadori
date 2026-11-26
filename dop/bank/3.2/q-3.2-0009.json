@@ -1,0 +1,66 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0009",
+  "services": [
+    "Amazon ECS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company deploys an Amazon ECS service with the rolling update (ECS) deployment controller. Last week, a new image that crashed at startup was deployed, and ECS kept trying to start new tasks until an engineer noticed and manually redeployed the previous task definition. The company wants failed deployments to be detected and returned to the last working deployment automatically, without changing the deployment controller. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、ローリング更新（ECS）のデプロイコントローラーで Amazon ECS のサービスをデプロイしています。先週、起動時にクラッシュする新しいイメージがデプロイされ、エンジニアが気づいて前のタスク定義を手作業で再デプロイするまで、ECS は新しいタスクを起動し続けました。会社は、デプロイコントローラーを変えずに、失敗したデプロイを検知して、最後に動いていたデプロイへ自動で戻したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an Amazon EventBridge rule for stopped tasks that invokes an AWS Lambda function to update the service with the previous task definition.",
+      "text_ja": "停止したタスクの Amazon EventBridge のルールを作り、前のタスク定義でサービスを更新する AWS Lambda 関数を呼び出す。"
+    },
+    {
+      "key": "B",
+      "text": "Switch the service to the AWS CodeDeploy blue/green deployment controller and configure automatic rollback in the deployment group.",
+      "text_ja": "サービスを AWS CodeDeploy の Blue/Green のデプロイコントローラーに切り替え、デプロイグループで自動ロールバックを設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Create an Amazon CloudWatch alarm on the number of running tasks that notifies the engineers so they can redeploy the previous task definition.",
+      "text_ja": "実行中のタスクの数に Amazon CloudWatch アラームを作ってエンジニアに通知し、エンジニアが前のタスク定義を再デプロイできるようにする。"
+    },
+    {
+      "key": "D",
+      "text": "Turn on the deployment circuit breaker for the service with the rollback option enabled.",
+      "text_ja": "サービスのデプロイのサーキットブレーカーを、ロールバックのオプションを有効にして使う。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "デプロイのサーキットブレーカーは、ローリング更新でタスクが安定した状態に達するかを判断する仕組みで、失敗したデプロイを COMPLETED の状態のデプロイへ自動でロールバックするオプションがあります。ローリング更新（ECS）のデプロイコントローラーのサービスでだけ使えるので、コントローラーを変えずに済みます。",
+    "per_choice": {
+      "A": "動きますが、失敗の判断と戻しを Lambda 関数で作って保守する必要があり、組み込みの仕組みより手間がかかります。",
+      "B": "自動で戻せますが、デプロイコントローラーを変えないという要件に反します。",
+      "C": "通知だけで戻しは手作業のままで、自動で戻すという要件に合いません。",
+      "D": "正しい。今のローリング更新のまま、失敗を検知して最後に完了したデプロイへ自動で戻します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html#deployment-circuit-breaker",
+      "source_id": "S4",
+      "quote": "The deployment circuit breaker has an option that will automatically roll back a failed deployment to the deployment that is in the COMPLETED state."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html#deployment-circuit-breaker",
+      "source_id": "S4",
+      "quote": "The deployment circuit breaker is only supported for Amazon ECS services that use the rolling update (ECS) deployment controller."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html#deployment-circuit-breaker",
+      "source_id": "S4",
+      "quote": "The deployment circuit breaker is the rolling update mechanism that determines if the tasks reach a steady state."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
