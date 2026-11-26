@@ -1,0 +1,148 @@
+{
+  "item": "C-0059",
+  "questions": [
+    {
+      "task": "4.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.3-0001",
+      "services": [
+        "Amazon EventBridge",
+        "Amazon SNS",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "The operations team wants an email through an existing Amazon SNS topic whenever any EC2 instance in the account is terminated. The team must not be notified about other instance state changes, such as stopping or starting, and does not want to maintain any code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "運用チームは、アカウントのどの EC2 インスタンスが終了した時にも、既存の Amazon SNS トピックを通してメールを受け取りたいと考えています。停止や開始など、インスタンスのほかの状態の変化は通知してはならず、コードを保守したくもありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an EventBridge rule whose event pattern matches EC2 state-change notification events from Amazon EC2 with the state terminated, set the SNS topic as the target, and allow EventBridge to publish to the topic.",
+          "text_ja": "Amazon EC2 からの EC2 の状態変化の通知のうち状態が terminated のイベントに一致するイベントパターンの EventBridge ルールを作り、SNS トピックをターゲットにして、EventBridge がトピックへ発行できるようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Create an EventBridge rule that matches all EC2 state-change notification events and sends them to an AWS Lambda function that publishes to the SNS topic only for terminated instances.",
+          "text_ja": "EC2 の状態変化の通知のイベントすべてに一致する EventBridge ルールを作り、終了したインスタンスの時だけ SNS トピックへ発行する AWS Lambda 関数へ送る。"
+        },
+        {
+          "key": "C",
+          "text": "Schedule an AWS Lambda function that calls DescribeInstances every 5 minutes and publishes to the SNS topic when it finds a newly terminated instance.",
+          "text_ja": "5 分ごとに DescribeInstances を呼び、新しく終了したインスタンスを見つけたら SNS トピックへ発行する AWS Lambda 関数をスケジュールで実行する。"
+        },
+        {
+          "key": "D",
+          "text": "Create an EventBridge rule that matches all EC2 state-change notification events, set the SNS topic as the target, and ask the team to ignore emails for other states.",
+          "text_ja": "EC2 の状態変化の通知のイベントすべてに一致する EventBridge ルールを作って SNS トピックをターゲットにし、ほかの状態のメールはチームが無視する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "イベントパターンは、どのイベントをターゲットへ送るかを決めるもので、イベントのソースや detail-type だけでなく、本文の state のような値でも絞り込めます。SNS トピックをターゲットにする時は、EventBridge がトピックへ発行できるようにトピックの設定を変えます。",
+        "per_choice": {
+          "A": "正しい。パターンで終了のイベントだけを選び、コード無しで SNS へ送れます。",
+          "B": "動きますが、絞り込みのコードを Lambda 関数で保守する必要があり、イベントパターンで済む所に手間がかかります。",
+          "C": "動きますが、ポーリングのコードを保守する必要があり、通知も最大 5 分遅れます。",
+          "D": "ほかの状態の変化も通知され、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "source_id": "S1",
+          "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "source_id": "S2",
+          "quote": "The following event pattern selects all Amazon EC2 instance-termination events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "source_id": "S2",
+          "quote": "the event pattern includes fields about the event--source and detail-type--as well as a field from the event body--state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-use-resource-based.html#eb-sns-permissions",
+          "source_id": "S10",
+          "quote": "To allow EventBridge to publish to an Amazon SNS topic, use the aws sns get-topic-attributes and the aws sns set-topic-attributes commands."
+        }
+      ]
+    },
+    {
+      "task": "4.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.3-0002",
+      "services": [
+        "Amazon EventBridge",
+        "Amazon SNS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An EventBridge rule sends EC2 instance termination events to an Amazon SNS topic that emails the on-call engineers. The engineers receive the full event JSON and find it hard to read. They want a short message such as \"Instance i-0abc in us-east-1 was terminated\" built from values in each event. The company does not want to add compute resources or code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "EventBridge ルールが、EC2 インスタンスの終了のイベントを、当番のエンジニアへメールを送る Amazon SNS トピックに送っています。エンジニアにはイベントの JSON 全体が届き、読みにくいと感じています。エンジニアは、各イベントの値から作った「Instance i-0abc in us-east-1 was terminated」のような短いメッセージを受け取りたいと考えています。会社は、コンピューティングのリソースやコードを足したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the rule's event pattern to match only the instance ID and Region fields so that the email contains only those values.",
+          "text_ja": "メールにその値だけが入るよう、ルールのイベントパターンをインスタンス ID とリージョンのフィールドだけに一致するように変える。"
+        },
+        {
+          "key": "B",
+          "text": "Send the events to an AWS Lambda function that builds the message from the event and publishes it to the SNS topic.",
+          "text_ja": "イベントを AWS Lambda 関数へ送り、関数がイベントからメッセージを作って SNS トピックへ発行する。"
+        },
+        {
+          "key": "C",
+          "text": "Configure an input transformer on the rule's target with an input path that stores the instance ID and Region in variables, and an input template that uses them.",
+          "text_ja": "ルールのターゲットに入力トランスフォーマーを設定し、入力パスでインスタンス ID とリージョンを変数に入れ、それを使う入力テンプレートを書く。"
+        },
+        {
+          "key": "D",
+          "text": "Keep the rule as it is, and ask the engineers to search each email for the instance ID and the Region fields.",
+          "text_ja": "ルールはそのままにし、エンジニアが各メールからインスタンス ID とリージョンのフィールドを探す。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "入力トランスフォーマーを使うと、ルールのターゲットへ渡す前にイベントの文を変えられます。入力パスで JSON パスを使って元のイベントの値を変数に入れ、入力テンプレートの中で <変数名> として使うと、元のイベントの代わりに変換したものがターゲットへ送られます。",
+        "per_choice": {
+          "A": "イベントパターンはどのイベントを送るかを決めるもので、送る中身は変わらず、JSON 全体が届いたままです。",
+          "B": "動きますが、メッセージを作るコードと関数を足して保守することになり、要件に反します。",
+          "C": "正しい。コード無しで、イベントの値から作った短いメッセージをターゲットへ送れます。",
+          "D": "読みにくさが変わらず、要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+          "source_id": "S8",
+          "quote": "You can customize the text from an event before EventBridge passes the information to the target of a rule."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+          "source_id": "S8",
+          "quote": "The transformed event is sent to a target instead of the original event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input-path",
+          "source_id": "S9",
+          "quote": "Input Path is used to define variables. Use JSON path to reference items in your event and store those values in variables."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "source_id": "S1",
+          "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+        }
+      ]
+    }
+  ]
+}

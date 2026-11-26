@@ -1,0 +1,72 @@
+{
+  "task": "4.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.3-0008",
+  "services": [
+    "Amazon EventBridge",
+    "Amazon SNS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An EventBridge rule sends EC2 instance termination events to an Amazon SNS topic that emails the on-call engineers. The engineers receive the full event JSON and find it hard to read. They want a short message such as \"Instance i-0abc in us-east-1 was terminated\" built from values in each event. The company does not want to add compute resources or code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "EventBridge ルールが、EC2 インスタンスの終了のイベントを、当番のエンジニアへメールを送る Amazon SNS トピックに送っています。エンジニアにはイベントの JSON 全体が届き、読みにくいと感じています。エンジニアは、各イベントの値から作った「Instance i-0abc in us-east-1 was terminated」のような短いメッセージを受け取りたいと考えています。会社は、コンピューティングのリソースやコードを足したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure an input transformer on the rule's target with an input path that stores the instance ID and Region in variables, and an input template that uses them.",
+      "text_ja": "ルールのターゲットに入力トランスフォーマーを設定し、入力パスでインスタンス ID とリージョンを変数に入れ、それを使う入力テンプレートを書く。"
+    },
+    {
+      "key": "B",
+      "text": "Change the rule's event pattern to match only the instance ID and Region fields so that the email contains only those values.",
+      "text_ja": "メールにその値だけが入るよう、ルールのイベントパターンをインスタンス ID とリージョンのフィールドだけに一致するように変える。"
+    },
+    {
+      "key": "C",
+      "text": "Send the events to an AWS Lambda function that builds the message from the event and publishes it to the SNS topic.",
+      "text_ja": "イベントを AWS Lambda 関数へ送り、関数がイベントからメッセージを作って SNS トピックへ発行する。"
+    },
+    {
+      "key": "D",
+      "text": "Keep the rule as it is, and ask the engineers to search each email for the instance ID and the Region fields.",
+      "text_ja": "ルールはそのままにし、エンジニアが各メールからインスタンス ID とリージョンのフィールドを探す。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "入力トランスフォーマーを使うと、ルールのターゲットへ渡す前にイベントの文を変えられます。入力パスで JSON パスを使って元のイベントの値を変数に入れ、入力テンプレートの中で <変数名> として使うと、元のイベントの代わりに変換したものがターゲットへ送られます。",
+    "per_choice": {
+      "A": "正しい。コード無しで、イベントの値から作った短いメッセージをターゲットへ送れます。",
+      "B": "イベントパターンはどのイベントを送るかを決めるもので、送る中身は変わらず、JSON 全体が届いたままです。",
+      "C": "動きますが、メッセージを作るコードと関数を足して保守することになり、要件に反します。",
+      "D": "読みにくさが変わらず、要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+      "source_id": "S8",
+      "quote": "You can customize the text from an event before EventBridge passes the information to the target of a rule."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+      "source_id": "S8",
+      "quote": "The transformed event is sent to a target instead of the original event."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input-path",
+      "source_id": "S9",
+      "quote": "Input Path is used to define variables. Use JSON path to reference items in your event and store those values in variables."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+      "source_id": "S1",
+      "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
