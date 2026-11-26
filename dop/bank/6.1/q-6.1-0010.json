@@ -1,0 +1,74 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0010",
+  "services": [
+    "AWS Secrets Manager",
+    "Amazon RDS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An application connects directly to an Amazon RDS database by using a database user that has only the privileges that the application needs. The user's password is stored in AWS Secrets Manager and must be rotated automatically. The application must keep working with the highest availability while a rotation is in progress, and the application must not use the master user. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "あるアプリケーションは、アプリケーションに必要な権限だけを持つデータベースユーザーで、Amazon RDS のデータベースに直接接続しています。ユーザーのパスワードは AWS Secrets Manager に保存されており、自動でローテーションする必要があります。ローテーションの最中もアプリケーションは最も高い可用性で動き続ける必要があり、アプリケーションはマスターユーザーを使ってはいけません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure rotation for the application user's secret with the alternating users strategy.",
+      "text_ja": "アプリケーションのユーザーのシークレットに、交代ユーザー（alternating users）の戦略でローテーションを設定する。"
+    },
+    {
+      "key": "B",
+      "text": "Create a separate secret that stores database superuser credentials for the rotation to use.",
+      "text_ja": "ローテーションが使う、データベースのスーパーユーザーの認証情報を保存した別のシークレットを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Configure rotation for the application user's secret with the single user strategy.",
+      "text_ja": "アプリケーションのユーザーのシークレットに、シングルユーザーの戦略でローテーションを設定する。"
+    },
+    {
+      "key": "D",
+      "text": "Change the application to connect with the master user, and use managed rotation for the master user secret.",
+      "text_ja": "アプリケーションがマスターユーザーで接続するように変え、マスターユーザーのシークレットにマネージドローテーションを使う。"
+    },
+    {
+      "key": "E",
+      "text": "Place Amazon RDS Proxy between the application and the database, and use the alternating users strategy through the proxy.",
+      "text_ja": "アプリケーションとデータベースの間に Amazon RDS Proxy を置き、プロキシを通して交代ユーザーの戦略を使う。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "アプリケーションのユーザーで最も高い可用性を求める時は、交代ユーザー（alternating users）の戦略を使えます。この戦略では最初のユーザーを複製するので、スーパーユーザーの認証情報を保存したシークレットが別に必要です。",
+    "per_choice": {
+      "A": "正しい。アプリケーションのユーザーで最も高い可用性を得られる戦略です。",
+      "B": "正しい。交代ユーザーの戦略はユーザーを複製するため、多くのユーザーには無い権限を持つスーパーユーザーの認証情報が要ります。",
+      "C": "自動でローテーションできますが、最も高い可用性のための戦略ではありません。",
+      "D": "アプリケーションでマスターユーザーを使わないという要件と、最小の権限のユーザーを使う推奨に反します。",
+      "E": "Amazon RDS Proxy は交代ユーザーの戦略に対応していません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+      "source_id": "S2",
+      "quote": "For application users, for highest availability, you can use the Alternating users rotation strategy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+      "source_id": "S3",
+      "quote": "You need a secret with superuser credentials because rotation clones the first user, and most users do not have that permission."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+      "source_id": "S3",
+      "quote": "Note that Amazon RDS Proxy does not support the alternating users strategy."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

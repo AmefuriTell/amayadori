@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 183,
+  "count": 187,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -10443,6 +10443,261 @@
         {
           "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
           "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0009",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company stores the master user credentials of an Amazon Aurora DB cluster in AWS Secrets Manager. The security team requires the credentials to be rotated automatically. The DevOps team does not want to deploy, patch, or troubleshoot any rotation function and wants the service to configure and manage the rotation. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、Amazon Aurora の DB クラスターのマスターユーザーの認証情報を AWS Secrets Manager に保存しています。セキュリティチームは、認証情報を自動でローテーションすることを求めています。DevOps チームは、ローテーションの関数をデプロイしたり、パッチを当てたり、トラブルシューティングしたりしたくなく、サービスにローテーションの設定と管理を任せたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on rotation by Lambda function with the single user strategy, and maintain the rotation function.",
+          "text_ja": "シングルユーザーの戦略で Lambda 関数によるローテーションを有効にし、ローテーションの関数を保守する。"
+        },
+        {
+          "key": "B",
+          "text": "Write a scheduled AWS Lambda function that changes the master password and updates the secret every 30 days.",
+          "text_ja": "30 日ごとにマスターパスワードを変えてシークレットを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Use Secrets Manager managed rotation that Aurora offers for the master user credentials.",
+          "text_ja": "Aurora がマスターユーザーの認証情報に提供する、Secrets Manager のマネージドローテーションを使う。"
+        },
+        {
+          "key": "D",
+          "text": "Move the credentials to a SecureString parameter and have the database administrator change them every quarter.",
+          "text_ja": "認証情報を SecureString パラメータへ移し、データベースの管理者が四半期ごとに変える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Aurora と RDS はマスターユーザーの認証情報のマネージドローテーションを提供しており、サービスがローテーションの設定と管理を行います。マネージドローテーションは Lambda 関数を使わないので、関数の保守も要りません。",
+        "per_choice": {
+          "A": "自動でローテーションできますが、ローテーションの関数を保守する必要があり、要件に反します。",
+          "B": "動きますが、独自の関数を書いて保守する必要があります。",
+          "C": "正しい。サービスがローテーションを設定・管理し、Lambda 関数を使わないので、関数の保守が要りません。",
+          "D": "手作業で、自動のローテーションになりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "Amazon Aurora offers managed rotation for master user credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "With managed rotation, you don't use an AWS Lambda function to update the secret and the credentials in the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "Managed rotation – For most managed secrets, you use managed rotation, where the service configures and manages rotation for you."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0010",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "Amazon RDS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application connects directly to an Amazon RDS database by using a database user that has only the privileges that the application needs. The user's password is stored in AWS Secrets Manager and must be rotated automatically. The application must keep working with the highest availability while a rotation is in progress, and the application must not use the master user. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "あるアプリケーションは、アプリケーションに必要な権限だけを持つデータベースユーザーで、Amazon RDS のデータベースに直接接続しています。ユーザーのパスワードは AWS Secrets Manager に保存されており、自動でローテーションする必要があります。ローテーションの最中もアプリケーションは最も高い可用性で動き続ける必要があり、アプリケーションはマスターユーザーを使ってはいけません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure rotation for the application user's secret with the alternating users strategy.",
+          "text_ja": "アプリケーションのユーザーのシークレットに、交代ユーザー（alternating users）の戦略でローテーションを設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Create a separate secret that stores database superuser credentials for the rotation to use.",
+          "text_ja": "ローテーションが使う、データベースのスーパーユーザーの認証情報を保存した別のシークレットを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Configure rotation for the application user's secret with the single user strategy.",
+          "text_ja": "アプリケーションのユーザーのシークレットに、シングルユーザーの戦略でローテーションを設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Change the application to connect with the master user, and use managed rotation for the master user secret.",
+          "text_ja": "アプリケーションがマスターユーザーで接続するように変え、マスターユーザーのシークレットにマネージドローテーションを使う。"
+        },
+        {
+          "key": "E",
+          "text": "Place Amazon RDS Proxy between the application and the database, and use the alternating users strategy through the proxy.",
+          "text_ja": "アプリケーションとデータベースの間に Amazon RDS Proxy を置き、プロキシを通して交代ユーザーの戦略を使う。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "アプリケーションのユーザーで最も高い可用性を求める時は、交代ユーザー（alternating users）の戦略を使えます。この戦略では最初のユーザーを複製するので、スーパーユーザーの認証情報を保存したシークレットが別に必要です。",
+        "per_choice": {
+          "A": "正しい。アプリケーションのユーザーで最も高い可用性を得られる戦略です。",
+          "B": "正しい。交代ユーザーの戦略はユーザーを複製するため、多くのユーザーには無い権限を持つスーパーユーザーの認証情報が要ります。",
+          "C": "自動でローテーションできますが、最も高い可用性のための戦略ではありません。",
+          "D": "アプリケーションでマスターユーザーを使わないという要件と、最小の権限のユーザーを使う推奨に反します。",
+          "E": "Amazon RDS Proxy は交代ユーザーの戦略に対応していません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "For application users, for highest availability, you can use the Alternating users rotation strategy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "You need a secret with superuser credentials because rotation clones the first user, and most users do not have that permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "Note that Amazon RDS Proxy does not support the alternating users strategy."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0011",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "AWS Lambda",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer turned on rotation by Lambda function for a secret of an Amazon RDS database that runs in private subnets. Rotation keeps failing, and Secrets Manager retries it several times. The function's permissions are correct, but the function cannot connect to the database. Which change will MOST likely fix the rotation?",
+      "stem_ja": "DevOps エンジニアは、プライベートサブネットで動く Amazon RDS のデータベースのシークレットに、Lambda 関数によるローテーションを有効にしました。ローテーションは失敗し続け、Secrets Manager が何度か再試行しています。関数の権限は正しいものの、関数がデータベースに接続できません。ローテーションを直せる可能性が最も高い変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run the rotation function in the same VPC and security group as the database, and make sure it can also reach Secrets Manager.",
+          "text_ja": "ローテーションの関数をデータベースと同じ VPC とセキュリティグループで動かし、Secrets Manager にも届くようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the timeout and the memory of the rotation function so that it has more time to connect.",
+          "text_ja": "接続により多くの時間をかけられるよう、ローテーションの関数のタイムアウトとメモリーを増やす。"
+        },
+        {
+          "key": "C",
+          "text": "Change the rotation schedule to a longer interval so that the function runs less often.",
+          "text_ja": "関数が動く回数が減るよう、ローテーションのスケジュールの間隔を長くする。"
+        },
+        {
+          "key": "D",
+          "text": "Attach an administrator policy to the function's execution role so that the function can call every AWS API.",
+          "text_ja": "関数がすべての AWS の API を呼べるよう、関数の実行ロールに管理者のポリシーをアタッチする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Lambda 関数によるローテーションでは、ローテーションの関数がネットワークを通して Secrets Manager とデータベースの両方に届く必要があります。勧められている VPC の構成では、関数をデータベースと同じ VPC とセキュリティグループに置きます。",
+        "per_choice": {
+          "A": "正しい。データベースと同じ VPC とセキュリティグループに置き、Secrets Manager にも届くようにすれば、関数が両方に接続できます。",
+          "B": "ネットワークで届かないので、時間を延ばしても接続できません。",
+          "C": "頻度を下げても、接続できないことは変わりません。",
+          "D": "権限は正しく、原因はネットワークです。権限を広げるだけで、最小の権限にも反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The last step is to make sure that the Lambda rotation function can access both Secrets Manager and your database through the network."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The rotation functions listed under Recommended VPC configurations have the same VPC and security group as the database, which helps the function access the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "If rotation fails, for example because Steps 3 and 4 are not yet completed, Secrets Manager retries the rotation process multiple times."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0012",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company in Japan (UTC+9) wants a secret to be rotated every day only between 02:00 and 03:00 Japan time, when traffic is lowest. The DevOps engineer will configure the rotation schedule with a cron expression and a rotation window. Which configuration meets this requirement with the LEAST amount of risk of rotating outside the low-traffic hour?",
+      "stem_ja": "日本（UTC+9）にある会社は、トラフィックが最も少ない日本時間の 02:00 から 03:00 の間にだけ、毎日シークレットをローテーションしたいと考えています。DevOps エンジニアは、cron 式とローテーションウィンドウでローテーションのスケジュールを設定します。トラフィックの少ない 1 時間の外でローテーションするおそれが最も小さい設定はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "cron(0 2 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(0 2 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "B",
+          "text": "cron(30 17 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(30 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "C",
+          "text": "cron(0 17 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(0 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "D",
+          "text": "cron(0 17 * * ? *) with the default rotation window that closes at the end of the day.",
+          "text_ja": "cron(0 17 * * ? *) と、日の終わりに閉じる既定のローテーションウィンドウ。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager のローテーションのスケジュールは UTC で、cron 式の分は 0 にする必要があります（ウィンドウは毎時ちょうどに始まる）。日本時間の 02:00 は UTC の 17:00 で、ウィンドウの中のどの時刻にもローテーションしうるので、ウィンドウを 1 時間にします。",
+        "per_choice": {
+          "A": "スケジュールは UTC なので、日本時間の 11:00 から 12:00 にローテーションしてしまいます。",
+          "B": "分が 0 でない cron 式は、Secrets Manager では使えません。",
+          "C": "正しい。UTC の 17:00 は日本時間の 02:00 で、1 時間のウィンドウの中でだけローテーションします。",
+          "D": "ウィンドウが長く、その中のどの時刻にもローテーションしうるため、トラフィックの少ない 1 時間の外で動くおそれがあります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotation schedules use UTC time zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "A cron expression for Secrets Manager must have 0 in the minutes field because Secrets Manager rotation windows start on the hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotates your secret at any time during the rotation window."
         }
       ],
       "low_confidence": false

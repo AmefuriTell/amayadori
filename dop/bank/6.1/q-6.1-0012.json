@@ -1,0 +1,66 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0012",
+  "services": [
+    "AWS Secrets Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company in Japan (UTC+9) wants a secret to be rotated every day only between 02:00 and 03:00 Japan time, when traffic is lowest. The DevOps engineer will configure the rotation schedule with a cron expression and a rotation window. Which configuration meets this requirement with the LEAST amount of risk of rotating outside the low-traffic hour?",
+  "stem_ja": "日本（UTC+9）にある会社は、トラフィックが最も少ない日本時間の 02:00 から 03:00 の間にだけ、毎日シークレットをローテーションしたいと考えています。DevOps エンジニアは、cron 式とローテーションウィンドウでローテーションのスケジュールを設定します。トラフィックの少ない 1 時間の外でローテーションするおそれが最も小さい設定はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "cron(0 2 * * ? *) with a rotation window of 1 hour.",
+      "text_ja": "cron(0 2 * * ? *) と、1 時間のローテーションウィンドウ。"
+    },
+    {
+      "key": "B",
+      "text": "cron(30 17 * * ? *) with a rotation window of 1 hour.",
+      "text_ja": "cron(30 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+    },
+    {
+      "key": "C",
+      "text": "cron(0 17 * * ? *) with a rotation window of 1 hour.",
+      "text_ja": "cron(0 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+    },
+    {
+      "key": "D",
+      "text": "cron(0 17 * * ? *) with the default rotation window that closes at the end of the day.",
+      "text_ja": "cron(0 17 * * ? *) と、日の終わりに閉じる既定のローテーションウィンドウ。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Secrets Manager のローテーションのスケジュールは UTC で、cron 式の分は 0 にする必要があります（ウィンドウは毎時ちょうどに始まる）。日本時間の 02:00 は UTC の 17:00 で、ウィンドウの中のどの時刻にもローテーションしうるので、ウィンドウを 1 時間にします。",
+    "per_choice": {
+      "A": "スケジュールは UTC なので、日本時間の 11:00 から 12:00 にローテーションしてしまいます。",
+      "B": "分が 0 でない cron 式は、Secrets Manager では使えません。",
+      "C": "正しい。UTC の 17:00 は日本時間の 02:00 で、1 時間のウィンドウの中でだけローテーションします。",
+      "D": "ウィンドウが長く、その中のどの時刻にもローテーションしうるため、トラフィックの少ない 1 時間の外で動くおそれがあります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+      "source_id": "S4",
+      "quote": "Secrets Manager rotation schedules use UTC time zone."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+      "source_id": "S4",
+      "quote": "A cron expression for Secrets Manager must have 0 in the minutes field because Secrets Manager rotation windows start on the hour."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+      "source_id": "S4",
+      "quote": "Secrets Manager rotates your secret at any time during the rotation window."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

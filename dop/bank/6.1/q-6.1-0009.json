@@ -1,0 +1,67 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0009",
+  "services": [
+    "AWS Secrets Manager",
+    "Amazon Aurora"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company stores the master user credentials of an Amazon Aurora DB cluster in AWS Secrets Manager. The security team requires the credentials to be rotated automatically. The DevOps team does not want to deploy, patch, or troubleshoot any rotation function and wants the service to configure and manage the rotation. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、Amazon Aurora の DB クラスターのマスターユーザーの認証情報を AWS Secrets Manager に保存しています。セキュリティチームは、認証情報を自動でローテーションすることを求めています。DevOps チームは、ローテーションの関数をデプロイしたり、パッチを当てたり、トラブルシューティングしたりしたくなく、サービスにローテーションの設定と管理を任せたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on rotation by Lambda function with the single user strategy, and maintain the rotation function.",
+      "text_ja": "シングルユーザーの戦略で Lambda 関数によるローテーションを有効にし、ローテーションの関数を保守する。"
+    },
+    {
+      "key": "B",
+      "text": "Write a scheduled AWS Lambda function that changes the master password and updates the secret every 30 days.",
+      "text_ja": "30 日ごとにマスターパスワードを変えてシークレットを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+    },
+    {
+      "key": "C",
+      "text": "Use Secrets Manager managed rotation that Aurora offers for the master user credentials.",
+      "text_ja": "Aurora がマスターユーザーの認証情報に提供する、Secrets Manager のマネージドローテーションを使う。"
+    },
+    {
+      "key": "D",
+      "text": "Move the credentials to a SecureString parameter and have the database administrator change them every quarter.",
+      "text_ja": "認証情報を SecureString パラメータへ移し、データベースの管理者が四半期ごとに変える。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Aurora と RDS はマスターユーザーの認証情報のマネージドローテーションを提供しており、サービスがローテーションの設定と管理を行います。マネージドローテーションは Lambda 関数を使わないので、関数の保守も要りません。",
+    "per_choice": {
+      "A": "自動でローテーションできますが、ローテーションの関数を保守する必要があり、要件に反します。",
+      "B": "動きますが、独自の関数を書いて保守する必要があります。",
+      "C": "正しい。サービスがローテーションを設定・管理し、Lambda 関数を使わないので、関数の保守が要りません。",
+      "D": "手作業で、自動のローテーションになりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+      "source_id": "S2",
+      "quote": "Amazon Aurora offers managed rotation for master user credentials."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+      "source_id": "S2",
+      "quote": "With managed rotation, you don't use an AWS Lambda function to update the secret and the credentials in the database."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+      "source_id": "S1",
+      "quote": "Managed rotation – For most managed secrets, you use managed rotation, where the service configures and manages rotation for you."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
