@@ -1,0 +1,225 @@
+{
+  "item": "C-0081",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company uses Amazon GuardDuty. Its security policy now requires every GuardDuty finding to be kept for at least 1 year for investigations. The company wants each new finding to be stored automatically, without people downloading findings and without custom polling code. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Keep the findings in GuardDuty and review them in the GuardDuty console when an investigation is needed."
+        },
+        {
+          "key": "B",
+          "text": "Create an EventBridge rule for GuardDuty findings that sends them to Amazon Data Firehose, which delivers them to Amazon S3."
+        },
+        {
+          "key": "C",
+          "text": "Ask a security engineer to export the findings from the console every week and upload the files to Amazon S3."
+        },
+        {
+          "key": "D",
+          "text": "Schedule an AWS Lambda function that calls the GuardDuty API every day, finds new findings, and writes them to Amazon S3."
+        }
+      ],
+      "explanation": {
+        "summary": "GuardDuty は検出結果を 90 日間保存し、すべての検出結果を自動で Amazon EventBridge にイベントとして送ります。EventBridge を使えば、検出結果を好きな保存先へ送り、好きなだけ長く残せます。",
+        "per_choice": {
+          "A": "GuardDuty は検出結果を 90 日間しか保存しないため、1 年間残す要件を満たしません。",
+          "B": "正しい。GuardDuty が自動で送るイベントをルールで受け、コード無しで保存先へ届けて長く残せます。",
+          "C": "人の作業が毎週必要で、要件に反します。",
+          "D": "動きますが、ポーリングのコードを書いて保守する必要があり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "source_id": "S4",
+          "quote": "GuardDuty stores findings for 90 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "source_id": "S4",
+          "quote": "GuardDuty automatically publishes (sends) findings as events to Amazon EventBridge (formerly Amazon CloudWatch Events), a serverless event bus service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "source_id": "S4",
+          "quote": "With EventBridge, you can send findings data to your preferred storage platform and store the data for as long as you like."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A security team receives findings from Amazon GuardDuty, Amazon Inspector, Amazon Macie, and a supported third-party product across several AWS accounts. Each source has its own console and finding format, and the team struggles to decide which issues to fix first. The team also wants to check its environment against security best practices. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Write AWS Lambda functions that convert each service's findings into one custom format and store them in a single DynamoDB table."
+        },
+        {
+          "key": "B",
+          "text": "Use AWS Security Hub CSPM to collect the findings in the AWS Security Finding Format and to assess the environment against standards."
+        },
+        {
+          "key": "C",
+          "text": "Query the AWS CloudTrail logs with Amazon Athena every week to find security problems and rank them by hand."
+        },
+        {
+          "key": "D",
+          "text": "Have the team review each service's console in each account every day and record the issues in a spreadsheet."
+        }
+      ],
+      "explanation": {
+        "summary": "Security Hub CSPM は、AWS のアカウント・サービス・対応するサードパーティの製品からセキュリティのデータを集め、GuardDuty・Inspector・Macie などの検出結果も受け取ります。検出結果を標準の形式（ASFF）で扱い、提供元をまたいで関連付けて重要なものから並べ、環境をセキュリティの標準とベストプラクティスに照らして評価します。",
+        "per_choice": {
+          "A": "形式はそろえられますが、変換と保存の仕組みを作って保守する必要があり、優先順位付けや標準の評価もありません。",
+          "B": "正しい。1 か所で標準の形式にそろえ、優先順位付けと標準に照らした評価ができます。",
+          "C": "CloudTrail のログは API の記録で、各サービスの検出結果をまとめるものではなく、手作業も多くなります。",
+          "D": "毎日の手作業が多く、形式もそろいません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#what-is-securityhub",
+          "source_id": "S6",
+          "quote": "Security Hub CSPM also receives findings from other AWS services—such as Amazon GuardDuty, Amazon Inspector, and Amazon Macie— and supported third-party products."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#securityhub-benefits",
+          "source_id": "S7",
+          "quote": "Security Hub CSPM processes finding data using the AWS Security Finding Format (ASFF), a standard finding format."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#securityhub-benefits",
+          "source_id": "S7",
+          "quote": "Security Hub CSPM also correlates findings across providers to help you prioritize the most important ones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#what-is-securityhub",
+          "source_id": "S6",
+          "quote": "helps you assess your AWS environment against security industry standards and best practices."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "Auditors require a company to prove that its AWS CloudTrail log files were not modified or deleted after CloudTrail delivered them to Amazon S3, and to show whether any log files were delivered during a given period. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn on log file integrity validation for the trail so that CloudTrail delivers signed digest files."
+        },
+        {
+          "key": "B",
+          "text": "Use the AWS CLI to validate the log files against the digest files for the period that the auditors request."
+        },
+        {
+          "key": "C",
+          "text": "Assume that turning on log file integrity validation also validates the files automatically, and give the auditors the setting."
+        },
+        {
+          "key": "D",
+          "text": "Query the log files with Amazon Athena and give the auditors the number of events for each day."
+        },
+        {
+          "key": "E",
+          "text": "Encrypt the log files with an AWS KMS key so that nobody can change them."
+        }
+      ],
+      "explanation": {
+        "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けるログファイルごとにハッシュを作り、1 時間ごとに署名したダイジェストファイルを届けます。ただし有効にするだけではファイルは検証されないので、AWS CLI などで検証します。これで変更・削除や、ある期間にログが届かなかったことを確かめられます。",
+        "per_choice": {
+          "A": "正しい。検証に使う署名付きのダイジェストファイルが S3 に届くようになります。",
+          "B": "正しい。有効にしただけでは検証されないので、AWS CLI でダイジェストファイルと照らして検証します。",
+          "C": "有効にしてもダイジェストファイルが届くだけで、ファイルの整合性は検証されません。",
+          "D": "イベントの数からは、ファイルが変更・削除されていないことを証明できません。",
+          "E": "暗号化しても、届いた後に変更・削除されていないことの証明にはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+          "source_id": "S8",
+          "quote": "To determine whether a log file was modified, deleted, or unchanged after CloudTrail delivered it, you can use CloudTrail log file integrity validation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+          "source_id": "S10",
+          "quote": "Enabling log file integrity validation allows CloudTrail to deliver digest log files to your Amazon S3 bucket, but does not validate the integrity of the files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+          "source_id": "S10",
+          "quote": "To validate the integrity of CloudTrail log files, you can use the AWS CLI or create your own solution."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+          "source_id": "S8",
+          "quote": "or assert positively that no log files were delivered to your account during a given period of time."
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0004",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A security engineer must find out which IAM users deleted resources during the last 6 months and from which source IP addresses. CloudTrail log files for that period are already stored in an Amazon S3 bucket. The engineer needs to run ad hoc SQL queries and does not want to load the data into another database or manage servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Download all the log files to a laptop and search them with command-line tools."
+        },
+        {
+          "key": "B",
+          "text": "Load the log files into an Amazon RDS database and run SQL queries against it."
+        },
+        {
+          "key": "C",
+          "text": "Use Amazon Athena to query the CloudTrail log files directly in Amazon S3."
+        },
+        {
+          "key": "D",
+          "text": "Review the Amazon GuardDuty findings, which list every API call that deleted a resource."
+        }
+      ],
+      "explanation": {
+        "summary": "CloudTrail のログには、コンソールからの操作も含めて、AWS のサービスへの API の呼び出しの詳細が入っています。Athena を使えば、ログファイルのある場所（LOCATION）を指定して、S3 のログファイルを直接クエリでき、送信元の IP アドレスや利用者で活動を絞り込めます。",
+        "per_choice": {
+          "A": "6 か月分のファイルを手で扱うことになり、SQL も使えず手間が大きくなります。",
+          "B": "SQL は使えますが、別のデータベースへ読み込み、そのデータベースを管理することになり、要件に反します。",
+          "C": "正しい。S3 のログを置いたまま SQL で調べられ、サーバーの管理も要りません。",
+          "D": "GuardDuty の検出結果は不審な活動の検出で、リソースを削除したすべての API の呼び出しの一覧ではありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+          "source_id": "S11",
+          "quote": "You can use Athena to query these log files directly from Amazon S3, specifying the LOCATION of log files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+          "source_id": "S11",
+          "quote": "you can use queries to identify trends and further isolate activity by attributes, such as source IP address or user."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html#features-of-guardduty",
+          "source_id": "S3",
+          "quote": "When GuardDuty detects potential security threats associated with your AWS resources, it starts generating security findings"
+        }
+      ]
+    }
+  ]
+}

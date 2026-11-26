@@ -1,0 +1,129 @@
+{
+  "item": "C-0081",
+  "questions": [
+    {
+      "id": "q-6.3-0001",
+      "task": "6.3",
+      "services": [
+        "Amazon GuardDuty",
+        "Amazon EventBridge",
+        "Amazon Data Firehose",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は Amazon GuardDuty を使っています。セキュリティのポリシーで、調査のために GuardDuty のすべての検出結果を少なくとも 1 年間残すことが求められるようになりました。会社は、人が検出結果をダウンロードしたり独自のポーリングのコードを書いたりせずに、新しい検出結果を自動で保存したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "検出結果は GuardDuty に置いたままにし、調査が必要な時に GuardDuty のコンソールで確認する。"
+        },
+        {
+          "key": "B",
+          "text": "GuardDuty の検出結果の EventBridge ルールを作り、Amazon Data Firehose へ送って、Firehose が Amazon S3 へ届ける。"
+        },
+        {
+          "key": "C",
+          "text": "セキュリティのエンジニアが毎週コンソールから検出結果を出力し、ファイルを Amazon S3 へアップロードする。"
+        },
+        {
+          "key": "D",
+          "text": "毎日 GuardDuty の API を呼んで新しい検出結果を探し、Amazon S3 へ書く AWS Lambda 関数をスケジュールで実行する。"
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0002",
+      "task": "6.3",
+      "services": [
+        "AWS Security Hub CSPM",
+        "Amazon GuardDuty",
+        "Amazon Inspector",
+        "Amazon Macie"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "セキュリティチームは、複数の AWS アカウントにまたがって、Amazon GuardDuty、Amazon Inspector、Amazon Macie、対応しているサードパーティの製品から検出結果を受け取っています。それぞれにコンソールと検出結果の形式があり、チームはどの問題から直すかを決めるのに苦労しています。チームは、環境をセキュリティのベストプラクティスに照らして確かめることも望んでいます。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "各サービスの検出結果を 1 つの独自の形式に変えて、1 つの DynamoDB テーブルに保存する AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "B",
+          "text": "AWS Security Hub CSPM を使い、検出結果を AWS Security Finding Format で集め、標準に照らして環境を評価する。"
+        },
+        {
+          "key": "C",
+          "text": "毎週 Amazon Athena で AWS CloudTrail のログを調べてセキュリティの問題を探し、手作業で順位を付ける。"
+        },
+        {
+          "key": "D",
+          "text": "チームが毎日、各アカウントで各サービスのコンソールを確認し、問題を表計算シートに記録する。"
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0003",
+      "task": "6.3",
+      "services": [
+        "AWS CloudTrail"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "監査人は、ある会社に、AWS CloudTrail のログファイルが Amazon S3 へ届けられた後に変更も削除もされていないことを証明し、決まった期間にログファイルが届いたかどうかを示すよう求めています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CloudTrail が署名したダイジェストファイルを届けるよう、証跡のログファイルの整合性の検証を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "監査人が求める期間について、AWS CLI でログファイルをダイジェストファイルと照らして検証する。"
+        },
+        {
+          "key": "C",
+          "text": "ログファイルの整合性の検証を有効にすればファイルも自動で検証されるとみなし、監査人にその設定を示す。"
+        },
+        {
+          "key": "D",
+          "text": "Amazon Athena でログファイルを調べ、監査人に日ごとのイベントの数を渡す。"
+        },
+        {
+          "key": "E",
+          "text": "誰も変えられないよう、AWS KMS のキーでログファイルを暗号化する。"
+        }
+      ]
+    },
+    {
+      "id": "q-6.3-0004",
+      "task": "6.3",
+      "services": [
+        "Amazon Athena",
+        "AWS CloudTrail",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "セキュリティのエンジニアは、過去 6 か月にどの IAM ユーザーがどの送信元の IP アドレスからリソースを削除したかを調べる必要があります。その期間の CloudTrail のログファイルは、既に Amazon S3 バケットに保存されています。エンジニアはその場で SQL のクエリを実行したく、データを別のデータベースへ入れたりサーバーを管理したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "すべてのログファイルをノートパソコンにダウンロードし、コマンドラインのツールで探す。"
+        },
+        {
+          "key": "B",
+          "text": "ログファイルを Amazon RDS のデータベースに読み込み、SQL のクエリを実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Amazon Athena を使い、Amazon S3 にある CloudTrail のログファイルを直接クエリする。"
+        },
+        {
+          "key": "D",
+          "text": "リソースを削除したすべての API の呼び出しを一覧する、Amazon GuardDuty の検出結果を確認する。"
+        }
+      ]
+    }
+  ]
+}
