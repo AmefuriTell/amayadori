@@ -125,7 +125,11 @@ test('publish: 番号を振り直し、正解の位置を散らす。bank と似
 
   // 同じ問題をもう一度入れようとすると dedupe で落ちる
   sb.run('loop', 'advance', '--result', 'pass');
-  sb.run('loop', 'close');
+  const closed = sb.run('loop', 'close');
+  // 公開した問題には図の項目が自動で足される（図を描くのもループの仕事）
+  assert.equal(closed.diagrams_added.length, 1);
+  const d = sb.read('.loop/backlog.json').find((b) => b.id === closed.diagrams_added[0]);
+  assert.deepEqual([d.kind, d.question_ids], ['diagram', ['q-1.1-0001']]);
   const id2 = authored(sb, [question()]);
   toVerify(sb, id2);
   verify(sb, id2, [{ qid: 'q-1.1-0001', blind: { answer: ['A'], confidence: 'high' }, issues: [], verdict: 'ok' }]);

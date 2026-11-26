@@ -8,7 +8,7 @@ import { validate } from './lib/schema.mjs';
 import { coverage, exam } from './lib/bank.mjs';
 import { addToBacklog, recordBase } from './refactor.mjs';
 import { loadBacklog, saveBacklog, nextId } from './lib/backlog.mjs';
-import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, copyForRecheck, copyContext } from './lib/seeds.mjs';
+import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, autoSeedDiagrams, copyForRecheck, copyContext } from './lib/seeds.mjs';
 
 // P-016: コードを測ってリファクタリングの項目を足す（本物の置き場の時だけ。試験の置き場 DOP_DATA ではしない）
 const autoScan = () => (process.env.DOP_DATA ? { added: [] } : addToBacklog());
@@ -179,7 +179,6 @@ const commands = {
     const repeated = Object.entries(counts).filter(([, n]) => n >= 2).map(([kind, n]) => ({ kind, n }));
 
     appendLine(paths.runs(), { item: item.id, kind: item.kind, outcome, attempts: item.attempts ?? 0, repeated, closed: new Date().toISOString() });
-    if (item.kind === 'app' || item.kind === 'refactor') autoScan();
 
     let archived = null;
     if (fs.existsSync(paths.work(item.id))) {
@@ -190,12 +189,16 @@ const commands = {
       archived = rel(dest);
     }
     saveBacklog(backlog);
+    // 下の 2 つは backlog を自分で読んで書く。上の保存より後に呼ぶ（先に呼ぶと足した項目が上の保存で消える）
+    if (item.kind === 'app' || item.kind === 'refactor') autoScan();
+    // 公開した問題に図を付ける（2026-11-26 利用者の決定）。図の無い問題があれば図の項目を足す
+    const diagramsAdded = outcome === 'done' && (item.kind === 'content' || item.kind === 'recheck') ? autoSeedDiagrams() : [];
     s.state = 'S0_pick'; s.item = null; s.session.closed += 1;
     saveState(s);
     emit({
       ok: true,
       summary: `${item.id} を ${outcome} で閉じた。次は S0_pick（loop next）`,
-      extra: { state: 'S0_pick', outcome, archived, repeated_issues: repeated, human_needed: outcome === 'blocked' ? item.note : null },
+      extra: { state: 'S0_pick', outcome, archived, repeated_issues: repeated, diagrams_added: diagramsAdded, human_needed: outcome === 'blocked' ? item.note : null },
     });
   },
 
