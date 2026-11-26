@@ -23,7 +23,7 @@
     },
     {
       "id": "q-4.1-0015",
-      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"証跡\" }\n    B@{ svc: \"Amazon S3\", label: \"届け先のバケット\" }\n    KEY@{ svc: \"AWS KMS\", label: \"✔ A: カスタマーマネージドキー\" }\n  end\n  AUD[\"監査担当のセキュリティロール\"]\n  OB[\"✔ B: キーポリシーに<br/>復号の権限を先に足す\"]\n  WC[\"⚠ C: us-east-1 のキーは使えない\"]\n  WD[\"⚠ D: SSE-C は使えない\"]\n  WE[\"⚠ E: 権限が後だと<br/>その間は読めない\"]\n  CT -- \"ログ・ダイジェスト\" --> B\n  CT -. \"✔ A: キーポリシーで許可\" .-> KEY\n  AUD -- \"読む\" --> B\n  OB -.- AUD\n  WC -.- KEY\n  WD -.- B\n  WE -.- AUD\n",
+      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"証跡<br/>ログとダイジェストを書く\" }\n    B@{ svc: \"Amazon S3\", label: \"届け先のバケット\" }\n    KEY@{ svc: \"AWS KMS\", label: \"✔ A: カスタマーマネージドキー<br/>キーポリシーで証跡に許可\" }\n  end\n  AUD[\"監査担当のセキュリティロール<br/>ログを読む\"]\n  OB[\"✔ B: キーポリシーに<br/>復号の権限を先に足す\"]\n  WC[\"⚠ C: us-east-1 のキーは使えない\"]\n  WD[\"⚠ D: SSE-C は使えない\"]\n  WE[\"⚠ E: 権限が後だと<br/>その間は読めない\"]\n  CT --> B\n  CT -.-> KEY\n  AUD --> B\n  OB -.- AUD\n  WC -.- KEY\n  WD -.- B\n  WE -.- AUD\n",
       "alt": "CloudTrail のログを KMS キーで暗号化し、監査担当がすぐ読めるようにする図。バケットと同じ eu-west-1 にキーを作り CloudTrail に使わせ（A）、監査担当に復号の権限を先に与える（B）。"
     }
   ]
