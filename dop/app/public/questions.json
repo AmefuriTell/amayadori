@@ -758,7 +758,10 @@
           "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "認証情報を変えても再デプロイしたくない。Secrets Manager の自動ローテーションを使い、アプリが実行時に取得する（B）。ビルド時の注入（A）やデプロイ時のコピー（D）は変更のたびに再デプロイが要る。"
+      }
     },
     {
       "id": "q-1.1-0012",
@@ -821,7 +824,10 @@
           "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "ECS の Blue/Green で一部のトラフィックを先に新版へ送る図。NLB では ECSAllAtOnce しか使えないので、ALB に移して Canary10Percent5Minutes を使う（D）。A と C は NLB のままなので使えない。"
+      }
     },
     {
       "id": "q-1.1-0013",
@@ -883,7 +889,10 @@
           "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "12 台のうち 4 分の 3 を残しつつ最速で進めるには、最小正常ホスト数 75% の独自設定にして 9 台を残し 3 台ずつデプロイする（C）。OneAtATime は遅く、HalfAtATime と AllAtOnce は要件を割る。"
+      }
     },
     {
       "id": "q-1.1-0014",
@@ -957,7 +966,10 @@
           "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Lambda のカナリアデプロイでエラー率がしきい値を超えたら止めて戻す図。CloudWatch アラームをデプロイグループに足し（A）、アラームでの自動ロールバックを有効にする（B）。"
+      }
     },
     {
       "id": "q-1.2-0001",

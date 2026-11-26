@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0014",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイグループ（カナリア）\" }\n  LF@{ svc: \"AWS Lambda\", label: \"新しい版の関数\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"✔ A: エラー率のアラーム\" }\n    RB[\"✔ B: アラームでの自動ロールバックを有効\"]\n  end\n  CD -- \"トラフィックを移す\" --> LF\n  LF -- \"エラー率\" --> CW\n  CW == \"✔ A: しきい値超えで停止\" ==> CD\n  RB == \"✔ B: 最後に正常な版へ戻す\" ==> CD\n  X[\"⚠ C: アラームを無視 / ⚠ D: 先に CloudWatch で作る必要 / ⚠ E: 手作業\"] -.-> CD\n",
+  "alt": "Lambda のカナリアデプロイでエラー率がしきい値を超えたら止めて戻す図。CloudWatch アラームをデプロイグループに足し（A）、アラームでの自動ロールバックを有効にする（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

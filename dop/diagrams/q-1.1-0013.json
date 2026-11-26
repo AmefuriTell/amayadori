@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0013",
+  "source": "flowchart TB\n  subgraph R[\"インプレース（12 台）\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"✔ C: 最小正常ホスト 75% の独自設定\" }\n  E1@{ svc: \"Amazon EC2\", label: \"デプロイ中 3 台\" }\n  E2@{ svc: \"Amazon EC2\", label: \"トラフィック処理 9 台を維持\" }\n  end\n  CD == \"✔ C: 3 台ずつ同時に\" ==> E1\n  CD -- \"残す\" --> E2\n  A[\"⚠ A: OneAtATime は遅い\"] -.-> CD\n  B[\"⚠ B: HalfAtATime は 6 台が止まり 75% を割る\"] -.-> CD\n  D[\"⚠ D: AllAtOnce は全台が止まる\"] -.-> CD\n",
+  "alt": "12 台のうち 4 分の 3 を残しつつ最速で進めるには、最小正常ホスト数 75% の独自設定にして 9 台を残し 3 台ずつデプロイする（C）。OneAtATime は遅く、HalfAtATime と AllAtOnce は要件を割る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

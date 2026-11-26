@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0011",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"✔ B: 認証情報（自動ローテーション）\" }\n    APP[\"アプリケーション（実行中）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"⚠ 今: 設定ファイルに書き込む\" }\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン\" }\n  end\n  SM == \"✔ B: 実行時に取得\" ==> APP\n  CB -. \"⚠ A D: ビルド・デプロイ時に反映 → 再デプロイが要る\" .-> APP\n  CP --> CB\n  PS[\"Parameter Store<br/>SecureString\"] -. \"⚠ C: ローテーションの Lambda を自作\" .-> APP\n",
+  "alt": "認証情報を変えても再デプロイしたくない。Secrets Manager の自動ローテーションを使い、アプリが実行時に取得する（B）。ビルド時の注入（A）やデプロイ時のコピー（D）は変更のたびに再デプロイが要る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
