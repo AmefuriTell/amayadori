@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0012",
+  "source": "flowchart TB\n  SM@{ svc: \"AWS Systems Manager State Manager\", label: \"AWS Systems Manager State Manager<br/>関連付け\" }\n  PM[\"Patch Manager のパッチ\"]\n  CP@{ svc: \"AWS Systems Manager\", label: \"✔ A: Compliance（1 か所で確認）\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: ルール\" }\n  N[\"準拠していないノード\"]\n  X1[\"⚠ B・D: 独自の収集やレポートを作る\"]\n  X2[\"⚠ C: 修復が手作業\"]\n  SM -- \"関連付けの準拠\" --> CP\n  PM -- \"パッチの準拠\" --> CP\n  CP == \"準拠していない\" ==> EB\n  EB == \"自動で修復を開始\" ==> N\n  X1 -.-> CP\n  X2 -.-> N\n",
+  "alt": "State Manager の関連付けと Patch Manager のパッチの準拠を Systems Manager Compliance で 1 か所に表示し、EventBridge のルールで修復を自動で始める図。独自ツールが要らない A が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

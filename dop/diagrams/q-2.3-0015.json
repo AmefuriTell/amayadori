@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0015",
+  "source": "flowchart TB\n  MW@{ svc: \"AWS Systems Manager Maintenance Windows\", label: \"AWS Systems Manager Maintenance Windows<br/>✔ D: 日曜 02:00〜05:00 のウィンドウ\" }\n  T1@{ svc: \"AWS Lambda\", label: \"タスク 1: ロードバランサーから外す\" }\n  T2[\"タスク 2: Run Command でパッチを入れる\"]\n  N[\"対象のノード\"]\n  X1[\"⚠ A: State Manager は構成の準拠向き\"]\n  X2[\"⚠ B・C: cron や手作業は手間が大きい\"]\n  MW -- \"ターゲットとタスクを登録\" --> T1\n  T1 -- \"続けて実行\" --> T2\n  T2 == \"パッチを入れる\" ==> N\n  X1 -.-> N\n  X2 -.-> N\n",
+  "alt": "日曜の決まった時間帯だけパッチを当てる図。メンテナンスウィンドウに最大の長さ・ターゲット・Lambda と Run Command のタスクを登録する D が正解で、State Manager（A）は時間帯内で複数のタスクを動かす用途に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0016",
+  "source": "flowchart TB\n  N[\"2,000 台のマネージドノード\"]\n  INV@{ svc: \"AWS Systems Manager Inventory\", label: \"AWS Systems Manager Inventory<br/>✔ C: Inventory\" }\n  S3@{ svc: \"Amazon S3\", label: \"中央のバケット\" }\n  Q[\"組み込みのツールでクエリ\"]\n  X1[\"⚠ A: パッチの準拠は承認パッチの確認用\"]\n  X2[\"⚠ B: 収集スクリプトを書いて保守する\"]\n  X3[\"⚠ D: 各ノードへ手作業でサインイン\"]\n  N -- \"メタデータ\" --> INV\n  INV == \"集めて置く\" ==> S3\n  S3 -- \"どのノードに入っているか\" --> Q\n  X1 -.-> Q\n  X2 -.-> INV\n  X3 -.-> N\n",
+  "alt": "脆弱なエージェントのバージョンが入ったノードを探す図。Inventory が 2,000 台のメタデータを中央の S3 に集め、組み込みのツールでクエリできる C が正解で、スクリプト（B）や手作業（D）は要件に反する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
