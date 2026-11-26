@@ -1,0 +1,74 @@
+{
+  "task": "1.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.2-0015",
+  "services": [
+    "AWS CodePipeline",
+    "AWS Step Functions"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "After deploying to a test environment, a pipeline must run an integration test workflow that has several steps and branches. A value produced by the workflow, such as the test environment URL that was verified, must be passed to the configuration of the next deploy action. The team wants to use managed pipeline features and avoid writing glue code. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "テスト環境へデプロイした後、パイプラインは、いくつかの手順と分岐を持つ結合テストのワークフローを実行する必要があります。ワークフローが出す値（例えば確かめたテスト環境の URL）は、次のデプロイのアクションの設定へ渡す必要があります。チームはパイプラインのマネージドの機能を使い、つなぎのコードを書くのは避けたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a Step Functions invoke action that starts a state machine for the test workflow and passes input from the action configuration or an artifact.",
+      "text_ja": "テストのワークフローの状態マシンを開始し、アクションの設定かアーティファクトから入力を渡す Step Functions の呼び出しのアクションを足す。"
+    },
+    {
+      "key": "B",
+      "text": "Reference the Step Functions action's output variables in the configuration of the next deploy action.",
+      "text_ja": "次のデプロイのアクションの設定で、Step Functions のアクションの出力変数を参照する。"
+    },
+    {
+      "key": "C",
+      "text": "Add a manual approval action and ask a tester to type the verified URL into the next action.",
+      "text_ja": "手動の承認のアクションを足し、テスターが確かめた URL を次のアクションに入力する。"
+    },
+    {
+      "key": "D",
+      "text": "Add a Device Farm test action so that the workflow's steps and branches run on test devices.",
+      "text_ja": "ワークフローの手順と分岐がテスト用の端末で動くよう、Device Farm のテストのアクションを足す。"
+    },
+    {
+      "key": "E",
+      "text": "Write a Lambda function that logs the full CodePipeline event and the workflow result so that the next action can read them.",
+      "text_ja": "次のアクションが読めるよう、CodePipeline のイベント全体とワークフローの結果をログに出す Lambda 関数を書く。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "Step Functions の呼び出しのアクションは、パイプラインから状態マシンの実行を始め、アクションの設定かアーティファクトのファイルから最初の状態を渡せます。このアクションは、パイプラインの後のアクションの設定から参照できる出力変数を出します。",
+    "per_choice": {
+      "A": "正しい。手順と分岐のあるテストを、つなぎのコード無しで状態マシンとして動かせます。",
+      "B": "正しい。出力変数を参照すれば、ワークフローの値を次のアクションに渡せます。",
+      "C": "値の受け渡しが手作業になり、要件に合いません。",
+      "D": "Device Farm は端末でアプリケーションを試すためのもので、手順と分岐のあるワークフローの実行や値の受け渡しには使いません。",
+      "E": "コードを書くことになり、イベントには一時的な認証情報が入っているので、ログに出してはいけません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+      "source_id": "S4",
+      "quote": "Starts an AWS Step Functions state machine execution from your pipeline."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+      "source_id": "S4",
+      "quote": "Provides an initial state to the state machine through either a property in the action configuration or a file located in a pipeline artifact to be passed as input."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-output",
+      "source_id": "S5",
+      "quote": "This action produces output variables that can be referenced by the action configuration of a downstream action in the pipeline."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
