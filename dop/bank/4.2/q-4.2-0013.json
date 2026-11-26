@@ -1,0 +1,66 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0013",
+  "services": [
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An application writes unstructured text log lines such as \"GET /orders took 532 ms\" to CloudWatch Logs. During incidents, on-call engineers must quickly find the average and maximum response time for each path, and every engineer in the same Region should be able to rerun the same analysis. The team does not want to move the logs or write code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "あるアプリケーションは、「GET /orders took 532 ms」のような構造の無いテキストのログの行を CloudWatch Logs に書いています。障害の時、当番のエンジニアはパスごとの平均と最大の応答時間を素早く知る必要があり、同じリージョンのどのエンジニアも同じ分析をやり直せるようにしたいと考えています。チームはログを移したりコードを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Export the log group to Amazon S3 every hour, and analyze the files with Amazon Athena.",
+      "text_ja": "1 時間ごとにロググループを Amazon S3 へエクスポートし、Amazon Athena でファイルを分析する。"
+    },
+    {
+      "key": "B",
+      "text": "Create a subscription filter that sends the logs to an AWS Lambda function that calculates the statistics.",
+      "text_ja": "統計を計算する AWS Lambda 関数へログを送るサブスクリプションフィルターを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Save a CloudWatch Logs Insights query that uses parse and stats on the path and time.",
+      "text_ja": "パスと時間に parse と stats を使う CloudWatch Logs Insights のクエリを保存する。"
+    },
+    {
+      "key": "D",
+      "text": "Have each engineer download the log streams and calculate the statistics in a spreadsheet.",
+      "text_ja": "各エンジニアがログストリームをダウンロードし、表計算シートで統計を計算する。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "CloudWatch Logs Insights では、parse でログのフィールドからデータを取り出し（ワイルドカードか正規表現）、stats で集計の統計を計算できます。作ったクエリは保存でき、クエリはリージョン単位で保存されるので、同じリージョンで CloudWatch Logs を使える人はそれを見て再び実行できます。",
+    "per_choice": {
+      "A": "ログを移すことになり、エクスポートの手間と遅れもあります。",
+      "B": "統計を計算するコードを書いて保守することになります。",
+      "C": "正しい。ログをそのままにしてコード無しで集計し、保存したクエリを同じリージョンの皆が再実行できます。",
+      "D": "手作業で時間がかかり、障害の時に素早く分析できません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+      "source_id": "S4",
+      "quote": "parse Extracts data from a log field to create an extracted field that you can process in your query."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+      "source_id": "S4",
+      "quote": "stats Calculate aggregate statistics using values in the log fields."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_Insights-Saving-Queries.html#CWL_Insights-Saving-Queries",
+      "source_id": "S5",
+      "quote": "If you create and save a query, other users with access to CloudWatch Logs in the same Region can see all saved queries and their folder structures in the Region."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

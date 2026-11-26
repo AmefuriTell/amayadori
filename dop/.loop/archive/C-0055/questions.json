@@ -1,0 +1,206 @@
+{
+  "item": "C-0055",
+  "questions": [
+    {
+      "task": "4.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.2-0006",
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An operations dashboard has a CloudWatch Logs Insights widget that queries 40 log groups over the last 30 days and refreshes every minute. Only 3 of the log groups contain the relevant application logs, and the team only needs the last hour of data. The CloudWatch Logs Insights charges have become high. Which change will reduce the cost the MOST while keeping the widget useful?",
+      "stem_ja": "運用のダッシュボードに、40 のロググループの過去 30 日分をクエリし、1 分ごとに更新される CloudWatch Logs Insights のウィジェットがあります。関係するアプリケーションのログがあるのは 3 つのロググループだけで、チームに必要なのは直近 1 時間のデータだけです。CloudWatch Logs Insights の料金が高くなっています。ウィジェットを役に立つまま、費用を最も減らせる変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Query only the 3 relevant log groups, use the last hour as the time range, and refresh the dashboard less often.",
+          "text_ja": "関係する 3 つのロググループだけをクエリし、時間の範囲を直近 1 時間にして、ダッシュボードの更新を減らす。"
+        },
+        {
+          "key": "B",
+          "text": "Keep the query as it is, and increase the retention period of the 40 log groups so that queries can reuse old results.",
+          "text_ja": "クエリはそのままにし、前の結果を使い回せるよう、40 のロググループの保持期間を延ばす。"
+        },
+        {
+          "key": "C",
+          "text": "Add a second widget with the same query so that the results load faster.",
+          "text_ja": "結果が早く出るよう、同じクエリの 2 つ目のウィジェットを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Keep the 30-day time range, and add a limit command so that only 20 rows are shown.",
+          "text_ja": "30 日の時間の範囲のまま、表示が 20 行だけになるよう limit のコマンドを足す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs Insights の料金は、スキャンした圧縮前のログデータの量で決まります。クエリには必要なロググループだけを選び、時間の範囲をできるだけ狭くし、ダッシュボードのウィジェットは更新のたびに新しいクエリが走るので、更新の頻度を上げすぎないようにします。",
+        "per_choice": {
+          "A": "正しい。スキャンするデータとクエリの回数の両方が大きく減ります。",
+          "B": "保持期間を延ばしても、クエリがスキャンするデータは減りません。",
+          "C": "クエリの回数が増え、費用も増えます。",
+          "D": "表示の行数を絞っても、30 日分を 40 のロググループでスキャンすることに変わりはなく、費用はあまり減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html#AnalyzingLogData",
+          "source_id": "S2",
+          "quote": "CloudWatch Logs Insights queries incur charges based on the amount of uncompressed log data scanned, regardless of query language."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "source_id": "S3",
+          "quote": "Always specify the narrowest possible time range for your queries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "source_id": "S3",
+          "quote": "When you add a CloudWatch Logs Insights widget to a dashboard, ensure that the dashboard is not refreshing at a high frequency, because each refresh starts a new query."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "source_id": "S3",
+          "quote": "Select only the necessary log groups for each query."
+        }
+      ]
+    },
+    {
+      "task": "4.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.2-0007",
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application writes unstructured text log lines such as \"GET /orders took 532 ms\" to CloudWatch Logs. During incidents, on-call engineers must quickly find the average and maximum response time for each path, and every engineer in the same Region should be able to rerun the same analysis. The team does not want to move the logs or write code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるアプリケーションは、「GET /orders took 532 ms」のような構造の無いテキストのログの行を CloudWatch Logs に書いています。障害の時、当番のエンジニアはパスごとの平均と最大の応答時間を素早く知る必要があり、同じリージョンのどのエンジニアも同じ分析をやり直せるようにしたいと考えています。チームはログを移したりコードを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Save a CloudWatch Logs Insights query that uses parse and stats on the path and time.",
+          "text_ja": "パスと時間に parse と stats を使う CloudWatch Logs Insights のクエリを保存する。"
+        },
+        {
+          "key": "B",
+          "text": "Export the log group to Amazon S3 every hour, and analyze the files with Amazon Athena.",
+          "text_ja": "1 時間ごとにロググループを Amazon S3 へエクスポートし、Amazon Athena でファイルを分析する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a subscription filter that sends the logs to an AWS Lambda function that calculates the statistics.",
+          "text_ja": "統計を計算する AWS Lambda 関数へログを送るサブスクリプションフィルターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Have each engineer download the log streams and calculate the statistics in a spreadsheet.",
+          "text_ja": "各エンジニアがログストリームをダウンロードし、表計算シートで統計を計算する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs Insights では、parse でログのフィールドからデータを取り出し（ワイルドカードか正規表現）、stats で集計の統計を計算できます。作ったクエリは保存でき、クエリはリージョン単位で保存されるので、同じリージョンで CloudWatch Logs を使える人はそれを見て再び実行できます。",
+        "per_choice": {
+          "A": "正しい。ログをそのままにしてコード無しで集計し、保存したクエリを同じリージョンの皆が再実行できます。",
+          "B": "ログを移すことになり、エクスポートの手間と遅れもあります。",
+          "C": "統計を計算するコードを書いて保守することになります。",
+          "D": "手作業で時間がかかり、障害の時に素早く分析できません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "source_id": "S4",
+          "quote": "parse Extracts data from a log field to create an extracted field that you can process in your query."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "source_id": "S4",
+          "quote": "stats Calculate aggregate statistics using values in the log fields."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_Insights-Saving-Queries.html#CWL_Insights-Saving-Queries",
+          "source_id": "S5",
+          "quote": "If you create and save a query, other users with access to CloudWatch Logs in the same Region can see all saved queries and their folder structures in the Region."
+        }
+      ]
+    },
+    {
+      "task": "4.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.2-0008",
+      "services": [
+        "Amazon Athena",
+        "AWS Glue"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team queries several years of VPC flow logs in Amazon S3 with Amazon Athena. The table is partitioned by date and Region, so it has a very large number of partitions. Queries are slow, and an engineer must add new partitions to the AWS Glue Data Catalog every day. The table is queried only through Athena. Which solution will speed up the queries and remove the daily partition management with the LEAST effort?",
+      "stem_ja": "セキュリティチームは、Amazon S3 にある数年分の VPC フローログを Amazon Athena でクエリしています。テーブルは日付とリージョンでパーティション分割されており、パーティションの数がとても多くなっています。クエリは遅く、エンジニアは毎日新しいパーティションを AWS Glue Data Catalog に足す必要があります。テーブルは Athena からしかクエリしません。最も少ない手間でクエリを速くし、毎日のパーティションの管理を無くすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on partition projection for the table with a configuration that describes the date and Region partitions.",
+          "text_ja": "日付とリージョンのパーティションを表す設定で、テーブルのパーティション射影を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Schedule a job that adds the new partitions to the AWS Glue Data Catalog every day.",
+          "text_ja": "毎日新しいパーティションを AWS Glue Data Catalog に足すジョブをスケジュールで実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Remove the partitions from the table so that Athena reads all the files in each query.",
+          "text_ja": "各クエリで Athena がすべてのファイルを読むよう、テーブルからパーティションを外す。"
+        },
+        {
+          "key": "D",
+          "text": "Copy the flow logs into CloudWatch Logs and query them with CloudWatch Logs Insights instead.",
+          "text_ja": "フローログを CloudWatch Logs へ写し、代わりに CloudWatch Logs Insights でクエリする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "パーティション射影を使うと、パーティションの多いテーブルのクエリを速くし、パーティションの管理を自動にできます。通常 Athena はパーティションを絞り込む前に AWS Glue Data Catalog に GetPartitions を呼びますが、射影の設定があれば Athena は自分でパーティションを組み立てられるので、その呼び出しが要りません。パーティション射影は Athena からクエリする時だけ使えます。",
+        "per_choice": {
+          "A": "正しい。Data Catalog への呼び出しを避けて速くなり、新しいパーティションを足す作業も要りません。",
+          "B": "手作業は自動になりますが、ジョブの保守が残り、パーティションの多さによる遅さも変わりません。",
+          "C": "毎回すべてのファイルを読むので、かえって遅くなり、費用も増えます。",
+          "D": "数年分のログを写すことになり、手間と費用が大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection",
+          "source_id": "S6",
+          "quote": "You can use partition projection in Athena to speed up query processing of highly partitioned tables and automate partition management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-pruning-vs-projection",
+          "source_id": "S7",
+          "quote": "Partition projection allows Athena to avoid calling GetPartitions because the partition projection configuration gives Athena all of the necessary information to build the partitions itself."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-considerations-and-limitations",
+          "source_id": "S8",
+          "quote": "Partition projection is usable only when the table is queried through Athena."
+        }
+      ]
+    }
+  ]
+}
