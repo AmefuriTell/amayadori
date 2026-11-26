@@ -1,0 +1,68 @@
+{
+  "item": "C-0048",
+  "questions": [
+    {
+      "id": "q-4.1-0005",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Data Firehose"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は、すべてのロググループを中央で処理するため Amazon Data Firehose へ送るアカウントレベルのサブスクリプションフィルターのポリシーを作りました。その後すぐ、配信の仕組み自身のリソースからログを受け取るロググループまで対象になり、再帰のループが起きて、CloudWatch Logs の取り込みの料金が急に上がりました。中央の処理を続けながら、ループを最も効果的に止める変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "アカウントレベルのポリシーに、配信の仕組みのリソースからログを取り込むロググループを除外する選択の条件を足す。"
+        },
+        {
+          "key": "B",
+          "text": "配信の回数が減るよう、Firehose のバッファーのサイズと間隔を大きくする。"
+        },
+        {
+          "key": "C",
+          "text": "アカウントレベルのポリシーを消し、各チームに自分のロググループのサブスクリプションフィルターを作ってもらう。"
+        },
+        {
+          "key": "D",
+          "text": "配信の時にログが小さくなるよう、Firehose で解凍の機能を有効にする。"
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0006",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon OpenSearch Service",
+        "AWS Lambda"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "あるチームは、CloudWatch Logs のロググループのログを、VPC アクセスを使う Amazon OpenSearch Service のドメインへ流したいと考えています。流す仕組みはドメインへ書き込む Lambda 関数を使いますが、関数がドメインのエンドポイントに届きません。流せるようにするために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "lambda.amazonaws.com を信頼し、AWSLambdaVPCAccessExecutionRole ポリシーをアタッチした Lambda の実行ロールを使う。"
+        },
+        {
+          "key": "B",
+          "text": "送り元のロググループが Standard のログクラスを使っていることを確かめる。"
+        },
+        {
+          "key": "C",
+          "text": "既存の OpenSearch Service のドメインを、VPC アクセスからパブリックアクセスへ変える。"
+        },
+        {
+          "key": "D",
+          "text": "データが VPC を通れるよう、サブスクリプションで gzip の圧縮を有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Lambda の実行ロールの信頼関係に、lambda.amazonaws.com の代わりに logs.amazonaws.com を入れる。"
+        }
+      ]
+    }
+  ]
+}

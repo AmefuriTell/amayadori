@@ -1,0 +1,62 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0011",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "Amazon Data Firehose"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company created an account-level subscription filter policy that sends all log groups to Amazon Data Firehose for central processing. Soon afterward, CloudWatch Logs ingestion charges rose sharply because log groups that receive logs from the delivery workflow's own resources were also being subscribed, causing a recursive loop. Which change will MOST effectively stop the loop while keeping the central processing?",
+  "stem_ja": "ある会社は、すべてのロググループを中央で処理するため Amazon Data Firehose へ送るアカウントレベルのサブスクリプションフィルターのポリシーを作りました。その後すぐ、配信の仕組み自身のリソースからログを受け取るロググループまで対象になり、再帰のループが起きて、CloudWatch Logs の取り込みの料金が急に上がりました。中央の処理を続けながら、ループを最も効果的に止める変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add selection criteria to the account-level policy that exclude log groups which ingest logs from resources in the delivery workflow.",
+      "text_ja": "アカウントレベルのポリシーに、配信の仕組みのリソースからログを取り込むロググループを除外する選択の条件を足す。"
+    },
+    {
+      "key": "B",
+      "text": "Increase the Firehose buffer size and buffer interval so that fewer deliveries are made.",
+      "text_ja": "配信の回数が減るよう、Firehose のバッファーのサイズと間隔を大きくする。"
+    },
+    {
+      "key": "C",
+      "text": "Delete the account-level policy and ask each team to create its own log group subscription filters.",
+      "text_ja": "アカウントレベルのポリシーを消し、各チームに自分のロググループのサブスクリプションフィルターを作ってもらう。"
+    },
+    {
+      "key": "D",
+      "text": "Turn on decompression in Firehose so that the logs are smaller when they are delivered.",
+      "text_ja": "配信の時にログが小さくなるよう、Firehose で解凍の機能を有効にする。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "サブスクリプションフィルターでは、再帰のループが起きて取り込みの料金が大きく増えることがあります。これを防ぐには、アカウントレベルのサブスクリプションフィルターの選択の条件で、配信の仕組みに含まれるリソースからログを取り込むロググループを除外することが勧められています。",
+    "per_choice": {
+      "A": "正しい。ループのもとになるロググループだけを外し、ほかのロググループの中央の処理は続けられます。",
+      "B": "配信の回数は減っても、ループで取り込まれるログの量は減りません。",
+      "C": "ループは止まりますが、中央でまとめて処理する仕組みが崩れ、各チームの手間が増えます。",
+      "D": "解凍してもループは止まらず、取り込みの料金も減りません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+      "source_id": "S7",
+      "quote": "There is a risk of causing an infinite recursive loop with subscription filters that can lead to a large increase in ingestion billing if not addressed."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+      "source_id": "S7",
+      "quote": "we recommend that you use selection criteria in your account-level subscription filters to exclude log groups that ingest log data from resources that are part of the subscription delivery workflow."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
