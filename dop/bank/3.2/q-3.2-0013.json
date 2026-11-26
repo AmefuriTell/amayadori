@@ -1,0 +1,77 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0013",
+  "services": [
+    "AWS Lambda",
+    "Application Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A Lambda function behind an API has high latency every weekday from 08:00 to 10:00 because many new execution environments start at once. Traffic is low at other times. The company wants to reduce this latency during the morning peak while keeping costs as low as possible. Which solution meets these requirements MOST cost-effectively?",
+  "stem_ja": "API の後ろの Lambda 関数が、平日の 08:00 から 10:00 に、多くの新しい実行環境が一度に起動するため、高いレイテンシーになります。それ以外の時間はトラフィックが少ないです。会社は、費用をできるだけ低く保ちつつ、朝の山のレイテンシーを下げたいと考えています。これらの要件を最も費用対効果よく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set reserved concurrency for the function to the number of instances needed at the peak.",
+      "text_ja": "関数の予約された同時実行数を、山で必要なインスタンスの数に設定する。"
+    },
+    {
+      "key": "B",
+      "text": "Keep provisioned concurrency at the peak level all day and every day.",
+      "text_ja": "プロビジョニングされた同時実行数を、毎日一日中、山の水準に保つ。"
+    },
+    {
+      "key": "C",
+      "text": "Request a higher account concurrency limit so that more environments can start at the same time.",
+      "text_ja": "より多くの環境が同時に起動できるよう、アカウントの同時実行数の上限を上げてもらう。"
+    },
+    {
+      "key": "D",
+      "text": "Use Application Auto Scaling to schedule provisioned concurrency for the peak hours only.",
+      "text_ja": "Application Auto Scaling で、山の時間だけプロビジョニングされた同時実行数をスケジュールする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "新しい実行環境を初期化することをコールドスタートといい、それを抑えるにはプロビジョニングされた同時実行数（前もって初期化した実行環境）を使います。これは追加の料金がかかり、使われなくても動き続けて課金されるので、予測できる負荷の変化には Application Auto Scaling のスケジュールで必要な時間だけ増やします。その時は最初の値を先に設定しておきます。",
+    "per_choice": {
+      "A": "予約された同時実行数は同時実行の最大と最小を割り当てるだけで、環境は前もって初期化されず、コールドスタートは減りません。",
+      "B": "レイテンシーは下がりますが、使わない時間も課金され続け、費用を低く保つ要件に反します。",
+      "C": "起動できる数が増えるだけで、各環境の初期化は変わらず、コールドスタートは減りません。",
+      "D": "正しい。山の時間だけ前もって初期化した環境を用意し、それ以外の時間の費用を抑えられます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+      "source_id": "S3",
+      "quote": "To mitigate cold starts, you can use provisioned concurrency."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurrency-targeting",
+      "source_id": "S7",
+      "quote": "With Application Auto Scaling, you can set your own scaling schedule according to predictable load changes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurency",
+      "source_id": "S6",
+      "quote": "ensure that you configure an initial provisioned concurrency value first."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#pc-logging-behavior",
+      "source_id": "S8",
+      "quote": "Provisioned concurrency runs continually and incurs separate billing from initialization and invocation costs."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+      "source_id": "S3",
+      "quote": "However, none of these environments come pre-initialized."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,66 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0014",
+  "services": [
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Many Lambda functions share an account's concurrency in one Region. When a batch-processing function receives a burst of events, it uses most of the available concurrency, and a customer-facing payment function starts to be throttled. The company must make sure that the payment function always has enough concurrency, without paying extra for idle environments. Which solution BEST meets these requirements?",
+  "stem_ja": "1 つのリージョンで、多くの Lambda 関数がアカウントの同時実行数を分け合っています。バッチ処理の関数にイベントが一度に届くと、その関数が使える同時実行数のほとんどを使い、利用者向けの決済の関数がスロットリングされ始めます。会社は、使われない環境のために余計に払わずに、決済の関数が常に十分な同時実行数を持てるようにする必要があります。これらの要件を最もよく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure provisioned concurrency for the batch-processing function.",
+      "text_ja": "バッチ処理の関数に、プロビジョニングされた同時実行数を設定する。"
+    },
+    {
+      "key": "B",
+      "text": "Configure reserved concurrency for the payment function.",
+      "text_ja": "決済の関数に、予約された同時実行数を設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Configure provisioned concurrency for the payment function at its peak level all day.",
+      "text_ja": "決済の関数に、一日中その山の水準のプロビジョニングされた同時実行数を設定する。"
+    },
+    {
+      "key": "D",
+      "text": "Put an API Gateway cache in front of the batch-processing function.",
+      "text_ja": "バッチ処理の関数の前に、API Gateway のキャッシュを置く。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "予約された同時実行数は、関数に割り当てる同時実行のインスタンスの最大と最小を決め、アカウントの同時実行数の一部をその関数のために取っておきます。予約していない関数は、残りの共有の同時実行数を分け合います。予約された同時実行数の設定に料金はかかりません。",
+    "per_choice": {
+      "A": "バッチの関数の環境を前もって初期化するだけで、決済の関数の分は確保されず、追加の料金もかかります。",
+      "B": "正しい。決済の関数の分を取っておけるので、ほかの関数に使い切られず、料金もかかりません。",
+      "C": "前もって初期化した環境を一日中持つため、使われない時間も課金され、要件に反します。",
+      "D": "バッチ処理のイベントは API の応答のキャッシュの対象ではなく、同時実行数の取り合いは変わりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-and-provisioned",
+      "source_id": "S1",
+      "quote": "Use reserved concurrency to set both the maximum and minimum number of concurrent instances to reserve a portion of your account's concurrency for an Event Function."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-concurrency-concept",
+      "source_id": "S2",
+      "quote": "There is no charge for configuring reserved concurrency for an Event Function."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+      "source_id": "S3",
+      "quote": "Using provisioned concurrency incurs additional charges to your account."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

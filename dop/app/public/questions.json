@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 261,
+  "count": 269,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -8581,6 +8581,213 @@
       "low_confidence": false
     },
     {
+      "id": "q-3.2-0013",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS Lambda",
+        "Application Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Lambda function behind an API has high latency every weekday from 08:00 to 10:00 because many new execution environments start at once. Traffic is low at other times. The company wants to reduce this latency during the morning peak while keeping costs as low as possible. Which solution meets these requirements MOST cost-effectively?",
+      "stem_ja": "API の後ろの Lambda 関数が、平日の 08:00 から 10:00 に、多くの新しい実行環境が一度に起動するため、高いレイテンシーになります。それ以外の時間はトラフィックが少ないです。会社は、費用をできるだけ低く保ちつつ、朝の山のレイテンシーを下げたいと考えています。これらの要件を最も費用対効果よく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Set reserved concurrency for the function to the number of instances needed at the peak.",
+          "text_ja": "関数の予約された同時実行数を、山で必要なインスタンスの数に設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Keep provisioned concurrency at the peak level all day and every day.",
+          "text_ja": "プロビジョニングされた同時実行数を、毎日一日中、山の水準に保つ。"
+        },
+        {
+          "key": "C",
+          "text": "Request a higher account concurrency limit so that more environments can start at the same time.",
+          "text_ja": "より多くの環境が同時に起動できるよう、アカウントの同時実行数の上限を上げてもらう。"
+        },
+        {
+          "key": "D",
+          "text": "Use Application Auto Scaling to schedule provisioned concurrency for the peak hours only.",
+          "text_ja": "Application Auto Scaling で、山の時間だけプロビジョニングされた同時実行数をスケジュールする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "新しい実行環境を初期化することをコールドスタートといい、それを抑えるにはプロビジョニングされた同時実行数（前もって初期化した実行環境）を使います。これは追加の料金がかかり、使われなくても動き続けて課金されるので、予測できる負荷の変化には Application Auto Scaling のスケジュールで必要な時間だけ増やします。その時は最初の値を先に設定しておきます。",
+        "per_choice": {
+          "A": "予約された同時実行数は同時実行の最大と最小を割り当てるだけで、環境は前もって初期化されず、コールドスタートは減りません。",
+          "B": "レイテンシーは下がりますが、使わない時間も課金され続け、費用を低く保つ要件に反します。",
+          "C": "起動できる数が増えるだけで、各環境の初期化は変わらず、コールドスタートは減りません。",
+          "D": "正しい。山の時間だけ前もって初期化した環境を用意し、それ以外の時間の費用を抑えられます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "To mitigate cold starts, you can use provisioned concurrency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurrency-targeting",
+          "quote": "With Application Auto Scaling, you can set your own scaling schedule according to predictable load changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#managing-provisioned-concurency",
+          "quote": "ensure that you configure an initial provisioned concurrency value first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#pc-logging-behavior",
+          "quote": "Provisioned concurrency runs continually and incurs separate billing from initialization and invocation costs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "However, none of these environments come pre-initialized."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0014",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Many Lambda functions share an account's concurrency in one Region. When a batch-processing function receives a burst of events, it uses most of the available concurrency, and a customer-facing payment function starts to be throttled. The company must make sure that the payment function always has enough concurrency, without paying extra for idle environments. Which solution BEST meets these requirements?",
+      "stem_ja": "1 つのリージョンで、多くの Lambda 関数がアカウントの同時実行数を分け合っています。バッチ処理の関数にイベントが一度に届くと、その関数が使える同時実行数のほとんどを使い、利用者向けの決済の関数がスロットリングされ始めます。会社は、使われない環境のために余計に払わずに、決済の関数が常に十分な同時実行数を持てるようにする必要があります。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure provisioned concurrency for the batch-processing function.",
+          "text_ja": "バッチ処理の関数に、プロビジョニングされた同時実行数を設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Configure reserved concurrency for the payment function.",
+          "text_ja": "決済の関数に、予約された同時実行数を設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Configure provisioned concurrency for the payment function at its peak level all day.",
+          "text_ja": "決済の関数に、一日中その山の水準のプロビジョニングされた同時実行数を設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Put an API Gateway cache in front of the batch-processing function.",
+          "text_ja": "バッチ処理の関数の前に、API Gateway のキャッシュを置く。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "予約された同時実行数は、関数に割り当てる同時実行のインスタンスの最大と最小を決め、アカウントの同時実行数の一部をその関数のために取っておきます。予約していない関数は、残りの共有の同時実行数を分け合います。予約された同時実行数の設定に料金はかかりません。",
+        "per_choice": {
+          "A": "バッチの関数の環境を前もって初期化するだけで、決済の関数の分は確保されず、追加の料金もかかります。",
+          "B": "正しい。決済の関数の分を取っておけるので、ほかの関数に使い切られず、料金もかかりません。",
+          "C": "前もって初期化した環境を一日中持つため、使われない時間も課金され、要件に反します。",
+          "D": "バッチ処理のイベントは API の応答のキャッシュの対象ではなく、同時実行数の取り合いは変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-and-provisioned",
+          "quote": "Use reserved concurrency to set both the maximum and minimum number of concurrent instances to reserve a portion of your account's concurrency for an Event Function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#reserved-concurrency-concept",
+          "quote": "There is no charge for configuring reserved concurrency for an Event Function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html#provisioned-concurrency-concept",
+          "quote": "Using provisioned concurrency incurs additional charges to your account."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0015",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "Amazon API Gateway"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A REST API in Amazon API Gateway serves several partner companies. One partner sometimes sends so many requests that the backend is overloaded, and most requests are repeated GET calls for the same product data, which changes about once every 10 minutes. The company wants to limit each partner's request rate and reduce the number of repeated calls that reach the backend. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "Amazon API Gateway の REST API が、いくつかの提携先の会社に使われています。ある提携先がときどき多すぎるリクエストを送ってバックエンドに負荷をかけすぎ、そのほとんどは、約 10 分に 1 回変わる同じ商品のデータへの繰り返しの GET の呼び出しです。会社は、各提携先のリクエストの速さを制限し、バックエンドに届く繰り返しの呼び出しを減らしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create usage plans with throttling rates and burst limits for each partner.",
+          "text_ja": "各提携先に、スロットリングの速さとバーストの上限を持つ使用量プランを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Enable caching for the stage with a time-to-live (TTL) of up to 600 seconds.",
+          "text_ja": "ステージのキャッシュを、最大 600 秒の TTL で有効にする。"
+        },
+        {
+          "key": "C",
+          "text": "Enable caching for the stage with a TTL of 0 seconds so that responses are always fresh.",
+          "text_ja": "応答が常に新しいよう、ステージのキャッシュを 0 秒の TTL で有効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Enable caching for the stage with a TTL of 2 hours to reduce backend calls as much as possible.",
+          "text_ja": "バックエンドへの呼び出しをできるだけ減らすよう、ステージのキャッシュを 2 時間の TTL で有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Rely on the account-level throttling limits, which guarantee a fixed ceiling for each partner.",
+          "text_ja": "各提携先に決まった上限を保証する、アカウントレベルのスロットリングの上限に任せる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "使用量プランを使うと、決めたリクエストの速さとクォータでクライアントのリクエストにスロットリングをかけられ、速さ（トークンを足す速さ）とバースト（トークンのバケットの大きさ）を指定できます。ステージのキャッシュを有効にすると、API Gateway は決めた TTL の間エンドポイントの応答をキャッシュし、既定では GET のメソッドがキャッシュされます。TTL の最大は 3600 秒で、0 はキャッシュの無効を意味します。",
+        "per_choice": {
+          "A": "正しい。提携先ごとに速さの上限を決められます。",
+          "B": "正しい。データが変わる間隔に合わせた TTL で、繰り返しの GET をキャッシュから返せます。",
+          "C": "TTL が 0 だとキャッシュは無効になり、呼び出しは減りません。",
+          "D": "TTL の最大は 3600 秒で、2 時間は設定できません。データも古くなりすぎます。",
+          "E": "アカウントレベルの制限は全 API の合計に対するもので、スロットリングも確実な上限ではなく目標として扱われます。提携先ごとには分けられません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling",
+          "quote": "Alternatively, you can enable usage plans to set throttles on client request submissions based on specified requests rates and quotas."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "When you enable caching for a stage, API Gateway caches responses from your endpoint for a specified time-to-live (TTL) period, in seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "The maximum TTL value is 3600 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html#api-gateway-caching",
+          "quote": "TTL=0 means caching is disabled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling",
+          "quote": "Both throttles and quotas are applied on a best-effort basis and should be thought of as targets rather than guaranteed request ceilings."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-3.3-0001",
       "task": "3.3",
       "domain": 3,
@@ -10235,6 +10442,212 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Domain",
           "quote": "The domain can have either public access or VPC access, but you can't then modify the type of access after the domain is created."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0013",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon CloudWatch"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application writes JSON log events such as {\"path\": \"/checkout\", \"statusCode\": 503} to CloudWatch Logs in a Standard log group. The operations team wants a CloudWatch alarm when the number of server errors (status codes of 500 or higher) on the /checkout path exceeds a threshold, and the alarm must not count errors on other paths. Which solution meets this requirement with the LEAST operational overhead?",
+      "stem_ja": "あるアプリケーションは、{\"path\": \"/checkout\", \"statusCode\": 503} のような JSON のログイベントを、Standard のロググループの CloudWatch Logs に書いています。運用チームは、/checkout のパスでのサーバーエラー（ステータスコードが 500 以上）の数がしきい値を超えた時に CloudWatch アラームを鳴らしたく、ほかのパスのエラーは数えてはいけません。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a metric filter with the pattern { $.statusCode >= 500 && $.path = \"/checkout\" }, and create an alarm on the resulting metric.",
+          "text_ja": "{ $.statusCode >= 500 && $.path = \"/checkout\" } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create a metric filter with the pattern { $.statusCode >= 500 }, and create an alarm on the resulting metric.",
+          "text_ja": "{ $.statusCode >= 500 } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a metric filter with the unstructured pattern \"checkout 500\", and create an alarm on the resulting metric.",
+          "text_ja": "構造の無い \"checkout 500\" のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Run a CloudWatch Logs Insights query by hand every 5 minutes and page the team when the count is too high.",
+          "text_ja": "5 分ごとに手作業で CloudWatch Logs Insights のクエリを実行し、数が多すぎたらチームを呼び出す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "メトリクスフィルターは、ログデータの中で探す語やパターンを決め、ログを数値の CloudWatch メトリクスに変えて、グラフにしたりアラームを設定したりできるようにします。JSON のログでは、パターンを {} で囲み、$. でプロパティを選び、数値の比較（>= など）と && による組み合わせを使えます。",
+        "per_choice": {
+          "A": "正しい。/checkout のパスで 500 以上のものだけを数えるメトリクスになり、それにアラームを設定できます。",
+          "B": "ほかのパスのサーバーエラーも数えてしまい、要件に反します。",
+          "C": "構造の無いパターンは語が含まれるかを見るだけで、500 以上という数値の条件を表せず、503 などを取りこぼします。",
+          "D": "手作業が必要で、オーバーヘッドが大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "quote": "CloudWatch Logs uses these metric filters to turn log data into numerical CloudWatch metrics that you can graph or set an alarm on."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "quote": "Set off property selectors with a dollar sign followed by a period (\"$.\")."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "quote": "You can use the logical operators AND (\"&&\") and OR (\"||\") in filter patterns to create compound expressions that match log events where two or more conditions are true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-unstructured-log-events",
+          "quote": "Filter patterns only return the log events that contain the terms you define."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0014",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "AWS KMS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An existing CloudWatch Logs log group in us-east-1 stores application logs with the default encryption. A new security policy requires all newly ingested log data in this log group to be encrypted with a customer managed AWS KMS key. Which solution BEST meets this requirement?",
+      "stem_ja": "us-east-1 の既存の CloudWatch Logs のロググループが、既定の暗号化でアプリケーションのログを保存しています。新しいセキュリティのポリシーで、このロググループに新しく取り込むすべてのログデータを、カスタマーマネージドの AWS KMS キーで暗号化することが求められました。この要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an asymmetric key in us-east-1 that allows the CloudWatch Logs principal, and associate it with the log group.",
+          "text_ja": "CloudWatch Logs のプリンシパルを許す非対称のキーを us-east-1 に作り、ロググループに関連付ける。"
+        },
+        {
+          "key": "B",
+          "text": "Create a symmetric KMS key in us-west-2, and associate it with the log group in us-east-1.",
+          "text_ja": "us-west-2 に対称の KMS キーを作り、us-east-1 のロググループに関連付ける。"
+        },
+        {
+          "key": "C",
+          "text": "Create a symmetric KMS key without changing its key policy, and associate it with the existing log group in the CloudWatch console.",
+          "text_ja": "キーポリシーを変えずに対称の KMS キーを作り、CloudWatch のコンソールで既存のロググループに関連付ける。"
+        },
+        {
+          "key": "D",
+          "text": "Create a symmetric key in us-east-1 that allows the CloudWatch Logs principal, and associate it by using the AWS CLI.",
+          "text_ja": "CloudWatch Logs のプリンシパルを許す対称のキーを us-east-1 に作り、AWS CLI で関連付ける。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "KMS による暗号化は、作る時か作った後にロググループへ KMS キーを関連付けて有効にし、その後に取り込むデータがそのキーで暗号化されます。CloudWatch Logs は対称の KMS キーにだけ対応し、キーポリシーで、キーと同じリージョンの CloudWatch Logs のサービスプリンシパルに使う権限を与えます。既存のロググループへの関連付けはコンソールではできません。",
+        "per_choice": {
+          "A": "CloudWatch Logs は対称の KMS キーにだけ対応し、非対称のキーは使ってはいけません。",
+          "B": "サービスプリンシパルはキーと同じリージョンにある必要があり、ほかのリージョンのキーは使えません。",
+          "C": "KMS キーは既定で持ち主しか使えないので、キーポリシーで権限を与える必要があり、既存のロググループへの関連付けもコンソールではできません。",
+          "D": "正しい。対称のキー、同じリージョンのサービスプリンシパルへの権限、API か CLI での関連付けがそろっています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+          "quote": "Encryption using AWS KMS is enabled at the log group level, by associating a KMS key with a log group, either when you create the log group or after it exists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+          "quote": "CloudWatch Logs supports only symmetric KMS keys."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-lg",
+          "quote": "This service principal must be in the same AWS Region where the KMS key is stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encryption-limits",
+          "quote": "You can't associate a KMS key with an existing log group using the CloudWatch console."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0015",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "AWS CloudTrail",
+        "AWS KMS",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company wants its CloudTrail trail to encrypt log files and digest files with a customer managed KMS key instead of SSE-S3. Auditors in a security role must be able to read the files as soon as the change is made. The trail delivers to an S3 bucket in eu-west-1. Which actions should a DevOps engineer take before updating the trail to use the key? (Choose TWO.)",
+      "stem_ja": "ある会社は、CloudTrail の証跡のログファイルとダイジェストファイルを、SSE-S3 ではなくカスタマーマネージドの KMS キーで暗号化したいと考えています。セキュリティのロールの監査担当は、変更した時からすぐにファイルを読める必要があります。証跡は eu-west-1 の S3 バケットへ届けています。証跡をキーを使うように更新する前に、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create the KMS key in eu-west-1 and add key policy statements that allow CloudTrail to use the key for encryption.",
+          "text_ja": "eu-west-1 に KMS キーを作り、CloudTrail が暗号化にキーを使えるようにするキーポリシーの文を足す。"
+        },
+        {
+          "key": "B",
+          "text": "Add key policy statements that grant decrypt permissions to the auditors' security role.",
+          "text_ja": "監査担当のセキュリティのロールに復号の権限を与える、キーポリシーの文を足す。"
+        },
+        {
+          "key": "C",
+          "text": "Create the KMS key in us-east-1 so that CloudTrail can use it for trails in every Region.",
+          "text_ja": "CloudTrail がすべてのリージョンの証跡で使えるよう、us-east-1 に KMS キーを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Set the bucket's default encryption to SSE-C so that the auditors can provide their own keys.",
+          "text_ja": "監査担当が自分のキーを渡せるよう、バケットのデフォルト暗号化を SSE-C にする。"
+        },
+        {
+          "key": "E",
+          "text": "Leave the key policy unchanged, and grant decrypt permissions to the auditors after they report access errors.",
+          "text_ja": "キーポリシーは変えず、監査担当がアクセスのエラーを報告した後に復号の権限を与える。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudTrail で SSE-KMS を使うには KMS キーを作って管理し、CloudTrail が暗号化に使い、利用者が復号できるようにするポリシーをキーに付けます。キーは、ログファイルを受け取る S3 バケットと同じリージョンに作る必要があります。復号の権限を証跡の設定より先に入れておかないと、権限の無い利用者は権限を与えるまで暗号化されたファイルを読めません。",
+        "per_choice": {
+          "A": "正しい。バケットと同じリージョンのキーで、CloudTrail が暗号化に使えるようにします。",
+          "B": "正しい。先に復号の権限を入れておけば、変更した時からすぐ読めます。",
+          "C": "キーはログファイルを受け取るバケットと同じリージョン（eu-west-1）に作る必要があります。",
+          "D": "SSE-C はデフォルト暗号化に使えません。",
+          "E": "変更から権限を与えるまでの間、監査担当がファイルを読めず、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms",
+          "quote": "The KMS key that you choose must be created in the same AWS Region as the Amazon S3 bucket that receives your log files and digest files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+          "quote": "Add policy sections to the key that enable CloudTrail to encrypt and users to decrypt log files and digest files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+          "quote": "If you do not perform this step before adding the key to your trail configuration, users without decrypt permissions cannot read encrypted files until you grant them those permissions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-bucket-encryption.html#default-bucket-encryption",
+          "quote": "Server-side encryption with customer-provided keys (SSE-C) is not supported for default encryption."
         }
       ],
       "low_confidence": false
@@ -11947,6 +12360,140 @@
         }
       ],
       "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0013",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon Route 53"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A web application in one Region has three public components: a web front end, an API, and an image service. Each component already has its own Route 53 health check on a public endpoint. The company wants a single health status for the whole application that a failover record can use, based on the status of the three existing health checks. Which solution meets this requirement with the LEAST operational overhead?",
+      "stem_ja": "あるリージョンの Web アプリケーションには、Web のフロントエンド、API、画像のサービスという 3 つの公開の部品があります。各部品には既に、公開のエンドポイントに対する Route 53 のヘルスチェックがあります。会社は、既存の 3 つのヘルスチェックの状態をもとに、フェイルオーバーのレコードが使えるアプリケーション全体の 1 つのヘルス状態を求めています。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Associate only the web front end health check with the failover record, and ignore the other two components.",
+          "text_ja": "Web のフロントエンドのヘルスチェックだけをフェイルオーバーのレコードに関連付け、ほかの 2 つの部品は見ない。"
+        },
+        {
+          "key": "B",
+          "text": "Create an \"M out of N\" CloudWatch alarm over the three components, and create a health check that monitors the alarm.",
+          "text_ja": "3 つの部品にまたがる「N 個中 M 個」の CloudWatch アラームを作り、そのアラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a calculated health check that monitors the three existing health checks, and associate it with the failover record.",
+          "text_ja": "既存の 3 つのヘルスチェックを監視する計算されたヘルスチェックを作り、フェイルオーバーのレコードに関連付ける。"
+        },
+        {
+          "key": "D",
+          "text": "Write an AWS Lambda function that checks the three endpoints every minute and updates the DNS record when one fails.",
+          "text_ja": "1 分ごとに 3 つのエンドポイントを確かめ、1 つが失敗したら DNS のレコードを更新する AWS Lambda 関数を書く。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "ほかのヘルスチェックの状態を監視するヘルスチェックを、計算されたヘルスチェックといいます。1 つの親のヘルスチェックは最大 255 の子のヘルスチェックを監視でき、Route 53 がほかのヘルスチェックを正常とみなすかどうかを見ます。",
+        "per_choice": {
+          "A": "API や画像のサービスの障害を見られず、アプリケーション全体の状態になりません。",
+          "B": "Route 53 は「N 個中 M 個」のアラームに対応していません。",
+          "C": "正しい。既存の 3 つのヘルスチェックを 1 つの状態にまとめ、レコードで使えます。",
+          "D": "独自の関数を作って保守する必要があり、組み込みの仕組みより手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "A health check can monitor the status of other health checks; this type of health check is known as a calculated health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "One parent health check can monitor the health of up to 255 child health checks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "Route 53 does not support \"M out of N\" alarms."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0014",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "Amazon Route 53",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company uses Route 53 failover routing for an internal service that is reachable only from a VPC and must not be exposed to the internet. The company wants Route 53 to fail over when the service becomes unhealthy. Which approaches can a DevOps engineer use to provide the health status? (Choose TWO.)",
+      "stem_ja": "ある会社は、VPC からしか届かず、インターネットに公開してはならない社内のサービスに、Route 53 のフェイルオーバーのルーティングを使っています。会社は、サービスが正常でなくなった時に Route 53 にフェイルオーバーさせたいと考えています。ヘルス状態を与えるために DevOps エンジニアが使える方法はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a private endpoint health check that uses a health check source in the VPC.",
+          "text_ja": "VPC の中のヘルスチェックの送り元を使う、プライベートエンドポイントのヘルスチェックを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create a health check that monitors a CloudWatch alarm on a service health metric in the same account.",
+          "text_ja": "同じアカウントで、サービスのヘルスのメトリクスの CloudWatch アラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a public endpoint health check that uses the private IP address of the service.",
+          "text_ja": "サービスのプライベート IP アドレスを使う、公開のエンドポイントのヘルスチェックを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Create a health check that monitors a CloudWatch alarm in a different AWS account that owns the service.",
+          "text_ja": "サービスを持つ別の AWS アカウントの CloudWatch アラームを監視するヘルスチェックを作る。"
+        },
+        {
+          "key": "E",
+          "text": "Create a calculated health check that references a private endpoint health check for the service.",
+          "text_ja": "サービスのプライベートエンドポイントのヘルスチェックを参照する、計算されたヘルスチェックを作る。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "プライベートエンドポイントのヘルスチェックは、VPC から届くエンドポイントを、インターネットに公開せずに監視し、VPC の中のヘルスチェックの送り元からリクエストを送ります。また、CloudWatch のメトリクスにアラームを作れば、そのアラームと同じデータを監視するヘルスチェックを作れます。アラームはヘルスチェックと同じアカウントにある必要があります。",
+        "per_choice": {
+          "A": "正しい。インターネットに公開せずに、VPC の中からサービスを直接確かめられます。",
+          "B": "正しい。同じアカウントのアラームのデータをもとに、ヘルス状態が変わります。",
+          "C": "公開のエンドポイントのヘルスチェックは、世界の各地のヘルスチェッカーから確かめるもので、VPC の中だけのサービスには届きません。",
+          "D": "ヘルスチェックが監視できるのは、同じアカウントの CloudWatch アラームだけです。",
+          "E": "計算されたヘルスチェックから、プライベートエンドポイントのヘルスチェックは参照できません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "A private endpoint health check monitors an endpoint that is reachable from your VPC, such as a specific IP address, domain name, or port."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You don't need to expose any endpoint to the internet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "A health check can only monitor a CloudWatch alarm that exists in the same AWS account as the health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You can't reference a private endpoint health check from a calculated health check."
+        }
+      ],
+      "low_confidence": true
     },
     {
       "id": "q-5.1-0001",

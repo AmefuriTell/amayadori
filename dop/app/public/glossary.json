@@ -3,6 +3,7 @@
     "AWS Certificate Manager": "acm",
     "Amazon API Gateway": "api-gateway",
     "AWS AppConfig": "appconfig",
+    "Amazon Application Recovery Controller": "arc",
     "Amazon Athena": "athena",
     "Amazon Aurora": "aurora",
     "AWS Backup": "backup",
@@ -41,10 +42,12 @@
     "AWS Fargate": "fargate",
     "AWS Fault Injection Service": "fault-injection-service",
     "AWS Fault Injection Service (AWS FIS)": "fault-injection-service",
+    "AWS Glue": "glue",
     "Amazon GuardDuty": "guardduty",
     "AWS Health": "health",
     "IAM Access Analyzer": "iam-access-analyzer",
     "AWS IAM Identity Center": "iam-identity-center",
+    "IAM Roles Anywhere": "iam-roles-anywhere",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
     "Amazon Inspector": "inspector",
@@ -211,6 +214,45 @@
         {
           "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy-predefined.html",
           "quote": "This strategy deploys the configuration to 20% of all targets every six minutes for a 30 minute deployment."
+        }
+      ]
+    },
+    "arc": {
+      "id": "arc",
+      "name": "Amazon Application Recovery Controller",
+      "reading": "アプリケーションリカバリーコントローラー",
+      "summary": "AWS で動くアプリケーションの復旧に備え、より速く復旧できるようにするサービス（略して ARC）。1 つのアベイラビリティーゾーン（AZ）の障害からの復旧と、リージョンをまたぐ復旧の機能を持つ。",
+      "features": [
+        {
+          "title": "ゾーンシフトとゾーンの自動シフト",
+          "text": "損なわれた AZ から正常な AZ へトラフィックを一時的に移して、1 つの AZ の障害から復旧する。"
+        },
+        {
+          "title": "ルーティングコントロール",
+          "text": "損なわれたリージョンから正常なリージョンへトラフィックをフェイルオーバーし、アプリケーションの可用性を保つ。"
+        },
+        {
+          "title": "リージョンの切り替え（Region switch）",
+          "text": "複数リージョンのアプリケーションの復旧を、1 か所で自動に、様子が見える形で計画・調整する。"
+        }
+      ],
+      "exam_points": [
+        "1 つの AZ の障害の時に、トラフィックを正常な AZ へ一時的に移す方法として、ゾーンシフトを押さえる。",
+        "readiness check の機能は新しい利用者の受け付けを止めている。ARC 本体と Region switch は引き続きサポートされる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-readiness-availability-change.html#arc-readiness-availability-change",
+          "quote": "The readiness check feature in Amazon Application Recovery Controller (ARC) is no longer open to new customers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/what-is-route53-recovery.html#what-is-route53-recovery",
+          "quote": "Multi-Availability Zone (AZ) recovery, including zonal shift and zonal autoshift"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/what-is-route53-recovery.html#what-is-route53-recovery.region",
+          "quote": "Routing control enables you to failover traffic from an impaired AWS Region to a healthy AWS Region"
         }
       ]
     },
@@ -1599,6 +1641,40 @@
         }
       ]
     },
+    "glue": {
+      "id": "glue",
+      "name": "AWS Glue",
+      "reading": "グルー",
+      "summary": "複数の元からデータを見つけ、整え、移し、つなぐことを簡単にする、サーバーレス（管理するインフラが無い）のデータ統合のサービス。データは中央のデータカタログで管理する。",
+      "features": [
+        {
+          "title": "データカタログとクローラー",
+          "text": "クローラーでスキーマ（データの形）の情報を自動で推定し、AWS Glue Data Catalog に入れる。"
+        },
+        {
+          "title": "ETL のパイプライン",
+          "text": "データを取り出し、変え、読み込む（ETL）パイプラインを、画面で作って動かし、監視できる。"
+        },
+        {
+          "title": "イベントでの自動実行",
+          "text": "イベントのトリガーでクローラーやジョブを始め、依存するジョブとクローラーをつなげられる。"
+        }
+      ],
+      "exam_points": [
+        "クローラーでデータのスキーマを自動で推定し、AWS Glue Data Catalog に入れる役割を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html#what-is-glue",
+          "quote": "AWS Glue is a serverless data integration service that makes it easy for analytics users to discover, prepare, move, and integrate data from multiple sources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html#glue-features-summary",
+          "quote": "Use AWS Glue crawlers to automatically infer schema information and integrate it into your AWS Glue Data Catalog."
+        }
+      ]
+    },
     "guardduty": {
       "id": "guardduty",
       "name": "Amazon GuardDuty",
@@ -1748,6 +1824,40 @@
         {
           "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/abac.html#abac",
           "quote": "Attribute-based access control (ABAC) is an authorization strategy that defines permissions based on attributes."
+        }
+      ]
+    },
+    "iam-roles-anywhere": {
+      "id": "iam-roles-anywhere",
+      "name": "IAM Roles Anywhere",
+      "reading": "アイエーエム ロールズ エニウェア",
+      "summary": "AWS の外で動くサーバー・コンテナ・アプリケーションが、IAM の一時的な認証情報を得られるようにする機能。AWS の外のワークロードで、長期の AWS の認証情報を管理しなくて済む。",
+      "features": [
+        {
+          "title": "X.509 の証明書とトラストアンカー",
+          "text": "ワークロードは自分の認証局（CA）が発行した X.509 の証明書を使う。CA をトラストアンカーとして登録し、自分の公開鍵の基盤（PKI）との信頼を作る。"
+        },
+        {
+          "title": "同じ IAM ロール",
+          "text": "AWS の中のアプリケーションと同じ IAM ポリシーと IAM ロールで、AWS のリソースにアクセスできる。"
+        },
+        {
+          "title": "プロファイル",
+          "text": "引き受けるロールと、一時的な認証情報でできることを決める。セッションポリシーで、そのセッションの権限を絞れる。"
+        }
+      ],
+      "exam_points": [
+        "AWS の外のワークロードに、長期の AWS の認証情報を管理せずに一時的な認証情報を使わせる方法として押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "quote": "Using IAM Roles Anywhere means you don't need to manage long-term AWS credentials for workloads running outside of AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#first-time-user",
+          "quote": "In a profile, you can define IAM session policies, which can be managed or inline, to limit the permissions created for a session."
         }
       ]
     },
