@@ -1,0 +1,66 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0009",
+  "services": [
+    "AWS Systems Manager State Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company configures its Amazon Linux managed nodes with an Ansible playbook bundle that contains a main playbook, several roles, and template files. The company wants the configuration to be applied to all nodes with the tag Role=web when they are first targeted and then every day, so that manual changes are corrected. The company wants to use the document that AWS currently recommends. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、メインのプレイブック、複数のロール、テンプレートファイルを含む Ansible のプレイブックの一式で、Amazon Linux のマネージドノードを構成しています。会社は、タグ Role=web を持つすべてのノードに、最初に対象になった時と、その後は毎日、構成を適用して、手作業の変更が直されるようにしたいと考えています。会社は、AWS が今勧めているドキュメントを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a State Manager association that uses the AWS-ApplyAnsiblePlaybooks document, targets the tag Role=web, and runs on a daily schedule.",
+      "text_ja": "AWS-ApplyAnsiblePlaybooks ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Create a State Manager association that uses the AWS-RunAnsiblePlaybook document, targets the tag Role=web, and runs on a daily schedule.",
+      "text_ja": "AWS-RunAnsiblePlaybook ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Run the AWS-ApplyAnsiblePlaybooks document with Run Command against the tag Role=web, and have an operator repeat the command every day.",
+      "text_ja": "Run Command でタグ Role=web に対して AWS-ApplyAnsiblePlaybooks ドキュメントを実行し、運用担当者が毎日そのコマンドを繰り返す。"
+    },
+    {
+      "key": "D",
+      "text": "Add a cron job to each web node's user data that downloads the bundle and runs ansible-playbook locally every day.",
+      "text_ja": "各ウェブのノードのユーザーデータに、一式をダウンロードして毎日ローカルで ansible-playbook を実行する cron ジョブを追加する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "State Manager の関連付けは、作った時に実行され、その後はスケジュールどおりに実行されるので、決めた状態を保てます。Ansible のプレイブックには AWS-ApplyAnsiblePlaybooks が勧められており、ファイルの構造ごとローカルに写してから実行するため、まとめた複雑なプレイブックにも対応します。",
+    "per_choice": {
+      "A": "正しい。勧められているドキュメントで一式を実行し、作った時とその後の毎日の適用を関連付けが自動で行います。",
+      "B": "関連付けとスケジュールは合っていますが、AWS-RunAnsiblePlaybook は非推奨で、今勧められているドキュメントを使うという要件に反します。",
+      "C": "勧められているドキュメントですが、Run Command は 1 回きりの実行で、毎日の繰り返しが手作業になります。",
+      "D": "動きますが、既に動いているノードには入らず、ノードごとの設定の保守が要ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+      "source_id": "S6",
+      "quote": "We recommend that you use the AWS-ApplyAnsiblePlaybooks document because of the enhancements described here."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+      "source_id": "S6",
+      "quote": "The AWS-ApplyAnsiblePlaybooks document supports bundled, complex playbooks because it copies the entire file structure to a local directory before executing the specified main playbook."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about-scheduling",
+      "source_id": "S5",
+      "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

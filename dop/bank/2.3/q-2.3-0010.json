@@ -1,0 +1,67 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0010",
+  "services": [
+    "AWS Systems Manager Distributor",
+    "AWS Systems Manager State Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company has built an internal monitoring agent and wants a specific version of it to be installed on all of its Systems Manager managed nodes. Nodes are launched and replaced every week, and the agent is sometimes removed by mistake. The company wants every node to keep the approved version installed without engineers running commands by hand. Which solution meets these requirements with the LEAST operational effort?",
+  "stem_ja": "ある会社は社内の監視エージェントを作っており、その特定のバージョンを Systems Manager のすべてのマネージドノードにインストールしたいと考えています。ノードは毎週起動され、入れ替わり、エージェントが誤って削除されることもあります。会社は、エンジニアが手作業でコマンドを実行せずに、すべてのノードに承認済みのバージョンがインストールされた状態を保ちたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Package the agent in Systems Manager Distributor, and install the approved version once on the current nodes by using Run Command.",
+      "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、Run Command で今あるノードに承認済みのバージョンを 1 回インストールする。"
+    },
+    {
+      "key": "B",
+      "text": "Store the installer in Amazon S3, and have an engineer run an installation script on new nodes and on nodes that lost the agent each week.",
+      "text_ja": "インストーラーを Amazon S3 に置き、エンジニアが毎週、新しいノードとエージェントが消えたノードでインストールのスクリプトを実行する。"
+    },
+    {
+      "key": "C",
+      "text": "Package the agent in Systems Manager Distributor, and ask each team to install the package version that they prefer on their nodes.",
+      "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、各チームがそれぞれ好きなパッケージのバージョンを自分のノードにインストールする。"
+    },
+    {
+      "key": "D",
+      "text": "Package the agent in Systems Manager Distributor, and create a State Manager association that installs the approved version on a schedule on all managed nodes.",
+      "text_ja": "エージェントを Systems Manager Distributor でパッケージにし、すべてのマネージドノードに承認済みのバージョンをスケジュールでインストールする State Manager の関連付けを作る。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Distributor はソフトウェアをパッケージにしてマネージドノードへ公開し、パッケージを作ると SSM ドキュメントができます。State Manager を使えばスケジュールでインストールでき、どのノードにどのバージョンを入れるかも決められるので、入れ替わったノードや消えたエージェントにも自動で対応できます。",
+    "per_choice": {
+      "A": "今あるノードには入りますが、Run Command は 1 回きりで、後から起動したノードや消えたエージェントには対応できません。",
+      "B": "毎週の手作業が必要で、次の作業までエージェントの無いノードが残ります。",
+      "C": "チームごとにバージョンがばらつき、承認済みのバージョンを保つという要件に反します。",
+      "D": "正しい。スケジュールで承認済みのバージョンを入れ直すので、新しいノードにも誤って消えたノードにも手作業無しで対応します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+      "source_id": "S8",
+      "quote": "Distributor helps you package and publish software to AWS Systems Manager managed nodes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+      "source_id": "S8",
+      "quote": "On a schedule by using AWS Systems Manager State Manager"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+      "source_id": "S8",
+      "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

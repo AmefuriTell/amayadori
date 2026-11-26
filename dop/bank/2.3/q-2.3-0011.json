@@ -1,0 +1,78 @@
+{
+  "task": "2.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.3-0011",
+  "services": [
+    "AWS Systems Manager Run Command"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A DevOps engineer must make a one-time configuration change on 200 managed nodes by using AWS Systems Manager Run Command. To limit the impact of a bad change, no more than one tenth of the nodes may run the command at the same time, and the system must stop sending the command to more nodes as soon as any node reports an error. Which settings should the engineer use? (Choose TWO.)",
+  "stem_ja": "DevOps エンジニアは、AWS Systems Manager Run Command を使って、200 台のマネージドノードで 1 回きりの構成の変更を行う必要があります。誤った変更の影響を抑えるため、同時にコマンドを実行するノードは全体の 10 分の 1 以下にし、どれかのノードがエラーを返したらすぐに、ほかのノードへのコマンドの送信を止める必要があります。エンジニアが使うべき設定はどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Set max-concurrency to 10%.",
+      "text_ja": "max-concurrency を 10% にする。"
+    },
+    {
+      "key": "B",
+      "text": "Leave max-concurrency at its default value.",
+      "text_ja": "max-concurrency を既定の値のままにする。"
+    },
+    {
+      "key": "C",
+      "text": "Set max-errors to 0.",
+      "text_ja": "max-errors を 0 にする。"
+    },
+    {
+      "key": "D",
+      "text": "Set max-errors to 10%.",
+      "text_ja": "max-errors を 10% にする。"
+    },
+    {
+      "key": "E",
+      "text": "Create a State Manager association with a daily schedule instead of using Run Command.",
+      "text_ja": "Run Command を使う代わりに、毎日のスケジュールの State Manager の関連付けを作る。"
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "max-concurrency は同時にコマンドを実行するノードの数を、10 のような数か 10% のような割合で決めます。max-errors を 0 にすると、最初のエラーが返った後、ほかのノードへのコマンドの送信を止めます。",
+    "per_choice": {
+      "A": "正しい。対象の 10% を上限にすると、200 台のうち同時に動くのは 10 分の 1 以下になります。",
+      "B": "既定の値は 50 で、200 台の 4 分の 1 が同時に動き、10 分の 1 以下という要件を満たしません。",
+      "C": "正しい。0 にすると最初のエラーで、ほかのノードへの送信を止めます。",
+      "D": "エラーを全体の 10% まで許すため、最初のエラーで止めるという要件を満たしません。",
+      "E": "1 回きりの変更なのに毎日繰り返し適用され、同時実行とエラーの要件にも答えていません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+      "source_id": "S9",
+      "quote": "You can specify either an absolute number of managed nodes, for example 10, or a percentage of the target set, for example 10%."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+      "source_id": "S9",
+      "quote": "The default for value max-concurrency is 50."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+      "source_id": "S10",
+      "quote": "If you specify 0, then the system stops sending the command to additional managed nodes after the first error result is returned."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+      "source_id": "S11",
+      "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,215 @@
+{
+  "item": "C-0028",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company configures its Amazon Linux managed nodes with an Ansible playbook bundle that contains a main playbook, several roles, and template files. The company wants the configuration to be applied to all nodes with the tag Role=web when they are first targeted and then every day, so that manual changes are corrected. The company wants to use the document that AWS currently recommends. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a State Manager association that uses the AWS-RunAnsiblePlaybook document, targets the tag Role=web, and runs on a daily schedule."
+        },
+        {
+          "key": "B",
+          "text": "Run the AWS-ApplyAnsiblePlaybooks document with Run Command against the tag Role=web, and have an operator repeat the command every day."
+        },
+        {
+          "key": "C",
+          "text": "Create a State Manager association that uses the AWS-ApplyAnsiblePlaybooks document, targets the tag Role=web, and runs on a daily schedule."
+        },
+        {
+          "key": "D",
+          "text": "Add a cron job to each web node's user data that downloads the bundle and runs ansible-playbook locally every day."
+        }
+      ],
+      "explanation": {
+        "summary": "State Manager の関連付けは、作った時に実行され、その後はスケジュールどおりに実行されるので、決めた状態を保てます。Ansible のプレイブックには AWS-ApplyAnsiblePlaybooks が勧められており、ファイルの構造ごとローカルに写してから実行するため、まとめた複雑なプレイブックにも対応します。",
+        "per_choice": {
+          "A": "関連付けとスケジュールは合っていますが、AWS-RunAnsiblePlaybook は非推奨で、今勧められているドキュメントを使うという要件に反します。",
+          "B": "勧められているドキュメントですが、Run Command は 1 回きりの実行で、毎日の繰り返しが手作業になります。",
+          "C": "正しい。勧められているドキュメントで一式を実行し、作った時とその後の毎日の適用を関連付けが自動で行います。",
+          "D": "動きますが、既に動いているノードには入らず、ノードごとの設定の保守が要ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "source_id": "S6",
+          "quote": "We recommend that you use the AWS-ApplyAnsiblePlaybooks document because of the enhancements described here."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "source_id": "S6",
+          "quote": "The AWS-ApplyAnsiblePlaybooks document supports bundled, complex playbooks because it copies the entire file structure to a local directory before executing the specified main playbook."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about-scheduling",
+          "source_id": "S5",
+          "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company has built an internal monitoring agent and wants a specific version of it to be installed on all of its Systems Manager managed nodes. Nodes are launched and replaced every week, and the agent is sometimes removed by mistake. The company wants every node to keep the approved version installed without engineers running commands by hand. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Package the agent in Systems Manager Distributor, and install the approved version once on the current nodes by using Run Command."
+        },
+        {
+          "key": "B",
+          "text": "Package the agent in Systems Manager Distributor, and create a State Manager association that installs the approved version on a schedule on all managed nodes."
+        },
+        {
+          "key": "C",
+          "text": "Store the installer in Amazon S3, and have an engineer run an installation script on new nodes and on nodes that lost the agent each week."
+        },
+        {
+          "key": "D",
+          "text": "Package the agent in Systems Manager Distributor, and ask each team to install the package version that they prefer on their nodes."
+        }
+      ],
+      "explanation": {
+        "summary": "Distributor はソフトウェアをパッケージにしてマネージドノードへ公開し、パッケージを作ると SSM ドキュメントができます。State Manager を使えばスケジュールでインストールでき、どのノードにどのバージョンを入れるかも決められるので、入れ替わったノードや消えたエージェントにも自動で対応できます。",
+        "per_choice": {
+          "A": "今あるノードには入りますが、Run Command は 1 回きりで、後から起動したノードや消えたエージェントには対応できません。",
+          "B": "正しい。スケジュールで承認済みのバージョンを入れ直すので、新しいノードにも誤って消えたノードにも手作業無しで対応します。",
+          "C": "毎週の手作業が必要で、次の作業までエージェントの無いノードが残ります。",
+          "D": "チームごとにバージョンがばらつき、承認済みのバージョンを保つという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "source_id": "S8",
+          "quote": "Distributor helps you package and publish software to AWS Systems Manager managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "source_id": "S8",
+          "quote": "On a schedule by using AWS Systems Manager State Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "source_id": "S8",
+          "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "answer": [
+        "A",
+        "C"
+      ],
+      "stem_en": "A DevOps engineer must make a one-time configuration change on 200 managed nodes by using AWS Systems Manager Run Command. To limit the impact of a bad change, no more than one tenth of the nodes may run the command at the same time, and the system must stop sending the command to more nodes as soon as any node reports an error. Which settings should the engineer use? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set max-concurrency to 10%."
+        },
+        {
+          "key": "B",
+          "text": "Leave max-concurrency at its default value."
+        },
+        {
+          "key": "C",
+          "text": "Set max-errors to 0."
+        },
+        {
+          "key": "D",
+          "text": "Set max-errors to 10%."
+        },
+        {
+          "key": "E",
+          "text": "Create a State Manager association with a daily schedule instead of using Run Command."
+        }
+      ],
+      "explanation": {
+        "summary": "max-concurrency は同時にコマンドを実行するノードの数を、10 のような数か 10% のような割合で決めます。max-errors を 0 にすると、最初のエラーが返った後、ほかのノードへのコマンドの送信を止めます。",
+        "per_choice": {
+          "A": "正しい。対象の 10% を上限にすると、200 台のうち同時に動くのは 10 分の 1 以下になります。",
+          "B": "既定の値は 50 で、200 台の 4 分の 1 が同時に動き、10 分の 1 以下という要件を満たしません。",
+          "C": "正しい。0 にすると最初のエラーで、ほかのノードへの送信を止めます。",
+          "D": "エラーを全体の 10% まで許すため、最初のエラーで止めるという要件を満たしません。",
+          "E": "1 回きりの変更なのに毎日繰り返し適用され、同時実行とエラーの要件にも答えていません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "source_id": "S9",
+          "quote": "You can specify either an absolute number of managed nodes, for example 10, or a percentage of the target set, for example 10%."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "source_id": "S9",
+          "quote": "The default for value max-concurrency is 50."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+          "source_id": "S10",
+          "quote": "If you specify 0, then the system stops sending the command to additional managed nodes after the first error result is returned."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+          "source_id": "S11",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company keeps its managed nodes configured with State Manager associations and patches them with Patch Manager. The security team wants one place to see which nodes are out of compliance with the associations or with patching, and wants noncompliant nodes to be remediated automatically. The team does not want to build a custom reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Write an AWS Lambda function that connects to each node every day, compares its settings and patches with the baseline, and stores the results in an Amazon S3 report."
+        },
+        {
+          "key": "B",
+          "text": "Use Systems Manager Compliance to view association and patch compliance, and use an Amazon EventBridge rule to start remediation for noncompliant nodes."
+        },
+        {
+          "key": "C",
+          "text": "Use Systems Manager Compliance to view association and patch compliance, and have an engineer fix each noncompliant node by hand every week."
+        },
+        {
+          "key": "D",
+          "text": "Run a weekly Run Command script that collects each node's settings into a spreadsheet, and ask the security team to review it."
+        }
+      ],
+      "explanation": {
+        "summary": "Systems Manager Compliance は、既定で Patch Manager のパッチと State Manager の関連付けの準拠のデータを表示します。問題は Run Command、State Manager、Amazon EventBridge を使って修復できます。",
+        "per_choice": {
+          "A": "動きますが、確認とレポートの独自のツールを作って保守することになり、要件に反します。",
+          "B": "正しい。組み込みの表示で 1 か所から確認でき、EventBridge で修復を自動で始められます。",
+          "C": "確認はできますが、修復が手作業で、自動で修復するという要件に合いません。",
+          "D": "独自の集計と人の確認が必要で、自動の修復もありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "source_id": "S7",
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "source_id": "S7",
+          "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
+        }
+      ]
+    }
+  ]
+}
