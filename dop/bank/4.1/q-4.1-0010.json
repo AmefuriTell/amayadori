@@ -1,0 +1,71 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0010",
+  "services": [
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company exports application logs to an Amazon S3 bucket as millions of small files of about 20 KB each. The team added an S3 Lifecycle rule that transitions objects to a lower-cost storage class after 30 days, but the objects stay in their original storage class and storage costs do not go down. What is the MOST likely reason?",
+  "stem_ja": "ある会社は、アプリケーションのログを、1 つ約 20 KB の数百万個の小さなファイルとして Amazon S3 バケットへエクスポートしています。チームは 30 日後にオブジェクトをより安いストレージクラスへ移す S3 ライフサイクルのルールを足しましたが、オブジェクトは元のストレージクラスのままで、ストレージの費用も下がりません。最も可能性の高い理由はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Lifecycle rules apply only to objects that are added after the rule is created, so the existing objects are not transitioned.",
+      "text_ja": "ライフサイクルのルールは作った後に足されたオブジェクトにだけ適用されるため、既存のオブジェクトは移されない。"
+    },
+    {
+      "key": "B",
+      "text": "The bucket policy denies all actions for all principals, which prevents the lifecycle rule from transitioning the objects.",
+      "text_ja": "バケットポリシーがすべてのプリンシパルのすべてのアクションを拒否しており、ライフサイクルのルールがオブジェクトを移せない。"
+    },
+    {
+      "key": "C",
+      "text": "Lifecycle transitions are charged as data retrieval, so S3 skips transitions that would cost more than they save.",
+      "text_ja": "ライフサイクルの移行はデータの取り出しとして課金されるため、S3 は節約より費用が大きくなる移行を飛ばす。"
+    },
+    {
+      "key": "D",
+      "text": "By default, S3 Lifecycle does not transition objects smaller than 128 KB to any storage class.",
+      "text_ja": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移さない。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移しません。小さなオブジェクトはオブジェクトごとに移行のリクエストの料金がかかり、節約より費用が大きくなることがあるため、移行は勧められていません。",
+    "per_choice": {
+      "A": "ライフサイクルのルールは既存のオブジェクトにも、後から足すオブジェクトにも適用されます。",
+      "B": "バケットポリシーでライフサイクルのルールによる削除や移行を止めることはできません。",
+      "C": "ライフサイクルの移行にデータの取り出しの料金はかかりません。",
+      "D": "正しい。約 20 KB のオブジェクトは既定の動きで移されません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html#lifecycle-configuration-constraints",
+      "source_id": "S6",
+      "quote": "Amazon S3 applies a default behavior to S3 Lifecycle configurations that prevents objects smaller than 128 KB from being transitioned to any storage class."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+      "source_id": "S5",
+      "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+      "source_id": "S5",
+      "quote": "You can't use a bucket policy to prevent deletions or transitions by an S3 Lifecycle rule."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+      "source_id": "S5",
+      "quote": "There are no data retrieval charges for lifecycle transitions."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

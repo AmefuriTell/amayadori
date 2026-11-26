@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 194,
+  "count": 196,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -7712,6 +7712,136 @@
       ],
       "low_confidence": false,
       "note": "公式のドキュメントは、新しい実装には OpenTelemetry（OTLP）でメトリクスを送ることを勧めている（S3・S7）。この問題は「PutMetricData の権限が無く、ログには書ける」という条件で埋め込みメトリクス形式を選ばせる。試験とずれるかもしれない（P-009）。"
+    },
+    {
+      "id": "q-4.1-0009",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Many teams create CloudWatch Logs log groups whose names start with /app/. Most of these log groups were created with the default retention, and storage costs keep growing. The company wants every existing and future log group with the /app/ prefix to keep log events for 90 days, without relying on each team to configure it. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "多くのチームが、名前が /app/ で始まる CloudWatch Logs のロググループを作っています。これらのロググループの多くは既定の保持のまま作られており、ストレージの費用が増え続けています。会社は、/app/ で始まる既存と今後のすべてのロググループで、各チームの設定に頼らずに、ログイベントを 90 日間保持したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the NEW_ONLY option.",
+          "text_ja": "/app/ の接頭辞に、90 日の保持期間と NEW_ONLY のオプションでアカウントレベルの保持ポリシーを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the RETROACTIVE option.",
+          "text_ja": "/app/ の接頭辞に、90 日の保持期間と RETROACTIVE のオプションでアカウントレベルの保持ポリシーを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Schedule an AWS Lambda function that lists the /app/ log groups every day and sets a 90-day retention on each one.",
+          "text_ja": "毎日 /app/ のロググループを一覧し、それぞれに 90 日の保持を設定する AWS Lambda 関数をスケジュールで実行する。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each team to set a 90-day retention on its log groups, and review the settings every month.",
+          "text_ja": "各チームに自分のロググループで 90 日の保持を設定してもらい、毎月設定を確認する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs の既定ではログデータは無期限に保存されます。アカウントレベルの保持ポリシーはロググループの設定より優先され、RETROACTIVE を指定すると、ポリシーを作る前からあるものも含めて接頭辞に合うすべてのロググループに適用されます。",
+        "per_choice": {
+          "A": "NEW_ONLY はポリシーを作った後に作られるロググループにだけ適用され、既存のロググループは無期限のままです。",
+          "B": "正しい。既存と今後の /app/ のロググループのすべてに、チームの設定に頼らず 90 日の保持が適用されます。",
+          "C": "動きますが、独自の関数を作って保守する必要があります。",
+          "D": "各チームに頼ることになり、要件に反します。確認の手間もかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "By default, log data is stored in CloudWatch Logs indefinitely."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify RETROACTIVE to apply the policy to every log group that matches the prefix, including log groups that existed before you created the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify NEW_ONLY to apply the policy only to log groups that are created after you create the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "An account-level retention policy overrides the retention setting of the log group."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0010",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company exports application logs to an Amazon S3 bucket as millions of small files of about 20 KB each. The team added an S3 Lifecycle rule that transitions objects to a lower-cost storage class after 30 days, but the objects stay in their original storage class and storage costs do not go down. What is the MOST likely reason?",
+      "stem_ja": "ある会社は、アプリケーションのログを、1 つ約 20 KB の数百万個の小さなファイルとして Amazon S3 バケットへエクスポートしています。チームは 30 日後にオブジェクトをより安いストレージクラスへ移す S3 ライフサイクルのルールを足しましたが、オブジェクトは元のストレージクラスのままで、ストレージの費用も下がりません。最も可能性の高い理由はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Lifecycle rules apply only to objects that are added after the rule is created, so the existing objects are not transitioned.",
+          "text_ja": "ライフサイクルのルールは作った後に足されたオブジェクトにだけ適用されるため、既存のオブジェクトは移されない。"
+        },
+        {
+          "key": "B",
+          "text": "The bucket policy denies all actions for all principals, which prevents the lifecycle rule from transitioning the objects.",
+          "text_ja": "バケットポリシーがすべてのプリンシパルのすべてのアクションを拒否しており、ライフサイクルのルールがオブジェクトを移せない。"
+        },
+        {
+          "key": "C",
+          "text": "Lifecycle transitions are charged as data retrieval, so S3 skips transitions that would cost more than they save.",
+          "text_ja": "ライフサイクルの移行はデータの取り出しとして課金されるため、S3 は節約より費用が大きくなる移行を飛ばす。"
+        },
+        {
+          "key": "D",
+          "text": "By default, S3 Lifecycle does not transition objects smaller than 128 KB to any storage class.",
+          "text_ja": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移さない。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移しません。小さなオブジェクトはオブジェクトごとに移行のリクエストの料金がかかり、節約より費用が大きくなることがあるため、移行は勧められていません。",
+        "per_choice": {
+          "A": "ライフサイクルのルールは既存のオブジェクトにも、後から足すオブジェクトにも適用されます。",
+          "B": "バケットポリシーでライフサイクルのルールによる削除や移行を止めることはできません。",
+          "C": "ライフサイクルの移行にデータの取り出しの料金はかかりません。",
+          "D": "正しい。約 20 KB のオブジェクトは既定の動きで移されません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html#lifecycle-configuration-constraints",
+          "quote": "Amazon S3 applies a default behavior to S3 Lifecycle configurations that prevents objects smaller than 128 KB from being transitioned to any storage class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "You can't use a bucket policy to prevent deletions or transitions by an S3 Lifecycle rule."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "There are no data retrieval charges for lifecycle transitions."
+        }
+      ],
+      "low_confidence": false
     },
     {
       "id": "q-4.2-0001",
