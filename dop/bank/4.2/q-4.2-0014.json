@@ -1,0 +1,67 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0014",
+  "services": [
+    "Amazon Athena",
+    "AWS Glue"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security team queries several years of VPC flow logs in Amazon S3 with Amazon Athena. The table is partitioned by date and Region, so it has a very large number of partitions. Queries are slow, and an engineer must add new partitions to the AWS Glue Data Catalog every day. The table is queried only through Athena. Which solution will speed up the queries and remove the daily partition management with the LEAST effort?",
+  "stem_ja": "セキュリティチームは、Amazon S3 にある数年分の VPC フローログを Amazon Athena でクエリしています。テーブルは日付とリージョンでパーティション分割されており、パーティションの数がとても多くなっています。クエリは遅く、エンジニアは毎日新しいパーティションを AWS Glue Data Catalog に足す必要があります。テーブルは Athena からしかクエリしません。最も少ない手間でクエリを速くし、毎日のパーティションの管理を無くすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on partition projection for the table with a configuration that describes the date and Region partitions.",
+      "text_ja": "日付とリージョンのパーティションを表す設定で、テーブルのパーティション射影を有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Schedule a job that adds the new partitions to the AWS Glue Data Catalog every day.",
+      "text_ja": "毎日新しいパーティションを AWS Glue Data Catalog に足すジョブをスケジュールで実行する。"
+    },
+    {
+      "key": "C",
+      "text": "Remove the partitions from the table so that Athena reads all the files in each query.",
+      "text_ja": "各クエリで Athena がすべてのファイルを読むよう、テーブルからパーティションを外す。"
+    },
+    {
+      "key": "D",
+      "text": "Copy the flow logs into CloudWatch Logs and query them with CloudWatch Logs Insights instead.",
+      "text_ja": "フローログを CloudWatch Logs へ写し、代わりに CloudWatch Logs Insights でクエリする。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "パーティション射影を使うと、パーティションの多いテーブルのクエリを速くし、パーティションの管理を自動にできます。通常 Athena はパーティションを絞り込む前に AWS Glue Data Catalog に GetPartitions を呼びますが、射影の設定があれば Athena は自分でパーティションを組み立てられるので、その呼び出しが要りません。パーティション射影は Athena からクエリする時だけ使えます。",
+    "per_choice": {
+      "A": "正しい。Data Catalog への呼び出しを避けて速くなり、新しいパーティションを足す作業も要りません。",
+      "B": "手作業は自動になりますが、ジョブの保守が残り、パーティションの多さによる遅さも変わりません。",
+      "C": "毎回すべてのファイルを読むので、かえって遅くなり、費用も増えます。",
+      "D": "数年分のログを写すことになり、手間と費用が大きくなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection",
+      "source_id": "S6",
+      "quote": "You can use partition projection in Athena to speed up query processing of highly partitioned tables and automate partition management."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-pruning-vs-projection",
+      "source_id": "S7",
+      "quote": "Partition projection allows Athena to avoid calling GetPartitions because the partition projection configuration gives Athena all of the necessary information to build the partitions itself."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-considerations-and-limitations",
+      "source_id": "S8",
+      "quote": "Partition projection is usable only when the table is queried through Athena."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

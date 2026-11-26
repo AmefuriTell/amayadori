@@ -1,0 +1,71 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0012",
+  "services": [
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An operations dashboard has a CloudWatch Logs Insights widget that queries 40 log groups over the last 30 days and refreshes every minute. Only 3 of the log groups contain the relevant application logs, and the team only needs the last hour of data. The CloudWatch Logs Insights charges have become high. Which change will reduce the cost the MOST while keeping the widget useful?",
+  "stem_ja": "運用のダッシュボードに、40 のロググループの過去 30 日分をクエリし、1 分ごとに更新される CloudWatch Logs Insights のウィジェットがあります。関係するアプリケーションのログがあるのは 3 つのロググループだけで、チームに必要なのは直近 1 時間のデータだけです。CloudWatch Logs Insights の料金が高くなっています。ウィジェットを役に立つまま、費用を最も減らせる変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the query as it is, and increase the retention period of the 40 log groups so that queries can reuse old results.",
+      "text_ja": "クエリはそのままにし、前の結果を使い回せるよう、40 のロググループの保持期間を延ばす。"
+    },
+    {
+      "key": "B",
+      "text": "Add a second widget with the same query so that the results load faster.",
+      "text_ja": "結果が早く出るよう、同じクエリの 2 つ目のウィジェットを足す。"
+    },
+    {
+      "key": "C",
+      "text": "Keep the 30-day time range, and add a limit command so that only 20 rows are shown.",
+      "text_ja": "30 日の時間の範囲のまま、表示が 20 行だけになるよう limit のコマンドを足す。"
+    },
+    {
+      "key": "D",
+      "text": "Query only the 3 relevant log groups, use the last hour as the time range, and refresh the dashboard less often.",
+      "text_ja": "関係する 3 つのロググループだけをクエリし、時間の範囲を直近 1 時間にして、ダッシュボードの更新を減らす。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CloudWatch Logs Insights の料金は、スキャンした圧縮前のログデータの量で決まります。クエリには必要なロググループだけを選び、時間の範囲をできるだけ狭くし、ダッシュボードのウィジェットは更新のたびに新しいクエリが走るので、更新の頻度を上げすぎないようにします。",
+    "per_choice": {
+      "A": "保持期間を延ばしても、クエリがスキャンするデータは減りません。",
+      "B": "クエリの回数が増え、費用も増えます。",
+      "C": "表示の行数を絞っても、30 日分を 40 のロググループでスキャンすることに変わりはなく、費用はあまり減りません。",
+      "D": "正しい。スキャンするデータとクエリの回数の両方が大きく減ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html#AnalyzingLogData",
+      "source_id": "S2",
+      "quote": "CloudWatch Logs Insights queries incur charges based on the amount of uncompressed log data scanned, regardless of query language."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+      "source_id": "S3",
+      "quote": "Always specify the narrowest possible time range for your queries."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+      "source_id": "S3",
+      "quote": "When you add a CloudWatch Logs Insights widget to a dashboard, ensure that the dashboard is not refreshing at a high frequency, because each refresh starts a new query."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+      "source_id": "S3",
+      "quote": "Select only the necessary log groups for each query."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

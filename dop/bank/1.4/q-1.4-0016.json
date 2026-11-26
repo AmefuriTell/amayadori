@@ -1,0 +1,62 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0016",
+  "services": [
+    "AWS CodeDeploy",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A CodeDeploy blue/green deployment for EC2 instances behind an Application Load Balancer fails during the AllowTraffic lifecycle event. The deployment logs on the replacement instances show no errors, and the application starts correctly. What is the MOST likely cause that the team should fix?",
+  "stem_ja": "Application Load Balancer の後ろの EC2 インスタンスへの CodeDeploy の Blue/Green デプロイが、AllowTraffic のライフサイクルイベントで失敗します。置き換え先のインスタンスのデプロイのログにはエラーが無く、アプリケーションも正しく起動します。チームが直すべき、最も可能性の高い原因はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The ApplicationStop script from the previous successful deployment contains an error.",
+      "text_ja": "前に成功したデプロイの ApplicationStop のスクリプトに誤りがある。"
+    },
+    {
+      "key": "B",
+      "text": "The load balancer health check is configured incorrectly.",
+      "text_ja": "ロードバランサーのヘルスチェックの設定が誤っている。"
+    },
+    {
+      "key": "C",
+      "text": "The CodeDeploy agent is not installed on the replacement instances.",
+      "text_ja": "置き換え先のインスタンスに CodeDeploy エージェントが入っていない。"
+    },
+    {
+      "key": "D",
+      "text": "The task definition artifact is larger than 3 MB.",
+      "text_ja": "タスク定義のアーティファクトが 3 MB より大きい。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Blue/Green デプロイが AllowTraffic で失敗し、デプロイのログに原因が出ない時は、たいていデプロイグループのトラフィックを扱うロードバランサーのヘルスチェックの設定の誤りが原因です。ヘルスチェックの設定を見直して直します。",
+    "per_choice": {
+      "A": "ApplicationStop の失敗なら、そのイベントで失敗し、ログにも原因が出ます。",
+      "B": "正しい。ログに原因が無い AllowTraffic の失敗は、ふつうヘルスチェックの設定の誤りです。",
+      "C": "エージェントが無ければ、それより前のライフサイクルイベントが動かず、AllowTraffic まで進みません。",
+      "D": "タスク定義のアーティファクトは ECS へのデプロイの話で、EC2 の Blue/Green には関係ありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+      "source_id": "S3",
+      "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+      "source_id": "S3",
+      "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

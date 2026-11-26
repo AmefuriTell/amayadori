@@ -1,0 +1,72 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0013",
+  "services": [
+    "AWS IAM",
+    "AWS STS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Administrators use the AWS CLI with IAM user access keys. The security team adds a policy that allows ec2:TerminateInstances only when the aws:MultiFactorAuthPresent condition key is true. Afterward, the administrators' terminate requests are denied even though they have MFA devices. What is the BEST way for the administrators to make the requests succeed while the MFA requirement stays in place?",
+  "stem_ja": "管理者は、IAM ユーザーのアクセスキーで AWS CLI を使っています。セキュリティチームが、aws:MultiFactorAuthPresent の条件キーが true の時だけ ec2:TerminateInstances を許すポリシーを足しました。その後、管理者は MFA デバイスを持っているのに、終了のリクエストが拒否されます。MFA の要件を残したまま、管理者のリクエストを通す最もよい方法はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep using the access keys, and add the MFA code as a parameter to each ec2:TerminateInstances request.",
+      "text_ja": "アクセスキーのまま使い、各 ec2:TerminateInstances のリクエストのパラメータに MFA のコードを足す。"
+    },
+    {
+      "key": "B",
+      "text": "Use the AWS account root user credentials with MFA for terminate requests.",
+      "text_ja": "終了のリクエストには、MFA 付きの AWS アカウントのルートユーザーの認証情報を使う。"
+    },
+    {
+      "key": "C",
+      "text": "Change the condition to check aws:MultiFactorAuthAge so that it works with the access keys.",
+      "text_ja": "アクセスキーでも効くよう、条件を aws:MultiFactorAuthAge を確かめるものに変える。"
+    },
+    {
+      "key": "D",
+      "text": "Call GetSessionToken with the MFA device serial number and a code, and use the returned temporary credentials for the request.",
+      "text_ja": "MFA デバイスのシリアル番号とコードを付けて GetSessionToken を呼び、返された一時的な認証情報でリクエストする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "MFA の保護は、AssumeRole か GetSessionToken で得た一時的な認証情報でだけ使えます。aws:MultiFactorAuthPresent のキーは短期の認証情報で認証した時だけあり、アクセスキーのような長期の認証情報には含まれません。そのため、MFA のコードとデバイスのシリアル番号を付けて一時的な認証情報を取り直す必要があります。",
+    "per_choice": {
+      "A": "アクセスキーは長期の認証情報で、条件キーを含まないため、要件を満たせません。",
+      "B": "ルートユーザーの認証情報では、MFA で保護された API アクセスは使えません。",
+      "C": "aws:MultiFactorAuthAge は MFA を使っていない時には無く、アクセスキーのリクエストは通りません。",
+      "D": "正しい。MFA で得た一時的な認証情報には条件キーが入り、ポリシーの条件を満たします。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+      "source_id": "S3",
+      "quote": "MFA protection is available only with temporary security credentials, which must be obtained with AssumeRole or GetSessionToken."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+      "source_id": "S2",
+      "quote": "The key is only present when the user authenticates with short-term credentials."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+      "source_id": "S2",
+      "quote": "Long-term credentials, such as access keys, do not include this key."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+      "source_id": "S3",
+      "quote": "You cannot use MFA-protected API access with AWS account root user credentials."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 247,
+  "count": 261,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -3521,6 +3521,254 @@
         {
           "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-install-files",
           "quote": "The agent deletes log files after seven days."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0014",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An in-place CodeDeploy deployment group keeps failing in the ApplicationStop lifecycle event. The team found that the ApplicationStop script in the last successful revision has a bug, so they fixed the script in a new revision, but deploying the new revision still fails at ApplicationStop. Which action will allow the new revision to be deployed with the LEAST effort?",
+      "stem_ja": "CodeDeploy のインプレースのデプロイグループが、ApplicationStop のライフサイクルイベントで失敗し続けています。チームは、最後に成功したリビジョンの ApplicationStop のスクリプトに不具合があると分かり、新しいリビジョンでスクリプトを直しましたが、新しいリビジョンのデプロイも ApplicationStop で失敗します。最も少ない手間で新しいリビジョンをデプロイできるようにする操作はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create the deployment again with the option to ignore ApplicationStop failures, such as --ignore-application-stop-failures.",
+          "text_ja": "--ignore-application-stop-failures のような、ApplicationStop の失敗を無視するオプションを付けてデプロイを作り直す。"
+        },
+        {
+          "key": "B",
+          "text": "Fix the ApplicationStop script again in another new revision, and deploy that revision without changing any options.",
+          "text_ja": "もう 1 つ新しいリビジョンで ApplicationStop のスクリプトをまた直し、オプションを変えずにデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Increase the timeout of the ApplicationStop hook in the new revision's AppSpec file.",
+          "text_ja": "新しいリビジョンの AppSpec ファイルで、ApplicationStop のフックのタイムアウトを延ばす。"
+        },
+        {
+          "key": "D",
+          "text": "Delete the CodeDeploy application and the deployment group, and create them again.",
+          "text_ja": "CodeDeploy のアプリケーションとデプロイグループを消して、作り直す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトは、今のデプロイではなく、前に成功したデプロイの AppSpec ファイルから実行されます。前のリビジョンのスクリプトが失敗し続ける時は、これらの失敗を無視するよう指定してデプロイを作れば、デプロイが続き、直したスクリプトで次から成功します。",
+        "per_choice": {
+          "A": "正しい。前のリビジョンの壊れたスクリプトの失敗を無視して、直したリビジョンを入れられます。",
+          "B": "ApplicationStop は前に成功したデプロイのスクリプトで動くので、新しいリビジョンで直しても失敗は続きます。",
+          "C": "新しいリビジョンの AppSpec の設定は、前のデプロイの ApplicationStop のスクリプトの不具合を直しません。",
+          "D": "手間が大きく、作り直しは不要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "create a deployment and specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0015",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CloudFormation stack update failed, and the rollback then also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because the rollback tries to return to a database instance that someone deleted outside CloudFormation. The team wants the stack back in a working state so that it can be updated again, without deleting the stack. Which action BEST meets this requirement?",
+      "stem_ja": "CloudFormation のスタックの更新が失敗し、その後のロールバックも失敗しました。ロールバックが、誰かが CloudFormation の外で削除したデータベースインスタンスへ戻ろうとするため、スタックは UPDATE_ROLLBACK_FAILED の状態です。チームは、スタックを削除せずに動く状態へ戻し、また更新できるようにしたいと考えています。この要件を最もよく満たす操作はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use the signal-resource command to send success signals to the database resource, and then retry the update.",
+          "text_ja": "signal-resource コマンドでデータベースのリソースに成功のシグナルを送り、その後に更新をやり直す。"
+        },
+        {
+          "key": "B",
+          "text": "Delete the stack with the RetainResources parameter, and create a new stack from the template.",
+          "text_ja": "RetainResources パラメータを付けてスタックを削除し、テンプレートから新しいスタックを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Grant the CloudFormation service more IAM permissions, and wait for the rollback to finish by itself.",
+          "text_ja": "CloudFormation のサービスにより多くの IAM の権限を与え、ロールバックが自分で終わるのを待つ。"
+        },
+        {
+          "key": "D",
+          "text": "Continue the update rollback and skip the deleted database resource so that the stack reaches UPDATE_ROLLBACK_COMPLETE.",
+          "text_ja": "更新のロールバックを続け、削除されたデータベースのリソースを飛ばして、スタックを UPDATE_ROLLBACK_COMPLETE にする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "依存するリソースが元の状態に戻れない時、ロールバックは失敗して UPDATE_ROLLBACK_FAILED になります。原因によっては、ロールバックを続けて動く状態（UPDATE_ROLLBACK_COMPLETE）に戻し、また更新できます。CloudFormation の外で消したリソースのように戻せない物は、ロールバックを続ける時に飛ばせます。",
+        "per_choice": {
+          "A": "シグナルを送る方法は、必要な数のシグナルを受け取れなかった時の対処で、消えたデータベースには効きません。",
+          "B": "スタックを削除しないという要件に反します。",
+          "C": "原因は権限ではなく、待ってもロールバックは終わりません。",
+          "D": "正しい。消えたリソースを飛ばしてロールバックを終え、スタックを削除せずに更新できる状態に戻せます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "A dependent resource can't return to its original state, causing the rollback to fail (UPDATE_ROLLBACK_FAILED state)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0016",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeDeploy blue/green deployment for EC2 instances behind an Application Load Balancer fails during the AllowTraffic lifecycle event. The deployment logs on the replacement instances show no errors, and the application starts correctly. What is the MOST likely cause that the team should fix?",
+      "stem_ja": "Application Load Balancer の後ろの EC2 インスタンスへの CodeDeploy の Blue/Green デプロイが、AllowTraffic のライフサイクルイベントで失敗します。置き換え先のインスタンスのデプロイのログにはエラーが無く、アプリケーションも正しく起動します。チームが直すべき、最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The ApplicationStop script from the previous successful deployment contains an error.",
+          "text_ja": "前に成功したデプロイの ApplicationStop のスクリプトに誤りがある。"
+        },
+        {
+          "key": "B",
+          "text": "The load balancer health check is configured incorrectly.",
+          "text_ja": "ロードバランサーのヘルスチェックの設定が誤っている。"
+        },
+        {
+          "key": "C",
+          "text": "The CodeDeploy agent is not installed on the replacement instances.",
+          "text_ja": "置き換え先のインスタンスに CodeDeploy エージェントが入っていない。"
+        },
+        {
+          "key": "D",
+          "text": "The task definition artifact is larger than 3 MB.",
+          "text_ja": "タスク定義のアーティファクトが 3 MB より大きい。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Blue/Green デプロイが AllowTraffic で失敗し、デプロイのログに原因が出ない時は、たいていデプロイグループのトラフィックを扱うロードバランサーのヘルスチェックの設定の誤りが原因です。ヘルスチェックの設定を見直して直します。",
+        "per_choice": {
+          "A": "ApplicationStop の失敗なら、そのイベントで失敗し、ログにも原因が出ます。",
+          "B": "正しい。ログに原因が無い AllowTraffic の失敗は、ふつうヘルスチェックの設定の誤りです。",
+          "C": "エージェントが無ければ、それより前のライフサイクルイベントが動かず、AllowTraffic まで進みません。",
+          "D": "タスク定義のアーティファクトは ECS へのデプロイの話で、EC2 の Blue/Green には関係ありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0017",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A CodeDeploy deployment to EC2 instances fails with error code HEALTH_CONSTRAINTS, and every lifecycle event on every instance shows as Skipped. Which are the MOST likely causes that a DevOps engineer should check? (Choose TWO.)",
+      "stem_ja": "EC2 インスタンスへの CodeDeploy のデプロイが、エラーコード HEALTH_CONSTRAINTS で失敗し、すべてのインスタンスのすべてのライフサイクルイベントが Skipped と表示されています。DevOps エンジニアが確かめるべき、最も可能性の高い原因はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The CodeDeploy agent is not installed or not running on the instances.",
+          "text_ja": "インスタンスで CodeDeploy エージェントが入っていないか、動いていない。"
+        },
+        {
+          "key": "B",
+          "text": "The CodeDeploy service role does not have the required permissions.",
+          "text_ja": "CodeDeploy のサービスロールに必要な権限が無い。"
+        },
+        {
+          "key": "C",
+          "text": "The ApplicationStop script in the new revision has an error.",
+          "text_ja": "新しいリビジョンの ApplicationStop のスクリプトに誤りがある。"
+        },
+        {
+          "key": "D",
+          "text": "The load balancer health check path is wrong.",
+          "text_ja": "ロードバランサーのヘルスチェックのパスが誤っている。"
+        },
+        {
+          "key": "E",
+          "text": "The stack for the instances has termination protection enabled.",
+          "text_ja": "インスタンスのスタックで終了保護が有効になっている。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "EC2 やオンプレミスのデプロイですべてのライフサイクルイベントが飛ばされ、HEALTH_CONSTRAINTS で失敗する時の主な原因には、CodeDeploy エージェントが入っていないか動いていないこと（メモリーやディスクの不足で止まることもある）と、CodeDeploy のサービスロールに必要な権限が無いことがあります。",
+        "per_choice": {
+          "A": "正しい。エージェントが動いていなければ、どのライフサイクルイベントも実行されません。",
+          "B": "正しい。サービスロールの権限が足りないことも、すべてのイベントが飛ばされる原因になります。",
+          "C": "スクリプトの誤りなら、そのイベントは実行されて失敗し、すべてが Skipped にはなりません。",
+          "D": "AllowTraffic で失敗するなら、それより前のイベントは実行されています。",
+          "E": "スタックの終了保護はスタックの削除を止めるもので、デプロイのライフサイクルイベントには関係ありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The CodeDeploy agent might not be installed or running on the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The CodeDeploy agent might stop running because an instance is running low on memory or hard disk space."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The service role for CodeDeploy might not have required permissions."
         }
       ],
       "low_confidence": false
@@ -7362,6 +7610,201 @@
       "low_confidence": false
     },
     {
+      "id": "q-3.1-0013",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a MySQL database on Amazon RDS. It needs automatic failover to another Availability Zone if the primary instance fails, with as little downtime as possible. The company also wants the standby capacity to serve read traffic so that it is not idle, without managing separate read replicas. Which deployment option BEST meets these requirements?",
+      "stem_ja": "ある会社は、Amazon RDS で MySQL のデータベースを動かしています。主のインスタンスが故障した時に、できるだけ短いダウンタイムで別のアベイラビリティーゾーンへ自動でフェイルオーバーする必要があります。また、別のリードレプリカを管理せずに、待機の容量が遊ばないよう読み取りのトラフィックも処理させたいと考えています。これらの要件を最もよく満たすデプロイの選択肢はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "A Multi-AZ DB cluster deployment with reader DB instances in other Availability Zones.",
+          "text_ja": "ほかのアベイラビリティーゾーンにリーダーの DB インスタンスを持つ、Multi-AZ DB クラスターのデプロイ。"
+        },
+        {
+          "key": "B",
+          "text": "A Multi-AZ DB instance deployment with one standby DB instance.",
+          "text_ja": "1 つのスタンバイの DB インスタンスを持つ、Multi-AZ DB インスタンスのデプロイ。"
+        },
+        {
+          "key": "C",
+          "text": "A Single-AZ DB instance with automated backups that are restored to another Availability Zone after a failure.",
+          "text_ja": "故障の後に別のアベイラビリティーゾーンへ復元する自動バックアップを持つ、シングル AZ の DB インスタンス。"
+        },
+        {
+          "key": "D",
+          "text": "A Single-AZ DB instance with a read replica that an engineer promotes by hand after a failure.",
+          "text_ja": "故障の後にエンジニアが手作業で昇格させるリードレプリカを持つ、シングル AZ の DB インスタンス。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ DB インスタンスのデプロイのスタンバイはフェイルオーバーを支えますが、読み取りのトラフィックは処理しません。Multi-AZ DB クラスターのデプロイでは、リーダーの DB インスタンスが自動のフェイルオーバーの先になり、読み取りのトラフィックも処理します。ライターが止まると、RDS がリーダーへのフェイルオーバーを管理します。",
+        "per_choice": {
+          "A": "正しい。リーダーが自動のフェイルオーバーの先になり、ふだんは読み取りも処理します。",
+          "B": "自動のフェイルオーバーはできますが、スタンバイは読み取りのトラフィックを処理しません。",
+          "C": "復元に時間がかかり、自動のフェイルオーバーではありません。",
+          "D": "昇格が手作業で、別のリードレプリカの管理も要ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "quote": "A Multi-AZ DB instance deployment has one standby DB instance that provides failover support, but doesn't serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "quote": "A Multi-AZ DB cluster deployment has standby DB instances that provide failover support and can also serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts-overview",
+          "quote": "If an outage occurs on your writer DB instance, RDS manages failover to one of the reader DB instances."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0014",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon ElastiCache"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application uses an Amazon ElastiCache for Valkey cluster as a session store. Each shard has only a primary node, so a node failure causes a long outage. The company wants a failed primary to be replaced automatically by a node in another Availability Zone with minimal downtime. Which change meets this requirement with the LEAST operational overhead?",
+      "stem_ja": "あるアプリケーションは、セッションの保存先として Amazon ElastiCache for Valkey のクラスターを使っています。各シャードには主ノードしか無いため、ノードの故障で長い停止が起きます。会社は、故障した主ノードを、ダウンタイムを最小にして別のアベイラビリティーゾーンのノードで自動で置き換えたいと考えています。運用上のオーバーヘッドが最も少なくこの要件を満たす変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on Multi-AZ for the cluster without adding any replicas to the shards.",
+          "text_ja": "シャードにレプリカを足さずに、クラスターの Multi-AZ を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Take a snapshot every hour, and restore it to a new cluster in another Availability Zone when a node fails.",
+          "text_ja": "1 時間ごとにスナップショットを取り、ノードが故障したら別のアベイラビリティーゾーンの新しいクラスターへ復元する。"
+        },
+        {
+          "key": "C",
+          "text": "Add at least one replica in a different Availability Zone to each shard, and turn on Multi-AZ with automatic failover.",
+          "text_ja": "各シャードに別の AZ のレプリカを 1 つ以上足し、自動フェイルオーバー付きの Multi-AZ を有効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Change each primary node to a larger node type so that failures are less likely.",
+          "text_ja": "故障しにくくなるよう、各主ノードをより大きなノードタイプに変える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Multi-AZ は ElastiCache の高い可用性のために勧められている構成で、有効にするとレプリカを別のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にします。主ノードが故障すると、レプリケーションの遅れが最も少ないレプリカが自動で主に昇格します。Multi-AZ には、主と別のアベイラビリティーゾーンにレプリカが少なくとも 1 つ要ります。",
+        "per_choice": {
+          "A": "Multi-AZ には、主と別のアベイラビリティーゾーンのレプリカが少なくとも 1 つ必要です。",
+          "B": "復元は手作業で時間もかかり、セッションのデータも失われます。",
+          "C": "正しい。故障した時にレプリカが自動で主に昇格し、ダウンタイムを最小にできます。",
+          "D": "故障の確率が下がるだけで、故障した時の自動の置き換えにはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "If the primary node fails, ElastiCache automatically promotes the replica with the least replication lag to primary."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0015",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon Application Recovery Controller",
+        "Elastic Load Balancing"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application behind a load balancer runs in three Availability Zones in one Region. Sometimes one zone becomes impaired in a way that health checks do not detect, and users see errors. The operations team wants to be able to move traffic away from an impaired zone to the healthy zones in the same Region quickly, as a temporary measure, without changing the application. Which actions should a DevOps engineer take to prepare for this? (Choose TWO.)",
+      "stem_ja": "ロードバランサーの後ろのアプリケーションが、1 つのリージョンの 3 つのアベイラビリティーゾーンで動いています。ときどき 1 つのゾーンが、ヘルスチェックでは分からない形で損なわれ、利用者にエラーが出ます。運用チームは、アプリケーションを変えずに、一時的な対処として、損なわれたゾーンから同じリージョンの正常なゾーンへトラフィックを素早く移せるようにしたいと考えています。これに備えて DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Opt in the load balancer to Amazon Application Recovery Controller (ARC) zonal shift.",
+          "text_ja": "ロードバランサーを Amazon Application Recovery Controller（ARC）のゾーンシフトにオプトインする。"
+        },
+        {
+          "key": "B",
+          "text": "Prescale the application so that the remaining zones have enough capacity when traffic is shifted away from one zone.",
+          "text_ja": "1 つのゾーンからトラフィックを移した時に残りのゾーンに十分な容量があるよう、アプリケーションを事前に拡張しておく。"
+        },
+        {
+          "key": "C",
+          "text": "Plan to start a zonal shift that never expires, so that the impaired zone stays out of service permanently.",
+          "text_ja": "損なわれたゾーンがずっと外れたままになるよう、期限の無いゾーンシフトを始める計画にする。"
+        },
+        {
+          "key": "D",
+          "text": "Create a Route 53 active-passive failover configuration to a standby stack in another Region.",
+          "text_ja": "別のリージョンの待機のスタックへの Route 53 のアクティブ・パッシブのフェイルオーバーの構成を作る。"
+        },
+        {
+          "key": "E",
+          "text": "Plan to terminate the instances in the impaired zone by hand during each incident.",
+          "text_ja": "障害のたびに、損なわれたゾーンのインスタンスを手作業で終了する計画にする。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ARC のゾーンシフトを使うと、対応するリソースのトラフィックを、損なわれたアベイラビリティーゾーンから同じリージョンの正常なゾーンへ移せます。使うにはリソースをオプトインする必要があり、始める前にアプリケーションを事前に拡張して、1 つのゾーンから移すだけの容量を持たせておく必要があります。ゾーンシフトはすべて一時的な対処で、最初に最長 72 時間の期限を決め、必要なら延ばします。",
+        "per_choice": {
+          "A": "正しい。ゾーンシフトを使うには、リソースのオプトインが必要です。",
+          "B": "正しい。移した先のゾーンに十分な容量が無いと、トラフィックを受け止められません。",
+          "C": "ゾーンシフトはすべて一時的な対処で、期限を決めて始めます。",
+          "D": "別のリージョンへ移す構成で、同じリージョンの正常なゾーンへ素早く移す要件に合いません。",
+          "E": "手作業で時間がかかり、素早く移す要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "shift traffic for a supported resource away from an impaired Availability Zone (AZ) in an AWS Region to healthy AZs in the same Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "You must opt-in resources in order to use zonal shift."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "Before you start a zonal shift, you must prescale your application and ensure that you have sufficient capacity to shift traffic away from an Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "All zonal shifts are temporary mitigations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-3.2-0001",
       "task": "3.2",
       "domain": 3,
@@ -10509,6 +10952,194 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
           "quote": "You can use subscriptions to get access to a real-time feed of log events from CloudWatch Logs"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0012",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An operations dashboard has a CloudWatch Logs Insights widget that queries 40 log groups over the last 30 days and refreshes every minute. Only 3 of the log groups contain the relevant application logs, and the team only needs the last hour of data. The CloudWatch Logs Insights charges have become high. Which change will reduce the cost the MOST while keeping the widget useful?",
+      "stem_ja": "運用のダッシュボードに、40 のロググループの過去 30 日分をクエリし、1 分ごとに更新される CloudWatch Logs Insights のウィジェットがあります。関係するアプリケーションのログがあるのは 3 つのロググループだけで、チームに必要なのは直近 1 時間のデータだけです。CloudWatch Logs Insights の料金が高くなっています。ウィジェットを役に立つまま、費用を最も減らせる変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the query as it is, and increase the retention period of the 40 log groups so that queries can reuse old results.",
+          "text_ja": "クエリはそのままにし、前の結果を使い回せるよう、40 のロググループの保持期間を延ばす。"
+        },
+        {
+          "key": "B",
+          "text": "Add a second widget with the same query so that the results load faster.",
+          "text_ja": "結果が早く出るよう、同じクエリの 2 つ目のウィジェットを足す。"
+        },
+        {
+          "key": "C",
+          "text": "Keep the 30-day time range, and add a limit command so that only 20 rows are shown.",
+          "text_ja": "30 日の時間の範囲のまま、表示が 20 行だけになるよう limit のコマンドを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Query only the 3 relevant log groups, use the last hour as the time range, and refresh the dashboard less often.",
+          "text_ja": "関係する 3 つのロググループだけをクエリし、時間の範囲を直近 1 時間にして、ダッシュボードの更新を減らす。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs Insights の料金は、スキャンした圧縮前のログデータの量で決まります。クエリには必要なロググループだけを選び、時間の範囲をできるだけ狭くし、ダッシュボードのウィジェットは更新のたびに新しいクエリが走るので、更新の頻度を上げすぎないようにします。",
+        "per_choice": {
+          "A": "保持期間を延ばしても、クエリがスキャンするデータは減りません。",
+          "B": "クエリの回数が増え、費用も増えます。",
+          "C": "表示の行数を絞っても、30 日分を 40 のロググループでスキャンすることに変わりはなく、費用はあまり減りません。",
+          "D": "正しい。スキャンするデータとクエリの回数の両方が大きく減ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html#AnalyzingLogData",
+          "quote": "CloudWatch Logs Insights queries incur charges based on the amount of uncompressed log data scanned, regardless of query language."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "quote": "Always specify the narrowest possible time range for your queries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "quote": "When you add a CloudWatch Logs Insights widget to a dashboard, ensure that the dashboard is not refreshing at a high frequency, because each refresh starts a new query."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "quote": "Select only the necessary log groups for each query."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0013",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application writes unstructured text log lines such as \"GET /orders took 532 ms\" to CloudWatch Logs. During incidents, on-call engineers must quickly find the average and maximum response time for each path, and every engineer in the same Region should be able to rerun the same analysis. The team does not want to move the logs or write code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるアプリケーションは、「GET /orders took 532 ms」のような構造の無いテキストのログの行を CloudWatch Logs に書いています。障害の時、当番のエンジニアはパスごとの平均と最大の応答時間を素早く知る必要があり、同じリージョンのどのエンジニアも同じ分析をやり直せるようにしたいと考えています。チームはログを移したりコードを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Export the log group to Amazon S3 every hour, and analyze the files with Amazon Athena.",
+          "text_ja": "1 時間ごとにロググループを Amazon S3 へエクスポートし、Amazon Athena でファイルを分析する。"
+        },
+        {
+          "key": "B",
+          "text": "Create a subscription filter that sends the logs to an AWS Lambda function that calculates the statistics.",
+          "text_ja": "統計を計算する AWS Lambda 関数へログを送るサブスクリプションフィルターを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Save a CloudWatch Logs Insights query that uses parse and stats on the path and time.",
+          "text_ja": "パスと時間に parse と stats を使う CloudWatch Logs Insights のクエリを保存する。"
+        },
+        {
+          "key": "D",
+          "text": "Have each engineer download the log streams and calculate the statistics in a spreadsheet.",
+          "text_ja": "各エンジニアがログストリームをダウンロードし、表計算シートで統計を計算する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs Insights では、parse でログのフィールドからデータを取り出し（ワイルドカードか正規表現）、stats で集計の統計を計算できます。作ったクエリは保存でき、クエリはリージョン単位で保存されるので、同じリージョンで CloudWatch Logs を使える人はそれを見て再び実行できます。",
+        "per_choice": {
+          "A": "ログを移すことになり、エクスポートの手間と遅れもあります。",
+          "B": "統計を計算するコードを書いて保守することになります。",
+          "C": "正しい。ログをそのままにしてコード無しで集計し、保存したクエリを同じリージョンの皆が再実行できます。",
+          "D": "手作業で時間がかかり、障害の時に素早く分析できません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "quote": "parse Extracts data from a log field to create an extracted field that you can process in your query."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html#CWL_QuerySyntax",
+          "quote": "stats Calculate aggregate statistics using values in the log fields."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_Insights-Saving-Queries.html#CWL_Insights-Saving-Queries",
+          "quote": "If you create and save a query, other users with access to CloudWatch Logs in the same Region can see all saved queries and their folder structures in the Region."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0014",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon Athena",
+        "AWS Glue"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team queries several years of VPC flow logs in Amazon S3 with Amazon Athena. The table is partitioned by date and Region, so it has a very large number of partitions. Queries are slow, and an engineer must add new partitions to the AWS Glue Data Catalog every day. The table is queried only through Athena. Which solution will speed up the queries and remove the daily partition management with the LEAST effort?",
+      "stem_ja": "セキュリティチームは、Amazon S3 にある数年分の VPC フローログを Amazon Athena でクエリしています。テーブルは日付とリージョンでパーティション分割されており、パーティションの数がとても多くなっています。クエリは遅く、エンジニアは毎日新しいパーティションを AWS Glue Data Catalog に足す必要があります。テーブルは Athena からしかクエリしません。最も少ない手間でクエリを速くし、毎日のパーティションの管理を無くすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on partition projection for the table with a configuration that describes the date and Region partitions.",
+          "text_ja": "日付とリージョンのパーティションを表す設定で、テーブルのパーティション射影を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Schedule a job that adds the new partitions to the AWS Glue Data Catalog every day.",
+          "text_ja": "毎日新しいパーティションを AWS Glue Data Catalog に足すジョブをスケジュールで実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Remove the partitions from the table so that Athena reads all the files in each query.",
+          "text_ja": "各クエリで Athena がすべてのファイルを読むよう、テーブルからパーティションを外す。"
+        },
+        {
+          "key": "D",
+          "text": "Copy the flow logs into CloudWatch Logs and query them with CloudWatch Logs Insights instead.",
+          "text_ja": "フローログを CloudWatch Logs へ写し、代わりに CloudWatch Logs Insights でクエリする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "パーティション射影を使うと、パーティションの多いテーブルのクエリを速くし、パーティションの管理を自動にできます。通常 Athena はパーティションを絞り込む前に AWS Glue Data Catalog に GetPartitions を呼びますが、射影の設定があれば Athena は自分でパーティションを組み立てられるので、その呼び出しが要りません。パーティション射影は Athena からクエリする時だけ使えます。",
+        "per_choice": {
+          "A": "正しい。Data Catalog への呼び出しを避けて速くなり、新しいパーティションを足す作業も要りません。",
+          "B": "手作業は自動になりますが、ジョブの保守が残り、パーティションの多さによる遅さも変わりません。",
+          "C": "毎回すべてのファイルを読むので、かえって遅くなり、費用も増えます。",
+          "D": "数年分のログを写すことになり、手間と費用が大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection",
+          "quote": "You can use partition projection in Athena to speed up query processing of highly partitioned tables and automate partition management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-pruning-vs-projection",
+          "quote": "Partition projection allows Athena to avoid calling GetPartitions because the partition projection configuration gives Athena all of the necessary information to build the partitions itself."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html#partition-projection-considerations-and-limitations",
+          "quote": "Partition projection is usable only when the table is queried through Athena."
         }
       ],
       "low_confidence": false
@@ -14001,6 +14632,257 @@
         {
           "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
           "quote": "Secrets Manager rotates your secret at any time during the rotation window."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0013",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Administrators use the AWS CLI with IAM user access keys. The security team adds a policy that allows ec2:TerminateInstances only when the aws:MultiFactorAuthPresent condition key is true. Afterward, the administrators' terminate requests are denied even though they have MFA devices. What is the BEST way for the administrators to make the requests succeed while the MFA requirement stays in place?",
+      "stem_ja": "管理者は、IAM ユーザーのアクセスキーで AWS CLI を使っています。セキュリティチームが、aws:MultiFactorAuthPresent の条件キーが true の時だけ ec2:TerminateInstances を許すポリシーを足しました。その後、管理者は MFA デバイスを持っているのに、終了のリクエストが拒否されます。MFA の要件を残したまま、管理者のリクエストを通す最もよい方法はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep using the access keys, and add the MFA code as a parameter to each ec2:TerminateInstances request.",
+          "text_ja": "アクセスキーのまま使い、各 ec2:TerminateInstances のリクエストのパラメータに MFA のコードを足す。"
+        },
+        {
+          "key": "B",
+          "text": "Use the AWS account root user credentials with MFA for terminate requests.",
+          "text_ja": "終了のリクエストには、MFA 付きの AWS アカウントのルートユーザーの認証情報を使う。"
+        },
+        {
+          "key": "C",
+          "text": "Change the condition to check aws:MultiFactorAuthAge so that it works with the access keys.",
+          "text_ja": "アクセスキーでも効くよう、条件を aws:MultiFactorAuthAge を確かめるものに変える。"
+        },
+        {
+          "key": "D",
+          "text": "Call GetSessionToken with the MFA device serial number and a code, and use the returned temporary credentials for the request.",
+          "text_ja": "MFA デバイスのシリアル番号とコードを付けて GetSessionToken を呼び、返された一時的な認証情報でリクエストする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "MFA の保護は、AssumeRole か GetSessionToken で得た一時的な認証情報でだけ使えます。aws:MultiFactorAuthPresent のキーは短期の認証情報で認証した時だけあり、アクセスキーのような長期の認証情報には含まれません。そのため、MFA のコードとデバイスのシリアル番号を付けて一時的な認証情報を取り直す必要があります。",
+        "per_choice": {
+          "A": "アクセスキーは長期の認証情報で、条件キーを含まないため、要件を満たせません。",
+          "B": "ルートユーザーの認証情報では、MFA で保護された API アクセスは使えません。",
+          "C": "aws:MultiFactorAuthAge は MFA を使っていない時には無く、アクセスキーのリクエストは通りません。",
+          "D": "正しい。MFA で得た一時的な認証情報には条件キーが入り、ポリシーの条件を満たします。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "quote": "MFA protection is available only with temporary security credentials, which must be obtained with AssumeRole or GetSessionToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "quote": "The key is only present when the user authenticates with short-term credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "quote": "Long-term credentials, such as access keys, do not include this key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "quote": "You cannot use MFA-protected API access with AWS account root user credentials."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0014",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "IAM Roles Anywhere"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Servers in a company's own data center run a backup job that uploads files to Amazon S3. Today the job uses an IAM user's access keys stored on each server. The company already runs its own certificate authority (CA) that issues X.509 certificates to these servers. The security team wants to stop managing long-term AWS credentials for these workloads. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "会社の自前のデータセンターのサーバーが、Amazon S3 へファイルをアップロードするバックアップのジョブを動かしています。今は各サーバーに保存した IAM ユーザーのアクセスキーを使っています。会社は既に、これらのサーバーに X.509 の証明書を発行する自前の認証局（CA）を動かしています。セキュリティチームは、これらのワークロードの長期の AWS の認証情報の管理をやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the IAM user access keys and rotate them on every server every 30 days.",
+          "text_ja": "IAM ユーザーのアクセスキーのまま、すべてのサーバーで 30 日ごとにローテーションする。"
+        },
+        {
+          "key": "B",
+          "text": "Create one IAM user per server so that each server has its own long-term access keys.",
+          "text_ja": "サーバーごとに 1 人の IAM ユーザーを作り、各サーバーが自分の長期のアクセスキーを持つようにする。"
+        },
+        {
+          "key": "C",
+          "text": "Use IAM Roles Anywhere with a trust anchor that references the company's CA, so that the servers exchange their certificates for temporary credentials.",
+          "text_ja": "会社の CA を参照するトラストアンカーで IAM Roles Anywhere を使い、サーバーが証明書と引き換えに一時的な認証情報を得るようにする。"
+        },
+        {
+          "key": "D",
+          "text": "Store the access keys in an encrypted file on each server and limit the file permissions.",
+          "text_ja": "各サーバーの暗号化したファイルにアクセスキーを保存し、ファイルの権限を絞る。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "IAM Roles Anywhere を使うと、AWS の外で動くサーバー・コンテナ・アプリケーションが IAM の一時的な認証情報を得られ、長期の AWS の認証情報を管理しなくて済みます。ワークロードは自分の CA が発行した X.509 の証明書を使い、トラストアンカー（AWS Private CA か外部の CA の証明書への参照）で認証して、一時的な認証情報と引き換えます。",
+        "per_choice": {
+          "A": "ローテーションしても長期の認証情報の管理は続き、要件を満たしません。",
+          "B": "長期の認証情報が増え、管理の手間も増えます。",
+          "C": "正しい。既存の CA の証明書を使い、長期の認証情報無しで一時的な認証情報を得られます。",
+          "D": "守り方を変えるだけで、長期の認証情報の管理は続きます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "quote": "Using IAM Roles Anywhere means you don't need to manage long-term AWS credentials for workloads running outside of AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "quote": "To use IAM Roles Anywhere, your workloads must use X.509 certificates issued by your certificate authority (CA)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#first-time-user",
+          "quote": "Your workloads outside of AWS authenticate with the trust anchor using certificates issued by the trusted CA in exchange for temporary AWS credentials."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0015",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an external CI service whose jobs can obtain tokens from an OpenID Connect (OIDC) compatible identity provider. Deployment jobs currently use IAM user access keys stored as CI secrets. The company wants the jobs to get temporary AWS credentials and to stop distributing long-term keys. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、ジョブが OpenID Connect（OIDC）に対応した ID プロバイダーからトークンを得られる、外部の CI サービスを使っています。デプロイのジョブは、今は CI のシークレットとして保存した IAM ユーザーのアクセスキーを使っています。会社は、ジョブが一時的な AWS の認証情報を得るようにし、長期のキーを配るのをやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the IAM user access keys in the CI secrets, and rotate them every week with a script.",
+          "text_ja": "IAM ユーザーのアクセスキーを CI のシークレットのままにし、スクリプトで毎週ローテーションする。"
+        },
+        {
+          "key": "B",
+          "text": "Create an IAM OIDC identity provider for the CI service's IdP, and create a role that the federated CI jobs can assume for temporary credentials.",
+          "text_ja": "CI サービスの IdP の IAM OIDC ID プロバイダーを作り、フェデレーションした CI のジョブが一時的な認証情報のために引き受けるロールを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Issue X.509 certificates to the CI runners from a new private CA, and set up IAM Roles Anywhere for them.",
+          "text_ja": "新しいプライベート CA から CI のランナーに X.509 の証明書を発行し、IAM Roles Anywhere を設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Create a separate IAM user with access keys for each CI project to limit the impact of a leak.",
+          "text_ja": "漏れた時の影響を抑えるため、CI のプロジェクトごとにアクセスキーを持つ別の IAM ユーザーを作る。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "IAM OIDC ID プロバイダーは、OIDC に対応した外部の IdP と AWS アカウントの間に信頼を作るために使います。ロールは IdP で認証された OIDC のフェデレーションのプリンシパルに割り当てられ、一時的な認証情報を求められるようにします。OIDC フェデレーションを使えば、アクセスキーのような長期の認証情報を配る必要がありません。",
+        "per_choice": {
+          "A": "長期のキーを配り続けることになり、要件に反します。",
+          "B": "正しい。CI がすでに使える OIDC のトークンで、長期のキー無しに一時的な認証情報を得られます。",
+          "C": "一時的な認証情報は得られますが、新しい CA と証明書の発行を用意して運用することになり、OIDC をそのまま使うより手間がかかります。",
+          "D": "長期のキーが増え、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "quote": "You use an IAM OIDC identity provider when you want to establish trust between an OIDC-compatible IdP and your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "quote": "The role permits your organization's IdP to request temporary security credentials for access to AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id-federation",
+          "quote": "you don't have to distribute long-term security credentials, such as IAM user access keys, with your application."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0016",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS IAM",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An EC2 instance uses an instance profile that contains a role for reading application data from Amazon S3. A new feature also needs permission to write to an Amazon SQS queue. An engineer tries to add a second IAM role to the same instance profile, but the request fails. Which solution gives the instance both permissions with the LEAST operational overhead?",
+      "stem_ja": "ある EC2 インスタンスは、Amazon S3 からアプリケーションのデータを読むロールを含むインスタンスプロファイルを使っています。新しい機能には、Amazon SQS のキューへ書き込む権限も必要です。エンジニアが同じインスタンスプロファイルに 2 つ目の IAM ロールを足そうとしましたが、リクエストが失敗しました。運用上のオーバーヘッドが最も少なく、インスタンスに両方の権限を与えるソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Request an increase to the limit of roles per instance profile so that the second role can be added.",
+          "text_ja": "2 つ目のロールを足せるよう、インスタンスプロファイルあたりのロールの数の上限を上げてもらう。"
+        },
+        {
+          "key": "B",
+          "text": "Remove the existing role from the instance profile and add a new role that has only the SQS permissions.",
+          "text_ja": "インスタンスプロファイルから既存のロールを外し、SQS の権限だけを持つ新しいロールを足す。"
+        },
+        {
+          "key": "C",
+          "text": "Add the SQS permissions to the policies of the role that is already in the instance profile.",
+          "text_ja": "インスタンスプロファイルに既にあるロールのポリシーに、SQS の権限を足す。"
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user with SQS permissions and store its access keys on the instance.",
+          "text_ja": "SQS の権限を持つ IAM ユーザーを作り、そのアクセスキーをインスタンスに置く。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "インスタンスプロファイルに入れられる IAM ロールは 1 つだけで、この上限は上げられません。ロールは外して別のロールに入れ替えられますが、今の権限を残したまま SQS の権限も持たせるには、既にあるロールに権限を足します。",
+        "per_choice": {
+          "A": "インスタンスプロファイルあたり 1 つのロールという上限は、上げられません。",
+          "B": "SQS には書けるようになりますが、S3 を読む権限が失われます。",
+          "C": "正しい。1 つのロールに両方の権限を持たせれば、インスタンスプロファイルを変えずに済みます。",
+          "D": "長期の認証情報をインスタンスに置くことになり、管理の手間とリスクが増えます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "An instance profile can contain only one IAM role, although a role can be included in multiple instance profiles."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "This limit of one role per instance profile cannot be increased."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "You can remove the existing role and then add a different role to an instance profile."
         }
       ],
       "low_confidence": false

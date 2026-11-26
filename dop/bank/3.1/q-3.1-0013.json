@@ -1,0 +1,66 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0013",
+  "services": [
+    "Amazon RDS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs a MySQL database on Amazon RDS. It needs automatic failover to another Availability Zone if the primary instance fails, with as little downtime as possible. The company also wants the standby capacity to serve read traffic so that it is not idle, without managing separate read replicas. Which deployment option BEST meets these requirements?",
+  "stem_ja": "ある会社は、Amazon RDS で MySQL のデータベースを動かしています。主のインスタンスが故障した時に、できるだけ短いダウンタイムで別のアベイラビリティーゾーンへ自動でフェイルオーバーする必要があります。また、別のリードレプリカを管理せずに、待機の容量が遊ばないよう読み取りのトラフィックも処理させたいと考えています。これらの要件を最もよく満たすデプロイの選択肢はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "A Multi-AZ DB cluster deployment with reader DB instances in other Availability Zones.",
+      "text_ja": "ほかのアベイラビリティーゾーンにリーダーの DB インスタンスを持つ、Multi-AZ DB クラスターのデプロイ。"
+    },
+    {
+      "key": "B",
+      "text": "A Multi-AZ DB instance deployment with one standby DB instance.",
+      "text_ja": "1 つのスタンバイの DB インスタンスを持つ、Multi-AZ DB インスタンスのデプロイ。"
+    },
+    {
+      "key": "C",
+      "text": "A Single-AZ DB instance with automated backups that are restored to another Availability Zone after a failure.",
+      "text_ja": "故障の後に別のアベイラビリティーゾーンへ復元する自動バックアップを持つ、シングル AZ の DB インスタンス。"
+    },
+    {
+      "key": "D",
+      "text": "A Single-AZ DB instance with a read replica that an engineer promotes by hand after a failure.",
+      "text_ja": "故障の後にエンジニアが手作業で昇格させるリードレプリカを持つ、シングル AZ の DB インスタンス。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "Multi-AZ DB インスタンスのデプロイのスタンバイはフェイルオーバーを支えますが、読み取りのトラフィックは処理しません。Multi-AZ DB クラスターのデプロイでは、リーダーの DB インスタンスが自動のフェイルオーバーの先になり、読み取りのトラフィックも処理します。ライターが止まると、RDS がリーダーへのフェイルオーバーを管理します。",
+    "per_choice": {
+      "A": "正しい。リーダーが自動のフェイルオーバーの先になり、ふだんは読み取りも処理します。",
+      "B": "自動のフェイルオーバーはできますが、スタンバイは読み取りのトラフィックを処理しません。",
+      "C": "復元に時間がかかり、自動のフェイルオーバーではありません。",
+      "D": "昇格が手作業で、別のリードレプリカの管理も要ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+      "source_id": "S1",
+      "quote": "A Multi-AZ DB instance deployment has one standby DB instance that provides failover support, but doesn't serve read traffic."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+      "source_id": "S1",
+      "quote": "A Multi-AZ DB cluster deployment has standby DB instances that provide failover support and can also serve read traffic."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts-overview",
+      "source_id": "S2",
+      "quote": "If an outage occurs on your writer DB instance, RDS manages failover to one of the reader DB instances."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

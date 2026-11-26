@@ -1,0 +1,66 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0014",
+  "services": [
+    "IAM Roles Anywhere"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Servers in a company's own data center run a backup job that uploads files to Amazon S3. Today the job uses an IAM user's access keys stored on each server. The company already runs its own certificate authority (CA) that issues X.509 certificates to these servers. The security team wants to stop managing long-term AWS credentials for these workloads. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "会社の自前のデータセンターのサーバーが、Amazon S3 へファイルをアップロードするバックアップのジョブを動かしています。今は各サーバーに保存した IAM ユーザーのアクセスキーを使っています。会社は既に、これらのサーバーに X.509 の証明書を発行する自前の認証局（CA）を動かしています。セキュリティチームは、これらのワークロードの長期の AWS の認証情報の管理をやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the IAM user access keys and rotate them on every server every 30 days.",
+      "text_ja": "IAM ユーザーのアクセスキーのまま、すべてのサーバーで 30 日ごとにローテーションする。"
+    },
+    {
+      "key": "B",
+      "text": "Create one IAM user per server so that each server has its own long-term access keys.",
+      "text_ja": "サーバーごとに 1 人の IAM ユーザーを作り、各サーバーが自分の長期のアクセスキーを持つようにする。"
+    },
+    {
+      "key": "C",
+      "text": "Use IAM Roles Anywhere with a trust anchor that references the company's CA, so that the servers exchange their certificates for temporary credentials.",
+      "text_ja": "会社の CA を参照するトラストアンカーで IAM Roles Anywhere を使い、サーバーが証明書と引き換えに一時的な認証情報を得るようにする。"
+    },
+    {
+      "key": "D",
+      "text": "Store the access keys in an encrypted file on each server and limit the file permissions.",
+      "text_ja": "各サーバーの暗号化したファイルにアクセスキーを保存し、ファイルの権限を絞る。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "IAM Roles Anywhere を使うと、AWS の外で動くサーバー・コンテナ・アプリケーションが IAM の一時的な認証情報を得られ、長期の AWS の認証情報を管理しなくて済みます。ワークロードは自分の CA が発行した X.509 の証明書を使い、トラストアンカー（AWS Private CA か外部の CA の証明書への参照）で認証して、一時的な認証情報と引き換えます。",
+    "per_choice": {
+      "A": "ローテーションしても長期の認証情報の管理は続き、要件を満たしません。",
+      "B": "長期の認証情報が増え、管理の手間も増えます。",
+      "C": "正しい。既存の CA の証明書を使い、長期の認証情報無しで一時的な認証情報を得られます。",
+      "D": "守り方を変えるだけで、長期の認証情報の管理は続きます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+      "source_id": "S6",
+      "quote": "Using IAM Roles Anywhere means you don't need to manage long-term AWS credentials for workloads running outside of AWS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+      "source_id": "S6",
+      "quote": "To use IAM Roles Anywhere, your workloads must use X.509 certificates issued by your certificate authority (CA)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#first-time-user",
+      "source_id": "S7",
+      "quote": "Your workloads outside of AWS authenticate with the trust anchor using certificates issued by the trusted CA in exchange for temporary AWS credentials."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

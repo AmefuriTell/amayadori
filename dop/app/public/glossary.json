@@ -53,8 +53,11 @@
     "AWS Key Management Service (AWS KMS)": "kms",
     "AWS Lambda": "lambda",
     "Amazon Macie": "macie",
+    "AWS Systems Manager Maintenance Windows": "maintenance-windows",
+    "Amazon OpenSearch Service": "opensearch-service",
     "AWS Organizations": "organizations",
     "AWS Systems Manager Parameter Store": "parameter-store",
+    "AWS Systems Manager Patch Manager": "patch-manager",
     "Amazon RDS": "rds",
     "AWS Regions": "regions",
     "AWS リージョンとアベイラビリティーゾーン": "regions",
@@ -71,6 +74,7 @@
     "AWS Systems Manager Automation": "ssm-automation",
     "AWS Systems Manager Compliance": "ssm-compliance",
     "AWS Systems Manager Distributor": "ssm-distributor",
+    "AWS Systems Manager Inventory": "ssm-inventory",
     "AWS Systems Manager OpsCenter": "ssm-opscenter",
     "AWS Systems Manager Run Command": "ssm-run-command",
     "AWS Systems Manager State Manager": "state-manager",
@@ -1964,6 +1968,70 @@
         }
       ]
     },
+    "maintenance-windows": {
+      "id": "maintenance-windows",
+      "name": "AWS Systems Manager Maintenance Windows",
+      "reading": "メンテナンスウィンドウ",
+      "summary": "OS のパッチ当てやドライバーの更新など、ノードを止めるおそれのある操作をいつ行うかのスケジュールを決める Systems Manager の機能。",
+      "features": [
+        {
+          "title": "スケジュールと最大の長さ",
+          "text": "各メンテナンスウィンドウは、いつ動くかのスケジュールと、動いてよい最大の長さを持つ。"
+        },
+        {
+          "title": "ターゲットとタスク",
+          "text": "登録したターゲット（操作するマネージドノードやほかの AWS のリソース）に対して、登録したタスクを動かす。"
+        }
+      ],
+      "exam_points": [
+        "止まるおそれのある更新を、決めた時間帯の中だけで行う方法として押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Each maintenance window has a schedule, a maximum duration, a set of registered targets"
+        }
+      ]
+    },
+    "opensearch-service": {
+      "id": "opensearch-service",
+      "name": "Amazon OpenSearch Service",
+      "reading": "オープンサーチサービス",
+      "summary": "OpenSearch のクラスター（検索や分析のためのサーバーの集まり）を AWS のクラウドで簡単に作り、動かし、規模を変えられる、AWS が運用するサービス。",
+      "features": [
+        {
+          "title": "用意と故障の入れ替え",
+          "text": "クラスターのリソースをすべて用意して起動し、故障したノードを自動で見つけて入れ替える。"
+        },
+        {
+          "title": "Multi-AZ",
+          "text": "同じリージョンの 2 つか 3 つのアベイラビリティーゾーンにノードを分けて置ける。"
+        },
+        {
+          "title": "スナップショットと監視",
+          "text": "自動のスナップショットでドメインをバックアップ・復元でき、CloudWatch でメトリクスを見てアラームを設定できる。"
+        }
+      ],
+      "exam_points": [
+        "故障したノードを自動で見つけて入れ替え、自分で運用する基盤の手間を減らせる点を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#what-is",
+          "quote": "It also automatically detects and replaces failed OpenSearch Service nodes, reducing the overhead associated with self-managed infrastructures."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#what-is-features",
+          "quote": "Node allocation across two or three Availability Zones in the same AWS Region, known as Multi-AZ"
+        }
+      ]
+    },
     "organizations": {
       "id": "organizations",
       "name": "AWS Organizations",
@@ -2047,6 +2115,40 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-tiers-introduction",
           "quote": "Configure each parameter individually to use either the standard tier or advanced tier. You can mix standard and advanced parameters."
+        }
+      ]
+    },
+    "patch-manager": {
+      "id": "patch-manager",
+      "name": "AWS Systems Manager Patch Manager",
+      "reading": "パッチマネージャー",
+      "summary": "マネージドノード（Systems Manager で管理するサーバー）へのパッチ当て（セキュリティなどの更新の適用）を自動にする Systems Manager の機能。OS とアプリケーションの両方のパッチを当てられる。",
+      "features": [
+        {
+          "title": "パッチポリシー",
+          "text": "AWS Organizations と連携し、1 つのポリシーで複数のアカウントとリージョンのパッチ当てを設定できる。"
+        },
+        {
+          "title": "いくつかの当て方",
+          "text": "パッチポリシー、メンテナンスウィンドウ、その場で当てる「Patch now」から選べる。"
+        },
+        {
+          "title": "セキュリティを優先",
+          "text": "既定では、使えるすべてのパッチではなく、セキュリティに関する更新を中心に入れる。"
+        }
+      ],
+      "exam_points": [
+        "組織の複数のアカウントとリージョンのパッチ当てを、1 つのパッチポリシーでまとめて設定する方法を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager",
+          "quote": "Patch Manager automates the process of patching managed nodes with both security-related updates and other types of updates."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#what-are-the-main-features-of-patch-manager",
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations."
         }
       ]
     },
@@ -2553,6 +2655,36 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor-features",
           "quote": "You can choose to deploy packages one time, on a regular schedule, or whenever the default package version is changed to a different version."
+        }
+      ]
+    },
+    "ssm-inventory": {
+      "id": "ssm-inventory",
+      "name": "AWS Systems Manager Inventory",
+      "reading": "インベントリ",
+      "summary": "マネージドノードからメタデータ（入っているソフトウェアや構成などの情報）を集め、AWS の環境を見えるようにする Systems Manager の機能。集めるのはメタデータだけで、独自の情報やデータには触れない。",
+      "features": [
+        {
+          "title": "中央に集めて調べる",
+          "text": "メタデータを中央の S3 バケットに保存し、組み込みのツールでクエリして、どのノードが決まったソフトウェアや構成を動かしているか、どれを更新する必要があるかを素早く見分けられる。"
+        },
+        {
+          "title": "独自のインベントリ",
+          "text": "用意されたメタデータの種類で足りない時は、独自のインベントリを作れる。"
+        }
+      ],
+      "exam_points": [
+        "どのノードが決まったソフトウェアや構成を動かしているか、どのノードを更新する必要があるかを、集めたメタデータのクエリで見分ける方法として押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
         }
       ]
     },

@@ -1,0 +1,67 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0015",
+  "services": [
+    "AWS IAM",
+    "AWS STS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses an external CI service whose jobs can obtain tokens from an OpenID Connect (OIDC) compatible identity provider. Deployment jobs currently use IAM user access keys stored as CI secrets. The company wants the jobs to get temporary AWS credentials and to stop distributing long-term keys. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、ジョブが OpenID Connect（OIDC）に対応した ID プロバイダーからトークンを得られる、外部の CI サービスを使っています。デプロイのジョブは、今は CI のシークレットとして保存した IAM ユーザーのアクセスキーを使っています。会社は、ジョブが一時的な AWS の認証情報を得るようにし、長期のキーを配るのをやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the IAM user access keys in the CI secrets, and rotate them every week with a script.",
+      "text_ja": "IAM ユーザーのアクセスキーを CI のシークレットのままにし、スクリプトで毎週ローテーションする。"
+    },
+    {
+      "key": "B",
+      "text": "Create an IAM OIDC identity provider for the CI service's IdP, and create a role that the federated CI jobs can assume for temporary credentials.",
+      "text_ja": "CI サービスの IdP の IAM OIDC ID プロバイダーを作り、フェデレーションした CI のジョブが一時的な認証情報のために引き受けるロールを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Issue X.509 certificates to the CI runners from a new private CA, and set up IAM Roles Anywhere for them.",
+      "text_ja": "新しいプライベート CA から CI のランナーに X.509 の証明書を発行し、IAM Roles Anywhere を設定する。"
+    },
+    {
+      "key": "D",
+      "text": "Create a separate IAM user with access keys for each CI project to limit the impact of a leak.",
+      "text_ja": "漏れた時の影響を抑えるため、CI のプロジェクトごとにアクセスキーを持つ別の IAM ユーザーを作る。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "IAM OIDC ID プロバイダーは、OIDC に対応した外部の IdP と AWS アカウントの間に信頼を作るために使います。ロールは IdP で認証された OIDC のフェデレーションのプリンシパルに割り当てられ、一時的な認証情報を求められるようにします。OIDC フェデレーションを使えば、アクセスキーのような長期の認証情報を配る必要がありません。",
+    "per_choice": {
+      "A": "長期のキーを配り続けることになり、要件に反します。",
+      "B": "正しい。CI がすでに使える OIDC のトークンで、長期のキー無しに一時的な認証情報を得られます。",
+      "C": "一時的な認証情報は得られますが、新しい CA と証明書の発行を用意して運用することになり、OIDC をそのまま使うより手間がかかります。",
+      "D": "長期のキーが増え、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+      "source_id": "S8",
+      "quote": "You use an IAM OIDC identity provider when you want to establish trust between an OIDC-compatible IdP and your AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+      "source_id": "S8",
+      "quote": "The role permits your organization's IdP to request temporary security credentials for access to AWS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id-federation",
+      "source_id": "S9",
+      "quote": "you don't have to distribute long-term security credentials, such as IAM user access keys, with your application."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

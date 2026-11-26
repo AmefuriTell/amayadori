@@ -1,0 +1,268 @@
+{
+  "item": "C-0016",
+  "questions": [
+    {
+      "task": "1.4",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.4-0005",
+      "services": [
+        "AWS CodeDeploy"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An in-place CodeDeploy deployment group keeps failing in the ApplicationStop lifecycle event. The team found that the ApplicationStop script in the last successful revision has a bug, so they fixed the script in a new revision, but deploying the new revision still fails at ApplicationStop. Which action will allow the new revision to be deployed with the LEAST effort?",
+      "stem_ja": "CodeDeploy のインプレースのデプロイグループが、ApplicationStop のライフサイクルイベントで失敗し続けています。チームは、最後に成功したリビジョンの ApplicationStop のスクリプトに不具合があると分かり、新しいリビジョンでスクリプトを直しましたが、新しいリビジョンのデプロイも ApplicationStop で失敗します。最も少ない手間で新しいリビジョンをデプロイできるようにする操作はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create the deployment again with the option to ignore ApplicationStop failures, such as --ignore-application-stop-failures.",
+          "text_ja": "--ignore-application-stop-failures のような、ApplicationStop の失敗を無視するオプションを付けてデプロイを作り直す。"
+        },
+        {
+          "key": "B",
+          "text": "Fix the ApplicationStop script again in another new revision, and deploy that revision without changing any options.",
+          "text_ja": "もう 1 つ新しいリビジョンで ApplicationStop のスクリプトをまた直し、オプションを変えずにデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Increase the timeout of the ApplicationStop hook in the new revision's AppSpec file.",
+          "text_ja": "新しいリビジョンの AppSpec ファイルで、ApplicationStop のフックのタイムアウトを延ばす。"
+        },
+        {
+          "key": "D",
+          "text": "Delete the CodeDeploy application and the deployment group, and create them again.",
+          "text_ja": "CodeDeploy のアプリケーションとデプロイグループを消して、作り直す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトは、今のデプロイではなく、前に成功したデプロイの AppSpec ファイルから実行されます。前のリビジョンのスクリプトが失敗し続ける時は、これらの失敗を無視するよう指定してデプロイを作れば、デプロイが続き、直したスクリプトで次から成功します。",
+        "per_choice": {
+          "A": "正しい。前のリビジョンの壊れたスクリプトの失敗を無視して、直したリビジョンを入れられます。",
+          "B": "ApplicationStop は前に成功したデプロイのスクリプトで動くので、新しいリビジョンで直しても失敗は続きます。",
+          "C": "新しいリビジョンの AppSpec の設定は、前のデプロイの ApplicationStop のスクリプトの不具合を直しません。",
+          "D": "手間が大きく、作り直しは不要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "source_id": "S1",
+          "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "source_id": "S2",
+          "quote": "create a deployment and specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "source_id": "S2",
+          "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
+        }
+      ]
+    },
+    {
+      "task": "1.4",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.4-0006",
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CloudFormation stack update failed, and the rollback then also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because the rollback tries to return to a database instance that someone deleted outside CloudFormation. The team wants the stack back in a working state so that it can be updated again, without deleting the stack. Which action BEST meets this requirement?",
+      "stem_ja": "CloudFormation のスタックの更新が失敗し、その後のロールバックも失敗しました。ロールバックが、誰かが CloudFormation の外で削除したデータベースインスタンスへ戻ろうとするため、スタックは UPDATE_ROLLBACK_FAILED の状態です。チームは、スタックを削除せずに動く状態へ戻し、また更新できるようにしたいと考えています。この要件を最もよく満たす操作はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Continue the update rollback and skip the deleted database resource so that the stack reaches UPDATE_ROLLBACK_COMPLETE.",
+          "text_ja": "更新のロールバックを続け、削除されたデータベースのリソースを飛ばして、スタックを UPDATE_ROLLBACK_COMPLETE にする。"
+        },
+        {
+          "key": "B",
+          "text": "Use the signal-resource command to send success signals to the database resource, and then retry the update.",
+          "text_ja": "signal-resource コマンドでデータベースのリソースに成功のシグナルを送り、その後に更新をやり直す。"
+        },
+        {
+          "key": "C",
+          "text": "Delete the stack with the RetainResources parameter, and create a new stack from the template.",
+          "text_ja": "RetainResources パラメータを付けてスタックを削除し、テンプレートから新しいスタックを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Grant the CloudFormation service more IAM permissions, and wait for the rollback to finish by itself.",
+          "text_ja": "CloudFormation のサービスにより多くの IAM の権限を与え、ロールバックが自分で終わるのを待つ。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "依存するリソースが元の状態に戻れない時、ロールバックは失敗して UPDATE_ROLLBACK_FAILED になります。原因によっては、ロールバックを続けて動く状態（UPDATE_ROLLBACK_COMPLETE）に戻し、また更新できます。CloudFormation の外で消したリソースのように戻せない物は、ロールバックを続ける時に飛ばせます。",
+        "per_choice": {
+          "A": "正しい。消えたリソースを飛ばしてロールバックを終え、スタックを削除せずに更新できる状態に戻せます。",
+          "B": "シグナルを送る方法は、必要な数のシグナルを受け取れなかった時の対処で、消えたデータベースには効きません。",
+          "C": "スタックを削除しないという要件に反します。",
+          "D": "原因は権限ではなく、待ってもロールバックは終わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "source_id": "S10",
+          "quote": "A dependent resource can't return to its original state, causing the rollback to fail (UPDATE_ROLLBACK_FAILED state)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "source_id": "S10",
+          "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "source_id": "S10",
+          "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
+        }
+      ]
+    },
+    {
+      "task": "1.4",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.4-0007",
+      "services": [
+        "AWS CodeDeploy",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A CodeDeploy blue/green deployment for EC2 instances behind an Application Load Balancer fails during the AllowTraffic lifecycle event. The deployment logs on the replacement instances show no errors, and the application starts correctly. What is the MOST likely cause that the team should fix?",
+      "stem_ja": "Application Load Balancer の後ろの EC2 インスタンスへの CodeDeploy の Blue/Green デプロイが、AllowTraffic のライフサイクルイベントで失敗します。置き換え先のインスタンスのデプロイのログにはエラーが無く、アプリケーションも正しく起動します。チームが直すべき、最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The ApplicationStop script from the previous successful deployment contains an error.",
+          "text_ja": "前に成功したデプロイの ApplicationStop のスクリプトに誤りがある。"
+        },
+        {
+          "key": "B",
+          "text": "The load balancer health check is configured incorrectly.",
+          "text_ja": "ロードバランサーのヘルスチェックの設定が誤っている。"
+        },
+        {
+          "key": "C",
+          "text": "The CodeDeploy agent is not installed on the replacement instances.",
+          "text_ja": "置き換え先のインスタンスに CodeDeploy エージェントが入っていない。"
+        },
+        {
+          "key": "D",
+          "text": "The task definition artifact is larger than 3 MB.",
+          "text_ja": "タスク定義のアーティファクトが 3 MB より大きい。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Blue/Green デプロイが AllowTraffic で失敗し、デプロイのログに原因が出ない時は、たいていデプロイグループのトラフィックを扱うロードバランサーのヘルスチェックの設定の誤りが原因です。ヘルスチェックの設定を見直して直します。",
+        "per_choice": {
+          "A": "ApplicationStop の失敗なら、そのイベントで失敗し、ログにも原因が出ます。",
+          "B": "正しい。ログに原因が無い AllowTraffic の失敗は、ふつうヘルスチェックの設定の誤りです。",
+          "C": "エージェントが無ければ、それより前のライフサイクルイベントが動かず、AllowTraffic まで進みません。",
+          "D": "タスク定義のアーティファクトは ECS へのデプロイの話で、EC2 の Blue/Green には関係ありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "source_id": "S3",
+          "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "source_id": "S3",
+          "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
+        }
+      ]
+    },
+    {
+      "task": "1.4",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.4-0008",
+      "services": [
+        "AWS CodeDeploy"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A CodeDeploy deployment to EC2 instances fails with error code HEALTH_CONSTRAINTS, and every lifecycle event on every instance shows as Skipped. Which are the MOST likely causes that a DevOps engineer should check? (Choose TWO.)",
+      "stem_ja": "EC2 インスタンスへの CodeDeploy のデプロイが、エラーコード HEALTH_CONSTRAINTS で失敗し、すべてのインスタンスのすべてのライフサイクルイベントが Skipped と表示されています。DevOps エンジニアが確かめるべき、最も可能性の高い原因はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The CodeDeploy agent is not installed or not running on the instances.",
+          "text_ja": "インスタンスで CodeDeploy エージェントが入っていないか、動いていない。"
+        },
+        {
+          "key": "B",
+          "text": "The CodeDeploy service role does not have the required permissions.",
+          "text_ja": "CodeDeploy のサービスロールに必要な権限が無い。"
+        },
+        {
+          "key": "C",
+          "text": "The ApplicationStop script in the new revision has an error.",
+          "text_ja": "新しいリビジョンの ApplicationStop のスクリプトに誤りがある。"
+        },
+        {
+          "key": "D",
+          "text": "The load balancer health check path is wrong.",
+          "text_ja": "ロードバランサーのヘルスチェックのパスが誤っている。"
+        },
+        {
+          "key": "E",
+          "text": "The stack for the instances has termination protection enabled.",
+          "text_ja": "インスタンスのスタックで終了保護が有効になっている。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "EC2 やオンプレミスのデプロイですべてのライフサイクルイベントが飛ばされ、HEALTH_CONSTRAINTS で失敗する時の主な原因には、CodeDeploy エージェントが入っていないか動いていないこと（メモリーやディスクの不足で止まることもある）と、CodeDeploy のサービスロールに必要な権限が無いことがあります。",
+        "per_choice": {
+          "A": "正しい。エージェントが動いていなければ、どのライフサイクルイベントも実行されません。",
+          "B": "正しい。サービスロールの権限が足りないことも、すべてのイベントが飛ばされる原因になります。",
+          "C": "スクリプトの誤りなら、そのイベントは実行されて失敗し、すべてが Skipped にはなりません。",
+          "D": "AllowTraffic で失敗するなら、それより前のイベントは実行されています。",
+          "E": "スタックの終了保護はスタックの削除を止めるもので、デプロイのライフサイクルイベントには関係ありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "source_id": "S4",
+          "quote": "The CodeDeploy agent might not be installed or running on the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "source_id": "S4",
+          "quote": "The CodeDeploy agent might stop running because an instance is running low on memory or hard disk space."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "source_id": "S4",
+          "quote": "The service role for CodeDeploy might not have required permissions."
+        }
+      ]
+    }
+  ]
+}

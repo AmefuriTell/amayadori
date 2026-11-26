@@ -1,0 +1,66 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0014",
+  "services": [
+    "Amazon ElastiCache"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An application uses an Amazon ElastiCache for Valkey cluster as a session store. Each shard has only a primary node, so a node failure causes a long outage. The company wants a failed primary to be replaced automatically by a node in another Availability Zone with minimal downtime. Which change meets this requirement with the LEAST operational overhead?",
+  "stem_ja": "あるアプリケーションは、セッションの保存先として Amazon ElastiCache for Valkey のクラスターを使っています。各シャードには主ノードしか無いため、ノードの故障で長い停止が起きます。会社は、故障した主ノードを、ダウンタイムを最小にして別のアベイラビリティーゾーンのノードで自動で置き換えたいと考えています。運用上のオーバーヘッドが最も少なくこの要件を満たす変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on Multi-AZ for the cluster without adding any replicas to the shards.",
+      "text_ja": "シャードにレプリカを足さずに、クラスターの Multi-AZ を有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Take a snapshot every hour, and restore it to a new cluster in another Availability Zone when a node fails.",
+      "text_ja": "1 時間ごとにスナップショットを取り、ノードが故障したら別のアベイラビリティーゾーンの新しいクラスターへ復元する。"
+    },
+    {
+      "key": "C",
+      "text": "Add at least one replica in a different Availability Zone to each shard, and turn on Multi-AZ with automatic failover.",
+      "text_ja": "各シャードに別の AZ のレプリカを 1 つ以上足し、自動フェイルオーバー付きの Multi-AZ を有効にする。"
+    },
+    {
+      "key": "D",
+      "text": "Change each primary node to a larger node type so that failures are less likely.",
+      "text_ja": "故障しにくくなるよう、各主ノードをより大きなノードタイプに変える。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Multi-AZ は ElastiCache の高い可用性のために勧められている構成で、有効にするとレプリカを別のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にします。主ノードが故障すると、レプリケーションの遅れが最も少ないレプリカが自動で主に昇格します。Multi-AZ には、主と別のアベイラビリティーゾーンにレプリカが少なくとも 1 つ要ります。",
+    "per_choice": {
+      "A": "Multi-AZ には、主と別のアベイラビリティーゾーンのレプリカが少なくとも 1 つ必要です。",
+      "B": "復元は手作業で時間もかかり、セッションのデータも失われます。",
+      "C": "正しい。故障した時にレプリカが自動で主に昇格し、ダウンタイムを最小にできます。",
+      "D": "故障の確率が下がるだけで、故障した時の自動の置き換えにはなりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+      "source_id": "S5",
+      "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+      "source_id": "S5",
+      "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+      "source_id": "S5",
+      "quote": "If the primary node fails, ElastiCache automatically promotes the replica with the least replication lag to primary."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

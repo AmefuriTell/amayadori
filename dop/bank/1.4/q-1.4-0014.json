@@ -1,0 +1,66 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0014",
+  "services": [
+    "AWS CodeDeploy"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An in-place CodeDeploy deployment group keeps failing in the ApplicationStop lifecycle event. The team found that the ApplicationStop script in the last successful revision has a bug, so they fixed the script in a new revision, but deploying the new revision still fails at ApplicationStop. Which action will allow the new revision to be deployed with the LEAST effort?",
+  "stem_ja": "CodeDeploy のインプレースのデプロイグループが、ApplicationStop のライフサイクルイベントで失敗し続けています。チームは、最後に成功したリビジョンの ApplicationStop のスクリプトに不具合があると分かり、新しいリビジョンでスクリプトを直しましたが、新しいリビジョンのデプロイも ApplicationStop で失敗します。最も少ない手間で新しいリビジョンをデプロイできるようにする操作はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create the deployment again with the option to ignore ApplicationStop failures, such as --ignore-application-stop-failures.",
+      "text_ja": "--ignore-application-stop-failures のような、ApplicationStop の失敗を無視するオプションを付けてデプロイを作り直す。"
+    },
+    {
+      "key": "B",
+      "text": "Fix the ApplicationStop script again in another new revision, and deploy that revision without changing any options.",
+      "text_ja": "もう 1 つ新しいリビジョンで ApplicationStop のスクリプトをまた直し、オプションを変えずにデプロイする。"
+    },
+    {
+      "key": "C",
+      "text": "Increase the timeout of the ApplicationStop hook in the new revision's AppSpec file.",
+      "text_ja": "新しいリビジョンの AppSpec ファイルで、ApplicationStop のフックのタイムアウトを延ばす。"
+    },
+    {
+      "key": "D",
+      "text": "Delete the CodeDeploy application and the deployment group, and create them again.",
+      "text_ja": "CodeDeploy のアプリケーションとデプロイグループを消して、作り直す。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトは、今のデプロイではなく、前に成功したデプロイの AppSpec ファイルから実行されます。前のリビジョンのスクリプトが失敗し続ける時は、これらの失敗を無視するよう指定してデプロイを作れば、デプロイが続き、直したスクリプトで次から成功します。",
+    "per_choice": {
+      "A": "正しい。前のリビジョンの壊れたスクリプトの失敗を無視して、直したリビジョンを入れられます。",
+      "B": "ApplicationStop は前に成功したデプロイのスクリプトで動くので、新しいリビジョンで直しても失敗は続きます。",
+      "C": "新しいリビジョンの AppSpec の設定は、前のデプロイの ApplicationStop のスクリプトの不具合を直しません。",
+      "D": "手間が大きく、作り直しは不要です。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+      "source_id": "S1",
+      "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+      "source_id": "S2",
+      "quote": "create a deployment and specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+      "source_id": "S2",
+      "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
