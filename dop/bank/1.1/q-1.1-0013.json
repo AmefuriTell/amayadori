@@ -1,0 +1,67 @@
+{
+  "task": "1.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.1-0013",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses CodeDeploy in-place deployments to 12 EC2 instances. During deployments, at least three quarters of the instances must stay available to serve traffic, but deployments must finish as quickly as possible within that limit. Which deployment configuration is the MOST appropriate?",
+  "stem_ja": "ある会社は、12 台の EC2 インスタンスに CodeDeploy のインプレースデプロイを行っています。デプロイ中も、少なくとも 4 分の 3 のインスタンスがトラフィックを処理できる状態で残る必要がありますが、その範囲でデプロイをできるだけ早く終える必要があります。最も適切なデプロイ設定はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "CodeDeployDefault.OneAtATime, which deploys to only one instance at a time.",
+      "text_ja": "1 度に 1 台のインスタンスにだけデプロイする CodeDeployDefault.OneAtATime。"
+    },
+    {
+      "key": "B",
+      "text": "CodeDeployDefault.HalfAtATime, which deploys to up to half of the instances at a time.",
+      "text_ja": "1 度に最大で半分のインスタンスにデプロイする CodeDeployDefault.HalfAtATime。"
+    },
+    {
+      "key": "C",
+      "text": "A custom deployment configuration with a minimum healthy hosts value of 75 percent.",
+      "text_ja": "最小正常ホスト数を 75% にした独自のデプロイ設定。"
+    },
+    {
+      "key": "D",
+      "text": "CodeDeployDefault.AllAtOnce, which deploys to as many instances as possible at once.",
+      "text_ja": "できるだけ多くのインスタンスに一度にデプロイする CodeDeployDefault.AllAtOnce。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "EC2/オンプレミスのデプロイ設定は、最小正常ホスト数で、デプロイ中にいつも残す必要があるインスタンスの数か割合を決めます。既定の設定が合わない時は、最小正常ホスト数を決めた独自のデプロイ設定を作れます。75% にすれば 12 台のうち 9 台を残しつつ、3 台ずつデプロイできます。",
+    "per_choice": {
+      "A": "残る台数の要件は満たしますが、1 台ずつなので最も時間がかかり、早く終える要件に合いません。",
+      "B": "最大で 6 台に同時にデプロイするため、残るのが半分になり、4 分の 3 を残す要件を満たしません。",
+      "C": "正しい。9 台を残す範囲で、できるだけ多くのインスタンスに同時にデプロイできます。",
+      "D": "すべてのインスタンスに一度にデプロイするため、残る台数の要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+      "source_id": "S1",
+      "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations-create.html#deployment-configurations-create-console",
+      "source_id": "S4",
+      "quote": "If you don't want to use one of the default deployment configurations provided with CodeDeploy, you can create your own using the following instructions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+      "source_id": "S1",
+      "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

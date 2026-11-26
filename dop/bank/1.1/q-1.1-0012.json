@@ -1,0 +1,69 @@
+{
+  "task": "1.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.1-0012",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon ECS",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon ECS service is deployed with AWS CodeDeploy blue/green deployments behind a Network Load Balancer, and all traffic currently moves to the new task set at once. The team wants new versions to receive a small share of traffic first and the remaining traffic a few minutes later, so that problems affect fewer users. Which solution meets this requirement with the LEAST change to the deployment process?",
+  "stem_ja": "Amazon ECS のサービスが、Network Load Balancer の後ろで AWS CodeDeploy の Blue/Green デプロイでデプロイされており、今はすべてのトラフィックが一度に新しいタスクセットへ移ります。チームは、問題が起きても影響を受ける利用者が少なくなるよう、新しい版にまず一部のトラフィックを送り、残りを数分後に送りたいと考えています。デプロイの手順の変更を最も少なくしてこの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSCanary10Percent5Minutes.",
+      "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSCanary10Percent5Minutes に変える。"
+    },
+    {
+      "key": "B",
+      "text": "Keep the Network Load Balancer and the CodeDeployDefault.ECSAllAtOnce configuration, and add a manual approval before each deployment.",
+      "text_ja": "Network Load Balancer と CodeDeployDefault.ECSAllAtOnce の設定のままにし、各デプロイの前に手動の承認を足す。"
+    },
+    {
+      "key": "C",
+      "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSLinear10PercentEvery1Minutes.",
+      "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSLinear10PercentEvery1Minutes に変える。"
+    },
+    {
+      "key": "D",
+      "text": "Move the service behind an Application Load Balancer and use the CodeDeployDefault.ECSCanary10Percent5Minutes deployment configuration.",
+      "text_ja": "サービスを Application Load Balancer の後ろへ移し、CodeDeployDefault.ECSCanary10Percent5Minutes のデプロイ設定を使う。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "ECS のデプロイでは、カナリア・リニア・一括のデプロイ設定でトラフィックを移せますが、Network Load Balancer を使う場合は事前定義の CodeDeployDefault.ECSAllAtOnce しか使えません。一部を先に送るカナリアを使うには、Application Load Balancer に移す必要があります。",
+    "per_choice": {
+      "A": "Network Load Balancer では ECSAllAtOnce しか使えず、このカナリアの設定は使えません。",
+      "B": "承認を足しても、トラフィックは一度にすべて移り、一部を先に送る要件を満たしません。",
+      "C": "Network Load Balancer では ECSAllAtOnce しか使えず、リニアの設定も使えません。",
+      "D": "正しい。ロードバランサーを変えれば、10% を先に送り残りを 5 分後に送るカナリアを使えます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+      "source_id": "S2",
+      "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+      "source_id": "S2",
+      "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+      "source_id": "S2",
+      "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
+    }
+  ],
+  "low_confidence": true,
+  "last_checked": "2026-11-26"
+}
