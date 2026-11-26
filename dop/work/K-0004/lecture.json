@@ -1,0 +1,723 @@
+{
+ "task": "1.4",
+ "title": "インスタンス・コンテナ・サーバーレスのデプロイ戦略",
+ "minutes": 13,
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "1 考え方: mutable と immutable",
+    "2 EC2・ECS・Lambda・EKS",
+    "3 保存場所・配る道具・権限"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph A[\"1 考え方\"]\n    M[\"mutable: in-place<br/>immutable: 置き換え\"]\n  end\n  subgraph B[\"2 デプロイ先ごと\"]\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2\" }\n    ECS@{ svc: \"Amazon ECS\", label: \"ECS\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda\" }\n    K@{ svc: \"Amazon EKS\", label: \"Amazon EKS\" }\n  end\n  subgraph C[\"3 まわりの準備\"]\n    S[\"保存場所<br/>EFS・S3・EBS\"]\n    T[\"配る道具と権限<br/>Image Builder・CodeArtifact\"]\n  end\n  M ~~~ EC2 & ECS & L & K\n  K ~~~ S\n  K ~~~ T\n",
+    "alt": "講義の三部構成。1 は考え方で、mutable（in-place）と immutable（置き換え）を比べる。2 はデプロイ先ごとの方法で、EC2・ECS・Lambda・Amazon EKS を見る。3 はまわりの準備で、保存場所（EFS・S3・EBS）と、配る道具と権限（Image Builder・CodeArtifact）を見る。"
+   },
+   "narration": "この講義では、アプリケーションの新しい版を、どう配って、どう入れ替えるかを学びます。順番は三つです。一つ目は考え方です。今ある環境をその場で書き換えるミュータブルな形と、新しい物に置き換えるイミュータブルな形を比べます。二つ目は、デプロイ先ごとの方法です。イーシーツーのインスタンス、イーシーエスのコンテナ、ラムダの関数、そしてイーケーエスのクラスターです。それぞれで、トラフィックの移し方と、失敗したときの調べ方や戻し方を見ます。三つ目は、まわりの準備です。データの保存場所と、コードを配る道具と、成果物の置き場に入る権限です。名前や数字などの細かい所は、画面に置きます。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "An in-place deployment is a deployment strategy that updates the application version without replacing any infrastructure components.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/in-place-deployments.html#in-place-deployments"
+    },
+    {
+     "source_id": "S9",
+     "quote": "Immutable environment updates are an alternative to rolling updates.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html#environmentmgmt-updates-immutable"
+    },
+    {
+     "source_id": "S1",
+     "quote": "AWS CodeDeploy is a fully managed deployment service that automates application deployments to compute services such as Amazon EC2, Amazon Elastic Container Service (Amazon ECS), AWS Lambda, or on-premises servers.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/aws-codedeploy.html#aws-codedeploy"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/argocd.html#argocd"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "CodeDeploy でデプロイを自動に",
+   "bullets": [
+    "CodeDeploy: デプロイを自動化",
+    "先: EC2・ECS・Lambda など",
+    "誤りやすい手作業を除く"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>デプロイを自動化\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2\" }\n  ECS@{ svc: \"Amazon ECS\", label: \"ECS\" }\n  L@{ svc: \"AWS Lambda\", label: \"Lambda\" }\n  OP[\"オンプレミスのサーバー\"]\n  CD --> EC2 & ECS & L & OP\n",
+    "alt": "CodeDeploy はアプリケーションのデプロイを自動にするサービスで、デプロイ先には EC2、ECS、Lambda、オンプレミスのサーバーなどがある。"
+   },
+   "narration": "まず、道具の中心になるコードデプロイです。コードデプロイは、アプリケーションのデプロイを自動にする、フルマネージドのサービスです。デプロイ先には、イーシーツー、イーシーエス、ラムダ、それに自社に置いたオンプレミスのサーバーなどがあります。手作業のデプロイは、誤りが起きやすい作業です。コードデプロイで自動にすれば、その手作業をデプロイの手順から取り除けます。この後、デプロイ先ごとに、コードデプロイが何をどう切り替えるのかを見ていきます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "AWS CodeDeploy is a fully managed deployment service that automates application deployments to compute services such as Amazon EC2, Amazon Elastic Container Service (Amazon ECS), AWS Lambda, or on-premises servers.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/aws-codedeploy.html#aws-codedeploy"
+    },
+    {
+     "source_id": "S1",
+     "quote": "Organizations can use CodeDeploy to automate deployments of an application and remove error prone manual operations from the deployment process.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/aws-codedeploy.html#aws-codedeploy"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "1 考え方: in-place（mutable）",
+   "bullets": [
+    "土台は置き換えない",
+    "版だけをその場で更新",
+    "止める → 入れる → 起動・確認"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "古い版を止める",
+      "note": "各計算資源の上で"
+     },
+     {
+      "label": "新しい版を入れる",
+      "note": "同じ計算資源に"
+     },
+     {
+      "label": "新しい版を起動する"
+     },
+     {
+      "label": "確かめる",
+      "note": "validated"
+     }
+    ]
+   },
+   "narration": "ここから一つ目、考え方です。インプレースデプロイは、基盤の部品を置き換えずに、アプリケーションの版だけを更新するやり方です。今ある物をその場で書き換えるので、この講義では、ミュータブル、つまり変更していく形の例として扱います。手順は画面のとおりです。それぞれの計算資源の上で、古い版を止め、新しい版を入れ、新しい版を起動して確かめます。古い版を止めることから、新しい版を確かめることまでが、同じ計算資源の上で順に進みます。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "An in-place deployment is a deployment strategy that updates the application version without replacing any infrastructure components.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/in-place-deployments.html#in-place-deployments"
+    },
+    {
+     "source_id": "S8",
+     "quote": "In an in-place deployment, the previous version of the application on each compute resource is stopped, the latest application is installed, and the new version of the application is started and validated.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/in-place-deployments.html#in-place-deployments"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "1 考え方: immutable と戻し方",
+   "bullets": [
+    "Beanstalk の例で比べる",
+    "Immutable: 失敗なら消すだけ",
+    "rolling: もう一度更新して戻す"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "Beanstalk の更新",
+     "失敗したときの戻し方"
+    ],
+    "rows": [
+     [
+      "Immutable",
+      "Auto Scaling group を終了"
+     ],
+     [
+      "rolling",
+      "もう一度 rolling 更新"
+     ]
+    ]
+   },
+   "narration": "次は、置き換える形、イミュータブルです。ここでの根拠は、エラスティックビーンストークの環境の更新の説明です。ビーンストークでは、イミュータブルな環境の更新が、ローリング更新の代わりとして用意されています。違いが出るのは、失敗したときの戻し方です。イミュータブルな更新が失敗したら、戻すには、オートスケーリンググループを一つ終了するだけで済みます。オートスケーリンググループとは、インスタンスをまとめて増やしたり減らしたりする単位です。一方、ローリング更新が失敗したら、変更を戻すために、もう一度ローリング更新をしなければなりません。ビーンストークでは、この戻しやすさの差が、二つを選び分ける手がかりになります。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "Immutable environment updates are an alternative to rolling updates.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html#environmentmgmt-updates-immutable"
+    },
+    {
+     "source_id": "S9",
+     "quote": "If an immutable environment update fails, the rollback process requires only terminating an Auto Scaling group.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html#environmentmgmt-updates-immutable"
+    },
+    {
+     "source_id": "S9",
+     "quote": "A failed rolling update, on the other hand, requires performing an additional rolling update to roll back the changes.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html#environmentmgmt-updates-immutable"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "2 EC2: agent と instance profile",
+   "bullets": [
+    "agent を入れて導入先にする",
+    "instance profile で権限を渡す",
+    "権限不足 → missing credentials"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy\" }\n  subgraph I[\"EC2 インスタンス\"]\n    AG[\"CodeDeploy agent\"]\n    IP@{ svc: \"AWS IAM\", label: \"IAM instance profile<br/>agent に権限を渡す\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"S3: revision\" }\n  E[\"権限が正しくない<br/>CommandPoller<br/>missing credentials\"]\n  AG -- \"やり取り\" --> CD\n  AG -- \"revision を取る\" --> S3\n  IP -.- AG\n  IP -. \"不足なら\" .-> E\n",
+    "alt": "EC2 インスタンスに入れた CodeDeploy agent は、CodeDeploy とやり取りし、S3 から revision を取る。その権限は IAM instance profile が agent に渡す。instance profile の権限が正しくないと、CommandPoller の missing credentials のエラーになる。"
+   },
+   "narration": "ここから二つ目、デプロイ先ごとの方法です。まずイーシーツーです。イーシーツーのインスタンスを、コードデプロイのデプロイ先にするには、コードデプロイエージェントが要ります。エージェントとは、インスタンスに入れて設定するソフトウェアのパッケージです。エージェントは、コードデプロイとやり取りし、配る中身であるリビジョンを、エススリーから取ってきます。その権限をエージェントに与えるのが、アイアムのインスタンスプロファイルです。失敗の調べ方も一つ押さえます。インスタンスプロファイルに正しい権限が設定されていないと、画面の、資格情報が無いというエラーが出ます。このエラーを見たら、インスタンスプロファイルの権限を確かめます。",
+   "refs": [
+    {
+     "source_id": "S12",
+     "quote": "The AWS CodeDeploy agent is a software package that, when installed and configured on an instance, makes it possible for that instance to be used in CodeDeploy deployments.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent"
+    },
+    {
+     "source_id": "S13",
+     "quote": "An IAM instance profile grants the CodeDeploy agent permission to communicate with CodeDeploy and to download your revision from Amazon S3.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-agent-commandpoller-error"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Your IAM instance profile does not have the correct permissions configured.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-agent-commandpoller-error"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "2 EC2: blue/green",
+   "bullets": [
+    "original: 今の版のインスタンス",
+    "replacement へ自動で移す",
+    "original は登録解除"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "original を決める",
+      "note": "今の版が動くインスタンス"
+     },
+     {
+      "label": "replacement を用意",
+      "note": "置き換え用のインスタンス"
+     },
+     {
+      "label": "トラフィックを移す",
+      "note": "replacement へ自動で"
+     },
+     {
+      "label": "original を登録解除"
+     }
+    ]
+   },
+   "narration": "次は、イーシーツーのブルーグリーンです。ブルーグリーンでは、今の環境と置き換え用の環境を分けて、トラフィックを一度に全部切り替えます。コードデプロイのデプロイグループを作るときは、まず、元の環境のインスタンスを決めます。元の環境とは、置き換えたいインスタンス、つまり今の版が動いているインスタンスのことです。置き換え用のインスタンスが用意されると、トラフィックはそちらへ自動で移されます。その後、元の環境のインスタンスは登録を外されます。インプレースと違い、新しい版は別のインスタンスで動き始めます。",
+   "refs": [
+    {
+     "source_id": "S19",
+     "quote": "identify the instances in your original environment (that is, the instances you want to replace or that are running the current application revision).",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html#deployment-groups-create-blue-green"
+    },
+    {
+     "source_id": "S19",
+     "quote": "automatically, causing traffic to be rerouted to them. Instances in the original environment are then deregistered.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html#deployment-groups-create-blue-green"
+    },
+    {
+     "source_id": "S18",
+     "quote": "Canary deployments differ from blue/green deployments by exposing the new version to only a portion of requests rather than switching all traffic at once.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "2 ECS: blue/green の移し方",
+   "bullets": [
+    "task set の間で移す",
+    "canary・linear・all-at-once",
+    "ALB か NLB が必須"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "移し方",
+     "トラフィックの動き"
+    ],
+    "rows": [
+     [
+      "canary",
+      "2 回に分けて移す"
+     ],
+     [
+      "linear",
+      "同じ幅・同じ間隔で"
+     ],
+     [
+      "all-at-once",
+      "一度に全部"
+     ],
+     [
+      "前提",
+      "ALB か NLB"
+     ]
+    ]
+   },
+   "narration": "次はイーシーエスです。イーシーエスのブルーグリーンでは、トラフィックを、元のタスクセットから、更新したタスクセットへ移します。タスクセットは、ここでは、同じ版で動くタスクのまとまりと考えてください。移し方は三つあります。カナリアは、トラフィックを二回に分けて移します。最初に一部だけを移して試す形です。リニアは、同じ幅ずつ、同じ分数の間隔を空けて移します。オールアットワンスは、一度に全部を移します。前提として、サービスには、アプリケーションロードバランサーか、ネットワークロードバランサーを使う設定が要ります。",
+   "refs": [
+    {
+     "source_id": "S20",
+     "quote": "There are three ways traffic can shift during a blue/green deployment:",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S20",
+     "quote": "Canary — Traffic is shifted in two increments.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S20",
+     "quote": "Linear — Traffic is shifted in equal increments with an equal number of minutes between each increment.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S20",
+     "quote": "All-at-once — All traffic is shifted from the original task set to the updated task set all at once.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S20",
+     "quote": "You must configure the service to use either an Application Load Balancer or Network Load Balancer.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "2 ECS: hook と NLB の待ち",
+   "bullets": [
+    "hook: 段階ごとに処理を差し込む",
+    "BeforeInstall では戻せない",
+    "NLB なら移す段階に 10 分"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "段階",
+     "押さえる所"
+    ],
+    "rows": [
+     [
+      "BeforeInstall",
+      "作る前・戻せない"
+     ],
+     [
+      "AfterInstall",
+      "作って target group 後"
+     ],
+     [
+      "TEST_TRAFFIC_SHIFT",
+      "NLB なら 10 分待つ"
+     ],
+     [
+      "PRODUCTION_TRAFFIC_SHIFT",
+      "NLB なら 10 分待つ"
+     ]
+    ]
+   },
+   "narration": "イーシーエスで気を付ける所を二つ見ます。一つ目はフックです。フックとは、デプロイの決まった段階で、自分の処理を走らせる場所です。ビフォーインストールは、置き換え用のタスクセットを作る前に走ります。この時点では、ロールバック、つまり元に戻すことができません。アフターインストールは、置き換え用のタスクセットを作り、ターゲットグループの一つをそれに結び付けた後に走ります。二つ目は待ち時間です。イーシーエスのブルーグリーンなどで、ネットワークロードバランサーを使う構成では、イーシーエスが、テスト用と本番用のトラフィックを移す段階に、十分の待ちを足します。画面の二つの段階です。",
+   "refs": [
+    {
+     "source_id": "S22",
+     "quote": "BeforeInstall – Use to run tasks before the replacement task set is created.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-ecs"
+    },
+    {
+     "source_id": "S22",
+     "quote": "A rollback is not possible at this point.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-ecs"
+    },
+    {
+     "source_id": "S22",
+     "quote": "AfterInstall – Use to run tasks after the replacement task set is created and one of the target groups is associated with it.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-ecs"
+    },
+    {
+     "source_id": "S21",
+     "quote": "When your configuration includes a Network Load Balancer, Amazon ECS adds a 10 minute delay to the following lifecycle stages:",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/nlb-resources-for-blue-green.html#nlb-resources-for-blue-green"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "2 Lambda: weighted alias と canary",
+   "bullets": [
+    "alias で 2 つの版に分ける",
+    "少しの割合で試す = canary",
+    "blue/green は一度に全部"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  U[\"リクエスト\"]\n  A[\"weighted alias<br/>重みで分ける\"]\n  V1@{ svc: \"AWS Lambda\", label: \"今の版<br/>大部分\" }\n  V2@{ svc: \"AWS Lambda\", label: \"新しい版<br/>少しの割合\" }\n  U --> A\n  A -- \"多く\" --> V1\n  A -- \"少し\" --> V2\n",
+    "alt": "Lambda の weighted alias が、同じ関数の二つの版にリクエストを重みで分ける。大部分は今の版へ、少しの割合を新しい版へ送って試すのが canary。"
+   },
+   "narration": "次はラムダです。ラムダでは、エイリアス、つまり関数の版を指す名前を使います。重み付きのエイリアスを使うと、同じ関数の二つの版の間で、トラフィックを分けられます。新しい版を、少しの割合のトラフィックで試し、必要ならすぐに戻せます。これをカナリアデプロイと呼びます。ブルーグリーンとの違いは、全部のトラフィックを一度に切り替えるのではなく、一部のリクエストだけを新しい版に向けることです。問題文に、まず少しだけ新しい版に流して確かめたい、とあれば、カナリアを思い出してください。",
+   "refs": [
+    {
+     "source_id": "S18",
+     "quote": "You can use a weighted alias to split traffic between two different versions of the same function.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing"
+    },
+    {
+     "source_id": "S18",
+     "quote": "With this approach, you can test new versions of your functions with a small percentage of traffic and quickly roll back if necessary. This is known as a canary deployment.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing"
+    },
+    {
+     "source_id": "S18",
+     "quote": "Canary deployments differ from blue/green deployments by exposing the new version to only a portion of requests rather than switching all traffic at once.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "2 Lambda: hook で確かめる",
+   "bullets": [
+    "hook 1 つ = Lambda 関数 1 つ",
+    "移す前と移した後に実行",
+    "1 時間返事が無ければ失敗"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy\" }\n  B@{ svc: \"AWS Lambda\", label: \"BeforeAllowTraffic<br/>検証の関数\" }\n  A@{ svc: \"AWS Lambda\", label: \"AfterAllowTraffic<br/>検証の関数\" }\n  R[\"結果を知らせる<br/>Succeeded か Failed<br/>1 時間返事が無ければ<br/>失敗とみなす\"]\n  CD -- \"移す前\" --> B\n  CD -- \"全部移した後\" --> A\n  B --> R\n  A --> R\n",
+    "alt": "CodeDeploy は、トラフィックを移す前に BeforeAllowTraffic の関数を、全部移した後に AfterAllowTraffic の関数を呼ぶ。検証の関数は CodeDeploy に Succeeded か Failed を知らせる。1 時間以内に知らせが無ければ、デプロイは失敗とみなされる。"
+   },
+   "narration": "ラムダのデプロイにも、フックがあります。ラムダのフックは、一つのラムダ関数で、デプロイごとに一回ずつ走ります。ビフォーアロートラフィックは、新しい版へトラフィックを移す前に処理を走らせます。アフターアロートラフィックは、全部のトラフィックを新しい版へ移した後に走らせます。ここでは、検証の関数として使う形を見ます。検証のテストが終わったら、関数はコードデプロイに呼び返して、成功か失敗かを知らせます。一時間のうちに知らせが届かないと、デプロイは失敗とみなされます。デプロイが原因を言わずに一時間で失敗したら、検証の関数が知らせを返しているかを確かめます。",
+   "refs": [
+    {
+     "source_id": "S15",
+     "quote": "An AWS Lambda hook is one Lambda function specified with a string on a new line after the name of the lifecycle event. Each hook is executed once per deployment.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-lambda"
+    },
+    {
+     "source_id": "S15",
+     "quote": "BeforeAllowTraffic – Use to run tasks before traffic is shifted to the deployed Lambda function version.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-lambda"
+    },
+    {
+     "source_id": "S15",
+     "quote": "AfterAllowTraffic – Use to run tasks after all traffic is shifted to the deployed Lambda function version.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-lambda"
+    },
+    {
+     "source_id": "S16",
+     "quote": "Following completion of the validation tests, the Lambda validation function calls back CodeDeploy and delivers a result of Succeeded or Failed.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-section-structure-lambda-sample-function"
+    },
+    {
+     "source_id": "S16",
+     "quote": "The deployment is considered to have failed if CodeDeploy is not notified by the Lambda validation function within one hour.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-section-structure-lambda-sample-function"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "2 Lambda: 失敗したときの戻し方",
+   "bullets": [
+    "戻す = 前の版を新しくデプロイ",
+    "自動: 失敗か alarm のしきい値",
+    "戻し無しで手動停止 → 次が失敗"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  F[\"デプロイの失敗<br/>alarm のしきい値\"]\n  DG@{ svc: \"AWS CodeDeploy\", label: \"deployment group<br/>自動ロールバックの設定\" }\n  OK@{ svc: \"AWS Lambda\", label: \"last known good の版<br/>新しいデプロイで戻す\" }\n  X[\"ロールバック無しで<br/>手動で止めた\"]\n  AL@{ svc: \"AWS Lambda\", label: \"alias が 2 つの版を指す<br/>次のデプロイが失敗\" }\n  F -- \"条件に合う\" --> DG\n  DG -- \"再デプロイ\" --> OK\n  X -. \"起こりうる\" .-> AL\n",
+    "alt": "deployment group に自動ロールバックを設定しておくと、デプロイの失敗や alarm のしきい値に達したときに、last known good の版が新しいデプロイとして再デプロイされる。ロールバックを設定せずに Lambda のデプロイを手動で止めると、alias が 2 つの版を指したままになり、次のデプロイが失敗することがある。"
+   },
+   "narration": "次は、ラムダのデプロイが失敗したときの戻し方です。コードデプロイのロールバックは、前にデプロイした版を、新しいデプロイとしてもう一度デプロイする形で行われます。デプロイグループには、条件に合ったら自動で戻す設定ができます。条件は、デプロイが失敗したときや、監視のアラームのしきい値に達したときです。このとき、最後に正しく動いていた版がデプロイされます。前の版を手動でデプロイし直して戻すこともできます。注意したいのは、ロールバックを設定していないデプロイを、手動で止めた場合です。エイリアスが二つの版を指したままになり、その後のデプロイが失敗することがあります。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "CodeDeploy implements rollbacks by redeploying, as a new deployment, a previously deployed revision.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-steps-lambda.html#deployment-rollback-lambda"
+    },
+    {
+     "source_id": "S4",
+     "quote": "You can configure a deployment group to automatically roll back deployments when certain conditions are met, including when a deployment fails or an alarm monitoring threshold is met.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-steps-lambda.html#deployment-rollback-lambda"
+    },
+    {
+     "source_id": "S4",
+     "quote": "You can also choose to roll back a failed deployment by manually redeploying a previously deployed revision.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-steps-lambda.html#deployment-rollback-lambda"
+    },
+    {
+     "source_id": "S17",
+     "quote": "In this case, the last known good version of an application revision is deployed.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-automatic-rollbacks"
+    },
+    {
+     "source_id": "S14",
+     "quote": "A Lambda deployment can get in this state when it does not have rollbacks configured and is manually stopped.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments-lambda.html#troubleshooting-manually-stopped-lambda-deployment"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "2 EKS: manifest と Argo CD",
+   "bullets": [
+    "manifest を kubectl apply",
+    "Argo CD: GitOps の道具",
+    "Git などがあるべき状態の元"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  M[\"deployment manifest\"]\n  G[\"Git・Helm・OCI image<br/>あるべき状態の元\"]\n  AR[\"Argo CD<br/>GitOps の<br/>継続的デリバリー\"]\n  K1@{ svc: \"Amazon EKS\", label: \"Amazon EKS<br/>クラスター\" }\n  K2@{ svc: \"Amazon EKS\", label: \"Amazon EKS<br/>別のクラスター\" }\n  M -- \"kubectl apply\" --> K1\n  G -- \"元にする\" --> AR\n  AR -- \"自動で反映\" --> K1\n  AR --> K2\n",
+    "alt": "Amazon EKS のクラスターには、deployment manifest を kubectl apply で適用してデプロイできる。Argo CD は GitOps の継続的デリバリーの道具で、Git リポジトリ・Helm レジストリ・OCI image をあるべき状態の元にし、複数のクラスターへのデプロイを自動にする。"
+   },
+   "narration": "次はイーケーエスです。イーケーエスのクラスターには、デプロイのマニフェストを適用して、アプリケーションを置けます。マニフェストとは、デプロイの中身を書いたファイルです。キューブコントロールのアプライというコマンドで、そのファイルをクラスターに適用します。もう一つの形が、アルゴシーディーです。アルゴシーディーは、クバネティスのための、宣言型でギットオプス型の継続的デリバリーの道具です。ギットオプスでは、ギットのリポジトリなどに置いた定義を、アプリケーションのあるべき状態の、正しい元とします。元には、ヘルムのレジストリや、オーシーアイのイメージも使えます。アルゴシーディーを使うと、複数のクラスターや環境にまたがって、デプロイと管理を自動にできます。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "Apply the deployment manifest to your cluster.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/sample-deployment.html#sample-deployment"
+    },
+    {
+     "source_id": "S3",
+     "quote": "kubectl apply -f eks-sample-deployment.yaml",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/sample-deployment.html#sample-deployment"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/argocd.html#argocd"
+    },
+    {
+     "source_id": "S2",
+     "quote": "With Argo CD, you can automate the deployment and lifecycle management of your applications across multiple clusters and environments.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/argocd.html#argocd"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Argo CD follows the GitOps pattern, where your application source (Git repository, Helm registry, or OCI image) is the source of truth for defining the desired application state.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/argocd.html#argocd"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "3 準備: データの保存場所",
+   "bullets": [
+    "EFS: 共有のファイル",
+    "S3: オブジェクト",
+    "EBS: EC2 に付けるブロック"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "保存場所",
+     "形",
+     "使う先の例"
+    ],
+    "rows": [
+     [
+      "Amazon EFS",
+      "共有ファイル",
+      "EC2・ECS・EKS・Lambda"
+     ],
+     [
+      "Amazon S3",
+      "オブジェクト",
+      "Web・バックアップ"
+     ],
+     [
+      "Amazon EBS",
+      "ブロック",
+      "EC2 に付ける"
+     ]
+    ]
+   },
+   "narration": "ここから三つ目、まわりの準備です。まず、アプリケーションのデータの保存場所です。イーエフエスは、サーバーレスで、自動で伸び縮みするファイルストレージです。容量や性能を用意したり管理したりせずに、ファイルのデータを共有できます。イーシーツー、イーシーエス、イーケーエス、ラムダ、ファーゲートなど、多くの種類の計算資源から使えます。エススリーは、オブジェクトストレージです。ウェブサイトやバックアップと復元、アーカイブなど、幅広い用途に使えます。コードデプロイのリビジョンの置き場にもなります。イービーエスは、ブロックストレージです。ボリュームを、イーシーツーのインスタンスに付けて使います。",
+   "refs": [
+    {
+     "source_id": "S5",
+     "quote": "Amazon Elastic File System (Amazon EFS) provides serverless, fully elastic file storage so that you can share file data without provisioning or managing storage capacity and performance.",
+     "url": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html#whatisefs"
+    },
+    {
+     "source_id": "S5",
+     "quote": "Amazon EFS is accessible across most types of Amazon Web Services compute instances, including Amazon EC2, Amazon ECS, Amazon EKS, AWS Lambda, and AWS Fargate.",
+     "url": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html#whatisefs"
+    },
+    {
+     "source_id": "S6",
+     "quote": "Amazon S3 to store and protect any amount of data for a range of use cases, such as data lakes, websites, mobile applications, backup and restore, archive, enterprise applications, IoT devices, and big data analytics.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#Welcome"
+    },
+    {
+     "source_id": "S13",
+     "quote": "to download your revision from Amazon S3.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-agent-commandpoller-error"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Amazon EBS volumes — These are storage volumes that you attach to Amazon EC2 instances.",
+     "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html#what-is-ebs"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "3 準備: 配る道具と権限",
+   "bullets": [
+    "Image Builder: image を自動で",
+    "pipeline で更新とパッチ",
+    "CodeArtifact: token で認証"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph IMG[\"サーバーの image\"]\n    direction TB\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>pipeline\" }\n    AMI[\"カスタムの image<br/>更新とパッチを自動で\"]\n  end\n  subgraph PKG[\"成果物の置き場\"]\n    direction TB\n    R@{ svc: \"AWS IAM\", label: \"AWS の資格情報<br/>正しい権限\" }\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>authorization token\" }\n  end\n  IB -- \"作る・配る\" --> AMI\n  R -- \"token を作る\" --> CA\n  AMI ~~~ R\n",
+    "alt": "EC2 Image Builder は pipeline で、カスタムのサーバーの image を作り、管理し、配る。更新とパッチの適用も自動にできる。CodeArtifact には、正しい権限を持つ AWS の資格情報で authorization token を作って認証する。"
+   },
+   "narration": "次は、コードを配る道具と、権限です。コードデプロイのほかに、配る道具として、イーシーツーイメージビルダーがあります。イメージとは、サーバーを起動する元になるひな形です。イメージビルダーは、カスタマイズした、安全で最新のサーバーのイメージを、作って、管理して、配るまでを自動にします。パイプラインを組めば、自分のイメージの更新とパッチの適用も自動にできます。最後は、成果物の置き場に入る権限です。試験ガイドでは、その例にコードアーティファクトが挙がっています。コードアーティファクトを使うには、自分の資格情報で認可のトークンを作り、それで認証しなければなりません。トークンを作るには、正しい権限が要ります。",
+   "refs": [
+    {
+     "source_id": "S10",
+     "quote": "EC2 Image Builder is a fully managed AWS service that helps you to automate the creation, management, and deployment of customized, secure, and up-to-date server images.",
+     "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder"
+    },
+    {
+     "source_id": "S10",
+     "quote": "You can configure pipelines to automate updates and system patching for the images that you own.",
+     "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder"
+    },
+    {
+     "source_id": "S11",
+     "quote": "You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials.",
+     "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html#tokens-authentication"
+    },
+    {
+     "source_id": "S11",
+     "quote": "In order to create an authorization token, you must have the correct permissions.",
+     "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html#tokens-authentication"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "条件から方法を選ぶ",
+   "bullets": [
+    "問題文の条件 → 選ぶ方法・確かめる所"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法・確かめる所"
+    ],
+    "rows": [
+     [
+      "土台を変えずに版だけ",
+      "in-place"
+     ],
+     [
+      "少しの割合で試す",
+      "canary"
+     ],
+     [
+      "失敗したら自動で戻す",
+      "自動ロールバック"
+     ],
+     [
+      "多くの資源で共有",
+      "Amazon EFS"
+     ],
+     [
+      "missing credentials",
+      "instance profile"
+     ]
+    ]
+   },
+   "narration": "問題文の条件から、方法を選ぶ表です。基盤を置き換えずに、アプリケーションの版だけを更新するなら、インプレースです。新しい版を、まず少しの割合のトラフィックで試してから移したいなら、カナリアです。ラムダなら重み付きのエイリアス、イーシーエスならカナリアの移し方です。デプロイの失敗や、アラームのしきい値で自動に戻したいなら、デプロイグループの自動ロールバックです。多くの種類の計算資源から、ファイルを共有したいなら、イーエフエスです。イーシーツーで、エージェントが資格情報が無いというエラーを出したら、インスタンスプロファイルの権限を確かめます。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "An in-place deployment is a deployment strategy that updates the application version without replacing any infrastructure components.",
+     "url": "https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/in-place-deployments.html#in-place-deployments"
+    },
+    {
+     "source_id": "S18",
+     "quote": "With this approach, you can test new versions of your functions with a small percentage of traffic and quickly roll back if necessary. This is known as a canary deployment.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing"
+    },
+    {
+     "source_id": "S20",
+     "quote": "Canary — Traffic is shifted in two increments.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S17",
+     "quote": "You can configure a deployment group or deployment to automatically roll back when a deployment fails or when a monitoring threshold you specify is met.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-automatic-rollbacks"
+    },
+    {
+     "source_id": "S5",
+     "quote": "so that you can share file data without provisioning or managing storage capacity and performance.",
+     "url": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html#whatisefs"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Your IAM instance profile does not have the correct permissions configured.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-agent-commandpoller-error"
+    }
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "まとめ",
+   "bullets": [
+    "1 考え方: 書き換えか置き換えか",
+    "2 先ごとに切り替える所",
+    "3 保存場所・道具・権限"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph A[\"1 考え方\"]\n    M[\"in-place: 土台はそのまま<br/>immutable: 置き換え<br/>Beanstalk では失敗なら消す\"]\n  end\n  subgraph B[\"2 デプロイ先ごと\"]\n    EC2@{ svc: \"Amazon EC2\", label: \"EC2<br/>agent・instance profile\" }\n    ECS@{ svc: \"Amazon ECS\", label: \"ECS<br/>task set・ALB か NLB\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda<br/>alias・hook<br/>ロールバック\" }\n    K@{ svc: \"Amazon EKS\", label: \"Amazon EKS<br/>manifest・Argo CD\" }\n  end\n  subgraph C[\"3 まわりの準備\"]\n    S[\"EFS は共有<br/>S3・EBS\"]\n    T[\"Image Builder<br/>CodeArtifact の token\"]\n  end\n  M ~~~ EC2 & ECS & L & K\n  K ~~~ S\n  K ~~~ T\n",
+    "alt": "まとめ。1 の考え方は、in-place は土台をそのまま更新し、immutable は置き換える形で、Beanstalk では失敗したら Auto Scaling group を終了して戻す。2 のデプロイ先ごとでは、EC2 は agent と instance profile、ECS は task set と ALB か NLB、Lambda は alias と hook とロールバック、Amazon EKS は manifest と Argo CD を押さえる。3 のまわりの準備では、共有なら EFS、ほかに S3 と EBS、配る道具の Image Builder と CodeArtifact の token を押さえる。"
+   },
+   "narration": "最後に、初めの地図に戻ります。一つ目の考え方では、その場で書き換えるインプレースと、置き換えるイミュータブルを比べました。ビーンストークでは、イミュータブルの方が、失敗したときに戻しやすいのでした。二つ目は、デプロイ先ごとの方法です。イーシーツーでは、エージェントとインスタンスプロファイルの権限が要ります。イーシーエスでは、タスクセットの間でトラフィックを移し、ロードバランサーが前提です。ラムダでは、エイリアスで版を分け、フックで確かめ、自動ロールバックで戻します。イーケーエスでは、マニフェストの適用か、アルゴシーディーを使います。三つ目は、保存場所と、配る道具と、権限でした。迷ったら、一つ前の条件の表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S9",
+     "quote": "If an immutable environment update fails, the rollback process requires only terminating an Auto Scaling group.",
+     "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environmentmgmt-updates-immutable.html#environmentmgmt-updates-immutable"
+    },
+    {
+     "source_id": "S13",
+     "quote": "An IAM instance profile grants the CodeDeploy agent permission to communicate with CodeDeploy and to download your revision from Amazon S3.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-agent-commandpoller-error"
+    },
+    {
+     "source_id": "S20",
+     "quote": "You must configure the service to use either an Application Load Balancer or Network Load Balancer.",
+     "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen"
+    },
+    {
+     "source_id": "S4",
+     "quote": "You can configure a deployment group to automatically roll back deployments when certain conditions are met, including when a deployment fails or an alarm monitoring threshold is met.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-steps-lambda.html#deployment-rollback-lambda"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes.",
+     "url": "https://docs.aws.amazon.com/eks/latest/userguide/argocd.html#argocd"
+    }
+   ]
+  }
+ ]
+}

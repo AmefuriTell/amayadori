@@ -198,7 +198,7 @@
         "source": "flowchart TB\n  PTC[\"pull through cache\"]\n  COP[\"create on push\"]\n  REP[\"replication\"]\n  TPL[\"repository creation template<br/>前もって決めた設定\"]\n  R@{ svc: \"Amazon ECR\", label: \"ECR<br/>自動で作られた repository<br/>tag immutability・暗号化<br/>policy・lifecycle・tag\" }\n  PTC --> TPL\n  COP --> TPL\n  REP --> TPL\n  TPL -- \"設定を当てる\" --> R\n",
         "alt": "pull through cache、create on push、replication の動きで ECR が代わりに repository を作るとき、repository creation template で前もって決めた設定（tag immutability、暗号化、repository policy、lifecycle policy、resource tag）が当たる。"
       },
-      "narration": "イーシーアールは、三つの動きの中で、利用者に代わってリポジトリを作ることがあります。プルスルーキャッシュ、クリエイトオンプッシュ、レプリケーションです。こうして作られるリポジトリの設定を、前もって決めておくのが、リポジトリクリエーションテンプレートです。決められる設定は、図の右下の箱に並べました。タグを変えられないようにするタグイミュータビリティ、暗号化の設定、リポジトリポリシー、ライフサイクルポリシー、リソースのタグです。自動で作られたリポジトリにも、守りと片付けの設定が最初から入る、ということです。",
+      "narration": "イーシーアールは、三つの動きの中で、利用者に代わってリポジトリを作ることがあります。プルスルーキャッシュ、クリエイトオンプッシュ、レプリケーションです。こうして作られるリポジトリの設定を、前もって決めておくのが、リポジトリクリエーションテンプレートです。決められる設定は、図のいちばん下の箱に並べました。タグを変えられないようにするタグイミュータビリティ、暗号化の設定、リポジトリポリシー、ライフサイクルポリシー、リソースのタグです。自動で作られたリポジトリにも、守りと片付けの設定が最初から入る、ということです。",
       "refs": [
         {
           "source_id": "S7",
@@ -345,7 +345,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  A[\"自分のアカウント<br/>Image Builder の resource を持つ\"]\n  RAM[\"AWS RAM\"]\n  T[\"相手: アカウント・組織・OU<br/>受けた物は再共有できない\"]\n  KMS@{ svc: \"AWS KMS\", label: \"KMS key<br/>暗号化した resource 用\" }\n  A -- \"resource を共有\" --> RAM\n  RAM --> T\n  KMS -- \"明示的に共有\" --> T\n",
+        "source": "flowchart TB\n  A[\"自分のアカウント<br/>Image Builder の resource を持つ\"]\n  RAM[\"AWS RAM\"]\n  T[\"相手<br/>アカウント・組織・OU<br/>受けた物は<br/>再共有できない\"]\n  KMS@{ svc: \"AWS KMS\", label: \"KMS key<br/>暗号化した resource 用\" }\n  A -- \"resource を共有\" --> RAM\n  RAM --> T\n  KMS -- \"明示的に共有\" --> T\n",
         "alt": "自分のアカウントが持つ Image Builder の resource を AWS RAM で相手のアカウント・組織・OU に共有する。相手は受けた物を再共有できない。暗号化した resource の KMS key は、相手に明示的に共有する。"
       },
       "narration": "作ったイメージビルダーのリソースは、エーダブリューエスラム、つまりリソースアクセスマネージャーで、ほかに共有できます。前提が三つあります。一つ目、共有するリソースは、自分のアカウントが持っている物でなければなりません。二つ目、ほかから共有された物を、さらに共有することはできません。三つ目、暗号化したリソースなら、それに結び付いたケーエムエスキーも、相手に、はっきり共有する必要があります。相手は、アカウント、組織、オーユーのどれかです。鍵を共有し忘れると、リソースだけ渡しても前提を満たしません。",
@@ -372,7 +372,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  V@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>package version\" }\n  R1[\"revision<br/>assets と metadata の組\"]\n  R2[\"新しい revision<br/>更新した後の組\"]\n  V -- \"最初の組\" --> R1\n  V -- \"更新するたび\" --> R2\n",
+        "source": "flowchart TB\n  V@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>package version\" }\n  R1[\"revision<br/>assets と metadata の組\"]\n  R2[\"新しい revision<br/>更新した後の組\"]\n  V -- \"今の組\" --> R1\n  V -- \"更新するたび\" --> R2\n",
         "alt": "CodeArtifact の package version には、assets と metadata の組を示す revision がある。版を更新するたびに、新しい revision が作られる。"
       },
       "narration": "三つ目の部、寿命です。まず、コードアーティファクトの、パッケージバージョンリビジョンです。これは、パッケージの一つの版について、特定のアセットとメタデータの組を示す文字列です。版が更新されるたびに、新しいリビジョンが作られます。つまり、同じ版でも、更新のたびにリビジョンが変わります。版の中身がいつ変わったかは、リビジョンで追えます。",
