@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0009",
+  "source": "flowchart TB\n  PB[\"Ansible のプレイブック一式\"]\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ A: State Manager の関連付け（Role=web・毎日）\" }\n  DOC[\"AWS-ApplyAnsiblePlaybooks\"]\n  N[\"Role=web のノード\"]\n  X1[\"⚠ B: RunAnsiblePlaybook は非推奨\"]\n  X2[\"⚠ C: Run Command は 1 回きり\"]\n  X3[\"⚠ D: cron はノードごとの保守が要る\"]\n  PB -- \"一式\" --> DOC\n  SM -- \"作った時と毎日\" --> DOC\n  DOC == \"ローカルに写して実行\" ==> N\n  X1 -.-> DOC\n  X2 -.-> SM\n  X3 -.-> N\n",
+  "alt": "Ansible のプレイブック一式を、State Manager の関連付けで Role=web のノードに毎日適用する図。勧められている AWS-ApplyAnsiblePlaybooks を使う A が正解で、B は非推奨のドキュメント、C は 1 回きりである。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

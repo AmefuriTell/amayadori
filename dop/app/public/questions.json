@@ -6137,7 +6137,10 @@
           "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Organizations の 20 アカウント・3 リージョンのノードを、パッチポリシー 1 つで管理する図。毎日のスキャンと毎週のインストールを分けて設定できる C が正解で、場所ごとの作成（A・D）や手作業（B）は要件に反する。"
+      }
     },
     {
       "id": "q-2.3-0002",
@@ -6202,7 +6205,10 @@
           "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "7 日後に自動承認するパッチベースラインでは、昨日出た重大なパッチは未承認のため、準拠と出ても入っていない。承認済みパッチの一覧に足す A が正解で、他の承認の決まりを変えずに次の Scan and install で入る。"
+      }
     },
     {
       "id": "q-2.3-0003",
@@ -6275,7 +6281,10 @@
           "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Env=Prod のタグのノードに State Manager の関連付けで毎日エージェントを入れ、Inventory でメタデータを中央の S3 に集めて照会する図。正解は A と B で、Inventory はソフトを入れない（C）。"
+      }
     },
     {
       "id": "q-2.3-0004",
@@ -6342,7 +6351,10 @@
           "quote": "You can use Inventory to collect metadata from your managed nodes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 バケットの作成や変更を AWS Config のルールで評価し、違反したら Systems Manager Automation のマネージドのドキュメントで修復する図。コードを書かずに済む A が正解で、通知だけ（B）や独自 Lambda（C）は要件に合わない。"
+      }
     },
     {
       "id": "q-2.3-0005",
@@ -6407,7 +6419,10 @@
           "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "承認システムの応答を最大 3 日待つワークフローの図。.waitForTaskToken で止まり、SendTaskSuccess で再開する Standard ワークフロー（C）が正解で、Express は最長 5 分のため合わない。"
+      }
     },
     {
       "id": "q-2.3-0006",
@@ -6479,7 +6494,10 @@
           "quote": "The name States.TaskFailed also acts a wildcard and matches any error except for States.Timeout."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Task ステートの再試行と Catch の図。スロットリングは 2 秒から倍にして 5 回まで Retry し（A）、尽きたものと他のエラーは States.ALL の Catch を最後に単独で置いて NotifyOps へ送る（B）。"
+      }
     },
     {
       "id": "q-2.3-0007",
@@ -6545,7 +6563,10 @@
           "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "非同期で呼ばれる Lambda 関数に、成功時と失敗時の送信先を別々に設定する図。コードを変えずに両方の記録が残る B が正解で、何もしないと再試行後の失敗イベントは捨てられる（C）。"
+      }
     },
     {
       "id": "q-2.3-0008",
@@ -6607,7 +6628,10 @@
           "quote": "Express Workflows only support Request Response integrations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "高い頻度で数秒の手順が動く IoT 取り込みの図。HTTP の応答で次に進めばよいので、リクエスト・レスポンス統合の Express ワークフロー（D）が正解で、Standard は長く動く処理向き、Express はコールバック待ちを使えない。"
+      }
     },
     {
       "id": "q-2.3-0009",
@@ -6668,7 +6692,10 @@
           "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Ansible のプレイブック一式を、State Manager の関連付けで Role=web のノードに毎日適用する図。勧められている AWS-ApplyAnsiblePlaybooks を使う A が正解で、B は非推奨のドキュメント、C は 1 回きりである。"
+      }
     },
     {
       "id": "q-2.3-0010",
@@ -6730,7 +6757,10 @@
           "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Distributor でパッケージにした承認済みのエージェントを、State Manager の関連付けでスケジュールどおり全ノードに入れる図。入れ替わったノードや消えたエージェントにも自動で対応できる D が正解。"
+      }
     },
     {
       "id": "q-2.3-0011",

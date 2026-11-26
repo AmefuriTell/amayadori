@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0002",
+  "source": "flowchart TB\n  PA[\"重大なパッチ（昨日リリース・未承認）\"]\n  PB@{ svc: \"AWS Systems Manager\", label: \"カスタムのパッチベースライン（7 日後に自動承認）\" }\n  W@{ svc: \"AWS Systems Manager\", label: \"毎週の Scan and install\" }\n  ND[\"マネージドノード（準拠と表示）\"]\n  AL[\"✔ A: 承認済みパッチの一覧に追加\"]\n  X1[\"⚠ B: 準拠でも未承認なので入っていない\"]\n  X2[\"⚠ C・D: Scan や Inventory は入れない\"]\n  PA -- \"まだ 7 日たっていない\" --> PB\n  AL ==> PB\n  PB -- \"承認したパッチだけ\" --> W\n  W -- \"インストール\" --> ND\n  X1 -.-> ND\n  X2 -.-> W\n",
+  "alt": "7 日後に自動承認するパッチベースラインでは、昨日出た重大なパッチは未承認のため、準拠と出ても入っていない。承認済みパッチの一覧に足す A が正解で、他の承認の決まりを変えずに次の Scan and install で入る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
