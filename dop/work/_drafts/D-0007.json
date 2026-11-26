@@ -3,12 +3,12 @@
   "diagrams": [
     {
       "id": "q-1.3-0012",
-      "source": "flowchart TB\n  IB[\"EC2 Image Builder<br/>パイプライン（毎週 AMI を作る）\"]\n  AMI@{ svc: \"Amazon EC2\", label: \"2 年分の AMI とスナップショット（費用が増える）\" }\n  subgraph LP[\"✔ B: ライフサイクルポリシー\"]\n    R1[\"ルール: 90 日後に非推奨\"]\n    R2[\"ルール: 180 日後に削除\"]\n  end\n  BADA[\"⚠ A: 配布設定の変更は今後のイメージだけ。既存は残る\"]\n  BADC[\"⚠ C: Lambda の独自コードを保守<br/>⚠ D: 毎月の手作業\"]\n  IB -- \"AMI\" --> AMI\n  R1 --> R2\n  LP == \"既存のイメージにも適用\" ==> AMI\n  BADA -.-> IB\n  BADC -.-> LP",
+      "source": "flowchart TB\n  IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>パイプライン（毎週 AMI を作る）\" }\n  AMI@{ svc: \"Amazon EC2\", label: \"2 年分の AMI とスナップショット（費用が増える）\" }\n  subgraph LP[\"✔ B: ライフサイクルポリシー\"]\n    R1[\"ルール: 90 日後に非推奨\"]\n    R2[\"ルール: 180 日後に削除\"]\n  end\n  BADA[\"⚠ A: 配布設定の変更は今後のイメージだけ。既存は残る\"]\n  BADC[\"⚠ C: Lambda の独自コードを保守<br/>⚠ D: 毎月の手作業\"]\n  IB -- \"AMI\" --> AMI\n  R1 --> R2\n  LP == \"既存のイメージにも適用\" ==> AMI\n  BADA -.-> IB\n  BADC -.-> LP",
       "alt": "Image Builder のライフサイクルポリシーに、90 日後に非推奨・180 日後に削除のルールを置くと、既存の古い AMI にも適用されてスナップショットの費用が減る（B）。配布設定の変更（A）は今後のイメージだけに効く。"
     },
     {
       "id": "q-1.3-0013",
-      "source": "flowchart TB\n  DF[\"Dockerfile\"]\n  REC[\"EC2 Image Builder<br/>✔ A: コンテナレシピ + テスト + スケジュール\"]\n  subgraph US[\"us-east-1\"]\n    E1@{ svc: \"Amazon ECR\", label: \"リポジトリ\" }\n  end\n  subgraph EU[\"eu-central-1\"]\n    E2@{ svc: \"Amazon ECR\", label: \"コピー\" }\n  end\n  BADB[\"⚠ B: 出力が AMI → ECR に公開できない\"]\n  BADD[\"⚠ D: CodeBuild の buildspec を自作して保守\"]\n  BADC[\"⚠ C: eu-central-1 へのコピーが手作業\"]\n  DF -- \"ビルドの元\" --> REC\n  REC == \"テスト合格後に配布\" ==> E1\n  REC == \"✔ A: コンテナの配布を追加\" ==> E2\n  BADB -.-> REC\n  BADD -.-> REC\n  BADC -.-> E2",
+      "source": "flowchart TB\n  DF[\"Dockerfile\"]\n  REC@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>✔ A: コンテナレシピ + テスト + スケジュール\" }\n  subgraph US[\"us-east-1\"]\n    E1@{ svc: \"Amazon ECR\", label: \"リポジトリ\" }\n  end\n  subgraph EU[\"eu-central-1\"]\n    E2@{ svc: \"Amazon ECR\", label: \"コピー\" }\n  end\n  BADB[\"⚠ B: 出力が AMI → ECR に公開できない\"]\n  BADD[\"⚠ D: CodeBuild の buildspec を自作して保守\"]\n  BADC[\"⚠ C: eu-central-1 へのコピーが手作業\"]\n  DF -- \"ビルドの元\" --> REC\n  REC == \"テスト合格後に配布\" ==> E1\n  REC == \"✔ A: コンテナの配布を追加\" ==> E2\n  BADB -.-> REC\n  BADD -.-> REC\n  BADC -.-> E2",
       "alt": "Image Builder のコンテナレシピで Dockerfile から定期的にイメージを作り、テストに合格したら us-east-1 の ECR に配布し、配布設定に eu-central-1 を足してコピーも置く（A）。AMI 出力（B）や手作業のコピー（C）は合わない。"
     }
   ]
