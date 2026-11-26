@@ -59,8 +59,42 @@ fetched: 2026-11-26
 > When executing fanout batch builds, each individual build generates test reports.
 > CodeBuild then automatically consolidates identical reports from different builds into a unified report, which is attached to the batch build.
 
+## S11 AWS CodeBuild build and test action reference — AWS CodeBuild build and test action reference
+url: https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild
+fetched: 2026-11-26
+> Allows you to run builds and tests as part of your pipeline.
+> When you run a CodeBuild build or test action, commands specified in the buildspec are run inside of a CodeBuild container.
+
+## S12 AWS Device Farm test action reference — AWS Device Farm test action reference
+url: https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-DeviceFarm.html#action-reference-DeviceFarm
+fetched: 2026-11-26
+> In your pipeline, you can configure a test action that uses AWS Device Farm to run and test your application on devices.
+> Device Farm uses test pools of devices and testing frameworks to test applications on specific devices.
+
+## S13 Invoke an AWS Lambda function in a pipeline in CodePipeline — Invoke an AWS Lambda function in a pipeline
+url: https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function
+fetched: 2026-11-26
+> You can create Lambda functions and add them as actions in your pipelines.
+> Because Lambda allows you to write functions to perform almost any task, you can customize the way your pipeline works.
+
+## S14 Automate the testing of your software applications at scale — Automate the testing of your software applications at scale
+url: https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview
+fetched: 2026-11-26
+> Distributed Load Testing on AWS helps you automate performance testing of your software applications at scale to identify bottlenecks before you release your application.
+> This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers.
+
+## S15 Features — Multiple Test Framework Support / High User Load Simulation
+url: https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features
+fetched: 2026-11-26
+> Supports JMeter, k6, and Locust test scripts, as well as simple HTTP endpoint testing without requiring custom scripts.
+> Simulates tens of thousands of concurrent virtual users to stress test your application under realistic load conditions.
+
+## S16 Features — Flexible Test Scheduling
+url: https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features
+fetched: 2026-11-26
+> Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing.
+
 ### 覆えなかった行
 - knowledge: 「security scans」（セキュリティスキャン）の種類と段階の使い分け。取れた公式ページに無かった（Inspector 系のページは未取得）。
-- skills: 「Running load/stress tests, performance benchmarking, and application testing at scale」。負荷・性能試験のサービス（Distributed Load Testing 等）の公式ページは未取得。
-- skills: 「Invoking AWS services in a pipeline for testing」のうち、CodePipeline の Invoke アクションのページは取れなかった（URL が 404）。S5 は CodeDeploy の検証用 Lambda の呼び出しで代えた。
-- knowledge: 「acceptance tests」「user interface tests」の使い分けの説明は取れず、S2 の Device Farm の文は種類の説明にとどまる（CloudWatch Synthetics のページは取れなかった）。
+- knowledge: 「acceptance tests」「user interface tests」の使い分け。S2・S12 は Device Farm の種類と用途の説明にとどまり、受け入れ試験と UI 試験をどの段階で使い分けるかは取れなかった（CloudWatch Synthetics は 404）。
+- skills: 「Invoking AWS services in a pipeline for testing」のうち、CodePipeline の Invoke アクションのページ（action-reference-Invoke）は 404 のまま。S13 の Lambda の呼び出しで代えた。
