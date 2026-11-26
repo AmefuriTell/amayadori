@@ -113,7 +113,7 @@ export function createLecture({ app, progress, hasTask, openTask, isActive }) {
         ? el('ul', { class: 'lec-list', 'data-testid': 'lecture-list' }, index.map((l) => el('li', {},
           el('button', { type: 'button', class: 'lec-row', 'data-testid': 'lecture-row', 'data-task': l.task, onclick: () => open(l.task) },
             el('span', { class: 'lec-task', text: `タスク ${l.task}` }),
-            el('span', { class: 'lec-title', text: l.title }),
+            el('span', { class: 'lec-row-title', text: l.title }),
             el('span', { class: 'lec-meta muted small' },
               `${l.slides ?? '?'} 枚・約 ${l.minutes ?? '?'} 分`,
               isSeen(saved, l.task) ? el('span', { class: 'badge seen', 'data-testid': 'lecture-seen', text: '見た' }) : null)))))

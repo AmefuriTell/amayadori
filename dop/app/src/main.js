@@ -13,6 +13,7 @@ import { serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } fro
 import { createSpeech } from './ui/speech.js';
 import { createMock } from './ui/mock.js';
 import { createDiagram } from './ui/diagram.js';
+import { createLecture } from './ui/lecture.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -52,8 +53,16 @@ const mockUi = createMock({
   },
 });
 
+// 講義（A-0017）: 見終えたら、その task の最初の問題を答える前の状態で開く
+const lectureUi = createLecture({
+  app, progress, isActive: () => state.view === 'lecture',
+  hasTask: (task) => state.allQuestions.some((q) => q.task === task),
+  openTask: (task) => { openQuestion(state.allQuestions.find((q) => q.task === task)?.id); render(); window.scrollTo(0, 0); },
+});
+if (lectureUi.opened()) state.view = 'lecture'; // 講義の途中で閉じたら、開き直した時も講義から
+
 for (const tab of document.querySelectorAll('.tab')) {
-  tab.addEventListener('click', () => { state.view = tab.dataset.view; render(); });
+  tab.addEventListener('click', () => { if (tab.dataset.view === 'lecture') lectureUi.toList(); state.view = tab.dataset.view; render(); });
 }
 
 // ---- サービス事典（A-0013、P-014）: 問題とは別のファイル。表示は ui/glossary.js ----
@@ -129,8 +138,14 @@ function openFromUrl() {
   url.searchParams.delete('q');
   history.replaceState(null, '', url.pathname + url.search + url.hash); // 読み込み直した時は続きの記録で開く
   if (!state.allQuestions.some((q) => q.id === id)) { state.qlinkMissing = id; return; }
+  openQuestion(id);
+}
+
+// その問題を答える前の状態で出す（A-0015・A-0017）。解き直しの対象に無ければ解き直しをやめる
+function openQuestion(id) {
+  if (!id) return;
   if (!state.questions.some((q) => q.id === id)) { saveRetry(null); useQuestions(null); }
-  Object.assign(state, resume(state.questions, { id, selected: [], answered: false, correct: 0 }), { view: 'solve', report: null });
+  Object.assign(state, resume(state.questions, { id, selected: [], answered: false, correct: 0 }), { view: 'solve', report: null, skipped: false });
 }
 
 // 解いている位置を最初に戻す（A-0016）。記録は消さない。解き直しの最中は解き直しの 1 問目へ
@@ -155,6 +170,8 @@ function render() {
   for (const tab of document.querySelectorAll('.tab')) {
     if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
   }
+  if (state.view === 'lecture') { mockUi.leave(); return lectureUi.render(); }
+  lectureUi.leave();
   if (state.view === 'mock') { app.replaceChildren(mockUi.render()); return; }
   mockUi.leave();
   if (state.view === 'stats') return renderStats();
