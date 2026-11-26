@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0005",
+  "source": "flowchart TB\n  subgraph ACC[\"アカウント\"]\n    TR@{ svc: \"AWS CloudTrail\", label: \"証跡（Insights を有効）\" }\n    RD[\"今: 読み取りの管理イベントだけ\"]\n    WR[\"✔ B: 書き込みの管理イベントも記録\"]\n    INS[\"Insights のイベント<br/>通常から外れた時に出る\"]\n  end\n  S3@{ svc: \"Amazon S3\", label: \"ログの保存先\" }\n  RD -- \"これだけでは出ない\" --> TR\n  WR == \"✔ B: 書き込みの呼び出しの割合を見る\" ==> TR\n  TR == \"最大 36 時間待つ\" ==> INS\n  TR -- \"ログ\" --> S3\n  ALM[\"⚠ A: 静的なしきい値のアラームは要件に反する\"]\n  ALM -.- TR\n",
+  "alt": "リソースを作る API 呼び出しの割合の急な上昇を CloudTrail Insights で知る図。証跡が読み取りだけだと出ないので、書き込みの管理イベントも記録し、最大 36 時間待つ（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

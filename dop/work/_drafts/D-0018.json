@@ -1,0 +1,55 @@
+{
+ "item": "D-0018",
+ "diagrams": [
+  {
+   "id": "q-3.2-0001",
+   "source": "flowchart TB\n  subgraph R[\"同じアカウント・リージョン\"]\n    BT@{ svc: \"AWS Lambda\", label: \"バッチ用の関数\" }\n    PAY@{ svc: \"AWS Lambda\", label: \"決済用の関数\" }\n    POOL[\"アカウントの同時実行\"]\n  end\n  BT -- \"大量のリクエスト\" --> POOL\n  POOL -. \"⚠ 使い切られて決済がスロットリング\" .-> PAY\n  PAY == \"✔ A: 200 を予約。他の関数は使えない\" ==> POOL\n  PRV[\"✔ B: 事前に初期化した実行環境\"] -- \"すぐ応答\" --> PAY\n  BT -. \"⚠ C: バッチの予約は、バッチを制限する要件違反\" .-> POOL\n  BD[\"⚠ D: バッチ側のプロビジョニングはバッチを速くするだけ\"] -.- BT\n",
+   "alt": "同じアカウントのバッチ用 Lambda 関数が同時実行を使い切り、決済用がスロットリングされる図。決済用に 200 の予約された同時実行（A）と、事前に初期化するプロビジョニングされた同時実行（B）が正解。バッチの制限（C）は要件に反する。"
+  },
+  {
+   "id": "q-3.2-0002",
+   "source": "flowchart TB\n  TR([\"急増するトラフィック\"])\n  subgraph ASG[\"Auto Scaling グループ\"]\n    RUN@{ svc: \"Amazon EC2 Auto Scaling\", label: \"稼働中のインスタンス（最小容量は通常分）\" }\n    WP[\"✔ A: ウォームプール（起動と大量の書き込みを済ませて待機）\"]\n  end\n  TR -- \"リクエスト\" --> RUN\n  WP == \"✔ A: 急増で素早く投入\" ==> RUN\n  OVER[\"⚠ B: 最小容量をさらに上げる＝過剰に用意して費用増\"]\n  WARM[\"⚠ C: ウォームアップ時間は数え始める時を決めるだけ\"]\n  OVER -.- RUN\n  WARM -.- RUN\n",
+   "alt": "新しいインスタンスの準備に約 15 分かかる Auto Scaling グループの図。ウォームプールに準備済みのインスタンスを待機させれば、最小容量を通常分まで下げても急増に素早く応じられる（A）。最小容量を上げる案（B）は費用が増える。"
+  },
+  {
+   "id": "q-3.2-0003",
+   "source": "flowchart TB\n  subgraph ASG[\"Auto Scaling グループ\"]\n    NEW@{ svc: \"Amazon EC2 Auto Scaling\", label: \"新しいインスタンス（約 5 分 CPU が高い）\" }\n    OLD[\"既存のインスタンス\"]\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"平均 CPU のメトリクス\" }\n  POL[\"ターゲット追跡ポリシー（目標 50%）\"]\n  OLD -- \"CPU\" --> CW\n  NEW -. \"⚠ 初期化中の CPU も集計され、増やしすぎ\" .-> CW\n  NEW == \"✔ C: ウォームアップ約 5 分の間は集計に入れない\" ==> CW\n  CW -- \"平均 CPU\" --> POL\n  POL -- \"起動\" --> NEW\n  X[\"⚠ A: 目標 80%・B: 目標 30%・D: スケールイン無効 は要件に反する\"] -.- POL\n",
+   "alt": "ターゲット追跡スケーリングで、新しいインスタンスの初期化中の高い CPU が集計に入り増やしすぎる図。インスタンスのウォームアップ時間を約 5 分にすると、その間は集計に入らず目標 50% のまま余計に増えない（C）。"
+  },
+  {
+   "id": "q-3.2-0004",
+   "source": "flowchart TB\n  subgraph H[\"過去最大 14 日のメトリクス\"]\n    CWM@{ svc: \"Amazon CloudWatch\", label: \"毎日のパターン\" }\n  end\n  PS[\"予測スケーリングポリシー\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループ\" }\n  CWM -- \"メトリクス\" --> PS\n  PS -. \"⚠ B: 予測のみ（forecast only）は予測を作るだけ\" .-> ASG\n  PS == \"✔ A: 予測とスケール＋事前起動 約 10 分\" ==> ASG\n  C[\"⚠ C: 固定の cron は形が変わるたびに直す\"] -.- PS\n  D[\"⚠ D: 作り直しても最初は予測のみ\"] -.- PS\n",
+   "alt": "予測スケーリングが朝のピーク前に容量を足さない理由と直し方の図。今は予測だけで増やさないモード。予測とスケールに変え、インスタンスの事前起動を約 10 分にすれば、固定のスケジュール無しでピーク前に容量が準備される（A）。"
+  },
+  {
+   "id": "q-3.2-0005",
+   "source": "flowchart TB\n  P([\"パートナーのファイアウォール\"])\n  subgraph NLB[\"Network Load Balancer\"]\n    subgraph AZA[\"AZ-a\"]\n      NA@{ svc: \"Elastic Load Balancing\", label: \"✔ C: ノード（Elastic IP 1 つ）\" }\n    end\n    subgraph AZB[\"AZ-b\"]\n      NB@{ svc: \"Elastic Load Balancing\", label: \"✔ C: ノード（Elastic IP 1 つ）\" }\n    end\n  end\n  T[\"バックエンドのターゲット\"]\n  P == \"✔ C: ゾーンごとの固定 IP だけ許可\" ==> NA\n  P == \"TCP\" ==> NB\n  NA -- \"1 接続は 1 ターゲット\" --> T\n  NB -- \"1 接続は 1 ターゲット\" --> T\n  W[\"⚠ B: DNS 名は不可・⚠ A: ALB は要件外・⚠ D: 1 台は単一障害点\"] -.- P\n",
+   "alt": "TCP のサービスをパートナーに公開する図。パートナーは AZ ごとに 1 つの固定 IP だけ許可できるので、有効な各 AZ のネットワークインターフェイスに Elastic IP を付けた Network Load Balancer を使う（C）。DNS 名（B）や 1 台の EC2（D）は合わない。"
+  },
+  {
+   "id": "q-3.2-0006",
+   "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  C@{ svc: \"Amazon ElastiCache\", label: \"キャッシュ（新しいノードも追加）\" }\n  DB[\"データベース\"]\n  APP -- \"✔ A: 書き込み（書くたびにキャッシュも更新）\" --> DB\n  APP == \"✔ A: 書き込みスルー\" ==> C\n  APP -- \"読み込み\" --> C\n  DB -. \"✔ B: ミスの時は読み込み（遅延読み込み）\" .-> C\n  T[\"✔ B: TTL で読まれないデータを減らす\"] -.- C\n  X[\"⚠ C: 遅延読み込みだけでは古くなる・⚠ D: TTL 無しは無駄が増える\"] -.- C\n",
+   "alt": "データベースの前の ElastiCache で古い価格が出る問題の図。書くたびにキャッシュも更新する書き込みスルー（A）に、足りないデータを埋める遅延読み込みと TTL（B）を組み合わせて、最新で無駄の少ないキャッシュにする。"
+  },
+  {
+   "id": "q-3.2-0007",
+   "source": "flowchart TB\n  subgraph ECS[\"Amazon ECS サービス\"]\n    SVC@{ svc: \"Amazon ECS\", label: \"タスクを増やす（ターゲット追跡）\" }\n    PEND[\"PENDING のタスク\"]\n  end\n  CP[\"✔ B: キャパシティープロバイダー（マネージドスケーリング・targetCapacity）\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループのインスタンス\" }\n  SVC -- \"タスクが空き待ち\" --> PEND\n  CP == \"✔ B: タスクの必要に合わせて増減\" ==> ASG\n  PEND -- \"リソースの要求\" --> CP\n  X[\"⚠ A: 最小サイズを上げる＝山の分を一日中払う\"] -.- ASG\n  Y[\"⚠ C: 独自の Lambda は保守が要る・⚠ D: タスクだけ増えて容量は増えない\"] -.- SVC\n",
+   "alt": "ECS のタスクが容量不足で PENDING のままになる図。Auto Scaling グループのキャパシティープロバイダーでマネージドスケーリングと targetCapacity を設定すれば、タスクの必要に合わせてインスタンスが増減し、独自のコードも不要（B）。"
+  },
+  {
+   "id": "q-3.2-0008",
+   "source": "flowchart TB\n  subgraph STR[\"✔ A: キャパシティープロバイダー戦略\"]\n    SP@{ svc: \"AWS Fargate\", label: \"FARGATE_SPOT（ほとんどのタスク）\" }\n    OD@{ svc: \"AWS Fargate\", label: \"FARGATE（Spot が使えない時の分）\" }\n  end\n  S@{ svc: \"Amazon ECS\", label: \"キューのワーカーのサービス\" }\n  S -- \"タスク\" --> SP\n  S -- \"タスク\" --> OD\n  SP == \"✔ C: 回収の 2 分前に SIGTERM → stopTimeout 内に後片付け\" ==> CL[\"コンテナ\"]\n  X[\"⚠ B: Spot をオンデマンドへ自動で置き換えない\"] -.- SP\n  Y[\"⚠ D: Auto Scaling グループとは混ぜられない・⚠ E: タスク 1 つは止まる\"] -.- S\n",
+   "alt": "Fargate Spot でワーカーを動かす図。戦略に FARGATE_SPOT と FARGATE の両方を入れ、ほとんどを Spot に置いて、使えない時も処理を続ける（A）。回収時は SIGTERM を受け、stopTimeout の中に後片付けを収める（C）。"
+  },
+  {
+   "id": "q-3.2-0009",
+   "source": "flowchart TB\n  subgraph SV[\"ローリング更新（ECS）のサービス\"]\n    S@{ svc: \"Amazon ECS\", label: \"新しいタスクを起動し続ける\" }\n    CB[\"✔ D: デプロイのサーキットブレーカー\"]\n  end\n  OLD[\"最後に完了したデプロイ（前のタスク定義）\"]\n  S -- \"起動時にクラッシュ\" --> CB\n  CB == \"✔ D: 失敗を検知して自動ロールバック\" ==> OLD\n  A[\"⚠ A: EventBridge と Lambda を作って保守する\"] -.- S\n  B[\"⚠ B: CodeDeploy への切り替えはコントローラーを変える\"] -.- S\n  C[\"⚠ C: 通知だけで戻しは手作業\"] -.- S\n",
+   "alt": "クラッシュする新しいイメージが出続ける ECS サービスの図。ローリング更新のまま、デプロイのサーキットブレーカーでロールバックを有効にすると、失敗を検知して最後に完了したデプロイへ自動で戻る（D）。"
+  },
+  {
+   "id": "q-3.2-0010",
+   "source": "flowchart TB\n  subgraph ADM[\"管理者のアカウント\"]\n    SS@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ B: 1 つのテンプレートを 1 回の操作で展開\" }\n  end\n  subgraph TG[\"30 アカウント × 4 リージョン\"]\n    ST1[\"アカウントとリージョンごとのスタック\"]\n  end\n  SS == \"テンプレート\" ==> ST1\n  ST1 -. \"失敗\" .-> SS\n  SS -- \"✔ B: 失敗の許容数を超えたら展開が止まる\" --> ST1\n  X[\"⚠ A: スクリプトを自作・⚠ C: 120 のアクション・⚠ D: 手作業\"] -.- SS\n",
+   "alt": "同じテンプレートを 4 リージョンの 30 アカウントへ展開する図。管理者のアカウントの CloudFormation StackSets で 1 回の操作で展開し、失敗の許容数を低く設定すると失敗が多い時に自動で止まる（B）。"
+  }
+ ]
+}

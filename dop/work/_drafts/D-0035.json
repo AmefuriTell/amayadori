@@ -1,0 +1,25 @@
+{
+  "item": "D-0035",
+  "diagrams": [
+    {
+      "id": "q-6.2-0011",
+      "source": "flowchart TB\n  AUD([\"監査人\"])\n  subgraph ACC[\"会社のアカウント\"]\n    S3@{ svc: \"Amazon S3\", label: \"機密のオブジェクト\" }\n    CMK@{ svc: \"AWS KMS\", label: \"✔ D: カスタマーマネージドキー\" }\n    POL[\"自分のキーポリシー<br/>無効化・削除の予定\"]\n  end\n  OWN[\"⚠ A: AWS 所有のキー<br/>ポリシー変更も監査もできない\"]\n  HSM[\"⚠ B: CloudHSM のクラスター<br/>ハードウェアの管理で手間が大きい\"]\n  S3 -- \"暗号化\" --> CMK\n  POL -- \"使える人を決める\" --> CMK\n  AUD -. \"キーの操作を監査\" .-> CMK\n  OWN -.- S3\n  HSM -.- CMK\n",
+      "alt": "S3 の機密のオブジェクトを暗号化するキーの選び方。自分のアカウントで作り自分のキーポリシーで管理するカスタマーマネージドキー（D）なら、使う人の制御・無効化・監査ができ、ハードウェアも不要。"
+    },
+    {
+      "id": "q-6.2-0012",
+      "source": "flowchart TB\n  subgraph ACM1[\"AWS Certificate Manager\"]\n    CERT[\"AWS Certificate Manager<br/>✔ A: DNS 検証の新しい証明書\"]\n  end\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  MAIL[\"⚠ B: メール検証<br/>毎年人が承認する\"]\n  ACME[\"⚠ C: ACME で発行した証明書<br/>ACM の自動更新の対象外\"]\n  CW[\"⚠ D: 期限のアラームだけ<br/>付け替えは手作業\"]\n  CERT == \"最初の 1 回だけ付ける\" ==> ALB\n  CERT -- \"自動で更新（ARN は同じ）\" --> CERT\n  MAIL -.- CERT\n  ACME -.- ALB\n  CW -.- ALB\n",
+      "alt": "ALB の証明書を人の操作なしで更新する構成。DNS 検証の ACM 証明書を最初に 1 回付ければ（A）、ACM が自動で更新し ARN も変わらない。メール検証や手作業の付け替えは手間が残る。"
+    },
+    {
+      "id": "q-6.2-0013",
+      "source": "flowchart TB\n  APP[\"アプリケーション<br/>毎日数百万のオブジェクトを書く\"]\n  subgraph ACC[\"会社のアカウント\"]\n    S3@{ svc: \"Amazon S3\", label: \"SSE-KMS のバケット\" }\n    BK[\"✔ B: S3 バケットキー\"]\n    KMS@{ svc: \"AWS KMS\", label: \"同じカスタマーマネージドキー\" }\n  end\n  APP -- \"オブジェクトを書く\" --> S3\n  S3 --- BK\n  BK == \"✔ B: KMS へのリクエストが減る\" ==> KMS\n  S3 -. \"⚠ 今: 書くたびに KMS を呼ぶ\" .-> KMS\n  KMS -. \"⚠ A: ローテーションは件数を減らさない\" .- BK\n  S3 -. \"⚠ C: キーを分けても総数は同じ\" .- KMS\n",
+      "alt": "SSE-KMS の S3 バケットで KMS のリクエスト費用を減らす図。同じカスタマーマネージドキーのままバケットに S3 バケットキーを設定すると（B）、S3 から KMS へのリクエストが減る。ローテーションやキー分割では減らない。"
+    },
+    {
+      "id": "q-6.2-0014",
+      "source": "flowchart TB\n  REG([\"規制当局<br/>FIPS 140-3 レベル 3 と<br/>IAM の外での利用者管理\"])\n  subgraph ACC[\"会社のアカウント\"]\n    HSM[\"AWS CloudHSM<br/>✔ B: FIPS モードのクラスター\"]\n    USR[\"HSM の利用者<br/>クラスターの中で自分で管理\"]\n    KMS@{ svc: \"AWS KMS\", label: \"カスタマーマネージドキー\" }\n  end\n  OWN[\"⚠ C: AWS 所有のキー<br/>AWS が管理する\"]\n  USR == \"✔ B: IAM の外で管理\" ==> HSM\n  REG -. \"要件\" .-> HSM\n  KMS -. \"⚠ A・D: シングルテナントの HSM でも、IAM の外の管理でもない\" .- HSM\n  OWN -.- KMS\n",
+      "alt": "決済の会社がシングルテナントの検証済み HSM と IAM の外での利用者管理を求められる図。FIPS モードの CloudHSM クラスターで利用者を自分で管理する（B）。KMS のキーや AWS 所有のキーは要件に合わない。"
+    }
+  ]
+}

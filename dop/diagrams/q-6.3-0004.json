@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0004",
+  "source": "flowchart TB\n  subgraph ORG[\"組織の各アカウント\"]\n    SRC[\"40 アカウント・4 リージョン<br/>AWS Config が記録\"]\n  end\n  subgraph SECA[\"セキュリティアカウント\"]\n    AGG@{ svc: \"AWS Config\", label: \"✔ A: 組織をソースとするアグリゲーター\" }\n    VIEW[\"1 つのビュー<br/>読むだけ\"]\n  end\n  SRC == \"設定とコンプライアンスのデータ\" ==> AGG\n  AGG --> VIEW\n  AGG -. \"⚠ B: アカウントごとの承認が要る\" .- SRC\n  VIEW -. \"⚠ C: 書き込み権限は要件に反する\" .- SRC\n",
+  "alt": "40 アカウント・4 リージョンの AWS Config のデータを 1 つのビューで見る図。セキュリティアカウントに組織をソースとするアグリゲーターを作ると（A）、各アカウントの承認なしで読むだけの集約ができる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

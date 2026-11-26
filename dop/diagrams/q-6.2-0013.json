@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0013",
+  "source": "flowchart TB\n  APP[\"アプリケーション<br/>毎日数百万のオブジェクトを書く\"]\n  subgraph ACC[\"会社のアカウント\"]\n    S3@{ svc: \"Amazon S3\", label: \"SSE-KMS のバケット\" }\n    BK[\"✔ B: S3 バケットキー\"]\n    KMS@{ svc: \"AWS KMS\", label: \"同じカスタマーマネージドキー\" }\n  end\n  APP -- \"オブジェクトを書く\" --> S3\n  S3 --- BK\n  BK == \"✔ B: KMS へのリクエストが減る\" ==> KMS\n  S3 -. \"⚠ 今: 書くたびに KMS を呼ぶ\" .-> KMS\n  KMS -. \"⚠ A: ローテーションは件数を減らさない\" .- BK\n  S3 -. \"⚠ C: キーを分けても総数は同じ\" .- KMS\n",
+  "alt": "SSE-KMS の S3 バケットで KMS のリクエスト費用を減らす図。同じカスタマーマネージドキーのままバケットに S3 バケットキーを設定すると（B）、S3 から KMS へのリクエストが減る。ローテーションやキー分割では減らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,55 @@
+{
+  "item": "D-0029",
+  "diagrams": [
+    {
+      "id": "q-5.2-0001",
+      "source": "flowchart TB\n  AC@{ svc: \"AWS AppConfig\", label: \"✔ B: 機能フラグ＋段階的なデプロイ戦略\" }\n  APP[\"アプリケーション（再デプロイなし）\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"チェックアウトのエラーのアラーム\" }\n  AC == \"少しずつ配信 → ベイク時間\" ==> APP\n  APP -- \"エラー\" --> CW\n  CW -- \"✔ B: ALARM で自動ロールバック\" --> AC\n  W1[\"⚠ A: 関数の新しい版を配る\"]\n  W2[\"⚠ C: 戻すのが手作業\"]\n  W3[\"⚠ D: コンテナイメージを作り直す\"]\n  W1 -.- APP\n  W2 -.- CW\n  W3 -.- APP",
+      "alt": "コードを再デプロイせずに新機能を段階的に出す図。AppConfig の機能フラグをベイク時間付きの段階的デプロイで配り、CloudWatch のアラームをロールバックのモニターにすれば、鳴った時に自動で戻る（B）。"
+    },
+    {
+      "id": "q-5.2-0002",
+      "source": "flowchart TB\n  AC@{ svc: \"AWS AppConfig\", label: \"デプロイ（配信中＋ベイク時間）\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"ロールバックのモニターのアラーム\" }\n  IAM@{ svc: \"AWS IAM\", label: \"✔ B: 先にアクセス許可を設定\" }\n  PREV[\"前の設定データ\"]\n  IAM -. \"アラームを読む権限\" .-> AC\n  CW -- \"✔ A: ALARM か INSUFFICIENT_DATA\" --> AC\n  AC == \"自動で戻す\" ==> PREV\n  W1[\"⚠ C: 人の承認は不要\"]\n  W2[\"⚠ D: 戻すのは設定データでコードではない\"]\n  W3[\"⚠ E: 100% 後もベイク時間は監視する\"]\n  W1 -.- AC\n  W2 -.- PREV\n  W3 -.- CW",
+      "alt": "AppConfig のロールバックの仕組みの図。配信中にモニターのアラームが ALARM か INSUFFICIENT_DATA になると自動で前の設定データに戻り（A）、そのためには先に権限の設定が要る（B）。人の承認やコードの再デプロイは無い。"
+    },
+    {
+      "id": "q-5.2-0003",
+      "source": "flowchart TB\n  PS@{ svc: \"AWS Systems Manager\", label: \"Parameter Store: /app/db-endpoint\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"パラメータ更新のルール\" }\n  AUT@{ svc: \"AWS Systems Manager\", label: \"✔ D: Automation ランブック\" }\n  AP[\"aws:approve（シニアエンジニアの承認）\"]\n  FL[\"インスタンスのフリート\"]\n  PS -- \"更新イベント\" --> EB\n  EB -- \"ターゲット\" --> AUT\n  AUT --> AP\n  AP == \"承認後に再起動\" ==> FL\n  W1[\"⚠ A: Lambda のコードを書く\"]\n  W2[\"⚠ B: 承認の手順が無い\"]\n  W3[\"⚠ C: 毎朝の手作業\"]\n  W1 -.- EB\n  W2 -.- AUT\n  W3 -.- PS",
+      "alt": "Parameter Store の更新で、承認後にアプリを再起動する図。更新イベントの EventBridge ルールで、aws:approve の手順を含む Automation ランブックを始める（D）。コード無しで、承認を待ってから再起動する。"
+    },
+    {
+      "id": "q-5.2-0004",
+      "source": "flowchart TB\n  AUT@{ svc: \"AWS Systems Manager\", label: \"✔ B: レート制御で Automation を実行\" }\n  subgraph FLEET[\"400 台のマネージドインスタンス\"]\n    G1[\"同時に実行: 20 台まで（concurrency 20）\"]\n    G2[\"残りのインスタンス\"]\n  end\n  AUT == \"設定ファイルの変更\" ==> G1\n  G1 -. \"失敗が 5 台を超えたら\" .-> STOP[\"残りへの送信を止める（error threshold 5）\"]\n  STOP -.- G2\n  W1[\"⚠ A: 適応型は同時数を自動で増やす\"]\n  W2[\"⚠ C: スクリプトを作る\"]\n  W3[\"⚠ D: 1 台ずつの手作業\"]\n  W1 -.- AUT\n  W2 -.- AUT\n  W3 -.- FLEET",
+      "alt": "400 台への Automation をレート制御で実行する図。同時実行数を 20、エラーのしきい値を 5 にすれば、20 台ずつ進み、失敗が 5 台を超えると残りへの送信を止める（B）。適応型の同時実行は 20 台の制限に合わない。"
+    },
+    {
+      "id": "q-5.2-0005",
+      "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"スケールインで終了の対象に\" }\n  HOOK[\"✔ A: 終了のライフサイクルフック（Terminating:Wait）\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  S3@{ svc: \"Amazon S3\", label: \"ログのコピー先\" }\n  ASG --> HOOK\n  HOOK -- \"イベント\" --> EB\n  EB -- \"ログのコピーを開始\" --> S3\n  S3 == \"✔ A: ハートビートで待ち時間を延ばし、完了後にアクションを完了\" ==> ASG\n  W1[\"⚠ B: 既定の 1 時間を超えると終了へ進む\"]\n  W2[\"⚠ C: ABANDON ですぐ終了\"]\n  W3[\"⚠ D: 最後の 1 時間のログを失う\"]\n  W1 -.- HOOK\n  W2 -.- HOOK\n  W3 -.- ASG",
+      "alt": "スケールインの終了の前にログを S3 へコピーする図。終了のライフサイクルフックで止め、EventBridge でコピーを始め、ハートビートで待ち時間を延ばしてから完了させる（A）。既定のままや ABANDON ではコピー前に終了する。"
+    },
+    {
+      "id": "q-5.2-0006",
+      "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"グループ（希望する容量 20 台）\" }\n  LT[\"新しい起動テンプレートのバージョン\"]\n  LT -- \"インスタンスの更新\" --> ASG\n  C[\"✔ D: 最小正常率 90・最大正常率 100\"]\n  C == \"容量の 10%（2 台）ずつ置き換え\" ==> ASG\n  K[\"常に 18 台以上がサービス中、余分な起動なし\"]\n  K -.- ASG\n  W1[\"⚠ A: 100/100 は 1 台ずつ\"]\n  W2[\"⚠ B: 0/100 は全部一度に\"]\n  W3[\"⚠ C: 50/100 は 10 台ずつ\"]\n  W1 -.- C\n  W2 -.- C\n  W3 -.- C",
+      "alt": "希望する容量 20 台の Auto Scaling グループのインスタンスの更新の図。最小正常率 90・最大正常率 100 にすると、容量の 10%（2 台）ずつ置き換えながら 90% 以上を保つ（D）。他の組み合わせは 1 台・全部・10 台ずつになる。"
+    },
+    {
+      "id": "q-5.2-0007",
+      "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"インスタンスの更新\" }\n  CP[\"✔ A: チェックポイント 20% と 100%\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"チェックポイントのルール\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"通知\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"エラーのアラーム\" }\n  ASG --> CP\n  CP -- \"20% のイベント\" --> EB\n  EB --> SNS\n  CW -- \"ALARM\" --> ASG\n  ASG == \"✔ B: 自動ロールバック\" ==> OLD[\"置き換えた分を元の状態へ\"]\n  W1[\"⚠ C: 取り消しても戻らない / ⚠ D: 終了後はロールバック不可\"]\n  W3[\"⚠ E: 最後は 100% にする\"]\n  W1 -.- OLD\n  W3 -.- OLD",
+      "alt": "インスタンスの更新で 20% 時点の通知と自動ロールバックを設定する図。20% と 100% にチェックポイントを置き EventBridge から SNS へ送り（A）、自動ロールバックでアラームを指定する（B）。取り消しでは元に戻らない。"
+    },
+    {
+      "id": "q-5.2-0008",
+      "source": "flowchart TB\n  CFN@{ svc: \"AWS CloudFormation\", label: \"スタック（テンプレート）\" }\n  SG[\"セキュリティグループ（コンソールで直接変更）\"]\n  CFN -- \"管理\" --> SG\n  D[\"✔ B: ドリフトの検出を実行（リソースは変えない）\"]\n  D == \"ドリフトしたリソースとプロパティ\" ==> CFN\n  W1[\"⚠ A: 変更セットはテンプレート変更の確認用\"]\n  W2[\"⚠ C: スタックの更新でリソースに手を入れる\"]\n  W3[\"⚠ D: イベントにコンソールの変更は出ない\"]\n  W1 -.- CFN\n  W2 -.- SG\n  W3 -.- CFN",
+      "alt": "CloudFormation の外で変更されたセキュリティグループを見つける図。スタックでドリフトの検出を実行すれば、リソースを変えずに、ドリフトしたリソースとテンプレートと違うプロパティが分かる（B）。"
+    },
+    {
+      "id": "q-5.2-0009",
+      "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"ルール\" }\n  B[\"準拠していない S3 バケット\"]\n  AUT[\"AWS Systems Manager Automation<br/>✔ A: AWS 用意の Automation ドキュメント\"]\n  B -- \"非準拠\" --> CFG\n  CFG == \"✔ A: 自動の修復のアクション\" ==> AUT\n  AUT -- \"決めた一連の操作で修復\" --> B\n  W1[\"⚠ B: 修復の Lambda を書く\"]\n  W2[\"⚠ C: 手作業\"]\n  W3[\"⚠ D: 週 1 回のスクリプト\"]\n  W1 -.- CFG\n  W2 -.- B\n  W3 -.- B",
+      "alt": "非準拠の S3 バケットを自動で直す図。AWS が用意する Systems Manager Automation のドキュメントを AWS Config ルールの自動の修復のアクションに関連付ける（A）。コードも手作業も要らない。"
+    },
+    {
+      "id": "q-5.2-0010",
+      "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"1 台のインスタンス（Auto Scaling の外）\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"✔ D: StatusCheckFailed_System のアラーム\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"運用チームへ通知\" }\n  EC2 -- \"ハードウェア障害\" --> CW\n  CW == \"✔ D: 復旧のアクション\" ==> EC2\n  CW -- \"通知\" --> SNS\n  W1[\"⚠ A: Instance のアラームには復旧のアクションを付けられない\"]\n  W2[\"⚠ B: Lambda を書く\"]\n  W3[\"⚠ C: 手作業で移す\"]\n  W1 -.- CW\n  W2 -.- EC2\n  W3 -.- EC2",
+      "alt": "Auto Scaling の外の 1 台の EC2 を、基盤のハードウェア障害から自動復旧する図。StatusCheckFailed_System の CloudWatch アラームに復旧のアクションと SNS の通知を付ける（D）。Instance のアラームには付けられない。"
+    }
+  ]
+}

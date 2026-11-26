@@ -84,7 +84,10 @@
           "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECR のイメージを継続的に自動チェックする図。拡張スキャンで Inspector と連携すると古いイメージも再評価される（C）。基本スキャンの push 時のみ（A）や Lambda の自作（B）は不十分。"
+      }
     },
     {
       "id": "q-1.1-0002",
@@ -152,7 +155,10 @@
           "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "各チームのリポジトリが共有リポジトリをアップストリームにし、共有リポジトリだけが npmjs への外部接続を持つ図。取り込みを一元管理できる（A と B）。各チームに外部接続を足す（E）は一元管理にならない。"
+      }
     },
     {
       "id": "q-1.1-0003",
@@ -212,7 +218,10 @@
           "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudFormation が作った GitHub への接続は PENDING のままで、パイプラインはアクセスできない。コンソールで接続を編集してセットアップすると AVAILABLE になる（D）。待つ（A）や CLI で作り直す（B）では変わらない。"
+      }
     },
     {
       "id": "q-1.1-0004",
@@ -271,7 +280,10 @@
           "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ソースアクションを full clone にすると CodeBuild が git のメタデータ込みで clone でき、バージョン計算が動く（B）。full clone の出力は CodeBuild のアクションしか使えないので CodeDeploy には直接渡せない（A）。"
+      }
     },
     {
       "id": "q-1.1-0005",
@@ -329,7 +341,10 @@
           "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GitHub の release で始まるタグが作られた時だけ CodePipeline を始める図。トリガーのフィルターに Tags と release* を設定する（C）。ブランチフィルター（A）、自作コード（B）、手動（D）は要件に合わない。"
+      }
     },
     {
       "id": "q-1.1-0006",
@@ -390,7 +405,10 @@
           "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "build フェーズのテストが失敗してもログをアップロードしたい。アップロードを finally ブロックに移すと、失敗しても実行され、フェーズは失敗のままになる（A）。on-failure は Lambda では使えない（B）。"
+      }
     },
     {
       "id": "q-1.1-0007",
@@ -463,7 +481,10 @@
           "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Docker イメージをビルドして ECR に push する CodeBuild を Lambda から戻す図。Lambda コンピューティングは Docker ビルドに対応しないので EC2 に戻し（A）、privilegedMode を true にする（B）。"
+      }
     },
     {
       "id": "q-1.1-0008",
@@ -520,7 +541,10 @@
           "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "約 3 時間の統合テストが既定の 60 分で止まる問題の図。timeoutInMinutes を 240 にすると 1 回のビルドで終わる（C）。上限は 2160 分なので 4320 は不可（B）、Lambda は 15 分超に対応しない（A）。"
+      }
     },
     {
       "id": "q-1.1-0009",
@@ -587,7 +611,10 @@
           "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeBuild の buildspec から認証情報を取り除く図。パスワードは自動ローテーションの Secrets Manager、エンドポイントは Parameter Store の SecureString から参照する（C）。Lambda の自作（A）や平文（D）は不適切。"
+      }
     },
     {
       "id": "q-1.1-0010",
@@ -661,7 +688,10 @@
           "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "1 つの JSON シークレットから API キー 1 つだけをビルドに渡し、暗号化が要るエンドポイントは Parameter Store の SecureString に置く図。json-key を指定する（A）、parameter-store で参照する（B）のが正解。"
+      }
     },
     {
       "id": "q-1.1-0011",
@@ -728,7 +758,10 @@
           "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "認証情報を変えても再デプロイしたくない。Secrets Manager の自動ローテーションを使い、アプリが実行時に取得する（B）。ビルド時の注入（A）やデプロイ時のコピー（D）は変更のたびに再デプロイが要る。"
+      }
     },
     {
       "id": "q-1.1-0012",
@@ -791,7 +824,10 @@
           "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "ECS の Blue/Green で一部のトラフィックを先に新版へ送る図。NLB では ECSAllAtOnce しか使えないので、ALB に移して Canary10Percent5Minutes を使う（D）。A と C は NLB のままなので使えない。"
+      }
     },
     {
       "id": "q-1.1-0013",
@@ -853,7 +889,10 @@
           "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "12 台のうち 4 分の 3 を残しつつ最速で進めるには、最小正常ホスト数 75% の独自設定にして 9 台を残し 3 台ずつデプロイする（C）。OneAtATime は遅く、HalfAtATime と AllAtOnce は要件を割る。"
+      }
     },
     {
       "id": "q-1.1-0014",
@@ -927,7 +966,10 @@
           "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Lambda のカナリアデプロイでエラー率がしきい値を超えたら止めて戻す図。CloudWatch アラームをデプロイグループに足し（A）、アラームでの自動ロールバックを有効にする（B）。"
+      }
     },
     {
       "id": "q-1.2-0001",
@@ -16134,7 +16176,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。"
+      "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。",
+      "diagram": {
+        "alt": "S3 の機密のオブジェクトを暗号化するキーの選び方。自分のアカウントで作り自分のキーポリシーで管理するカスタマーマネージドキー（D）なら、使う人の制御・無効化・監査ができ、ハードウェアも不要。"
+      }
     },
     {
       "id": "q-6.2-0012",
@@ -16196,7 +16241,10 @@
           "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB の証明書を人の操作なしで更新する構成。DNS 検証の ACM 証明書を最初に 1 回付ければ（A）、ACM が自動で更新し ARN も変わらない。メール検証や手作業の付け替えは手間が残る。"
+      }
     },
     {
       "id": "q-6.2-0013",
@@ -16262,7 +16310,10 @@
           "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SSE-KMS の S3 バケットで KMS のリクエスト費用を減らす図。同じカスタマーマネージドキーのままバケットに S3 バケットキーを設定すると（B）、S3 から KMS へのリクエストが減る。ローテーションやキー分割では減らない。"
+      }
     },
     {
       "id": "q-6.2-0014",
@@ -16320,7 +16371,10 @@
           "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "決済の会社がシングルテナントの検証済み HSM と IAM の外での利用者管理を求められる図。FIPS モードの CloudHSM クラスターで利用者を自分で管理する（B）。KMS のキーや AWS 所有のキーは要件に合わない。"
+      }
     },
     {
       "id": "q-6.3-0001",
@@ -16382,7 +16436,10 @@
           "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Organizations で全アカウントのイベントを記録する構成。管理アカウントがセキュリティアカウントを CloudTrail の委任管理者にし、そこから組織の証跡を作る（D）。管理アカウントにサインインせずに済む。"
+      }
     },
     {
       "id": "q-6.3-0002",
@@ -16444,7 +16501,10 @@
           "quote": "assert positively that no log files were delivered to your account during a given period of time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail のログが届いた後に変更・削除されていないことを示す図。整合性の検証を有効にすると毎時の署名付きダイジェストが届き（A）、ログと照らして変更や届かなかった期間を証明できる。"
+      }
     },
     {
       "id": "q-6.3-0003",
@@ -16516,7 +16576,10 @@
           "quote": "Legal holds can be freely placed and removed by any user who has the s3:PutObjectLegalHold permission."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 オブジェクトロックで 7 年はルートも削除できず、調査対象は調査が終わるまで残す図。バケットにコンプライアンスモード 7 年（A）、調査対象にリーガルホールドを付け調査チームが外せる（C）。"
+      }
     },
     {
       "id": "q-6.3-0004",
@@ -16578,7 +16641,10 @@
           "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "40 アカウント・4 リージョンの AWS Config のデータを 1 つのビューで見る図。セキュリティアカウントに組織をソースとするアグリゲーターを作ると（A）、各アカウントの承認なしで読むだけの集約ができる。"
+      }
     },
     {
       "id": "q-6.3-0005",
@@ -16644,7 +16710,10 @@
           "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "リソースを作る API 呼び出しの割合の急な上昇を CloudTrail Insights で知る図。証跡が読み取りだけだと出ないので、書き込みの管理イベントも記録し、最大 36 時間待つ（B）。"
+      }
     },
     {
       "id": "q-6.3-0006",
@@ -16701,7 +16770,10 @@
           "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "時間帯で変わる失敗回数のメトリクスに、異常に多い時だけ鳴らす図。異常検出のアラームを予想される値のバンドより上で鳴るようにする（C）。静的なしきい値や下・両側のアラームは要件に合わない。"
+      }
     },
     {
       "id": "q-6.3-0007",
@@ -16775,7 +16847,10 @@
           "quote": "The notification frequency for newly generated findings is in near real-time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty の新しい検出結果をメールで受け、繰り返しを 15 分ごとにする図。EventBridge のルールで SNS トピックへ送り（A）、管理者アカウントで後続の発生の頻度を 15 分にする（B）。"
+      }
     },
     {
       "id": "q-6.3-0008",
@@ -16838,7 +16913,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 D の Insights の説明は C-0079 の出典（Insights は API の呼び出しの率と誤りの率）による"
+      "note": "選択肢 D の Insights の説明は C-0079 の出典（Insights は API の呼び出しの率と誤りの率）による",
+      "diagram": {
+        "alt": "機密の S3 バケットのダウンロードの記録を安く取る図。高度なイベントセレクターでそのバケットと GetObject だけのデータイベントを記録する（A）。全バケットの記録や管理イベントだけでは合わない。"
+      }
     },
     {
       "id": "q-6.3-0009",
@@ -16907,7 +16985,10 @@
           "quote": "By default, the maximum aggregation interval is 10 minutes. When you create a flow log, you can optionally specify a maximum aggregation interval of 1 minute."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "サブネットの拒否された接続の記録を S3 に残す図。拒否だけを記録して S3 に発行するフローログを作り（A）、最大集約間隔を最も短い 1 分にする（B）。30 秒は選べず、既定は 10 分。"
+      }
     },
     {
       "id": "q-6.3-0010",
@@ -16977,7 +17058,10 @@
           "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB のリクエストの記録と EC2 のアプリケーションログを集める図。ALB のアクセスログを有効にして S3 へ（A）、CloudWatch エージェントでログファイルを CloudWatch Logs へ送る（B）。"
+      }
     },
     {
       "id": "q-6.3-0011",
@@ -17041,7 +17125,10 @@
           "quote": "With EventBridge, you can send findings data to your preferred storage platform and store the data for as long as you like."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty の検出結果を 1 年以上、自動で残す図。検出結果は EventBridge に自動で送られるので、ルールで Firehose へ送り S3 へ届ける（A）。GuardDuty だけでは 90 日、手作業やポーリングは手間が大きい。"
+      }
     },
     {
       "id": "q-6.3-0012",
@@ -17109,7 +17196,10 @@
           "quote": "helps you assess your AWS environment against security industry standards and best practices."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "複数のアカウントの GuardDuty・Inspector・Macie・サードパーティの検出結果を 1 か所にまとめる図。Security Hub CSPM が ASFF で集めて優先順位を付け、標準に照らして評価する（C）。"
+      }
     },
     {
       "id": "q-6.3-0013",
@@ -17181,7 +17271,10 @@
           "quote": "or assert positively that no log files were delivered to your account during a given period of time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail のログが変更・削除されていないことを証明する図。整合性の検証を有効にして署名付きダイジェストを届け（A）、AWS CLI でログをダイジェストと照らして検証する（B）。有効にするだけでは検証されない。"
+      }
     },
     {
       "id": "q-6.3-0014",
@@ -17244,7 +17337,10 @@
           "quote": "When GuardDuty detects potential security threats associated with your AWS resources, it starts generating security findings"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 にある 6 か月分の CloudTrail ログから、誰がどの IP でリソースを削除したか調べる図。Athena で S3 のログを置いたまま直接 SQL でクエリすれば、サーバーも別のデータベースも要らない（D）。"
+      }
     }
   ]
 }

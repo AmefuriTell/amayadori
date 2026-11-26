@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0012",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  LB@{ svc: \"Elastic Load Balancing\", label: \"✔ D: Application Load Balancer へ移す\" }\n  OLD@{ svc: \"Amazon ECS\", label: \"旧タスクセット\" }\n  NEW@{ svc: \"Amazon ECS\", label: \"新タスクセット\" }\n  end\n  CD -- \"デプロイ設定\" --> LB\n  LB -- \"90%\" --> OLD\n  LB == \"✔ D: Canary10Percent5Minutes 10% → 5 分後に残り\" ==> NEW\n  NLB[\"Network Load Balancer（今）<br/>ECSAllAtOnce のみ\"]\n  A[\"⚠ A C: NLB のままでは<br/>Canary/Linear は使えない\"] -.-> NLB\n  B[\"⚠ B: 承認を足しても一度に全部移る\"] -.-> CD\n",
+  "alt": "ECS の Blue/Green で一部のトラフィックを先に新版へ送る図。NLB では ECSAllAtOnce しか使えないので、ALB に移して Canary10Percent5Minutes を使う（D）。A と C は NLB のままなので使えない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0009",
+  "source": "flowchart TB\n  subgraph VPC[\"VPC\"]\n    SUB@{ svc: \"Amazon VPC\", label: \"対象のサブネット\" }\n    FL[\"✔ A: フローログ<br/>拒否だけを記録\"]\n    AGG[\"✔ B: 最大集約間隔 1 分\"]\n  end\n  S3@{ svc: \"Amazon S3\", label: \"後で照会するための保存先\" }\n  SUB -- \"通信\" --> FL\n  AGG -.- FL\n  FL == \"ログ\" ==> S3\n  W1[\"⚠ C: 選べるのは 10 分か 1 分\"]\n  W2[\"⚠ D: 全トラフィックは受け入れも記録する\"]\n  W1 -.- AGG\n  W2 -.- FL\n",
+  "alt": "サブネットの拒否された接続の記録を S3 に残す図。拒否だけを記録して S3 に発行するフローログを作り（A）、最大集約間隔を最も短い 1 分にする（B）。30 秒は選べず、既定は 10 分。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

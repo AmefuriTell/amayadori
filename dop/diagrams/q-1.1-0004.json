@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0004",
+  "source": "flowchart TB\n  GH[\"GitHub\"]\n  subgraph R[\"アカウント\"]\n  SRC@{ svc: \"AWS CodePipeline\", label: \"ソースアクション（接続経由）\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"git でバージョン計算\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ\" }\n  end\n  GH -- \"コミット\" --> SRC\n  SRC == \"✔ B: full clone の参照（git メタデータ込み）\" ==> CB\n  CB -- \"ビルド出力\" --> CD\n  SRC -. \"⚠ A: full clone は CodeBuild だけが使える\" .-> CD\n  SRC -. \"⚠ C・D: 既定の ZIP は git メタデータ無し\" .-> CB\n",
+  "alt": "ソースアクションを full clone にすると CodeBuild が git のメタデータ込みで clone でき、バージョン計算が動く（B）。full clone の出力は CodeBuild のアクションしか使えないので CodeDeploy には直接渡せない（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

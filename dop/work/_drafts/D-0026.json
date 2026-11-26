@@ -1,0 +1,55 @@
+{
+ "item": "D-0026",
+ "diagrams": [
+  {
+   "id": "q-4.3-0001",
+   "source": "flowchart TB\n  subgraph RG[\"Amazon RDS の DB インスタンス\"]\n    DB@{ svc: \"Amazon RDS\", label: \"割り当て 950 GiB・空き 4%\" }\n    TH[\"最大ストレージのしきい値 1,000 GiB\"]\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"空き 10% 以下が 5 分続く\" }\n  CW -- \"自動拡張の条件を満たす\" --> DB\n  DB -- \"増加分 95 GiB（10%）\" --> TH\n  TH -. \"⚠ 950+95 は 1,000 超。拡張されない\" .-> DB\n  TH == \"✔ A: しきい値を十分に高くする\" ==> DB\n  W[\"⚠ B: 待っても同じ / ⚠ D: しきい値を下げても拡張されない\"]\n  W -.- TH",
+   "alt": "RDS のストレージ自動スケーリングが止まっている図。空きが少ない条件は満たしているが、次の増加分（950 GiB の 10%）が最大しきい値 1,000 GiB を超えるので拡張されない。正解 A は最大しきい値を十分に高くすること。"
+  },
+  {
+   "id": "q-4.3-0002",
+   "source": "flowchart TB\n  subgraph ECS[\"Amazon ECS クラスター\"]\n    CP@{ svc: \"Amazon ECS\", label: \"キャパシティープロバイダー（managed scaling 90%）\" }\n    T[\"タスク\"]\n  end\n  subgraph ASG[\"Auto Scaling グループ\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"希望する容量\" }\n    MP[\"ECS 管理の target tracking ポリシー\"]\n    OWN[\"チーム独自の CPU ポリシー\"]\n  end\n  T -- \"使う資源\" --> CP\n  CP == \"✔ B: ECS が管理するポリシーだけ\" ==> MP\n  MP --> AS\n  OWN -. \"⚠ ぶつかり合う。B: 削除する\" .-> AS\n  W[\"⚠ A: ポリシーが増える / ⚠ C: MaximumCapacity 0 では増えない\"]\n  W -.- AS",
+   "alt": "ECS のマネージドスケーリングと独自の CPU ポリシーが同じ Auto Scaling グループを動かしてぶつかる図。正解 B は独自ポリシーを削除し、ECS が管理するターゲット追跡ポリシーだけに希望する容量を任せること。"
+  },
+  {
+   "id": "q-4.3-0003",
+   "source": "flowchart TB\n  M@{ svc: \"Amazon DynamoDB\", label: \"ThrottledRequests（絞り込みの時だけ値が出る）\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"アラーム（期間 1 分）\" }\n  M -- \"データポイント\" --> AL\n  AL --> R[\"直近 5 つのうち 3 つで ALARM\"]\n  AL -. \"静かな期間はデータが欠ける\" .-> Q[\"✔ A: notBreaching で OK になる\"]\n  X1[\"⚠ B: breaching だと静かな時に ALARM\"]\n  X2[\"⚠ C: 既定の missing だと INSUFFICIENT_DATA\"]\n  X3[\"⚠ D: 5 分 × 3 では範囲が 15 分\"]\n  Q -.- X1\n  Q -.- X2\n  Q -.- X3",
+   "alt": "DynamoDB の ThrottledRequests は絞り込みの時だけ値が出る。5 つのうち 3 つで ALARM にし、静かな期間は OK にするには、欠落データを notBreaching にする（A）。breaching や既定のままでは合わない。"
+  },
+  {
+   "id": "q-4.3-0004",
+   "source": "flowchart TB\n  DBA[\"データベースのアラーム\"]\n  APPA[\"アプリのヘルスのアラーム（約 20 個）\"]\n  subgraph ACC[\"1 つのアカウントとリージョン\"]\n    CA@{ svc: \"Amazon CloudWatch\", label: \"✔ C: 複合アラーム\" }\n    SNS@{ svc: \"Amazon SNS\", label: \"1 件の通知\" }\n    SM@{ svc: \"AWS Systems Manager\", label: \"OpsItem を 1 つ\" }\n  end\n  DBA -- \"状態\" --> CA\n  APPA -- \"状態\" --> CA\n  CA == \"✔ C: db AND AT_LEAST(50%)\" ==> SNS\n  CA ==> SM\n  W1[\"⚠ A: OR だと片方だけで通知\"]\n  W2[\"⚠ B: 複合アラームは EC2 の再起動ができない\"]\n  W1 -.- CA\n  W2 -.- CA",
+   "alt": "データベースとアプリのヘルスの複数のアラームを複合アラームでまとめる図。AND と AT_LEAST の 50% を使い、両方そろった時だけ SNS の通知と OpsItem を 1 件出す（C）。OR や EC2 の再起動は不適切。"
+  },
+  {
+   "id": "q-4.3-0005",
+   "source": "flowchart TB\n  APP[\"アプリケーションサーバー\"]\n  subgraph B[\"バケット app-logs\"]\n    RAW@{ svc: \"Amazon S3\", label: \"raw/ の生ログ\" }\n    OUT@{ svc: \"Amazon S3\", label: \"✔ C: processed/ に結果\" }\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"ログを解析する関数\" }\n  APP -- \"ログのアップロード\" --> RAW\n  RAW -- \"イベント通知（raw/ だけ）\" --> FN\n  FN == \"✔ C: 別のプレフィックスへ書く\" ==> OUT\n  FN -. \"⚠ 今: 同じ場所へ書き、またイベントが出る\" .-> RAW\n  W[\"⚠ A: 処理が止まる / ⚠ B: 上限を上げても繰り返す / ⚠ D: 結果も .log\"]\n  W -.- FN",
+   "alt": "S3 のイベントで Lambda が動き、結果を同じバケットへ書くと呼び出しが繰り返される図。通知を raw/ に限り、結果を processed/ など別のプレフィックスへ書けば止まる（C）。"
+  },
+  {
+   "id": "q-4.3-0006",
+   "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"ログバケット（EventBridge 配信を有効）\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: ルールで振り分け\" }\n  Q@{ svc: \"Amazon SQS\", label: \"FIFO キュー\" }\n  SF[\"Step Functions のワークフロー\"]\n  FN@{ svc: \"AWS Lambda\", label: \"セキュリティ用の関数\" }\n  S3 -- \"新しいオブジェクトのイベント\" --> EB\n  EB ==> Q\n  EB ==> SF\n  EB ==> FN\n  S3 -. \"⚠ C: 通知は FIFO キューに直接送れない\" .-> Q\n  N1[\"✔ B: 少なくとも 1 回の配信。重複に耐える設計\"]\n  N1 -.- EB\n  N2[\"⚠ D: 必ず 1 回ではない / ⚠ E: 絞るのはルール側\"]\n  N2 -.- S3",
+   "alt": "S3 のログバケットの新しいオブジェクトを EventBridge で FIFO キュー・Step Functions・Lambda に振り分ける図。通知は少なくとも 1 回の配信なので重複に耐える設計にする（A と B）。"
+  },
+  {
+   "id": "q-4.3-0007",
+   "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"インスタンスの状態変化\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ B: state が terminated のパターン\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"既存のトピック\" }\n  M[\"運用チームのメール\"]\n  EC2 -- \"状態変化の通知\" --> EB\n  EB == \"終了のイベントだけ\" ==> SNS\n  SNS -- \"メール\" --> M\n  W1[\"⚠ A: Lambda の保守が要る\"]\n  W2[\"⚠ C: 5 分ごとのポーリング\"]\n  W3[\"⚠ D: 停止・開始も通知される\"]\n  W1 -.- EB\n  W2 -.- EC2\n  W3 -.- EB",
+   "alt": "EC2 インスタンスの終了だけを SNS のメールで知らせる図。EventBridge のイベントパターンで状態が terminated のものだけに絞り、SNS をターゲットにする（B）。Lambda や定期確認は手間が増える。"
+  },
+  {
+   "id": "q-4.3-0008",
+   "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"インスタンスの終了イベント\" }\n  subgraph RULE[\"EventBridge ルールのターゲット\"]\n    EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: 入力トランスフォーマー\" }\n  end\n  SNS@{ svc: \"Amazon SNS\", label: \"トピック\" }\n  E[\"当番のエンジニア\"]\n  EC2 -- \"JSON 全体\" --> EB\n  EB == \"短いメッセージ\" ==> SNS\n  SNS -- \"メール\" --> E\n  W1[\"⚠ B: パターンは送る中身を変えない\"]\n  W2[\"⚠ C: Lambda を足すことになる\"]\n  W1 -.- EB\n  W2 -.- EB",
+   "alt": "EventBridge から SNS へ送る終了イベントを短いメッセージに変える図。ターゲットの入力トランスフォーマーで値を取り出しテンプレートに入れる（A）。イベントパターンの変更や Lambda では要件に合わない。"
+  },
+  {
+   "id": "q-4.3-0009",
+   "source": "flowchart TB\n  subgraph REG[\"1 つのリージョン\"]\n    EC2@{ svc: \"Amazon EC2\", label: \"300 台（IMDSv2・SSM Agent 3.2.582.0 以降）\" }\n    SSM@{ svc: \"AWS Systems Manager\", label: \"マネージドノード\" }\n  end\n  DH[\"✔ C: Default Host Management Configuration を有効\"]\n  DH == \"既定のロール（今と今後のすべて）\" ==> EC2\n  EC2 ==> SSM\n  W1[\"⚠ A: プロファイルを 1 台ずつ作る・付ける\"]\n  W2[\"⚠ B: 受信ルールは要らない\"]\n  W3[\"⚠ D: IMDSv1 は非対応\"]\n  W1 -.- EC2\n  W2 -.- EC2\n  W3 -.- DH",
+   "alt": "インスタンスプロファイル無しで EC2 を Systems Manager のマネージドノードにする図。リージョンで Default Host Management Configuration を有効にすれば、IMDSv2 と新しい SSM Agent の今と今後の全インスタンスが対象になる（C）。"
+  },
+  {
+   "id": "q-4.3-0010",
+   "source": "flowchart TB\n  subgraph VPC[\"VPC（インターネットへのルート無し）\"]\n    subgraph SUB[\"プライベートサブネット\"]\n      EC2@{ svc: \"Amazon EC2\", label: \"SSM Agent のあるインスタンス\" }\n    end\n    EP@{ svc: \"Amazon VPC\", label: \"✔ A: ssm・ssmmessages・ec2messages のエンドポイント\" }\n  end\n  SSM@{ svc: \"AWS Systems Manager\", label: \"サービス\" }\n  EC2 == \"✔ B: 443 番の外向き HTTPS\" ==> EP\n  EP --> SSM\n  X[\"⚠ D: NAT とインターネット経路は要件に反する\"]\n  X -.-> EC2\n  Y[\"⚠ C: 受信は不要 / ⚠ E: CloudWatch エージェントは無関係\"]\n  Y -.- EC2",
+   "alt": "インターネットに出られないプライベートサブネットの EC2 を Systems Manager で管理する図。ssm・ssmmessages・ec2messages の VPC エンドポイントを作り、443 番の外向き HTTPS を許す（A と B）。"
+  }
+ ]
+}

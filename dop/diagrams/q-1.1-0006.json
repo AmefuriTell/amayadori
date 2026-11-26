@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0006",
+  "source": "flowchart TB\n  subgraph R[\"Lambda コンピューティング\"]\n  T@{ svc: \"AWS CodeBuild\", label: \"build: commands でユニットテスト\" }\n    UP[\"ログのアップロード\"]\n    FIN[\"✔ A: finally ブロックに移す\"]\n  end\n  T -- \"テスト失敗\" --> FIN\n  FIN == \"✔ A: 失敗でも実行・フェーズは失敗のまま\" ==> UP\n  T -. \"⚠ 今: 失敗するとアップロードを飛ばす\" .-> UP\n  OF[\"⚠ B: on-failure は Lambda では使えない\"] -.-> T\n  C[\"⚠ C: テストの前では、ログがまだ無い\"] -.-> UP\n",
+  "alt": "build フェーズのテストが失敗してもログをアップロードしたい。アップロードを finally ブロックに移すと、失敗しても実行され、フェーズは失敗のままになる（A）。on-failure は Lambda では使えない（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

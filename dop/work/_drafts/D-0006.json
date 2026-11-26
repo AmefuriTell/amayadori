@@ -1,0 +1,55 @@
+{
+  "item": "D-0006",
+  "diagrams": [
+    {
+      "id": "q-1.3-0001",
+      "source": "flowchart TB\n  PUSH[\"イメージのプッシュ\"]\n  ECR@{ svc: \"Amazon ECR\", label: \"リポジトリ（ライフサイクルポリシー）\" }\n  R1[\"✔ A: 優先度 1: release タグを選ぶ（上限 10000）\"]\n  R2[\"優先度 2: プッシュから 90 日で削除\"]\n  KEEP[\"release のイメージは残る\"]\n  DEL[\"ほかのイメージは 90 日後に削除\"]\n  BAD[\"⚠ B: 優先度 1 が全イメージを 90 日で削除 → release も消える\"]\n  PUSH -- \"イメージ\" --> ECR\n  ECR -- \"規則\" --> R1\n  R1 == \"合った物は優先度 2 で消えない\" ==> KEEP\n  R1 -- \"合わない物\" --> R2\n  R2 --> DEL\n  BAD -.-> ECR",
+      "alt": "ECR のライフサイクルポリシーで release タグのイメージを優先度 1 の規則で選び、上限を大きくして残す（A）。優先度 2 の 90 日の削除はほかのイメージだけに効く。優先度を逆にすると release も消える（B）。"
+    },
+    {
+      "id": "q-1.3-0003",
+      "source": "flowchart TB\n  CEN[\"中央のチーム\"]\n  KMS@{ svc: \"AWS KMS\", label: \"カスタマーマネージドキー\" }\n  subgraph DOM[\"✔ D: 1 つのドメイン\"]\n    RA@{ svc: \"AWS CodeArtifact\", label: \"チーム A のリポジトリ\" }\n    RB@{ svc: \"AWS CodeArtifact\", label: \"チーム B のリポジトリ\" }\n  end\n  BADA[\"⚠ A: ドメインごとにポリシー → 1 か所で管理できない\"]\n  BADB[\"⚠ B: 共有リポジトリ 1 つ → チームごとの要件に反する\"]\n  CEN -- \"ドメインポリシーで一括管理\" --> DOM\n  KMS -- \"全資産を暗号化\" --> DOM\n  BADA -.-> DOM\n  BADB -.-> RA",
+      "alt": "1 つの KMS キーで暗号化した 1 つのドメインの中に、チームごとのリポジトリを置く図。中央のチームはドメインポリシーで使えるアカウントや取得元を 1 か所で管理する（D）。ドメインを分ける案（A）や共有リポジトリ 1 つ（B）は要件に合わない。"
+    },
+    {
+      "id": "q-1.3-0004",
+      "source": "flowchart TB\n  subgraph ACCB[\"アカウント B\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（サービスロール）\" }\n  end\n  subgraph ACCA[\"アカウント A\"]\n    ECR@{ svc: \"Amazon ECR\", label: \"✔ A: リポジトリポリシーで pull を許可\" }\n    CA@{ svc: \"AWS CodeArtifact\", label: \"✔ B: ドメインポリシーでアカウント B を許可\" }\n  end\n  BADC[\"⚠ C: リポジトリを公開（できない・禁止）\"]\n  BADD[\"⚠ D: IAM ユーザーのアクセスキー（長期の認証情報）\"]\n  CB == \"イメージの取得\" ==> ECR\n  CB == \"ロールで認可トークン→パッケージ\" ==> CA\n  BADC -.-> CA\n  BADD -.-> CB",
+      "alt": "アカウント B の CodeBuild が、アカウント A の ECR からイメージを、CodeArtifact からパッケージを取る図。ECR はリポジトリポリシー（A）、CodeArtifact はドメインポリシーとロールのトークン（B）で許す。公開や長期のアクセスキーは要件に反する。"
+    },
+    {
+      "id": "q-1.3-0005",
+      "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（dist/ に出力）\" }\n  DIST[\"dist/ の中: assets/ と views/\"]\n  OUT[\"成果物の最上位: assets/ と views/（構造は保つ）\"]\n  BADB[\"⚠ B: dist/ ごと入り、最上位に中身が来ない\"]\n  BADC[\"⚠ C・D: discard-paths で構造が平らになる\"]\n  CB -- \"出力\" --> DIST\n  DIST == \"✔ A: files '**/*' + base-directory dist\" ==> OUT\n  DIST -.-> BADB\n  DIST -.-> BADC",
+      "alt": "buildspec の artifacts の設定の図。base-directory に dist、files に 「**/*」 を指定すると、dist の中身が最上位に入りサブディレクトリの構造も残る（A）。dist 付きの指定（B）や discard-paths（C・D）では要件を満たさない。"
+    },
+    {
+      "id": "q-1.3-0006",
+      "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（buildspec の env）\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"prod/db の JSON キー password\" }\n  SSM@{ svc: \"AWS Systems Manager\", label: \"Parameter Store: API のエンドポイント\" }\n  ROLE[\"サービスロール: ssm:GetParameters\"]\n  BADC[\"⚠ C・E: 平文の環境変数・リポジトリに書くと見える\"]\n  BADD[\"⚠ D: json-key 無しは秘密の全文が返る\"]\n  SM == \"✔ A: secrets-manager prod/db:password\" ==> CB\n  SSM == \"✔ B: parameter-store の対応付け\" ==> CB\n  ROLE -- \"権限\" --> SSM\n  BADC -.-> CB\n  BADD -.-> SM",
+      "alt": "CodeBuild の buildspec の env で、Secrets Manager のパスワードは json-key を付けて値だけ取り（A）、Parameter Store の値は parameter-store の対応付けとサービスロールの権限で取る（B）。平文の環境変数や json-key 無しは要件に反する。"
+    },
+    {
+      "id": "q-1.3-0007",
+      "source": "flowchart TB\n  NET([\"インターネット（公開リポジトリ）\"])\n  subgraph VPC[\"VPC\"]\n    subgraph PRI[\"プライベートサブネット\"]\n      CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（VPC・サブネット・SG を設定）\" }\n      RDS@{ svc: \"Amazon RDS\", label: \"データベース（非公開）\" }\n    end\n    NAT@{ svc: \"Amazon VPC\", label: \"✔ B: NAT ゲートウェイ\" }\n  end\n  BADD[\"⚠ D: VPC の設定なし → RDS に届かない\"]\n  CB -- \"統合テスト\" --> RDS\n  CB == \"✔ B: パッケージ取得\" ==> NAT\n  NAT --> NET\n  CB -. \"⚠ C: ルート無し\" .-> NET\n  BADD -.-> RDS",
+      "alt": "VPC のプライベートサブネットの CodeBuild が、RDS に統合テストを行い、NAT ゲートウェイ経由で公開リポジトリからパッケージを取る図（B）。ルートが無い構成（C）や VPC 設定なし（D）では片方に届かない。"
+    },
+    {
+      "id": "q-1.3-0008",
+      "source": "flowchart TB\n  LIB[\"共有ライブラリ\"]\n  LAYER@{ svc: \"AWS Lambda\", label: \"✔ A: レイヤー（.zip）として公開\" }\n  ZIPF@{ svc: \"AWS Lambda\", label: \".zip の関数 ×5\" }\n  IMG[\"パイプラインでビルドしたコンテナイメージ\"]\n  PAY@{ svc: \"AWS Lambda\", label: \"✔ B: payments 用の新しい関数（イメージ）\" }\n  BADC[\"⚠ C: 既存の関数の種類は変えられない\"]\n  BADD[\"⚠ D: レイヤーは .zip で作る（イメージ不可）\"]\n  LIB -- \"まとめる\" --> LAYER\n  LAYER == \"共有して付ける\" ==> ZIPF\n  IMG == \"新しく作る\" ==> PAY\n  BADC -.-> PAY\n  BADD -.-> LAYER",
+      "alt": "共有ライブラリは .zip のレイヤーにして 5 つの .zip の関数で共有する（A）。payments は既存の関数の種類を変えられないので、コンテナイメージから新しい関数を作る（B）。"
+    },
+    {
+      "id": "q-1.3-0009",
+      "source": "flowchart TB\n  SCH[\"毎週のスケジュール\"]\n  subgraph IB[\"✔ C: EC2 Image Builder のパイプライン\"]\n    BLD[\"EC2 Image Builder<br/>ビルドコンポーネント（パッチ・強化）\"]\n    TST[\"EC2 Image Builder<br/>テストコンポーネント（確認）\"]\n  end\n  DIST[\"配布設定: 合格した AMI だけ配布\"]\n  TEAM[\"チーム\"]\n  BADB[\"⚠ B: 毎週の開始が手作業\"]\n  BADD[\"⚠ D: テスト無し → 未確認の AMI が渡る\"]\n  SCH -- \"自動で開始\" --> BLD\n  BLD -- \"AMI\" --> TST\n  TST -- \"合格のみ\" --> DIST\n  DIST -- \"配布\" --> TEAM\n  BADB -.-> SCH\n  BADD -.-> DIST",
+      "alt": "スケジュールで毎週 Image Builder のパイプラインを動かし、ビルドコンポーネントでパッチと強化、テストコンポーネントで確認、合格した AMI だけを配布する（C）。手作業の開始（B）やテスト無し（D）は要件に合わない。"
+    },
+    {
+      "id": "q-1.3-0010",
+      "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    PIPE[\"EC2 Image Builder<br/>パイプライン（AMI をビルド）\"]\n    LT1@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    LT2@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  subgraph AP[\"ap-southeast-2\"]\n    LT3@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  BAD[\"⚠ A: setDefaultVersion false → デフォルトは古い AMI のまま\"]\n  PIPE == \"✔ D: 配布 + 新版をデフォルトに\" ==> LT1\n  PIPE == \"✔ D: AMI を配布 + 新版\" ==> LT2\n  PIPE == \"✔ D: AMI を配布 + 新版\" ==> LT3\n  BAD -.-> LT2",
+      "alt": "Image Builder の配布設定に 3 つのリージョンの配布を追加し、各配布で起動テンプレートを指定して setDefaultVersion を true のままにすると、新しい AMI がデフォルトバージョンになる（D）。false にすると古い AMI のまま（A）。"
+    },
+    {
+      "id": "q-1.3-0011",
+      "source": "flowchart TB\n  IB[\"EC2 Image Builder<br/>パイプライン（AMI をビルド）\"]\n  INS@{ svc: \"Amazon Inspector\", label: \"✔ A: 脆弱性のスキャン\" }\n  FAIL[\"許容より重大な検出 → イメージを失敗（AMI を作らない）\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"✔ B: 検出結果のイベントのルール\" }\n  SEC[\"セキュリティチーム（SNS トピックで受信）\"]\n  BADC[\"⚠ C: 独自スキャナーの保守が要る\"]\n  BADE[\"⚠ E: 手作業の確認・自動の通知ではない\"]\n  IB -- \"AMI\" --> INS\n  INS == \"重大度の条件\" ==> FAIL\n  INS -- \"検出結果のイベント\" --> EB\n  EB == \"SNS で通知\" ==> SEC\n  BADC -.-> INS\n  BADE -.-> SEC",
+      "alt": "Image Builder で Inspector のスキャンを有効にして許容より重大な検出なら AMI を失敗させ（A）、検出結果のイベントを EventBridge のルールで SNS に流して自動通知する（B）。独自スキャナーや手作業の確認は要件に反する。"
+    }
+  ]
+}

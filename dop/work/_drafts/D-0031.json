@@ -1,0 +1,55 @@
+{
+  "item": "D-0031",
+  "diagrams": [
+    {
+      "id": "q-5.3-0001",
+      "source": "flowchart TB\n  ENG[\"チーム\"]\n  subgraph EC2G[\"EC2 インスタンス\"]\n    AG@{ svc: \"Amazon EC2\", label: \"CodeDeploy エージェント\" }\n    OLD[\"前に成功したデプロイの ApplicationStop（バグあり）\"]\n  end\n  CD@{ svc: \"AWS CodeDeploy\", label: \"新しいデプロイ（修正したリビジョン）\" }\n  ENG -- \"✔ A: --ignore-application-stop-failures\" --> CD\n  CD -- \"リビジョン\" --> AG\n  AG -- \"ApplicationStop は前の物を実行\" --> OLD\n  OLD -. \"⚠ B・C: 同じ失敗がくり返す\" .-> CD\n  AG -. \"⚠ D: 入れ直しても変わらない\" .-> OLD\n",
+      "alt": "CodeDeploy のエージェントは ApplicationStop を前に成功したデプロイのスクリプトから実行するため、修正したリビジョンでも失敗する。失敗を無視するオプション付きでデプロイする A が正解。"
+    },
+    {
+      "id": "q-5.3-0002",
+      "source": "flowchart TB\n  ENG[\"チーム\"]\n  subgraph STK[\"CloudFormation のスタック\"]\n    F@{ svc: \"AWS CloudFormation\", label: \"UPDATE_ROLLBACK_FAILED\" }\n    C@{ svc: \"AWS CloudFormation\", label: \"UPDATE_ROLLBACK_COMPLETE\" }\n    U@{ svc: \"AWS CloudFormation\", label: \"更新を適用\" }\n  end\n  ENG -- \"原因を手で修正\" --> F\n  F == \"✔ C: ロールバックを続行\" ==> C\n  C == \"もう一度更新\" ==> U\n  F -. \"⚠ A: この状態では更新できない\" .-> U\n  F -. \"⚠ D: 削除は要件に反する\" .-> X[\"スタックを削除\"]\n",
+      "alt": "更新のロールバックに失敗したスタックは、原因を直した後でロールバックを続行して UPDATE_ROLLBACK_COMPLETE にし、そこから再更新する。A の更新やD の削除は不適切で、C が正解。"
+    },
+    {
+      "id": "q-5.3-0003",
+      "source": "flowchart TB\n  subgraph PL[\"パイプライン\"]\n    ST@{ svc: \"AWS CodePipeline\", label: \"ステージ（テスト 3 並列）\" }\n    A1[\"テスト 1（成功）\"]\n    A2[\"テスト 2（成功）\"]\n    A3[\"テスト 3（失敗）\"]\n  end\n  ST --> A1\n  ST --> A2\n  ST --> A3\n  A3 == \"✔ A: 失敗したアクションだけ再試行\" ==> ST\n  ST == \"✔ B: 失敗時の自動再試行は 1 回\" ==> ST\n  ST -. \"⚠ C: ステージの全アクションをやり直す\" .-> A1\n  ST -. \"⚠ D: パイプラインを最初から\" .-> SRC[\"ソースのステージ\"]\n",
+      "alt": "並列テストの 1 つが失敗した時、失敗したアクションだけを再試行し(A)、ステージの自動再試行は 1 回だけ設定する(B)。ステージ全体や最初からのやり直しは要件に反する。"
+    },
+    {
+      "id": "q-5.3-0004",
+      "source": "flowchart TB\n  subgraph PL[\"新しいパイプライン\"]\n    R1@{ svc: \"AWS CodePipeline\", label: \"Deploy ステージ（1 回目の実行）\" }\n    OK[\"戻り先の成功した実行\"]\n  end\n  R1 -- \"失敗\" --> RB[\"自動ロールバック\"]\n  OK -. \"✔ C: 成功した実行が無いので戻れない\" .-> RB\n  RB -. \"⚠ A: CodeDeploy 限定ではない\" .-> R1\n  RB -. \"⚠ D: 手動の再試行は条件ではない\" .-> R1\n",
+      "alt": "自動ロールバックは、そのステージに戻り先となる成功した実行が 1 回以上ある時だけ動く。最初の実行が失敗した新しいパイプラインでは戻れない。正解は C。"
+    },
+    {
+      "id": "q-5.3-0005",
+      "source": "flowchart TB\n  USER[\"顧客\"]\n  subgraph AWSA[\"AWS\"]\n    APP[\"新しいバージョンのアプリ\"]\n    CN@{ svc: \"Amazon CloudWatch Synthetics\", label: \"チェックアウトの Canary\" }\n    ART[\"失敗した回のスクリーンショット・ログ・ステップ報告\"]\n  end\n  USER -- \"影響が出る\" --> APP\n  CN -- \"テスト\" --> APP\n  CN -- \"成果物\" --> ART\n  APP == \"✔ D: まずロールバック\" ==> OLD[\"前のバージョン\"]\n  ART == \"✔ D: 後で成功した回と比べる\" ==> CAUSE[\"根本原因\"]\n  APP -. \"⚠ A・B: 影響が続く\" .-> USER\n  ART -. \"⚠ C: 成果物を消すと調べられない\" .-> CAUSE\n",
+      "alt": "新バージョンで Canary が失敗した時は、まずロールバックして顧客への影響を止め、失敗した回のスクリーンショットやログを成功した回と比べて原因を調べる(D)。"
+    },
+    {
+      "id": "q-5.3-0006",
+      "source": "flowchart TB\n  subgraph ECSX[\"Amazon ECS（Fargate）\"]\n    TK@{ svc: \"AWS Fargate\", label: \"新しいサービスのタスク\" }\n    ER@{ svc: \"AWS IAM\", label: \"タスク実行ロール\" }\n  end\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ\" }\n  ER == \"✔ D: イメージのプル権限を追加\" ==> ECR\n  ECR -- \"イメージ\" --> TK\n  TK -. \"⚠ A: タスクロールではプルできない\" .-> ECR\n  TK -. \"⚠ B: インスタンスロールは Fargate に効かない\" .-> ECR\n  ECR -. \"⚠ C: 誰でもプルできてしまう\" .-> ANY[\"どのプリンシパルも\"]\n",
+      "alt": "Fargate でイメージをプルするのはタスク実行ロール。そこに ECR のプル権限だけを足すのが最小権限で正解(D)。タスクロールやインスタンスロールでは直らない。"
+    },
+    {
+      "id": "q-5.3-0007",
+      "source": "flowchart TB\n  ENG[\"当番のエンジニア\"]\n  subgraph ECSX[\"Amazon ECS\"]\n    SV@{ svc: \"Amazon ECS\", label: \"サービス（タスクを入れ替え続ける）\" }\n    TK[\"停止したタスク（PENDING の後に消える）\"]\n  end\n  SV -- \"タスクを起動\" --> TK\n  SV -- \"イベント\" --> ENG\n  TK -- \"stopCode・stoppedReason\" --> ENG\n  ENG == \"✔ A: サービスのイベントを確認\" ==> SV\n  ENG == \"✔ B: 停止したタスクを describe\" ==> TK\n  TK -. \"⚠ C: 1 日待つと情報が消える\" .-> ENG\n",
+      "alt": "タスクが入れ替わり続ける時は、サービスのイベントで ECS の動きを見て(A)、停止したタスクの stopCode と stoppedReason を読む(B)。停止したタスクは早く確認しないと消える。"
+    },
+    {
+      "id": "q-5.3-0008",
+      "source": "flowchart TB\n  subgraph ASGX[\"Auto Scaling グループ\"]\n    ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"起動時ライフサイクルフック\" }\n    INS@{ svc: \"Amazon EC2\", label: \"新しいインスタンス\" }\n    SC[\"インストールのスクリプト（誤りあり）\"]\n  end\n  ASG -- \"起動\" --> INS\n  INS -- \"実行\" --> SC\n  SC -- \"abandon で完了\" --> TERM[\"インスタンス終了・入れ替え\"]\n  TERM -. \"続くと起動が遅くなる\" .-> ASG\n  SC == \"✔ A: 誤りを直して continue\" ==> OK[\"サービスに入る\"]\n  ASG -. \"⚠ B: 時間切れではない\" .-> SC\n  ASG -. \"⚠ C: 最大容量は関係ない\" .-> INS\n",
+      "alt": "起動時フックのスクリプトが失敗して abandon になると、インスタンスが入れ替わり起動も遅くなる。スクリプトの誤りを直して continue で完了させる A が正解。"
+    },
+    {
+      "id": "q-5.3-0009",
+      "source": "flowchart TB\n  subgraph ASGX[\"Auto Scaling グループ\"]\n    ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"ヘルスチェックの猶予期間\" }\n    INS@{ svc: \"Amazon EC2\", label: \"新しいインスタンス（起動に約 4 分）\" }\n  end\n  ELB@{ svc: \"Elastic Load Balancing\", label: \"ALB のヘルスチェック\" }\n  ASG -- \"起動\" --> INS\n  ELB -- \"ヘルスチェック\" --> INS\n  ASG == \"✔ D: 猶予期間を 4 分より長くする\" ==> INS\n  ELB -. \"⚠ A: 無効にすると要件に反する\" .-> ASG\n  INS -. \"⚠ B: 容量を増やしても同じ入れ替え\" .-> ASG\n",
+      "alt": "アプリの起動に 4 分かかるのに ELB のヘルスチェックで入れ替えられてしまう。猶予期間を起動時間より長くすれば、ヘルスチェックを残したまま解決する(D)。"
+    },
+    {
+      "id": "q-5.3-0010",
+      "source": "flowchart TB\n  subgraph VPCX[\"プライベートサブネット\"]\n    ND@{ svc: \"Amazon EC2\", label: \"新しいノード（ステータスチェックは正常）\" }\n  end\n  CF@{ svc: \"AWS CloudFormation\", label: \"ノードのスタック（ステージングから複製）\" }\n  EKS[\"Amazon EKS<br/>本番クラスター\"]\n  CF -- \"ClusterName パラメータ\" --> ND\n  ND -. \"⚠ 名前の不一致で参加できない\" .-> EKS\n  CF == \"✔ B: 名前を本番に合わせる\" ==> EKS\n  ND -. \"⚠ C: 原因でない\" .-> EKS\n  ND -. \"⚠ D: 通っている\" .-> CF\n",
+      "alt": "ステージングから複製したノードのスタックで ClusterName が本番クラスターの名前と一致しないと、ノードは参加できない。最初に確かめるのは B。"
+    }
+  ]
+}

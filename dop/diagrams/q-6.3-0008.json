@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0008",
+  "source": "flowchart TB\n  AUD([\"監査人<br/>誰がダウンロードしたか\"])\n  subgraph ACC[\"アカウント\"]\n    TR@{ svc: \"AWS CloudTrail\", label: \"証跡（管理イベントだけ）\" }\n    SEL[\"✔ A: 高度なイベントセレクター<br/>そのバケットと GetObject だけ\"]\n    B1@{ svc: \"Amazon S3\", label: \"機密のバケット\" }\n    B2@{ svc: \"Amazon S3\", label: \"利用の多い他のバケット（数百）\" }\n  end\n  B1 == \"データイベント\" ==> SEL\n  SEL --> TR\n  AUD -.-> TR\n  B2 -. \"⚠ B: 全バケットは費用が増える\" .-> TR\n  W[\"⚠ C: GetObject は既定では記録されない\"]\n  W -.- TR\n",
+  "alt": "機密の S3 バケットのダウンロードの記録を安く取る図。高度なイベントセレクターでそのバケットと GetObject だけのデータイベントを記録する（A）。全バケットの記録や管理イベントだけでは合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

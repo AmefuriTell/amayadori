@@ -1,0 +1,55 @@
+{
+  "item": "D-0014",
+  "diagrams": [
+    {
+      "id": "q-2.3-0001",
+      "source": "flowchart TB\n  ORG@{ svc: \"AWS Organizations\", label: \"組織（20 アカウント・3 リージョン）\" }\n  PP@{ svc: \"AWS Systems Manager\", label: \"✔ C: パッチポリシー 1 つ\" }\n  N[\"マネージドノード（EC2）\"]\n  X1[\"⚠ A・D: 場所ごとにウィンドウや関連付けを作る\"]\n  X2[\"⚠ B: 今すぐパッチ適用は手作業\"]\n  ORG -- \"組織を対象\" --> PP\n  PP == \"✔ 毎日スキャン・毎週インストール\" ==> N\n  X1 -. \"1 つの設定にならない\" .-> N\n  X2 -. \"毎日のスキャンも自動でない\" .-> N\n",
+      "alt": "AWS Organizations の 20 アカウント・3 リージョンのノードを、パッチポリシー 1 つで管理する図。毎日のスキャンと毎週のインストールを分けて設定できる C が正解で、場所ごとの作成（A・D）や手作業（B）は要件に反する。"
+    },
+    {
+      "id": "q-2.3-0002",
+      "source": "flowchart TB\n  PA[\"重大なパッチ（昨日リリース・未承認）\"]\n  PB@{ svc: \"AWS Systems Manager\", label: \"カスタムのパッチベースライン（7 日後に自動承認）\" }\n  W@{ svc: \"AWS Systems Manager\", label: \"毎週の Scan and install\" }\n  ND[\"マネージドノード（準拠と表示）\"]\n  AL[\"✔ A: 承認済みパッチの一覧に追加\"]\n  X1[\"⚠ B: 準拠でも未承認なので入っていない\"]\n  X2[\"⚠ C・D: Scan や Inventory は入れない\"]\n  PA -- \"まだ 7 日たっていない\" --> PB\n  AL ==> PB\n  PB -- \"承認したパッチだけ\" --> W\n  W -- \"インストール\" --> ND\n  X1 -.-> ND\n  X2 -.-> W\n",
+      "alt": "7 日後に自動承認するパッチベースラインでは、昨日出た重大なパッチは未承認のため、準拠と出ても入っていない。承認済みパッチの一覧に足す A が正解で、他の承認の決まりを変えずに次の Scan and install で入る。"
+    },
+    {
+      "id": "q-2.3-0003",
+      "source": "flowchart TB\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ A: State Manager の関連付け（毎日）\" }\n  N[\"Env=Prod のマネージドノード\"]\n  INV@{ svc: \"AWS Systems Manager\", label: \"✔ B: Inventory\" }\n  S3@{ svc: \"Amazon S3\", label: \"中央のバケット\" }\n  Q[\"コンプライアンスチーム\"]\n  X1[\"⚠ C: Inventory は集めるだけで入れない\"]\n  X2[\"⚠ D・E: 独自コードや今すぐパッチは要件に反する\"]\n  SM == \"タグで選び、無ければ入れる\" ==> N\n  N -- \"メタデータ\" --> INV\n  INV == \"集めて置く\" ==> S3\n  Q -- \"バージョンを照会\" --> S3\n  X1 -.-> INV\n  X2 -.-> SM\n",
+      "alt": "Env=Prod のタグのノードに State Manager の関連付けで毎日エージェントを入れ、Inventory でメタデータを中央の S3 に集めて照会する図。正解は A と B で、Inventory はソフトを入れない（C）。"
+    },
+    {
+      "id": "q-2.3-0004",
+      "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット\" }\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: Config ルール（作成・変更で評価）\" }\n  SSM@{ svc: \"AWS Systems Manager\", label: \"Automation のマネージドのドキュメント\" }\n  X1[\"⚠ B: 通知だけで修正は手作業\"]\n  X2[\"⚠ C: 独自の Lambda を書いて保守する\"]\n  X3[\"⚠ D: Inventory は設定を評価しない・毎日では遅い\"]\n  S3 -- \"作成・変更\" --> CFG\n  CFG == \"✔ A: 違反を noncompliant にして修復\" ==> SSM\n  SSM -- \"決められた操作で修正\" --> S3\n  X1 -.-> CFG\n  X2 -.-> SSM\n  X3 -.-> S3\n",
+      "alt": "S3 バケットの作成や変更を AWS Config のルールで評価し、違反したら Systems Manager Automation のマネージドのドキュメントで修復する図。コードを書かずに済む A が正解で、通知だけ（B）や独自 Lambda（C）は要件に合わない。"
+    },
+    {
+      "id": "q-2.3-0005",
+      "source": "flowchart TB\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ C: Standard ワークフロー\" }\n  EXT[\"外部の承認システム\"]\n  MG[\"マネージャー（応答に最大 3 日）\"]\n  X1[\"⚠ A・D: Express は最長 5 分・1 回以上\"]\n  X2[\"⚠ B: 毎分のポーリングは要件に反する\"]\n  SF -- \"依頼とタスクトークン\" --> EXT\n  EXT --> MG\n  MG -- \"応答\" --> EXT\n  EXT == \"SendTaskSuccess で再開\" ==> SF\n  X1 -.-> SF\n  X2 -.-> SF\n",
+      "alt": "承認システムの応答を最大 3 日待つワークフローの図。.waitForTaskToken で止まり、SendTaskSuccess で再開する Standard ワークフロー（C）が正解で、Express は最長 5 分のため合わない。"
+    },
+    {
+      "id": "q-2.3-0006",
+      "source": "flowchart TB\n  T@{ svc: \"AWS Step Functions\", label: \"Task ステート\" }\n  API[\"ときどきスロットリングする API\"]\n  R[\"✔ A: Retry 2 秒・5 回・倍々\"]\n  C[\"✔ B: States.ALL の Catch（最後に単独）\"]\n  N[\"NotifyOps ステート\"]\n  X1[\"⚠ C: MaxAttempts 0 は再試行しない\"]\n  X2[\"⚠ D: TaskFailed はタイムアウトに合わない\"]\n  T -- \"呼び出し\" --> API\n  API -- \"スロットリング\" --> R\n  R -- \"再試行\" --> T\n  R -- \"尽きた\" --> C\n  T -- \"タイムアウトなど他のエラー\" --> C\n  C == \"Next\" ==> N\n  X1 -.-> R\n  X2 -.-> C\n",
+      "alt": "Task ステートの再試行と Catch の図。スロットリングは 2 秒から倍にして 5 回まで Retry し（A）、尽きたものと他のエラーは States.ALL の Catch を最後に単独で置いて NotifyOps へ送る（B）。"
+    },
+    {
+      "id": "q-2.3-0007",
+      "source": "flowchart TB\n  SRC[\"非同期の呼び出し元\"]\n  FN@{ svc: \"AWS Lambda\", label: \"注文を処理する関数（実行ロールに送る権限）\" }\n  OK[\"✔ B: 成功時の送信先\"]\n  NG[\"✔ B: 失敗時の送信先（再試行の後）\"]\n  X1[\"⚠ A: 関数に try/catch のコードを足す\"]\n  X2[\"⚠ C: 失敗したイベントは捨てられる\"]\n  SRC -- \"イベント\" --> FN\n  FN -- \"成功の記録\" --> OK\n  FN == \"失敗の記録\" ==> NG\n  X1 -.-> FN\n  X2 -.-> NG\n",
+      "alt": "非同期で呼ばれる Lambda 関数に、成功時と失敗時の送信先を別々に設定する図。コードを変えずに両方の記録が残る B が正解で、何もしないと再試行後の失敗イベントは捨てられる（C）。"
+    },
+    {
+      "id": "q-2.3-0008",
+      "source": "flowchart TB\n  SRC[\"IoT データ（大量・高い頻度）\"]\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ D: Express ワークフロー\" }\n  SV[\"呼び出すサービス\"]\n  X1[\"⚠ A・C: Standard は長く動く処理向き\"]\n  X2[\"⚠ B: Express は waitForTaskToken を使えない\"]\n  SRC -- \"イベント\" --> SF\n  SF == \"リクエスト・レスポンス\" ==> SV\n  SV -- \"HTTP の応答\" --> SF\n  X1 -.-> SF\n  X2 -.-> SF\n",
+      "alt": "高い頻度で数秒の手順が動く IoT 取り込みの図。HTTP の応答で次に進めばよいので、リクエスト・レスポンス統合の Express ワークフロー（D）が正解で、Standard は長く動く処理向き、Express はコールバック待ちを使えない。"
+    },
+    {
+      "id": "q-2.3-0009",
+      "source": "flowchart TB\n  PB[\"Ansible のプレイブック一式\"]\n  SM[\"AWS Systems Manager State Manager<br/>✔ A: 関連付け（Role=web・毎日）\"]\n  DOC[\"AWS-ApplyAnsiblePlaybooks\"]\n  N[\"Role=web のノード\"]\n  X1[\"⚠ B: RunAnsiblePlaybook は非推奨\"]\n  X2[\"⚠ C: Run Command は 1 回きり\"]\n  X3[\"⚠ D: cron はノードごとの保守が要る\"]\n  PB -- \"一式\" --> DOC\n  SM -- \"作った時と毎日\" --> DOC\n  DOC == \"ローカルに写して実行\" ==> N\n  X1 -.-> DOC\n  X2 -.-> SM\n  X3 -.-> N\n",
+      "alt": "Ansible のプレイブック一式を、State Manager の関連付けで Role=web のノードに毎日適用する図。勧められている AWS-ApplyAnsiblePlaybooks を使う A が正解で、B は非推奨のドキュメント、C は 1 回きりである。"
+    },
+    {
+      "id": "q-2.3-0010",
+      "source": "flowchart TB\n  PK[\"AWS Systems Manager Distributor<br/>エージェントのパッケージ（承認済み）\"]\n  SM[\"AWS Systems Manager State Manager<br/>✔ D: 関連付け（スケジュール）\"]\n  N[\"全マネージドノード（入れ替わる）\"]\n  X1[\"⚠ A: Run Command は 1 回きり\"]\n  X2[\"⚠ B: 毎週の手作業\"]\n  X3[\"⚠ C: バージョンがばらつく\"]\n  PK -- \"承認済みのバージョン\" --> SM\n  SM == \"✔ D: 入れ直す\" ==> N\n  X1 -.-> N\n  X2 -.-> N\n  X3 -.-> N\n",
+      "alt": "Distributor でパッケージにした承認済みのエージェントを、State Manager の関連付けでスケジュールどおり全ノードに入れる図。入れ替わったノードや消えたエージェントにも自動で対応できる D が正解。"
+    }
+  ]
+}

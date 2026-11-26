@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0007",
+  "source": "flowchart TB\n  subgraph R[\"CodeBuild プロジェクト\"]\n  L@{ svc: \"AWS CodeBuild\", label: \"⚠ Lambda コンピューティング: docker build は失敗\" }\n  E@{ svc: \"AWS CodeBuild\", label: \"✔ A: EC2 コンピューティング\" }\n    PM[\"✔ B: privilegedMode を true\"]\n  end\n  ECR@{ svc: \"Amazon ECR\", label: \"イメージの push 先\" }\n  L -. \"⚠ C: privileged は Lambda で使えない\" .-> ECR\n  E == \"✔ A: 戻して docker build\" ==> ECR\n  PM == \"✔ B: Docker デーモンに必要\" ==> E\n  F[\"⚠ E: 予約容量のフリートは EC2 側の選択\"] -.-> L\n",
+  "alt": "Docker イメージをビルドして ECR に push する CodeBuild を Lambda から戻す図。Lambda コンピューティングは Docker ビルドに対応しないので EC2 に戻し（A）、privilegedMode を true にする（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0010",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"複数キーの JSON シークレット\" }\n  PS@{ svc: \"AWS Systems Manager\", label: \"✔ B: エンドポイント（SecureString）\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"buildspec の env\" }\n  end\n  SM == \"✔ A: secrets-manager＋json-key で API キー 1 つ\" ==> CB\n  PS == \"✔ B: parameter-store（ssm:GetParameters 必要）\" ==> CB\n  C[\"⚠ C: API キーを Parameter Store へコピー（推奨外）\"] -.-> PS\n  D[\"⚠ D: json-key 無しは全文＋jq の自作解析\"] -.-> SM\n  E[\"⚠ E: 平文の variables では暗号化されない\"] -.-> CB\n",
+  "alt": "1 つの JSON シークレットから API キー 1 つだけをビルドに渡し、暗号化が要るエンドポイントは Parameter Store の SecureString に置く図。json-key を指定する（A）、parameter-store で参照する（B）のが正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

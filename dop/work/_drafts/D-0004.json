@@ -1,0 +1,55 @@
+{
+ "item": "D-0004",
+ "diagrams": [
+  {
+   "id": "q-1.2-0001",
+   "source": "flowchart TB\n  GH[\"GitHub のプルリクエスト\"]\n  subgraph R[\"アカウント\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"Webhook のフィルター\" }\n    G1[\"✔ B: 1 グループに EVENT（PR 作成・更新）と BASE_REF が main\"]\n  end\n  GH -- \"Webhook イベント\" --> G1\n  G1 == \"✔ B: main 向けの PR だけ開始\" ==> CB\n  A[\"⚠ A: グループを分けるとどれか真で開始 → 他ブランチ向けでも動く\"] -.-> CB\n  C[\"⚠ C: 更新が入っていない / D: 更新に動かない\"] -.-> G1\n",
+   "alt": "Webhook のフィルターグループは中の全フィルターが真の時だけ真になる。1 グループに PR の作成・更新と BASE_REF が main を入れると、main 向けの PR だけでビルドが始まる（B）。グループを分ける A は他ブランチでも動く。"
+  },
+  {
+   "id": "q-1.2-0002",
+   "source": "flowchart TB\n  DEV[\"開発者\"]\n  subgraph R[\"CodeBuild ビルド（.NET）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"テストが test-results に NUnit 3 XML を出力\" }\n    RP[\"✔ A: reports セクション（file-format: NUNIT3XML）\"]\n  end\n  CB -- \"結果ファイル\" --> RP\n  RP == \"✔ A: 変換なしでテストレポート\" ==> DEV\n  B[\"⚠ B: file-format 無しは JUNITXML 扱い\"] -.-> RP\n  C[\"⚠ C: 変換手順を足すのは余計\"] -.-> CB\n  D[\"⚠ D: S3 に残るだけでレポートにならない\"] -.-> CB\n",
+   "alt": "NUnit 3 の XML 結果を CodeBuild のテストレポートで見る図。buildspec の reports に結果ファイルと file-format NUNIT3XML を指定する（A）。形式を省くと JUNITXML 扱いになり合わない（B）。"
+  },
+  {
+   "id": "q-1.2-0003",
+   "source": "flowchart TB\n  GH[\"GitHub\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"V2 パイプライン 1 つ\" }\n    TR[\"✔ D: トリガー pullRequest（main の Open と Update）＋ push（main）\"]\n  end\n  GH -- \"PR 作成・新リビジョン\" --> TR\n  GH -- \"main への push\" --> TR\n  TR == \"✔ D: 開始\" ==> CP\n  A[\"⚠ A: Closed は PR が閉じた時。新リビジョンで動かない\"] -.-> TR\n  B[\"⚠ B: CodeBuild の Webhook ではパイプラインは始まらない\"] -.-> CP\n  C[\"⚠ C: パイプラインが 2 つになる\"] -.-> CP\n",
+   "alt": "V2 パイプライン 1 つで、main 向け PR の作成と新リビジョン、main への push で開始する図。pullRequest フィルターに Open と Update、さらに push フィルターを入れる（D）。Closed では新リビジョンで動かない（A）。"
+  },
+  {
+   "id": "q-1.2-0004",
+   "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"リリースのたびに呼び出し\" }\n    DLT[\"✔ C: Distributed Load Testing on AWS\"]\n    SCH[\"✔ C: 毎週のスケジュール\"]\n    WEB[\"Web アプリケーション\"]\n  end\n  JM[\"既存の JMeter スクリプト\"]\n  JM -- \"そのまま使う\" --> DLT\n  CP == \"✔ C: 負荷テスト開始\" ==> DLT\n  SCH --> DLT\n  DLT -- \"数千の同時ユーザー\" --> WEB\n  A[\"⚠ A D: 負荷用サーバーを自分で管理\"] -.-> DLT\n",
+   "alt": "JMeter スクリプトを流用し、サーバーを管理せずに数千ユーザーの負荷をかける図。Distributed Load Testing on AWS をデプロイし、毎週のスケジュールとパイプラインからの呼び出しの両方で動かす（C）。"
+  },
+  {
+   "id": "q-1.2-0005",
+   "source": "flowchart TB\n  subgraph R[\"CodeBuild プロジェクト 1 つ\"]\n  B0@{ svc: \"AWS CodeBuild\", label: \"バッチビルド（ビルドファンアウト）\" }\n    P[\"✔ D: parallelism = 10\"]\n  B1@{ svc: \"AWS CodeBuild\", label: \"ビルド 1: テスト塊 1\" }\n  B2@{ svc: \"AWS CodeBuild\", label: \"ビルド 2〜10: 各テスト塊\" }\n  end\n  P == \"✔ D: 同じ設定で 2000 件を 10 個に分割\" ==> B0\n  B0 --> B1\n  B0 --> B2\n  A[\"⚠ A: マトリックスは設定の組み合わせごとに作る\"] -.-> B0\n  C[\"⚠ C: 10 回動かすだけで分割されない\"] -.-> B0\n",
+   "alt": "2000 件のテストを同じ設定のまま 10 個のビルドに分ける図。ビルドファンアウトのバッチビルドで parallelism を 10 にする（D）。ビルドマトリックスは設定の組み合わせごとに作るので合わない（A）。"
+  },
+  {
+   "id": "q-1.2-0006",
+   "source": "flowchart TB\n  PR[\"プルリクエスト\"]\n  subgraph R[\"バッチビルド\"]\n  M@{ svc: \"AWS CodeBuild\", label: \"✔ A: ビルドマトリックス（3 バージョン × 2 イメージ）\" }\n  B1@{ svc: \"AWS CodeBuild\", label: \"ビルド 1〜3: OS イメージ 1\" }\n  B2@{ svc: \"AWS CodeBuild\", label: \"ビルド 4〜6: OS イメージ 2\" }\n  end\n  PR --> M\n  M == \"✔ A: 6 通りを並列\" ==> B1\n  M == \"✔ A: 6 通りを並列\" ==> B2\n  B[\"⚠ B: ファンアウトは同じ設定のテスト分割\"] -.-> M\n  C[\"⚠ C: 6 プロジェクト / D: 順に実行\"] -.-> M\n",
+   "alt": "3 つのランタイムと 2 つの OS イメージの 6 通りを並列で 1 か所に定義する図。バッチビルドのビルドマトリックスで組み合わせごとにビルドを作る（A）。ファンアウトは同じ設定のテスト分割用（B）。"
+  },
+  {
+   "id": "q-1.2-0007",
+   "source": "flowchart TB\n  subgraph R[\"Amazon ECS サービス\"]\n  T@{ svc: \"Amazon ECS\", label: \"新しいタスク（読み込みに約 90 秒）\" }\n    HC[\"コンテナのヘルスチェック\"]\n    SP[\"✔ C: startPeriod = 120 秒\"]\n  end\n  HC -- \"起動中の失敗\" --> T\n  SP == \"✔ C: 起動中の失敗を数えない・その後は通常\" ==> HC\n  A[\"⚠ A: retries は 10 回まで\"] -.-> HC\n  B[\"⚠ B: interval は 300 秒まで・起動後も弱くなる\"] -.-> HC\n  D[\"⚠ D: timeout は 60 秒まで・遅さを解決しない\"] -.-> HC\n",
+   "alt": "起動に約 90 秒かかるコンテナが起動前に異常と判断される問題の図。startPeriod を 120 秒にすると起動中の失敗を数えず、起動後は通常どおり確かめる（C）。retries と timeout には上限があり解決しない。"
+  },
+  {
+   "id": "q-1.2-0008",
+   "source": "flowchart TB\n  subgraph R[\"Amazon ECS タスク\"]\n  APP@{ svc: \"Amazon ECS\", label: \"アプリのコンテナ\" }\n    HA[\"✔ B: essential のまま＋ヘルスチェックのコマンド\"]\n  SC@{ svc: \"Amazon ECS\", label: \"ログ転送のサイドカー\" }\n    ES[\"✔ A: essential = false\"]\n  end\n  SC -- \"クラッシュ\" --> X[\"アプリは動き続ける\"]\n  ES == \"✔ A: 他に影響しない\" ==> SC\n  HA == \"✔ B: タスクの健全性はアプリだけ\" ==> APP\n  C[\"⚠ C: essential のコンテナが 1 つは要る\"] -.-> R2[\"⚠ D: サイドカーの状態も健全性に入る / E: 省くと essential\"]\n",
+   "alt": "ログ転送のサイドカーが失敗してもアプリを動かし続ける図。サイドカーを essential false にし（A）、アプリには essential のままヘルスチェックを定義する（B）。両方 false（C）は essential が 1 つも無くなる。"
+  },
+  {
+   "id": "q-1.2-0009",
+   "source": "flowchart TB\n  subgraph R[\"CodeDeploy のデプロイ（EC2）\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"ライフサイクルイベント\" }\n    BI[\"BeforeInstall（インストール前）\"]\n    VS[\"ValidateService: 最大 4 分ポーリング\"]\n    TO[\"✔ D: タイムアウトを 300 秒に\"]\n  end\n  CD --> BI\n  CD -- \"最後のイベント\" --> VS\n  TO == \"✔ D: 4 分が収まる（今は 60 秒で失敗）\" ==> VS\n  A[\"⚠ A: 上限は 3600 秒\"] -.-> TO\n  B[\"⚠ B: インストール前では確かめにならない\"] -.-> BI\n  C[\"⚠ C: 確認なしは要件に反する\"] -.-> VS\n",
+   "alt": "ValidateService のポーリングが最大 4 分かかるのにタイムアウトが 60 秒で失敗する図。タイムアウトを 300 秒に増やせば確認を続けられる（D）。上限は 3600 秒（A）で、フックの削除や移動は要件に合わない。"
+  },
+  {
+   "id": "q-1.2-0010",
+   "source": "flowchart TB\n  DEV[\"開発者\"]\n  subgraph R[\"CodeBuild ビルド（Java）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"テストが JaCoCo XML を出力\" }\n    RG[\"✔ B: reports にコードカバレッジのレポートグループ＋JACOCOXML\"]\n  end\n  CB -- \"カバレッジのファイル\" --> RG\n  RG == \"✔ B: 行・分岐カバレッジをビルドごとに表示\" ==> DEV\n  A[\"⚠ A: 形式を省くと JUNITXML 扱い\"] -.-> RG\n  C[\"⚠ C: S3＋自作ダッシュボードは保守が重い\"] -.-> CB\n  D[\"⚠ D: EC2 の自前サーバーは保守が重い\"] -.-> CB\n",
+   "alt": "JaCoCo のカバレッジを CodeBuild で見る図。buildspec の reports にコードカバレッジのレポートグループと JACOCOXML の形式を指定する（B）。形式を省くと JUNITXML 扱いになる（A）。"
+  }
+ ]
+}
