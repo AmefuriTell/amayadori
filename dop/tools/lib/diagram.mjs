@@ -102,7 +102,11 @@ export async function renderAll(list, { previewDir } = {}) {
             const m = g.id.match(/(?:^|-)flowchart-(.+)-\d+$/);
             if (m && nodes[m[1]]) { g.setAttribute('data-service', nodes[m[1]]); g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0'); }
           }
-          return root.outerHTML;
+          // XML として書き出す。outerHTML は <br> のような HTML の形になり、
+          // <img> で読むと壊れた画像になる（講義の図は <img> で出す）
+          const xml = new XMLSerializer().serializeToString(root);
+          if (new DOMParser().parseFromString(xml, 'image/svg+xml').querySelector('parsererror')) throw new Error('SVG が XML として読めない');
+          return xml;
         }, [pre.mermaid, rid, pre.nodes]);
         let png;
         if (previewDir) {
