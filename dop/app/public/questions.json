@@ -16203,7 +16203,10 @@
           "quote": "Security Hub CSPM is not automatically enabled for an account based on the cross-Region aggregation configuration."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クロスリージョン集約は Security Hub CSPM を有効にしたリージョンのデータだけを集める。新しい ap-south-1 で Security Hub CSPM を有効にすれば、検出結果がホームリージョンに集まる(B)。"
+      }
     },
     {
       "id": "q-6.2-0002",
@@ -16273,7 +16276,10 @@
         }
       ],
       "low_confidence": true,
-      "note": "central configuration はレガシー（2026-11-25 の公式ドキュメント）。試験が古い形のままなら central configuration の選択肢が出る可能性がある"
+      "note": "central configuration はレガシー（2026-11-25 の公式ドキュメント）。試験が古い形のままなら central configuration の選択肢が出る可能性がある",
+      "diagram": {
+        "alt": "管理アカウントがセキュリティアカウントを委任管理者に指定し(A)、Security Hub CSPM の宣言型ポリシーを組織のルートにアタッチする(B)と、後から加わるアカウントも自動で有効化・設定される。"
+      }
     },
     {
       "id": "q-6.2-0003",
@@ -16327,7 +16333,10 @@
           "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "Control Tower のコントロールは OU 全体に当たり、1 アカウントだけ外せない。古いシステムのアカウントをコントロールのない別の OU に移す(C)のが最も手間が少ない。"
+      }
     },
     {
       "id": "q-6.2-0004",
@@ -16388,7 +16397,10 @@
           "quote": "If the traffic matches a rule, the rule is applied and we do not evaluate any additional rules."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "セキュリティグループは許可しか書けず、ネットワーク ACL は番号の小さい順に評価する。HTTPS の許可より小さい番号で悪意のある範囲を拒否するルールを置く(B)。"
+      }
     },
     {
       "id": "q-6.2-0005",
@@ -16449,7 +16461,10 @@
           "quote": "Must be explicitly allowed (stateless)"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ネットワーク ACL はステートレスなので、戻りの通信をアウトバウンドのルールで許可する必要がある(A)。セキュリティグループはステートフルで応答を自動で通すため、そこを変えても直らない。"
+      }
     },
     {
       "id": "q-6.2-0006",
@@ -16511,7 +16526,10 @@
           "quote": "Allow rules only"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS WAF のレートベースのルールを持つウェブ ACL を ALB に関連付けると、速すぎる送信元を自動で制限できる。IP の一覧を手で更新したりコードを書いたりしなくてよい(D)。"
+      }
     },
     {
       "id": "q-6.2-0007",
@@ -16585,7 +16603,10 @@
           "quote": "For example, you are assigned to look into findings or alerts uncovered by services such as Amazon GuardDuty and Amazon Inspector."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "管理アカウントがセキュリティアカウントを GuardDuty の委任管理者にしてメンバーで有効化し(A)、検出結果の根本原因は Amazon Detective で調べる(B)。VPC フローログを自分で作る必要はない。"
+      }
     },
     {
       "id": "q-6.2-0008",
@@ -16654,7 +16675,10 @@
           "quote": "You can configure a job to run only once for on-demand analysis and assessment, or on a recurring basis for periodic analysis, assessment, and monitoring."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "自動化された機密データ検出で全バケットを継続的に広く把握し(A)、規制対象の 3 バケットには独自の条件を付けた定期的な検出ジョブで深く分析する(B)。"
+      }
     },
     {
       "id": "q-6.2-0009",
@@ -16715,7 +16739,10 @@
           "quote": "This is the case even if the data matches the criteria of a managed data identifier or a custom data identifier."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "従業員 ID は正規表現のカスタムデータ識別子で見つけ、サンプルのカード番号だけを許可リストに入れて報告から外す(C)。本物のカード番号はマネージドデータ識別子が引き続き報告する。"
+      }
     },
     {
       "id": "q-6.2-0010",
@@ -16777,7 +16804,10 @@
           "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Macie を Organizations と統合してセキュリティアカウントを管理者に指定すれば、各アカウントにサインインせずにメンバーで Macie を有効にし、バケットの情報を確認できる(D)。"
+      }
     },
     {
       "id": "q-6.2-0011",

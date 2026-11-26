@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0006",
+  "source": "flowchart TB\n  ATK[\"攻撃者（変化する IP の集合）\"]\n  USR[\"通常のユーザー\"]\n  WAF@{ svc: \"AWS WAF\", label: \"ウェブ ACL（レートベースのルール）<br/>速すぎる送信元を制限\" }\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  API[\"ログインの API\"]\n  ATK -- \"大量のリクエスト\" --> WAF\n  USR -- \"通常のリクエスト\" --> WAF\n  WAF == \"✔ D: 自動で制限\" ==> ALB\n  ALB --> API\n  A[\"⚠ A: NACL に IP の拒否を手で追加\"]\n  A -.-> ATK\n  B[\"⚠ B: SG に IP の拒否を追加（拒否は書けない）\"]\n  B -.-> ATK\n  C[\"⚠ C: ログを読む Lambda を書く（コードが要る）\"]\n  C -.-> ALB\n",
+  "alt": "AWS WAF のレートベースのルールを持つウェブ ACL を ALB に関連付けると、速すぎる送信元を自動で制限できる。IP の一覧を手で更新したりコードを書いたりしなくてよい(D)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0007",
+  "source": "flowchart TB\n  MGT[\"管理アカウント\"]\n    SEC@{ svc: \"Amazon GuardDuty\", label: \"セキュリティアカウント\" }\n    MEM@{ svc: \"Amazon GuardDuty\", label: \"メンバーアカウント\" }\n    DET@{ svc: \"Amazon Detective\", label: \"根本原因の調査\" }\n  MGT == \"✔ A: 委任管理者に指定\" ==> SEC\n  SEC -- \"✔ A: メンバーで有効化\" --> MEM\n  SEC == \"✔ B: 検出結果から調査\" ==> DET\n  C[\"⚠ C: 先に VPC フローログを作る（不要）\"]\n  C -.-> MEM\n  D[\"⚠ D: Detective で検出する（検出は GuardDuty）\"]\n  D -.-> MEM\n  E[\"⚠ E: セキュリティアカウントだけで有効化（メンバーは自動で入らない）\"]\n  E -.-> SEC\n",
+  "alt": "管理アカウントがセキュリティアカウントを GuardDuty の委任管理者にしてメンバーで有効化し(A)、検出結果の根本原因は Amazon Detective で調べる(B)。VPC フローログを自分で作る必要はない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

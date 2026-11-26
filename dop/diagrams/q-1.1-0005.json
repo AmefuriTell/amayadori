@@ -1,6 +1,6 @@
 {
   "id": "q-1.1-0005",
-  "source": "flowchart TB\n  GH[\"GitHub\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン（トリガー設定）\" }\n    TRG[\"✔ C: フィルター Tags / パターン release*\"]\n  end\n  GH -- \"タグ release1.0 作成\" --> TRG\n  TRG == \"✔ C: 開始\" ==> CP\n  GH -. \"⚠ A: main への push のたびに開始\" .-> CP\n  EB[\"⚠ B: EventBridge＋Lambda（自作コード）\"] -.-> CP\n  MAN[\"⚠ D: 毎回コンソールで手動リリース\"] -.-> CP\n",
+  "source": "flowchart TB\n  GH@{ svc: \"GitHub\", label: \"GitHub\" }\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン（トリガー設定）\" }\n    TRG[\"✔ C: フィルター Tags / パターン release*\"]\n  end\n  GH -- \"タグ release1.0 作成\" --> TRG\n  TRG == \"✔ C: 開始\" ==> CP\n  GH -. \"⚠ A: main への push のたびに開始\" .-> CP\n  EB[\"⚠ B: EventBridge＋Lambda（自作コード）\"] -.-> CP\n  MAN[\"⚠ D: 毎回コンソールで手動リリース\"] -.-> CP\n",
   "alt": "GitHub の release で始まるタグが作られた時だけ CodePipeline を始める図。トリガーのフィルターに Tags と release* を設定する（C）。ブランチフィルター（A）、自作コード（B）、手動（D）は要件に合わない。",
   "status": "verified",
   "created": "2026-11-26",

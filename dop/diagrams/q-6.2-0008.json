@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0008",
+  "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    ALL[\"数千の S3 バケット\"]\n    REG@{ svc: \"Amazon S3\", label: \"規制対象の 3 つのバケット\" }\n    AUTO@{ svc: \"Amazon Macie\", label: \"自動化された機密データ検出<br/>（サンプリング）\" }\n    JOB@{ svc: \"Amazon Macie\", label: \"定期的な検出ジョブ（毎月）\" }\n  end\n  AUTO == \"✔ A: 継続的に広く\" ==> ALL\n  JOB == \"✔ B: 独自の条件で深く\" ==> REG\n  C[\"⚠ C: 1 回限りのジョブ（継続監視しない）\"]\n  C -.-> ALL\n  D[\"⚠ D: 自動検出に全オブジェクトを深く調べさせる（サンプリング）\"]\n  D -.-> REG\n  E[\"⚠ E: バケットごとにカスタム識別子（監視の仕組みでない）\"]\n  E -.-> ALL\n",
+  "alt": "自動化された機密データ検出で全バケットを継続的に広く把握し(A)、規制対象の 3 バケットには独自の条件を付けた定期的な検出ジョブで深く分析する(B)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

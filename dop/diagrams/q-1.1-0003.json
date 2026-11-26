@@ -1,6 +1,6 @@
 {
   "id": "q-1.1-0003",
-  "source": "flowchart TB\n  GH[\"GitHub\"]\n  subgraph R[\"アカウント\"]\n  CFN@{ svc: \"AWS CloudFormation\", label: \"スタックが接続を作る\" }\n    CON[\"接続 AWS CodeConnections: PENDING\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン（ソース: GitHub）\" }\n    CONS[\"✔ D: コンソールで接続を編集 → AVAILABLE\"]\n  end\n  CFN -- \"作成\" --> CON\n  CONS == \"✔ D: セットアップ完了\" ==> CON\n  CON -- \"AVAILABLE ならアクセス可\" --> GH\n  CP --> CON\n  CON -. \"⚠ A: 待っても自動では変わらない\" .- CP\n  CON -. \"⚠ B: CLI で作り直しても PENDING\" .- CFN\n",
+  "source": "flowchart TB\n  GH@{ svc: \"GitHub\", label: \"GitHub\" }\n  subgraph R[\"アカウント\"]\n  CFN@{ svc: \"AWS CloudFormation\", label: \"スタックが接続を作る\" }\n    CON[\"接続 AWS CodeConnections: PENDING\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン（ソース: GitHub）\" }\n    CONS[\"✔ D: コンソールで接続を編集 → AVAILABLE\"]\n  end\n  CFN -- \"作成\" --> CON\n  CONS == \"✔ D: セットアップ完了\" ==> CON\n  CON -- \"AVAILABLE ならアクセス可\" --> GH\n  CP --> CON\n  CON -. \"⚠ A: 待っても自動では変わらない\" .- CP\n  CON -. \"⚠ B: CLI で作り直しても PENDING\" .- CFN\n",
   "alt": "CloudFormation が作った GitHub への接続は PENDING のままで、パイプラインはアクセスできない。コンソールで接続を編集してセットアップすると AVAILABLE になる（D）。待つ（A）や CLI で作り直す（B）では変わらない。",
   "status": "verified",
   "created": "2026-11-26",

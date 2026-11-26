@@ -1,0 +1,12 @@
+{
+  "item": "F-0007",
+  "goal": "app/src/main.js を 400 行の決まりの中に収める。構成図を描く部分（取得のキャッシュ・事典を開く操作）を ui/diagram.js へ移す",
+  "findings": ["file:app/src/main.js"],
+  "plan": [
+    "app/src/ui/diagram.js に createDiagram(state, rerender) を作り、問題 ID ごとの SVG のキャッシュと renderDiagram(q) を持たせる（ui/speech.js の createSpeech と同じ形）",
+    "main.js は createDiagram を呼んで renderDiagram を受け取るだけにし、lookup と openGlossary の import のうち要らなくなった物を消す",
+    "node tools/app.mjs stamp で index.html の importmap に新しいファイルを足す"
+  ],
+  "invariants": ["画面の振る舞い・data-testid・文言は変えない", "試験のファイルは変えない", "e2e と unit の試験がすべて通る"],
+  "allow_test_changes": []
+}
