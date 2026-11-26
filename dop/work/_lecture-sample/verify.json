@@ -1,0 +1,87 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "where": "bullets[3]「CodeDeploy agent と権限の要否」",
+          "detail": "画面には5項目あるが、narration は「次の三つ」で、agent と権限の要否に触れていない（一つ目=in-place等、二つ目=トラフィックの移し方、三つ目=失敗時）。refs に C-0015 S1「The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform...」を挙げているのに、読み上げでは扱わない。bullets から外すか、narration に四つ目として足す。"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "where": "bullets[1]「in-place は短時間、利用できなくなることがある」",
+          "detail": "根拠は Beanstalk 限定。C-0017 S6「Because AWS Elastic Beanstalk performs an in-place update when you update your application versions, your application might become unavailable to users for a short period of time.」narration は「エラスティックビーンストークの説明では」と範囲を限っているが、bullet は in-place 一般の事実として書いており、画面と読み上げで範囲が食い違う。「Beanstalk の in-place 更新は…」のように限定する。"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s04",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s05",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s06",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s07",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s08",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s09",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s10",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s11",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s12",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "where": "narration「新しい環境を別に用意する、ブルーグリーンやイミュータブルが候補になります」",
+          "detail": "抜き出しでは、使えなくなる時間を避ける方法として挙がるのは blue/green のみ（C-0017 S6「To avoid this, perform a blue/green deployment.」）。Immutable は「元のインスタンスに手が付かない」「途中で止まったローリングの問題を防ぐ」（C-0017 S5）で、停止時間を避けるとは書かれていない。また「インプレースの更新では短い間使えなくなる」も根拠は Beanstalk の in-place のみで、一般化している。イミュータブルを外すか、Beanstalk に限定する。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "verdict": "ok",
+      "issues": []
+    }
+  ]
+}
