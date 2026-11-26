@@ -1,0 +1,53 @@
+{
+  "id": "kms",
+  "name": "AWS Key Management Service (AWS KMS)",
+  "aliases": [
+    "AWS KMS",
+    "AWS Key Management Service (AWS KMS)"
+  ],
+  "reading": "ケーエムエス",
+  "summary": "データの暗号化や署名に使う鍵を、作って管理しやすくする AWS のサービス。KMS で作った鍵は、検証済みの専用のハードウェア（HSM）で守られ、暗号化されていない形で KMS の外に出ることはない。",
+  "features": [
+    {
+      "title": "鍵の一生を KMS の中で",
+      "text": "KMS の鍵は、作る・管理する・使う・消す、のすべてを KMS の中で行う。",
+      "source_id": "S8"
+    },
+    {
+      "title": "キーポリシー",
+      "text": "KMS の鍵に付けるリソースポリシーで、鍵へのアクセスを決める主な方法。どの鍵にも既定のキーポリシーがある。キーポリシー・IAM ポリシー・グラント（鍵の使用を許すもう 1 つの仕組み）のどれかで明示的に許可され、どれでも拒否されていない時だけ使える（ルートユーザーや鍵を作った人も同じ）。",
+      "source_id": "S9"
+    },
+    {
+      "title": "キーポリシーはリージョンごと",
+      "text": "世界共通の IAM ポリシーと違い、キーポリシーはリージョンごとで、同じリージョンの鍵へのアクセスだけを決める。",
+      "source_id": "S9"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "鍵を使わせたいのに使えない場面では、キーポリシー・IAM ポリシー・グラント（鍵の使用を許す仕組み）のどれかで明示的に許可されているか（どこでも拒否されていないか）を確かめる。",
+      "source_id": "S9"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html#overview",
+      "source_id": "S7",
+      "quote": "AWS Key Management Service (AWS KMS) is an AWS managed service that makes it easy for you to create and control the keys used to encrypt and sign your data."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html#service-kms-why",
+      "source_id": "S8",
+      "quote": "KMS keys are created, managed, used, and deleted entirely within AWS KMS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html#key-policies",
+      "source_id": "S9",
+      "quote": "Key policies are the primary way to control access to KMS keys."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
