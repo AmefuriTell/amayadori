@@ -223,7 +223,7 @@
      ]
     ]
    },
-   "narration": "ここからはログの部です。たまったログを調べる道具を二つ見ます。先に、クエリの対象の違いを言います。クラウドウォッチログスのログインサイツは、ロググループのログにクエリを書く道具です。アマゾンアテナは、表にクエリを動かすサービスです。どちらを選ぶかの基準は、この講義の資料には書かれていません。問題文では、調べたい物がロググループか表かを手がかりにしてください。ログインサイツから見ます。いくつかのコマンドは、パイプの記号で区切ってつなぎます。フィルターコマンドは、条件に合うログイベントだけを返します。アノマリーコマンドは、機械学習でログの中の珍しい型を見つけます。対象はログで、メトリクスの異常検出のアラームとは別物です。アテナでは、パーティションプロジェクションを使うと、細かく分割された表へのクエリを速くし、分割の管理を自動にできます。",
+   "narration": "ここからはログの部です。たまったログを調べる道具を二つ見ます。先に、クエリの対象の違いを言います。クラウドウォッチログスのログインサイツは、ロググループのログにクエリを書く道具です。アマゾンアテナは、表にクエリを動かすサービスです。どちらを選ぶかの基準は、この講義の資料には書かれていません。問題文では、調べたい物がロググループか表かを手がかりにしてください。ログインサイツから見ます。いくつかのコマンドは、パイプの記号で区切ってつなぎます。フィルターコマンドは、条件に合うログイベントだけを返します。アノマリーコマンドは、機械学習でログの中の珍しいパターンを見つけます。対象はログで、メトリクスの異常検出のアラームとは別物です。アテナでは、パーティションプロジェクションを使うと、細かく分割された表へのクエリを速くし、分割の管理を自動にできます。",
    "refs": [
     {
      "source_id": "S7",
@@ -260,7 +260,7 @@
     "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ<br/>subscription filter<br/>どの送り先にも gzip\" }\n  KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams\" }\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"Data Firehose\" }\n  OS@{ svc: \"Amazon OpenSearch Service\", label: \"Amazon OpenSearch Service\" }\n  SC[\"stream consumer<br/>シャードを順に読む<br/>状態を持つ処理\"]\n  QC[\"queue consumer<br/>1 つずつ別々に<br/>状態を持たない処理\"]\n  LG --> KD\n  LG --> LA\n  LG --> FH\n  LG --> OS\n  KD --> SC\n  KD --> QC\n",
     "alt": "ロググループの subscription filter で、ログを Kinesis Data Streams・Lambda・Data Firehose・Amazon OpenSearch Service へ送れ、どの送り先にも gzip で圧縮されて届く。Kinesis Data Streams の読み手は 2 つ。stream consumer はシャードのレコードを順に読み状態を持つ処理に向き、queue consumer はレコードを 1 つずつ別々に受け取り状態を持たない処理に向く。"
    },
-   "narration": "ログの部の二枚目は、リアルタイムの分析です。サブスクリプションフィルターを使うと、ロググループのログを、ほかのサービスへ送れます。資料に挙がる送り先は、キネシスデータストリームズ、ラムダ、データファイアホース、オープンサーチサービスの四つです。どの送り先でも、ログはジージップで圧縮されて届きます。キネシスデータストリームズは、大量のレコードをリアルタイムで集めて処理するサービスです。シャードは、ストリームを分けた区切りと考えてください。読み手は、画面の下の二つです。ストリームコンシューマーは、シャードのレコードを順に読むので、前のレコードに頼る、状態を持つ処理に向きます。使い道の例には、異常や型の検出が挙がっています。キューコンシューマーは、レコードを一つずつ別々に受け取るので、状態を持たない処理に向きます。",
+   "narration": "ログの部の二枚目は、リアルタイムの分析です。サブスクリプションフィルターを使うと、ロググループのログを、ほかのサービスへ送れます。資料に挙がる送り先は、キネシスデータストリームズ、ラムダ、データファイアホース、オープンサーチサービスの四つです。どの送り先でも、ログはジージップで圧縮されて届きます。キネシスデータストリームズは、大量のレコードをリアルタイムで集めて処理するサービスです。シャードは、ストリームを分けた区切りと考えてください。読み手は、画面の下の二つです。ストリームコンシューマーは、シャードのレコードを順に読むので、前のレコードに頼る、状態を持つ処理に向きます。用途の例に、異常やパターンの検出があります。キューコンシューマーは、レコードを一つずつ別々に受け取るので、状態を持たない処理に向きます。",
    "refs": [
     {
      "source_id": "S10",
@@ -550,7 +550,7 @@
    "bullets": [
     "アカウントをまたぐ → 設定が要る",
     "ロググループ → Logs Insights",
-    "ログの珍しい型 → anomaly コマンド"
+    "珍しいパターン → anomaly コマンド"
    ],
    "visual": {
     "type": "compare",
@@ -576,7 +576,7 @@
       "| でコマンドをつなぐ"
      ],
      [
-      "ログの珍しい型を探す",
+      "珍しいパターンを探す",
       "anomaly コマンド",
       "対象はログ"
      ],
@@ -587,7 +587,7 @@
      ]
     ]
    },
-   "narration": "二枚目は、ダッシュボードと、ログの調べ方です。別々のリージョンのリソースを一つの画面で見たいなら、ダッシュボードです。アカウントもまたぎたいなら、クロスアカウントオブザーバビリティの設定が先に要り、監視のアカウントにダッシュボードを作ります。ロググループのログをクエリで調べたいなら、ログインサイツです。ログの中の珍しい型を探したいなら、ログインサイツのアノマリーコマンドです。対象はログです。一枚目の異常検出のアラームは対象がメトリクスなので、別物です。細かく分割された表へのクエリを速くしたいなら、アテナのパーティションプロジェクションです。",
+   "narration": "二枚目は、ダッシュボードと、ログの調べ方です。別々のリージョンのリソースを一つの画面で見たいなら、ダッシュボードです。アカウントもまたぎたいなら、クロスアカウントオブザーバビリティの設定が先に要り、監視のアカウントにダッシュボードを作ります。ロググループのログをクエリで調べたいなら、ログインサイツです。ログの中の珍しいパターンを探したいなら、ログインサイツのアノマリーコマンドです。対象はログです。一枚目の異常検出のアラームは対象がメトリクスなので、別物です。細かく分割された表へのクエリを速くしたいなら、アテナのパーティションプロジェクションです。",
    "refs": [
     {
      "source_id": "S6",
@@ -731,7 +731,7 @@
      ]
     ]
    },
-   "narration": "四枚目は、トレースと、コンフィグです。エーピーアイゲートウェイの要求を追いたいなら、ステージのアクティブトレーシングです。追えるのはレストエーピーアイだけです。イーシーエスのアプリケーションを追いたいなら、デーモンのコンテナを自分で置きます。イメージは、エックスレイがイーシーアールに用意しています。ラムダから外への呼び出しまで記録したいなら、エックスレイのエスディーケーを同梱します。これは資料どおりの答えです。今はオープンテレメトリーが勧められている点は、注意として押さえます。記録する要求を選びたいなら、サンプリングルールです。設定をあるべき設定と比べたいなら、コンフィグルールです。インスペクターのスキャンを確かめるルールも例にありました。",
+   "narration": "四枚目は、トレースと、コンフィグです。エーピーアイゲートウェイの要求を追いたいなら、ステージのアクティブトレーシングです。追えるのはレストエーピーアイだけです。イーシーエスのアプリケーションを追いたいなら、デーモンのコンテナを自分で置きます。イメージは、エックスレイがイーシーアールに用意しています。ラムダから外への呼び出しまで記録したいなら、エックスレイのエスディーケーを同梱します。資料どおりの設定です。今はオープンテレメトリーが勧められている点は、注意として押さえます。記録する要求を選びたいなら、サンプリングルールです。設定をあるべき設定と比べたいなら、コンフィグルールです。インスペクターのスキャンを確かめるルールも例にありました。",
    "refs": [
     {
      "source_id": "S12",
@@ -780,8 +780,8 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph P1[\"メトリクス\"]\n    CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>anomaly detection・<br/>アラームの動作・<br/>ダッシュボード\" }\n  end\n  subgraph P2[\"ログ\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>anomaly コマンド・<br/>subscription filter\" }\n    AT@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>partition projection\" }\n    KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams<br/>シャードを順に読む\" }\n  end\n  subgraph P3[\"トレース\"]\n    XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サービスごとの設定・<br/>sampling rules\" }\n  end\n  subgraph P4[\"設定と操作の記録\"]\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>Config rules\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"AWS CloudTrail<br/>90 日より長くは<br/>trail か Lake\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n",
-    "alt": "講義の地図に戻ったまとめ。扱った順に 4 つの部を並べた図で、処理の流れではない。メトリクスの部は CloudWatch の anomaly detection・アラームの動作・ダッシュボード。ログの部は CloudWatch Logs の anomaly コマンドと subscription filter、Amazon Athena の partition projection、シャードを順に読む Kinesis Data Streams。トレースの部はサービスごとの AWS X-Ray の設定と sampling rules。設定と操作の記録の部は AWS Config の Config rules と、90 日より長くは trail か Lake を使う AWS CloudTrail。"
+    "source": "flowchart TB\n  subgraph P1[\"メトリクス\"]\n    CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>anomaly detection・<br/>アラームの動作・<br/>ダッシュボード\" }\n  end\n  subgraph P2[\"ログ\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>anomaly コマンド・<br/>subscription filter\" }\n    AT@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>partition projection\" }\n    KD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis Data Streams<br/>stream consumer は<br/>シャードを順に読む\" }\n  end\n  subgraph P3[\"トレース\"]\n    XR@{ svc: \"AWS X-Ray\", label: \"AWS X-Ray<br/>サービスごとの設定・<br/>sampling rules\" }\n  end\n  subgraph P4[\"設定と操作の記録\"]\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>Config rules\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"AWS CloudTrail<br/>90 日より長くは<br/>trail か Lake\" }\n  end\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n",
+    "alt": "講義の地図に戻ったまとめ。扱った順に 4 つの部を並べた図で、処理の流れではない。メトリクスの部は CloudWatch の anomaly detection・アラームの動作・ダッシュボード。ログの部は CloudWatch Logs の anomaly コマンドと subscription filter、Amazon Athena の partition projection、stream consumer がシャードを順に読む Kinesis Data Streams。トレースの部はサービスごとの AWS X-Ray の設定と sampling rules。設定と操作の記録の部は AWS Config の Config rules と、90 日より長くは trail か Lake を使う AWS CloudTrail。"
    },
    "narration": "まとめです。最初の地図に戻ります。図は扱った順に部を並べた物で、処理の流れではありません。メトリクスの部では、アラームが評価する物、異常検出のアラーム、アラームの動作、ダッシュボードを見ました。ログの部では、たまったログを調べるログインサイツとアテナ、リアルタイムに分析するサブスクリプションフィルターとキネシスデータストリームズを見ました。トレースの部では、サービスごとのエックスレイの設定とサンプリングルールを見ました。設定と操作の記録の部では、コンフィグルールと、クラウドトレイルを見ました。問題文で迷ったら、四枚の表に戻ってください。",
    "refs": [
