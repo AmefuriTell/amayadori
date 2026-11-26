@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // 講義のツール: validate / verdict / gate / publish
 // 講義の項目（K-）の束は work/<ID>/lecture.json に
-//   { task, title, slides: [{ id, title, bullets, visual, narration, refs: [{ source_id, quote, url }] }] }。
+//   { task, title, slides: [{ id, title, bullets, visual, dialogue | narration, refs: [{ source_id, quote, url }] }] }。
+// dialogue は掛け合いの台本 [{ who: 'teacher' | 'student', text }]（先生 = 四国めたん、生徒 = ずんだもん）。
+// narration は 1 人で読む前の形（先生の 1 行として扱う）。
 // C3 の 2 人の検証役は work/<ID>/review-consistency.json と review-clarity.json を書く。
 // 出来上がりは lectures/<task>.json（講義の元）と app/public/lectures/<task>/（アプリが読む形・図・音声）。
 import fs from 'node:fs';
@@ -11,12 +13,12 @@ import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, to
 import { itemIdOf as idOf, requireState, referenceErrors, failToFeedback as toFeedback } from './lib/step.mjs';
 import { iconMap, renderAll } from './lib/diagram.mjs';
 import { parseSources } from './lib/text.mjs';
-import { synthesize, CREDIT } from './lib/tts.mjs';
+import { synthesize, creditOf, linesOf, VOICES } from './lib/tts.mjs';
 import { readability } from './dg.mjs';
 
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
-export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
+export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, dialogueMax: 5500, lineMax: 160, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
 // 読み上げで崩れる字: 英字・数字・記号（半角は全部、全角は英数字と括弧・かぎ括弧・斜線・中黒・矢印・コロンなど）
 const UNSPEAKABLE = /[\x21-\x7e０-９Ａ-Ｚａ-ｚ（）「」『』【】［］〔〕〈〉《》＜＞／・→←↑↓⇒：；＃＄％＆＊＋＝＠＼＾｜～〜]/g;
 // 台本 1 分あたりの字数（試作: 4,477 字で約 15 分。速さ 1.1）。音声を作らない時の見積もりに使う
@@ -28,6 +30,8 @@ const itemIdOf = (arg) => idOf(arg, { prefix: 'K', message: '講義の項目 ID�
 const width = (t) => [...String(t)].reduce((n, c) => n + (c.charCodeAt(0) < 128 ? 0.5 : 1), 0);
 const len = (t) => [...String(t ?? '')].length;
 const isText = (t) => typeof t === 'string' && t.trim().length > 0;
+/** スライドの台本の字数（掛け合いなら全部の行） */
+const spokenLen = (s) => linesOf(s).reduce((n, l) => n + len(l?.text), 0);
 
 function loadLecture(id) {
   const l = readJSON(paths.work(id, 'lecture.json'), null);
@@ -96,8 +100,11 @@ export function checkLecture(id, lec = loadLecture(id)) {
   if (!isText(lec.title)) top('講義の title が要る');
   const n = lec.slides.length;
   if (n < LIMITS.slidesMin || n > LIMITS.slidesMax) top(`スライドが ${n} 枚。${LIMITS.slidesMin}〜${LIMITS.slidesMax} 枚にする`);
-  const total = lec.slides.reduce((t, s) => t + len(s?.narration), 0);
-  if (total < LIMITS.narrationMin || total > LIMITS.narrationMax) top(`台本の合計が ${total} 字。${LIMITS.narrationMin}〜${LIMITS.narrationMax} 字にする`);
+  const total = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
+  const isDialogue = lec.slides.some((s) => Array.isArray(s?.dialogue));
+  const max = isDialogue ? LIMITS.dialogueMax : LIMITS.narrationMax;
+  if (total < LIMITS.narrationMin || total > max) top(`台本の合計が ${total} 字。${LIMITS.narrationMin}〜${max} 字にする`);
+  if (isDialogue && lec.slides.some((s) => s && !Array.isArray(s.dialogue))) top('掛け合いにするなら、全部のスライドを dialogue にする');
   const srcFile = paths.work(id, 'sources.md');
   const sources = fs.existsSync(srcFile) ? parseSources(fs.readFileSync(srcFile, 'utf8')) : null;
 
@@ -116,7 +123,18 @@ export function checkLecture(id, lec = loadLecture(id)) {
         else if (width(b) > LIMITS.bulletWidth) add(`要点が長い（${b}）。幅 ${LIMITS.bulletWidth} まで（全角 1・半角 0.5）`);
       }
     }
-    if (!isText(s.narration)) add('narration（台本）が要る');
+    if (Array.isArray(s.dialogue)) {
+      if (s.dialogue.length < 2) add('dialogue（掛け合い）は 2 行以上にする');
+      if (!s.dialogue.some((l) => l?.who === 'teacher')) add('dialogue に先生（teacher）の行が要る');
+      s.dialogue.forEach((l, k) => {
+        const at = `dialogue の ${k + 1} 行目`;
+        if (!l || !VOICES[l.who]) return add(`${at}: who は ${Object.keys(VOICES).join(' か ')} にする`);
+        if (!isText(l.text)) return add(`${at}: text が要る`);
+        if (len(l.text) > LIMITS.lineMax) add(`${at}が ${len(l.text)} 字。1 行は ${LIMITS.lineMax} 字までにして、相手の返しを挟む`);
+        const bad = [...new Set(l.text.match(UNSPEAKABLE) ?? [])];
+        if (bad.length) add(`${at}に読み上げで崩れる字がある（${bad.slice(0, 8).join(' ')}）。英字・数字・記号はかなや言葉に直す`);
+      });
+    } else if (!isText(s.narration)) add('dialogue（掛け合いの台本）か narration（台本）が要る');
     else {
       const bad = [...new Set(s.narration.match(UNSPEAKABLE) ?? [])];
       if (bad.length) add(`台本に読み上げで崩れる字がある（${bad.slice(0, 8).join(' ')}）。英字・数字・記号はかなや言葉に直す`);
@@ -213,7 +231,7 @@ const commands = {
     const unknown = [...new Set(results.flatMap((r) => r.unknown))];
     const details = errors.length ? writeReport(`${id}/validate.txt`, errors.map((e) => `${e.id ?? '(全体)'}\t${e.message}`).join('\n') + '\n') : undefined;
     if (!errors.length) setResult(id, 'C2_author', 'ok');
-    const chars = lec.slides.reduce((t, s) => t + len(s?.narration), 0);
+    const chars = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
     emit({
       ok: !errors.length,
       summary: errors.length
@@ -296,7 +314,7 @@ const commands = {
 
     // 音声を先に作る（失敗したら何も入れない）。作業の場所で作ってから写す
     const skipTTS = process.env.DOP_TTS === 'skip';
-    const chars = lec.slides.reduce((t, s) => t + len(s.narration), 0);
+    const chars = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
     let audio = null;
     if (!skipTTS) {
       const tmp = paths.work(id, 'audio');
@@ -308,7 +326,8 @@ const commands = {
     // 講義の元
     const srcFile = path.join(paths.lectures(), `${lec.task}.json`);
     const prev = readJSON(srcFile, null);
-    const source = { ...lec, credit: CREDIT, audio: !!audio, minutes, status: 'verified', created: prev?.created ?? today(), last_checked: today() };
+    const credit = creditOf(lec);
+    const source = { ...lec, credit, audio: !!audio, minutes, status: 'verified', created: prev?.created ?? today(), last_checked: today() };
     writeJSON(srcFile, source);
 
     // アプリが読む形・図・音声
@@ -326,12 +345,13 @@ const commands = {
       const visual = type === 'mermaid' ? { type, alt, svg: `visuals/${s.id}.svg` } : { type, ...rest };
       const sec = audio?.files.find((f) => f.id === s.id)?.seconds;
       return {
-        id: s.id, title: s.title, bullets: s.bullets, visual, narration: s.narration,
+        id: s.id, title: s.title, bullets: s.bullets, visual,
+        ...(Array.isArray(s.dialogue) ? { dialogue: s.dialogue } : { narration: s.narration }),
         refs: s.refs.map((r) => ({ quote: r.quote, url: r.url })),
         ...(audio ? { audio: `audio/${s.id}.mp3`, seconds: sec } : {}),
       };
     });
-    writeJSON(path.join(dir, 'lecture.json'), { task: lec.task, title: lec.title, credit: CREDIT, audio: !!audio, minutes, last_checked: source.last_checked, slides });
+    writeJSON(path.join(dir, 'lecture.json'), { task: lec.task, title: lec.title, credit, audio: !!audio, minutes, last_checked: source.last_checked, slides });
 
     // 一覧を書き直す
     const ldir = paths.lectures();

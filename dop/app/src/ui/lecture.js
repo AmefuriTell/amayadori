@@ -73,6 +73,18 @@ function renderRefs(refs) {
       r.url ? el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' })) : null))));
 }
 
+// 掛け合いの役の名前（声は先生 = 四国めたん、生徒 = ずんだもん）
+const SPEAKERS = { teacher: 'めたん先生', student: 'ずんだもん' };
+
+/** 台本。掛け合い（dialogue）なら話す人の名前を付けて 1 行ずつ、無ければ narration をそのまま */
+function renderScript(s) {
+  if (!Array.isArray(s.dialogue)) return el('p', { class: 'lec-script', text: s.narration ?? '' });
+  return el('dl', { class: 'lec-script lec-dialogue', 'data-testid': 'lecture-dialogue' },
+    s.dialogue.map((l) => el('div', { class: `lec-line ${l.who === 'student' ? 'student' : 'teacher'}` },
+      el('dt', { text: SPEAKERS[l.who] ?? l.who }),
+      el('dd', { text: l.text }))));
+}
+
 /** スライドの中身（番号・題・図・要点・台本・根拠） */
 function renderCard(s, i, n, url) {
   return el('section', { class: 'card lec-slide', 'data-testid': 'lecture-slide', 'aria-live': 'polite' },
@@ -81,7 +93,7 @@ function renderCard(s, i, n, url) {
     renderVisual(s.visual, url),
     el('ul', { class: 'lec-bullets', 'data-testid': 'lecture-bullets' }, (s.bullets ?? []).map((b) => el('li', { text: b }))),
     el('details', { class: 'lec-more', 'data-testid': 'lecture-script' },
-      el('summary', { text: '台本を読む' }), el('p', { class: 'lec-script', text: s.narration ?? '' })),
+      el('summary', { text: '台本を読む' }), renderScript(s)),
     renderRefs(s.refs ?? []));
 }
 

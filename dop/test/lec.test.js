@@ -127,3 +127,46 @@ test('lec gate と publish: verdict の後の書き換えを落とし、通れ�
   assert.deepEqual([sb.read(`work/${ID}/result.json`).state, sb.read(`work/${ID}/result.json`).result], ['C4_gate', 'fail']);
   assert.ok(sb.read(`work/${ID}/feedback.json`).slides);
 });
+
+const LINE_T = 'この方法では、新しい版を少しずつ入れ替えます。';
+const LINE_S = 'それって、全部を一度に替えるのとは違うのだ？';
+const talk = (n = 6) => Array.from({ length: n }, (_, k) => (k % 2 ? { who: 'student', text: LINE_S } : { who: 'teacher', text: LINE_T }));
+
+test('lec validate: 掛け合い（dialogue）を受け、話す人・行の長さ・読めない字・混在を返す', () => {
+  const sb = setup();
+  const ok = lecture(Array.from({ length: 12 }, (_, i) => { const s = slide(i + 1, { dialogue: talk(16) }); delete s.narration; return s; }));
+  sb.write(`work/${ID}/lecture.json`, ok);
+  const good = sb.run('lec', 'validate', ID);
+  assert.equal(good.ok, true, JSON.stringify(good));
+
+  const bad = structuredClone(ok);
+  bad.slides[1].dialogue[1] = { who: 'narrator', text: LINE_S };
+  bad.slides[2].dialogue[0] = { who: 'teacher', text: 'あ'.repeat(161) };
+  bad.slides[3].dialogue[0] = { who: 'teacher', text: 'CodeDeploy で入れ替えます。' };
+  bad.slides[4].dialogue = [{ who: 'student', text: LINE_S }, { who: 'student', text: LINE_S }];
+  bad.slides[5] = slide(6);
+  sb.write(`work/${ID}/lecture.json`, bad);
+  const r = sb.run('lec', 'validate', ID);
+  assert.equal(r.ok, false);
+  const all = r.items.join('\n');
+  assert.match(all, /s02: dialogue の 2 行目: who は teacher か student/);
+  assert.match(all, /s03: dialogue の 1 行目が 161 字/);
+  assert.match(all, /s04: dialogue の 1 行目に読み上げで崩れる字/);
+  assert.match(all, /s05: dialogue に先生（teacher）の行が要る/);
+  assert.match(all, /全部のスライドを dialogue にする/);
+});
+
+test('lec publish: 掛け合いなら 2 人の声のクレジットを付け、アプリへ dialogue を渡す', () => {
+  const sb = setup('C3_verify');
+  sb.write(`work/${ID}/lecture.json`, lecture(Array.from({ length: 12 }, (_, i) => { const s = slide(i + 1, { dialogue: talk(16) }); delete s.narration; return s; })));
+  sb.write(`work/${ID}/review-consistency.json`, review());
+  sb.write(`work/${ID}/review-clarity.json`, review());
+  assert.equal(sb.run('lec', 'verdict', ID).result, 'pass');
+  assert.equal(sb.run('lec', 'gate', ID).ok, true);
+  at(sb, 'C4_gate');
+  assert.equal(sb.run('lec', 'publish', ID).ok, true);
+  const app = sb.read('app/public/lectures/1.4/lecture.json');
+  assert.equal(app.credit, 'VOICEVOX:四国めたん、VOICEVOX:ずんだもん');
+  assert.deepEqual(app.slides[0].dialogue.slice(0, 2), talk(2));
+  assert.equal('narration' in app.slides[0], false);
+});
