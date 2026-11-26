@@ -9902,7 +9902,10 @@
           "quote": "If the target is part of an Auto Scaling group, it can be terminated and replaced."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "スケールインで終了するインスタンスが最大 90 秒のリクエストを処理中に切られ、500 番台のエラーが出る図。登録解除の遅延を最も長いリクエストより長い値（既定の 300 秒）にすると、処理中のリクエストが終わるまで待てる（D）。"
+      }
     },
     {
       "id": "q-3.3-0012",
@@ -9960,7 +9963,10 @@
           "quote": "If you set Evaluate Target Health to No, Route 53 continues to route traffic to the records that an alias record refers to even if health checks for those records are failing."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "2 つのリージョンのロードバランサーをレイテンシーのエイリアスのレコードで使う図。両方のレコードで Evaluate Target Health を Yes にすると、正常なリソースが無いリージョンを避けて、もう一方のリージョンへ送る（D）。"
+      }
     },
     {
       "id": "q-3.3-0013",
@@ -10021,7 +10027,10 @@
           "quote": "If a target in slow start mode becomes unhealthy, the target exits slow start mode."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ヘルスチェックのパスを変えた後、全 AZ の全ターゲットが同時に失敗しても、利用者のリクエストがターゲットに届いた図。ターゲットグループに unhealthy しか無いとロードバランサーはフェイルオープンになり、全ターゲットへ送る（C）。"
+      }
     },
     {
       "id": "q-3.3-0014",
@@ -10082,7 +10091,10 @@
           "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB のヘルスチェックを / から /health に変える図。/health はデータベースに届かない時に 503 を返すので、成功コードを 200 のままにすれば壊れたインスタンスが unhealthy になり、正常なターゲットにだけ送られる（B）。"
+      }
     },
     {
       "id": "q-4.1-0001",
