@@ -1,0 +1,72 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0010",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "Amazon Kinesis Data Streams"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A subscription filter sends a busy log group to an Amazon Kinesis Data Streams stream. The stream has enough total shards for the log volume, but the DeliveryThrottling metric is high because a few log streams produce most of the events. The filter uses the default distribution. Which change will MOST effectively reduce the throttling?",
+  "stem_ja": "サブスクリプションフィルターが、忙しいロググループを Amazon Kinesis Data Streams のストリームへ送っています。ストリームのシャードは合計でログの量に足りていますが、一部のログストリームがイベントのほとんどを出しているため、DeliveryThrottling のメトリクスが高くなっています。フィルターは既定の分配を使っています。スロットリングを最も効果的に減らす変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Shorten the log group's retention period so that fewer events are stored.",
+      "text_ja": "保存されるイベントが減るよう、ロググループの保持期間を短くする。"
+    },
+    {
+      "key": "B",
+      "text": "Rely on CloudWatch Logs retries, because throttled events are retried for up to 24 hours.",
+      "text_ja": "スロットリングされたイベントは最大 24 時間再試行されるので、CloudWatch Logs の再試行に任せる。"
+    },
+    {
+      "key": "C",
+      "text": "Set the subscription filter's distribution to random.",
+      "text_ja": "サブスクリプションフィルターの分配を random にする。"
+    },
+    {
+      "key": "D",
+      "text": "Change the stream's consumer to read records faster from each shard.",
+      "text_ja": "ストリームのコンシューマーを、各シャードからより速くレコードを読むように変える。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "既定では、ストリームへの分配はログストリームごとで、これがスロットリングの原因になりえます。サブスクリプションフィルターを作る時に分配を random にすると、スロットリングを減らせます。",
+    "per_choice": {
+      "A": "保持期間は保存の長さで、送る量や分配は変わりません。",
+      "B": "再試行は最大 24 時間で、その後は落とされます。スロットリングそのものは減りません。",
+      "C": "正しい。ログストリームごとの偏りをなくし、シャード全体に散らして送れます。",
+      "D": "スロットリングはストリームへの送り込みで起きており、読み出しの速さを変えても減りません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+      "source_id": "S8",
+      "quote": "By default, the stream filter distribution is by log stream and this can cause throttling."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+      "source_id": "S7",
+      "quote": "Throttled deliverables are retried for up to 24 hours. After 24 hours, the failed deliverables are dropped."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+      "source_id": "S9",
+      "quote": "the DeliveryThrottling metric can be used to track the number of log events for which CloudWatch Logs was throttled"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+      "source_id": "S8",
+      "quote": "Specify random for distribution when you create the subscription filter with PutSubscriptionFilter or put-subscription-filter."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

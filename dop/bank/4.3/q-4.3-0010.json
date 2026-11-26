@@ -1,0 +1,79 @@
+{
+  "task": "4.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.3-0010",
+  "services": [
+    "AWS Systems Manager",
+    "Amazon VPC"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "EC2 instances in private subnets have SSM Agent and the required IAM permissions, but they do not appear as Systems Manager managed nodes. The subnets have no route to the internet, and the security team will not allow outbound internet access. Which actions should a DevOps engineer take so that the instances can be managed by Systems Manager? (Choose TWO.)",
+  "stem_ja": "プライベートサブネットの EC2 インスタンスには SSM Agent と必要な IAM の権限がありますが、Systems Manager のマネージドノードとして表示されません。サブネットにはインターネットへのルートが無く、セキュリティチームは外向きのインターネットのアクセスを許しません。インスタンスを Systems Manager で管理できるようにするために、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create VPC endpoints for the ssm, ssmmessages, and ec2messages services in the VPC.",
+      "text_ja": "VPC に、ssm、ssmmessages、ec2messages のサービスの VPC エンドポイントを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Allow outbound HTTPS traffic on port 443 from the instances to the VPC endpoints.",
+      "text_ja": "インスタンスから VPC エンドポイントへの、443 番ポートの外向きの HTTPS の通信を許す。"
+    },
+    {
+      "key": "C",
+      "text": "Add an inbound rule for port 443 from Systems Manager to the instances' security group.",
+      "text_ja": "インスタンスのセキュリティグループに、Systems Manager からの 443 番ポートの受信のルールを足す。"
+    },
+    {
+      "key": "D",
+      "text": "Add a NAT gateway and a route to the internet so that SSM Agent can reach the public endpoints.",
+      "text_ja": "SSM Agent が公開のエンドポイントに届くよう、NAT ゲートウェイとインターネットへのルートを足す。"
+    },
+    {
+      "key": "E",
+      "text": "Install the CloudWatch agent on the instances so that they report their status to Systems Manager.",
+      "text_ja": "状態を Systems Manager へ報告するよう、インスタンスに CloudWatch エージェントを入れる。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "SSM Agent は Systems Manager のサービスへの接続をすべて自分から始め、ssm・ssmmessages・ec2messages のエンドポイントと HTTPS（443 番ポート）で通信します。インターネットへの外向きのアクセスを使わない時は、VPC エンドポイントを使います。",
+    "per_choice": {
+      "A": "正しい。インターネットに出ずに、SSM Agent が通信するエンドポイントへ VPC の中から届きます。",
+      "B": "正しい。SSM Agent は HTTPS の 443 番ポートで外向きに接続するので、エンドポイントへの外向きの通信を許します。",
+      "C": "SSM Agent が接続を始めるので、受信の通信を許す必要はありません。",
+      "D": "動きますが、外向きのインターネットのアクセスを許さないという要件に反します。",
+      "E": "状態を Systems Manager へ送るのは SSM Agent で、CloudWatch エージェントは関係ありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+      "source_id": "S7",
+      "quote": "The alternative to using a VPC endpoint is to allow outbound internet access on your managed instances."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+      "source_id": "S7",
+      "quote": "the managed instances must also allow HTTPS (port 443) outbound traffic to the following endpoints: ssm.region.amazonaws.com, ssmmessages.region.amazonaws.com, ec2messages.region.amazonaws.com."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+      "source_id": "S7",
+      "quote": "SSM Agent initiates all connections to the Systems Manager service in the cloud."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html#ssm-agent",
+      "source_id": "S1",
+      "quote": "SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Gateway Service (ssmmessages)."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

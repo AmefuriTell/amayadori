@@ -1,0 +1,169 @@
+{
+  "item": "C-0054",
+  "questions": [
+    {
+      "id": "q-4.2-0003",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A security team wants to detect suspicious login patterns from application logs that are already in CloudWatch Logs. Detection must start within a few minutes of each event, and the detection logic must read the events in order because each decision depends on earlier events. The team will run its own consumer application. Which solution BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create a daily CloudWatch Logs export task to Amazon S3, and have the application read the exported files."
+        },
+        {
+          "key": "B",
+          "text": "Create a subscription filter that sends the log events to an Amazon Kinesis Data Streams stream, and have the application consume the stream."
+        },
+        {
+          "key": "C",
+          "text": "Create a subscription filter that sends the log events to Amazon Data Firehose, which delivers them to Amazon S3 for the application to read."
+        },
+        {
+          "key": "D",
+          "text": "Have an operator run CloudWatch Logs Insights queries every hour and send suspicious results to the application."
+        }
+      ],
+      "explanation": {
+        "summary": "サブスクリプションでは CloudWatch Logs のログイベントをリアルタイムに Kinesis のストリームなどへ送れ、通常 3 分以内に届きます。Kinesis Data Streams のストリームのコンシューマーはシャードのレコードを順番に読むので、前のレコードに依存する状態を持つ処理や異常の検出に向きます。",
+        "per_choice": {
+          "A": "毎日のエクスポートでは、数分以内に検出を始めるという要件を満たせません。",
+          "B": "正しい。数分以内に届き、コンシューマーがシャードのレコードを順番に読めます。",
+          "C": "リアルタイムに送れますが、Firehose はためてから S3 へ届けるため、アプリケーションはファイルを読むことになり、順番に読むストリームの処理になりません。",
+          "D": "手作業で 1 時間ごとなので、数分以内という要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+          "source_id": "S2",
+          "quote": "Log events are sent to the receiving resource soon after being ingested, usually less than three minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+          "source_id": "S16",
+          "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html#key-concepts",
+          "source_id": "S18",
+          "quote": "Amazon Data Firehose buffers incoming streaming data to a certain size or for a certain period of time before delivering it to destinations."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A subscription filter sends a busy log group to an Amazon Kinesis Data Streams stream. The stream has enough total shards for the log volume, but the DeliveryThrottling metric is high because a few log streams produce most of the events. The filter uses the default distribution. Which change will MOST effectively reduce the throttling?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Set the subscription filter's distribution to random."
+        },
+        {
+          "key": "B",
+          "text": "Shorten the log group's retention period so that fewer events are stored."
+        },
+        {
+          "key": "C",
+          "text": "Rely on CloudWatch Logs retries, because throttled events are retried for up to 24 hours."
+        },
+        {
+          "key": "D",
+          "text": "Change the stream's consumer to read records faster from each shard."
+        }
+      ],
+      "explanation": {
+        "summary": "既定では、ストリームへの分配はログストリームごとで、これがスロットリングの原因になりえます。サブスクリプションフィルターを作る時に分配を random にすると、スロットリングを減らせます。",
+        "per_choice": {
+          "A": "正しい。ログストリームごとの偏りをなくし、シャード全体に散らして送れます。",
+          "B": "保持期間は保存の長さで、送る量や分配は変わりません。",
+          "C": "再試行は最大 24 時間で、その後は落とされます。スロットリングそのものは減りません。",
+          "D": "スロットリングはストリームへの送り込みで起きており、読み出しの速さを変えても減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "source_id": "S8",
+          "quote": "By default, the stream filter distribution is by log stream and this can cause throttling."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "source_id": "S7",
+          "quote": "Throttled deliverables are retried for up to 24 hours. After 24 hours, the failed deliverables are dropped."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "source_id": "S9",
+          "quote": "the DeliveryThrottling metric can be used to track the number of log events for which CloudWatch Logs was throttled"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "source_id": "S8",
+          "quote": "Specify random for distribution when you create the subscription filter with PutSubscriptionFilter or put-subscription-filter."
+        }
+      ]
+    },
+    {
+      "id": "q-4.2-0005",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "A security account in us-east-1 runs a central Amazon Kinesis Data Streams stream for log analysis. Application accounts have log groups in us-east-1 and eu-west-1 whose events must be sent to that central stream in real time. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "In the security account, create a CloudWatch Logs destination in each Region that has source log groups, and point each destination to the central stream in us-east-1."
+        },
+        {
+          "key": "B",
+          "text": "In the application accounts, create subscription filters on the log groups that use the destination in the same Region as each log group."
+        },
+        {
+          "key": "C",
+          "text": "Create subscription filters on the eu-west-1 log groups that use the destination that is in us-east-1."
+        },
+        {
+          "key": "D",
+          "text": "Create a daily export task in each application account that writes the logs to an S3 bucket in the security account."
+        },
+        {
+          "key": "E",
+          "text": "Create a separate Kinesis Data Streams stream in each application account, and have the analysis team poll every stream."
+        }
+      ],
+      "explanation": {
+        "summary": "別のアカウントのログイベントを、中央の Kinesis のストリームで受け取れます（クロスアカウントのデータ共有）。ロググループと送信先は同じリージョンにある必要がありますが、送信先が指す AWS のリソースは別のリージョンにあってもかまいません。",
+        "per_choice": {
+          "A": "正しい。各リージョンに送信先を作れば、ロググループと同じリージョンに置けて、送信先は us-east-1 の中央のストリームを指せます。",
+          "B": "正しい。各ロググループは同じリージョンの送信先を使うサブスクリプションフィルターで、イベントをリアルタイムに送ります。",
+          "C": "ロググループと送信先は同じリージョンにある必要があり、eu-west-1 のロググループから us-east-1 の送信先は使えません。",
+          "D": "毎日のエクスポートはリアルタイムではなく、要件を満たしません。",
+          "E": "中央のストリームで受け取る要件に合わず、読みに行くストリームも増えます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+          "source_id": "S11",
+          "quote": "this log event data can be read from a centralized Amazon Kinesis Data Streams or Firehose stream to perform custom processing and analysis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+          "source_id": "S12",
+          "quote": "The log group and the destination must be in the same AWS Region. However, the AWS resource that the destination points to can be located in a different Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+          "source_id": "S1",
+          "quote": "You can use subscriptions to get access to a real-time feed of log events from CloudWatch Logs"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0009",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "Amazon Kinesis Data Streams"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security team wants to detect suspicious login patterns from application logs that are already in CloudWatch Logs. Detection must start within a few minutes of each event, and the detection logic must read the events in order because each decision depends on earlier events. The team will run its own consumer application. Which solution BEST meets these requirements?",
+  "stem_ja": "セキュリティチームは、既に CloudWatch Logs にあるアプリケーションのログから、不審なログインのパターンを見つけたいと考えています。検出は各イベントから数分以内に始まる必要があり、各判断が前のイベントに依存するため、検出の処理はイベントを順番に読む必要があります。チームは自前のコンシューマーのアプリケーションを動かします。これらの要件を最もよく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a subscription filter that sends the log events to an Amazon Kinesis Data Streams stream, and have the application consume the stream.",
+      "text_ja": "ログイベントを Amazon Kinesis Data Streams のストリームへ送るサブスクリプションフィルターを作り、アプリケーションがストリームを読む。"
+    },
+    {
+      "key": "B",
+      "text": "Create a daily CloudWatch Logs export task to Amazon S3, and have the application read the exported files.",
+      "text_ja": "Amazon S3 への CloudWatch Logs のエクスポートのタスクを毎日作り、アプリケーションがエクスポートしたファイルを読む。"
+    },
+    {
+      "key": "C",
+      "text": "Create a subscription filter that sends the log events to Amazon Data Firehose, which delivers them to Amazon S3 for the application to read.",
+      "text_ja": "ログイベントを Amazon Data Firehose へ送るサブスクリプションフィルターを作り、Firehose が Amazon S3 へ届けたものをアプリケーションが読む。"
+    },
+    {
+      "key": "D",
+      "text": "Have an operator run CloudWatch Logs Insights queries every hour and send suspicious results to the application.",
+      "text_ja": "運用担当者が 1 時間ごとに CloudWatch Logs Insights のクエリを実行し、不審な結果をアプリケーションへ送る。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "サブスクリプションでは CloudWatch Logs のログイベントをリアルタイムに Kinesis のストリームなどへ送れ、通常 3 分以内に届きます。Kinesis Data Streams のストリームのコンシューマーはシャードのレコードを順番に読むので、前のレコードに依存する状態を持つ処理や異常の検出に向きます。",
+    "per_choice": {
+      "A": "正しい。数分以内に届き、コンシューマーがシャードのレコードを順番に読めます。",
+      "B": "毎日のエクスポートでは、数分以内に検出を始めるという要件を満たせません。",
+      "C": "リアルタイムに送れますが、Firehose はためてから S3 へ届けるため、アプリケーションはファイルを読むことになり、順番に読むストリームの処理になりません。",
+      "D": "手作業で 1 時間ごとなので、数分以内という要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+      "source_id": "S2",
+      "quote": "Log events are sent to the receiving resource soon after being ingested, usually less than three minutes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+      "source_id": "S16",
+      "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html#key-concepts",
+      "source_id": "S18",
+      "quote": "Amazon Data Firehose buffers incoming streaming data to a certain size or for a certain period of time before delivering it to destinations."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

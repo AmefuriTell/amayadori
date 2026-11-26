@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 194,
+  "count": 205,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -7714,6 +7714,136 @@
       "note": "公式のドキュメントは、新しい実装には OpenTelemetry（OTLP）でメトリクスを送ることを勧めている（S3・S7）。この問題は「PutMetricData の権限が無く、ログには書ける」という条件で埋め込みメトリクス形式を選ばせる。試験とずれるかもしれない（P-009）。"
     },
     {
+      "id": "q-4.1-0009",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Many teams create CloudWatch Logs log groups whose names start with /app/. Most of these log groups were created with the default retention, and storage costs keep growing. The company wants every existing and future log group with the /app/ prefix to keep log events for 90 days, without relying on each team to configure it. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "多くのチームが、名前が /app/ で始まる CloudWatch Logs のロググループを作っています。これらのロググループの多くは既定の保持のまま作られており、ストレージの費用が増え続けています。会社は、/app/ で始まる既存と今後のすべてのロググループで、各チームの設定に頼らずに、ログイベントを 90 日間保持したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the NEW_ONLY option.",
+          "text_ja": "/app/ の接頭辞に、90 日の保持期間と NEW_ONLY のオプションでアカウントレベルの保持ポリシーを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the RETROACTIVE option.",
+          "text_ja": "/app/ の接頭辞に、90 日の保持期間と RETROACTIVE のオプションでアカウントレベルの保持ポリシーを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Schedule an AWS Lambda function that lists the /app/ log groups every day and sets a 90-day retention on each one.",
+          "text_ja": "毎日 /app/ のロググループを一覧し、それぞれに 90 日の保持を設定する AWS Lambda 関数をスケジュールで実行する。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each team to set a 90-day retention on its log groups, and review the settings every month.",
+          "text_ja": "各チームに自分のロググループで 90 日の保持を設定してもらい、毎月設定を確認する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudWatch Logs の既定ではログデータは無期限に保存されます。アカウントレベルの保持ポリシーはロググループの設定より優先され、RETROACTIVE を指定すると、ポリシーを作る前からあるものも含めて接頭辞に合うすべてのロググループに適用されます。",
+        "per_choice": {
+          "A": "NEW_ONLY はポリシーを作った後に作られるロググループにだけ適用され、既存のロググループは無期限のままです。",
+          "B": "正しい。既存と今後の /app/ のロググループのすべてに、チームの設定に頼らず 90 日の保持が適用されます。",
+          "C": "動きますが、独自の関数を作って保守する必要があります。",
+          "D": "各チームに頼ることになり、要件に反します。確認の手間もかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "By default, log data is stored in CloudWatch Logs indefinitely."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify RETROACTIVE to apply the policy to every log group that matches the prefix, including log groups that existed before you created the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify NEW_ONLY to apply the policy only to log groups that are created after you create the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "An account-level retention policy overrides the retention setting of the log group."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.1-0010",
+      "task": "4.1",
+      "domain": 4,
+      "services": [
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company exports application logs to an Amazon S3 bucket as millions of small files of about 20 KB each. The team added an S3 Lifecycle rule that transitions objects to a lower-cost storage class after 30 days, but the objects stay in their original storage class and storage costs do not go down. What is the MOST likely reason?",
+      "stem_ja": "ある会社は、アプリケーションのログを、1 つ約 20 KB の数百万個の小さなファイルとして Amazon S3 バケットへエクスポートしています。チームは 30 日後にオブジェクトをより安いストレージクラスへ移す S3 ライフサイクルのルールを足しましたが、オブジェクトは元のストレージクラスのままで、ストレージの費用も下がりません。最も可能性の高い理由はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Lifecycle rules apply only to objects that are added after the rule is created, so the existing objects are not transitioned.",
+          "text_ja": "ライフサイクルのルールは作った後に足されたオブジェクトにだけ適用されるため、既存のオブジェクトは移されない。"
+        },
+        {
+          "key": "B",
+          "text": "The bucket policy denies all actions for all principals, which prevents the lifecycle rule from transitioning the objects.",
+          "text_ja": "バケットポリシーがすべてのプリンシパルのすべてのアクションを拒否しており、ライフサイクルのルールがオブジェクトを移せない。"
+        },
+        {
+          "key": "C",
+          "text": "Lifecycle transitions are charged as data retrieval, so S3 skips transitions that would cost more than they save.",
+          "text_ja": "ライフサイクルの移行はデータの取り出しとして課金されるため、S3 は節約より費用が大きくなる移行を飛ばす。"
+        },
+        {
+          "key": "D",
+          "text": "By default, S3 Lifecycle does not transition objects smaller than 128 KB to any storage class.",
+          "text_ja": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移さない。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移しません。小さなオブジェクトはオブジェクトごとに移行のリクエストの料金がかかり、節約より費用が大きくなることがあるため、移行は勧められていません。",
+        "per_choice": {
+          "A": "ライフサイクルのルールは既存のオブジェクトにも、後から足すオブジェクトにも適用されます。",
+          "B": "バケットポリシーでライフサイクルのルールによる削除や移行を止めることはできません。",
+          "C": "ライフサイクルの移行にデータの取り出しの料金はかかりません。",
+          "D": "正しい。約 20 KB のオブジェクトは既定の動きで移されません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html#lifecycle-configuration-constraints",
+          "quote": "Amazon S3 applies a default behavior to S3 Lifecycle configurations that prevents objects smaller than 128 KB from being transitioned to any storage class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "You can't use a bucket policy to prevent deletions or transitions by an S3 Lifecycle rule."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "There are no data retrieval charges for lifecycle transitions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-4.2-0001",
       "task": "4.2",
       "domain": 4,
@@ -8229,6 +8359,203 @@
         {
           "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda",
           "quote": "you don't use the SDK to instrument incoming requests, make sampling decisions, and create segments."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0009",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Kinesis Data Streams"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team wants to detect suspicious login patterns from application logs that are already in CloudWatch Logs. Detection must start within a few minutes of each event, and the detection logic must read the events in order because each decision depends on earlier events. The team will run its own consumer application. Which solution BEST meets these requirements?",
+      "stem_ja": "セキュリティチームは、既に CloudWatch Logs にあるアプリケーションのログから、不審なログインのパターンを見つけたいと考えています。検出は各イベントから数分以内に始まる必要があり、各判断が前のイベントに依存するため、検出の処理はイベントを順番に読む必要があります。チームは自前のコンシューマーのアプリケーションを動かします。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a subscription filter that sends the log events to an Amazon Kinesis Data Streams stream, and have the application consume the stream.",
+          "text_ja": "ログイベントを Amazon Kinesis Data Streams のストリームへ送るサブスクリプションフィルターを作り、アプリケーションがストリームを読む。"
+        },
+        {
+          "key": "B",
+          "text": "Create a daily CloudWatch Logs export task to Amazon S3, and have the application read the exported files.",
+          "text_ja": "Amazon S3 への CloudWatch Logs のエクスポートのタスクを毎日作り、アプリケーションがエクスポートしたファイルを読む。"
+        },
+        {
+          "key": "C",
+          "text": "Create a subscription filter that sends the log events to Amazon Data Firehose, which delivers them to Amazon S3 for the application to read.",
+          "text_ja": "ログイベントを Amazon Data Firehose へ送るサブスクリプションフィルターを作り、Firehose が Amazon S3 へ届けたものをアプリケーションが読む。"
+        },
+        {
+          "key": "D",
+          "text": "Have an operator run CloudWatch Logs Insights queries every hour and send suspicious results to the application.",
+          "text_ja": "運用担当者が 1 時間ごとに CloudWatch Logs Insights のクエリを実行し、不審な結果をアプリケーションへ送る。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "サブスクリプションでは CloudWatch Logs のログイベントをリアルタイムに Kinesis のストリームなどへ送れ、通常 3 分以内に届きます。Kinesis Data Streams のストリームのコンシューマーはシャードのレコードを順番に読むので、前のレコードに依存する状態を持つ処理や異常の検出に向きます。",
+        "per_choice": {
+          "A": "正しい。数分以内に届き、コンシューマーがシャードのレコードを順番に読めます。",
+          "B": "毎日のエクスポートでは、数分以内に検出を始めるという要件を満たせません。",
+          "C": "リアルタイムに送れますが、Firehose はためてから S3 へ届けるため、アプリケーションはファイルを読むことになり、順番に読むストリームの処理になりません。",
+          "D": "手作業で 1 時間ごとなので、数分以内という要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+          "quote": "Log events are sent to the receiving resource soon after being ingested, usually less than three minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+          "quote": "A stream consumer reads the records of a shard in order, which suits stateful processing"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html#key-concepts",
+          "quote": "Amazon Data Firehose buffers incoming streaming data to a certain size or for a certain period of time before delivering it to destinations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0010",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Kinesis Data Streams"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A subscription filter sends a busy log group to an Amazon Kinesis Data Streams stream. The stream has enough total shards for the log volume, but the DeliveryThrottling metric is high because a few log streams produce most of the events. The filter uses the default distribution. Which change will MOST effectively reduce the throttling?",
+      "stem_ja": "サブスクリプションフィルターが、忙しいロググループを Amazon Kinesis Data Streams のストリームへ送っています。ストリームのシャードは合計でログの量に足りていますが、一部のログストリームがイベントのほとんどを出しているため、DeliveryThrottling のメトリクスが高くなっています。フィルターは既定の分配を使っています。スロットリングを最も効果的に減らす変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Shorten the log group's retention period so that fewer events are stored.",
+          "text_ja": "保存されるイベントが減るよう、ロググループの保持期間を短くする。"
+        },
+        {
+          "key": "B",
+          "text": "Rely on CloudWatch Logs retries, because throttled events are retried for up to 24 hours.",
+          "text_ja": "スロットリングされたイベントは最大 24 時間再試行されるので、CloudWatch Logs の再試行に任せる。"
+        },
+        {
+          "key": "C",
+          "text": "Set the subscription filter's distribution to random.",
+          "text_ja": "サブスクリプションフィルターの分配を random にする。"
+        },
+        {
+          "key": "D",
+          "text": "Change the stream's consumer to read records faster from each shard.",
+          "text_ja": "ストリームのコンシューマーを、各シャードからより速くレコードを読むように変える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "既定では、ストリームへの分配はログストリームごとで、これがスロットリングの原因になりえます。サブスクリプションフィルターを作る時に分配を random にすると、スロットリングを減らせます。",
+        "per_choice": {
+          "A": "保持期間は保存の長さで、送る量や分配は変わりません。",
+          "B": "再試行は最大 24 時間で、その後は落とされます。スロットリングそのものは減りません。",
+          "C": "正しい。ログストリームごとの偏りをなくし、シャード全体に散らして送れます。",
+          "D": "スロットリングはストリームへの送り込みで起きており、読み出しの速さを変えても減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "quote": "By default, the stream filter distribution is by log stream and this can cause throttling."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "quote": "Throttled deliverables are retried for up to 24 hours. After 24 hours, the failed deliverables are dropped."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "quote": "the DeliveryThrottling metric can be used to track the number of log events for which CloudWatch Logs was throttled"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample",
+          "quote": "Specify random for distribution when you create the subscription filter with PutSubscriptionFilter or put-subscription-filter."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.2-0011",
+      "task": "4.2",
+      "domain": 4,
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon Kinesis Data Streams"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A security account in us-east-1 runs a central Amazon Kinesis Data Streams stream for log analysis. Application accounts have log groups in us-east-1 and eu-west-1 whose events must be sent to that central stream in real time. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "us-east-1 にあるセキュリティのアカウントが、ログの分析のための中央の Amazon Kinesis Data Streams のストリームを動かしています。アプリケーションのアカウントには us-east-1 と eu-west-1 のロググループがあり、そのイベントをリアルタイムに中央のストリームへ送る必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "In the security account, create a CloudWatch Logs destination in each Region that has source log groups, and point each destination to the central stream in us-east-1.",
+          "text_ja": "セキュリティのアカウントで、送り元のロググループがある各リージョンに CloudWatch Logs の送信先を作り、それぞれを us-east-1 の中央のストリームに向ける。"
+        },
+        {
+          "key": "B",
+          "text": "In the application accounts, create subscription filters on the log groups that use the destination in the same Region as each log group.",
+          "text_ja": "アプリケーションのアカウントで、各ロググループと同じリージョンの送信先を使うサブスクリプションフィルターをロググループに作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create subscription filters on the eu-west-1 log groups that use the destination that is in us-east-1.",
+          "text_ja": "eu-west-1 のロググループに、us-east-1 にある送信先を使うサブスクリプションフィルターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Create a daily export task in each application account that writes the logs to an S3 bucket in the security account.",
+          "text_ja": "各アプリケーションのアカウントで、セキュリティのアカウントの S3 バケットへログを書く毎日のエクスポートのタスクを作る。"
+        },
+        {
+          "key": "E",
+          "text": "Create a separate Kinesis Data Streams stream in each application account, and have the analysis team poll every stream.",
+          "text_ja": "各アプリケーションのアカウントに別の Kinesis Data Streams のストリームを作り、分析チームがすべてのストリームを読みに行く。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "別のアカウントのログイベントを、中央の Kinesis のストリームで受け取れます（クロスアカウントのデータ共有）。ロググループと送信先は同じリージョンにある必要がありますが、送信先が指す AWS のリソースは別のリージョンにあってもかまいません。",
+        "per_choice": {
+          "A": "正しい。各リージョンに送信先を作れば、ロググループと同じリージョンに置けて、送信先は us-east-1 の中央のストリームを指せます。",
+          "B": "正しい。各ロググループは同じリージョンの送信先を使うサブスクリプションフィルターで、イベントをリアルタイムに送ります。",
+          "C": "ロググループと送信先は同じリージョンにある必要があり、eu-west-1 のロググループから us-east-1 の送信先は使えません。",
+          "D": "毎日のエクスポートはリアルタイムではなく、要件を満たしません。",
+          "E": "中央のストリームで受け取る要件に合わず、読みに行くストリームも増えます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+          "quote": "this log event data can be read from a centralized Amazon Kinesis Data Streams or Firehose stream to perform custom processing and analysis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CrossAccountSubscriptions.html#CrossAccountSubscriptions",
+          "quote": "The log group and the destination must be in the same AWS Region. However, the AWS resource that the destination points to can be located in a different Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html#Subscriptions",
+          "quote": "You can use subscriptions to get access to a real-time feed of log events from CloudWatch Logs"
         }
       ],
       "low_confidence": false
@@ -8759,6 +9086,145 @@
         {
           "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
           "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0009",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "AWS Systems Manager",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An account has 300 EC2 instances in one Region. All instances use IMDSv2 and run SSM Agent 3.2.582.0 or later, but many of them have no IAM instance profile, so they do not appear as Systems Manager managed nodes. The company wants all current and future instances in the Region to become managed nodes without creating or attaching instance profiles. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるアカウントの 1 つのリージョンに 300 台の EC2 インスタンスがあります。すべてのインスタンスが IMDSv2 を使い、SSM Agent 3.2.582.0 以降を動かしていますが、多くに IAM インスタンスプロファイルが無いため、Systems Manager のマネージドノードとして表示されません。会社は、インスタンスプロファイルを作ったりアタッチしたりせずに、そのリージョンの今と今後のすべてのインスタンスをマネージドノードにしたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an instance profile with the AmazonSSMManagedInstanceCore policy, and attach it to every instance that lacks one.",
+          "text_ja": "AmazonSSMManagedInstanceCore ポリシーを持つインスタンスプロファイルを作り、持っていない各インスタンスにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Add an inbound rule for HTTPS on port 443 to each instance's security group so that Systems Manager can connect to SSM Agent.",
+          "text_ja": "Systems Manager が SSM Agent に接続できるよう、各インスタンスのセキュリティグループに 443 番ポートの HTTPS の受信のルールを足す。"
+        },
+        {
+          "key": "C",
+          "text": "Turn on Default Host Management Configuration in the Region, and use the default role that it provides.",
+          "text_ja": "そのリージョンで Default Host Management Configuration を有効にし、それが用意する既定のロールを使う。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on Default Host Management Configuration, and switch the instances to IMDSv1 so that they can get the role's credentials.",
+          "text_ja": "Default Host Management Configuration を有効にし、ロールの認証情報を得られるようインスタンスを IMDSv1 に切り替える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Default Host Management Configuration を有効にすると、インスタンスプロファイルを手作業で作らなくても、そのアカウントとリージョンで IMDSv2 を使い SSM Agent 3.2.582.0 以降を入れたすべてのインスタンスが自動でマネージドインスタンスになります。既定のロールは、Systems Manager で管理するのに必要な最小の権限を持ちます。",
+        "per_choice": {
+          "A": "マネージドノードにはなりますが、インスタンスプロファイルを作ってアタッチしないという要件に反し、今後のインスタンスにも作業が要ります。",
+          "B": "SSM Agent が Systems Manager への接続をすべて始めるので、受信のルールは要らず、権限の問題も解決しません。",
+          "C": "正しい。条件を満たす今と今後のインスタンスが、インスタンスプロファイル無しで自動で管理されます。",
+          "D": "Default Host Management Configuration は IMDSv1 に対応しておらず、IMDSv2 が必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#fleet-manager-default-host-management-configuration",
+          "quote": "Using Default Host Management Configuration, you can manage EC2 instances without having to manually create an AWS Identity and Access Management (IAM) instance profile."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-permissions.html#default-host-management",
+          "quote": "all instances using Instance Metadata Service Version 2 (IMDSv2) in the AWS Region and AWS account with SSM Agent version 3.2.582.0 or later installed automatically become managed instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#dhmc-prerequisites",
+          "quote": "Default Host Management Configuration doesn't support Instance Metadata Service Version 1."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "you don't need to configure your firewall to allow inbound traffic to your instances for Systems Manager."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-4.3-0010",
+      "task": "4.3",
+      "domain": 4,
+      "services": [
+        "AWS Systems Manager",
+        "Amazon VPC"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "EC2 instances in private subnets have SSM Agent and the required IAM permissions, but they do not appear as Systems Manager managed nodes. The subnets have no route to the internet, and the security team will not allow outbound internet access. Which actions should a DevOps engineer take so that the instances can be managed by Systems Manager? (Choose TWO.)",
+      "stem_ja": "プライベートサブネットの EC2 インスタンスには SSM Agent と必要な IAM の権限がありますが、Systems Manager のマネージドノードとして表示されません。サブネットにはインターネットへのルートが無く、セキュリティチームは外向きのインターネットのアクセスを許しません。インスタンスを Systems Manager で管理できるようにするために、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create VPC endpoints for the ssm, ssmmessages, and ec2messages services in the VPC.",
+          "text_ja": "VPC に、ssm、ssmmessages、ec2messages のサービスの VPC エンドポイントを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Allow outbound HTTPS traffic on port 443 from the instances to the VPC endpoints.",
+          "text_ja": "インスタンスから VPC エンドポイントへの、443 番ポートの外向きの HTTPS の通信を許す。"
+        },
+        {
+          "key": "C",
+          "text": "Add an inbound rule for port 443 from Systems Manager to the instances' security group.",
+          "text_ja": "インスタンスのセキュリティグループに、Systems Manager からの 443 番ポートの受信のルールを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Add a NAT gateway and a route to the internet so that SSM Agent can reach the public endpoints.",
+          "text_ja": "SSM Agent が公開のエンドポイントに届くよう、NAT ゲートウェイとインターネットへのルートを足す。"
+        },
+        {
+          "key": "E",
+          "text": "Install the CloudWatch agent on the instances so that they report their status to Systems Manager.",
+          "text_ja": "状態を Systems Manager へ報告するよう、インスタンスに CloudWatch エージェントを入れる。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "SSM Agent は Systems Manager のサービスへの接続をすべて自分から始め、ssm・ssmmessages・ec2messages のエンドポイントと HTTPS（443 番ポート）で通信します。インターネットへの外向きのアクセスを使わない時は、VPC エンドポイントを使います。",
+        "per_choice": {
+          "A": "正しい。インターネットに出ずに、SSM Agent が通信するエンドポイントへ VPC の中から届きます。",
+          "B": "正しい。SSM Agent は HTTPS の 443 番ポートで外向きに接続するので、エンドポイントへの外向きの通信を許します。",
+          "C": "SSM Agent が接続を始めるので、受信の通信を許す必要はありません。",
+          "D": "動きますが、外向きのインターネットのアクセスを許さないという要件に反します。",
+          "E": "状態を Systems Manager へ送るのは SSM Agent で、CloudWatch エージェントは関係ありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "The alternative to using a VPC endpoint is to allow outbound internet access on your managed instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "the managed instances must also allow HTTPS (port 443) outbound traffic to the following endpoints: ssm.region.amazonaws.com, ssmmessages.region.amazonaws.com, ec2messages.region.amazonaws.com."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "SSM Agent initiates all connections to the Systems Manager service in the cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html#ssm-agent",
+          "quote": "SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Gateway Service (ssmmessages)."
         }
       ],
       "low_confidence": false
@@ -11776,6 +12242,263 @@
         {
           "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
           "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.2-0011",
+      "task": "6.2",
+      "domain": 6,
+      "services": [
+        "AWS KMS",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company encrypts sensitive objects in Amazon S3 with AWS KMS. Auditors require the company to define who can use the key in its own key policy, to be able to disable the key or schedule it for deletion, and to audit activity on the key. The company wants to avoid running its own hardware. Which type of key should the company use with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、Amazon S3 の機密のオブジェクトを AWS KMS で暗号化しています。監査人は、誰がキーを使えるかを会社自身のキーポリシーで決めること、キーを無効にしたり削除を予定したりできること、キーの操作を監査できることを求めています。会社は、自前のハードウェアを動かすことは避けたいと考えています。運用上のオーバーヘッドが最も少なく使えるキーの種類はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "An AWS owned key that the S3 service owns and manages for use in multiple accounts.",
+          "text_ja": "S3 のサービスが複数のアカウントで使うために所有・管理する、AWS 所有のキー。"
+        },
+        {
+          "key": "B",
+          "text": "Keys in an AWS CloudHSM cluster that the company manages, with users that it manages outside IAM.",
+          "text_ja": "会社が管理する AWS CloudHSM のクラスターのキーと、IAM の外で管理する利用者。"
+        },
+        {
+          "key": "C",
+          "text": "An AWS managed key that S3 creates and uses on the company's behalf in the company's account.",
+          "text_ja": "S3 が会社のアカウントで会社の代わりに作って使う、AWS マネージドキー。"
+        },
+        {
+          "key": "D",
+          "text": "A customer managed key that the company creates in its account and manages with its own key policy.",
+          "text_ja": "会社が自分のアカウントで作り、自分のキーポリシーで管理するカスタマーマネージドキー。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "カスタマーマネージドキーは自分のアカウントで作り、所有し、管理するキーで、キーポリシー・IAM ポリシー・グラント、有効と無効、削除の予定などを完全に管理できます。キーの寿命と使い方を完全に管理したい場合に勧められています。",
+        "per_choice": {
+          "A": "AWS 所有のキーは、ポリシーを変えることも、操作を監査することも、削除することもできません。",
+          "B": "要件は満たせますが、HSM のクラスターと利用者を自分で管理することになり、オーバーヘッドが大きくなります。",
+          "C": "AWS マネージドキーは AWS のサービスが会社の代わりに作り、管理し、使うキーで、新しいサービス向けには作られていない古い種類です。",
+          "D": "正しい。自分のキーポリシーで使える人を決め、無効化や削除の予定もでき、自前のハードウェアも要りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-mgn-key",
+          "quote": "You have full control over these KMS keys, including establishing and maintaining their key policies, IAM policies, and grants, enabling and disabling them"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-owned-key",
+          "quote": "you cannot change their policies, you cannot audit activities on these keys, and you cannot delete them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "quote": "AWS managed keys are KMS keys in your account that are created, managed, and used on your behalf by an AWS service integrated with AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts",
+          "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "quote": "AWS managed keys are a legacy key type that is no longer being created for new AWS services as of 2021."
+        }
+      ],
+      "low_confidence": false,
+      "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。"
+    },
+    {
+      "id": "q-6.2-0012",
+      "task": "6.2",
+      "domain": 6,
+      "services": [
+        "AWS Certificate Manager",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Application Load Balancer uses an Amazon-issued public certificate from AWS Certificate Manager (ACM). The certificate was validated by email, and last year it expired because nobody acted on the renewal emails. The company wants future renewals to happen automatically without any human action and without changing the certificate that the load balancer references. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "Application Load Balancer が、AWS Certificate Manager（ACM）の Amazon が発行した公開の証明書を使っています。証明書はメールで検証されており、昨年は更新のメールに誰も対応しなかったため期限が切れました。会社は、今後の更新を人の操作無しに自動で行い、ロードバランサーが参照する証明書を変えずに済ませたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Request a new ACM certificate that uses DNS validation and attach it to the load balancer once, so that ACM renews it automatically.",
+          "text_ja": "DNS 検証を使う新しい ACM の証明書を申請してロードバランサーに 1 回付け、ACM が自動で更新するようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Keep email validation, and create a calendar reminder for the team to approve the renewal email every year.",
+          "text_ja": "メールの検証のままにし、チームが毎年更新のメールを承認するようカレンダーの予定を作る。"
+        },
+        {
+          "key": "C",
+          "text": "Issue certificates through ACME certificate automation so that ACM managed renewal renews them.",
+          "text_ja": "ACM のマネージド更新で更新されるよう、ACME の証明書の自動化で証明書を発行する。"
+        },
+        {
+          "key": "D",
+          "text": "Create an Amazon CloudWatch alarm on the days to expiry, and replace the certificate on the load balancer by hand when the alarm fires.",
+          "text_ja": "有効期限までの日数に Amazon CloudWatch アラームを作り、アラームが鳴ったらロードバランサーの証明書を手作業で付け替える。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "ACM は Amazon が発行した SSL/TLS の証明書をマネージド更新します。DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせます。更新しても証明書の ARN は変わらないので、ロードバランサーの参照を変えずに済みます。",
+        "per_choice": {
+          "A": "正しい。DNS 検証の証明書は ACM が自動で更新し、ARN も変わらないため、付け替えは最初の 1 回だけです。",
+          "B": "人の操作が毎年要り、要件に反します。",
+          "C": "ACME の証明書の自動化で発行した証明書は、ACM のマネージド更新の対象外です。",
+          "D": "気づけるだけで、付け替えは手作業のままで、参照する証明書も変わります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "When ACM renews a certificate, the certificate's Amazon Resource Name (ARN) remains the same."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.2-0013",
+      "task": "6.2",
+      "domain": 6,
+      "services": [
+        "Amazon S3",
+        "AWS KMS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application writes millions of new objects every day to an Amazon S3 bucket that uses SSE-KMS with one customer managed key. The AWS KMS request charges have become a large part of the monthly bill. The company must keep using the same customer managed key. Which change will reduce the KMS request costs the MOST?",
+      "stem_ja": "あるアプリケーションは、1 つのカスタマーマネージドキーで SSE-KMS を使う Amazon S3 バケットに、毎日数百万個の新しいオブジェクトを書き込んでいます。AWS KMS のリクエストの料金が、毎月の請求の大きな部分を占めるようになりました。会社は、同じカスタマーマネージドキーを使い続ける必要があります。KMS のリクエストの費用を最も減らせる変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on automatic key rotation for the customer managed key so that new key material is used every year.",
+          "text_ja": "毎年新しいキーの素材が使われるよう、カスタマーマネージドキーの自動ローテーションを有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Configure an S3 Bucket Key for the bucket so that S3 sends fewer requests to AWS KMS for new objects.",
+          "text_ja": "新しいオブジェクトについて S3 から AWS KMS へのリクエストが減るよう、バケットに S3 バケットキーを設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a separate customer managed key for each prefix in the bucket so that requests are spread across keys.",
+          "text_ja": "リクエストが複数のキーに分かれるよう、バケットのプレフィックスごとに別のカスタマーマネージドキーを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Request a higher AWS KMS request quota so that the application is not throttled during peaks.",
+          "text_ja": "山の時にアプリケーションがスロットリングされないよう、AWS KMS のリクエストのクォータを上げてもらう。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "SSE-KMS でバケットレベルのキー（S3 バケットキー）を使うと、S3 から AWS KMS へのリクエストが減り、KMS のリクエストの費用を最大 99% 減らせます。設定した時点でバケットにあるオブジェクトはバケットキーを使いませんが、この会社の費用の多くは新しいオブジェクトの書き込みから来ています。",
+        "per_choice": {
+          "A": "ローテーションは今のキーの素材を変えるだけで、リクエストの数は減りません。",
+          "B": "正しい。同じカスタマーマネージドキーのまま、KMS へのリクエストを大きく減らせます。",
+          "C": "キーを分けてもリクエストの総数は変わらず、バケットキーは同じ KMS キーで暗号化したオブジェクトの間でだけ共有されるので、かえって効果が下がります。",
+          "D": "クォータを上げてもリクエストの数と費用は減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "Using a bucket-level key for SSE-KMS can reduce AWS KMS request costs by up to 99 percent by decreasing the request traffic from Amazon S3 to AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "When you configure an S3 Bucket Key, objects that are already in the bucket do not use the S3 Bucket Key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "Amazon S3 will only share an S3 Bucket Key for objects encrypted by the same AWS KMS key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys",
+          "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.2-0014",
+      "task": "6.2",
+      "domain": 6,
+      "services": [
+        "AWS CloudHSM",
+        "AWS KMS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A payment company must store its encryption keys in single-tenant hardware security modules that are FIPS 140-3 level 3 validated. Regulators also require that AWS cannot see the cryptographic data plane and that the company manages the HSM users itself, outside IAM. Which solution BEST meets these requirements?",
+      "stem_ja": "ある決済の会社は、暗号化のキーを、FIPS 140-3 レベル 3 の検証を受けたシングルテナントのハードウェアセキュリティモジュール（HSM）に保存する必要があります。規制当局は、暗号のデータプレーンが AWS から見えないことと、会社が IAM の外で HSM の利用者を自分で管理することも求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Use AWS KMS customer managed keys with automatic key rotation turned on.",
+          "text_ja": "自動のキーローテーションを有効にした AWS KMS のカスタマーマネージドキーを使う。"
+        },
+        {
+          "key": "B",
+          "text": "Use an AWS CloudHSM cluster in FIPS mode, and manage the HSM users in the cluster.",
+          "text_ja": "FIPS モードの AWS CloudHSM のクラスターを使い、クラスターの中で HSM の利用者を管理する。"
+        },
+        {
+          "key": "C",
+          "text": "Use AWS owned keys so that AWS manages the keys for the company.",
+          "text_ja": "AWS がキーを管理するよう、AWS 所有のキーを使う。"
+        },
+        {
+          "key": "D",
+          "text": "Use AWS KMS customer managed keys, and control access to them only with IAM policies.",
+          "text_ja": "AWS KMS のカスタマーマネージドキーを使い、IAM ポリシーだけでアクセスを管理する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS CloudHSM は、汎用・シングルテナントで、FIPS モードのクラスターでは FIPS 140-2 または FIPS 140-3 のレベル 3 の検証を受けた HSM を提供します。データプレーンはエンドツーエンドで暗号化されて AWS から見えず、利用者の管理は IAM のロールの外で自分で行います。",
+        "per_choice": {
+          "A": "キーのローテーションは良い運用ですが、シングルテナントの HSM や、IAM の外での利用者の管理という要件は満たしません。",
+          "B": "正しい。シングルテナントの検証済みの HSM で、データプレーンは AWS から見えず、利用者を自分で管理します。",
+          "C": "AWS 所有のキーは AWS が所有・管理し、ポリシーの変更も監査もできず、要件に合いません。",
+          "D": "利用者の管理が IAM になり、IAM の外で管理するという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "quote": "HSMs are general purpose, single tenant, and either FIPS 140-2 level-3 or FIPS 140-3 level-3 validated for clusters in FIPS mode"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
         }
       ],
       "low_confidence": false

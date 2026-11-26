@@ -1,0 +1,71 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0009",
+  "services": [
+    "Amazon CloudWatch Logs"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Many teams create CloudWatch Logs log groups whose names start with /app/. Most of these log groups were created with the default retention, and storage costs keep growing. The company wants every existing and future log group with the /app/ prefix to keep log events for 90 days, without relying on each team to configure it. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "多くのチームが、名前が /app/ で始まる CloudWatch Logs のロググループを作っています。これらのロググループの多くは既定の保持のまま作られており、ストレージの費用が増え続けています。会社は、/app/ で始まる既存と今後のすべてのロググループで、各チームの設定に頼らずに、ログイベントを 90 日間保持したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the NEW_ONLY option.",
+      "text_ja": "/app/ の接頭辞に、90 日の保持期間と NEW_ONLY のオプションでアカウントレベルの保持ポリシーを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Create an account-level retention policy for the /app/ prefix with a 90-day retention period and the RETROACTIVE option.",
+      "text_ja": "/app/ の接頭辞に、90 日の保持期間と RETROACTIVE のオプションでアカウントレベルの保持ポリシーを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Schedule an AWS Lambda function that lists the /app/ log groups every day and sets a 90-day retention on each one.",
+      "text_ja": "毎日 /app/ のロググループを一覧し、それぞれに 90 日の保持を設定する AWS Lambda 関数をスケジュールで実行する。"
+    },
+    {
+      "key": "D",
+      "text": "Ask each team to set a 90-day retention on its log groups, and review the settings every month.",
+      "text_ja": "各チームに自分のロググループで 90 日の保持を設定してもらい、毎月設定を確認する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "CloudWatch Logs の既定ではログデータは無期限に保存されます。アカウントレベルの保持ポリシーはロググループの設定より優先され、RETROACTIVE を指定すると、ポリシーを作る前からあるものも含めて接頭辞に合うすべてのロググループに適用されます。",
+    "per_choice": {
+      "A": "NEW_ONLY はポリシーを作った後に作られるロググループにだけ適用され、既存のロググループは無期限のままです。",
+      "B": "正しい。既存と今後の /app/ のロググループのすべてに、チームの設定に頼らず 90 日の保持が適用されます。",
+      "C": "動きますが、独自の関数を作って保守する必要があります。",
+      "D": "各チームに頼ることになり、要件に反します。確認の手間もかかります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+      "source_id": "S1",
+      "quote": "By default, log data is stored in CloudWatch Logs indefinitely."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+      "source_id": "S2",
+      "quote": "Specify RETROACTIVE to apply the policy to every log group that matches the prefix, including log groups that existed before you created the policy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+      "source_id": "S2",
+      "quote": "Specify NEW_ONLY to apply the policy only to log groups that are created after you create the policy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+      "source_id": "S1",
+      "quote": "An account-level retention policy overrides the retention setting of the log group."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,72 @@
+{
+  "task": "6.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.2-0013",
+  "services": [
+    "Amazon S3",
+    "AWS KMS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An application writes millions of new objects every day to an Amazon S3 bucket that uses SSE-KMS with one customer managed key. The AWS KMS request charges have become a large part of the monthly bill. The company must keep using the same customer managed key. Which change will reduce the KMS request costs the MOST?",
+  "stem_ja": "あるアプリケーションは、1 つのカスタマーマネージドキーで SSE-KMS を使う Amazon S3 バケットに、毎日数百万個の新しいオブジェクトを書き込んでいます。AWS KMS のリクエストの料金が、毎月の請求の大きな部分を占めるようになりました。会社は、同じカスタマーマネージドキーを使い続ける必要があります。KMS のリクエストの費用を最も減らせる変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on automatic key rotation for the customer managed key so that new key material is used every year.",
+      "text_ja": "毎年新しいキーの素材が使われるよう、カスタマーマネージドキーの自動ローテーションを有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Configure an S3 Bucket Key for the bucket so that S3 sends fewer requests to AWS KMS for new objects.",
+      "text_ja": "新しいオブジェクトについて S3 から AWS KMS へのリクエストが減るよう、バケットに S3 バケットキーを設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Create a separate customer managed key for each prefix in the bucket so that requests are spread across keys.",
+      "text_ja": "リクエストが複数のキーに分かれるよう、バケットのプレフィックスごとに別のカスタマーマネージドキーを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Request a higher AWS KMS request quota so that the application is not throttled during peaks.",
+      "text_ja": "山の時にアプリケーションがスロットリングされないよう、AWS KMS のリクエストのクォータを上げてもらう。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "SSE-KMS でバケットレベルのキー（S3 バケットキー）を使うと、S3 から AWS KMS へのリクエストが減り、KMS のリクエストの費用を最大 99% 減らせます。設定した時点でバケットにあるオブジェクトはバケットキーを使いませんが、この会社の費用の多くは新しいオブジェクトの書き込みから来ています。",
+    "per_choice": {
+      "A": "ローテーションは今のキーの素材を変えるだけで、リクエストの数は減りません。",
+      "B": "正しい。同じカスタマーマネージドキーのまま、KMS へのリクエストを大きく減らせます。",
+      "C": "キーを分けてもリクエストの総数は変わらず、バケットキーは同じ KMS キーで暗号化したオブジェクトの間でだけ共有されるので、かえって効果が下がります。",
+      "D": "クォータを上げてもリクエストの数と費用は減りません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+      "source_id": "S9",
+      "quote": "Using a bucket-level key for SSE-KMS can reduce AWS KMS request costs by up to 99 percent by decreasing the request traffic from Amazon S3 to AWS KMS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+      "source_id": "S9",
+      "quote": "When you configure an S3 Bucket Key, objects that are already in the bucket do not use the S3 Bucket Key."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+      "source_id": "S9",
+      "quote": "Amazon S3 will only share an S3 Bucket Key for objects encrypted by the same AWS KMS key."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys",
+      "source_id": "S5",
+      "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,67 @@
+{
+  "task": "6.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.2-0012",
+  "services": [
+    "AWS Certificate Manager",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Application Load Balancer uses an Amazon-issued public certificate from AWS Certificate Manager (ACM). The certificate was validated by email, and last year it expired because nobody acted on the renewal emails. The company wants future renewals to happen automatically without any human action and without changing the certificate that the load balancer references. Which solution meets these requirements with the LEAST operational effort?",
+  "stem_ja": "Application Load Balancer が、AWS Certificate Manager（ACM）の Amazon が発行した公開の証明書を使っています。証明書はメールで検証されており、昨年は更新のメールに誰も対応しなかったため期限が切れました。会社は、今後の更新を人の操作無しに自動で行い、ロードバランサーが参照する証明書を変えずに済ませたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Request a new ACM certificate that uses DNS validation and attach it to the load balancer once, so that ACM renews it automatically.",
+      "text_ja": "DNS 検証を使う新しい ACM の証明書を申請してロードバランサーに 1 回付け、ACM が自動で更新するようにする。"
+    },
+    {
+      "key": "B",
+      "text": "Keep email validation, and create a calendar reminder for the team to approve the renewal email every year.",
+      "text_ja": "メールの検証のままにし、チームが毎年更新のメールを承認するようカレンダーの予定を作る。"
+    },
+    {
+      "key": "C",
+      "text": "Issue certificates through ACME certificate automation so that ACM managed renewal renews them.",
+      "text_ja": "ACM のマネージド更新で更新されるよう、ACME の証明書の自動化で証明書を発行する。"
+    },
+    {
+      "key": "D",
+      "text": "Create an Amazon CloudWatch alarm on the days to expiry, and replace the certificate on the load balancer by hand when the alarm fires.",
+      "text_ja": "有効期限までの日数に Amazon CloudWatch アラームを作り、アラームが鳴ったらロードバランサーの証明書を手作業で付け替える。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ACM は Amazon が発行した SSL/TLS の証明書をマネージド更新します。DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせます。更新しても証明書の ARN は変わらないので、ロードバランサーの参照を変えずに済みます。",
+    "per_choice": {
+      "A": "正しい。DNS 検証の証明書は ACM が自動で更新し、ARN も変わらないため、付け替えは最初の 1 回だけです。",
+      "B": "人の操作が毎年要り、要件に反します。",
+      "C": "ACME の証明書の自動化で発行した証明書は、ACM のマネージド更新の対象外です。",
+      "D": "気づけるだけで、付け替えは手作業のままで、参照する証明書も変わります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+      "source_id": "S7",
+      "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+      "source_id": "S7",
+      "quote": "When ACM renews a certificate, the certificate's Amazon Resource Name (ARN) remains the same."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+      "source_id": "S7",
+      "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
