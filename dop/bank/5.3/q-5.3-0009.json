@@ -1,0 +1,62 @@
+{
+  "task": "5.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.3-0009",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Auto Scaling group behind an Application Load Balancer uses Elastic Load Balancing health checks. The application takes about 4 minutes to start. New instances are marked unhealthy and replaced before the application finishes starting, so the group never reaches its desired capacity. The company must keep the load balancer health checks to detect real failures. Which change resolves the issue with the LEAST effort?",
+  "stem_ja": "Application Load Balancer の後ろの Auto Scaling グループが、Elastic Load Balancing のヘルスチェックを使っています。アプリケーションの起動には約 4 分かかります。新しいインスタンスは、アプリケーションの起動が終わる前に unhealthy とされて入れ替えられるため、グループは希望する容量に達しません。会社は、本当の障害を見つけるために、ロードバランサーのヘルスチェックを残す必要があります。最も少ない手間で問題を解決する変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn off the Elastic Load Balancing health checks for the group and rely only on the EC2 status checks.",
+      "text_ja": "グループの Elastic Load Balancing のヘルスチェックを無効にし、EC2 のステータスチェックだけに頼る。"
+    },
+    {
+      "key": "B",
+      "text": "Increase the group's desired capacity so that some instances remain while others are replaced.",
+      "text_ja": "入れ替えられている間もいくつかのインスタンスが残るよう、グループの希望する容量を増やす。"
+    },
+    {
+      "key": "C",
+      "text": "Replace unhealthy instances manually after checking each one, and suspend the replacement process.",
+      "text_ja": "各インスタンスを確かめてから手作業で入れ替え、入れ替えのプロセスを停止する。"
+    },
+    {
+      "key": "D",
+      "text": "Set the group's health check grace period to a value longer than the application's startup time.",
+      "text_ja": "グループのヘルスチェックの猶予期間を、アプリケーションの起動の時間より長い値にする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "Amazon EC2 Auto Scaling は、新しいインスタンスに組み込みの EC2 のステータスチェックを行い、有効にした追加のヘルスチェック（ELB など）は猶予期間の後に行います。猶予期間を起動の時間より長くすれば、起動中のインスタンスが入れ替えられず、ロードバランサーのヘルスチェックも残せます。",
+    "per_choice": {
+      "A": "入れ替えは止まりますが、ロードバランサーのヘルスチェックを残すという要件に反します。",
+      "B": "新しいインスタンスは同じように起動中に入れ替えられ、問題は解決しません。",
+      "C": "手作業が多く、自動の入れ替えも失われます。",
+      "D": "正しい。起動の間は ELB のヘルスチェックで入れ替えられず、起動の後は本当の障害を見つけられます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+      "source_id": "S2",
+      "quote": "Amazon EC2 Auto Scaling performs health checks on the instance by using the built-in Amazon EC2 status checks, and after a grace period, any optional health checks that you enabled for the group."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+      "source_id": "S2",
+      "quote": "If any of the health checks fail, the instance is replaced."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

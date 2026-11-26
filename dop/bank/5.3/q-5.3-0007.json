@@ -1,0 +1,73 @@
+{
+  "task": "5.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.3-0007",
+  "services": [
+    "Amazon ECS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An Amazon ECS service keeps replacing its tasks. Each task shows PENDING for a short time and then disappears. An on-call engineer is paged 20 minutes after the problem starts and must find out why the tasks stopped as quickly as possible, before the information is gone. Which actions should the engineer take? (Choose TWO.)",
+  "stem_ja": "Amazon ECS のサービスがタスクを入れ替え続けています。各タスクは短い間 PENDING と表示された後、消えてしまいます。問題が始まって 20 分後に当番のエンジニアが呼ばれ、情報が消える前に、タスクが止まった理由をできるだけ早く突き止める必要があります。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Review the service events to see the actions that ECS took to maintain the service.",
+      "text_ja": "サービスのイベントを確認し、サービスを保つために ECS が取った動きを見る。"
+    },
+    {
+      "key": "B",
+      "text": "Describe the stopped tasks and read the stopCode, the stoppedReason, and each container reason.",
+      "text_ja": "停止したタスクを describe し、stopCode、stoppedReason、各コンテナの reason を読む。"
+    },
+    {
+      "key": "C",
+      "text": "Wait one day for the stopped tasks to collect, and then review them together in the ECS console.",
+      "text_ja": "停止したタスクがたまるまで 1 日待ってから、ECS のコンソールでまとめて確認する。"
+    },
+    {
+      "key": "D",
+      "text": "Increase the service's desired count so that more tasks start, and watch whether some of them stay running.",
+      "text_ja": "サービスの希望するタスクの数を増やしてより多くのタスクを起動し、そのうちいくつかが動き続けるかを見る。"
+    },
+    {
+      "key": "E",
+      "text": "Turn on access logs for the load balancer and look for errors in the logs that are delivered later.",
+      "text_ja": "ロードバランサーのアクセスログを有効にし、後で届くログの中からエラーを探す。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "サービスが作ったタスクでは、サービスを保つために ECS が取った動きがサービスのイベントに出ます。停止したタスクは stopCode・StoppedReason・コンテナの reason で止まった理由を示し、コンソールに出るのは 1 時間だけなので早めに確かめます。",
+    "per_choice": {
+      "A": "正しい。サービスが作ったタスクでは、ECS がサービスを保つために取った動き（タスクの停止と入れ替え）がサービスのイベントに出ます。",
+      "B": "正しい。停止したタスクの stopCode・stoppedReason・コンテナの reason が、止まった理由を直接示します。",
+      "C": "停止したタスクがコンソールに出るのは 1 時間だけで、1 日待つと情報が消えます。",
+      "D": "原因が分からないまま失敗するタスクを増やすだけで、理由の特定に役立ちません。",
+      "E": "タスクが起動の途中で消えているので、ロードバランサーのログに理由が出るとは限らず、後で届くので遅くなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+      "source_id": "S4",
+      "quote": "If your task was created by an Amazon ECS service, the actions that Amazon ECS takes to maintain the service are published in the service events."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+      "source_id": "S4",
+      "quote": "Stopped tasks only appear in the console for 1 hour."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+      "source_id": "S4",
+      "quote": "StoppedReason - The reason the task stopped."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
