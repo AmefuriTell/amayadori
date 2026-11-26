@@ -26,7 +26,7 @@ url: https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architec
 fetched: 2026-11-27
 > Events can trigger a Lambda function in two ways: through direct invocation (push) and event source mappings (pull).
 > With event source mapping, Lambda actively fetches (or pulls) events from a queue or stream.
-> Event-driven architectures can also make it easier to design near-real-time systems, helping organizations move away from batch-based processing.
+> This is particularly true of event-driven architectures, where each Lambda function is treated as a microservice responsible for performing a narrow set of specific instructions.
 
 ## S5 Fanout Amazon SNS notifications to Amazon SQS queues for asynchronous processing — Fanout Amazon SNS notifications to Amazon SQS queues for asynchronous processing
 url: https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html#sns-sqs-as-subscriber
@@ -99,7 +99,7 @@ url: https://docs.aws.amazon.com/lambda/latest/dg/with-step-functions.html#with-
 fetched: 2026-11-27
 > AWS Step Functions provides visual workflow orchestration for coordinating Lambda Event Functions with other AWS services.
 > Step Functions coordinates the flow of data between your functions and handles errors at each step.
-> While Lambda provides retry capabilities for asynchronous invocations and event source mappings, Step Functions offers more sophisticated error handling for complex workflows.
+> Write separate Lambda Event Functions for each task and use Step Functions to manage the workflow.
 
 ## S15 Retry policies and dead-letter queues — Retry policies and dead-letter queues
 url: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-custom-bus-retry.html#eb-custom-bus-retry
@@ -117,4 +117,3 @@ fetched: 2026-11-27
 url: https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#polling-webhooks-events
 fetched: 2026-11-27
 > Both of these mechanisms can be replaced by events, which can be filtered, routed, and pushed downstream to consuming microservices.
-> Microservices enable developers and architects to simplify complex workflows.
