@@ -4,6 +4,8 @@ import { REPORT_KEY, parseReports, serializeReports } from './logic/report.js';
 import { LANG_KEY, parseLang } from './logic/lang.js';
 import { SPEECH_KEY, parseSpeech } from './logic/speech.js';
 import { PROGRESS_KEY, parseProgress } from './logic/progress.js';
+import { MOCK_KEY, parseMock } from './logic/mock.js';
+import { RETRY_KEY, parseRetry } from './logic/retry.js';
 
 export function loadAnswers() {
   try {
@@ -93,6 +95,40 @@ export function loadProgress() {
 export function saveProgress(progress) {
   try {
     window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadMock() {
+  try {
+    return parseMock(window.localStorage.getItem(MOCK_KEY));
+  } catch {
+    return null;
+  }
+}
+
+export function saveMock(mock) {
+  try {
+    if (mock) window.localStorage.setItem(MOCK_KEY, JSON.stringify(mock)); else window.localStorage.removeItem(MOCK_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadRetry() {
+  try {
+    return parseRetry(window.localStorage.getItem(RETRY_KEY));
+  } catch {
+    return null;
+  }
+}
+
+export function saveRetry(retry) {
+  try {
+    if (retry) window.localStorage.setItem(RETRY_KEY, JSON.stringify(retry)); else window.localStorage.removeItem(RETRY_KEY);
     return true;
   } catch {
     return false;
