@@ -192,3 +192,11 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>dg verdict（と q verdict）で、verdict が ok の図に style 以外の kind があれば、判定せずに「verify.json が食い違っている」と返す。C3 の文書に「ok の図の issues は style だけ」を 1 行足す</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-022" from="D-0024,D-0026,D-0027,D-0028" status="proposed">
+  <issue>図の検証の fix の多くが unreadable だった。長い線のラベル、同じ 2 つの箱の間の複数の線（行きと帰り）、subgraph の題に重なる矢印で、文字が隠れたり切れたりした</issue>
+  <kind>tool</kind>
+  <change>dg validate に検査を足す: ① 線のラベルは 15 文字まで（長い説明は箱のラベルへ）。② 同じ 2 つの箱の間の線は 1 本まで。③ subgraph の題は 12 文字まで。C2 の図の決まりにも同じ 3 行を足す。人が決める</change>
+</proposal>
+```
