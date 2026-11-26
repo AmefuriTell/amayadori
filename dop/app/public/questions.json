@@ -5736,7 +5736,10 @@
           "quote": "No permissions are granted by an SCP."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ベンダーが会社のロールを AssumeRole で引き受け、一時的な認証情報でメトリクスを読む図。ロールの信頼ポリシーで外部 ID を必須にし（A）、AssumeRole のたびに外部 ID を指定する（B）。混乱した代理を防ぎ、長期の認証情報も渡さない。"
+      }
     },
     {
       "id": "q-2.2-0012",
@@ -5798,7 +5801,10 @@
           "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "開発者がロールを作る時は、決めた範囲の管理ポリシーを permissions boundary に設定することを条件にする図（C）。広いポリシーを付けても境界を超えず、プラットフォームチームの権限は変わらない。A の SCP は管理者まで制限する。"
+      }
     },
     {
       "id": "q-2.2-0013",
@@ -5860,7 +5866,10 @@
           "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "管理アカウントか委任管理者から PutOrganizationConfigRule で、組織のすべてのアカウントに同じ Config ルールを配り、サンドボックスのアカウントを除外する図（A）。新しいアカウントにも配られる。B のアグリゲーターはルールを配れない。"
+      }
     },
     {
       "id": "q-2.2-0014",
@@ -5922,7 +5931,10 @@
           "quote": "Aggregators do not provide mutating access into a source account or region."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "監査のアカウントに組織の AWS Config アグリゲーターを作ると、承認なしで組織のすべてのアカウントの構成と準拠のデータを 1 か所で読める図（C）。送り元は読むだけで変更できない。A の管理者権限は強すぎ、B はルールの配布。"
+      }
     },
     {
       "id": "q-2.2-0015",
@@ -5995,7 +6007,10 @@
           "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty はリージョンのサービスなので、管理アカウントが 3 つのリージョンのそれぞれで同じセキュリティのアカウントを委任管理者に指定する図（A）。委任管理者は各リージョンでメンバーアカウントの GuardDuty を有効にして管理する（B）。"
+      }
     },
     {
       "id": "q-2.2-0016",
@@ -6057,7 +6072,10 @@
           "quote": "A control is a high-level rule that provides ongoing governance for your overall AWS environment."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Amazon Detective は AWS のリソースのログのデータを自動で集め、GuardDuty の検出結果を分析担当が調べて根本の原因を素早く見つけるのを助ける図（B）。D はログを手作業で探す今のやり方で、時間がかかる。"
+      }
     },
     {
       "id": "q-2.3-0001",
