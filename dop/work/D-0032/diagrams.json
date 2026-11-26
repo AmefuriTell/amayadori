@@ -1,0 +1,55 @@
+{
+  "item": "D-0032",
+  "diagrams": [
+    {
+      "id": "q-6.1-0001",
+      "source": "flowchart TB\n  SEC[\"セキュリティチーム\"]\n  DEV[\"開発者\"]\n  TEAM[\"同じアカウントのほかのチーム\"]\n  subgraph ACC[\"共有アカウント\"]\n    PB@{ svc: \"AWS IAM\", label: \"管理ポリシー（S3 と DynamoDB だけ）\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"開発者が作るロール\" }\n    FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  end\n  SEC -- \"ロール作成の条件\" --> DEV\n  DEV -- \"ロールを作る\" --> ROLE\n  PB == \"✔ C: 境界として必ず付ける\" ==> ROLE\n  ROLE -- \"実行ロール\" --> FN\n  A[\"⚠ A: 開発者自身に境界を付ける（作るロールの上限にならない）\"]\n  A -.-> DEV\n  B[\"⚠ B: SCP をアカウントに適用（他チームも止まる）\"]\n  B -.-> TEAM\n  D[\"⚠ D: 完全な IAM 権限を与え毎週外す\"]\n  D -.-> DEV\n",
+      "alt": "開発者が作る Lambda のロールには、S3 と DynamoDB だけの管理ポリシーを境界として必ず付ける条件でロール作成を許す(C)。他チームに影響する SCP や人手の確認は不適切。"
+    },
+    {
+      "id": "q-6.1-0002",
+      "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"AdministratorAccess のロール\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"直近 90 日の活動の記録\" }\n    AA@{ svc: \"IAM Access Analyzer\", label: \"ポリシーを生成\" }\n    POL@{ svc: \"AWS IAM\", label: \"細かいポリシー\" }\n  end\n  STG[\"ステージングでテスト\"]\n  PROD[\"本番にデプロイ\"]\n  ROLE -- \"活動\" --> CT\n  CT -- \"ログ\" --> AA\n  AA == \"✔ B: 使ったアクションだけ\" ==> POL\n  POL -- \"ポリシー\" --> STG\n  STG -- \"問題なし\" --> PROD\n  A[\"⚠ A: 本番でサービスを外していく（失敗する）\"]\n  A -.-> PROD\n  C[\"⚠ C: 境界を付け Administrator はそのまま\"]\n  C -.-> ROLE\n  D[\"⚠ D: コードから手書き（手間）\"]\n  D -.-> POL\n",
+      "alt": "CloudTrail の活動記録から IAM Access Analyzer が実際に使ったアクションだけのポリシーを生成し、ステージングで試してから本番に出す(B)。手書きや本番での試行は不適切。"
+    },
+    {
+      "id": "q-6.1-0003",
+      "source": "flowchart TB\n  subgraph ORG[\"組織（信頼ゾーン）\"]\n    S3A@{ svc: \"Amazon S3\", label: \"バケット（リソースベースのポリシー）\" }\n    RL@{ svc: \"AWS IAM\", label: \"ロール（信頼ポリシー）\" }\n    AA@{ svc: \"IAM Access Analyzer\", label: \"外部アクセスのアナライザー<br/>（リソースごとに検出）\" }\n  end\n  EXT[\"組織の外のプリンシパル\"]\n  SEC[\"セキュリティチーム\"]\n  EXT -. \"アクセスを許可している\" .-> S3A\n  EXT -. \"アクセスを許可している\" .-> RL\n  S3A -- \"ポリシー\" --> AA\n  RL -- \"ポリシー\" --> AA\n  AA == \"✔ D: 検出結果\" ==> SEC\n  A[\"⚠ A: 最終アクセス情報（外部共有は見つけられない）\"]\n  A -.-> RL\n  B[\"⚠ B: すべてのロールに境界（共有は見つけられない）\"]\n  B -.-> RL\n  C[\"⚠ C: ポリシーを読むスクリプト（保守が要る）\"]\n  C -.-> S3A\n",
+      "alt": "IAM Access Analyzer で組織を信頼ゾーンにすると、組織外に共有されている S3 バケットや IAM ロールをリソースごとの検出結果として得られる(D)。スクリプトの保守は不要。"
+    },
+    {
+      "id": "q-6.1-0004",
+      "source": "flowchart TB\n  ROLE@{ svc: \"AWS IAM\", label: \"IAM ロール\" }\n  subgraph POLS[\"適用されるポリシー\"]\n    ID[\"ID ポリシー: s3:* 許可・DeleteObject 拒否\"]\n    PB[\"境界: GetObject と PutObject だけ許可\"]\n  end\n  S3B@{ svc: \"Amazon S3\", label: \"バケット\" }\n  ROLE --> ID\n  ROLE --> PB\n  ID -- \"重なりだけ有効\" --> S3B\n  PB -- \"重なりだけ有効\" --> S3B\n  S3B == \"✔ A・C: 許可\" ==> OK[\"許可<br/>✔ A: GetObject<br/>✔ C: PutObject\"]\n  S3B -. \"⚠ B・D・E: 拒否\" .-> NG[\"拒否<br/>⚠ B・E: 境界が許さない<br/>⚠ D: 明示的な拒否\"]\n",
+      "alt": "実際の権限は ID ポリシーと境界の両方が許す操作だけ。GetObject と PutObject は許可される(A・C)。ListBucket と PutBucketPolicy は境界が許さず、DeleteObject は明示的な拒否で拒否される。"
+    },
+    {
+      "id": "q-6.1-0005",
+      "source": "flowchart TB\n  subgraph TEAMS[\"40 チーム\"]\n    R1@{ svc: \"AWS IAM\", label: \"ロール（タグ: Project=X）\" }\n  end\n  POL@{ svc: \"AWS IAM\", label: \"1 つのポリシー（タグ一致で許可）\" }\n  subgraph RES[\"毎週増えるリソース\"]\n    B@{ svc: \"Amazon S3\", label: \"バケット（タグ: Project=X）\" }\n    T@{ svc: \"Amazon DynamoDB\", label: \"テーブル（タグ: Project=X）\" }\n  end\n  R1 -- \"プリンシパルのタグ\" --> POL\n  POL == \"✔ D: タグ一致のみ\" ==> B\n  POL == \"✔ D: タグ一致のみ\" ==> T\n  W1[\"⚠ A: ARN を毎晩書き足す（ポリシーが減らない）\"]\n  W1 -.-> R1\n  W2[\"⚠ B: 職務機能のポリシー（プロジェクトごとに絞れない）\"]\n  W2 -.-> R1\n  W3[\"⚠ C: 完全なアクセス（最小権限に反する）\"]\n  W3 -.-> B\n",
+      "alt": "プロジェクトのタグをロールとリソースに付け、タグが一致する時だけ許す 1 つのポリシーにする ABAC なら、リソースが増えてもポリシーを更新しなくてよい(D)。"
+    },
+    {
+      "id": "q-6.1-0006",
+      "source": "flowchart TB\n  EMP[\"従業員（Department 属性あり）\"]\n    ATTR@{ svc: \"AWS IAM Identity Center\", label: \"✔ A: アクセス制御の属性に Department\" }\n    PS@{ svc: \"AWS IAM Identity Center\", label: \"✔ B: 1 つのアクセス許可セット\" }\n  subgraph ACC[\"AWS アカウント\"]\n    BK@{ svc: \"Amazon S3\", label: \"バケット（部署のタグ）<br/>PrincipalTag と部署タグが一致で許可\" }\n  end\n  EMP -- \"サインイン\" --> ATTR\n  ATTR -- \"セッションタグ\" --> PS\n  PS == \"✔ B: タグが一致\" ==> BK\n  C[\"⚠ C: 部署ごとの許可セットに ARN を並べる\"]\n  C -.-> BK\n  D[\"⚠ D: 従業員ごとに IAM ユーザーを作る\"]\n  D -.-> EMP\n  E[\"⚠ E: バケットポリシーにグループ名を書く\"]\n  E -.-> BK\n",
+      "alt": "Identity Center のアクセス制御の属性で Department をセッションタグとして渡し(A)、1 つのアクセス許可セットで PrincipalTag とバケットの部署タグが一致する時だけ許す(B)。"
+    },
+    {
+      "id": "q-6.1-0007",
+      "source": "flowchart TB\n  GRP[\"DBA のグループ（15 人・出入りあり）<br/>10 アカウントずつ割り当て\"]\n    PS@{ svc: \"AWS IAM Identity Center\", label: \"Database Admin のアクセス許可セット（1 つ）\" }\n  subgraph ORG[\"25 アカウント\"]\n    ACC@{ svc: \"AWS Organizations\", label: \"各アカウントにロールを自動作成\" }\n  end\n  GRP == \"✔ B: グループに割当\" ==> PS\n  PS -- \"割り当て・ポリシー変更が届く\" --> ACC\n  A[\"⚠ A: 15 人に個別に割り当て（出入りで手間）\"]\n  A -.-> GRP\n  C[\"⚠ C: 25 個のロールを自分で作って更新\"]\n  C -.-> ACC\n  D[\"⚠ D: アカウントごとに 25 個の許可セット（変更の手間）\"]\n  D -.-> PS\n",
+      "alt": "1 つのアクセス許可セットを DBA のグループに割り当てれば、人の出入りはグループの変更だけで済み、ポリシー変更も全アカウントに届く(B)。個人への割り当てや 25 個の作成は手間が増える。"
+    },
+    {
+      "id": "q-6.1-0008",
+      "source": "flowchart TB\n  subgraph VEN[\"ベンダーのアカウント\"]\n    VS[\"監視サービス（多くの顧客）\"]\n  end\n  OTHER[\"別の顧客<br/>（混乱した代理）\"]\n  subgraph CO[\"自社のアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"ロール（信頼ポリシー）<br/>ベンダーが顧客ごとに決めた ExternalId\" }\n    STS@{ svc: \"AWS STS\", label: \"ロールの引き受け\" }\n  end\n  OTHER -. \"ARN を渡す\" .-> VS\n  VS -- \"要求 + ExternalId\" --> STS\n  STS == \"✔ D: ExternalId\" ==> ROLE\n  A[\"⚠ A: 自社で決めた ExternalId（防げない）\"]\n  A -.-> ROLE\n  B[\"⚠ B: 条件なしでベンダーのアカウントを許可\"]\n  B -.-> ROLE\n  C[\"⚠ C: アクセスキー付きの IAM ユーザー\"]\n  C -.-> ROLE\n",
+      "alt": "ベンダーが顧客ごとに一意に作る ExternalId を信頼ポリシーの条件にすれば、別の顧客が ARN を渡してもベンダーはだまされない(D)。自社で決めた値や条件なしでは防げない。"
+    },
+    {
+      "id": "q-6.1-0009",
+      "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    SM@{ svc: \"AWS Secrets Manager\", label: \"マスターユーザーのシークレット<br/>マネージドローテーション（Lambda 不要）\" }\n    AU@{ svc: \"Amazon Aurora\", label: \"DB クラスター\" }\n  end\n  SM == \"✔ C: パスワードを変える\" ==> AU\n  A[\"⚠ A: Lambda 関数でローテーション（関数の保守）\"]\n  A -.-> SM\n  B[\"⚠ B: 自作の Lambda が 30 日ごとにパスワード変更\"]\n  B -.-> AU\n  D[\"⚠ D: SecureString へ移し手作業で変更\"]\n  D -.-> SM\n",
+      "alt": "Aurora のマスターユーザーの認証情報には Secrets Manager のマネージドローテーションがあり、サービスが設定と管理を行うので Lambda 関数の保守が要らない(C)。"
+    },
+    {
+      "id": "q-6.1-0010",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph SMG[\"シークレット\"]\n    S1@{ svc: \"AWS Secrets Manager\", label: \"アプリのユーザーのシークレット<br/>交代ユーザーの戦略でローテーション\" }\n    S2@{ svc: \"AWS Secrets Manager\", label: \"✔ B: スーパーユーザーのシークレット\" }\n  end\n  DB@{ svc: \"Amazon RDS\", label: \"データベース\" }\n  APP -- \"接続\" --> DB\n  S1 == \"✔ A: 交代ユーザー\" ==> DB\n  S2 -- \"ユーザーを複製する権限\" --> DB\n  C[\"⚠ C: シングルユーザーの戦略（最も高い可用性ではない）\"]\n  C -.-> S1\n  D[\"⚠ D: マスターユーザーで接続する\"]\n  D -.-> APP\n  E[\"⚠ E: RDS Proxy 経由（交代ユーザーに非対応）\"]\n  E -.-> DB\n",
+      "alt": "アプリのユーザーのシークレットを交代ユーザーの戦略でローテーションし(A)、ユーザーの複製に使うスーパーユーザーのシークレットを別に用意する(B)と、高い可用性を保てる。"
+    }
+  ]
+}
