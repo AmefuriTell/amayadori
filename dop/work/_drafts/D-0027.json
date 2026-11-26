@@ -18,7 +18,7 @@
   },
   {
    "id": "q-4.3-0014",
-   "source": "flowchart TB\n  subgraph VPC[\"VPC（インターネットに公開しない）\"]\n    SVC[\"社内のサービス\"]\n    PHC@{ svc: \"Amazon Route 53\", label: \"✔ A: プライベートエンドポイントのヘルスチェック\" }\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"サービスのヘルスのアラーム（同じアカウント）\" }\n  HC2@{ svc: \"Amazon Route 53\", label: \"✔ B: アラームを監視するヘルスチェック\" }\n  REC@{ svc: \"Amazon Route 53\", label: \"フェイルオーバーのレコード\" }\n  PHC -- \"VPC 内の送り元から確認\" --> SVC\n  SVC -- \"メトリクス\" --> CW\n  CW -- \"アラームの状態\" --> HC2\n  PHC == \"ヘルス状態\" ==> REC\n  HC2 == \"ヘルス状態\" ==> REC\n  W[\"⚠ C: 公開の確認は届かない / ⚠ D: 別アカウントは不可 / ⚠ E: 参照できない\"]\n  W -.- REC",
+   "source": "flowchart TB\n  subgraph VPC[\"VPC（非公開）\"]\n    SVC[\"社内のサービス\"]\n    PHC@{ svc: \"Amazon Route 53\", label: \"✔ A: プライベートエンドポイントのヘルスチェック\" }\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"サービスのヘルスのアラーム（同じアカウント）\" }\n  HC2@{ svc: \"Amazon Route 53\", label: \"✔ B: アラームを監視するヘルスチェック\" }\n  REC@{ svc: \"Amazon Route 53\", label: \"フェイルオーバーのレコード\" }\n  PHC -- \"VPC 内の送り元から確認\" --> SVC\n  SVC -- \"メトリクス\" --> CW\n  CW -- \"アラームの状態\" --> HC2\n  PHC == \"ヘルス状態\" ==> REC\n  HC2 == \"ヘルス状態\" ==> REC\n  W[\"⚠ C: 公開の確認は届かない / ⚠ D: 別アカウントは不可 / ⚠ E: 参照できない\"]\n  W -.- REC",
    "alt": "公開できない社内サービスに Route 53 のフェイルオーバーを使う図。VPC 内の送り元で確認するプライベートエンドポイントのヘルスチェック（A）と、同じアカウントの CloudWatch アラームを監視するヘルスチェック（B）が使える。"
   }
  ]

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0010",
+  "source": "flowchart TB\n  CLI([\"クライアント\"])\n  subgraph VPC[\"VPC\"]\n    ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"インスタンス（CloudWatch エージェント）\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"✔ A: アクセスログの保存先\" }\n  CWL@{ svc: \"Amazon CloudWatch Logs\", label: \"✔ B: アプリケーションのログ\" }\n  CLI -- \"HTTP リクエスト\" --> ALB --> EC2\n  ALB == \"✔ A: アクセスログ（既定は無効）\" ==> S3\n  EC2 == \"✔ B: ログファイル\" ==> CWL\n  W[\"⚠ D: フローログは IP の通信だけ<br/>⚠ E: CloudTrail はログファイルを集めない\"]\n  W -.- VPC\n",
+  "alt": "ALB のリクエストの記録と EC2 のアプリケーションログを集める図。ALB のアクセスログを有効にして S3 へ（A）、CloudWatch エージェントでログファイルを CloudWatch Logs へ送る（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

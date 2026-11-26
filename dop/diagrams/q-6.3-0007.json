@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0007",
+  "source": "flowchart TB\n  subgraph ADM[\"委任管理者アカウント\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"検出結果\" }\n    FQ[\"✔ B: 後続の発生の頻度を 15 分に<br/>管理者アカウントだけが変えられる\"]\n    EB@{ svc: \"Amazon EventBridge\", label: \"✔ A: 検出結果のルール\" }\n    SNS@{ svc: \"Amazon SNS\", label: \"メールのサブスクリプション\" }\n  end\n  TEAM([\"セキュリティチーム\"])\n  GD -- \"検出結果のイベント\" --> EB\n  FQ -.- GD\n  EB -- \"ターゲット\" --> SNS\n  SNS -- \"メール\" --> TEAM\n  W[\"⚠ C: メンバーでは変えられない<br/>⚠ D: 新しい検出結果の頻度は変えられない\"]\n  W -.- GD\n",
+  "alt": "GuardDuty の新しい検出結果をメールで受け、繰り返しを 15 分ごとにする図。EventBridge のルールで SNS トピックへ送り（A）、管理者アカウントで後続の発生の頻度を 15 分にする（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

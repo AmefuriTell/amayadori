@@ -16394,7 +16394,10 @@
           "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Organizations で全アカウントのイベントを記録する構成。管理アカウントがセキュリティアカウントを CloudTrail の委任管理者にし、そこから組織の証跡を作る（D）。管理アカウントにサインインせずに済む。"
+      }
     },
     {
       "id": "q-6.3-0002",
@@ -16456,7 +16459,10 @@
           "quote": "assert positively that no log files were delivered to your account during a given period of time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail のログが届いた後に変更・削除されていないことを示す図。整合性の検証を有効にすると毎時の署名付きダイジェストが届き（A）、ログと照らして変更や届かなかった期間を証明できる。"
+      }
     },
     {
       "id": "q-6.3-0003",
@@ -16528,7 +16534,10 @@
           "quote": "Legal holds can be freely placed and removed by any user who has the s3:PutObjectLegalHold permission."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 オブジェクトロックで 7 年はルートも削除できず、調査対象は調査が終わるまで残す図。バケットにコンプライアンスモード 7 年（A）、調査対象にリーガルホールドを付け調査チームが外せる（C）。"
+      }
     },
     {
       "id": "q-6.3-0004",
@@ -16590,7 +16599,10 @@
           "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "40 アカウント・4 リージョンの AWS Config のデータを 1 つのビューで見る図。セキュリティアカウントに組織をソースとするアグリゲーターを作ると（A）、各アカウントの承認なしで読むだけの集約ができる。"
+      }
     },
     {
       "id": "q-6.3-0005",
@@ -16656,7 +16668,10 @@
           "quote": "A CloudTrail Insights event is generated in the same Region as its supporting management or data event is generated."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "リソースを作る API 呼び出しの割合の急な上昇を CloudTrail Insights で知る図。証跡が読み取りだけだと出ないので、書き込みの管理イベントも記録し、最大 36 時間待つ（B）。"
+      }
     },
     {
       "id": "q-6.3-0006",
@@ -16713,7 +16728,10 @@
           "quote": "You can choose whether the alarm is triggered when the metric value is above the band of expected values, below the band, or both."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "時間帯で変わる失敗回数のメトリクスに、異常に多い時だけ鳴らす図。異常検出のアラームを予想される値のバンドより上で鳴るようにする（C）。静的なしきい値や下・両側のアラームは要件に合わない。"
+      }
     },
     {
       "id": "q-6.3-0007",
@@ -16787,7 +16805,10 @@
           "quote": "The notification frequency for newly generated findings is in near real-time."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty の新しい検出結果をメールで受け、繰り返しを 15 分ごとにする図。EventBridge のルールで SNS トピックへ送り（A）、管理者アカウントで後続の発生の頻度を 15 分にする（B）。"
+      }
     },
     {
       "id": "q-6.3-0008",
@@ -16850,7 +16871,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 D の Insights の説明は C-0079 の出典（Insights は API の呼び出しの率と誤りの率）による"
+      "note": "選択肢 D の Insights の説明は C-0079 の出典（Insights は API の呼び出しの率と誤りの率）による",
+      "diagram": {
+        "alt": "機密の S3 バケットのダウンロードの記録を安く取る図。高度なイベントセレクターでそのバケットと GetObject だけのデータイベントを記録する（A）。全バケットの記録や管理イベントだけでは合わない。"
+      }
     },
     {
       "id": "q-6.3-0009",
@@ -16919,7 +16943,10 @@
           "quote": "By default, the maximum aggregation interval is 10 minutes. When you create a flow log, you can optionally specify a maximum aggregation interval of 1 minute."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "サブネットの拒否された接続の記録を S3 に残す図。拒否だけを記録して S3 に発行するフローログを作り（A）、最大集約間隔を最も短い 1 分にする（B）。30 秒は選べず、既定は 10 分。"
+      }
     },
     {
       "id": "q-6.3-0010",
@@ -16989,7 +17016,10 @@
           "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ALB のリクエストの記録と EC2 のアプリケーションログを集める図。ALB のアクセスログを有効にして S3 へ（A）、CloudWatch エージェントでログファイルを CloudWatch Logs へ送る（B）。"
+      }
     },
     {
       "id": "q-6.3-0011",

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0001",
+  "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations\"]\n    MGT[\"管理アカウント<br/>委任管理者を決める\"]\n    SEC[\"セキュリティアカウント\"]\n    MEM[\"メンバーアカウント<br/>後から加わる分も含む\"]\n  end\n  CT@{ svc: \"AWS CloudTrail\", label: \"✔ D: 組織の証跡\" }\n  MGT -- \"✔ D: 委任管理者に指定\" --> SEC\n  SEC == \"組織の証跡を作る・管理\" ==> CT\n  CT -- \"全アカウントのイベント\" --> MGT\n  CT -- \"イベント\" --> MEM\n  MGT -. \"⚠ B: 管理アカウントにサインインが要る\" .- SEC\n  MEM -. \"⚠ A: 証跡がアカウントごとで追加が要る\" .- CT\n",
+  "alt": "Organizations で全アカウントのイベントを記録する構成。管理アカウントがセキュリティアカウントを CloudTrail の委任管理者にし、そこから組織の証跡を作る（D）。管理アカウントにサインインせずに済む。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

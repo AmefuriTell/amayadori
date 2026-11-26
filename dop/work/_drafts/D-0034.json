@@ -13,7 +13,7 @@
   },
   {
    "id": "q-6.2-0003",
-   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations\"]\n    subgraph WL[\"Workloads OU（検出コントロール有効）\"]\n      A1@{ svc: \"AWS Control Tower\", label: \"ほかのアカウント（コントロール適用）\" }\n      LEG[\"古いシステムのアカウント\"]\n    end\n    subgraph OTH[\"別の OU（コントロールなし）\"]\n      NEW[\"✔ C: 古いシステムのアカウントを移す\"]\n    end\n  end\n  LEG == \"✔ C: OU を移す\" ==> NEW\n  A1 -. \"コントロールは OU 全体に当たる\" .-> LEG\n  LEG -. \"⚠ A: 1 つのアカウントだけ外せない\" .-> A1\n  LEG -. \"⚠ D: 毎週の手作業になる\" .-> A1\n",
+   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations\"]\n    subgraph WL[\"Workloads OU\"]\n      A1@{ svc: \"AWS Control Tower\", label: \"ほかのアカウント（コントロール適用）\" }\n      LEG[\"古いシステムのアカウント\"]\n    end\n    subgraph OTH[\"別の OU（コントロールなし）\"]\n      NEW[\"適用なし\"]\n    end\n  end\n  LEG == \"✔ C: OU を移す\" ==> NEW\n  A1 -. \"OU 全体に当たる\" .-> LEG\n  LEG -. \"⚠ A: 1 つだけ外せない\" .-> A1\n  LEG -. \"⚠ D: 毎週の手作業\" .-> A1\n",
    "alt": "Control Tower のコントロールは OU 全体に当たり、1 アカウントだけ外せない。古いシステムのアカウントをコントロールのない別の OU に移す(C)のが最も手間が少ない。"
   },
   {

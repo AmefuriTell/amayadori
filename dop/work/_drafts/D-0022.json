@@ -1,0 +1,55 @@
+{
+ "item": "D-0022",
+ "diagrams": [
+  {
+   "id": "q-4.1-0001",
+   "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"既存のロググループ\" }\n    KEY@{ svc: \"AWS KMS\", label: \"対称の KMS キー\" }\n    POL[\"✔ D: キーポリシーに文を追加<br/>logs のサービスプリンシパルを許可<br/>条件: このロググループの ARN\"]\n  end\n  WC[\"⚠ C: us-east-1 のキーと<br/>サービスプリンシパルは合わない\"]\n  WA[\"⚠ A: 非対称キーは使えない\"]\n  WB[\"⚠ B: IAM ロールに権限を足しても<br/>サービスプリンシパルは使えない\"]\n  LG -- \"関連付け\" --> KEY\n  POL == \"使う権限\" ==> KEY\n  WC -.- KEY\n  WA -.- KEY\n  WB -.- LG\n",
+   "alt": "eu-west-1 の CloudWatch Logs のロググループを KMS キーで暗号化する図。キーポリシーに、ロググループの ARN の条件付きで CloudWatch Logs のサービスプリンシパルへの許可を足すのが正解（D）。非対称キーや別リージョンのキーは使えない。"
+  },
+  {
+   "id": "q-4.1-0002",
+   "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  OP[\"オペレーター\"]\n  PA[\"✔ A: データ保護ポリシー<br/>カード番号の識別子でマスク\"]\n  PB[\"✔ B: 保持期間 90 日<br/>古いログは自動で削除\"]\n  WC[\"⚠ C: KMS で暗号化しても<br/>表示の時は復号される\"]\n  WD[\"⚠ D・E: 自分のコードや<br/>毎日の書き出しが要る\"]\n  APP -- \"ログ\" --> LG\n  LG -- \"表示の時にマスク\" --> OP\n  PA -.- LG\n  PB -.- LG\n  WC -.- LG\n  WD -.- LG\n",
+   "alt": "CloudWatch Logs のロググループで、カード番号を見えなくして 90 日で自動削除する図。データ保護ポリシーでマスクし（A）、保持期間を 90 日にする（B）。KMS 暗号化やコードでの削除は要件に合わない。"
+  },
+  {
+   "id": "q-4.1-0003",
+   "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"Standard のロググループ\" }\n  MF[\"メトリクスフィルター（ERROR）\"]\n  M@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  AL[\"アラーム\"]\n  NA[\"✔ A: 作った後に届いたログだけ数える<br/>⚠ D: 作り直しても過去は数えない\"]\n  NB[\"✔ B: 既定値 0 を設定すると<br/>一致なしでも 0 を報告\"]\n  NC[\"⚠ C: ディメンションを付けると<br/>既定値は決められない\"]\n  LG -- \"新しいログ\" --> MF\n  MF -- \"データポイント\" --> M\n  M --> AL\n  NA -.- MF\n  NB -.- MF\n  NC -.- M\n",
+   "alt": "ERROR を数えるメトリクスフィルターの図。フィルターは作った後のログしか数えず（A）、一致が無い時は既定値 0 を設定すると 0 を報告するので INSUFFICIENT_DATA を避けられる（B）。"
+  },
+  {
+   "id": "q-4.1-0004",
+   "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"関数\" }\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"カスタムメトリクス\" }\n  OK[\"✔ A: 埋め込みメトリクス形式で書く<br/>必要なのは logs:PutLogEvents だけ\"]\n  WB[\"⚠ B: PutMetricData の同期呼び出しと<br/>権限が要る\"]\n  WC[\"⚠ C: メトリクスごとに<br/>フィルターが要る\"]\n  FN == \"ログ（埋め込み形式）\" ==> LG\n  LG -- \"非同期にメトリクス化\" --> CW\n  OK -.- FN\n  WB -.- CW\n  WC -.- LG\n",
+   "alt": "Lambda のカスタムメトリクスを出す図。埋め込みメトリクス形式でログに書けば、logs:PutLogEvents の権限だけで非同期にメトリクスができる（A）。PutMetricData やメトリクスごとのフィルターは要件に反する。"
+  },
+  {
+   "id": "q-4.1-0005",
+   "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"AWS/EC2 と AWS/RDS のメトリクス\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム（Parquet に変換）\" }\n  DL@{ svc: \"Amazon S3\", label: \"データレイク\" }\n  OK[\"✔ D: 2 つの名前空間の include フィルター<br/>変換は Firehose で行う\"]\n  WA[\"⚠ A: ストリームが直接出せる形式は<br/>JSON と OpenTelemetry だけ\"]\n  WB[\"⚠ B: include と exclude の<br/>両方は置けない\"]\n  CW -- \"メトリクスストリーム\" --> FH\n  FH -- \"Parquet\" --> DL\n  OK -.- CW\n  WA -.- FH\n  WB -.- CW\n",
+   "alt": "CloudWatch のメトリクスを Parquet で S3 に届ける図。名前空間の include フィルターを持つメトリクスストリームを Firehose へ送り、Firehose で Parquet に変換する（D）。ストリームが直接出せる形式は JSON と OpenTelemetry だけ。"
+  },
+  {
+   "id": "q-4.1-0006",
+   "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  FN@{ svc: \"AWS Lambda\", label: \"処理する関数\" }\n  OA[\"✔ A: gzip + base64 で<br/>awslogs.data に入る\"]\n  OB[\"✔ B: 少なくとも 1 回の配信<br/>重複を処理できるように\"]\n  WC[\"⚠ C: 必ず 1 回だけではない\"]\n  WE[\"⚠ E: フィルターは最大 5 つ\"]\n  LG -- \"一致したイベント\" --> FN\n  OA -.- FN\n  OB -.- FN\n  WC -.- FN\n  WE -.- LG\n",
+   "alt": "CloudWatch Logs のサブスクリプションフィルターから Lambda へ送る図。データは gzip で圧縮され base64 で awslogs.data に入り（A）、配信は少なくとも 1 回なので重複を処理できるようにする（B）。"
+  },
+  {
+   "id": "q-4.1-0007",
+   "source": "flowchart TB\n  PS@{ svc: \"AWS Systems Manager Parameter Store\", label: \"エージェントの設定\" }\n  SM[\"Systems Manager<br/>（エージェントを一括で入れる）\"]\n  EC2[\"EC2 インスタンス 300 台<br/>（CloudWatchAgentServerPolicy）\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"メモリ・ディスクのメトリクス\" }\n  OK[\"✔ C: パラメータ名が<br/>AmazonCloudWatch- で始まる\"]\n  WA[\"⚠ A: 名前が違うと管理ポリシーで読めない\"]\n  WB[\"⚠ B・D: 独自の cron や<br/>手作業のコピーになる\"]\n  SM -- \"インストール\" --> EC2\n  PS -- \"設定を読む\" --> EC2\n  EC2 -- \"メトリクス\" --> CW\n  OK -.- PS\n  WA -.- PS\n  WB -.- EC2\n",
+   "alt": "300 台の EC2 に CloudWatch エージェントの 1 つの設定を使わせる図。設定を AmazonCloudWatch- で始まる名前で Parameter Store に置けば、管理ポリシーのままで読め、Systems Manager で一括で入れられる（C）。"
+  },
+  {
+   "id": "q-4.1-0008",
+   "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"注文を処理する関数\" }\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"注文の種類ごとのメトリクス\" }\n  OK[\"✔ B: 埋め込みメトリクス形式<br/>ディメンションは注文の種類（約 10）だけ\"]\n  WA[\"⚠ A: リクエスト ID は値が多く<br/>メトリクスが大量にできる\"]\n  WC[\"⚠ C: PutMetricData の権限が要る\"]\n  FN -- \"ログ（埋め込み形式）\" --> LG\n  LG -- \"メトリクス化\" --> CW\n  OK -.- LG\n  WA -.- CW\n  WC -.- FN\n",
+   "alt": "Lambda から注文の種類ごとのカスタムメトリクスを出す図。PutMetricData の権限が無いので、埋め込みメトリクス形式でログに書き、ディメンションを注文の種類だけにする（B）。リクエスト ID を付けるとメトリクスが大量にできる。"
+  },
+  {
+   "id": "q-4.1-0009",
+   "source": "flowchart TB\n  subgraph ACC[\"アカウント\"]\n    POL[\"✔ B: アカウントレベルの保持ポリシー<br/>接頭辞 /app/・90 日・RETROACTIVE\"]\n    OLD@{ svc: \"Amazon CloudWatch Logs\", label: \"既存の /app/ のロググループ\" }\n    NEW@{ svc: \"Amazon CloudWatch Logs\", label: \"今後作る /app/ のロググループ\" }\n  end\n  WA[\"⚠ A: NEW_ONLY は既存が無期限のまま\"]\n  WC[\"⚠ C・D: 独自の関数や<br/>各チームの設定に頼る\"]\n  POL == \"既存にも適用\" ==> OLD\n  POL == \"今後にも適用\" ==> NEW\n  WA -.- OLD\n  WC -.- POL\n",
+   "alt": "/app/ で始まる既存と今後のロググループに 90 日の保持を使う図。アカウントレベルの保持ポリシーを RETROACTIVE で作ると、既存のものにも今後のものにも適用される（B）。NEW_ONLY では既存が無期限のまま。"
+  },
+  {
+   "id": "q-4.1-0010",
+   "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  B@{ svc: \"Amazon S3\", label: \"ログのバケット\" }\n  RULE[\"ライフサイクルのルール<br/>30 日後に安いクラスへ\"]\n  IA[\"より安いストレージクラス\"]\n  OK[\"✔ D: 128 KB より小さい<br/>オブジェクトは既定で移されない\"]\n  WA[\"⚠ A: ルールは既存のオブジェクトにも効く\"]\n  APP -- \"約 20 KB のファイル（数百万）\" --> B\n  RULE -.- B\n  B -. \"移されない\" .-> IA\n  OK -.- B\n  WA -.- RULE\n",
+   "alt": "S3 のライフサイクルのルールが小さなログファイルを移さない図。約 20 KB のオブジェクトは、既定で 128 KB より小さい物はどのストレージクラスへも移されないため、元のクラスのままで費用も下がらない（D）。"
+  }
+ ]
+}

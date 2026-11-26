@@ -1,0 +1,8 @@
+{
+  "id": "q-6.3-0002",
+  "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"証跡（整合性の検証を有効）\" }\n  subgraph BKT[\"ログのバケット\"]\n    LOG@{ svc: \"Amazon S3\", label: \"ログファイル\" }\n    DG@{ svc: \"Amazon S3\", label: \"ダイジェストファイル（毎時）\" }\n  end\n  AUD([\"監査人\"])\n  CT -- \"ログ\" --> LOG\n  CT == \"✔ A: ハッシュを並べた署名付きの物\" ==> DG\n  AUD -. \"✔ A: ログをダイジェストと照らす\" .-> DG\n  VER[\"⚠ B: バージョニングは<br/>届けたままの証明にならない\"]\n  VER -.- LOG\n",
+  "alt": "CloudTrail のログが届いた後に変更・削除されていないことを示す図。整合性の検証を有効にすると毎時の署名付きダイジェストが届き（A）、ログと照らして変更や届かなかった期間を証明できる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
