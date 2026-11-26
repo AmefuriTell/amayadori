@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0003",
+  "source": "flowchart TB\n      A1@{ svc: \"AWS Control Tower\", label: \"Workloads OU のほかのアカウント（コントロール適用）\" }\n      LEG[\"Workloads OU の古いシステムのアカウント\"]\n    NEW[\"別の OU: 適用なし（コントロールなし）\"]\n  LEG == \"✔ C: OU を移す\" ==> NEW\n  A1 -. \"OU 全体に当たる\" .-> LEG\n  A[\"⚠ A: 古いアカウントだけ無効にする（OU 単位でしか効かない）\"]\n  A -.-> LEG\n  B[\"⚠ B: OU で無効にし独自の Config ルール（要件に反する）\"]\n  B -.-> A1\n  D[\"⚠ D: 毎週の結果の抑制（手作業）\"]\n  D -.-> LEG\n",
+  "alt": "Control Tower のコントロールは OU 全体に当たり、1 アカウントだけ外せない。古いシステムのアカウントをコントロールのない別の OU に移す(C)のが最も手間が少ない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

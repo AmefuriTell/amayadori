@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0010",
+  "source": "flowchart TB\n  SEC@{ svc: \"Amazon Macie\", label: \"セキュリティアカウント（Macie の管理者）<br/>Organizations 連携で有効化\" }\n  MEM@{ svc: \"Amazon Macie\", label: \"50 のメンバーアカウント\" }\n  S3B@{ svc: \"Amazon S3\", label: \"メンバーの S3 バケット\" }\n  SEC == \"✔ D: 連携で有効化\" ==> MEM\n  MEM -- \"バケットの情報\" --> S3B\n  S3B -- \"確認できる\" --> SEC\n  AB[\"⚠ A: 招待を送り承諾してもらう<br/>⚠ B: 各アカウントにサインインして有効化\"]\n  AB -.-> MEM\n  C[\"⚠ C: セキュリティアカウントだけで有効化<br/>（自動ではスキャンされない）\"]\n  C -.-> S3B",
+  "alt": "Macie を Organizations と統合してセキュリティアカウントを管理者に指定すれば、各アカウントにサインインせずにメンバーで Macie を有効にし、バケットの情報を確認できる(D)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

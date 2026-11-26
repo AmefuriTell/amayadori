@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0002",
+  "source": "flowchart TB\n  MGT[\"管理アカウント\"]\n    SEC@{ svc: \"AWS Security Hub CSPM\", label: \"セキュリティアカウント\" }\n    POL@{ svc: \"AWS Organizations\", label: \"宣言型ポリシー\" }\n    MEM@{ svc: \"AWS Security Hub CSPM\", label: \"メンバーアカウント（後から加わる分も）\" }\n  MGT == \"✔ A: 委任管理者に指定\" ==> SEC\n  MGT == \"✔ B: ルートにアタッチ\" ==> POL\n  POL -- \"有効化と設定を引き継ぐ\" --> MEM\n  SEC -- \"組織を管理\" --> MEM\n  C[\"⚠ C: 各アカウントにサインインして有効化\"]\n  C -.-> MEM\n  D[\"⚠ D: 加わるたびに招待を送る\"]\n  D -.-> MEM\n  E[\"⚠ E: セキュリティアカウントを管理アカウントにする\"]\n  E -.-> MGT\n",
+  "alt": "管理アカウントがセキュリティアカウントを委任管理者に指定し(A)、Security Hub CSPM の宣言型ポリシーを組織のルートにアタッチする(B)と、後から加わるアカウントも自動で有効化・設定される。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

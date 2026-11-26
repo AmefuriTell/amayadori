@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0001",
+  "source": "flowchart TB\n  EU@{ svc: \"AWS Security Hub CSPM\", label: \"eu-west-1<br/>有効（リンク済み）\" }\n  AP@{ svc: \"AWS Security Hub CSPM\", label: \"ap-south-1<br/>新しいワークロード（未有効）\" }\n  HUB@{ svc: \"AWS Security Hub CSPM\", label: \"us-east-1（ホームリージョン）<br/>集約された検出結果\" }\n  EU -- \"検出結果\" --> HUB\n  AP == \"✔ B: ここで有効化\" ==> HUB\n  A[\"⚠ A: 集約が有効にするのを待つ<br/>（有効にならない）\"]\n  A -.-> AP\n  D[\"⚠ D: S3 へ毎日エクスポートして取り込む<br/>（手間）\"]\n  D -.-> AP\n  C[\"⚠ C: ホームを ap-south-1 に変える<br/>（集まらない）\"]\n  C -.-> HUB",
+  "alt": "クロスリージョン集約は Security Hub CSPM を有効にしたリージョンのデータだけを集める。新しい ap-south-1 で Security Hub CSPM を有効にすれば、検出結果がホームリージョンに集まる(B)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

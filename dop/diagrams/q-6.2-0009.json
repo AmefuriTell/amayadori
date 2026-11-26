@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0009",
+  "source": "flowchart TB\n  subgraph BKT[\"S3 バケット\"]\n    EMP[\"従業員 ID（EMP- と 6 桁）\"]\n    TEST[\"テスト用のサンプルのカード番号\"]\n    REAL[\"本物のカード番号\"]\n  end\n  subgraph MAC[\"Amazon Macie\"]\n    CDI@{ svc: \"Amazon Macie\", label: \"カスタムデータ識別子（正規表現）\" }\n    ALW@{ svc: \"Amazon Macie\", label: \"許可リスト（サンプルの番号）\" }\n    MDI@{ svc: \"Amazon Macie\", label: \"マネージドデータ識別子（カード番号）\" }\n  end\n  EMP -- \"✔ C: 報告する\" --> CDI\n  REAL -- \"報告する\" --> MDI\n  TEST -- \"✔ C: 報告しない\" --> ALW\n  A[\"⚠ A: マネージドだけ（従業員 ID を知らない）\"]\n  A -.-> EMP\n  B[\"⚠ B: ID を許可リスト・サンプルを識別子に（逆）\"]\n  B -.-> ALW\n  D[\"⚠ D: カード番号のマネージド識別子を無効に（本物も漏れる）\"]\n  D -.-> MDI\n",
+  "alt": "従業員 ID は正規表現のカスタムデータ識別子で見つけ、サンプルのカード番号だけを許可リストに入れて報告から外す(C)。本物のカード番号はマネージドデータ識別子が引き続き報告する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.2-0004",
+  "source": "flowchart TB\n  BAD[\"悪意のある IP 範囲\"]\n  GOOD[\"通常のユーザー（HTTPS）\"]\n  subgraph VPC[\"パブリックサブネット\"]\n    NACL@{ svc: \"Amazon VPC\", label: \"ネットワーク ACL（番号の小さい順に評価）\" }\n    SG@{ svc: \"Amazon VPC\", label: \"セキュリティグループ（許可のみ）\" }\n    WEB[\"Web サーバー\"]\n  end\n  BAD == \"✔ B: 小さい番号で拒否\" ==> NACL\n  GOOD -- \"HTTPS の許可\" --> NACL\n  NACL --> SG\n  SG --> WEB\n  A[\"⚠ A: SG に拒否ルール（書けない）\"]\n  A -.-> SG\n  C[\"⚠ C: 大きい番号の拒否（許可が先に合う）\"]\n  C -.-> NACL\n  D[\"⚠ D: SG の HTTPS を外し許可を並べる（手間）\"]\n  D -.-> SG\n",
+  "alt": "セキュリティグループは許可しか書けず、ネットワーク ACL は番号の小さい順に評価する。HTTPS の許可より小さい番号で悪意のある範囲を拒否するルールを置く(B)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
