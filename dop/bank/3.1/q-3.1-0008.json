@@ -1,0 +1,66 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0008",
+  "services": [
+    "Amazon Aurora"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. Every quarter, the company moves the primary Region to the other Region as a planned operation, with both Regions healthy. The move must not lose any data, and the applications must not need configuration changes after each move. Which approach meets these requirements with the LEAST operational effort?",
+  "stem_ja": "ある会社は、プライマリクラスターを us-east-1、セカンダリクラスターを us-west-2 に置いた Amazon Aurora グローバルデータベースを使っています。会社は四半期ごとに、両方のリージョンが正常な状態で、計画した作業としてプライマリのリージョンをもう一方のリージョンへ移します。移す時にデータを失ってはならず、移すたびにアプリケーションの設定を変える必要が無いようにしなければなりません。運用の手間が最も少なくこれらの要件を満たす方法はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Perform a global database failover to us-west-2 each quarter, and update the applications to use the new primary cluster's endpoint.",
+      "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのフェイルオーバーを行い、アプリケーションが新しいプライマリクラスターのエンドポイントを使うように更新する。"
+    },
+    {
+      "key": "B",
+      "text": "Take a snapshot of the primary cluster each quarter, copy it to us-west-2, restore a new cluster, and point the applications to it.",
+      "text_ja": "四半期ごとにプライマリクラスターのスナップショットを取って us-west-2 へコピーし、新しいクラスターを復元して、アプリケーションをそこへ向ける。"
+    },
+    {
+      "key": "C",
+      "text": "Perform a global database switchover to us-west-2 each quarter, and have the applications connect to the global database writer endpoint.",
+      "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションはグローバルデータベースのライターエンドポイントに接続する。"
+    },
+    {
+      "key": "D",
+      "text": "Perform a global database switchover to us-west-2 each quarter, and update the applications to use the cluster endpoint in the new primary Region.",
+      "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションが新しいプライマリのリージョンのクラスターエンドポイントを使うように更新する。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "リージョンの入れ替えのような計画した作業にはスイッチオーバーを使い、正常なグローバルデータベースのプライマリを、データを失わずにセカンダリのリージョンへ移せます。グローバルデータベースのライターエンドポイントは、スイッチオーバーやフェイルオーバーの後も常にプライマリのクラスターを指すので、アプリケーションの設定を変えずに済みます。",
+    "per_choice": {
+      "A": "フェイルオーバーはプライマリのリージョンの障害から復旧するための仕組みで、計画した作業にはスイッチオーバーを使います。アプリケーションの更新も要ります。",
+      "B": "復元までに書かれたデータを失うおそれがあり、移すたびにアプリケーションの向け先も変える必要があります。",
+      "C": "正しい。スイッチオーバーでデータを失わずに移し、ライターエンドポイントが新しいプライマリを指し続けます。",
+      "D": "データは失いませんが、移すたびにアプリケーションの設定を変える必要があり、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+      "source_id": "S5",
+      "quote": "For planned operational procedures such as Regional rotation, use the switchover mechanism"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+      "source_id": "S5",
+      "quote": "you can relocate the primary cluster of a healthy Aurora Global Database to one of its secondary Regions with no data loss."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+      "source_id": "S4",
+      "quote": "connect to the Aurora Global Database writer endpoint, which always points to the primary DB cluster, even after a switchover or failover to a different AWS Region."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

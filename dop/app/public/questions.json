@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 166,
+  "count": 169,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -5398,6 +5398,201 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
           "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0007",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon DynamoDB"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A gaming company runs its backend in us-east-1 and eu-west-1. Players in each Region must read and write their profile data with low latency in their own Region. If one Region is interrupted, traffic must shift to the other Region with little or no data loss. The company does not want to build or maintain its own replication process. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるゲーム会社は、バックエンドを us-east-1 と eu-west-1 で動かしています。各リージョンのプレイヤーは、自分のリージョンで低いレイテンシーでプロフィールのデータを読み書きできる必要があります。一方のリージョンが中断した場合は、データの損失がほとんど無いか全く無い状態で、トラフィックをもう一方のリージョンへ移す必要があります。会社は、独自のレプリケーションの処理を作ったり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Store the data in an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in eu-west-1.",
+          "text_ja": "プライマリクラスターを us-east-1、セカンダリクラスターを eu-west-1 に置いた Amazon Aurora グローバルデータベースにデータを保存する。"
+        },
+        {
+          "key": "B",
+          "text": "Store the data in a DynamoDB table in each Region, and use DynamoDB Streams with an AWS Lambda function to copy every change to the other Region.",
+          "text_ja": "各リージョンの DynamoDB テーブルにデータを保存し、DynamoDB Streams と AWS Lambda 関数で、すべての変更をもう一方のリージョンへコピーする。"
+        },
+        {
+          "key": "C",
+          "text": "Store the data in an Amazon RDS DB instance in us-east-1 and create a cross-Region read replica in eu-west-1.",
+          "text_ja": "us-east-1 の Amazon RDS の DB インスタンスにデータを保存し、eu-west-1 にクロスリージョンのリードレプリカを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Store the data in a DynamoDB global table that has replicas in us-east-1 and eu-west-1.",
+          "text_ja": "us-east-1 と eu-west-1 にレプリカを持つ DynamoDB グローバルテーブルにデータを保存する。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "DynamoDB グローバルテーブルは、独自のレプリケーションを作らずにリージョン間でデータを自動で複製し、どのレプリカでも読み書きできるマルチアクティブの機能です。リージョンが中断した時は別のリージョンへトラフィックを移し、低いかゼロの RPO を実現できます。",
+        "per_choice": {
+          "A": "複数リージョンに置けますが、データが書き込まれるのはプライマリのリージョンだけです。eu-west-1 のプレイヤーの書き込みを自分のリージョンで処理するマルチアクティブの構成にはなりません。",
+          "B": "両方のリージョンで読み書きできますが、変更をコピーする仕組みを自分で作って保守する必要があります。",
+          "C": "リードレプリカは読み取り用で、eu-west-1 のプレイヤーは自分のリージョンで書き込めません。",
+          "D": "正しい。どちらのリージョンのレプリカでも読み書きでき、複製は自動で、中断時は別のリージョンへ移せます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables",
+          "quote": "Global tables automatically replicate your DynamoDB table data across AWS Regions and optionally across AWS accounts without requiring you to build and maintain your own replication solution."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables",
+          "quote": "Any global table replica can serve reads and writes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "An Aurora global database consists of one primary AWS Region where your data is written, and up to 10 read-only secondary AWS Regions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0008",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses an Amazon Aurora global database with the primary cluster in us-east-1 and a secondary cluster in us-west-2. Every quarter, the company moves the primary Region to the other Region as a planned operation, with both Regions healthy. The move must not lose any data, and the applications must not need configuration changes after each move. Which approach meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は、プライマリクラスターを us-east-1、セカンダリクラスターを us-west-2 に置いた Amazon Aurora グローバルデータベースを使っています。会社は四半期ごとに、両方のリージョンが正常な状態で、計画した作業としてプライマリのリージョンをもう一方のリージョンへ移します。移す時にデータを失ってはならず、移すたびにアプリケーションの設定を変える必要が無いようにしなければなりません。運用の手間が最も少なくこれらの要件を満たす方法はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Perform a global database failover to us-west-2 each quarter, and update the applications to use the new primary cluster's endpoint.",
+          "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのフェイルオーバーを行い、アプリケーションが新しいプライマリクラスターのエンドポイントを使うように更新する。"
+        },
+        {
+          "key": "B",
+          "text": "Take a snapshot of the primary cluster each quarter, copy it to us-west-2, restore a new cluster, and point the applications to it.",
+          "text_ja": "四半期ごとにプライマリクラスターのスナップショットを取って us-west-2 へコピーし、新しいクラスターを復元して、アプリケーションをそこへ向ける。"
+        },
+        {
+          "key": "C",
+          "text": "Perform a global database switchover to us-west-2 each quarter, and have the applications connect to the global database writer endpoint.",
+          "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションはグローバルデータベースのライターエンドポイントに接続する。"
+        },
+        {
+          "key": "D",
+          "text": "Perform a global database switchover to us-west-2 each quarter, and update the applications to use the cluster endpoint in the new primary Region.",
+          "text_ja": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションが新しいプライマリのリージョンのクラスターエンドポイントを使うように更新する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "リージョンの入れ替えのような計画した作業にはスイッチオーバーを使い、正常なグローバルデータベースのプライマリを、データを失わずにセカンダリのリージョンへ移せます。グローバルデータベースのライターエンドポイントは、スイッチオーバーやフェイルオーバーの後も常にプライマリのクラスターを指すので、アプリケーションの設定を変えずに済みます。",
+        "per_choice": {
+          "A": "フェイルオーバーはプライマリのリージョンの障害から復旧するための仕組みで、計画した作業にはスイッチオーバーを使います。アプリケーションの更新も要ります。",
+          "B": "復元までに書かれたデータを失うおそれがあり、移すたびにアプリケーションの向け先も変える必要があります。",
+          "C": "正しい。スイッチオーバーでデータを失わずに移し、ライターエンドポイントが新しいプライマリを指し続けます。",
+          "D": "データは失いませんが、移すたびにアプリケーションの設定を変える必要があり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "For planned operational procedures such as Regional rotation, use the switchover mechanism"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "you can relocate the primary cluster of a healthy Aurora Global Database to one of its secondary Regions with no data loss."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "connect to the Aurora Global Database writer endpoint, which always points to the primary DB cluster, even after a switchover or failover to a different AWS Region."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0009",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Amazon CloudFront",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company serves a static website through an Amazon CloudFront distribution whose origin is an Amazon S3 bucket in us-east-1. Content is updated several times each day. If the us-east-1 bucket becomes unavailable, CloudFront must automatically serve the site's GET requests from a copy of the content in another Region, and the copy must stay current without scheduled jobs. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "ある会社は、オリジンを us-east-1 の Amazon S3 バケットにした Amazon CloudFront ディストリビューションで、静的なウェブサイトを配信しています。コンテンツは 1 日に何度も更新されます。us-east-1 のバケットが使えなくなった場合、CloudFront はサイトへの GET リクエストに、別のリージョンにあるコンテンツの写しから自動で応答する必要があり、その写しはスケジュールしたジョブ無しで最新に保たれる必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure S3 Cross-Region Replication from the us-east-1 bucket to a bucket in us-west-2.",
+          "text_ja": "us-east-1 のバケットから us-west-2 のバケットへの S3 クロスリージョンレプリケーションを設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Configure S3 Same-Region Replication from the us-east-1 bucket to a second bucket in us-east-1.",
+          "text_ja": "us-east-1 のバケットから us-east-1 の 2 つ目のバケットへの S3 同一リージョンレプリケーションを設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a CloudFront origin group with the us-east-1 bucket as the primary origin and the us-west-2 bucket as the secondary origin.",
+          "text_ja": "us-east-1 のバケットをプライマリオリジン、us-west-2 のバケットをセカンダリオリジンにした CloudFront のオリジングループを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Schedule an AWS Lambda function that copies new objects from the us-east-1 bucket to a bucket in us-west-2 every night.",
+          "text_ja": "毎晩、us-east-1 のバケットから us-west-2 のバケットへ新しいオブジェクトをコピーする AWS Lambda 関数をスケジュールで実行する。"
+        },
+        {
+          "key": "E",
+          "text": "Add the us-west-2 bucket as a second origin, and have an engineer change the default cache behavior to it when the primary bucket fails.",
+          "text_ja": "us-west-2 のバケットを 2 つ目のオリジンとして追加し、プライマリのバケットが使えなくなった時にエンジニアがデフォルトのキャッシュ動作をそちらへ変える。"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "explanation": {
+        "summary": "S3 クロスリージョンレプリケーションは、別のリージョンのバケットへオブジェクトを自動・非同期でコピーします。CloudFront のオリジングループは、プライマリのオリジンが使えないか失敗を示すステータスコードを返した時に、GET・HEAD・OPTIONS のリクエストを自動でセカンダリのオリジンへ切り替えます。",
+        "per_choice": {
+          "A": "正しい。別のリージョンの写しが、ジョブ無しで自動で最新に保たれます。",
+          "B": "写しは自動で保たれますが同じリージョンにあり、別のリージョンに写しを置くという要件に合いません。",
+          "C": "正しい。プライマリが使えない時、CloudFront が GET のリクエストを自動でセカンダリへ切り替えます。",
+          "D": "スケジュールしたジョブで、要件に反します。次の実行までは写しが古いままです。",
+          "E": "切り替えが手作業で、自動で応答するという要件に合いません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication",
+          "quote": "You can use replication to enable automatic, asynchronous copying of objects across Amazon S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#crr-scenario",
+          "quote": "S3 Cross-Region Replication (CRR) is used to copy objects across Amazon S3 buckets in different AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+          "quote": "If the primary origin is unavailable, or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
         }
       ],
       "low_confidence": false
