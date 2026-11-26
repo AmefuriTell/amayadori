@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0012",
+  "source": "flowchart TB\n  WID[\"ダッシュボードの Logs Insights のウィジェット<br/>1 分ごとに更新\"]\n  OLD@{ svc: \"Amazon CloudWatch Logs\", label: \"40 のロググループ・30 日分（今）\" }\n  NEW@{ svc: \"Amazon CloudWatch Logs\", label: \"関係する 3 つ・直近 1 時間\" }\n  NOTE[\"料金はスキャンしたデータの量で決まる\"]\n  WA[\"⚠ A: 保持期間を延ばしても<br/>スキャンは減らない\"]\n  WB[\"⚠ B: ウィジェットを増やすと<br/>クエリが増える\"]\n  WC[\"⚠ C: limit では<br/>スキャン量は同じ\"]\n  WID -. \"⚠ 毎回クエリ\" .-> OLD\n  WID == \"✔ D: 絞って更新も減らす\" ==> NEW\n  NOTE -.- OLD\n  WA -.- OLD\n  WB -.- WID\n  WC -.- OLD\n",
+  "alt": "Logs Insights のウィジェットの費用を減らす図。料金はスキャンしたデータ量で決まるので、関係する 3 つのロググループだけを直近 1 時間でクエリし、更新を減らす（D）。保持期間や limit では減らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
