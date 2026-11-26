@@ -86,15 +86,14 @@ export function seedGlossary(args) {
 }
 
 // P-015: 構成図の項目。--ids q-…,q-… で問題を選ぶ（無ければ図の無い問題をタスクごとに size 問ずつ）
-export function seedDiagram(args) {
-  const size = Number(args.size ?? 5);
+// 図の項目を足す。ids を渡せばその問題だけ、無ければ「検証済みで図も図の項目も無い問題」を task ごとに size 問ずつ束ねる
+function addDiagramItems({ size = 10, priority = 2, ids = null, dry = false } = {}) {
   const backlog = loadBacklog();
   const done = new Set(fs.existsSync(paths.diagrams()) ? fs.readdirSync(paths.diagrams()).map((f) => f.replace(/\.json$/, '')) : []);
   const pending = new Set(backlog.filter((b) => b.kind === 'diagram' && b.status !== 'done').flatMap((b) => b.question_ids ?? []));
   const bank = loadBank().filter((q) => q.status === 'verified');
   const groups = [];
-  if (typeof args.ids === 'string') {
-    const ids = args.ids.split(',').map((s) => s.trim()).filter(Boolean);
+  if (ids) {
     const missing = ids.filter((i) => !bank.some((q) => q.id === i));
     if (missing.length) throw new ToolError(`bank に無い: ${missing.join(', ')}`);
     groups.push(ids);
@@ -102,16 +101,27 @@ export function seedDiagram(args) {
     const byTask = {};
     for (const q of bank) if (!done.has(q.id) && !pending.has(q.id)) (byTask[q.task] ??= []).push(q.id);
     for (const t of Object.keys(byTask).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
-      const ids = byTask[t].sort();
-      for (let i = 0; i < ids.length; i += size) groups.push(ids.slice(i, i + size));
+      const list = byTask[t].sort();
+      for (let i = 0; i < list.length; i += size) groups.push(list.slice(i, i + size));
     }
   }
-  const add = groups.map((ids) => ({ kind: 'diagram', task: ids[0].match(/^q-([1-6]\.[0-9]+)-/)[1], question_ids: ids, priority: Number(args.priority ?? 2), source: 'diagram', title: `構成図（${ids.join(', ')}）` }));
-  if (!args.dry) {
+  const add = groups.map((g) => ({ kind: 'diagram', task: g[0].match(/^q-([1-6]\.[0-9]+)-/)[1], question_ids: g, priority, source: 'diagram', title: `構成図（${g.join(', ')}）` }));
+  if (!dry && add.length) {
     for (const item of add) { item.id = nextId(backlog, 'diagram'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
     saveBacklog(backlog);
   }
+  return add;
+}
+
+export function seedDiagram(args) {
+  const ids = typeof args.ids === 'string' ? args.ids.split(',').map((s) => s.trim()).filter(Boolean) : null;
+  const add = addDiagramItems({ size: Number(args.size ?? 10), priority: Number(args.priority ?? 2), ids, dry: Boolean(args.dry) });
   emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}図の項目 ${add.length} 個、${add.reduce((n, a) => n + a.question_ids.length, 0)} 問ぶんを足した`, extra: { added: add.map((a) => a.id) } });
+}
+
+// 問題を公開した項目（content・recheck）を閉じた時に loop close が呼ぶ。図の無い問題があれば図の項目を足す
+export function autoSeedDiagrams() {
+  return addDiagramItems().map((a) => a.id);
 }
 
 // 図を描く人が読む問題の中身（日本語の問題文・選択肢・答え・解説・補足）。bank は読ませない
