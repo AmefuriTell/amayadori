@@ -1,0 +1,148 @@
+{
+  "item": "C-0053",
+  "questions": [
+    {
+      "task": "4.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.2-0001",
+      "services": [
+        "AWS X-Ray",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Amazon EventBridge schedule invokes a Lambda function through an alias named prod, which points to published version 12. No traces appear in AWS X-Ray. An engineer turned on Active tracing for the function in the Lambda console, which edited the unpublished version, but production invocations are still not traced. The company wants production invocations to be traced with the LEAST amount of effort. What should the engineer do?",
+      "stem_ja": "Amazon EventBridge のスケジュールが、prod というエイリアスを通して Lambda 関数を呼び出しています。prod は公開済みのバージョン 12 を指しています。AWS X-Ray にはトレースが表示されません。エンジニアが Lambda のコンソールで関数の Active tracing を有効にし、未公開のバージョンが変更されましたが、本番の呼び出しはまだトレースされません。会社は、最も少ない手間で本番の呼び出しをトレースしたいと考えています。エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Change the tracing mode of version 12 to Active so that the prod alias keeps pointing to the same version.",
+          "text_ja": "prod エイリアスが同じバージョンを指したままになるよう、バージョン 12 のトレースのモードを Active に変える。"
+        },
+        {
+          "key": "B",
+          "text": "Publish a new version from the unpublished version that has Active tracing, and update the prod alias to point to it.",
+          "text_ja": "Active tracing を有効にした未公開のバージョンから新しいバージョンを公開し、prod エイリアスがそれを指すように更新する。"
+        },
+        {
+          "key": "C",
+          "text": "Add the AWSXRayDaemonWriteAccess managed policy to the execution role, and keep the prod alias pointing to version 12.",
+          "text_ja": "実行ロールに AWSXRayDaemonWriteAccess 管理ポリシーを追加し、prod エイリアスはバージョン 12 を指したままにする。"
+        },
+        {
+          "key": "D",
+          "text": "Set the function's X-Ray sampling rate to 100 percent so that every scheduled invocation is recorded.",
+          "text_ja": "関数の X-Ray のサンプリングレートを 100% にして、スケジュールの呼び出しをすべて記録する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "トレースのモードは、関数のバージョンを公開する時のバージョンごとの設定で、公開済みのバージョンでは変えられません。スケジュールで動く関数は Active tracing でサンプリングして記録するので、有効にした設定から新しいバージョンを公開し、エイリアスをそちらへ向けます。",
+        "per_choice": {
+          "A": "公開済みのバージョンのトレースのモードは変えられません。",
+          "B": "正しい。Active tracing を含む新しいバージョンを公開してエイリアスを向ければ、本番の呼び出しがトレースされます。",
+          "C": "権限は必要ですが、コンソールで有効にした時に追加されます。バージョン 12 は Active tracing ではないため、トレースは送られません。",
+          "D": "Lambda 関数の X-Ray のサンプリングレートは設定できません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+          "source_id": "S2",
+          "quote": "Tracing mode is part of the version-specific configuration when you publish a version of your function. You can't change the tracing mode on a published version."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda",
+          "source_id": "S1",
+          "quote": "If your Lambda function runs on a schedule, or is invoked by a service that is not instrumented, you can configure Lambda to sample and record invocations with active tracing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+          "source_id": "S2",
+          "quote": "When you activate tracing in the Lambda console, Lambda adds the required permissions to your Event Function's execution role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+          "source_id": "S2",
+          "quote": "You can't configure the X-Ray sampling rate for your functions."
+        }
+      ]
+    },
+    {
+      "task": "4.2",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.2-0002",
+      "services": [
+        "AWS X-Ray",
+        "Amazon API Gateway"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company exposes a REST API in Amazon API Gateway that invokes Lambda functions. The company wants traces to start at API Gateway. It also wants to record 10% of requests to the /orders resource and 1% of all other requests, and wants to change these percentages later without redeploying any code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、Lambda 関数を呼び出す REST API を Amazon API Gateway で公開しています。会社は、トレースを API Gateway から始めたいと考えています。また、/orders リソースへのリクエストは 10%、それ以外のすべてのリクエストは 1% を記録し、後でコードを再デプロイせずにこの割合を変えたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on Active tracing only for the Lambda functions, and set the percentages in each function's environment variables.",
+          "text_ja": "Lambda 関数だけで Active tracing を有効にし、記録する割合を各関数の環境変数で設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Add the X-Ray SDK to each Lambda function, and write code that decides which incoming requests to sample for each resource.",
+          "text_ja": "各 Lambda 関数に X-Ray SDK を追加し、リソースごとにどの受信リクエストをサンプリングするかを決めるコードを書く。"
+        },
+        {
+          "key": "C",
+          "text": "Turn on X-Ray tracing for the API stage and redeploy, then define sampling rules for /orders and other requests in the X-Ray console.",
+          "text_ja": "API のステージで X-Ray のトレースを有効にして再デプロイし、/orders 用とほかのリクエスト用のサンプリングルールを X-Ray のコンソールで作る。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on X-Ray tracing for the API stage and redeploy the API, and rely on the default sampling for all requests.",
+          "text_ja": "API のステージで X-Ray のトレースを有効にして API を再デプロイし、すべてのリクエストに既定のサンプリングをそのまま使う。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "API Gateway は REST API のステージで Active tracing を有効にでき、どのリクエストを記録するかは X-Ray のコンソールで定義したサンプリングルールで決めます。ルールはコンソールで変えられるので、割合を変える時にコードを再デプロイする必要はありません。",
+        "per_choice": {
+          "A": "トレースが API Gateway から始まらず、Lambda 関数の X-Ray のサンプリングレートは設定できません。",
+          "B": "Lambda では SDK で受信リクエストのサンプリングを決めることはなく、割合を変えるたびにコードの変更も要ります。",
+          "C": "正しい。ステージでトレースを有効にし、リソースごとの割合を X-Ray のサンプリングルールで決め、後からコンソールで変えられます。",
+          "D": "トレースは API Gateway から始まりますが、リソースごとの割合（10% と 1%）を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-apigateway.html#xray-services-apigateway",
+          "source_id": "S3",
+          "quote": "Enable active tracing on your API stages to sample incoming requests and send traces to X-Ray."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-apigateway.html#xray-services-apigateway",
+          "source_id": "S3",
+          "quote": "API Gateway uses sampling rules that you define in the X-Ray console to determine which requests to record."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+          "source_id": "S2",
+          "quote": "You can't configure the X-Ray sampling rate for your functions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda",
+          "source_id": "S1",
+          "quote": "you don't use the SDK to instrument incoming requests, make sampling decisions, and create segments."
+        }
+      ]
+    }
+  ],
+  "note": "3 問の予定を 2 問にした。ECS の X-Ray デーモンは SDK・デーモンの保守モード（S0）で答えが変わりうるため問題にしていない（P-009）。"
+}
