@@ -132,6 +132,17 @@ function openFromUrl() {
   Object.assign(state, resume(state.questions, { id, selected: [], answered: false, correct: 0 }), { view: 'solve', report: null });
 }
 
+// 解いている位置を最初に戻す（A-0016）。記録は消さない。解き直しの最中は解き直しの 1 問目へ
+function renderSolveBar() {
+  const atStart = state.index === 0 && !state.answered && state.selected.length === 0;
+  return el('div', { class: 'solve-bar' },
+    el('button', {
+      type: 'button', class: 'secondary', 'data-testid': 'restart', disabled: atStart,
+      onclick: () => { if (window.confirm('最初の問題に戻ります。記録は消えません。よろしいですか？')) restart(); },
+      text: '最初から',
+    }));
+}
+
 function renderQlinkMissing() {
   if (!state.qlinkMissing) return null;
   return el('p', { class: 'notice', 'data-testid': 'qlink-missing', text: `指定の問題 ${state.qlinkMissing} は見つかりません。続きから開きました。` });
@@ -199,7 +210,7 @@ function render() {
   } else {
     card.append(renderAnswer(q));
   }
-  app.replaceChildren(...[renderQlinkMissing(), renderRetryBar(), card].filter(Boolean));
+  app.replaceChildren(...[renderQlinkMissing(), renderRetryBar(), renderSolveBar(), card].filter(Boolean));
   autoSpeak(q, view);
 }
 
