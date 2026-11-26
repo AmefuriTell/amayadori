@@ -1,0 +1,61 @@
+{
+ "slides": [
+  {
+   "id": "s04",
+   "issues": [
+    {
+     "kind": "unsupported",
+     "severity": "軽",
+     "detail": "台本の「コンテナインスタンスは、タスクを動かすイーシーツーインスタンスです」は言い切り。S4 は container instance resources と言うだけで定義は無い。notes では「と考えてください」と弱めて書いたとあるが、この文は弱まっていない（desired count の方だけ弱めてある）。",
+     "suggest": "「コンテナインスタンスは、ここでは、タスクを動かすイーシーツーインスタンスと考えてください」にそろえる。"
+    },
+    {
+     "kind": "fact",
+     "severity": "軽",
+     "detail": "図の CloudWatch の箱「届くまで指標もアラームも無い」。S3 は「無い指標にはアラームを作れない」で、bullets・台本もそう言う。図だけ「アラームが無い」になり少しずれる。",
+     "suggest": "「届くまで指標は無く アラームも作れない」にする。"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "severity": "軽",
+     "detail": "前回の重（Fargate と Fargate Spot の混同）は表・台本とも「Fargate と Auto Scaling group」に直っている。ただ bullet「strategy に Auto Scaling group を混ぜない」は、何と混ぜないかが画面に無く、「strategy に ASG は入れられない」とも読める。",
+     "suggest": "「strategy に Fargate と ASG を混ぜない」とする。"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "severity": "軽",
+     "detail": "1 行目の確かめる所「使用率・比例・1 分以下」は、s03 で「条件ではなく勧め」と分けた 1 分以下を、条件と同列に並べている。この表の台本は 1 分以下に触れない。",
+     "suggest": "「使用率・比例（1 分以下は勧め）」にするか、1 分以下を外す。"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "issues": [
+    {
+     "kind": "terms",
+     "severity": "軽",
+     "detail": "条件「Auto Scaling group と併用」は、何と併用するか（Fargate）が表に無い。台本は「ファーゲートとオートスケーリンググループの容量を併せて使う」と言う。また s06 の中身が s13（Fargate Spot）と s14（strategy）に分かれ、「第 2 部の前半／後半」の境目が s06 の中にある。",
+     "suggest": "条件を「Fargate と ASG を併用」にする。タイトルの前半・後半はそのままでよいが、気になるなら Fargate Spot の行を s14 に移す。"
+    }
+   ]
+  }
+ ],
+ "global": [
+  {
+   "severity": "軽",
+   "detail": "前回の重・中 5 件（s06 の Fargate／ASG、s08 の「ふつう要らない」、s13 の Service Auto Scaling の行、s14 のタイトル、s15 の Route 53 latency と Global Accelerator の書き分け）はすべて直っている。s12・s15 の書き分けは S17（lowest latency・レコードの値）と S18（AWS global network・nearest Region）に合う。notes の採らなかった理由（根拠に無い言い換えを避けた）は妥当。新しい重・中は見当たらない。",
+   "suggest": "上の軽だけ、余裕があれば直す。"
+  }
+ ]
+}

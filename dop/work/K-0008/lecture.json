@@ -2,26 +2,32 @@
   "task": "3.1",
   "title": "要件に合う高可用性の仕組みを作る",
   "notes": [
-    "C2 の初稿。軸は試験ガイドの task 3.1 の knowledge・skills（要件を回復力の要件に直す、単一障害点、Multi-AZ と multi-Region、計算の層とデータの層、cross-Region の仕組み、AZ をまたぐ負荷分散）。中身の事実は sources.md の S1〜S20 だけ。",
-    "用語のうち、Availability Zone・Region・単一障害点・Auto Scaling グループ・ロードバランサーのノード・replica lag は sources.md に定義が無いので、台本では「と考えてください」「という意味で使います」の弱い言い方にした。",
-    "ARC と S3 RTC は、sources.md に正式名の展開が無いので、略称のまま読ませた。",
-    "条件から選ぶ表は、行が 5 行までのため 3 枚（要件と計算の層／データの層／S3 と切り替え）に分けた。"
+    "C3 1 回目への返事（採らなかった提案と、一部だけ採った提案）",
+    "clarity s05: 表を cross-zone のオン・オフの図に作り直した。zonal shift は図に入れず bullets と台本に置いた（箱の数と、別の話を 1 つの図に混ぜないため）。ARC は正式名が sources.md に無いので展開せず、「ゾーナルシフトのある仕組みの名前」とだけ言った。",
+    "clarity s06: AZ の枠は描かなかった（箱と枠が増えて読みにくくなるため）。3 つの AZ は alt と台本で言う。replica lag の一文は、判断に効かないので削った。",
+    "clarity s08: switchover と failover は図に入れず、bullets と s14 の表に置いた。secondary の箱は 1 つのまま、「secondary は最大 10」とした。",
+    "clarity s09: MREC と MRSC が何をどう保つかの説明は sources.md に無いので、名前（結果整合性・強い整合性）と、既定と、作成後に変えられない事だけにした。",
+    "clarity s11: active-active の図は足さなかった（箱が 7 個を超えるため）。台本で先に言い切り、s15 の表の「確かめる所」に「全部か予備か」を置いた。",
+    "clarity s12・consistency s12: pilot light の一文は、講義の中で説明できないので台本から外した（S15 の引用には残る）。図の切り替えの手段は sources.md に結びつきが無いので描かず、矢印は「復旧までが短い」とした。",
+    "clarity s13: RPO・RTO の行は表から外し、台本の前置きにした。RPO の結び付きは s14 の台本（global tables）で、RTO は s12 の台本（warm standby）で言う。",
+    "clarity global: Multi-AZ と multi-Region の軸は、地図の枠の名前（AZ が止まっても／Region が止まっても）と s01・s13 の台本で、「と考えると整理しやすい」の弱い言い方で言った（S19・S20 と S2・S8 の範囲）。",
+    "用語のうち、Availability Zone・Region・単一障害点・Auto Scaling グループ・ロードバランサーのノード・レプリカ・read replica・health check・オリジン・非同期は sources.md に定義が無いので、台本では弱い言い方にした。"
   ],
   "slides": [
     {
       "id": "s01",
       "title": "この講義の地図",
       "bullets": [
-        "要件を数字に直す",
-        "AZ をまたぐ: 計算とデータ",
-        "Region をまたぐ: 複製と切り替え"
+        "要件を数字に、単一障害点を探す",
+        "AZ が止まっても: 計算とデータ",
+        "Region が止まっても: 複製と切り替え"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph T1[\"1 要件を数字に\"]\n    RQ[\"RPO と RTO<br/>単一障害点を探す\"]\n  end\n  subgraph T2[\"2 AZ をまたぐ\"]\n    CO@{ svc: \"Amazon EC2 Auto Scaling\", label: \"計算の層<br/>Auto Scaling・ELB<br/>NAT gateway\" }\n    DA@{ svc: \"Amazon RDS\", label: \"データの層<br/>RDS・ElastiCache<br/>Multi-AZ\" }\n  end\n  subgraph T3[\"3 Region をまたぐ\"]\n    AU@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>Global Database\" }\n    DD@{ svc: \"Amazon DynamoDB\", label: \"DynamoDB<br/>global tables\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3 の複製<br/>RDS の read replica\" }\n    RT@{ svc: \"Amazon Route 53\", label: \"Route 53・CloudFront<br/>warm standby\" }\n  end\n  T1 ~~~ T2\n  T2 ~~~ T3\n",
-        "alt": "講義の地図。扱う順に 3 つの枠を上から並べる。1 つ目は要件を数字に直すことで、RPO と RTO、単一障害点を探すこと。2 つ目は AZ をまたぐ構成で、計算の層の Auto Scaling・ELB・NAT gateway と、データの層の RDS・ElastiCache の Multi-AZ。3 つ目は Region をまたぐ構成で、Aurora Global Database、DynamoDB global tables、S3 の複製と RDS の read replica、Route 53・CloudFront の切り替えと warm standby。枠の並びは講義の順で、処理の流れではない。"
+        "source": "flowchart TB\n  subgraph T1[\"1 要件と単一障害点\"]\n    RQ[\"RPO と RTO\"]\n    NT[\"NAT gateway<br/>単一障害点の例\"]\n  end\n  subgraph T2[\"2 AZ が止まっても\"]\n    CO[\"計算の層<br/>Auto Scaling<br/>ロードバランサー\"]\n    DA[\"データの層<br/>RDS・ElastiCache<br/>Multi-AZ\"]\n  end\n  subgraph T3[\"3 Region が止まっても\"]\n    DB[\"データの複製<br/>Aurora・DynamoDB<br/>RDS・S3\"]\n    SW[\"入口の切り替え<br/>Route 53・CloudFront\"]\n    WS[\"待機の構成<br/>warm standby\"]\n  end\n  T1 ~~~ T2\n  T2 ~~~ T3\n",
+        "alt": "講義の地図。扱う順に 3 つの枠を上から並べる。1 つ目は要件と単一障害点で、RPO と RTO、単一障害点の例としての NAT gateway。2 つ目は AZ が止まっても動かす構成で、計算の層（Auto Scaling、ロードバランサー）と、データの層（RDS・ElastiCache の Multi-AZ）。3 つ目は Region が止まっても動かす構成で、データの複製（Aurora・DynamoDB・RDS・S3）、入口の切り替え（Route 53・CloudFront）、待機の構成（warm standby）。枠の並びは講義の順で、処理の流れではない。"
       },
-      "narration": "この講義では、可用性の高い仕組みを学びます。画面の地図は、扱う順番を示したもので、処理の流れではありません。はじめに、ビジネスの要件を、復旧の目標の数字に直す考え方と、単一障害点の探し方を見ます。次に、アベイラビリティーゾーンをまたぐ構成です。アベイラビリティーゾーンは、同じリージョンの中にある、別々の場所と考えてください。計算の層とデータの層に分けて見ます。そのあと、リージョンをまたぐ構成です。データの複製、入口での切り替え、ウォームスタンバイを順に見ます。最後に、問題文の条件から方法を選ぶ表で締めます。",
+      "narration": "この講義では、可用性の高い仕組みを学びます。画面の地図は、扱う順番を示したもので、処理の流れではありません。はじめに、ビジネスの要件を復旧の目標の数字に直し、ナットゲートウェイを例に、単一障害点の探し方を見ます。次に、アベイラビリティーゾーンをまたぐ構成です。アベイラビリティーゾーンは、同じリージョンの中にある、別々の場所と考えてください。こちらは、一つのゾーンが弱ったり止まったりしたときへの備え、と考えると整理しやすいでしょう。計算の層とデータの層に分けて見ます。そのあと、リージョンをまたぐ構成です。こちらは、リージョンの障害への備えです。データの複製、入口での切り替え、ウォームスタンバイを順に見ます。最後に、条件から方法を選ぶ表で締めます。",
       "refs": [
         {
           "source_id": "S4",
@@ -29,9 +35,14 @@
           "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts"
         },
         {
-          "source_id": "S13",
-          "quote": "The ability to maintain availability and to recover from software and operational disruption in a designated time frame.",
-          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html#resiliency"
+          "source_id": "S19",
+          "quote": "Shifting your resource's traffic away from an impaired AZ reduces the duration and severity of impact caused by power outages, or hardware or software issues in an AZ, and helps to mitigate issues and quickly recover your application.",
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift"
+        },
+        {
+          "source_id": "S2",
+          "quote": "To recover your Aurora Global Database after an outage in the primary Region, use the failover mechanism.",
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview"
         }
       ]
     },
@@ -40,31 +51,15 @@
       "title": "要件を数字に: RPO と RTO",
       "bullets": [
         "回復力は時間の枠で決める",
-        "RPO: データを失える幅",
-        "RTO: 止まってよい長さ"
+        "RPO: 最後の復旧点からの上限",
+        "RTO: 中断から再開までの上限"
       ],
       "visual": {
-        "type": "compare",
-        "columns": [
-          "言葉",
-          "ドキュメントの説明"
-        ],
-        "rows": [
-          [
-            "Resiliency",
-            "決めた時間内に保ち復旧"
-          ],
-          [
-            "RPO",
-            "最後の復旧点からの上限"
-          ],
-          [
-            "RTO",
-            "中断から再開までの上限"
-          ]
-        ]
+        "type": "mermaid",
+        "source": "flowchart TB\n  LP[\"最後のデータの復旧点\"]\n  IN[\"サービスの中断\"]\n  RS[\"サービスの再開\"]\n  LP -- \"RPO の上限\" --> IN\n  IN -- \"RTO の上限\" --> RS\n",
+        "alt": "上から下へ時間が進む図。最後のデータの復旧点からサービスの中断までの時間の上限が RPO。サービスの中断からサービスの再開までの遅れの上限が RTO。"
       },
-      "narration": "試験ガイドには、ビジネスの要件を、技術の回復力の要件に直す、という項目があります。レジリエンシー、つまり回復力は、決めた時間の枠の中で、可用性を保ち、ソフトウェアや運用の障害から復旧する力です。アールピーオーは、目標の復旧時点です。最後にデータを戻せる時点から、どれだけの時間までなら許せるか、の上限です。失ってもよいデータの幅を、時間で表した物と考えると分かりやすいでしょう。アールティーオーは、目標の復旧時間です。サービスが止まってから、再開するまでの遅れを、どこまで許せるか、の上限です。問題文の損失や停止の条件は、この二つの数字に置きかえて読みます。",
+      "narration": "試験ガイドには、ビジネスの要件を、技術の回復力の要件に直す、という項目があります。レジリエンシー、つまり回復力は、決めた時間の枠の中で、可用性を保ち、障害から復旧する力です。図は、上から下へ時間が進みます。真ん中がサービスの中断です。アールピーオーは、中断より前の側の話と考えてください。最後にデータを戻せる時点から、どれだけの時間までなら許せるか、の上限です。失ってもよいデータの幅と考えると分かりやすいでしょう。アールティーオーは、中断より後の側です。中断から再開までの遅れを、どこまで許せるか、の上限です。問題文の損失や停止の条件は、この二つに置きかえて読みます。",
       "refs": [
         {
           "source_id": "S13",
@@ -88,15 +83,15 @@
       "title": "単一障害点の例: NAT gateway",
       "bullets": [
         "NAT gateway は 1 つの AZ に",
-        "共有すると AZ 障害で外へ出られない",
+        "NAT のある AZ が止まると他も不通",
         "AZ ごとに置き、同じ AZ へ経路"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph BAD[\"1 つを共有する形\"]\n    R1[\"別の AZ の<br/>リソース\"]\n    N1[\"NAT gateway<br/>1 つの AZ にだけ\"]\n    R1 -- \"共有して使う\" --> N1\n  end\n  subgraph GOOD[\"AZ ごとに置く形\"]\n    RA[\"AZ a の<br/>リソース\"]\n    NA[\"NAT gateway<br/>AZ a\"]\n    RB[\"AZ b の<br/>リソース\"]\n    NB[\"NAT gateway<br/>AZ b\"]\n    RA -- \"同じ AZ の物\" --> NA\n    RB -- \"同じ AZ の物\" --> NB\n  end\n  BAD ~~~ GOOD\n",
-        "alt": "上の枠は 1 つの NAT gateway を共有する形。別の AZ のリソースも、1 つの AZ にだけある NAT gateway を使う。下の枠は AZ ごとに NAT gateway を置く形。AZ a のリソースは AZ a の NAT gateway を、AZ b のリソースは AZ b の NAT gateway を使う。"
+        "source": "flowchart TB\n  subgraph BAD[\"1 つを共有する形\"]\n    subgraph BA[\"AZ a が止まる\"]\n      N1[\"NAT gateway\"]\n    end\n    subgraph BB[\"AZ b\"]\n      R1[\"リソース<br/>外へ出られない\"]\n    end\n    R1 -- \"AZ をまたぐ\" --> N1\n  end\n  subgraph GOOD[\"AZ ごとに置く形\"]\n    subgraph GB[\"AZ b\"]\n      RB[\"リソース\"]\n      NB[\"NAT gateway\"]\n    end\n    subgraph GA[\"AZ a\"]\n      RA[\"リソース\"]\n      NA[\"NAT gateway\"]\n    end\n    RB -- \"同じ AZ の物\" --> NB\n    RA -- \"同じ AZ の物\" --> NA\n  end\n  BAD ~~~ GOOD\n",
+        "alt": "上の枠は 1 つの NAT gateway を共有する形。NAT gateway は AZ a にだけあり、AZ b のリソースも AZ をまたいでそれを使う。AZ a が止まると、AZ b のリソースもインターネットへ出られない。下の枠は AZ ごとに NAT gateway を置く形で、各 AZ のリソースは同じ AZ の NAT gateway を使い、AZ をまたぐ線が無い。"
       },
-      "narration": "試験ガイドには、既存の構成の単一障害点を見つけて直す、という項目もあります。単一障害点は、そこが一か所止まると全体が止まってしまう所、という意味で使います。ナットゲートウェイは、ある一つのアベイラビリティーゾーンに作られ、そのゾーンの中では冗長に作られています。ところが、複数のゾーンのリソースが一つのナットゲートウェイを共有していると、そのゾーンが止まったとき、ほかのゾーンのリソースもインターネットへ出られなくなります。図の上の形です。回復力を上げるには、ゾーンごとにナットゲートウェイを作ります。そして、各リソースが同じゾーンのナットゲートウェイを使うように、ルーティングを設定します。図の下の形です。これは一つの例です。",
+      "narration": "試験ガイドには、既存の構成の単一障害点を見つけて直す、という項目もあります。単一障害点は、そこが一か所止まると全体が止まってしまう所、という意味で使います。ナットゲートウェイは、ある一つのアベイラビリティーゾーンに作られ、そのゾーンの中では冗長に作られています。図の上の形では、もう一つのゾーンのリソースも、ゾーンをまたいで同じナットゲートウェイを使っています。ナットゲートウェイのあるゾーンが止まると、もう一つのゾーンのリソースも、インターネットへ出られなくなります。ここが単一障害点です。図の下の形では、ゾーンごとにナットゲートウェイを作り、各リソースが同じゾーンの物を使うように、ルーティングを設定します。ゾーンをまたぐ線がなくなります。",
       "refs": [
         {
           "source_id": "S18",
@@ -124,10 +119,10 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>有効な AZ に同じ数\" }\n  subgraph ZB[\"AZ b\"]\n    EB@{ svc: \"Amazon EC2\", label: \"EC2<br/>インスタンス\" }\n  end\n  subgraph ZA[\"AZ a\"]\n    EA@{ svc: \"Amazon EC2\", label: \"EC2<br/>インスタンス\" }\n  end\n  AS -- \"数をそろえる\" --> EB\n  AS -- \"数をそろえる\" --> EA\n",
+        "source": "flowchart TB\n  AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>有効な AZ に同じ数\" }\n  EA@{ svc: \"Amazon EC2\", label: \"AZ a の<br/>EC2 インスタンス\" }\n  EB@{ svc: \"Amazon EC2\", label: \"AZ b の<br/>EC2 インスタンス\" }\n  AS -- \"数をそろえる\" --> EA\n  AS -- \"数をそろえる\" --> EB\n",
         "alt": "EC2 Auto Scaling が、有効にした AZ a と AZ b のそれぞれに、同じ数の EC2 インスタンスを保つ。"
       },
-      "narration": "ここから、アベイラビリティーゾーンをまたぐ構成です。まず、計算の層です。イーシーツーオートスケーリングは、有効にしたアベイラビリティーゾーンの間で、インスタンスの数を同じに保ちます。オートスケーリンググループは、まとめて数を増やしたり減らしたりする、インスタンスの集まりと考えてください。あるゾーンで起動に失敗したときは、別の健全なゾーンで起動しようとします。つまり、グループで複数のゾーンを有効にしておくと、インスタンスがゾーンに分かれて置かれます。",
+      "narration": "ここから、アベイラビリティーゾーンをまたぐ構成です。まず、計算の層です。イーシーツーオートスケーリングは、有効にしたアベイラビリティーゾーンの間で、インスタンスの数を同じに保ちます。オートスケーリンググループは、まとめて数を増やしたり減らしたりする、インスタンスの集まりと考えてください。あるゾーンで起動に失敗したときは、別の健全なゾーンで起動しようとします。つまり、グループで複数のゾーンを有効にしておくと、インスタンスが一つのゾーンに寄らず、分かれて置かれます。",
       "refs": [
         {
           "source_id": "S16",
@@ -143,46 +138,27 @@
     },
     {
       "id": "s05",
-      "title": "負荷分散と zonal shift",
+      "title": "ロードバランサーと zonal shift",
       "bullets": [
-        "cross-zone: 全 AZ に振るか",
-        "ALB は LB 単位で常にオン",
-        "zonal shift の前に容量を足す"
+        "オン: 全 AZ、オフ: 自分の AZ だけ",
+        "ALB は LB の単位で常にオン",
+        "zonal shift の前に規模を上げる"
       ],
       "visual": {
-        "type": "compare",
-        "columns": [
-          "設定・操作",
-          "ふるまい"
-        ],
-        "rows": [
-          [
-            "cross-zone オン",
-            "全 AZ のターゲットへ"
-          ],
-          [
-            "cross-zone オフ",
-            "自分の AZ のターゲットだけ"
-          ],
-          [
-            "ALB の場合",
-            "LB 単位で常にオン"
-          ],
-          [
-            "zonal shift",
-            "弱った AZ から外す"
-          ],
-          [
-            "zonal shift の前",
-            "先に規模を上げておく"
-          ]
-        ]
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph ON[\"cross-zone オン\"]\n    NA[\"AZ a の<br/>LB のノード\"]\n    TA[\"AZ a の<br/>ターゲット\"]\n    TB[\"AZ b の<br/>ターゲット\"]\n    NA --> TA\n    NA --> TB\n  end\n  subgraph OFF[\"cross-zone オフ\"]\n    NC[\"AZ a の<br/>LB のノード\"]\n    TC[\"AZ a の<br/>ターゲットだけ\"]\n    NC --> TC\n  end\n  ON ~~~ OFF\n",
+        "alt": "上の枠は cross-zone 負荷分散がオンの時で、AZ a のロードバランサーのノードが AZ a と AZ b の両方のターゲットへ振り分ける。下の枠はオフの時で、AZ a のノードは AZ a のターゲットだけへ振り分ける。"
       },
-      "narration": "次は、ロードバランサーとゾーンの関係です。ロードバランサーには、ゾーンごとにノードがある、と考えてください。クロスゾーン負荷分散がオンのときは、各ノードが、登録された全てのゾーンのターゲットに、トラフィックを振り分けます。オフのときは、自分のゾーンのターゲットだけに振り分けます。アプリケーションロードバランサーでは、ロードバランサーの単位で、クロスゾーン負荷分散は常にオンで、オフにはできません。ゾーンを使うと、ゾーンの間で中断なく自動で切り替わる設計ができます。あるゾーンが弱ったときは、エーアールシーのゾーナルシフトで、そのゾーンからトラフィックを外せます。障害の影響を、短く小さくできます。ただし始める前に、前もって規模を上げ、残りのゾーンだけで足りる容量を用意しておく必要があります。",
+      "narration": "次は、ロードバランサーです。ゾーンを使うと、ゾーンの間で中断なく自動で切り替わる設計ができます。ロードバランサーには、ゾーンごとにノードがある、と考えてください。図の上は、クロスゾーン負荷分散がオンのときです。各ノードが、登録された全てのゾーンのターゲットに振り分けます。図の下はオフのときで、自分のゾーンのターゲットだけに振り分けます。アプリケーションロードバランサーでは、ロードバランサーの単位では常にオンで、オフにはできません。あるゾーンが弱ったときは、ゾーナルシフトで、そのゾーンからトラフィックを外せます。ゾーナルシフトは、エーアールシーという名前の仕組みにある機能です。ただし始める前に、前もって規模を上げ、足りる容量を用意しておく必要があります。",
       "refs": [
         {
           "source_id": "S17",
           "quote": "When cross-zone load balancing is on, each load balancer node distributes traffic across the registered targets in all registered Availability Zones.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone"
+        },
+        {
+          "source_id": "S17",
+          "quote": "When cross-zone load balancing is off, each load balancer node distributes traffic only across the registered targets in its Availability Zone.",
           "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone"
         },
         {
@@ -207,15 +183,15 @@
       "title": "データの層: RDS の Multi-AZ",
       "bullets": [
         "DB instance: standby は読めない",
-        "DB cluster: reader 2 台が読める",
+        "DB cluster: reader が予備で読める",
         "cluster は半同期の複製"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph MI[\"Multi-AZ DB instance\"]\n    P1@{ svc: \"Amazon RDS\", label: \"RDS<br/>DB instance\" }\n    SB[\"standby 1 台<br/>読み取りは受けない\"]\n    P1 -- \"障害時の切り替え先\" --> SB\n  end\n  subgraph MC[\"Multi-AZ DB cluster\"]\n    WR@{ svc: \"Amazon RDS\", label: \"RDS<br/>writer\" }\n    RA[\"reader<br/>読み取りも受ける\"]\n    RB[\"reader<br/>読み取りも受ける\"]\n    WR -- \"半同期の複製\" --> RA\n    WR -- \"半同期の複製\" --> RB\n  end\n  MI ~~~ MC\n",
-        "alt": "上の枠は Multi-AZ DB instance。DB instance の障害時の切り替え先として standby が 1 台あり、standby は読み取りを受けない。下の枠は Multi-AZ DB cluster。writer から 2 台の reader へ半同期で複製し、reader は読み取りも受ける。"
+        "source": "flowchart TB\n  subgraph MI[\"Multi-AZ DB instance\"]\n    P1@{ svc: \"Amazon RDS\", label: \"RDS<br/>DB instance\" }\n    SB[\"standby<br/>予備で<br/>読み取りは受けない\"]\n    P1 -- \"障害時の切り替え先\" --> SB\n  end\n  subgraph MC[\"Multi-AZ DB cluster\"]\n    WR@{ svc: \"Amazon RDS\", label: \"RDS<br/>writer\" }\n    RA[\"reader<br/>予備で読み取りも受ける\"]\n    RB[\"reader<br/>予備で読み取りも受ける\"]\n    WR -- \"半同期の複製\" --> RA\n    WR -- \"半同期の複製\" --> RB\n  end\n  MI ~~~ MC\n",
+        "alt": "上の枠は Multi-AZ DB instance。DB instance の障害時の切り替え先として standby が 1 台あり、予備だが読み取りは受けない。下の枠は Multi-AZ DB cluster。writer から 2 台の reader へ半同期で複製し、reader は切り替えの予備で、読み取りも受ける。writer と reader は同じ Region の別々の 3 つの AZ にある。"
       },
-      "narration": "次は、データの層です。アールディーエスのマルチエーゼットには、二つの形があります。一つ目は、マルチエーゼットのディービーインスタンスです。障害時の切り替えのための、スタンバイが一台あります。ただし、スタンバイは読み取りを受けません。二つ目は、マルチエーゼットのディービークラスターです。同じリージョンの別々の三つのゾーンに、書き込みを受けるライターが一台と、リーダーが二台あります。リーダーは、自動の切り替え先になり、読み取りも受けます。複製は半同期です。変更を確定するのに、少なくとも一台のリーダーの応答を待つ、という意味です。ライターが止まったときは、アールディーエスがリーダーの一台へ切り替えます。なお、マイエスキューエルのクラスターでは、切り替えの時間が、残る二台の複製の遅れで変わります。",
+      "narration": "次は、データの層です。アールディーエスのマルチエーゼットには、二つの形があります。一つ目は、マルチエーゼットのディービーインスタンスです。障害時の切り替え先として、スタンバイが一台あります。このスタンバイは、読み取りを受けません。二つ目は、マルチエーゼットのディービークラスターです。同じリージョンの別々の三つのゾーンに、書き込みを受けるライターが一台と、リーダーが二台あります。リーダーも切り替えの予備、つまりスタンバイの役をしますが、こちらは読み取りも受けます。複製は半同期です。変更を確定するのに、少なくとも一台のリーダーの応答を待つ、という意味です。ライターが止まったときは、アールディーエスがリーダーの一台へ切り替えます。",
       "refs": [
         {
           "source_id": "S3",
@@ -234,7 +210,7 @@
         },
         {
           "source_id": "S4",
-          "quote": "For RDS for MySQL Multi-AZ DB clusters, failover time depends on replica lag of both remaining reader DB instances.",
+          "quote": "If an outage occurs on your writer DB instance, RDS manages failover to one of the reader DB instances.",
           "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts"
         }
       ]
@@ -245,13 +221,13 @@
       "bullets": [
         "有効なら遅れの小さいレプリカを昇格",
         "別 AZ にレプリカ 1 つ以上",
-        "無効なら主を作り直す"
+        "無効なら主を外し、新しく用意"
       ],
       "visual": {
         "type": "compare",
         "columns": [
           "Multi-AZ",
-          "主のノードが壊れた時"
+          "ふるまい"
         ],
         "rows": [
           [
@@ -272,7 +248,7 @@
           ]
         ]
       },
-      "narration": "データの層の二つ目は、バルキーとレディスオーエスエスで使うエラスティキャッシュです。マルチエーゼットを有効にすると、エラスティキャッシュは、レプリカを複数のゾーンに分けて置き、自動の切り替えを有効にします。レプリカは、主のノードの複製を持つノードと考えてください。主のノードが壊れたときは、複製の遅れが一番小さいレプリカを、自動で主に昇格させます。マルチエーゼットには、主のノードと別のゾーンに、少なくとも一つのレプリカが要ります。一方、マルチエーゼットが無効のまま主のノードが壊れたときは、エラスティキャッシュは主のノードを外し、新しい主のノードを用意します。",
+      "narration": "次は、バルキーとレディスオーエスエスで使うエラスティキャッシュです。マルチエーゼットを有効にすると、エラスティキャッシュは、レプリカを複数のゾーンに分けて置き、自動の切り替えを有効にします。レプリカは、主のノードの複製を持つノードと考えてください。主のノードが壊れたときは、複製の遅れが一番小さいレプリカを、自動で主に昇格させます。マルチエーゼットには、主のノードと別のゾーンに、少なくとも一つのレプリカが要ります。一方、マルチエーゼットが無効のまま主のノードが壊れたときは、エラスティキャッシュは主のノードを外し、新しい主のノードを用意します。",
       "refs": [
         {
           "source_id": "S10",
@@ -306,10 +282,10 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph PR[\"primary Region\"]\n    AW@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>書き込みを受ける\" }\n  end\n  subgraph SR[\"secondary Region\"]\n    AR@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>読み取り専用<br/>10 Region まで\" }\n  end\n  AW -- \"複製 多くは 1 秒未満\" --> AR\n",
-        "alt": "primary Region の Aurora が書き込みを受け、secondary Region の読み取り専用の Aurora へ複製する。複製の遅れは多くの場合 1 秒未満。secondary Region は 10 個まで。"
+        "source": "flowchart TB\n  subgraph PR[\"primary Region\"]\n    AW@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>書き込みを受ける\" }\n  end\n  subgraph SR[\"secondary Region\"]\n    AR@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>読み取り専用<br/>secondary は最大 10\" }\n  end\n  AW -- \"複製 多くは 1 秒未満\" --> AR\n",
+        "alt": "primary Region の Aurora が書き込みを受け、secondary Region の読み取り専用の Aurora へ複製する。複製の遅れは多くの場合 1 秒未満。secondary Region は最大 10 個。"
       },
-      "narration": "ここから、リージョンをまたぐ構成です。オーロラグローバルデータベースは、複数のリージョンにまたがる、一つのオーロラのデータベースです。データを書き込むプライマリーのリージョンが一つと、読み取り専用のセカンダリーのリージョンが、十個まであります。書き込みは、専用の基盤でセカンダリーへ複製されます。遅れは多くの場合、一秒未満です。プライマリーを別のリージョンへ移す方法は、二つあります。リージョンを交代させるような、計画した作業には、スイッチオーバーを使います。健全なグローバルデータベースのプライマリーを、データを失わずに、セカンダリーのリージョンへ移せます。一方、プライマリーのリージョンの障害から復旧するには、フェイルオーバーを使います。",
+      "narration": "ここから、リージョンをまたぐ構成です。オーロラグローバルデータベースは、複数のリージョンにまたがる一つのデータベースです。データを書き込むプライマリーのリージョンが一つと、読み取り専用のセカンダリーのリージョンが、十個まであります。書き込みは、専用の基盤でセカンダリーへ複製されます。遅れは多くの場合、一秒未満です。プライマリーを別のリージョンへ移す方法は、二つあります。リージョンの交代のような計画した作業には、スイッチオーバーを使います。健全なグローバルデータベースのプライマリーを、データを失わずに、セカンダリーのリージョンへ移せます。一方、プライマリーのリージョンの障害から復旧するには、フェイルオーバーを使います。",
       "refs": [
         {
           "source_id": "S1",
@@ -338,7 +314,7 @@
       "title": "Region をまたぐ: DynamoDB global tables",
       "bullets": [
         "どのレプリカでも読み書き",
-        "一貫性のモードは 2 つ",
+        "整合性のモードは MREC と MRSC",
         "モードは作った後に変えられない"
       ],
       "visual": {
@@ -349,16 +325,16 @@
         ],
         "rows": [
           [
-            "複製",
-            "Region 間を自動で"
-          ],
-          [
             "読み書き",
             "どのレプリカでも"
           ],
           [
-            "一貫性のモード",
-            "MREC か MRSC"
+            "MREC",
+            "結果整合性のモード"
+          ],
+          [
+            "MRSC",
+            "強い整合性のモード"
           ],
           [
             "指定しない時",
@@ -370,7 +346,7 @@
           ]
         ]
       },
-      "narration": "次は、ダイナモディービーのグローバルテーブルです。グローバルテーブルは、テーブルのデータを、リージョンの間で自動で複製します。自分で複製の仕組みを作る必要はありません。どのレプリカでも、読み取りと書き込みを受けられます。あるリージョンで処理が止まったときは、別のリージョンへトラフィックを移すことで、アールピーオーを低く、またはゼロにして、高い回復力を得られます。整合性のモードは二つです。マルチリージョンの結果整合性と、マルチリージョンの強い整合性です。作るときにモードを指定しなければ、結果整合性になります。そして、作った後でモードを変えることはできません。",
+      "narration": "次は、ダイナモディービーのグローバルテーブルです。グローバルテーブルは、テーブルのデータを、リージョンの間で自動で複製します。自分で複製の仕組みを作る必要はありません。どのレプリカでも、読み取りと書き込みを受けられます。あるリージョンで処理が止まったときは、別のリージョンへトラフィックを移すことで、アールピーオーを低く、またはゼロにできます。整合性のモードは二つです。マルチリージョンの結果整合性、略してエムアールイーシーと、マルチリージョンの強い整合性、略してエムアールエスシーです。指定しなければ、エムアールイーシーになります。作った後でモードは変えられません。強い整合性のモードを使うなら、作るときに指定しておく必要があります。",
       "refs": [
         {
           "source_id": "S8",
@@ -396,6 +372,11 @@
           "source_id": "S9",
           "quote": "You cannot change a global table's consistency mode after creation.",
           "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables.consistency-modes"
+        },
+        {
+          "source_id": "S9",
+          "quote": "Global tables support two consistency modes: multi-Region eventual consistency (MREC) and multi-Region strong consistency (MRSC).",
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables.consistency-modes"
         }
       ]
     },
@@ -404,40 +385,45 @@
       "title": "Region をまたぐ: RDS と S3 の複製",
       "bullets": [
         "RDS: 別 Region に read replica",
-        "S3: 非同期の自動コピー",
+        "S3: 何を・どこへ・どれだけ速く",
         "S3 RTC は SLA で裏付け"
       ],
       "visual": {
         "type": "compare",
         "columns": [
+          "観点",
           "使う物",
-          "できること",
-          "確かめる所"
+          "中身"
         ],
         "rows": [
           [
-            "RDS read replica",
-            "別 Region に作る",
-            "暗号化は元も暗号化"
+            "何を",
+            "live replication",
+            "新規と更新を自動で"
           ],
           [
+            "どこへ",
             "S3 CRR",
-            "別 Region のバケットへ",
-            "非同期のコピー"
+            "別 Region のバケット"
           ],
           [
-            "S3 live replication",
-            "新規と更新を自動で",
-            "書き込みに合わせて"
-          ],
-          [
+            "どれだけ速く",
             "S3 RTC",
-            "新しい物の 99.99%",
-            "15 分以内・SLA"
+            "新しいオブジェクトの 99.99%"
+          ],
+          [
+            "その約束",
+            "SLA",
+            "15 分以内を裏付け"
+          ],
+          [
+            "RDS の場合",
+            "別 Region に replica",
+            "暗号化なら元も暗号化"
           ]
         ]
       },
-      "narration": "アールディーエスでは、元のディービーインスタンスと別のリージョンに、リードレプリカを作れます。リードレプリカは、読み取りのための複製と考えてください。暗号化したリードレプリカを別のリージョンに作るには、元のディービーインスタンスも暗号化されている必要があります。エススリーでは、レプリケーションで、バケットの間のオブジェクトを、非同期で自動でコピーできます。クロスリージョンレプリケーションなら、別のリージョンのバケットへ複製します。ライブレプリケーションは、元のバケットに書かれた新しいオブジェクトと、更新されたオブジェクトを、自動で複製します。エススリーアールティーシーは、新しいオブジェクトの九十九点九九パーセントを、十五分以内に複製します。これはサービスレベルアグリーメント、つまりサービスの水準の約束で裏付けられています。",
+      "narration": "まず、アールディーエスです。元のディービーインスタンスと別のリージョンに、リードレプリカを作れます。リードレプリカは、読み取りのための複製と考えてください。暗号化したリードレプリカを別のリージョンに作るには、元も暗号化されている必要があります。次に、エススリーのレプリケーションです。バケットの間で、オブジェクトを非同期で自動でコピーします。非同期は、書き込みとは別に後から、と考えてください。何を複製するか。ライブレプリケーションは、新しいオブジェクトと更新されたオブジェクトを複製します。どこへ複製するか。クロスリージョンレプリケーションなら、別のリージョンのバケットです。どれだけ速いか。エススリーアールティーシーは、新しいオブジェクトの九十九点九九パーセントを、十五分以内に複製します。サービスレベルアグリーメント、つまりサービスの水準の約束で裏付けられています。",
       "refs": [
         {
           "source_id": "S5",
@@ -458,6 +444,11 @@
           "source_id": "S7",
           "quote": "S3 RTC replicates 99.99 percent of new objects stored in Amazon S3 within 15 minutes (backed by a service-level agreement, or SLA).",
           "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication-workload-requirements"
+        },
+        {
+          "source_id": "S6",
+          "quote": "Live replication – To automatically replicate new and updated objects as they are written to the source bucket, use live replication.",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication"
         }
       ]
     },
@@ -465,16 +456,16 @@
       "id": "s11",
       "title": "切り替え: Route 53 と CloudFront",
       "bullets": [
-        "Route 53: health check で切り替え",
-        "active-active と active-passive",
+        "active-active: 全部使い、不健全だけ外す",
+        "active-passive: primary が不健全なら予備",
         "CloudFront: origin group"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph RT[\"Route 53 の切り替え\"]\n    R5@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>health check\" }\n    PA[\"primary の<br/>リソース\"]\n    SA[\"secondary の<br/>リソース\"]\n    R5 -- \"健全な時\" --> PA\n    R5 -- \"健全でない時\" --> SA\n  end\n  subgraph OG[\"CloudFront の origin group\"]\n    CF@{ svc: \"Amazon CloudFront\", label: \"CloudFront\" }\n    O1[\"primary origin\"]\n    O2[\"secondary origin\"]\n    CF -- \"ふだん\" --> O1\n    CF -- \"使えない時\" --> O2\n  end\n  RT ~~~ OG\n",
-        "alt": "上の枠は Route 53 の active-passive の切り替え。health check で primary のリソースが健全な時は primary のレコードで答え、健全でない時は secondary のレコードで答える。下の枠は CloudFront の origin group。ふだんは primary origin を使い、primary が使えない時や失敗を示す状態コードを返した時は secondary origin に切り替える。"
+        "source": "flowchart TB\n  subgraph RT[\"Route 53 active-passive\"]\n    R5@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>health check\" }\n    PA[\"primary の<br/>リソース\"]\n    SA[\"secondary の<br/>リソース\"]\n    R5 -- \"primary が健全な時\" --> PA\n    R5 -- \"primary が健全でない時\" --> SA\n  end\n  subgraph OG[\"CloudFront の origin group\"]\n    CF@{ svc: \"Amazon CloudFront\", label: \"CloudFront\" }\n    O1[\"primary origin\"]\n    O2[\"secondary origin\"]\n    CF -- \"ふだん\" --> O1\n    CF -- \"使えない・失敗コード\" --> O2\n  end\n  RT ~~~ OG\n",
+        "alt": "上の枠は Route 53 の active-passive。health check で primary のリソースが健全な時は primary のレコードで答え、健全でない時は secondary のレコードで答える。下の枠は CloudFront の origin group。ふだんは primary origin を使い、primary が使えない時や失敗を示す状態コードを返した時は secondary origin に切り替える。"
       },
-      "narration": "次は、入口での切り替えです。ルートフィフティースリーは、ヘルスチェックを使って、アクティブアクティブと、アクティブパッシブの切り替えを組めます。ヘルスチェックは、健全かどうかを確かめる仕組みです。アクティブアクティブでは、名前と種類とルーティングポリシーが同じレコードが、健全でないとみなされない限り、全て使われます。アクティブパッシブでは、図の上のように、プライマリーのリソースが健全なときはプライマリーのレコードで答え、健全でないときはセカンダリーのレコードで答えます。クラウドフロントでは、プライマリーとセカンダリーの二つのオリジンで、オリジングループを作ります。オリジンは、クラウドフロントが中身を取りに行く先です。プライマリーが使えないときや、失敗を示す決まった状態コードを返したときは、自動でセカンダリーに切り替わります。",
+      "narration": "次は、入口での切り替えです。ルートフィフティースリーは、ヘルスチェックを使って、二つの切り替え方を組めます。ヘルスチェックは、健全かを確かめる仕組みです。一つ目のアクティブアクティブは、レコードを全部使い、健全でない物だけを外す形です。対象は、名前と種類とルーティングポリシーが同じレコードです。二つ目のアクティブパッシブは、図の上の形です。プライマリーのリソースが健全なときはプライマリーのレコードで、健全でないときはセカンダリーのレコードで答えます。クラウドフロントでは、二つのオリジンでオリジングループを作ります。オリジンは、クラウドフロントが中身を取りに行く先と考えてください。プライマリーが使えないときや、失敗を示す決まった状態コードを返したときは、自動でセカンダリーに切り替わります。",
       "refs": [
         {
           "source_id": "S12",
@@ -508,10 +499,10 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph MAIN[\"本番の Region\"]\n    PE[\"本番の環境\"]\n  end\n  subgraph OTHER[\"別の Region\"]\n    WS[\"本番の複製<br/>規模は縮小<br/>完全に動く・常に稼働\"]\n  end\n  MAIN ~~~ OTHER\n",
-        "alt": "warm standby の形。本番の Region に本番の環境があり、別の Region に、規模を縮小したが完全に動く本番の複製を常に動かしておく。"
+        "source": "flowchart TB\n  PE[\"本番の Region<br/>本番の環境<br/>Region が止まる\"]\n  WS[\"別の Region<br/>本番の複製<br/>規模は縮小・完全に動く<br/>常に稼働\"]\n  PE -- \"復旧までが短い\" --> WS\n",
+        "alt": "warm standby の形。別の Region に、規模を縮小したが完全に動く本番の複製を常に動かしておく。本番の Region が止まった時、常に動いている複製があるので、復旧までの時間が短い。"
       },
-      "narration": "リージョンをまたぐ構成の最後は、ウォームスタンバイです。ウォームスタンバイでは、本番の環境の複製を、別のリージョンに用意しておきます。この複製は、規模は縮小していますが、完全に動く物です。ホワイトペーパーは、これをパイロットライトの考えを広げた物としています。ワークロードが別のリージョンで常に動いているので、復旧までの時間を縮められます。図の二つの枠は、置き場所を並べただけです。復旧までの時間、つまりアールティーオーが問題文で厳しく求められるとき、候補の一つになると考えられます。",
+      "narration": "リージョンをまたぐ構成の最後は、ウォームスタンバイです。本番の環境の複製を、別のリージョンに用意しておきます。この複製は、規模は縮小していますが、完全に動く物です。図の下の箱のように、別のリージョンで常に動いている点が要です。そのため、復旧までの時間を縮められます。復旧までの時間、つまりアールティーオーが厳しく求められるとき、候補の一つになると考えられます。",
       "refs": [
         {
           "source_id": "S15",
@@ -527,9 +518,9 @@
     },
     {
       "id": "s13",
-      "title": "条件から選ぶ 1: 要件と計算の層",
+      "title": "条件から選ぶ 1: NAT と計算の層",
       "bullets": [
-        "損失と停止の上限 → RPO・RTO",
+        "まず RPO・RTO、止まる単位を見る",
         "NAT の共有 → AZ ごとに",
         "弱った AZ → zonal shift"
       ],
@@ -542,11 +533,6 @@
         ],
         "rows": [
           [
-            "損失と停止の上限",
-            "RPO と RTO",
-            "時間で表す"
-          ],
-          [
             "NAT を共有している",
             "AZ ごとに NAT",
             "同じ AZ へ経路"
@@ -557,9 +543,14 @@
             "AZ を有効にする"
           ],
           [
-            "AZ をまたいで振る",
-            "cross-zone",
-            "ALB は常にオン"
+            "全 AZ へ振り分ける",
+            "cross-zone オン",
+            "オフは自分の AZ"
+          ],
+          [
+            "ALB の cross-zone",
+            "LB の単位で",
+            "常にオン・切れない"
           ],
           [
             "弱った AZ を外す",
@@ -568,13 +559,8 @@
           ]
         ]
       },
-      "narration": "ここから、条件から方法を選ぶ表です。まず、要件と計算の層です。データをどこまで失えるか、どれだけ止まってよいか、という条件は、アールピーオーとアールティーオーの時間に直して読みます。複数のゾーンのリソースが、一つのナットゲートウェイを共有している、とあれば、それは単一障害点です。ゾーンごとに作り、同じゾーンの物へ経路を向けます。ゾーンの間でインスタンスの数をそろえたいなら、オートスケーリングで複数のゾーンを有効にします。ゾーンをまたいでターゲットに振り分けるかは、クロスゾーン負荷分散の設定です。弱ったゾーンからトラフィックを外したいなら、ゾーナルシフトです。前もって規模を上げておく点を確かめます。",
+      "narration": "ここから、条件から方法を選ぶ表です。まず要件を、アールピーオーとアールティーオーの時間に直します。そして、止まる単位がゾーンかリージョンかを見ると、方法を絞りやすいでしょう。一枚目は、単一障害点の例と、計算の層です。複数のゾーンのリソースが一つのナットゲートウェイを共有している、とあれば、単一障害点です。ゾーンごとに作り、同じゾーンの物へ経路を向けます。台数をゾーンの間でそろえるなら、オートスケーリングです。全てのゾーンのターゲットに振り分けるなら、クロスゾーン負荷分散をオンにします。オフなら自分のゾーンだけです。アプリケーションロードバランサーでは、ロードバランサーの単位で常にオンです。弱ったゾーンからトラフィックを外すなら、ゾーナルシフトです。前もって規模を上げておきます。",
       "refs": [
-        {
-          "source_id": "S14",
-          "quote": "The maximum acceptable amount of time since the last data recovery point.",
-          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html#RPO"
-        },
         {
           "source_id": "S18",
           "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone.",
@@ -594,6 +580,11 @@
           "source_id": "S19",
           "quote": "Before you start a zonal shift, you must prescale your application and ensure that you have sufficient capacity to shift traffic away from an Availability Zone.",
           "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift"
+        },
+        {
+          "source_id": "S17",
+          "quote": "When cross-zone load balancing is off, each load balancer node distributes traffic only across the registered targets in its Availability Zone.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone"
         }
       ]
     },
@@ -601,9 +592,9 @@
       "id": "s14",
       "title": "条件から選ぶ 2: データの層",
       "bullets": [
-        "standby も読ませる → DB cluster",
+        "予備にも読ませる → DB cluster",
         "計画の交代 → switchover",
-        "強い整合性 → 作る時に MRSC"
+        "どこでも書く → global tables"
       ],
       "visual": {
         "type": "compare",
@@ -614,9 +605,9 @@
         ],
         "rows": [
           [
-            "standby も読ませる",
+            "予備にも読ませる",
             "Multi-AZ DB cluster",
-            "reader 2 台"
+            "reader が読める"
           ],
           [
             "キャッシュの主の故障",
@@ -631,7 +622,7 @@
           [
             "どの Region でも書く",
             "DynamoDB global tables",
-            "モードは作成時に"
+            "強い整合性は作成時"
           ],
           [
             "暗号化して別 Region",
@@ -640,7 +631,7 @@
           ]
         ]
       },
-      "narration": "次は、データの層です。スタンバイにも読み取りを受けさせたい、とあれば、アールディーエスのマルチエーゼットのディービークラスターです。キャッシュの主のノードが壊れたときに、自動で切り替えたいなら、エラスティキャッシュのマルチエーゼットです。オーロラのプライマリーを別のリージョンへ移すときは、計画した交代ならスイッチオーバー、プライマリーのリージョンの障害ならフェイルオーバーです。どのリージョンでも読み書きしたい、とあれば、ダイナモディービーのグローバルテーブルです。整合性のモードは、作るときに決め、後から変えられません。暗号化したリードレプリカを別のリージョンに作るなら、元のディービーインスタンスも暗号化されている必要があります。",
+      "narration": "次は、データの層です。予備にも読み取りを受けさせたい、とあれば、アールディーエスのマルチエーゼットのディービークラスターです。キャッシュの主のノードが壊れたときに自動で切り替えたいなら、エラスティキャッシュのマルチエーゼットです。ここまでがゾーンの話です。オーロラのプライマリーを別のリージョンへ移すときは、計画した交代ならスイッチオーバー、プライマリーのリージョンの障害ならフェイルオーバーです。どのリージョンでも読み書きしたい、アールピーオーを低くしたい、とあれば、ダイナモディービーのグローバルテーブルです。強い整合性のエムアールエスシーを使うなら、作るときに指定します。暗号化したリードレプリカを別のリージョンに作るなら、元も暗号化されている必要があります。",
       "refs": [
         {
           "source_id": "S3",
@@ -666,6 +657,11 @@
           "source_id": "S5",
           "quote": "To create an encrypted read replica in a different AWS Region from the source DB instance, the source DB instance must be encrypted.",
           "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.XRgn.html#USER_ReadRepl.XRgn"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Applications can achieve high resilience with a low or zero Recovery Point Objective (RPO) by shifting traffic to a different Region if application processing is interrupted in a Region.",
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables"
         }
       ]
     },
@@ -675,7 +671,7 @@
       "bullets": [
         "複製の時間に約束 → S3 RTC",
         "DNS で切り替え → Route 53",
-        "常に動く縮小版 → warm standby"
+        "RTO を縮めたい → warm standby"
       ],
       "visual": {
         "type": "compare",
@@ -693,12 +689,12 @@
           [
             "複製の時間に約束",
             "S3 RTC",
-            "15 分・SLA"
+            "99.99% を 15 分"
           ],
           [
-            "DNS で予備へ",
+            "DNS で切り替える",
             "Route 53",
-            "health check"
+            "全部か予備か"
           ],
           [
             "オリジンの予備",
@@ -706,13 +702,13 @@
             "状態コードでも"
           ],
           [
-            "常に動く縮小版",
+            "RTO を縮めたい",
             "warm standby",
-            "別 Region で稼働"
+            "別 Region で常に稼働"
           ]
         ]
       },
-      "narration": "最後は、エススリーと切り替えです。別のリージョンのバケットへ複製したいなら、クロスリージョンレプリケーションです。複製の時間に約束が要る、とあれば、エススリーアールティーシーです。新しいオブジェクトの九十九点九九パーセントを、十五分以内に複製します。ディーエヌエスの答えで予備に切り替えたいなら、ルートフィフティースリーのヘルスチェックを使った切り替えです。クラウドフロントのオリジンに予備を置きたいなら、オリジングループです。オリジンが使えないときだけでなく、失敗を示す決まった状態コードでも切り替わります。別のリージョンに、縮小した、完全に動く複製を常に動かしておきたいなら、ウォームスタンバイです。",
+      "narration": "最後は、エススリーと切り替えです。別のリージョンのバケットへ複製したいなら、クロスリージョンレプリケーションです。複製の時間に約束が要る、とあれば、エススリーアールティーシーです。新しいオブジェクトの九十九点九九パーセントを、十五分以内に複製し、サービスの水準の約束で裏付けられています。ディーエヌエスの答えで切り替えたいなら、ルートフィフティースリーのヘルスチェックです。レコードを全部使うならアクティブアクティブ、予備で待たせるならアクティブパッシブです。オリジンに予備を置くなら、クラウドフロントのオリジングループです。失敗を示す決まった状態コードでも切り替わります。アールティーオーを縮めたいなら、ウォームスタンバイです。",
       "refs": [
         {
           "source_id": "S6",
@@ -745,16 +741,16 @@
       "id": "s16",
       "title": "まとめ",
       "bullets": [
-        "要件を RPO・RTO に直す",
-        "AZ をまたぐ: 一か所に寄せない",
-        "Region をまたぐ: 複製と切り替え"
+        "要件を RPO・RTO に、単一障害点を直す",
+        "AZ が止まっても: 計算とデータ",
+        "Region が止まっても: 複製と切り替え"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph T1[\"1 要件を数字に\"]\n    RQ[\"RPO と RTO<br/>単一障害点を直す\"]\n  end\n  subgraph T2[\"2 AZ をまたぐ\"]\n    CO@{ svc: \"Amazon EC2 Auto Scaling\", label: \"計算の層<br/>AZ に同じ数<br/>cross-zone<br/>AZ ごとの NAT\" }\n    DA@{ svc: \"Amazon RDS\", label: \"データの層<br/>DB cluster は読める<br/>ElastiCache は昇格\" }\n  end\n  subgraph T3[\"3 Region をまたぐ\"]\n    AU@{ svc: \"Amazon Aurora\", label: \"Aurora<br/>switchover と failover\" }\n    DD@{ svc: \"Amazon DynamoDB\", label: \"DynamoDB<br/>どこでも読み書き\" }\n    S3@{ svc: \"Amazon S3\", label: \"S3 RTC<br/>15 分・SLA\" }\n    RT@{ svc: \"Amazon Route 53\", label: \"Route 53・CloudFront<br/>健全でなければ予備へ\" }\n  end\n  T1 ~~~ T2\n  T2 ~~~ T3\n",
-        "alt": "講義の地図に戻ったまとめ。1 つ目の枠は要件を RPO と RTO に直し、単一障害点を直すこと。2 つ目の枠は AZ をまたぐ構成で、計算の層は AZ に同じ数・cross-zone・AZ ごとの NAT gateway、データの層は読み取りも受ける Multi-AZ DB cluster と、レプリカを昇格する ElastiCache。3 つ目の枠は Region をまたぐ構成で、Aurora の switchover と failover、どこでも読み書きできる DynamoDB global tables、15 分の SLA がある S3 RTC、健全でなければ予備へ切り替える Route 53 と CloudFront。"
+        "source": "flowchart TB\n  subgraph T1[\"1 要件と単一障害点\"]\n    RQ[\"RPO と RTO<br/>時間の向き\"]\n    NT[\"NAT gateway<br/>AZ ごとに置く\"]\n  end\n  subgraph T2[\"2 AZ が止まっても\"]\n    CO[\"計算の層<br/>Auto Scaling<br/>cross-zone・zonal shift\"]\n    DA[\"データの層<br/>DB cluster は読める<br/>ElastiCache は<br/>Multi-AZ で<br/>レプリカを昇格\"]\n  end\n  subgraph T3[\"3 Region が止まっても\"]\n    DB[\"データの複製<br/>Aurora・DynamoDB<br/>RDS read replica・S3\"]\n    SW[\"入口の切り替え<br/>Route 53・CloudFront\"]\n    WS[\"待機の構成<br/>warm standby 常に稼働\"]\n  end\n  T1 ~~~ T2\n  T2 ~~~ T3\n",
+        "alt": "講義の地図に戻ったまとめ。1 つ目の枠は、RPO と RTO を時間の向きで読むことと、NAT gateway を AZ ごとに置くこと。2 つ目の枠は AZ が止まっても動かす構成で、計算の層は Auto Scaling・cross-zone・zonal shift、データの層は読み取りも受ける DB cluster の reader と、Multi-AZ を有効にした時にレプリカを昇格する ElastiCache。3 つ目の枠は Region が止まっても動かす構成で、Aurora・DynamoDB・RDS read replica・S3 のデータの複製、Route 53・CloudFront の入口の切り替え、常に稼働する warm standby。"
       },
-      "narration": "まとめです。最初の地図に戻ります。はじめに、ビジネスの要件を、アールピーオーとアールティーオーの時間に直しました。そして、単一障害点を探しました。アベイラビリティーゾーンをまたぐ構成では、計算の層で、オートスケーリングがゾーンに同じ数を保ち、クロスゾーン負荷分散が全てのゾーンに振り分けます。データの層では、アールディーエスのディービークラスターのリーダーが読み取りも受け、エラスティキャッシュはレプリカを主に昇格させます。リージョンをまたぐ構成では、オーロラの二つの切り替え、どこでも読み書きできるダイナモディービー、十五分の約束があるエススリーアールティーシー、そして健全でなければ予備へ切り替える、ルートフィフティースリーとクラウドフロントを見ました。問題文で迷ったら、三つの表に戻ってください。",
+      "narration": "まとめです。地図に戻ります。はじめに、要件をアールピーオーとアールティーオーの時間に直し、ナットゲートウェイを例に、単一障害点を探して直しました。ゾーンの備えとして、計算の層では、オートスケーリングがゾーンに同じ数を保ち、クロスゾーン負荷分散がオンなら全てのゾーンに振り分け、弱ったゾーンはゾーナルシフトで外します。データの層では、ディービークラスターのリーダーが読み取りも受け、エラスティキャッシュはマルチエーゼットを有効にした時、レプリカを主に昇格させます。リージョンの備えとして、オーロラ、ダイナモディービー、リードレプリカ、エススリーの複製を見ました。入口では、ルートフィフティースリーはヘルスチェックで、クラウドフロントは失敗の状態コードなどで予備へ切り替えます。そしてウォームスタンバイです。迷ったら、表に戻ってください。",
       "refs": [
         {
           "source_id": "S14",

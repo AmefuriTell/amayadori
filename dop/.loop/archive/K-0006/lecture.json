@@ -1,0 +1,764 @@
+{
+  "task": "2.2",
+  "title": "マルチアカウント環境でアカウントを作り、迎え入れ、守る自動化",
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "1 土台 2 作る・集める",
+        "3 権限 4 まとめて統制",
+        "最後に条件から選ぶ表 2 枚"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"1 土台<br/>landing zone<br/>Account Factory\" }\n  MK[\"2 作る・集める<br/>Service Catalog API<br/>StackSets・招待・移動\"]\n  P[\"3 権限<br/>SCP・ロール・境界\"]\n  G[\"4 統制<br/>Config・controls<br/>セキュリティの<br/>3 サービス\"]\n  TB[\"条件から選ぶ表\"]\n  CT --> MK\n  MK --> P\n  P --> G\n  G --> TB\n",
+        "alt": "講義の地図。1 土台は Control Tower の landing zone と Account Factory、2 は Service Catalog の API・StackSets・招待・移動で作る・集める、3 は SCP・ロール・権限の境界、4 は Config・controls・セキュリティの 3 サービスによる統制、最後に条件から選ぶ表。"
+      },
+      "narration": "この講義では、たくさんのアカウントを使う環境で、アカウントを作り、迎え入れ、守る仕組みを学びます。部は四つです。一つ目は土台です。コントロールタワーと、ランディングゾーン、アカウントファクトリーを見ます。二つ目は、アカウントを作る方法と集める方法です。サービスカタログのエーピーアイ、スタックセットの自動デプロイ、招待と組織の間の移動を扱います。三つ目は権限です。サービスコントロールポリシー、ロールの引き受け、権限の境界を見ます。四つ目は、まとめて統制する道具です。コンフィグとコントロールタワーのコントロール、それにセキュリティのサービスを三つ見ます。最後に、条件から方法を選ぶ表を二枚置きます。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS Control Tower offers a straightforward way to set up and govern an AWS multi-account environment, following prescriptive best practices.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#what-is-control-tower"
+        },
+        {
+          "source_id": "S1",
+          "quote": "AWS Control Tower orchestrates the capabilities of several other AWS services, including AWS Organizations, AWS Service Catalog, and AWS IAM Identity Center, to build a landing zone in less than an hour.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#what-is-control-tower"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "土台 1: Control Tower と landing zone",
+      "bullets": [
+        "ほかのサービスを組み合わせる",
+        "1 時間かからず landing zone",
+        "landing zone: 複数アカウントの環境"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"Control Tower<br/>例の 3 つなどを<br/>組み合わせる\" }\n  ORG@{ svc: \"AWS Organizations\", label: \"Organizations<br/>アカウントの管理\" }\n  SC@{ svc: \"AWS Service Catalog\", label: \"Service Catalog\" }\n  IDC@{ svc: \"AWS IAM Identity Center\", label: \"IAM Identity Center\" }\n  LZ[\"landing zone<br/>複数アカウントの環境\"]\n  CT --> ORG\n  CT --> SC\n  CT --> IDC\n  CT -- \"作る\" --> LZ\n",
+        "alt": "Control Tower が、例として挙がる Organizations、Service Catalog、IAM Identity Center などの働きを組み合わせて、複数アカウントの環境である landing zone を作る。"
+      },
+      "narration": "一つ目の土台です。コントロールタワーは、複数のアカウントを使う環境を、決まったベストプラクティスに沿って用意し、統制するためのサービスです。ほかのサービスを組み合わせて動きます。例として、オーガニゼーションズ、サービスカタログ、アイアムアイデンティティセンターが挙がっています。これらを組み合わせて、一時間かからずにランディングゾーンを作ります。ランディングゾーンとは、セキュリティとコンプライアンスのベストプラクティスに基づいた、複数のアカウントの環境です。コンプライアンスとは、決まりを守っている状態のことです。オーガニゼーションズの働きには、アカウントを一か所で統制すること、プログラムから呼ぶ窓口であるエーピーアイでアカウントを作ること、そしてサービスコントロールポリシーがあります。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS Control Tower orchestrates the capabilities of several other AWS services, including AWS Organizations, AWS Service Catalog, and AWS IAM Identity Center, to build a landing zone in less than an hour.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#what-is-control-tower"
+        },
+        {
+          "source_id": "S2",
+          "quote": "A landing zone is a well-architected, multi-account environment that's based on security and compliance best practices.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features"
+        },
+        {
+          "source_id": "S3",
+          "quote": "The AWS Organizations service provides essential capabilities for managing a multi-account environment, including central governance and management of accounts, account creation from AWS Organizations APIs, service control policies (SCPs), and resource control policies (RCPs).",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#related-services"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "土台 2: OU と Account Factory",
+      "bullets": [
+        "landing zone は入れ物",
+        "OU: アカウントのまとまり",
+        "Account Factory: アカウントの型"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "用語",
+          "意味"
+        ],
+        "rows": [
+          [
+            "landing zone",
+            "会社全体の入れ物"
+          ],
+          [
+            "〃 中身",
+            "OU・アカウント・ユーザー"
+          ],
+          [
+            "OU",
+            "アカウントのまとまり"
+          ],
+          [
+            "Account Factory",
+            "アカウントの型"
+          ],
+          [
+            "〃 役目",
+            "承認済みの設定で作る"
+          ]
+        ]
+      },
+      "narration": "ランディングゾーンの中を、外から内へ見ます。ランディングゾーンは、会社全体の入れ物です。組織単位、アカウント、ユーザーなど、決まりに従わせたい物をまとめて持ちます。組織単位は、画面ではオーユーと書きます。いくつかのアカウントをまとめる単位で、中にアカウントが入ります。そのアカウントを作るための型が、アカウントファクトリーです。設定を変えられるアカウントの型で、新しいアカウントを、前もって承認した設定で作り、作り方をそろえます。問題文に、新しいアカウントを標準の形で作りたい、とあれば、この型を思い出してください。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "It is the enterprise-wide container that holds all of your organizational units (OUs), accounts, users, and other resources that you want to be subject to compliance regulation.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features"
+        },
+        {
+          "source_id": "S2",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features"
+        },
+        {
+          "source_id": "S16",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "作る 1: Service Catalog の API",
+      "bullets": [
+        "API でアカウントを作る",
+        "組織にいるアカウントを登録",
+        "登録の先は Control Tower"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ADM[\"管理者の自動化\"]\n  SC@{ svc: \"AWS Service Catalog\", label: \"Service Catalog<br/>API\" }\n  CT@{ svc: \"AWS Control Tower\", label: \"Control Tower\" }\n  NEW[\"新しい<br/>メンバーアカウント\"]\n  OLD[\"組織にいる既存の<br/>メンバーアカウント\"]\n  ADM -- \"API を呼ぶ\" --> SC\n  SC --> CT\n  CT -- \"作る\" --> NEW\n  CT -- \"登録する\" --> OLD\n",
+        "alt": "管理者の自動化が Service Catalog の API を呼び、Control Tower で新しいメンバーアカウントを作る、またはすでに組織にいる既存のメンバーアカウントを Control Tower に登録する。"
+      },
+      "narration": "二つ目の部、作る方法と集める方法に入ります。まず、前のスライドの標準の形でのアカウントの用意を、プログラムで自動にする道です。コントロールタワーは、サービスカタログなどと統合されています。コントロールタワーでは、サービスカタログのエーピーアイで、メンバーアカウントを作って用意できます。管理アカウントは、組織を管理する側のアカウントで、メンバーアカウントは、それ以外の組織のアカウントです。同じエーピーアイで、すでに組織にいるメンバーアカウントを、コントロールタワーに登録することもできます。入る先は、組織ではなくコントロールタワーです。問題文に、アカウントの用意をプログラムで自動にしたい、とあれば、サービスカタログのエーピーアイを確かめます。",
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "AWS Control Tower is integrated with several other AWS services, such as AWS Service Catalog.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/automated-provisioning-walkthrough.html#automated-provisioning-walkthrough"
+        },
+        {
+          "source_id": "S4",
+          "quote": "You can use the APIs to create and provision your member accounts in AWS Control Tower, or to enroll existing member accounts.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/automated-provisioning-walkthrough.html#automated-provisioning-walkthrough"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS Service Catalog enables IT administrators to create, manage, and distribute portfolios of approved products to end users, who then have access to the products they need in a personalized portal.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/service-catalog.html#service-catalog"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "作る 2: StackSets の自動デプロイ",
+      "bullets": [
+        "StackSets を組織と組む",
+        "アカウントの出入りで起動",
+        "対象 OU 間の移動でも起動"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ACC[\"アカウント\"]\n  ORG@{ svc: \"AWS Organizations\", label: \"対象の組織・OU\" }\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSets<br/>自動デプロイが有効\" }\n  ACC -- \"加わる・外れる・移る\" --> ORG\n  ORG -- \"きっかけ\" --> SS\n  SS -- \"加わった所へデプロイ\" --> ACC\n",
+        "alt": "アカウントが対象の組織や OU に加わる、外れる、対象の OU の間を移ると、それがきっかけになり、自動デプロイを有効にした StackSets のデプロイが動く。加わったアカウントへは自動でデプロイされる。"
+      },
+      "narration": "次は、アカウントの中身を自動でそろえる話です。クラウドフォーメーションのスタックセットは、オーガニゼーションズの組織と組み合わせて、組織のアカウントへデプロイできます。大事なのは、自動デプロイという設定です。有効にすると、アカウントの出入りのたびに、デプロイが自動で動きます。きっかけは三つです。対象の組織や組織単位にアカウントが加わった時、そこから外れた時、対象の組織単位の間で移された時です。加わったアカウントへのデプロイを、人が手で始める必要はありません。問題文に、組織に加わるアカウントにも自動で同じ物を入れたい、とあれば、スタックセットの自動デプロイが有効かを確かめます。",
+      "refs": [
+        {
+          "source_id": "S13",
+          "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html#stacksets-orgs-auto-deployment-example"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "集める: 招待と組織の間の移動",
+      "bullets": [
+        "招待は管理アカウントから",
+        "入れる組織は 1 つだけ",
+        "移す時も新しい組織から招待"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph NEW[\"新しい組織\"]\n    M@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n    J[\"組織に加わる\"]\n  end\n  A[\"既存のアカウント<br/>組織の外・別の組織\"]\n  M -- \"招待を送る\" --> A\n  A -- \"受け入れる\" --> J\n",
+        "alt": "新しい組織の管理アカウントが、組織の外や別の組織にある既存のアカウントへ招待を送る。そのアカウントが受け入れると、新しい組織に加わる。"
+      },
+      "narration": "ここからは集める方法です。組織を作り、管理アカウントのメールアドレスが自分の物だと確かめると、既存のアカウントを組織に招待できます。さきほどの登録は、すでに組織にいるアカウントの話でした。招待を送れるのは、組織の管理アカウントからだけです。また、一つのアカウントが入れる組織は一つだけで、招待をいくつ受け取っても、受け入れられるのは一つです。入れる組織は一つなので、移る時は、新しい組織の招待を受け入れて移ります。アカウントは、いつでも移せます。例は、合併や買収で、いくつもの組織のアカウントを一つにまとめる場合です。この時も、新しい組織の管理アカウントから招待を送り、そのアカウントが受け入れます。問題文に、合併で別の組織のアカウントを集めたい、とあれば、新しい組織からの招待を選びます。",
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "After you create an organization and verify that you own the email address associated with the management account, you can invite existing AWS accounts to join your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html#orgs_manage_accounts_invites"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can send an invitation to other accounts only from the management account of your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html#orgs_manage_accounts_invites"
+        },
+        {
+          "source_id": "S6",
+          "quote": "An account can only join one organization. If you receive multiple invitations, you can accept only one.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html#orgs_manage_accounts_invites"
+        },
+        {
+          "source_id": "S7",
+          "quote": "You can migrate an AWS account from one organization to another at any time.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html#orgs_account_migration"
+        },
+        {
+          "source_id": "S7",
+          "quote": "For example, migrating an account can be helpful in the case of a merger and acquisition when you need to consolidate one or more AWS accounts from multiple organizations into one organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html#orgs_account_migration"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Whatever your use case, migrating an account between organizations requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html#orgs_account_migration"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "権限 1: SCP は権限を与えない",
+      "bullets": [
+        "SCP は許可を与えない",
+        "使える権限の上限を決める",
+        "対象は IAM ユーザーとロール"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "点",
+          "SCP"
+        ],
+        "rows": [
+          [
+            "権限を与えるか",
+            "与えない"
+          ],
+          [
+            "決める物",
+            "使える権限の上限"
+          ],
+          [
+            "対象",
+            "組織の IAM ユーザー・ロール"
+          ]
+        ]
+      },
+      "narration": "三つ目の部、権限です。サービスコントロールポリシー、略してエスシーピーは、決して権限を与えません。組織の中のアイアムユーザーとアイアムロールが使える権限の、上限を決めるアクセスの制御です。ロールとは、ほかの人やアカウントが引き受けて使う身元です。たとえるなら、エスシーピーは天井です。天井の下で、別に許可された事だけができます。天井を高くしても、それだけで何かができるようにはなりません。問題文で、エスシーピーを付ければ操作できるようになる、と読める選択肢は、この点と合いません。",
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "However, an SCP never grants permissions.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        },
+        {
+          "source_id": "S9",
+          "quote": "Instead, SCPs are access controls that specify the maximum available permissions for the IAM users and IAM roles in your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "権限 2: Deny は下の全部に届く",
+      "bullets": [
+        "経路のどこか 1 つの Deny で拒否",
+        "付けた段より下の全部に効く",
+        "アカウント自身も経路に入る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  R[\"root<br/>組織の一番上\"]\n  O1[\"OU<br/>Deny の SCP を付ける\"]\n  O2[\"下の OU<br/>Deny が効く\"]\n  A[\"アカウント<br/>Deny が効く<br/>自分の SCP も経路\"]\n  B[\"アカウント<br/>Deny が効く\"]\n  R --> O1\n  O1 --> O2\n  O2 --> A\n  O1 --> B\n",
+        "alt": "組織の一番上の root から OU、下の OU、アカウントへとつながる。上の OU に Deny の SCP を付けると、その下の OU とアカウントの全部で Deny が効く。経路にはアカウント自身に付いた SCP も入る。"
+      },
+      "narration": "エスシーピーの拒否、つまりディナイの効き方です。組織は、一番上のルートから組織単位を通って、アカウントへつながります。ルートからあるアカウントまでの、まっすぐな経路の上で、どこか一つのエスシーピーが権限を拒否していれば、そのアカウントでは拒否されます。経路には、対象のアカウント自身も入ります。言い換えると、拒否のポリシーをどの段に付けても、その下の全ての組織単位とメンバーアカウントで評価されます。図では、上の組織単位に付けた拒否が、下の組織単位とアカウントに届いています。問題文に、ある組織単位の全てのアカウントで、ある操作を禁じたい、とあれば、その組織単位に拒否のエスシーピーを付けます。",
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "For a permission to be denied for a specific account, any SCP from the root through each OU in the direct path to the account (including the target account itself) can deny that permission.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#how_scps_deny"
+        },
+        {
+          "source_id": "S8",
+          "quote": "a deny policy attached to any level in the organization is evaluated for all the OUs and member accounts underneath it.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#how_scps_deny"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "権限 3: ロールを引き受ける",
+      "bullets": [
+        "作成時に管理用のロール",
+        "第三者には external ID",
+        "AssumeRole で毎回指定"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "場面",
+          "意味"
+        ],
+        "rows": [
+          [
+            "作成時のロール",
+            "OrganizationAccountAccessRole"
+          ],
+          [
+            "〃 権限",
+            "全ての管理者権限"
+          ],
+          [
+            "第三者のアクセス",
+            "external ID を付ける"
+          ],
+          [
+            "〃 付け方",
+            "AssumeRole で毎回"
+          ],
+          [
+            "〃 扱い",
+            "秘密ではない"
+          ]
+        ]
+      },
+      "narration": "次は、ロールの引き受けです。オーガニゼーションズのコンソール、コマンドラインの道具、またはアカウントを作るエーピーアイでメンバーアカウントを作ると、その中にアイアムロールが自動で作られます。既定の名前は、オーガニゼーションアカウントアクセスロールで、そのアカウントの全ての管理者権限を持ちます。もう一つは、第三者が持つアカウントへのアクセスです。引き受ける側は、エクスターナルアイディーで、どんな状況で操作しているかを示します。ロールを引き受けるエーピーアイでは、毎回これを指定します。ただし、秘密の値としては扱われません。問題文に、作ったメンバーアカウントを管理者として操作したい、とあれば、このロールです。第三者のアカウントへのアクセスでロールを引き受ける、とあれば、エクスターナルアイディーです。",
+      "refs": [
+        {
+          "source_id": "S10",
+          "quote": "When you create a member account by using the AWS Organizations console, the AWS CLI, or the CreateAccount API operation, AWS Organizations automatically creates an IAM role in the account.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_access-cross-account-role.html#orgs_manage_accounts_access-cross-account-role"
+        },
+        {
+          "source_id": "S10",
+          "quote": "By default, this role is named OrganizationAccountAccessRole.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_access-cross-account-role.html#orgs_manage_accounts_access-cross-account-role"
+        },
+        {
+          "source_id": "S10",
+          "quote": "This role has full administrative permissions in the member account.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_access-cross-account-role.html#orgs_manage_accounts_access-cross-account-role"
+        },
+        {
+          "source_id": "S11",
+          "quote": "An external ID allows the user that is assuming the role to assert the circumstances in which they are operating.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id"
+        },
+        {
+          "source_id": "S11",
+          "quote": "AWS does not treat the external ID as a secret.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id"
+        },
+        {
+          "source_id": "S11",
+          "quote": "You should always specify the external ID in your AssumeRole API calls.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "権限 4: permissions boundary",
+      "bullets": [
+        "権限の管理作業を任せる",
+        "決めた境界の中だけ",
+        "SCP は組織、境界は自分のアカウント"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ADM[\"自分<br/>任せる側\"]\n  U@{ svc: \"AWS IAM\", label: \"任された IAM ユーザー<br/>permissions boundary<br/>の中だけで作業\" }\n  ADM -- \"作業を任せる\" --> U\n",
+        "alt": "自分が権限の管理作業、たとえばユーザーを作る作業を IAM ユーザーに任せる。任されたユーザーは permissions boundary の枠の中でだけ作業する。"
+      },
+      "narration": "権限の最後は、パーミッションバウンダリー、日本語で権限の境界です。権限の境界を使うと、権限を管理する作業を、自分のアカウントのアイアムユーザーに任せられます。例として、ユーザーを作る作業が挙がっています。任された人は、決められた権限の境界の中でだけ、代わりに作業します。エスシーピーとの違いを言葉で分けます。エスシーピーは、組織の中の上限を決める、組織のポリシーです。権限の境界は、自分のアカウントの中で、作業を任せる時の範囲です。問題文に、開発者に権限の作業を任せたいが、決めた範囲は超えさせたくない、とあれば、権限の境界を思い出します。",
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "You can use permissions boundaries to delegate permissions management tasks, such as user creation, to IAM users in your account.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-delegate"
+        },
+        {
+          "source_id": "S12",
+          "quote": "This permits others to perform tasks on your behalf within a specific boundary of permissions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-delegate"
+        },
+        {
+          "source_id": "S9",
+          "quote": "Instead, SCPs are access controls that specify the maximum available permissions for the IAM users and IAM roles in your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "統制 1: Config で集める・配る",
+      "bullets": [
+        "aggregator は読むだけ",
+        "組織のルールは自動で配る",
+        "委任管理者ではロールが自動で作られない"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  S[\"元のアカウント<br/>複数のリージョン\"]\n  AG@{ svc: \"AWS Config\", label: \"aggregator<br/>集める側のアカウント<br/>読むだけの一覧\" }\n  RULE@{ svc: \"AWS Config\", label: \"組織のルール\" }\n  N[\"組織に加わる<br/>アカウント\"]\n  S -- \"データを写す\" --> AG\n  RULE -- \"加われば配る\" --> N\n",
+        "alt": "複数のアカウントとリージョンから、集める側のアカウントにある Config の aggregator にデータを写し、読むだけの一覧を作る。組織のルールは、組織に加わるアカウントへ自動で配られる。"
+      },
+      "narration": "四つ目の部、統制の道具です。まずコンフィグです。コンフィグのアグリゲーターは、複数のアカウントと、地域の区切りであるリージョンをまたいで、コンプライアンスのデータを集めます。元のアカウントから、集める側のアカウントへデータを写し、読むだけの一覧を作ります。元のアカウントを変える操作はできません。次に、組織への配布です。コンフィグのルールを組織に配ると、新しく加わったアカウントにも配られ、外れたアカウントからは取り除かれます。配る時の注意が一つあります。管理アカウントから、委任された管理者、つまり管理を任された別のアカウントを使って配る場合、コンフィグはサービスリンクロールというロールを自動では作りません。問題文に、全てのアカウントのコンプライアンスを一か所で見たい、とあれば、アグリゲーターです。",
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "You can aggregate compliance data to assess the overall compliance postures of your organization, or across accounts and Regions.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-use-cases"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Aggregators provide a read-only view into the source accounts and Regions that the aggregator is authorized to view by replicating data from the source accounts into the aggregator account.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-use-cases"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Aggregators do not provide mutating access into a source account or region.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-use-cases"
+        },
+        {
+          "source_id": "S15",
+          "quote": "If a new account joins an organization, the rule or conformance pack is deployed to that account.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations"
+        },
+        {
+          "source_id": "S15",
+          "quote": "If you are using an organization management account and intend to use a delegated administrator for organizational deployment, be aware that AWS Config won't automatically create the service-linked role (SLR).",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "統制 2: Control Tower の controls",
+      "bullets": [
+        "controls は OU 全体に効く",
+        "OU の全アカウントが対象",
+        "種類は 3 つの名前まで"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "点",
+          "controls"
+        ],
+        "rows": [
+          [
+            "付ける単位",
+            "OU 全体"
+          ],
+          [
+            "影響を受ける物",
+            "OU の全アカウント"
+          ],
+          [
+            "種類",
+            "preventive"
+          ],
+          [
+            "〃",
+            "detective"
+          ],
+          [
+            "〃",
+            "proactive"
+          ]
+        ]
+      },
+      "narration": "次は、コントロールタワーの中の、コントロールという決まりです。このコントロールは、組織単位の全体に付き、その組織単位の中の全てのアカウントが影響を受けます。種類は三つで、プリベンティブ、ディテクティブ、プロアクティブです。これらで、アカウントのまとまりの中のリソースを統制し、コンプライアンスを見張ります。ある操作を禁じる、つまり権限の上限を決めたいだけなら、前のエスシーピーです。コントロールタワーの環境で、統制とコンプライアンスの見張りを組織単位にまとめてかけたいなら、このコントロールです。",
+      "refs": [
+        {
+          "source_id": "S16",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S16",
+          "quote": "AWS Control Tower implements preventive, detective, and proactive controls that help you govern your resources and monitor compliance across groups of AWS accounts.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "統制 3: Security Hub CSPM ほか",
+      "bullets": [
+        "Security Hub CSPM: 管理の 2 つのやり方",
+        "Detective: 根本原因を調べる",
+        "GuardDuty: リージョンごと"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "サービス",
+          "押さえる点"
+        ],
+        "rows": [
+          [
+            "Security Hub CSPM",
+            "初めてなら宣言型ポリシー"
+          ],
+          [
+            "〃",
+            "宣言型と中央設定は併用不可"
+          ],
+          [
+            "Detective",
+            "根本原因を調べる"
+          ],
+          [
+            "〃",
+            "ログを自動で集める"
+          ],
+          [
+            "GuardDuty",
+            "委任管理者もリージョンごと"
+          ]
+        ]
+      },
+      "narration": "統制の最後に、三つのセキュリティのサービスです。一つ目は、セキュリティハブシーエスピーエムです。シーエスピーエムまでが名前です。複数のアカウントを管理するやり方が二つあります。中央設定と、宣言型ポリシーです。中央設定は、このサービスを使うアカウントが複数ある環境で役に立ちます。ただ、複数アカウントの管理を初めて組むなら、宣言型ポリシーが勧められています。二つは同じ組織で同時には使えません。二つ目は、アマゾンディテクティブです。リソースのログを自動で集め、怪しい動きなどの根本の原因を素早く見つけるのを助けます。三つ目は、ガードデューティです。リージョンごとのサービスで、委任された管理者アカウントもリージョンごとです。問題文に、初めて管理を組む、とあれば宣言型ポリシー、根本の原因を調べたい、とあればディテクティブ、ガードデューティの委任の管理者、とあればリージョンごとと考えます。",
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "Central configuration is most beneficial for AWS environments that include multiple Security Hub CSPM accounts.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/central-configuration-intro.html#central-configuration-audience"
+        },
+        {
+          "source_id": "S17",
+          "quote": "If you're setting up multi-account management for the first time, we recommend that you use Security Hub CSPM declarative policies instead of central configuration.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/central-configuration-intro.html#central-configuration-audience"
+        },
+        {
+          "source_id": "S17",
+          "quote": "You can't use central configuration and declarative policies in the same organization at the same time.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/central-configuration-intro.html#central-configuration-audience"
+        },
+        {
+          "source_id": "S18",
+          "quote": "Amazon Detective helps you analyze, investigate, and quickly identify the root cause of security findings or suspicious activities.",
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective"
+        },
+        {
+          "source_id": "S18",
+          "quote": "Detective automatically collects log data from your AWS resources.",
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective"
+        },
+        {
+          "source_id": "S19",
+          "quote": "A delegated GuardDuty administrator account is Regional.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important"
+        },
+        {
+          "source_id": "S19",
+          "quote": "Unlike AWS Organizations, GuardDuty is a Regional service.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 1: 作る・集める・禁じる",
+      "bullets": [
+        "左から 条件・方法・確かめる所",
+        "作る・集めるの判断",
+        "禁じるのは SCP"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "標準設定で新アカウント",
+            "Account Factory",
+            "自動は Service Catalog API"
+          ],
+          [
+            "組織の既存を Control Tower へ",
+            "Service Catalog API",
+            "組織にいるアカウント"
+          ],
+          [
+            "加わるアカウントに同じ物",
+            "StackSets",
+            "自動デプロイが有効"
+          ],
+          [
+            "合併で別組織から集める",
+            "招待",
+            "新しい組織の管理から"
+          ],
+          [
+            "OU で特定の操作を禁止",
+            "SCP の Deny",
+            "権限は与えない"
+          ]
+        ]
+      },
+      "narration": "ここから二枚で、問題文の条件から方法を選ぶ表にまとめます。一枚目は、作る、集める、禁じる、の判断です。新しいアカウントを標準の設定で作りたい時は、アカウントファクトリーです。自動にするなら、サービスカタログのエーピーアイです。組織にいる既存のアカウントをコントロールタワーに入れたい時は、同じエーピーアイの登録です。加わるアカウントに同じ物を入れたい時は、スタックセットの自動デプロイを有効にします。合併などで別の組織のアカウントを集める時は、新しい組織の管理アカウントからの招待です。組織単位で特定の操作を禁じたい時は、拒否のエスシーピーで、権限は与えない点を確かめます。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features"
+        },
+        {
+          "source_id": "S4",
+          "quote": "You can use the APIs to create and provision your member accounts in AWS Control Tower, or to enroll existing member accounts.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/automated-provisioning-walkthrough.html#automated-provisioning-walkthrough"
+        },
+        {
+          "source_id": "S13",
+          "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html#stacksets-orgs-auto-deployment-example"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Whatever your use case, migrating an account between organizations requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html#orgs_account_migration"
+        },
+        {
+          "source_id": "S9",
+          "quote": "However, an SCP never grants permissions.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 2: 入る・任せる・見張る",
+      "bullets": [
+        "Security Hub CSPM 初回は宣言型",
+        "根本原因の調査は Detective",
+        "GuardDuty の委任はリージョンごと"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "新メンバーに管理者で入る",
+            "OrganizationAccountAccessRole",
+            "全ての管理者権限"
+          ],
+          [
+            "第三者の所でロールを使う",
+            "external ID",
+            "AssumeRole で毎回"
+          ],
+          [
+            "作業を範囲内で任せる",
+            "permissions boundary",
+            "自分のアカウント内"
+          ],
+          [
+            "全アカウントのコンプライアンス",
+            "Config aggregator",
+            "読むだけ"
+          ],
+          [
+            "OU に統制と監視をまとめる",
+            "Control Tower controls",
+            "OU 全体に効く"
+          ]
+        ]
+      },
+      "narration": "二枚目は、入る、任せる、見張る、の判断です。表は左から、条件、選ぶ方法、確かめる所です。作ったメンバーアカウントに管理者として入りたい時は、自動で作られるロールです。第三者のアカウントへのアクセスでロールを引き受ける時は、エクスターナルアイディーを毎回指定します。権限の作業を、範囲を決めて任せたい時は、権限の境界です。全てのアカウントのコンプライアンスを一か所で見たい時は、コンフィグのアグリゲーターで、読むだけの点を確かめます。組織単位に統制と見張りをまとめてかけたい時は、コントロールタワーのコントロールです。セキュリティの三つです。初めて複数アカウントの管理を組むなら、セキュリティハブの宣言型ポリシーです。根本の原因を調べるなら、ディテクティブです。ガードデューティの委任の管理者は、リージョンごとです。",
+      "refs": [
+        {
+          "source_id": "S10",
+          "quote": "By default, this role is named OrganizationAccountAccessRole.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_access-cross-account-role.html#orgs_manage_accounts_access-cross-account-role"
+        },
+        {
+          "source_id": "S11",
+          "quote": "You should always specify the external ID in your AssumeRole API calls.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id"
+        },
+        {
+          "source_id": "S12",
+          "quote": "This permits others to perform tasks on your behalf within a specific boundary of permissions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-delegate"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Aggregators do not provide mutating access into a source account or region.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-use-cases"
+        },
+        {
+          "source_id": "S16",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S17",
+          "quote": "If you're setting up multi-account management for the first time, we recommend that you use Security Hub CSPM declarative policies instead of central configuration.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/central-configuration-intro.html#central-configuration-audience"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "地図の 4 つの部に戻る",
+        "controls は OU 全体に効く",
+        "GuardDuty はリージョンごと"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"1 土台<br/>landing zone<br/>Account Factory\" }\n  MK[\"2 作る・集める<br/>Service Catalog API<br/>StackSets・招待・移動\"]\n  P[\"3 権限<br/>SCP は上限<br/>ロール・境界\"]\n  G[\"4 統制<br/>Config・controls<br/>Security Hub CSPM<br/>Detective・GuardDuty\"]\n  TB[\"条件から選ぶ表\"]\n  CT --> MK\n  MK --> P\n  P --> G\n  G --> TB\n",
+        "alt": "まとめの地図。最初の地図と同じ並び。1 土台は landing zone と Account Factory、2 は Service Catalog の API・StackSets・招待・移動、3 は SCP が上限を決めることとロール・権限の境界、4 は Config・controls・Security Hub CSPM・Detective・GuardDuty、最後に条件から選ぶ表。"
+      },
+      "narration": "まとめです。最初の地図に戻ります。一つ目の土台では、コントロールタワーがランディングゾーンを作ること、その中の組織単位と、アカウントの型であるアカウントファクトリーを見ました。二つ目では、サービスカタログのエーピーアイでの作成と登録、スタックセットの自動デプロイ、招待と組織の間の移動を見ました。三つ目では、エスシーピーは権限を与えずに上限を決めること、拒否は下の全部に届くこと、ロールの引き受け、権限の境界を見ました。四つ目では、コンフィグ、コントロール、三つのセキュリティのサービスを見ました。効く範囲は道具ごとに違い、コントロールは組織単位の全体、ガードデューティはリージョンごとです。問題を解く時は、条件の語から、この地図のどこの話かを考えてください。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "In short, AWS Control Tower offers the easiest way to set up and govern a secure, compliant, multi-account AWS environment based on best practices established by working with thousands of enterprises.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#what-is-control-tower"
+        },
+        {
+          "source_id": "S3",
+          "quote": "AWS Control Tower is built on top of trusted and reliable AWS services including AWS Service Catalog, AWS IAM Identity Center, and AWS Organizations.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#related-services"
+        },
+        {
+          "source_id": "S16",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S19",
+          "quote": "Unlike AWS Organizations, GuardDuty is a Regional service.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "1 回目の指摘への返事（採らなかった物・一部だけ採った物）",
+    "clarity s07: 元の組織を離れる手順は sources.md に無いので図に足さない。「前のスライドと同じ形」の言い方はやめ、招待を送る側（新しい組織の管理アカウント）だけを言う。s06 と s07 は 1 枚にまとめた（条件の表を 2 枚にして 16 枚に収めるため）。",
+    "clarity s09: Deny を付けていない別の OU を「効かない」と描く案は、sources.md に効かない側の記述が無いので採らない。アカウント自身の SCP も経路に入る点だけ図に足した。",
+    "clarity s08: 何が許可を与えるか（IAM のポリシー）は sources.md に無いので名指ししない。「天井の下で、別に許可された事だけができる」の言い換えにとどめた。",
+    "clarity s05: 外れた時に何が起きるかは sources.md に無いので言わない。「出入りのたびに動く」とまとめ、加わる時を中心にした。",
+    "clarity s12: Config のルールを「コンプライアンスを確かめるルール」と言い換える案と、SLR で「自分で用意が要る」と言う案は、sources.md に無い事実になるので採らない。bullets から SLR の略語は外した。",
+    "clarity s13: preventive・detective・proactive の中身は sources.md に無いので、訳を外し英語の名前 3 つだけにした。",
+    "clarity s14: GuardDuty が何をするサービスかは sources.md に無いので、リージョンごとという点だけを書く。",
+    "consistency s02・clarity s02: RCP は台本から外した。",
+    "clarity s04: Account Factory と Service Catalog の API を直接結ぶ文は sources.md に無いので、「標準のアカウントを API で用意する道」として s04 の冒頭と s14 の表でつなぐ形にとどめた。",
+    "clarity s11・s12（図）: subgraph で囲む案は、描くと線が枠の題に重なったので、枠の代わりに箱のラベルへ「permissions boundary の中だけで作業」「集める側のアカウント」と書いた。",
+    "2 回目の指摘への返事: 中 3 件と、軽のうち s04・s06・s08・s13・s15 は直した。s11 の SLR と Config のルールは、指摘のとおり根拠に中身が無いので名前のままにした。"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        { "kind": "flow", "severity": "軽", "detail": "bullets・台本は「最後に条件から選ぶ表」「表で締めます」と 1 枚の表のように予告するが、本文は s12〜s15 の 4 枚の表。", "suggest": "「最後に条件から選ぶ 4 枚の表」と枚数を入れる。" },
+        { "kind": "unsupported", "severity": "軽", "detail": "部 2「custom metrics と 2 つのエージェント」の絵が CloudWatch のアイコンだけなので、SSM Agent も CloudWatch の物に見える（s05 では SSM Agent は Systems Manager 向け）。s16 も同じ。", "suggest": "部 2 のアイコンを外すか、ラベルを「custom metrics・CloudWatch agent・SSM Agent」にして CloudWatch だけの部に見えないようにする。" }
+      ]
+    },
+    {
+      "id": "s03",
+      "issues": [
+        { "kind": "unsupported", "severity": "軽", "detail": "表の「使える条件」と台本「ここに条件があります。使えるのは…」は「EC2 の数値のアラームでだけ使える」と限定して言い切る。S2 は \"Alarms based on EC2 metrics can also perform EC2 actions\" で、だけとは言っていない。", "suggest": "列名を「使えるアラーム」、台本を「イーシーツーの数値をもとにしたアラームで使えます」のように、根拠どおり肯定の形にする。" }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        { "kind": "fact", "severity": "軽", "detail": "台本「動く場所は、イーシーツー、オンプレミス…コンテナのアプリケーション」。S8 は「EC2・オンプレミス・コンテナのアプリケーションから集める」（collects ... from）で、コンテナのアプリケーションはエージェントが動く場所ではなく集める相手。", "suggest": "「数値などを集める相手は、イーシーツー、オンプレミスのサーバー、コンテナのアプリケーションです」とする。" }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "bullets「それ以外は Application Auto Scaling」・図「それ以外のリソース」・台本「増減したい物がイーシーツーか、それ以外かで、使う仕組みが変わります」は、EC2 以外は全て Application Auto Scaling という二択の規則にしている。S3 は \"scales other resources, such as ECS services, DynamoDB tables, Aurora replicas, and Spot Fleets\" と例を挙げるだけ。しかも s07・s14 では EC2 以外の RDS が storage autoscaling で増える（Application Auto Scaling ではない）ので、講義の中で食い違って見える。", "suggest": "「Application Auto Scaling は、ほかのリソースを増減する。例: ECS サービス・DynamoDB の表・Aurora のレプリカ・Spot Fleet」と例の形にし、「EC2 か、それ以外かで決まる」の一文は外す。" }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        { "kind": "unsupported", "severity": "軽", "detail": "台本「プロビジョンドの読み書きの容量」の「読み書き」は S16（provisioned throughput capacity）に無い。", "suggest": "「プロビジョンドのスループットの容量」か、画面どおり「プロビジョンドの容量」とする。" }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        { "kind": "mismatch", "severity": "軽", "detail": "画面は「ふつう数秒、1 分以上も」、台本は「ふつうはすぐに届きますが、時間がかかることもあります」で、数秒・1 分以上という数が台本に無い。", "suggest": "台本を「ふつうは数秒で届きますが、一分以上かかることもあります」とそろえる。" }
+      ]
+    },
+    {
+      "id": "s10",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "s10 は「Automation document」「Systems Manager の Automation document」、s01・s15・s16 は「Automation」とだけ書き、呼び方がそろわない。", "suggest": "表とまとめも「Automation document」にそろえるか、s10 で「以下 Automation と呼ぶ」と一度言う。" }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "bullets は「相手に直接要求を送る形」、図の枠は「相手に直接たずねる」、左の Route 53 のラベルには health check が無く、右（「Route 53 health check」）と書き方がそろわない。", "suggest": "bullets と図の枠の言い方を一つにし、左の Route 53 にも「health check」を入れる。" }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        { "kind": "unsupported", "severity": "軽", "detail": "確かめる所「一番簡単な自動化」は、S1 の条件（alarm の状態の変化で独自の動作を自動にするには）が落ち、自動化全般で一番簡単と読める。", "suggest": "「独自処理の自動化で一番簡単」とする。" },
+        { "kind": "flow", "severity": "軽", "detail": "台本「地図の部に合わせて四枚あります」とあるが、地図の部は 6 つで、4 枚目に 4〜6 の部をまとめている。部と表が一対一に見える。", "suggest": "「六つの部を四枚の表にまとめました。最後の一枚は四つ目から六つ目の部です」とする。" }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        { "kind": "terms", "severity": "軽", "detail": "表の「SSM で更新・設定」・bullets「SSM で管理」の「SSM」は、s05 では Systems Manager としか呼んでおらず、SSM = Systems Manager の説明が無い。台本はシステムズマネージャーと言う。", "suggest": "画面も「Systems Manager で更新・設定」とそろえる。" }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        { "kind": "unsupported", "severity": "中", "detail": "行「EC2 以外を増減 → Application Auto Scaling」と bullets「EC2 以外 → Application Auto Scaling」は s06 と同じ一般化（S3 は例を挙げるだけ）。同じ表の下の行で、EC2 以外の RDS は storage autoscaling を選んでいるので、表の中で答えが二つに見える。", "suggest": "条件を「ECS サービス・DynamoDB の表などを増減」と例の形にし、bullets も「ECS サービスなど → Application Auto Scaling」とする。" },
+        { "kind": "terms", "severity": "軽", "detail": "確かめる所「ECS が数値と方針を作る」の「方針」は、ほかでは scaling policy・スケーリングポリシーと呼んでいる。", "suggest": "「ECS が数値と scaling policy を作る」とする。" }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        { "kind": "mismatch", "severity": "軽", "detail": "題と表・台本はヘルスチェックを含むが、bullets 3 つにヘルスチェックが無い。", "suggest": "bullets に「外から確かめる → Route 53 health check」を足すか、3 つを 4 つにする。" }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        { "kind": "mismatch", "severity": "軽", "detail": "台本は部 1 で composite alarm に触れるが、画面の部 1 のラベルは「SNS・Lambda・EC2」で composite alarm が無い。", "suggest": "部 1 のラベルに「composite alarm」を足す。" }
+      ]
+    }
+  ],
+  "global": [
+    { "severity": "軽", "detail": "notes の申し送りどおり、根拠の無い EC2 Auto Scaling groups の設定・EKS・ALB・metric filters・OpenSearch／CloudWatch Logs への配送は講義に出ておらず、根拠外の言い切りは見当たらない。ECS は cluster auto scaling の名で一貫している。図の矢印（s02・s04・s05・s06・s08・s09・s11）は根拠のつながりと合い、地図（s01・s16）は矢印の無い並びで、流れには見えない。", "suggest": "対応不要（確認の記録）。" }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+ "slides": [
+  {
+   "id": "s05",
+   "issues": [
+    {
+     "kind": "visual",
+     "severity": "軽",
+     "detail": "注記「既定の 100% では空きが無く 増やす間 PENDING」が右のインスタンスにだけ点線でつながり、右の 1 台だけの話に見える。",
+     "suggest": "注記を Auto Scaling group（targetCapacity）の箱につなぐ。"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "issues": [
+    {
+     "kind": "leap",
+     "severity": "軽",
+     "detail": "bullet「strategy に Auto Scaling group を混ぜない」は、何に混ぜないのかが画面だけでは取れない。表と台本で補えるので分からなくなるほどではない。",
+     "suggest": "「strategy に Fargate と ASG を混ぜない」とする。"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "issues": [
+    {
+     "kind": "listen",
+     "severity": "軽",
+     "detail": "「増減させる対象は、デプロイメントなど、画面にある物です」は耳だけだと何の事か取りにくい。",
+     "suggest": "「増減させる対象は、デプロイメントなど、ポッドをまとめて動かす物です」のように、画面に頼らない言い方にする（新しい事実は足さず、図の並びの言い換えで）。"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "issues": [
+    {
+     "kind": "visual",
+     "severity": "軽",
+     "detail": "1・2 の線はターゲットを囲む枠から出ていて前回の偏りは直ったが、枠に名前が無い。台本は「アプリケーションは、まずキャッシュに聞きます」と言うので、誰が聞くのか図とつながりにくい。",
+     "suggest": "枠に「アプリケーション」と名前を付ける。"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "issues": [
+    {
+     "kind": "exam",
+     "severity": "軽",
+     "detail": "条件「Auto Scaling group と併用」は相手（Fargate）が抜けていて、表だけ見返すと何と併用する時の話か残りにくい。",
+     "suggest": "「Fargate と ASG を併用」にする。"
+    }
+   ]
+  }
+ ],
+ "global": [
+  {
+   "severity": "軽",
+   "detail": "前回の中 13 件は直っている: s03（向かない例を比例の条件に結び付け）、s04（desired count・コンテナインスタンスの説明、CloudWatch を通る輪の図）、s05（100% は使い切る目標→PENDING の因果）、s06（capacity provider と strategy の言い換え、ASG＝EC2 の容量）、s08（ふつう要らない）、s09（疎結合の言い換え、送る側の箱）、s11（ラベルを LB に移し、両ターゲットを枠でまとめた）、s12（届け方を先頭、使う設定・見分ける所の一文）、s13（列名「方法・関わる仕組み」、起点の行）、s15（Route 53 latency と Global Accelerator を 2 行に分け、決め手を待ち時間最短／最も近い・レコードの値／AWS の網で書き分け）。s13〜s15 の行は「条件→方法→確かめる所」になっている。notes で採らなかった提案は、根拠に無い事を足さない理由で妥当。",
+   "suggest": "上の軽だけ、余裕があれば直す。"
+  }
+ ]
+}

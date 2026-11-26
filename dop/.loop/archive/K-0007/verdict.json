@@ -1,0 +1,83 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 9
+  },
+  "mild": [
+    {
+      "slide": "s04",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "表の 2 行目は方法の欄が空で「アカウントとリージョンへ」だけが入る。画面だけ見ると 4 つ目の行（名前の無い方法）があるように見え、bullet と台本の「方法は 3 つ」と数が合って見えない。",
+      "suggest": "patch policy の説明を 1 行に縮める（例: 「1 つのポリシーで複数アカウント・リージョン」）か、2 行目の方法の欄に「（続き）」と入れる。"
+    },
+    {
+      "slide": "s10",
+      "from": "consistency",
+      "kind": "terms",
+      "severity": "軽",
+      "detail": "s10 の終わりは「ラムダは、多くのプログラミング言語向けのエスディーケーと一緒に使えます」、s11 はそれを「ラムダのコードから使うエスディーケー」と受ける。s10 では「コードから使う」とは言っておらず、受け方が少しずれる。根拠（S15）との食い違いではない。",
+      "suggest": "s10 を「ラムダの関数のコードからは、多くのプログラミング言語向けのエスディーケーを使えます」とし、s11 の言い方とそろえる。"
+    },
+    {
+      "slide": "s12",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "表の行「長さ・例」で Standard は長さ（最長 1 年）、Express は例（IoT・ストリーム・モバイル）と、同じ行で違う物を比べている。",
+      "suggest": "許される行数の中なら「長さ」と「例に挙がる事」を分けるか、Standard の欄を「最長 1 年（長く動く）」、Express の欄を「例: IoT・ストリーム・モバイル」と頭に印を付ける。"
+    },
+    {
+      "slide": null,
+      "from": "consistency",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の中 2 つは直っている。s07 は S11 の比較（State Manager と Maintenance Windows）と講義側で並べた Run Command を分けて言い、「二つあります」の言い切りも消えた。s11 は SDK integrations を「ラムダのコードから使うエスディーケーとは別の、ステップファンクションズの機能」と区別し、S15 の話は s10 に移った。前回の軽（s02 の矢印の向き、s03 の行名、s05 の「利用できて」、s09 の bullet と図、s10 の「既定」、s12 の Run a Job、s14 の「ドキュメント」の表記、Maintenance Windows の表記）もそろっている。notes の採らなかった理由（S10 に「すぐ」が無い、Step Functions のエラー処理の中身が根拠に無い、executeAwsApi と修復の結び付けが根拠に無い、Standard の統合パターンの一覧が根拠に無い）はどれも sources.md の範囲と合っており妥当。",
+      "suggest": "対応不要（記録として残す）。"
+    },
+    {
+      "slide": "s09",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "図で AWS Config Rules と AWS Config（修復を適用）が別々の箱で、間に線が無い。「Rules が合わないと評価した物を、Config が Automation のドキュメントで直す」という順番は台本で分かるが、図だけだと二つの流れが並んでいるように見える。",
+      "suggest": "AWS Config Rules から AWS Config へ「合わない物を渡す」などの線を 1 本足すか、ルールに合わないリソースの箱を真ん中に置き、左から評価、右から修復の矢印が入る形にする。"
+    },
+    {
+      "slide": "s10",
+      "from": "clarity",
+      "kind": "leap",
+      "severity": "軽",
+      "detail": "最後の「なお、ラムダは、多くのプログラミング言語向けのエスディーケーと一緒に使えます」が、非同期の呼び出しの失敗の話と無関係に置かれ、なぜここで言うのかが分からない。エスディーケーが何かの説明も無い。",
+      "suggest": "「次のステップファンクションズの話と区別するため、先に言っておきます。ラムダの関数のコードからは、言語ごとのエスディーケー、つまり AWS を呼ぶための部品を使えます」のように、置く理由を一言添える。"
+    },
+    {
+      "slide": "s11",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "SDK integrations と Optimized integrations の対は図・bullet で並んだが、問題文でどちらを選ぶかの手掛かりは無く、s15 の表にも SDK integrations しか無い。notes のとおり根拠と行数の制約によるもので、誤って覚える恐れは小さい。",
+      "suggest": "台本の最後に「この講義の表では、流れから直接 API を呼ぶ場面だけを扱います」と一言添えて、Optimized を覚える対象から外す事を明示する。"
+    },
+    {
+      "slide": "s16",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "「5 複雑な処理」の箱は Step Functions のアイコンだけで、ラベルの「Lambda の再試行」と絵が合わない（s01 も同じ）。notes のとおり箱の上限による。",
+      "suggest": "ラベルを「Lambda の再試行 → Step Functions の Standard と Express」と流れが分かる書き方にする程度でよい。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の重 2 つ（s07・s14 の「急ぎ」）は直っている。s07 は「優先度が高く、行う時刻が大事な作業を、決めた時間帯に」「急ぎという意味ではなく、時刻を決めておく」と言い、s04・s13・s14 も「時刻・時間帯を決めて」でそろった。前回の中 14 も直っている: 地図（s01・s16）は 5 つのまとまりを番号付きで横に並べ読める大きさになった。s03 の行名、s04 の 3 つの方法、s06 の図と説明の順、s09 の図と読み上げ、s10 の待つ時間と重複の理由、s11 の結論・Optimized の対比・SDK の区別、s12 の Run a Job（.sync）、s13 の Maintenance Windows の行が入り、条件の表（s13〜s15）は本文の判断（Inventory・Config・パッチ 3 方法・State Manager・Maintenance Windows・Run Command・Compliance・Config の修復・Lambda の再試行・SDK integrations・Standard・Express・Run a Job）を覆っている。notes の採らなかった理由（箱の上限、根拠に無い中身、中黒が読み上げで崩れる）も妥当。",
+      "suggest": "対応不要（記録として残す）。"
+    }
+  ],
+  "verify_hash": "5149516e38677732"
+}
