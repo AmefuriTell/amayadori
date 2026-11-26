@@ -21,6 +21,7 @@ export const paths = {
   bank: (...p) => path.join(DATA, 'bank', ...p),
   glossary: (...p) => path.join(DATA, 'glossary', ...p),
   diagrams: (...p) => path.join(DATA, 'diagrams', ...p),
+  lectures: (...p) => path.join(DATA, 'lectures', ...p),
   config: (name) => path.join(CODE, 'config', name),
   schema: (name) => path.join(CODE, 'schemas', name),
 };

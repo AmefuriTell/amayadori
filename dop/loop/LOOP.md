@@ -25,6 +25,7 @@ AI はこのファイルと、今いる工程の 1 枚（`steps/<id>.md`）だ�
 
 - **content**: 問題を 1 束（既定 5 問）作る。閉じると、公開した問題の図の項目（diagram）をツールが自動で足す。
 - **diagram**: 問題ごとに構成図を描く（C2 → C3 → C4。P-015）。図の無い問題を残さない。問題を見直した（recheck）時は、付いている図を書き直す前に点検する（check: true。合わなければ書き直す）。
+- **lecture**: 試験ガイドの task ごとに講義を 1 本作る（C1 資料集め → C2 スライドと台本 → C3 整合性と分かりやすさの 2 人の検証 → C4 図と音声を作って公開。2026-11-26 利用者の決定）。問題集の前に聞く物。
 - **app**: Web アプリの機能を 1 つ作る・直す。
 - **learn**: 自分の解答の記録から苦手な範囲を出し、content の項目を足す（外側のループ）。
 
@@ -33,7 +34,7 @@ AI はこのファイルと、今いる工程の 1 枚（`steps/<id>.md`）だ�
 ```json
 {
   "states": {
-    "S0_pick":      { "doc": "steps/S0-pick.md",      "actor": "tool",         "next": { "content": "C1_research", "recheck": "C1_research", "translate": "C2_author", "glossary": "C1_research", "diagram": "C2_author", "refactor": "A1_spec", "app": "A1_spec", "learn": "L1_learn", "empty": "STOP" } },
+    "S0_pick":      { "doc": "steps/S0-pick.md",      "actor": "tool",         "next": { "content": "C1_research", "recheck": "C1_research", "translate": "C2_author", "glossary": "C1_research", "diagram": "C2_author", "lecture": "C1_research", "refactor": "A1_spec", "app": "A1_spec", "learn": "L1_learn", "empty": "STOP" } },
     "C1_research":  { "doc": "steps/C1-research.md",  "actor": "researcher",   "next": { "ok": "C2_author", "no_source": "S9_close" } },
     "C2_author":    { "doc": "steps/C2-author.md",    "actor": "author",       "next": { "ok": "C3_verify" } },
     "C3_verify":    { "doc": "steps/C3-verify.md",    "actor": "verifier",     "next": { "pass": "C4_gate", "fix": "C2_author", "drop": "S9_close" } },

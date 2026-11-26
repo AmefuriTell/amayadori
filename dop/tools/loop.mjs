@@ -8,7 +8,7 @@ import { validate } from './lib/schema.mjs';
 import { coverage, exam } from './lib/bank.mjs';
 import { addToBacklog, recordBase } from './refactor.mjs';
 import { loadBacklog, saveBacklog, nextId } from './lib/backlog.mjs';
-import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, autoSeedDiagrams, seedDiagramChecks, copyCurrentDiagrams, copyForRecheck, copyContext } from './lib/seeds.mjs';
+import { seedCoverage, seedTranslate, seedGlossary, seedDiagram, autoSeedDiagrams, seedDiagramChecks, seedLecture, copyCurrentDiagrams, copyForRecheck, copyContext } from './lib/seeds.mjs';
 
 // P-016: コードを測ってリファクタリングの項目を足す（本物の置き場の時だけ。試験の置き場 DOP_DATA ではしない）
 const autoScan = () => (process.env.DOP_DATA ? { added: [] } : addToBacklog());
@@ -34,7 +34,7 @@ const GUARDED = {
 const BACK = new Set(['fix', 'fail']);
 // S9 へ行く時の項目の終わり方
 const OUTCOME = { pass: 'done', ok: 'done', no_source: 'dropped', drop: 'dropped' };
-const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', diagram: 'C2_author', refactor: 'A1_spec', app: 'A1_spec', learn: 'L1_learn' };
+const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', diagram: 'C2_author', lecture: 'C1_research', refactor: 'A1_spec', app: 'A1_spec', learn: 'L1_learn' };
 
 function loadState() {
   return readJSON(paths.state(), { state: 'S0_pick', item: null, prev: null, session: { active: false, started: null, closed: 0 } });
@@ -271,6 +271,7 @@ const commands = {
     if (args.translate) return seedTranslate(args);
     if (args.glossary) return seedGlossary(args);
     if (args.diagram) return seedDiagram(args);
+    if (args.lecture) return seedLecture(args);
     return seedCoverage(args);
   },
 
