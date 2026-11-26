@@ -3,7 +3,7 @@
   "diagrams": [
     {
       "id": "q-1.3-0012",
-      "source": "flowchart TB\n  IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>パイプライン（毎週 AMI を作る）\" }\n  AMI@{ svc: \"Amazon EC2\", label: \"2 年分の AMI とスナップショット（費用が増える）\" }\n  subgraph LP[\"✔ B: ライフサイクルポリシー\"]\n    R1[\"ルール: 90 日後に非推奨\"]\n    R2[\"ルール: 180 日後に削除\"]\n  end\n  BADA[\"⚠ A: 配布設定の変更は今後のイメージだけ。既存は残る\"]\n  BADC[\"⚠ C: Lambda の独自コードを保守<br/>⚠ D: 毎月の手作業\"]\n  IB -- \"AMI\" --> AMI\n  R1 --> R2\n  LP == \"既存のイメージにも適用\" ==> AMI\n  BADA -.-> IB\n  BADC -.-> LP",
+      "source": "flowchart TB\n  IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>パイプライン（毎週 AMI を作る）\" }\n  AMI@{ svc: \"Amazon EC2\", label: \"2 年分の AMI とスナップショット（費用が増える）\" }\n  subgraph LP[\"✔ B: ライフサイクルポリシー\"]\n    R1[\"ルール: 90 日後に非推奨\"]\n    R2[\"ルール: 180 日後に削除\"]\n  end\n  BADA[\"⚠ A: 配布設定の変更は今後のイメージだけ。既存は残る\"]\n  BADC[\"⚠ C: Lambda の独自コードを保守<br/>⚠ D: 毎月の手作業\"]\n  IB -- \"AMI\" --> AMI\n  R1 --> R2\n  LP == \"既存のイメージにも適用\" ==> AMI\n  BADA -.-> IB\n  BADC -. \"自分で片付ける\" .-> AMI",
       "alt": "Image Builder のライフサイクルポリシーに、90 日後に非推奨・180 日後に削除のルールを置くと、既存の古い AMI にも適用されてスナップショットの費用が減る（B）。配布設定の変更（A）は今後のイメージだけに効く。"
     },
     {
