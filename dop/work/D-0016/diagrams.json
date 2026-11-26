@@ -1,0 +1,55 @@
+{
+  "item": "D-0016",
+  "diagrams": [
+    {
+      "id": "q-3.1-0001",
+      "source": "flowchart TB\n  U[\"ユーザー\"]\n  subgraph P[\"プライマリリージョン\"]\n    PS[\"本番（通常はここだけが応答）\"]\n  end\n  subgraph R[\"復旧先リージョン\"]\n    WS@{ svc: \"Amazon EC2\", label: \"✔ D: 縮小した完全な本番の複製\" }\n  end\n  X1[\"⚠ A: 障害後に再デプロイが要る\"]\n  X2[\"⚠ B: 先にサーバーを起こす作業が要る\"]\n  X3[\"⚠ C: 常に両方で応答・最も費用が高い\"]\n  U -- \"通常\" --> PS\n  U == \"障害時（すぐ処理して拡張）\" ==> WS\n  X1 -.-> R\n  X2 -.-> R\n  X3 -.-> R\n",
+      "alt": "復旧先リージョンに縮小した完全な本番の複製を動かしておくウォームスタンバイの図。障害時は縮小した量ですぐ処理して後で拡張できる D が正解で、バックアップと復元（A）やパイロットライト（B）はすぐには処理できない。"
+    },
+    {
+      "id": "q-3.1-0002",
+      "source": "flowchart TB\n  subgraph P[\"プライマリリージョン\"]\n    DB1@{ svc: \"Amazon RDS\", label: \"データベース\" }\n  end\n  subgraph R[\"復旧先リージョン\"]\n    DB2@{ svc: \"Amazon RDS\", label: \"✔ B: 動かしておくデータベース\" }\n    AP[\"✔ B: アプリサーバーは停止\"]\n  end\n  X1[\"⚠ A: 毎晩のスナップショットは継続的でない\"]\n  X2[\"⚠ C: 縮小本番の常時稼働は費用が高い\"]\n  X3[\"⚠ D: 最も複雑で費用が高い\"]\n  DB1 == \"✔ B: 継続的にレプリケート\" ==> DB2\n  DB2 -. \"障害時にサーバーを起こす\" .-> AP\n  X1 -.-> DB1\n  X2 -.-> R\n  X3 -.-> R\n",
+      "alt": "データベースだけを復旧先リージョンへ継続的に複製し、アプリサーバーは止めておくパイロットライトの図。データ損失が小さく費用も低い B が正解で、毎晩のコピー（A）は継続的でなく、C や D は費用が高い。"
+    },
+    {
+      "id": "q-3.1-0003",
+      "source": "flowchart TB\n  BIZ[\"停止してよい 1 時間 = RTO・失ってよい 5 分 = RPO（✔ A）\"]\n  POL@{ svc: \"AWS Resilience Hub\", label: \"✔ C: 耐障害性の方針（RTO 1 時間・RPO 5 分）\" }\n  APP[\"今のアーキテクチャ\"]\n  X1[\"⚠ B: RTO と RPO が逆\"]\n  X2[\"⚠ D: AZ の障害は別の AZ で解決できる\"]\n  X3[\"⚠ E: 手作業で見比べるのは手間が大きい\"]\n  BIZ -- \"目標\" --> POL\n  POL == \"AZ・リージョンの障害ごとに評価\" ==> APP\n  X1 -.-> BIZ\n  X2 -.-> APP\n  X3 -.-> APP\n",
+      "alt": "RTO 1 時間・RPO 5 分の目標を AWS Resilience Hub の耐障害性の方針に決め、今のアーキテクチャが満たすかを評価する図。正解は A（止まってよい時間が RTO）と C で、B は逆、E は手作業。"
+    },
+    {
+      "id": "q-3.1-0005",
+      "source": "flowchart TB\n  LB@{ svc: \"Elastic Load Balancing\", label: \"NLB（クロスゾーン無効）\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"✔ B: 両ゾーンに均等に配置\" }\n  subgraph AZA[\"AZ-a\"]\n    A1[\"インスタンス 5 台\"]\n  end\n  subgraph AZB[\"AZ-b\"]\n    B1[\"インスタンス 1 台（過負荷）\"]\n  end\n  X1[\"⚠ C・D: 1 つのゾーンに頼ると単一障害点\"]\n  X2[\"⚠ E: 無効のままは自ゾーンにしか配らない\"]\n  LB -- \"今: 自ゾーンのターゲットだけ\" --> B1\n  LB == \"✔ A: クロスゾーンを有効に\" ==> A1\n  ASG == \"均等に起動\" ==> B1\n  X1 -.-> A1\n  X2 -.-> LB\n",
+      "alt": "クロスゾーン無効の NLB に AZ-a が 5 台、AZ-b が 1 台のインスタンスがある図。クロスゾーン負荷分散を有効にし（A）、Auto Scaling グループを両ゾーンに均等に配置する（B）のが正解。"
+    },
+    {
+      "id": "q-3.1-0006",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph AZA[\"アベイラビリティーゾーン A\"]\n    P@{ svc: \"Amazon ElastiCache\", label: \"プライマリ（障害）\" }\n  end\n  subgraph AZB[\"アベイラビリティーゾーン B\"]\n    R[\"✔ B: レプリカ\"]\n  end\n  X1[\"⚠ A: 自動フェイルオーバーだけでは別ゾーンの保証がない\"]\n  X2[\"⚠ C・D: 大きいノードやスナップショットは自動昇格でない\"]\n  APP -- \"読み書き\" --> P\n  P -. \"障害\" .-> R\n  R == \"✔ B: Multi-AZ で自動昇格\" ==> APP\n  X1 -.-> P\n  X2 -.-> P\n",
+      "alt": "ElastiCache のプライマリが落ちた時、別のアベイラビリティーゾーンのレプリカが自動で昇格する図。Multi-AZ を有効にしてレプリカを別のゾーンに置く B が正解で、自動フェイルオーバーだけ（A）では別ゾーンの保証がない。"
+    },
+    {
+      "id": "q-3.1-0007",
+      "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    PU[\"プレイヤー（米国）\"]\n    T1@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    PE[\"プレイヤー（欧州）\"]\n    T2@{ svc: \"Amazon DynamoDB\", label: \"✔ D: グローバルテーブルのレプリカ\" }\n  end\n  X1[\"⚠ A: Aurora は書き込みがプライマリだけ\"]\n  X2[\"⚠ B: コピーの仕組みを自作して保守\"]\n  X3[\"⚠ C: リードレプリカは読み取り用\"]\n  PU -- \"読み書き\" --> T1\n  PE -- \"読み書き\" --> T2\n  T1 <== \"✔ D: 自動で複製\" ==> T2\n  X1 -.-> PE\n  X2 -.-> PU\n  X3 -.-> PE\n",
+      "alt": "us-east-1 と eu-west-1 の DynamoDB グローバルテーブルのレプリカに、プレイヤーが自分のリージョンで読み書きする図。複製は自動でマルチアクティブな D が正解で、A や C は書き込みがプライマリだけ、B は自作が要る。"
+    },
+    {
+      "id": "q-3.1-0008",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  EP[\"✔ C: グローバルデータベースのライターエンドポイント\"]\n  subgraph US[\"us-east-1\"]\n    P@{ svc: \"Amazon Aurora\", label: \"プライマリクラスター（今）\" }\n  end\n  subgraph WE[\"us-west-2\"]\n    S@{ svc: \"Amazon Aurora\", label: \"セカンダリクラスター\" }\n  end\n  X1[\"⚠ A: フェイルオーバーは障害からの復旧用\"]\n  X2[\"⚠ B: スナップショットの復元は失うおそれ\"]\n  X3[\"⚠ D: 移すたびに接続先を更新する\"]\n  APP -- \"設定は変えない\" --> EP\n  EP -- \"常にプライマリを指す\" --> P\n  P == \"✔ C: スイッチオーバーで移す\" ==> S\n  X1 -.-> P\n  X2 -.-> P\n  X3 -.-> APP\n",
+      "alt": "Aurora グローバルデータベースのプライマリを計画してもう一方のリージョンへ移す図。データを失わないスイッチオーバーを使い、アプリはライターエンドポイントに接続する C が正解で、B や D は要件に反する。"
+    },
+    {
+      "id": "q-3.1-0009",
+      "source": "flowchart TB\n  USER[\"利用者\"]\n  CF@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション（オリジングループ）\" }\n  subgraph US[\"us-east-1\"]\n    B1@{ svc: \"Amazon S3\", label: \"プライマリのオリジン\" }\n  end\n  subgraph WE[\"us-west-2\"]\n    B2@{ svc: \"Amazon S3\", label: \"セカンダリのオリジン（写し）\" }\n  end\n  X1[\"⚠ B: 同じリージョンの写しでは足りない\"]\n  X2[\"⚠ D・E: 夜間コピーや手作業の切り替え\"]\n  USER -- \"GET\" --> CF\n  CF -- \"通常\" --> B1\n  CF == \"✔ C: 使えない時に自動で切替\" ==> B2\n  B1 == \"✔ A: クロスリージョンレプリケーション\" ==> B2\n  X1 -.-> B1\n  X2 -.-> CF\n",
+      "alt": "CloudFront のオリジングループで、us-east-1 のバケットが使えない時に us-west-2 の写しへ自動で切り替える図。S3 のクロスリージョンレプリケーション（A）とオリジングループ（C）が正解で、B・D・E は要件に合わない。"
+    },
+    {
+      "id": "q-3.1-0010",
+      "source": "flowchart TB\n  LB@{ svc: \"Elastic Load Balancing\", label: \"NLB\" }\n  subgraph Z1[\"ゾーン 1\"]\n    A[\"ターゲット 2 台（高負荷）\"]\n  end\n  subgraph Z2[\"ゾーン 2\"]\n    B[\"ターゲット 6 台（ほぼ暇）\"]\n  end\n  X1[\"⚠ B: インスタンスを足さない要件に反する\"]\n  X2[\"⚠ C: 種類を変える要件に反する\"]\n  X3[\"⚠ D: 外すだけで残りに偏る\"]\n  LB -- \"今: 自ゾーンだけ\" --> A\n  LB == \"✔ A: クロスゾーン有効で全 8 台へ\" ==> B\n  X1 -.-> A\n  X2 -.-> LB\n  X3 -.-> A\n",
+      "alt": "NLB のクロスゾーン負荷分散は既定で無効のため、2 台と 6 台のゾーンで偏る図。クロスゾーン負荷分散を有効にすれば、インスタンスを足さず種類も変えずに全 8 台へ分散できる A が正解。"
+    },
+    {
+      "id": "q-3.1-0011",
+      "source": "flowchart TB\n  LB@{ svc: \"Elastic Load Balancing\", label: \"ALB（ノードは 1a・1b にある）\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"1c でもインスタンスを起動\" }\n  subgraph OKZ[\"us-east-1a・1b（有効）\"]\n    T1[\"ターゲット\"]\n  end\n  subgraph CZ[\"us-east-1c（未有効）\"]\n    T3[\"新しいインスタンス（正常・登録済み）\"]\n  end\n  X1[\"⚠ A: ALB のクロスゾーンは常に有効\"]\n  X2[\"⚠ C・D: Auto Scaling やヘルスチェックは原因でない\"]\n  LB -- \"トラフィック\" --> T1\n  ASG --> T3\n  LB -. \"⚠ 1c にノードが無く届かない\" .-> T3\n  FIX[\"✔ B: 1c をロードバランサーで有効にする\"] ==> LB\n  X1 -.-> LB\n  X2 -.-> T3\n",
+      "alt": "ALB が us-east-1a と 1b だけで有効なため、1c に登録した正常なインスタンスにトラフィックが来ない図。ロードバランサーで 1c を有効にしてノードを作る B が原因と対処。"
+    }
+  ]
+}
