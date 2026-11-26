@@ -1,0 +1,25 @@
+{
+  "item": "D-0025",
+  "diagrams": [
+    {
+      "id": "q-4.2-0011",
+      "source": "flowchart TB\n  subgraph APPA[\"アプリケーションのアカウント\"]\n    LU@{ svc: \"Amazon CloudWatch Logs\", label: \"us-east-1 のロググループ\" }\n    LE@{ svc: \"Amazon CloudWatch Logs\", label: \"eu-west-1 のロググループ\" }\n  end\n  subgraph SEC[\"セキュリティのアカウント\"]\n    DU[\"送信先（us-east-1）\"]\n    DE[\"✔ A: 送信先（eu-west-1）\"]\n    KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"中央のストリーム（us-east-1）\" }\n  end\n  WC[\"⚠ C: 別リージョンの送信先は使えない\"]\n  LU -- \"✔ B: 同じリージョンの送信先\" --> DU\n  LE == \"✔ B: 同じリージョンの送信先\" ==> DE\n  DU --> KDS\n  DE == \"ストリームを指す\" ==> KDS\n  LE -. \"⚠ C\" .-> DU\n  WC -.- LE\n",
+      "alt": "2 つのリージョンのロググループのログを us-east-1 の中央のストリームへ送る図。セキュリティのアカウントに各リージョンの送信先を作り（A）、ロググループと同じリージョンの送信先を使うサブスクリプションフィルターを作る（B）。"
+    },
+    {
+      "id": "q-4.2-0012",
+      "source": "flowchart TB\n  WID[\"ダッシュボードの Logs Insights のウィジェット<br/>1 分ごとに更新\"]\n  OLD@{ svc: \"Amazon CloudWatch Logs\", label: \"40 のロググループ・30 日分（今）\" }\n  NEW@{ svc: \"Amazon CloudWatch Logs\", label: \"関係する 3 つ・直近 1 時間\" }\n  NOTE[\"料金はスキャンしたデータの量で決まる\"]\n  WA[\"⚠ A: 保持期間を延ばしても<br/>スキャンは減らない\"]\n  WB[\"⚠ B: ウィジェットを増やすと<br/>クエリが増える\"]\n  WC[\"⚠ C: limit では<br/>スキャン量は同じ\"]\n  WID -. \"⚠ 毎回クエリ\" .-> OLD\n  WID == \"✔ D: 絞って更新も減らす\" ==> NEW\n  NOTE -.- OLD\n  WA -.- OLD\n  WB -.- WID\n  WC -.- OLD\n",
+      "alt": "Logs Insights のウィジェットの費用を減らす図。料金はスキャンしたデータ量で決まるので、関係する 3 つのロググループだけを直近 1 時間でクエリし、更新を減らす（D）。保持期間や limit では減らない。"
+    },
+    {
+      "id": "q-4.2-0013",
+      "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ（構造の無い行）\" }\n  Q@{ svc: \"Amazon CloudWatch Logs\", label: \"✔ C: 保存したクエリ（parse と stats）\" }\n  ENG[\"同じリージョンのエンジニア\"]\n  WA[\"⚠ A: S3 へ移して Athena<br/>手間と遅れが出る\"]\n  WB[\"⚠ B: Lambda のコードを保守する\"]\n  WD[\"⚠ D: 手作業で素早くできない\"]\n  APP -- \"GET /orders took 532 ms\" --> LG\n  LG -- \"ログはそのまま\" --> Q\n  Q -- \"パスごとの平均・最大\" --> ENG\n  WA -.- LG\n  WB -.- LG\n  WD -.- ENG\n",
+      "alt": "構造の無いログ行からパスごとの平均と最大の応答時間を出す図。Logs Insights の parse と stats のクエリを保存すれば、ログを移さずコードも書かずに、同じリージョンの誰でも再実行できる（C）。"
+    },
+    {
+      "id": "q-4.2-0014",
+      "source": "flowchart TB\n  S3B@{ svc: \"Amazon S3\", label: \"VPC フローログ（日付・リージョンで分割）\" }\n  ATH@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>クエリ\" }\n  GLUE@{ svc: \"AWS Glue\", label: \"AWS Glue<br/>Data Catalog\" }\n  WB[\"⚠ B: ジョブの保守が残る\"]\n  WC[\"⚠ C: 全ファイルを読み、かえって遅い\"]\n  WD[\"⚠ D: 写す手間と費用が大きい\"]\n  ATH -. \"⚠ 今: GetPartitions を毎回呼ぶ\" .-> GLUE\n  ATH == \"✔ A: 射影で自分で組み立てる\" ==> S3B\n  WB -.- GLUE\n  WC -.- S3B\n  WD -.- S3B\n",
+      "alt": "パーティションの多い VPC フローログを Athena で速くクエリする図。パーティション射影を有効にすると、Data Catalog への呼び出しを避けて速くなり、毎日のパーティション追加も不要になる（A）。"
+    }
+  ]
+}
