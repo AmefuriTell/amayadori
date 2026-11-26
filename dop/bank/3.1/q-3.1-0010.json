@@ -1,0 +1,66 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0010",
+  "services": [
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A Network Load Balancer is enabled in two Availability Zones. One zone has 2 registered targets and the other has 6. The 2 targets are overloaded while the other 6 are mostly idle. The company wants traffic to be spread evenly across all 8 targets without adding instances or changing the load balancer type. Which solution meets these requirements with the LEAST effort?",
+  "stem_ja": "Network Load Balancer が 2 つのアベイラビリティーゾーンで有効になっています。一方のゾーンには 2 つ、もう一方には 6 つのターゲットが登録されています。2 つのターゲットは負荷が高すぎ、残りの 6 つはほとんど暇です。会社は、インスタンスを足したりロードバランサーの種類を変えたりせずに、8 つのターゲット全体にトラフィックを均等に分けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on cross-zone load balancing for the Network Load Balancer.",
+      "text_ja": "Network Load Balancer のクロスゾーン負荷分散を有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Launch 4 more instances in the zone that has 2 targets and register them.",
+      "text_ja": "ターゲットが 2 つのゾーンに 4 台のインスタンスを足して登録する。"
+    },
+    {
+      "key": "C",
+      "text": "Replace the Network Load Balancer with an Application Load Balancer, and turn off cross-zone load balancing on its target group.",
+      "text_ja": "Network Load Balancer を Application Load Balancer に置き換え、ターゲットグループでクロスゾーン負荷分散を無効にする。"
+    },
+    {
+      "key": "D",
+      "text": "Lower the health check interval so that the overloaded targets are removed from service sooner.",
+      "text_ja": "負荷が高すぎるターゲットがより早く外されるよう、ヘルスチェックの間隔を短くする。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "Network Load Balancer では、クロスゾーン負荷分散は既定で無効で、各ノードは自分のアベイラビリティーゾーンのターゲットにだけトラフィックを分けます。有効にすると、各ノードが有効なすべてのアベイラビリティーゾーンのターゲットに分けるので、ゾーンごとのターゲットの数が違っても全体に分かれます。設定はロードバランサーを作った後でもいつでも変えられます。",
+    "per_choice": {
+      "A": "正しい。インスタンスを足さず、種類も変えずに、すべてのターゲットにトラフィックを分けられます。",
+      "B": "偏りは減りますが、インスタンスを足さないという要件に反します。",
+      "C": "ロードバランサーの種類を変えるうえ、クロスゾーンを無効にするとゾーンごとの偏りがそのまま残ります。",
+      "D": "負荷の高いターゲットが外されるだけで、残りのターゲットの負荷がさらに高まり、均等には分かれません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+      "source_id": "S3",
+      "quote": "By default, each Network Load Balancer node distributes traffic across the registered targets in its Availability Zone only."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+      "source_id": "S3",
+      "quote": "If you turn on cross-zone load balancing, each Network Load Balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#cross-zone-load-balancing",
+      "source_id": "S2",
+      "quote": "After you create the load balancer, you can enable or disable cross-zone load balancing at any time."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,201 @@
+{
+  "item": "C-0033",
+  "questions": [
+    {
+      "task": "3.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-3.1-0004",
+      "services": [
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones. One zone has 2 registered targets and the other has 6. The 2 targets are overloaded while the other 6 are mostly idle. The company wants traffic to be spread evenly across all 8 targets without adding instances or changing the load balancer type. Which solution meets these requirements with the LEAST effort?",
+      "stem_ja": "Network Load Balancer が 2 つのアベイラビリティーゾーンで有効になっています。一方のゾーンには 2 つ、もう一方には 6 つのターゲットが登録されています。2 つのターゲットは負荷が高すぎ、残りの 6 つはほとんど暇です。会社は、インスタンスを足したりロードバランサーの種類を変えたりせずに、8 つのターゲット全体にトラフィックを均等に分けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing for the Network Load Balancer.",
+          "text_ja": "Network Load Balancer のクロスゾーン負荷分散を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Launch 4 more instances in the zone that has 2 targets and register them.",
+          "text_ja": "ターゲットが 2 つのゾーンに 4 台のインスタンスを足して登録する。"
+        },
+        {
+          "key": "C",
+          "text": "Replace the Network Load Balancer with an Application Load Balancer, and turn off cross-zone load balancing on its target group.",
+          "text_ja": "Network Load Balancer を Application Load Balancer に置き換え、ターゲットグループでクロスゾーン負荷分散を無効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Lower the health check interval so that the overloaded targets are removed from service sooner.",
+          "text_ja": "負荷が高すぎるターゲットがより早く外されるよう、ヘルスチェックの間隔を短くする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Network Load Balancer では、クロスゾーン負荷分散は既定で無効で、各ノードは自分のアベイラビリティーゾーンのターゲットにだけトラフィックを分けます。有効にすると、各ノードが有効なすべてのアベイラビリティーゾーンのターゲットに分けるので、ゾーンごとのターゲットの数が違っても全体に分かれます。設定はロードバランサーを作った後でもいつでも変えられます。",
+        "per_choice": {
+          "A": "正しい。インスタンスを足さず、種類も変えずに、すべてのターゲットにトラフィックを分けられます。",
+          "B": "偏りは減りますが、インスタンスを足さないという要件に反します。",
+          "C": "ロードバランサーの種類を変えるうえ、クロスゾーンを無効にするとゾーンごとの偏りがそのまま残ります。",
+          "D": "負荷の高いターゲットが外されるだけで、残りのターゲットの負荷がさらに高まり、均等には分かれません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "source_id": "S3",
+          "quote": "By default, each Network Load Balancer node distributes traffic across the registered targets in its Availability Zone only."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "source_id": "S3",
+          "quote": "If you turn on cross-zone load balancing, each Network Load Balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#cross-zone-load-balancing",
+          "source_id": "S2",
+          "quote": "After you create the load balancer, you can enable or disable cross-zone load balancing at any time."
+        }
+      ]
+    },
+    {
+      "task": "3.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-3.1-0005",
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Application Load Balancer is enabled in us-east-1a and us-east-1b. To improve availability, a team changed its Auto Scaling group to also launch instances in us-east-1c. The new instances in us-east-1c are healthy and registered in the target group, but they never receive traffic. What is the MOST likely cause?",
+      "stem_ja": "Application Load Balancer は us-east-1a と us-east-1b で有効になっています。可用性を高めるため、チームは Auto Scaling グループを us-east-1c でもインスタンスを起動するように変えました。us-east-1c の新しいインスタンスは正常で、ターゲットグループにも登録されていますが、トラフィックを一切受け取りません。最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Cross-zone load balancing is turned off at the load balancer level of the Application Load Balancer.",
+          "text_ja": "Application Load Balancer のロードバランサーのレベルで、クロスゾーン負荷分散が無効になっている。"
+        },
+        {
+          "key": "B",
+          "text": "us-east-1c is not enabled for the load balancer, so no load balancer node exists in that zone.",
+          "text_ja": "ロードバランサーで us-east-1c が有効になっておらず、そのゾーンにロードバランサーのノードが無い。"
+        },
+        {
+          "key": "C",
+          "text": "The Auto Scaling group balances instances equally across zones, so it stops new instances in us-east-1c.",
+          "text_ja": "Auto Scaling グループがゾーン間でインスタンスを均等に保つため、us-east-1c の新しいインスタンスを止める。"
+        },
+        {
+          "key": "D",
+          "text": "The health check marks the instances as healthy too quickly, so the load balancer ignores them.",
+          "text_ja": "ヘルスチェックがインスタンスを早く正常とみなしすぎるため、ロードバランサーが無視する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ロードバランサーでアベイラビリティーゾーンを有効にすると、Elastic Load Balancing はそのゾーンにロードバランサーのノードを作ります。ターゲットを登録しても、そのゾーンを有効にしていなければ、登録したターゲットはトラフィックを受け取りません。",
+        "per_choice": {
+          "A": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は常に有効で、無効にできません。",
+          "B": "正しい。ゾーンを有効にしていないと、そのゾーンに登録したターゲットはトラフィックを受け取りません。",
+          "C": "Auto Scaling は有効なゾーン間でインスタンスの数を均等に保ちますが、それでトラフィックが来なくなるわけではありません。",
+          "D": "正常と判定されたターゲットは使われます。早く正常になっても無視されることはありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#availability-zones",
+          "source_id": "S1",
+          "quote": "If you register targets in an Availability Zone but do not enable the Availability Zone, these registered targets do not receive traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "source_id": "S5",
+          "quote": "With Application Load Balancers, cross-zone load balancing is always turned on at the load balancer level, and cannot be turned off."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "source_id": "S8",
+          "quote": "When the health checks exceed HealthyThresholdCount consecutive successes, the load balancer puts the target back in service."
+        }
+      ]
+    },
+    {
+      "task": "3.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-3.1-0006",
+      "services": [
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Application Load Balancer is enabled in three Availability Zones and has two target groups. Cross-zone load balancing is turned off at the target group level for both groups to keep traffic within each zone. One target group has targets in all three zones, but the other has targets in only two zones. Users intermittently receive HTTP 503 errors for the second group's paths. Which change BEST resolves the errors while keeping cross-zone load balancing off?",
+      "stem_ja": "Application Load Balancer は 3 つのアベイラビリティーゾーンで有効になっており、2 つのターゲットグループがあります。トラフィックを各ゾーンの中に留めるため、両方のグループでターゲットグループのレベルのクロスゾーン負荷分散を無効にしています。一方のターゲットグループには 3 つのゾーンすべてにターゲットがありますが、もう一方は 2 つのゾーンにしかありません。利用者は 2 つ目のグループのパスで、ときどき HTTP 503 のエラーを受け取ります。クロスゾーン負荷分散を無効のまま、エラーを最もよく解決する変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on target stickiness for the second target group so that each user stays on a working target.",
+          "text_ja": "各利用者が動いているターゲットに留まるよう、2 つ目のターゲットグループでターゲットのスティッキネスを有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Register targets for the second target group in the third Availability Zone as well.",
+          "text_ja": "2 つ目のターゲットグループのターゲットを、3 つ目のゾーンにも登録する。"
+        },
+        {
+          "key": "C",
+          "text": "Increase the health check interval of the second target group so that targets are not removed as often.",
+          "text_ja": "ターゲットが頻繁に外されないよう、2 つ目のターゲットグループのヘルスチェックの間隔を長くする。"
+        },
+        {
+          "key": "D",
+          "text": "Turn off cross-zone load balancing at the load balancer level as well.",
+          "text_ja": "ロードバランサーのレベルでも、クロスゾーン負荷分散を無効にする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "クロスゾーン負荷分散を無効にすると、各ノードは自分のゾーンのターゲットにだけトラフィックを分けます。複数のターゲットグループがある時は、すべてのターゲットグループが同じゾーンに参加するようにし、空のゾーンを作らないようにします。空のゾーンに入ったリクエストは 503 エラーになります。",
+        "per_choice": {
+          "A": "クロスゾーン負荷分散が無効の時、ターゲットのスティッキネスは使えません。",
+          "B": "正しい。3 つ目のゾーンにもターゲットがあれば空のゾーンが無くなり、クロスゾーンを無効のまま 503 を防げます。",
+          "C": "ターゲットが無いゾーンの問題で、ヘルスチェックの間隔を変えても解決しません。",
+          "D": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は無効にできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "source_id": "S6",
+          "quote": "ensure all target groups are participating in the same Availability Zones, within the configured Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "source_id": "S6",
+          "quote": "as this triggers a 503 error for all HTTP requests that enter the empty Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "source_id": "S5",
+          "quote": "Target stickiness is not supported when cross-zone load balancing is off."
+        }
+      ]
+    }
+  ]
+}
