@@ -1,0 +1,62 @@
+{
+  "task": "1.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.2-0014",
+  "services": [
+    "AWS CodePipeline",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A pipeline uses a Lambda invoke action to start an integration test suite in an external test system and wait for the result. The suite now takes about 40 minutes, so the action fails. The team wants to keep the existing Lambda invoke action and the same function. Which solution meets these requirements with the LEAST effort?",
+  "stem_ja": "パイプラインは Lambda の呼び出しのアクションで、外部のテストのシステムで結合テストを始め、結果を待っています。テストは今は約 40 分かかるため、アクションが失敗します。チームは、今の Lambda の呼び出しのアクションと同じ関数を使い続けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Have the function start the test, return a continuation token, and check the test status on each later invocation until it finishes.",
+      "text_ja": "関数がテストを始めて継続トークンを返し、その後の呼び出しのたびにテストの状態を確かめて、終わるまで続ける。"
+    },
+    {
+      "key": "B",
+      "text": "Increase the Lambda function timeout to 60 minutes so that it can wait for the whole test suite.",
+      "text_ja": "テスト全体を待てるよう、Lambda 関数のタイムアウトを 60 分にする。"
+    },
+    {
+      "key": "C",
+      "text": "Replace the Lambda invoke action with a manual approval action and have a tester approve when the suite passes.",
+      "text_ja": "Lambda の呼び出しのアクションを手動の承認のアクションに置き換え、テストが通ったらテスターが承認する。"
+    },
+    {
+      "key": "D",
+      "text": "Replace the Lambda invoke action with a Step Functions invoke action that waits for the test system.",
+      "text_ja": "Lambda の呼び出しのアクションを、テストのシステムを待つ Step Functions の呼び出しのアクションに置き換える。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "継続トークン（continue_job_later）を使うと、時間のかかる非同期の処理を見守れます。これにより、Lambda の上限である 15 分を超えても、アクションが続き、関数を成功させられます。",
+    "per_choice": {
+      "A": "正しい。今のアクションと関数のまま、15 分を超えるテストを待てます。",
+      "B": "Lambda の実行時間の上限は 15 分で、60 分にはできません。",
+      "C": "自動のテストの待ち合わせが手作業になり、要件に合いません。",
+      "D": "動きますが、今の Lambda の呼び出しのアクションを使い続けるという要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+      "source_id": "S1",
+      "quote": "Using a continuation token to monitor a long-running asynchronous process (continue_job_later)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+      "source_id": "S1",
+      "quote": "This allows the action to continue and the function to succeed even if it exceeds a fifteen-minute runtime (a limit in Lambda)."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

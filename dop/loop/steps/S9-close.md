@@ -11,6 +11,8 @@
     <a>機械で確かめられる指摘なら、文書でなくツールの検査を足す案にする（AI が覚えるより確実）。</a>
     <a>出力の human_needed が null でなければ（項目が blocked）、その理由と選べる案を 3 行で人に伝える。ループは次の項目へ進めてよい。</a>
     <a>dop/ と .claude/ の変更をコミットして、作業のブランチへ push する（クラウドのコンテナは使い捨てなので、項目ごとに残す）。メッセージは「DOP ループ: &lt;ID&gt; &lt;終わり方&gt;（&lt;題&gt;）」。</a>
+    <a>loop next が STOP（この回の上限）を返したら、作業のブランチから master への PR を作り、CI が通ったらマージする。人の承認は要らない（LOOP.md 6 章）。マージした後は master を作業のブランチへ fast-forward して push し、次の回を loop start で始める。</a>
+    <a>PR が開いている間は、作業のブランチへ push しない（手元でコミットするのはよい）。CI が落ちたら原因を直してから push する。</a>
   </actions>
   <exit>loop close が advance も兼ねる。次は loop next</exit>
 </step>

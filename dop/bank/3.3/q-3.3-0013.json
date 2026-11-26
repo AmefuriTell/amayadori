@@ -1,0 +1,66 @@
+{
+  "task": "3.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.3-0013",
+  "services": [
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "After a deployment changed the health check path, every target in an Application Load Balancer target group, in all enabled Availability Zones, failed its health checks at the same time. The team expected the load balancer to stop sending requests, but users still reached the targets and received application errors. What is the MOST likely explanation?",
+  "stem_ja": "デプロイでヘルスチェックのパスが変わった後、Application Load Balancer のターゲットグループのすべてのターゲットが、有効なすべてのアベイラビリティーゾーンで同時にヘルスチェックに失敗しました。チームはロードバランサーがリクエストを送るのをやめると思っていましたが、利用者はまだターゲットに届き、アプリケーションのエラーを受け取りました。最も可能性の高い説明はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The deregistration delay kept the unhealthy targets in service for 300 seconds after they failed.",
+      "text_ja": "登録解除の遅延によって、失敗した後 300 秒間は unhealthy のターゲットが使われ続けた。"
+    },
+    {
+      "key": "B",
+      "text": "Slow start mode kept sending a small share of requests to the unhealthy targets.",
+      "text_ja": "スロースタートのモードが、unhealthy のターゲットへ少しのリクエストを送り続けた。"
+    },
+    {
+      "key": "C",
+      "text": "When all targets fail health checks at the same time, the load balancer fails open and routes requests to all targets.",
+      "text_ja": "すべてのターゲットが同時にヘルスチェックに失敗すると、ロードバランサーはフェイルオープンになり、すべてのターゲットへリクエストを送る。"
+    },
+    {
+      "key": "D",
+      "text": "Application Load Balancers do not stop routing to targets based on health checks unless the Auto Scaling group replaces them.",
+      "text_ja": "Application Load Balancer は、Auto Scaling グループが入れ替えない限り、ヘルスチェックでターゲットへの送信を止めない。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "各ロードバランサーのノードは、通常は正常なターゲットにだけリクエストを送ります。ただし、ターゲットグループに unhealthy なターゲットしか無い時は、状態に関係なくすべてのターゲットへ送ります。有効なすべてのアベイラビリティーゾーンで全ターゲットが同時に失敗すると、ロードバランサーはフェイルオープンになります。",
+    "per_choice": {
+      "A": "登録解除の遅延は登録解除中のターゲットの話で、ヘルスチェックに失敗したターゲットを使い続ける仕組みではありません。",
+      "B": "スロースタートのターゲットは、unhealthy になるとスロースタートを抜けます。",
+      "C": "正しい。全ターゲットが同時に失敗したため、フェイルオープンですべてのターゲットへ送られました。",
+      "D": "ロードバランサーは通常、正常なターゲットにだけリクエストを送ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+      "source_id": "S1",
+      "quote": "If a target group contains only unhealthy registered targets, the load balancer routes requests to all those targets, regardless of their health status."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+      "source_id": "S1",
+      "quote": "if all targets fail health checks at the same time in all enabled Availability Zones, the load balancer fails open."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#slow-start-mode",
+      "source_id": "S5",
+      "quote": "If a target in slow start mode becomes unhealthy, the target exits slow start mode."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,154 @@
+{
+  "item": "C-0010",
+  "questions": [
+    {
+      "id": "q-1.2-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A pipeline in us-east-1 has a Lambda invoke action that runs a smoke test against a new deployment. The function runs in eu-west-1 as a cross-region action. The test finishes, but the pipeline action never shows success or failure until it times out. The function reports its result to the CodePipeline endpoint in the pipeline Region. Which change will MOST likely fix the problem?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Send PutJobSuccessResult and PutJobFailureResult to the eu-west-1 endpoint, where the Lambda function runs."
+        },
+        {
+          "key": "B",
+          "text": "Increase the Lambda function timeout to the maximum so that the pipeline has more time to receive the result."
+        },
+        {
+          "key": "C",
+          "text": "Log the full JSON event from CodePipeline in the function so that the pipeline can read the result from CloudWatch Logs."
+        },
+        {
+          "key": "D",
+          "text": "Replace the Lambda action with a manual approval action and ask a tester to approve after checking the result."
+        }
+      ],
+      "explanation": {
+        "summary": "クロスリージョンの Lambda の呼び出しのアクションでは、PutJobSuccessResult と PutJobFailureResult による結果を、CodePipeline のあるリージョンではなく、Lambda 関数のあるリージョンへ送る必要があります。",
+        "per_choice": {
+          "A": "正しい。関数のあるリージョンへ結果を送れば、アクションが成功か失敗になります。",
+          "B": "結果が正しいリージョンへ届かない限り、時間を延ばしても表示は変わりません。",
+          "C": "CodePipeline の JSON のイベントには一時的な認証情報が入っており、ログに出すと認証情報が CloudWatch Logs に残るため、出してはいけません。",
+          "D": "自動のテストが手作業になり、問題の原因も直りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "source_id": "S1",
+          "quote": "should be sent to the AWS Region where the Lambda function is present and not to the Region where CodePipeline exists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "source_id": "S1",
+          "quote": "Do not log the JSON event that CodePipeline sends to Lambda because this can result in user credentials being logged in CloudWatch Logs."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0005",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A pipeline uses a Lambda invoke action to start an integration test suite in an external test system and wait for the result. The suite now takes about 40 minutes, so the action fails. The team wants to keep the existing Lambda invoke action and the same function. Which solution meets these requirements with the LEAST effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Increase the Lambda function timeout to 60 minutes so that it can wait for the whole test suite."
+        },
+        {
+          "key": "B",
+          "text": "Have the function start the test, return a continuation token, and check the test status on each later invocation until it finishes."
+        },
+        {
+          "key": "C",
+          "text": "Replace the Lambda invoke action with a manual approval action and have a tester approve when the suite passes."
+        },
+        {
+          "key": "D",
+          "text": "Replace the Lambda invoke action with a Step Functions invoke action that waits for the test system."
+        }
+      ],
+      "explanation": {
+        "summary": "継続トークン（continue_job_later）を使うと、時間のかかる非同期の処理を見守れます。これにより、Lambda の上限である 15 分を超えても、アクションが続き、関数を成功させられます。",
+        "per_choice": {
+          "A": "Lambda の実行時間の上限は 15 分で、60 分にはできません。",
+          "B": "正しい。今のアクションと関数のまま、15 分を超えるテストを待てます。",
+          "C": "自動のテストの待ち合わせが手作業になり、要件に合いません。",
+          "D": "動きますが、今の Lambda の呼び出しのアクションを使い続けるという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "source_id": "S1",
+          "quote": "Using a continuation token to monitor a long-running asynchronous process (continue_job_later)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "source_id": "S1",
+          "quote": "This allows the action to continue and the function to succeed even if it exceeds a fifteen-minute runtime (a limit in Lambda)."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0006",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "After deploying to a test environment, a pipeline must run an integration test workflow that has several steps and branches. A value produced by the workflow, such as the test environment URL that was verified, must be passed to the configuration of the next deploy action. The team wants to use managed pipeline features and avoid writing glue code. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add a Step Functions invoke action that starts a state machine for the test workflow and passes input from the action configuration or an artifact."
+        },
+        {
+          "key": "B",
+          "text": "Reference the Step Functions action's output variables in the configuration of the next deploy action."
+        },
+        {
+          "key": "C",
+          "text": "Add a manual approval action and ask a tester to type the verified URL into the next action."
+        },
+        {
+          "key": "D",
+          "text": "Add a Device Farm test action so that the workflow's steps and branches run on test devices."
+        },
+        {
+          "key": "E",
+          "text": "Write a Lambda function that logs the full CodePipeline event and the workflow result so that the next action can read them."
+        }
+      ],
+      "explanation": {
+        "summary": "Step Functions の呼び出しのアクションは、パイプラインから状態マシンの実行を始め、アクションの設定かアーティファクトのファイルから最初の状態を渡せます。このアクションは、パイプラインの後のアクションの設定から参照できる出力変数を出します。",
+        "per_choice": {
+          "A": "正しい。手順と分岐のあるテストを、つなぎのコード無しで状態マシンとして動かせます。",
+          "B": "正しい。出力変数を参照すれば、ワークフローの値を次のアクションに渡せます。",
+          "C": "値の受け渡しが手作業になり、要件に合いません。",
+          "D": "Device Farm は端末でアプリケーションを試すためのもので、手順と分岐のあるワークフローの実行や値の受け渡しには使いません。",
+          "E": "コードを書くことになり、イベントには一時的な認証情報が入っているので、ログに出してはいけません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+          "source_id": "S4",
+          "quote": "Starts an AWS Step Functions state machine execution from your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+          "source_id": "S4",
+          "quote": "Provides an initial state to the state machine through either a property in the action configuration or a file located in a pipeline artifact to be passed as input."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-output",
+          "source_id": "S5",
+          "quote": "This action produces output variables that can be referenced by the action configuration of a downstream action in the pipeline."
+        }
+      ]
+    }
+  ]
+}

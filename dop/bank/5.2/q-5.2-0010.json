@@ -1,0 +1,68 @@
+{
+  "task": "5.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.2-0010",
+  "services": [
+    "Amazon CloudWatch",
+    "Amazon EC2",
+    "Amazon SNS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A legacy application runs on a single EC2 instance that is not in an Auto Scaling group. The company wants the instance to be recovered automatically when it becomes impaired because of an underlying hardware failure that requires AWS involvement, and the operations team must be notified when this happens. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "古いアプリケーションが、Auto Scaling グループに入っていない 1 台の EC2 インスタンスで動いています。会社は、AWS の対応が必要な基盤のハードウェアの障害でインスタンスが損なわれた時に、自動で復旧させたいと考えており、その時には運用チームに通知する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create a CloudWatch alarm on StatusCheckFailed_Instance with a recover action and an SNS notification.",
+      "text_ja": "StatusCheckFailed_Instance に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Write an AWS Lambda function that checks the instance status every minute and stops and starts the instance when it fails.",
+      "text_ja": "1 分ごとにインスタンスの状態を確かめ、失敗していたらインスタンスを停止・起動する AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "C",
+      "text": "Create a CloudWatch alarm that emails the team so that an engineer can move the instance to new hardware by hand.",
+      "text_ja": "チームにメールを送る CloudWatch アラームを作り、エンジニアが手作業でインスタンスを新しいハードウェアへ移す。"
+    },
+    {
+      "key": "D",
+      "text": "Create a CloudWatch alarm on StatusCheckFailed_System with a recover action and an SNS notification.",
+      "text_ja": "StatusCheckFailed_System に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CloudWatch アラームのアクションで、EC2 インスタンスを自動で停止・終了・再起動・復旧できます。基盤のハードウェアの障害など AWS の対応が必要な問題で損なわれた時は、StatusCheckFailed_System のアラームの復旧のアクションで自動で復旧し、選んだ SNS トピックで通知されます。",
+    "per_choice": {
+      "A": "復旧のアクションは、StatusCheckFailed_Instance を除く EC2 のインスタンスごとのメトリクスのアラームに付けられます。",
+      "B": "独自の関数を作って保守する必要があり、組み込みの復旧のアクションより手間がかかります。",
+      "C": "復旧が手作業で、自動で復旧する要件を満たしません。",
+      "D": "正しい。ハードウェアの障害を StatusCheckFailed_System で見つけ、自動で復旧して SNS で知らせます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#AddingRecoverActions",
+      "source_id": "S7",
+      "quote": "When the StatusCheckFailed_System alarm is triggered, and the recover action is initiated, you will be notified by the Amazon SNS topic"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions",
+      "source_id": "S6",
+      "quote": "You can also add the recover action to alarms that is set on any Amazon EC2 per-instance metric except for StatusCheckFailed_Instance."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#AddingRecoverActions",
+      "source_id": "S7",
+      "quote": "automatically recovers the instance if it becomes impaired due to an underlying hardware failure or a problem that requires AWS involvement to repair."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

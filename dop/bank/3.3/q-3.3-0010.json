@@ -1,0 +1,74 @@
+{
+  "task": "3.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.3-0010",
+  "services": [
+    "Amazon EC2 Auto Scaling",
+    "Elastic Load Balancing"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "EC2 instances in an Auto Scaling group are registered with an Application Load Balancer target group by a launch script, not by the Auto Scaling group. Sometimes the application process hangs: the load balancer marks the instance unhealthy, but the EC2 status checks still pass, so the instance is never replaced. The company wants such instances to be replaced automatically. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "Auto Scaling グループの EC2 インスタンスは、Auto Scaling グループではなく起動のスクリプトによって、Application Load Balancer のターゲットグループに登録されています。ときどきアプリケーションのプロセスが固まり、ロードバランサーはそのインスタンスを unhealthy としますが、EC2 のステータスチェックは通るため、インスタンスは入れ替えられません。会社は、そのようなインスタンスを自動で入れ替えたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach the target group to the Auto Scaling group instead of registering instances with a script.",
+      "text_ja": "スクリプトでインスタンスを登録する代わりに、ターゲットグループを Auto Scaling グループにアタッチする。"
+    },
+    {
+      "key": "B",
+      "text": "Turn on Elastic Load Balancing health checks for the Auto Scaling group.",
+      "text_ja": "Auto Scaling グループで、Elastic Load Balancing のヘルスチェックを有効にする。"
+    },
+    {
+      "key": "C",
+      "text": "Increase the minimum capacity of the Auto Scaling group so that more healthy instances remain.",
+      "text_ja": "正常なインスタンスがより多く残るよう、Auto Scaling グループの最小の容量を増やす。"
+    },
+    {
+      "key": "D",
+      "text": "Create a CloudWatch alarm that notifies an engineer to reboot instances that the load balancer marks unhealthy.",
+      "text_ja": "ロードバランサーが unhealthy とするインスタンスを再起動するよう、エンジニアに通知する CloudWatch アラームを作る。"
+    },
+    {
+      "key": "E",
+      "text": "Shorten the health check grace period so that EC2 status checks start earlier.",
+      "text_ja": "EC2 のステータスチェックが早く始まるよう、ヘルスチェックの猶予期間を短くする。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "既定では、Amazon EC2 Auto Scaling は EC2 のヘルスチェックで異常か届かないインスタンスだけを入れ替えます。ロードバランサー（ALB の場合はターゲットグループ）を Auto Scaling グループにアタッチし、Elastic Load Balancing のヘルスチェックを有効にすると、ロードバランサーが unhealthy と報告したインスタンスも入れ替えられます。",
+    "per_choice": {
+      "A": "正しい。ALB はロードバランサーではなくターゲットグループをアタッチし、ロードバランサーの判定を Auto Scaling で使えるようにします。",
+      "B": "正しい。ロードバランサーが unhealthy と報告したインスタンスを、Auto Scaling が入れ替えるようになります。",
+      "C": "固まったインスタンスは入れ替えられないまま残ります。",
+      "D": "再起動が手作業で、自動で入れ替える要件を満たしません。",
+      "E": "EC2 のステータスチェックは通っているので、早く始めても入れ替えは起きません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+      "source_id": "S7",
+      "quote": "By default, Amazon EC2 Auto Scaling only replaces instances that are unhealthy or unreachable based on Amazon EC2 health checks."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+      "source_id": "S7",
+      "quote": "Amazon EC2 Auto Scaling can replace a running instance if any of the Elastic Load Balancing load balancers you attach to the Auto Scaling group report it as unhealthy."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+      "source_id": "S7",
+      "quote": "When you attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, you attach a target group rather than the load balancer itself."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

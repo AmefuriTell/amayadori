@@ -1,0 +1,66 @@
+{
+  "task": "3.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.3-0014",
+  "services": [
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Application Load Balancer health check uses the path / and expects a 200 response. The home page returns 200 even when the instance has lost its connection to the database, so users are sent to broken instances. The application already exposes /health, which returns 503 when the database is unreachable and 200 otherwise. Which change BEST ensures that requests go only to instances that can serve them?",
+  "stem_ja": "Application Load Balancer のヘルスチェックは / のパスを使い、200 の応答を期待しています。トップページはインスタンスがデータベースへの接続を失っていても 200 を返すため、利用者が壊れたインスタンスへ送られます。アプリケーションには既に /health があり、データベースに届かない時は 503、それ以外は 200 を返します。リクエストが処理できるインスタンスにだけ送られるようにする最もよい変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Change the health check success codes to 200-499 so that more responses count as healthy.",
+      "text_ja": "より多くの応答を正常とみなすよう、ヘルスチェックの成功コードを 200-499 にする。"
+    },
+    {
+      "key": "B",
+      "text": "Change the health check path to /health and keep 200 as the success code.",
+      "text_ja": "ヘルスチェックのパスを /health にし、成功コードは 200 のままにする。"
+    },
+    {
+      "key": "C",
+      "text": "Keep the path / and shorten the health check interval so that failures are detected sooner.",
+      "text_ja": "/ のパスのままにし、失敗を早く見つけるようヘルスチェックの間隔を短くする。"
+    },
+    {
+      "key": "D",
+      "text": "Keep the load balancer health check on / and create a Route 53 health check that requests /health.",
+      "text_ja": "ロードバランサーのヘルスチェックは / のままにし、/health を要求する Route 53 のヘルスチェックを作る。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "ヘルスチェックのパスは、ターゲットのヘルスチェックの送り先で、成功コードはターゲットからの成功の応答として扱うコードです。データベースに届かない時に 503 を返す /health を使い、成功を 200 にすれば、壊れたインスタンスは unhealthy になり、ロードバランサーは正常なターゲットにだけリクエストを送ります。",
+    "per_choice": {
+      "A": "/ のままでは壊れていても 200 が返り、問題は変わりません。",
+      "B": "正しい。データベースに届かないインスタンスが 503 で unhealthy になり、外されます。",
+      "C": "/ は壊れていても 200 を返すので、間隔を短くしても失敗として見つかりません。",
+      "D": "ロードバランサーは自分のヘルスチェック（/ の 200）で判断するため、データベースに届かないインスタンスにもリクエストを送り続けます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+      "source_id": "S2",
+      "quote": "If the protocol version is HTTP/1.1 or HTTP/2, the possible values are from 200 to 499."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+      "source_id": "S2",
+      "quote": "The codes to use when checking for a successful response from a target."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+      "source_id": "S1",
+      "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
