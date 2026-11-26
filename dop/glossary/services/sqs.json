@@ -1,0 +1,46 @@
+{
+  "id": "sqs",
+  "name": "Amazon SQS",
+  "aliases": [
+    "Amazon SQS"
+  ],
+  "reading": "エスキューエス",
+  "summary": "メッセージを一時的にためておく「キュー（順番待ちの列）」を提供するサービス。送る側と受け取る側を直接つながずに済むので、分かれたソフトウェアの部品どうしを、互いに強く頼らない形（疎結合）でつなげられる。",
+  "features": [
+    {
+      "title": "標準キューと FIFO キュー",
+      "text": "メッセージは複数のサーバーにしまわれる。標準キューは「少なくとも 1 回」届ける。FIFO キューは「必ず 1 回だけ」処理する。",
+      "source_id": "S2"
+    },
+    {
+      "title": "可視性タイムアウト",
+      "text": "受け取ったメッセージはキューに残るが、しばらくほかの受け取り手から見えなくなる。その間に、ほかの受け取り手が同じメッセージを処理しないようにする。",
+      "source_id": "S3"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "標準キューは同じメッセージが 2 回以上届くことがある前提で作る。1 回だけの処理が要る時は FIFO キューを考える。",
+      "source_id": "S2"
+    },
+    {
+      "text": "処理に時間がかかるとほかの受け取り手が同じメッセージを処理してしまう場面では、可視性タイムアウトを考える。",
+      "source_id": "S3"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html#sqs-benefits",
+      "source_id": "S2",
+      "quote": "Standard queues support at-least-once message delivery, and FIFO queues support exactly-once message processing and high-throughput mode."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+      "source_id": "S3",
+      "quote": "This invisibility is controlled by the visibility timeout, which ensures that other consumers cannot process the same message while you are working on it."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
