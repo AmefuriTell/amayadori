@@ -10,7 +10,7 @@ import { yomiHash, sayErrors } from './yomi.mjs';
 import { readability } from '../dg.mjs';
 import fs from 'node:fs';
 
-export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, dialogueMax: 5500, lineMax: 160, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
+export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, dialogueMax: 6000, lineMax: 160, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
 // 読み上げで崩れる字: 英字・数字・記号（半角は全部、全角は英数字と括弧・かぎ括弧・斜線・中黒・矢印・コロンなど）
 export const UNSPEAKABLE = /[\x21-\x7e０-９Ａ-Ｚａ-ｚ（）「」『』【】［］〔〕〈〉《》＜＞／・→←↑↓⇒：；＃＄％＆＊＋＝＠＼＾｜～〜]/g;
 // 台本 1 分あたりの字数（試作: 4,477 字で約 15 分。速さ 1.1）。音声を作らない時の見積もりに使う
