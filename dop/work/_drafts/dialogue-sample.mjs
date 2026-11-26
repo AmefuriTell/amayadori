@@ -5,6 +5,7 @@ import path from 'node:path';
 import { paths, readJSON, writeJSON } from '../../tools/lib/io.mjs';
 import { synthesize, creditOf } from '../../tools/lib/tts.mjs';
 import { renderVisuals } from '../../tools/lec.mjs';
+import { sayMap } from '../../tools/lib/yomi.mjs';
 
 const out = paths.work('_dialogue-sample');
 const lec = readJSON(paths.work('K-0001', 'lecture.json'));
@@ -12,7 +13,7 @@ fs.mkdirSync(path.join(out, 'visuals'), { recursive: true });
 const { results, errors } = await renderVisuals(lec, {});
 if (errors.length) throw new Error(JSON.stringify(errors));
 for (const r of results) fs.writeFileSync(path.join(out, 'visuals', `${r.id}.svg`), r.svg + '\n');
-const audio = await synthesize(lec, path.join(out, 'audio'));
+const audio = await synthesize(lec, path.join(out, 'audio'), { says: sayMap(readJSON(paths.work('K-0001', 'yomi.json'), null)) });
 const slides = lec.slides.map((s) => {
   const { type, alt, source: _s, ...rest } = s.visual;
   return {
