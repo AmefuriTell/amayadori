@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 158,
+  "count": 162,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -3968,6 +3968,260 @@
         {
           "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
           "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0009",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Organizations with all features enabled. Workload accounts are in an OU named Workloads, and new accounts are added to that OU every month. The company must prevent every IAM user and role in those accounts, including each account's root user, from using AWS services outside two approved Regions. Administrators of each account must not be able to remove the restriction. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、すべての機能を有効にした AWS Organizations を使っています。ワークロードのアカウントは Workloads という OU にあり、毎月新しいアカウントがその OU に追加されます。会社は、それらのアカウントのすべての IAM ユーザーとロール（各アカウントのルートユーザーも含む）が、承認済みの 2 つのリージョン以外で AWS のサービスを使えないようにする必要があります。各アカウントの管理者がこの制限を外せないようにする必要もあります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an IAM policy that denies requests outside the two approved Regions, and attach it to every IAM user and role in each workload account.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する IAM ポリシーを作り、各ワークロードのアカウントのすべての IAM ユーザーとロールにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the management account.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、管理アカウントにアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "Set a permissions boundary that allows only the two approved Regions on every IAM role in the workload accounts, and check new accounts each month.",
+          "text_ja": "ワークロードのアカウントのすべての IAM ロールに、承認済みの 2 つのリージョンだけを許す permissions boundary を設定し、毎月新しいアカウントを確認する。"
+        },
+        {
+          "key": "D",
+          "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the Workloads OU.",
+          "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、Workloads OU にアタッチする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "SCP はメンバーアカウントの IAM ユーザーとロール（ルートユーザーも含む）の権限を制限し、OU に付けた Deny はその下のすべてのアカウントに効きます。後から OU に入ったアカウントにも効き、アカウントの IAM の権限では SCP を超えられません。",
+        "per_choice": {
+          "A": "アカウントごとの IAM ポリシーは、そのアカウントの管理者が外せます。ルートユーザーにも付けられず、新しいアカウントごとの作業も要ります。",
+          "B": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントにだけ効くため、ワークロードのアカウントを制限できません。",
+          "C": "ロールにしか効かずルートユーザーは制限できず、アカウントの管理者が外せます。毎月の確認の手間もかかります。",
+          "D": "正しい。OU の Deny は配下のすべてのアカウントとルートユーザーに効き、新しいアカウントにも自動で効きます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "when they are applied at the root or the OU-level they affect all the accounts under it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs don't affect users or roles in the management account. They affect only the member accounts in your organization."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0010",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS Organizations",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "In a company's organization, the root has the FullAWSAccess SCP. An OU named Sandbox has FullAWSAccess removed and instead has an SCP that allows only Amazon S3 and Amazon EC2 actions. A member account in the Sandbox OU has FullAWSAccess attached. A developer in that account has an IAM policy that allows all Amazon DynamoDB actions, but every DynamoDB request is denied. What should a DevOps engineer do to allow the developer to use DynamoDB with the LEAST change to the organization?",
+      "stem_ja": "ある会社の組織では、ルートに FullAWSAccess の SCP があります。Sandbox という OU では FullAWSAccess が外され、代わりに Amazon S3 と Amazon EC2 のアクションだけを許す SCP があります。Sandbox OU のメンバーアカウントには FullAWSAccess がアタッチされています。そのアカウントの開発者には Amazon DynamoDB のすべてのアクションを許す IAM ポリシーがありますが、DynamoDB へのリクエストはすべて拒否されます。組織への変更を最も少なくして、開発者が DynamoDB を使えるようにするために、DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach a new IAM policy to the developer that explicitly allows all DynamoDB actions on all resources.",
+          "text_ja": "すべてのリソースへの DynamoDB のすべてのアクションを明示的に許す新しい IAM ポリシーを開発者にアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Add the DynamoDB actions to the Allow statement of the SCP that is attached to the Sandbox OU.",
+          "text_ja": "Sandbox OU にアタッチされた SCP の Allow ステートメントに、DynamoDB のアクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Attach an SCP that allows DynamoDB actions directly to the member account.",
+          "text_ja": "DynamoDB のアクションを許す SCP を、メンバーアカウントに直接アタッチする。"
+        },
+        {
+          "key": "D",
+          "text": "Attach an SCP that allows DynamoDB actions to the management account of the organization.",
+          "text_ja": "DynamoDB のアクションを許す SCP を、組織の管理アカウントにアタッチする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "SCP で許されるには、ルートからアカウントまでの経路のすべての段（各 OU とアカウント自身）に明示的な Allow が要ります。Sandbox OU の SCP が DynamoDB を許していないため、IAM ポリシーで許していても拒否されます。",
+        "per_choice": {
+          "A": "IAM ポリシーは既に許しています。SCP で許されていないアクションは、IAM ポリシーで許しても実行できません。",
+          "B": "正しい。経路の中で Allow が欠けている Sandbox OU の段に DynamoDB を足せば、すべての段で許されます。",
+          "C": "アカウントの段はすでに FullAWSAccess で許しています。Sandbox OU の段に Allow が無いので拒否されたままです。",
+          "D": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントの評価の経路にも入らないため、変わりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "there must be an explicit Allow statement at every level from the root through each OU in the direct path to the account (including the target account itself)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "If a user or role has an IAM permission policy that grants access to an action that is either not allowed or explicitly denied by the applicable SCPs, the user or role can't perform that action."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0011",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS IAM",
+        "AWS STS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A company is adopting a third-party monitoring service that runs in the vendor's AWS account and serves many customers. The service needs to read metrics from the company's AWS account. The company does not want to give the vendor long-term credentials and wants to prevent the confused deputy problem. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "ある会社は、ベンダーの AWS アカウントで動き、多くの顧客に提供されているサードパーティの監視サービスを導入しようとしています。サービスは会社の AWS アカウントからメトリクスを読む必要があります。会社は、ベンダーに長期の認証情報を渡したくなく、混乱した代理（confused deputy）の問題を防ぎたいと考えています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an IAM role with read permissions for metrics, and in its trust policy allow the vendor's account and require the external ID that the vendor provides for the company.",
+          "text_ja": "メトリクスを読む権限を持つ IAM ロールを作り、その信頼ポリシーでベンダーのアカウントを許し、ベンダーが会社用に示す外部 ID を必須にする。"
+        },
+        {
+          "key": "B",
+          "text": "Ask the vendor to specify the company's external ID in every AssumeRole API call that it makes for the company's role.",
+          "text_ja": "ベンダーに、会社のロールに対して行うすべての AssumeRole API の呼び出しで、会社の外部 ID を指定するよう求める。"
+        },
+        {
+          "key": "C",
+          "text": "Create an IAM user with read permissions for metrics, and give the vendor an access key that is rotated every 90 days.",
+          "text_ja": "メトリクスを読む権限を持つ IAM ユーザーを作り、90 日ごとにローテーションするアクセスキーをベンダーに渡す。"
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM role whose trust policy allows the vendor's account without any condition, and rely on the vendor to restrict which customer data it reads.",
+          "text_ja": "信頼ポリシーで条件を付けずにベンダーのアカウントを許す IAM ロールを作り、どの顧客のデータを読むかの制限はベンダーに任せる。"
+        },
+        {
+          "key": "E",
+          "text": "Create an SCP that allows the vendor's account to read metrics, and attach it to the company's account.",
+          "text_ja": "ベンダーのアカウントにメトリクスの読み取りを許す SCP を作り、会社のアカウントにアタッチする。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "外部 ID の主な役目は混乱した代理の問題を防ぐことで、ロールの信頼ポリシーに指定し、AssumeRole の呼び出しで毎回指定します。ロールを引き受けさせれば、ベンダーに長期の認証情報を渡さずに済みます。",
+        "per_choice": {
+          "A": "正しい。信頼ポリシーで外部 ID を必須にすると、会社用の外部 ID を示した時だけロールを引き受けられます。",
+          "B": "正しい。外部 ID は AssumeRole の呼び出しで常に指定するものとされています。",
+          "C": "アクセスキーは長期の認証情報で、ローテーションしても要件に反します。",
+          "D": "ロールで長期の認証情報は避けられますが、外部 ID が無いと混乱した代理の問題を防げません。",
+          "E": "SCP は権限を与えないため、ベンダーにアクセスを許すことはできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "The primary function of the external ID is to address and prevent The confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You must specify this ID when you define the trust policy for the role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You should always specify the external ID in your AssumeRole API calls."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "No permissions are granted by an SCP."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.2-0012",
+      "task": "2.2",
+      "domain": 2,
+      "services": [
+        "AWS IAM",
+        "AWS Organizations"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "In a member account, developers must be able to create IAM roles for their AWS Lambda functions. A platform team in the same account must keep its full administrative permissions. The security team requires that any role a developer creates can never have permissions beyond a defined set, even if the developer attaches a broader policy to it. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "あるメンバーアカウントでは、開発者が自分の AWS Lambda 関数用の IAM ロールを作れる必要があります。同じアカウントのプラットフォームチームは、完全な管理者権限を保つ必要があります。セキュリティチームは、開発者が作るロールが、開発者がより広いポリシーをアタッチしたとしても、決めた範囲を超える権限を持てないことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Attach an SCP to the member account that limits all IAM principals in the account to the defined set of permissions.",
+          "text_ja": "アカウントのすべての IAM プリンシパルを決めた範囲の権限に制限する SCP を、メンバーアカウントにアタッチする。"
+        },
+        {
+          "key": "B",
+          "text": "Attach an RCP to the member account that limits the permissions of roles that developers create.",
+          "text_ja": "開発者が作るロールの権限を制限する RCP を、メンバーアカウントにアタッチする。"
+        },
+        {
+          "key": "C",
+          "text": "Create a managed policy for the defined set, and allow developers to create roles only when that policy is set as the role's permissions boundary.",
+          "text_ja": "決めた範囲の管理ポリシーを作り、そのポリシーをロールの permissions boundary に設定する場合にだけ、開発者がロールを作れるようにする。"
+        },
+        {
+          "key": "D",
+          "text": "Allow developers to create roles freely, and have the security team review each new role's policies every week.",
+          "text_ja": "開発者が自由にロールを作れるようにし、セキュリティチームが毎週、新しい各ロールのポリシーを確認する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "permissions boundary は管理ポリシーで、アイデンティティベースのポリシーがエンティティに与えられる最大の権限を決めます。開発者が作るロールに境界を必須にすれば、広いポリシーを付けても境界を超えられず、プラットフォームチームには影響しません。",
+        "per_choice": {
+          "A": "SCP はアカウントのすべてのユーザーとロールの上限になるため、プラットフォームチームの管理者権限まで制限されます。",
+          "B": "RCP は、組織の外のプリンシパルが組織のリソースへアクセスするのを制限するためのもので、開発者が作るロールの権限の上限にはなりません。",
+          "C": "正しい。開発者が作るロールだけに上限が付き、プラットフォームチームの権限は変わりません。",
+          "D": "確認するまでの間、範囲を超えた権限を持つロールが使えてしまい、要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs offer central control over the maximum available permissions for the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps.html#orgs_manage_policies_rcps",
+          "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
         }
       ],
       "low_confidence": false

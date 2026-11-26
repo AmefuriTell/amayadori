@@ -1,0 +1,67 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0012",
+  "services": [
+    "AWS IAM",
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "In a member account, developers must be able to create IAM roles for their AWS Lambda functions. A platform team in the same account must keep its full administrative permissions. The security team requires that any role a developer creates can never have permissions beyond a defined set, even if the developer attaches a broader policy to it. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "あるメンバーアカウントでは、開発者が自分の AWS Lambda 関数用の IAM ロールを作れる必要があります。同じアカウントのプラットフォームチームは、完全な管理者権限を保つ必要があります。セキュリティチームは、開発者が作るロールが、開発者がより広いポリシーをアタッチしたとしても、決めた範囲を超える権限を持てないことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Attach an SCP to the member account that limits all IAM principals in the account to the defined set of permissions.",
+      "text_ja": "アカウントのすべての IAM プリンシパルを決めた範囲の権限に制限する SCP を、メンバーアカウントにアタッチする。"
+    },
+    {
+      "key": "B",
+      "text": "Attach an RCP to the member account that limits the permissions of roles that developers create.",
+      "text_ja": "開発者が作るロールの権限を制限する RCP を、メンバーアカウントにアタッチする。"
+    },
+    {
+      "key": "C",
+      "text": "Create a managed policy for the defined set, and allow developers to create roles only when that policy is set as the role's permissions boundary.",
+      "text_ja": "決めた範囲の管理ポリシーを作り、そのポリシーをロールの permissions boundary に設定する場合にだけ、開発者がロールを作れるようにする。"
+    },
+    {
+      "key": "D",
+      "text": "Allow developers to create roles freely, and have the security team review each new role's policies every week.",
+      "text_ja": "開発者が自由にロールを作れるようにし、セキュリティチームが毎週、新しい各ロールのポリシーを確認する。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "permissions boundary は管理ポリシーで、アイデンティティベースのポリシーがエンティティに与えられる最大の権限を決めます。開発者が作るロールに境界を必須にすれば、広いポリシーを付けても境界を超えられず、プラットフォームチームには影響しません。",
+    "per_choice": {
+      "A": "SCP はアカウントのすべてのユーザーとロールの上限になるため、プラットフォームチームの管理者権限まで制限されます。",
+      "B": "RCP は、組織の外のプリンシパルが組織のリソースへアクセスするのを制限するためのもので、開発者が作るロールの権限の上限にはなりません。",
+      "C": "正しい。開発者が作るロールだけに上限が付き、プラットフォームチームの権限は変わりません。",
+      "D": "確認するまでの間、範囲を超えた権限を持つロールが使えてしまい、要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries",
+      "source_id": "S5",
+      "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+      "source_id": "S1",
+      "quote": "SCPs offer central control over the maximum available permissions for the IAM users and IAM roles in your organization."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps.html#orgs_manage_policies_rcps",
+      "source_id": "S4",
+      "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

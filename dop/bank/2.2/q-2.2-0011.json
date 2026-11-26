@@ -1,0 +1,79 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0011",
+  "services": [
+    "AWS IAM",
+    "AWS STS"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company is adopting a third-party monitoring service that runs in the vendor's AWS account and serves many customers. The service needs to read metrics from the company's AWS account. The company does not want to give the vendor long-term credentials and wants to prevent the confused deputy problem. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "ある会社は、ベンダーの AWS アカウントで動き、多くの顧客に提供されているサードパーティの監視サービスを導入しようとしています。サービスは会社の AWS アカウントからメトリクスを読む必要があります。会社は、ベンダーに長期の認証情報を渡したくなく、混乱した代理（confused deputy）の問題を防ぎたいと考えています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an IAM role with read permissions for metrics, and in its trust policy allow the vendor's account and require the external ID that the vendor provides for the company.",
+      "text_ja": "メトリクスを読む権限を持つ IAM ロールを作り、その信頼ポリシーでベンダーのアカウントを許し、ベンダーが会社用に示す外部 ID を必須にする。"
+    },
+    {
+      "key": "B",
+      "text": "Ask the vendor to specify the company's external ID in every AssumeRole API call that it makes for the company's role.",
+      "text_ja": "ベンダーに、会社のロールに対して行うすべての AssumeRole API の呼び出しで、会社の外部 ID を指定するよう求める。"
+    },
+    {
+      "key": "C",
+      "text": "Create an IAM user with read permissions for metrics, and give the vendor an access key that is rotated every 90 days.",
+      "text_ja": "メトリクスを読む権限を持つ IAM ユーザーを作り、90 日ごとにローテーションするアクセスキーをベンダーに渡す。"
+    },
+    {
+      "key": "D",
+      "text": "Create an IAM role whose trust policy allows the vendor's account without any condition, and rely on the vendor to restrict which customer data it reads.",
+      "text_ja": "信頼ポリシーで条件を付けずにベンダーのアカウントを許す IAM ロールを作り、どの顧客のデータを読むかの制限はベンダーに任せる。"
+    },
+    {
+      "key": "E",
+      "text": "Create an SCP that allows the vendor's account to read metrics, and attach it to the company's account.",
+      "text_ja": "ベンダーのアカウントにメトリクスの読み取りを許す SCP を作り、会社のアカウントにアタッチする。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "外部 ID の主な役目は混乱した代理の問題を防ぐことで、ロールの信頼ポリシーに指定し、AssumeRole の呼び出しで毎回指定します。ロールを引き受けさせれば、ベンダーに長期の認証情報を渡さずに済みます。",
+    "per_choice": {
+      "A": "正しい。信頼ポリシーで外部 ID を必須にすると、会社用の外部 ID を示した時だけロールを引き受けられます。",
+      "B": "正しい。外部 ID は AssumeRole の呼び出しで常に指定するものとされています。",
+      "C": "アクセスキーは長期の認証情報で、ローテーションしても要件に反します。",
+      "D": "ロールで長期の認証情報は避けられますが、外部 ID が無いと混乱した代理の問題を防げません。",
+      "E": "SCP は権限を与えないため、ベンダーにアクセスを許すことはできません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+      "source_id": "S6",
+      "quote": "The primary function of the external ID is to address and prevent The confused deputy problem."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+      "source_id": "S6",
+      "quote": "You must specify this ID when you define the trust policy for the role."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+      "source_id": "S6",
+      "quote": "You should always specify the external ID in your AssumeRole API calls."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+      "source_id": "S1",
+      "quote": "No permissions are granted by an SCP."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

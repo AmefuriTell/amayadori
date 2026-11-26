@@ -1,0 +1,66 @@
+{
+  "task": "2.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.2-0009",
+  "services": [
+    "AWS Organizations"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Organizations with all features enabled. Workload accounts are in an OU named Workloads, and new accounts are added to that OU every month. The company must prevent every IAM user and role in those accounts, including each account's root user, from using AWS services outside two approved Regions. Administrators of each account must not be able to remove the restriction. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、すべての機能を有効にした AWS Organizations を使っています。ワークロードのアカウントは Workloads という OU にあり、毎月新しいアカウントがその OU に追加されます。会社は、それらのアカウントのすべての IAM ユーザーとロール（各アカウントのルートユーザーも含む）が、承認済みの 2 つのリージョン以外で AWS のサービスを使えないようにする必要があります。各アカウントの管理者がこの制限を外せないようにする必要もあります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an IAM policy that denies requests outside the two approved Regions, and attach it to every IAM user and role in each workload account.",
+      "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する IAM ポリシーを作り、各ワークロードのアカウントのすべての IAM ユーザーとロールにアタッチする。"
+    },
+    {
+      "key": "B",
+      "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the management account.",
+      "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、管理アカウントにアタッチする。"
+    },
+    {
+      "key": "C",
+      "text": "Set a permissions boundary that allows only the two approved Regions on every IAM role in the workload accounts, and check new accounts each month.",
+      "text_ja": "ワークロードのアカウントのすべての IAM ロールに、承認済みの 2 つのリージョンだけを許す permissions boundary を設定し、毎月新しいアカウントを確認する。"
+    },
+    {
+      "key": "D",
+      "text": "Create an SCP with a Deny statement for requests outside the two approved Regions, and attach it to the Workloads OU.",
+      "text_ja": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、Workloads OU にアタッチする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "SCP はメンバーアカウントの IAM ユーザーとロール（ルートユーザーも含む）の権限を制限し、OU に付けた Deny はその下のすべてのアカウントに効きます。後から OU に入ったアカウントにも効き、アカウントの IAM の権限では SCP を超えられません。",
+    "per_choice": {
+      "A": "アカウントごとの IAM ポリシーは、そのアカウントの管理者が外せます。ルートユーザーにも付けられず、新しいアカウントごとの作業も要ります。",
+      "B": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントにだけ効くため、ワークロードのアカウントを制限できません。",
+      "C": "ロールにしか効かずルートユーザーは制限できず、アカウントの管理者が外せます。毎月の確認の手間もかかります。",
+      "D": "正しい。OU の Deny は配下のすべてのアカウントとルートユーザーに効き、新しいアカウントにも自動で効きます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+      "source_id": "S2",
+      "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+      "source_id": "S3",
+      "quote": "when they are applied at the root or the OU-level they affect all the accounts under it."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+      "source_id": "S1",
+      "quote": "SCPs don't affect users or roles in the management account. They affect only the member accounts in your organization."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
