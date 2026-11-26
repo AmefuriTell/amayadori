@@ -1,0 +1,67 @@
+{
+  "task": "6.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.1-0016",
+  "services": [
+    "AWS IAM",
+    "Amazon EC2"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An EC2 instance uses an instance profile that contains a role for reading application data from Amazon S3. A new feature also needs permission to write to an Amazon SQS queue. An engineer tries to add a second IAM role to the same instance profile, but the request fails. Which solution gives the instance both permissions with the LEAST operational overhead?",
+  "stem_ja": "ある EC2 インスタンスは、Amazon S3 からアプリケーションのデータを読むロールを含むインスタンスプロファイルを使っています。新しい機能には、Amazon SQS のキューへ書き込む権限も必要です。エンジニアが同じインスタンスプロファイルに 2 つ目の IAM ロールを足そうとしましたが、リクエストが失敗しました。運用上のオーバーヘッドが最も少なく、インスタンスに両方の権限を与えるソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Request an increase to the limit of roles per instance profile so that the second role can be added.",
+      "text_ja": "2 つ目のロールを足せるよう、インスタンスプロファイルあたりのロールの数の上限を上げてもらう。"
+    },
+    {
+      "key": "B",
+      "text": "Remove the existing role from the instance profile and add a new role that has only the SQS permissions.",
+      "text_ja": "インスタンスプロファイルから既存のロールを外し、SQS の権限だけを持つ新しいロールを足す。"
+    },
+    {
+      "key": "C",
+      "text": "Add the SQS permissions to the policies of the role that is already in the instance profile.",
+      "text_ja": "インスタンスプロファイルに既にあるロールのポリシーに、SQS の権限を足す。"
+    },
+    {
+      "key": "D",
+      "text": "Create an IAM user with SQS permissions and store its access keys on the instance.",
+      "text_ja": "SQS の権限を持つ IAM ユーザーを作り、そのアクセスキーをインスタンスに置く。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "インスタンスプロファイルに入れられる IAM ロールは 1 つだけで、この上限は上げられません。ロールは外して別のロールに入れ替えられますが、今の権限を残したまま SQS の権限も持たせるには、既にあるロールに権限を足します。",
+    "per_choice": {
+      "A": "インスタンスプロファイルあたり 1 つのロールという上限は、上げられません。",
+      "B": "SQS には書けるようになりますが、S3 を読む権限が失われます。",
+      "C": "正しい。1 つのロールに両方の権限を持たせれば、インスタンスプロファイルを変えずに済みます。",
+      "D": "長期の認証情報をインスタンスに置くことになり、管理の手間とリスクが増えます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+      "source_id": "S5",
+      "quote": "An instance profile can contain only one IAM role, although a role can be included in multiple instance profiles."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+      "source_id": "S5",
+      "quote": "This limit of one role per instance profile cannot be increased."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+      "source_id": "S5",
+      "quote": "You can remove the existing role and then add a different role to an instance profile."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

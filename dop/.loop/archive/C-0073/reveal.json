@@ -1,0 +1,214 @@
+{
+  "item": "C-0073",
+  "questions": [
+    {
+      "id": "q-6.1-0005",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "Administrators use the AWS CLI with IAM user access keys. The security team adds a policy that allows ec2:TerminateInstances only when the aws:MultiFactorAuthPresent condition key is true. Afterward, the administrators' terminate requests are denied even though they have MFA devices. What is the BEST way for the administrators to make the requests succeed while the MFA requirement stays in place?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Call GetSessionToken with the MFA device serial number and a code, and use the returned temporary credentials for the request."
+        },
+        {
+          "key": "B",
+          "text": "Keep using the access keys, and add the MFA code as a parameter to each ec2:TerminateInstances request."
+        },
+        {
+          "key": "C",
+          "text": "Use the AWS account root user credentials with MFA for terminate requests."
+        },
+        {
+          "key": "D",
+          "text": "Change the condition to check aws:MultiFactorAuthAge so that it works with the access keys."
+        }
+      ],
+      "explanation": {
+        "summary": "MFA の保護は、AssumeRole か GetSessionToken で得た一時的な認証情報でだけ使えます。aws:MultiFactorAuthPresent のキーは短期の認証情報で認証した時だけあり、アクセスキーのような長期の認証情報には含まれません。そのため、MFA のコードとデバイスのシリアル番号を付けて一時的な認証情報を取り直す必要があります。",
+        "per_choice": {
+          "A": "正しい。MFA で得た一時的な認証情報には条件キーが入り、ポリシーの条件を満たします。",
+          "B": "アクセスキーは長期の認証情報で、条件キーを含まないため、要件を満たせません。",
+          "C": "ルートユーザーの認証情報では、MFA で保護された API アクセスは使えません。",
+          "D": "aws:MultiFactorAuthAge は MFA を使っていない時には無く、アクセスキーのリクエストは通りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "source_id": "S3",
+          "quote": "MFA protection is available only with temporary security credentials, which must be obtained with AssumeRole or GetSessionToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "source_id": "S2",
+          "quote": "The key is only present when the user authenticates with short-term credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "source_id": "S2",
+          "quote": "Long-term credentials, such as access keys, do not include this key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "source_id": "S3",
+          "quote": "You cannot use MFA-protected API access with AWS account root user credentials."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0006",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "Servers in a company's own data center run a backup job that uploads files to Amazon S3. Today the job uses an IAM user's access keys stored on each server. The company already runs its own certificate authority (CA) that issues X.509 certificates to these servers. The security team wants to stop managing long-term AWS credentials for these workloads. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Keep the IAM user access keys and rotate them on every server every 30 days."
+        },
+        {
+          "key": "B",
+          "text": "Use IAM Roles Anywhere with a trust anchor that references the company's CA, so that the servers exchange their certificates for temporary credentials."
+        },
+        {
+          "key": "C",
+          "text": "Create one IAM user per server so that each server has its own long-term access keys."
+        },
+        {
+          "key": "D",
+          "text": "Store the access keys in an encrypted file on each server and limit the file permissions."
+        }
+      ],
+      "explanation": {
+        "summary": "IAM Roles Anywhere を使うと、AWS の外で動くサーバー・コンテナ・アプリケーションが IAM の一時的な認証情報を得られ、長期の AWS の認証情報を管理しなくて済みます。ワークロードは自分の CA が発行した X.509 の証明書を使い、トラストアンカー（AWS Private CA か外部の CA の証明書への参照）で認証して、一時的な認証情報と引き換えます。",
+        "per_choice": {
+          "A": "ローテーションしても長期の認証情報の管理は続き、要件を満たしません。",
+          "B": "正しい。既存の CA の証明書を使い、長期の認証情報無しで一時的な認証情報を得られます。",
+          "C": "長期の認証情報が増え、管理の手間も増えます。",
+          "D": "守り方を変えるだけで、長期の認証情報の管理は続きます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "source_id": "S6",
+          "quote": "Using IAM Roles Anywhere means you don't need to manage long-term AWS credentials for workloads running outside of AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "source_id": "S6",
+          "quote": "To use IAM Roles Anywhere, your workloads must use X.509 certificates issued by your certificate authority (CA)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#first-time-user",
+          "source_id": "S7",
+          "quote": "Your workloads outside of AWS authenticate with the trust anchor using certificates issued by the trusted CA in exchange for temporary AWS credentials."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0007",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company uses an external CI service whose jobs can obtain tokens from an OpenID Connect (OIDC) compatible identity provider. Deployment jobs currently use IAM user access keys stored as CI secrets. The company wants the jobs to get temporary AWS credentials and to stop distributing long-term keys. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Create an IAM OIDC identity provider for the CI service's IdP, and create a role that the federated CI jobs can assume for temporary credentials."
+        },
+        {
+          "key": "B",
+          "text": "Keep the IAM user access keys in the CI secrets, and rotate them every week with a script."
+        },
+        {
+          "key": "C",
+          "text": "Issue X.509 certificates to the CI runners from a new private CA, and set up IAM Roles Anywhere for them."
+        },
+        {
+          "key": "D",
+          "text": "Create a separate IAM user with access keys for each CI project to limit the impact of a leak."
+        }
+      ],
+      "explanation": {
+        "summary": "IAM OIDC ID プロバイダーは、OIDC に対応した外部の IdP と AWS アカウントの間に信頼を作るために使います。ロールは IdP で認証された OIDC のフェデレーションのプリンシパルに割り当てられ、一時的な認証情報を求められるようにします。OIDC フェデレーションを使えば、アクセスキーのような長期の認証情報を配る必要がありません。",
+        "per_choice": {
+          "A": "正しい。CI がすでに使える OIDC のトークンで、長期のキー無しに一時的な認証情報を得られます。",
+          "B": "長期のキーを配り続けることになり、要件に反します。",
+          "C": "一時的な認証情報は得られますが、新しい CA と証明書の発行を用意して運用することになり、OIDC をそのまま使うより手間がかかります。",
+          "D": "長期のキーが増え、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "source_id": "S8",
+          "quote": "You use an IAM OIDC identity provider when you want to establish trust between an OIDC-compatible IdP and your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "source_id": "S8",
+          "quote": "The role permits your organization's IdP to request temporary security credentials for access to AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id-federation",
+          "source_id": "S9",
+          "quote": "you don't have to distribute long-term security credentials, such as IAM user access keys, with your application."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0008",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An EC2 instance uses an instance profile that contains a role for reading application data from Amazon S3. A new feature also needs permission to write to an Amazon SQS queue. An engineer tries to add a second IAM role to the same instance profile, but the request fails. Which solution gives the instance both permissions with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Request an increase to the limit of roles per instance profile so that the second role can be added."
+        },
+        {
+          "key": "B",
+          "text": "Add the SQS permissions to the policies of the role that is already in the instance profile."
+        },
+        {
+          "key": "C",
+          "text": "Remove the existing role from the instance profile and add a new role that has only the SQS permissions."
+        },
+        {
+          "key": "D",
+          "text": "Create an IAM user with SQS permissions and store its access keys on the instance."
+        }
+      ],
+      "explanation": {
+        "summary": "インスタンスプロファイルに入れられる IAM ロールは 1 つだけで、この上限は上げられません。ロールは外して別のロールに入れ替えられますが、今の権限を残したまま SQS の権限も持たせるには、既にあるロールに権限を足します。",
+        "per_choice": {
+          "A": "インスタンスプロファイルあたり 1 つのロールという上限は、上げられません。",
+          "B": "正しい。1 つのロールに両方の権限を持たせれば、インスタンスプロファイルを変えずに済みます。",
+          "C": "SQS には書けるようになりますが、S3 を読む権限が失われます。",
+          "D": "長期の認証情報をインスタンスに置くことになり、管理の手間とリスクが増えます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "source_id": "S5",
+          "quote": "An instance profile can contain only one IAM role, although a role can be included in multiple instance profiles."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "source_id": "S5",
+          "quote": "This limit of one role per instance profile cannot be increased."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "source_id": "S5",
+          "quote": "You can remove the existing role and then add a different role to an instance profile."
+        }
+      ]
+    }
+  ]
+}
