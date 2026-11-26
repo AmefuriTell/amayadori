@@ -1,0 +1,79 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0015",
+  "services": [
+    "Amazon Application Recovery Controller",
+    "Elastic Load Balancing"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "An application behind a load balancer runs in three Availability Zones in one Region. Sometimes one zone becomes impaired in a way that health checks do not detect, and users see errors. The operations team wants to be able to move traffic away from an impaired zone to the healthy zones in the same Region quickly, as a temporary measure, without changing the application. Which actions should a DevOps engineer take to prepare for this? (Choose TWO.)",
+  "stem_ja": "ロードバランサーの後ろのアプリケーションが、1 つのリージョンの 3 つのアベイラビリティーゾーンで動いています。ときどき 1 つのゾーンが、ヘルスチェックでは分からない形で損なわれ、利用者にエラーが出ます。運用チームは、アプリケーションを変えずに、一時的な対処として、損なわれたゾーンから同じリージョンの正常なゾーンへトラフィックを素早く移せるようにしたいと考えています。これに備えて DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Opt in the load balancer to Amazon Application Recovery Controller (ARC) zonal shift.",
+      "text_ja": "ロードバランサーを Amazon Application Recovery Controller（ARC）のゾーンシフトにオプトインする。"
+    },
+    {
+      "key": "B",
+      "text": "Prescale the application so that the remaining zones have enough capacity when traffic is shifted away from one zone.",
+      "text_ja": "1 つのゾーンからトラフィックを移した時に残りのゾーンに十分な容量があるよう、アプリケーションを事前に拡張しておく。"
+    },
+    {
+      "key": "C",
+      "text": "Plan to start a zonal shift that never expires, so that the impaired zone stays out of service permanently.",
+      "text_ja": "損なわれたゾーンがずっと外れたままになるよう、期限の無いゾーンシフトを始める計画にする。"
+    },
+    {
+      "key": "D",
+      "text": "Create a Route 53 active-passive failover configuration to a standby stack in another Region.",
+      "text_ja": "別のリージョンの待機のスタックへの Route 53 のアクティブ・パッシブのフェイルオーバーの構成を作る。"
+    },
+    {
+      "key": "E",
+      "text": "Plan to terminate the instances in the impaired zone by hand during each incident.",
+      "text_ja": "障害のたびに、損なわれたゾーンのインスタンスを手作業で終了する計画にする。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "ARC のゾーンシフトを使うと、対応するリソースのトラフィックを、損なわれたアベイラビリティーゾーンから同じリージョンの正常なゾーンへ移せます。使うにはリソースをオプトインする必要があり、始める前にアプリケーションを事前に拡張して、1 つのゾーンから移すだけの容量を持たせておく必要があります。ゾーンシフトはすべて一時的な対処で、最初に最長 72 時間の期限を決め、必要なら延ばします。",
+    "per_choice": {
+      "A": "正しい。ゾーンシフトを使うには、リソースのオプトインが必要です。",
+      "B": "正しい。移した先のゾーンに十分な容量が無いと、トラフィックを受け止められません。",
+      "C": "ゾーンシフトはすべて一時的な対処で、期限を決めて始めます。",
+      "D": "別のリージョンへ移す構成で、同じリージョンの正常なゾーンへ素早く移す要件に合いません。",
+      "E": "手作業で時間がかかり、素早く移す要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+      "source_id": "S7",
+      "quote": "shift traffic for a supported resource away from an impaired Availability Zone (AZ) in an AWS Region to healthy AZs in the same Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+      "source_id": "S7",
+      "quote": "You must opt-in resources in order to use zonal shift."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+      "source_id": "S7",
+      "quote": "Before you start a zonal shift, you must prescale your application and ensure that you have sufficient capacity to shift traffic away from an Availability Zone."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+      "source_id": "S7",
+      "quote": "All zonal shifts are temporary mitigations."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

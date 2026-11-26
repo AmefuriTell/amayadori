@@ -1,0 +1,169 @@
+{
+  "item": "C-0034",
+  "questions": [
+    {
+      "id": "q-3.1-0007",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company runs a MySQL database on Amazon RDS. It needs automatic failover to another Availability Zone if the primary instance fails, with as little downtime as possible. The company also wants the standby capacity to serve read traffic so that it is not idle, without managing separate read replicas. Which deployment option BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "A Multi-AZ DB instance deployment with one standby DB instance."
+        },
+        {
+          "key": "B",
+          "text": "A Multi-AZ DB cluster deployment with reader DB instances in other Availability Zones."
+        },
+        {
+          "key": "C",
+          "text": "A Single-AZ DB instance with automated backups that are restored to another Availability Zone after a failure."
+        },
+        {
+          "key": "D",
+          "text": "A Single-AZ DB instance with a read replica that an engineer promotes by hand after a failure."
+        }
+      ],
+      "explanation": {
+        "summary": "Multi-AZ DB インスタンスのデプロイのスタンバイはフェイルオーバーを支えますが、読み取りのトラフィックは処理しません。Multi-AZ DB クラスターのデプロイでは、リーダーの DB インスタンスが自動のフェイルオーバーの先になり、読み取りのトラフィックも処理します。ライターが止まると、RDS がリーダーへのフェイルオーバーを管理します。",
+        "per_choice": {
+          "A": "自動のフェイルオーバーはできますが、スタンバイは読み取りのトラフィックを処理しません。",
+          "B": "正しい。リーダーが自動のフェイルオーバーの先になり、ふだんは読み取りも処理します。",
+          "C": "復元に時間がかかり、自動のフェイルオーバーではありません。",
+          "D": "昇格が手作業で、別のリードレプリカの管理も要ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "source_id": "S1",
+          "quote": "A Multi-AZ DB instance deployment has one standby DB instance that provides failover support, but doesn't serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "source_id": "S1",
+          "quote": "A Multi-AZ DB cluster deployment has standby DB instances that provide failover support and can also serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts-overview",
+          "source_id": "S2",
+          "quote": "If an outage occurs on your writer DB instance, RDS manages failover to one of the reader DB instances."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0008",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An application uses an Amazon ElastiCache for Valkey cluster as a session store. Each shard has only a primary node, so a node failure causes a long outage. The company wants a failed primary to be replaced automatically by a node in another Availability Zone with minimal downtime. Which change meets this requirement with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn on Multi-AZ for the cluster without adding any replicas to the shards."
+        },
+        {
+          "key": "B",
+          "text": "Add at least one replica in a different Availability Zone to each shard, and turn on Multi-AZ with automatic failover."
+        },
+        {
+          "key": "C",
+          "text": "Take a snapshot every hour, and restore it to a new cluster in another Availability Zone when a node fails."
+        },
+        {
+          "key": "D",
+          "text": "Change each primary node to a larger node type so that failures are less likely."
+        }
+      ],
+      "explanation": {
+        "summary": "Multi-AZ は ElastiCache の高い可用性のために勧められている構成で、有効にするとレプリカを別のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にします。主ノードが故障すると、レプリケーションの遅れが最も少ないレプリカが自動で主に昇格します。Multi-AZ には、主と別のアベイラビリティーゾーンにレプリカが少なくとも 1 つ要ります。",
+        "per_choice": {
+          "A": "Multi-AZ には、主と別のアベイラビリティーゾーンのレプリカが少なくとも 1 つ必要です。",
+          "B": "正しい。故障した時にレプリカが自動で主に昇格し、ダウンタイムを最小にできます。",
+          "C": "復元は手作業で時間もかかり、セッションのデータも失われます。",
+          "D": "故障の確率が下がるだけで、故障した時の自動の置き換えにはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "source_id": "S5",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "source_id": "S5",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "source_id": "S5",
+          "quote": "If the primary node fails, ElastiCache automatically promotes the replica with the least replication lag to primary."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0009",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "An application behind a load balancer runs in three Availability Zones in one Region. Sometimes one zone becomes impaired in a way that health checks do not detect, and users see errors. The operations team wants to be able to move traffic away from an impaired zone to the healthy zones in the same Region quickly, as a temporary measure, without changing the application. Which actions should a DevOps engineer take to prepare for this? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Opt in the load balancer to Amazon Application Recovery Controller (ARC) zonal shift."
+        },
+        {
+          "key": "B",
+          "text": "Prescale the application so that the remaining zones have enough capacity when traffic is shifted away from one zone."
+        },
+        {
+          "key": "C",
+          "text": "Plan to start a zonal shift that never expires, so that the impaired zone stays out of service permanently."
+        },
+        {
+          "key": "D",
+          "text": "Create a Route 53 active-passive failover configuration to a standby stack in another Region."
+        },
+        {
+          "key": "E",
+          "text": "Plan to terminate the instances in the impaired zone by hand during each incident."
+        }
+      ],
+      "explanation": {
+        "summary": "ARC のゾーンシフトを使うと、対応するリソースのトラフィックを、損なわれたアベイラビリティーゾーンから同じリージョンの正常なゾーンへ移せます。使うにはリソースをオプトインする必要があり、始める前にアプリケーションを事前に拡張して、1 つのゾーンから移すだけの容量を持たせておく必要があります。ゾーンシフトはすべて一時的な対処で、最初に最長 72 時間の期限を決め、必要なら延ばします。",
+        "per_choice": {
+          "A": "正しい。ゾーンシフトを使うには、リソースのオプトインが必要です。",
+          "B": "正しい。移した先のゾーンに十分な容量が無いと、トラフィックを受け止められません。",
+          "C": "ゾーンシフトはすべて一時的な対処で、期限を決めて始めます。",
+          "D": "別のリージョンへ移す構成で、同じリージョンの正常なゾーンへ素早く移す要件に合いません。",
+          "E": "手作業で時間がかかり、素早く移す要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "source_id": "S7",
+          "quote": "shift traffic for a supported resource away from an impaired Availability Zone (AZ) in an AWS Region to healthy AZs in the same Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "source_id": "S7",
+          "quote": "You must opt-in resources in order to use zonal shift."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "source_id": "S7",
+          "quote": "Before you start a zonal shift, you must prescale your application and ensure that you have sufficient capacity to shift traffic away from an Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "source_id": "S7",
+          "quote": "All zonal shifts are temporary mitigations."
+        }
+      ]
+    }
+  ]
+}
