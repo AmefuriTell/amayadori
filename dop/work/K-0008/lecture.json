@@ -88,7 +88,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph BAD[\"1 つを共有する形\"]\n    subgraph BA[\"AZ a が止まる\"]\n      N1[\"NAT gateway\"]\n    end\n    subgraph BB[\"AZ b\"]\n      R1[\"リソース<br/>外へ出られない\"]\n    end\n    R1 -- \"AZ をまたぐ\" --> N1\n  end\n  subgraph GOOD[\"AZ ごとに置く形\"]\n    subgraph GA[\"AZ a\"]\n      RA[\"リソース\"]\n      NA[\"NAT gateway\"]\n    end\n    subgraph GB[\"AZ b\"]\n      RB[\"リソース\"]\n      NB[\"NAT gateway\"]\n    end\n    RA -- \"同じ AZ の物\" --> NA\n    RB -- \"同じ AZ の物\" --> NB\n  end\n  BAD ~~~ GOOD\n",
+        "source": "flowchart TB\n  subgraph BAD[\"1 つを共有する形\"]\n    subgraph BA[\"AZ a が止まる\"]\n      N1[\"NAT gateway\"]\n    end\n    subgraph BB[\"AZ b\"]\n      R1[\"リソース<br/>外へ出られない\"]\n    end\n    R1 -- \"AZ をまたぐ\" --> N1\n  end\n  subgraph GOOD[\"AZ ごとに置く形\"]\n    subgraph GB[\"AZ b\"]\n      RB[\"リソース\"]\n      NB[\"NAT gateway\"]\n    end\n    subgraph GA[\"AZ a\"]\n      RA[\"リソース\"]\n      NA[\"NAT gateway\"]\n    end\n    RB -- \"同じ AZ の物\" --> NB\n    RA -- \"同じ AZ の物\" --> NA\n  end\n  BAD ~~~ GOOD\n",
         "alt": "上の枠は 1 つの NAT gateway を共有する形。NAT gateway は AZ a にだけあり、AZ b のリソースも AZ をまたいでそれを使う。AZ a が止まると、AZ b のリソースもインターネットへ出られない。下の枠は AZ ごとに NAT gateway を置く形で、各 AZ のリソースは同じ AZ の NAT gateway を使い、AZ をまたぐ線が無い。"
       },
       "narration": "試験ガイドには、既存の構成の単一障害点を見つけて直す、という項目もあります。単一障害点は、そこが一か所止まると全体が止まってしまう所、という意味で使います。ナットゲートウェイは、ある一つのアベイラビリティーゾーンに作られ、そのゾーンの中では冗長に作られています。図の上の形では、もう一つのゾーンのリソースも、ゾーンをまたいで同じナットゲートウェイを使っています。ナットゲートウェイのあるゾーンが止まると、もう一つのゾーンのリソースも、インターネットへ出られなくなります。ここが単一障害点です。図の下の形では、ゾーンごとにナットゲートウェイを作り、各リソースが同じゾーンの物を使うように、ルーティングを設定します。ゾーンをまたぐ線がなくなります。",
@@ -119,7 +119,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>有効な AZ に同じ数\" }\n  subgraph ZB[\"AZ b\"]\n    EB@{ svc: \"Amazon EC2\", label: \"EC2<br/>インスタンス\" }\n  end\n  subgraph ZA[\"AZ a\"]\n    EA@{ svc: \"Amazon EC2\", label: \"EC2<br/>インスタンス\" }\n  end\n  AS -- \"数をそろえる\" --> EB\n  AS -- \"数をそろえる\" --> EA\n",
+        "source": "flowchart TB\n  AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>有効な AZ に同じ数\" }\n  EA@{ svc: \"Amazon EC2\", label: \"AZ a の<br/>EC2 インスタンス\" }\n  EB@{ svc: \"Amazon EC2\", label: \"AZ b の<br/>EC2 インスタンス\" }\n  AS -- \"数をそろえる\" --> EA\n  AS -- \"数をそろえる\" --> EB\n",
         "alt": "EC2 Auto Scaling が、有効にした AZ a と AZ b のそれぞれに、同じ数の EC2 インスタンスを保つ。"
       },
       "narration": "ここから、アベイラビリティーゾーンをまたぐ構成です。まず、計算の層です。イーシーツーオートスケーリングは、有効にしたアベイラビリティーゾーンの間で、インスタンスの数を同じに保ちます。オートスケーリンググループは、まとめて数を増やしたり減らしたりする、インスタンスの集まりと考えてください。あるゾーンで起動に失敗したときは、別の健全なゾーンで起動しようとします。つまり、グループで複数のゾーンを有効にしておくと、インスタンスが一つのゾーンに寄らず、分かれて置かれます。",
@@ -188,7 +188,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph MI[\"Multi-AZ DB instance\"]\n    P1@{ svc: \"Amazon RDS\", label: \"RDS<br/>DB instance\" }\n    SB[\"standby<br/>予備で読み取りは受けない\"]\n    P1 -- \"障害時の切り替え先\" --> SB\n  end\n  subgraph MC[\"Multi-AZ DB cluster\"]\n    WR@{ svc: \"Amazon RDS\", label: \"RDS<br/>writer\" }\n    RA[\"reader<br/>予備で読み取りも受ける\"]\n    RB[\"reader<br/>予備で読み取りも受ける\"]\n    WR -- \"半同期の複製\" --> RA\n    WR -- \"半同期の複製\" --> RB\n  end\n  MI ~~~ MC\n",
+        "source": "flowchart TB\n  subgraph MI[\"Multi-AZ DB instance\"]\n    P1@{ svc: \"Amazon RDS\", label: \"RDS<br/>DB instance\" }\n    SB[\"standby<br/>予備で<br/>読み取りは受けない\"]\n    P1 -- \"障害時の切り替え先\" --> SB\n  end\n  subgraph MC[\"Multi-AZ DB cluster\"]\n    WR@{ svc: \"Amazon RDS\", label: \"RDS<br/>writer\" }\n    RA[\"reader<br/>予備で読み取りも受ける\"]\n    RB[\"reader<br/>予備で読み取りも受ける\"]\n    WR -- \"半同期の複製\" --> RA\n    WR -- \"半同期の複製\" --> RB\n  end\n  MI ~~~ MC\n",
         "alt": "上の枠は Multi-AZ DB instance。DB instance の障害時の切り替え先として standby が 1 台あり、予備だが読み取りは受けない。下の枠は Multi-AZ DB cluster。writer から 2 台の reader へ半同期で複製し、reader は切り替えの予備で、読み取りも受ける。writer と reader は同じ Region の別々の 3 つの AZ にある。"
       },
       "narration": "次は、データの層です。アールディーエスのマルチエーゼットには、二つの形があります。一つ目は、マルチエーゼットのディービーインスタンスです。障害時の切り替え先として、スタンバイが一台あります。このスタンバイは、読み取りを受けません。二つ目は、マルチエーゼットのディービークラスターです。同じリージョンの別々の三つのゾーンに、書き込みを受けるライターが一台と、リーダーが二台あります。リーダーも切り替えの予備、つまりスタンバイの役をしますが、こちらは読み取りも受けます。複製は半同期です。変更を確定するのに、少なくとも一台のリーダーの応答を待つ、という意味です。ライターが止まったときは、アールディーエスがリーダーの一台へ切り替えます。",
@@ -499,7 +499,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph MAIN[\"本番の Region\"]\n    PE[\"本番の環境<br/>Region が止まる\"]\n  end\n  subgraph OTHER[\"別の Region\"]\n    WS[\"本番の複製<br/>規模は縮小・完全に動く<br/>常に稼働\"]\n  end\n  PE -- \"復旧までが短い\" --> WS\n",
+        "source": "flowchart TB\n  PE[\"本番の Region<br/>本番の環境<br/>Region が止まる\"]\n  WS[\"別の Region<br/>本番の複製<br/>規模は縮小・完全に動く<br/>常に稼働\"]\n  PE -- \"復旧までが短い\" --> WS\n",
         "alt": "warm standby の形。別の Region に、規模を縮小したが完全に動く本番の複製を常に動かしておく。本番の Region が止まった時、常に動いている複製があるので、復旧までの時間が短い。"
       },
       "narration": "リージョンをまたぐ構成の最後は、ウォームスタンバイです。本番の環境の複製を、別のリージョンに用意しておきます。この複製は、規模は縮小していますが、完全に動く物です。図の下の箱のように、別のリージョンで常に動いている点が要です。そのため、復旧までの時間を縮められます。復旧までの時間、つまりアールティーオーが厳しく求められるとき、候補の一つになると考えられます。",
