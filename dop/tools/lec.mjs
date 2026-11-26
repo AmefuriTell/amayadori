@@ -132,6 +132,8 @@ export function checkLecture(id, lec = loadLecture(id)) {
 export async function renderVisuals(lec, { previewDir } = {}) {
   const list = lec.slides.filter((s) => s?.visual?.type === 'mermaid' && typeof s.visual.source === 'string').map((s) => ({ id: s.id, source: s.visual.source }));
   if (!list.length) return { errors: [], results: [] };
+  // 試験と CI（ブラウザが無い）では描かない。中身の無い絵を置く（形の検査は描く前に済んでいる）
+  if (process.env.DOP_RENDER === 'skip') return { errors: [], results: list.map((d) => ({ id: d.id, svg: '<svg xmlns="http://www.w3.org/2000/svg"/>', unknown: [] })) };
   const results = await renderAll(list, { previewDir });
   const errors = results.filter((r) => r.error).map((r) => ({ id: r.id, message: `図が描けない: ${r.error}` }));
   return { errors, results };

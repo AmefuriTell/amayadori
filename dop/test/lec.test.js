@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,6 +6,9 @@ import path from 'node:path';
 import { sandbox, SOURCES } from './helpers.js';
 
 process.env.DOP_TTS = 'skip';
+// 図を描くにはブラウザ（playwright）が要る。無い所（CI）では描かずに形だけを確かめる
+const canRender = (() => { try { createRequire(import.meta.url).resolve('playwright'); return true; } catch { return false; } })();
+if (!canRender) process.env.DOP_RENDER = 'skip';
 const ID = 'K-0001';
 const SENTENCE = 'この講義では、新しい版を少しずつ入れ替える方法を、例を見ながら順に学びます。';
 
@@ -60,7 +64,7 @@ test('lec validate: 正しい lecture.json なら ok で、図の絵を preview 
   const r = sb.run('lec', 'validate', ID);
   assert.equal(r.ok, true, JSON.stringify(r));
   assert.deepEqual([sb.read(`work/${ID}/result.json`).state, sb.read(`work/${ID}/result.json`).result], ['C2_author', 'ok']);
-  assert.ok(sb.exists(`work/${ID}/preview/s01.png`));
+  if (canRender) assert.ok(sb.exists(`work/${ID}/preview/s01.png`));
 });
 
 test('lec verdict: 重・中があれば fix、同じファイルへの 2 回目は数え直さない、軽だけなら pass', () => {
