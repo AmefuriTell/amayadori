@@ -1,0 +1,415 @@
+{
+  "item": "D-0002",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "services": [
+        "Amazon ECR",
+        "Amazon Inspector"
+      ],
+      "type": "single",
+      "stem": "ある企業は、コンテナイメージを Amazon ECR のプライベートリポジトリに保存しています。セキュリティチームは、数か月前にプッシュされたイメージが、新しい脆弱性が公開された後に再評価されていないことに気付きました。チームは、人やパイプラインがチェックを開始しなくても、すべてのリポジトリが継続的に自動でチェックされるようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "レジストリのすべてのリポジトリで、プッシュ時のスキャンを有効にした基本スキャンを設定する。"
+        },
+        {
+          "key": "B",
+          "text": "各イメージの手動の基本スキャンを毎日開始する、スケジュールされた AWS Lambda 関数を作成する。"
+        },
+        {
+          "key": "C",
+          "text": "レジストリで拡張スキャンを有効にし、Amazon Inspector にイメージを評価させる。"
+        },
+        {
+          "key": "D",
+          "text": "各イメージのプッシュ前にオープンソースのイメージスキャナーを実行する AWS CodeBuild のステージを追加する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+        "per_choice": {
+          "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+          "B": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+          "C": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+          "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0002",
+      "services": [
+        "AWS CodeArtifact"
+      ],
+      "type": "multi",
+      "stem": "ある企業は AWS CodeArtifact を使用しています。開発チームごとに専用のリポジトリがあり、すべてのリポジトリは 1 つのドメインにあります。ビルドでは、社内の npm パッケージとオープンソースの npm パッケージの両方を、チーム自身のリポジトリを通じて解決する必要があります。中央のチームは、各チームが個別に設定するのではなく、オープンソースのパッケージの取り込み方を一元的に管理したいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "公開の npmjs レジストリへの外部接続を持つ共有リポジトリを作成する。"
+        },
+        {
+          "key": "B",
+          "text": "共有リポジトリを、各チームのリポジトリのアップストリームリポジトリとして設定する。"
+        },
+        {
+          "key": "C",
+          "text": "各チームのリポジトリを専用のドメインに移し、共有リポジトリを参照させる。"
+        },
+        {
+          "key": "D",
+          "text": "ビルドが認証情報なしでパッケージをダウンロードできるように、共有リポジトリを公開する。"
+        },
+        {
+          "key": "E",
+          "text": "すべてのチームのリポジトリに npmjs への外部接続を追加し、共有リポジトリを削除する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "外部接続（external connection）を持つ共有のリポジトリを中央のチームが持ち、それを各チームのリポジトリの upstream にする。upstream は同じドメインの中で設定でき、各チームのリポジトリから社内のパッケージと公開のパッケージの両方を取れる。",
+        "per_choice": {
+          "A": "正しい。公開の npmjs から取り込む入口を 1 か所にまとめられる。",
+          "B": "正しい。同じドメインの中なら、あるリポジトリのパッケージを別のリポジトリで使えるようにできる。",
+          "C": "あるリポジトリのパッケージを別のリポジトリで使えるようにできるのは、同じドメインの中だけ。ドメインを分ける構成はこの要件に合わない。",
+          "D": "CodeArtifact のリポジトリのパッケージは公開できない。",
+          "E": "各チームが別々に外部接続を持つことになり、中央のチームがまとめて管理する要件に合わない。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0003",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeConnections",
+        "AWS CloudFormation",
+        "GitHub"
+      ],
+      "type": "single",
+      "stem": "DevOps エンジニアが AWS CloudFormation を使用して、GitHub への接続と、それをソースとして使う AWS CodePipeline のパイプラインを作成しました。スタックのデプロイは成功しましたが、パイプラインはリポジトリにアクセスできず、接続のステータスは PENDING です。エンジニアは、スタックが作成した接続をそのまま使い、個人用のトークンを保存しないようにしたいと考えています。エンジニアは最も少ない運用の手間で何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "最初のパイプラインの実行後に、接続が自動的に AVAILABLE に変わるのを待つ。"
+        },
+        {
+          "key": "B",
+          "text": "接続を削除し、AVAILABLE になるように AWS CLI で作成し直す。"
+        },
+        {
+          "key": "C",
+          "text": "GitHub の個人用アクセストークンを AWS Secrets Manager に保存し、ソースアクションから参照させる。"
+        },
+        {
+          "key": "D",
+          "text": "コンソールで接続を編集してセットアップを完了し、ステータスを AVAILABLE にする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+        "per_choice": {
+          "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+          "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+          "C": "個人のトークンを持たない要件に反する。",
+          "D": "正しい。コンソールで編集すれば AVAILABLE になる。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0004",
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeBuild",
+        "AWS CodeConnections"
+      ],
+      "type": "single",
+      "stem": "AWS CodePipeline のパイプラインは、接続を通じた GitHub のソースアクションと、それに続く AWS CodeBuild のアクションを使用しています。ビルドスクリプトはコミット履歴を読んでバージョン番号を計算する git コマンドを実行しますが、Git のメタデータが無いためコマンドが失敗します。後続の AWS CodeDeploy のアクションは、引き続きビルドの出力を受け取る必要があります。チームはビルドに Git の認証情報を保存したくありません。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "ソースアクションの出力を完全なクローンに設定し、ソースアーティファクトを CodeDeploy のアクションに直接渡す。"
+        },
+        {
+          "key": "B",
+          "text": "ソースアクションの出力を完全なクローンに設定し、ソースアーティファクトを使うアクションは CodeBuild のままにする。"
+        },
+        {
+          "key": "C",
+          "text": "既定の ZIP の出力のまま、個人用アクセストークンを使う git clone コマンドを buildspec に追加する。"
+        },
+        {
+          "key": "D",
+          "text": "既定の ZIP の出力のまま、バージョンのスクリプトの前にビルドで git init を実行する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+        "per_choice": {
+          "A": "full clone の参照は CodeBuild のアクションしか使えない。",
+          "B": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+          "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+          "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0005",
+      "services": [
+        "AWS CodePipeline",
+        "GitHub"
+      ],
+      "type": "single",
+      "stem": "ある企業の AWS CodePipeline のパイプラインは、接続を通じた GitHub のソースを使用しており、現在はプッシュのたびに開始されます。企業は、名前が \"release\" で始まる Git タグが作成された時だけパイプラインを開始したいと考えています。そのようなタグの無いプッシュでパイプラインを開始してはならず、企業は独自のコードを書きたくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "プッシュのトリガーを残し、リリースのタグを作成する main ブランチのブランチフィルターを追加する。"
+        },
+        {
+          "key": "B",
+          "text": "GitHub のタグのイベントで Lambda 関数を呼び出してパイプラインを開始する Amazon EventBridge ルールを作成する。"
+        },
+        {
+          "key": "C",
+          "text": "パイプラインのトリガーに、フィルターの種類 Tags とパターン release* を設定する。"
+        },
+        {
+          "key": "D",
+          "text": "自動の開始を無効にし、リリースのタグを作成するたびにコンソールで [変更をリリースする] を選ぶ。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+        "per_choice": {
+          "A": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+          "B": "自分でコードを書くことになり、要件に反する。",
+          "C": "正しい。release で始まるタグが作られた時だけ始まる。",
+          "D": "毎回人が始めることになり、手間が大きい。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0006",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "stem": "ある CodeBuild プロジェクトは、起動を速くするために AWS Lambda のコンピューティングを使用しています。build フェーズでは、最初のコマンドでユニットテストを実行し、次のコマンドでテストのログをアップロードします。テストが失敗すると CodeBuild はアップロードのコマンドを飛ばすため、ログが失われます。テストが失敗してもログをアップロードし、かつテストが失敗した時はフェーズも失敗にする必要があります。最も少ない運用の手間でこれらの要件を満たす buildspec の変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "アップロードのコマンドを build フェーズの finally ブロックに移す。"
+        },
+        {
+          "key": "B",
+          "text": "build フェーズに on-failure: CONTINUE を設定し、アップロードのコマンドを post_build フェーズに移す。"
+        },
+        {
+          "key": "C",
+          "text": "commands ブロックの中で、アップロードのコマンドをテストのコマンドより前に移す。"
+        },
+        {
+          "key": "D",
+          "text": "毎回のビルドの後に動いてログをアップロードする 2 つ目の CodeBuild プロジェクトを作成する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+        "per_choice": {
+          "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+          "B": "on-failure は Lambda の計算では使えない。",
+          "C": "試験の前に上げると、試験のログがまだ無い。",
+          "D": "プロジェクトを足すことになり、手間が大きい。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0007",
+      "services": [
+        "AWS CodeBuild",
+        "Amazon ECR"
+      ],
+      "type": "multi",
+      "stem": "あるチームは、起動時間を短くするために CodeBuild プロジェクトを AWS Lambda のコンピューティングに移しました。このプロジェクトは Docker イメージをビルドして Amazon ECR にプッシュしますが、移してからは docker build を実行する時に毎回ビルドが失敗します。チームは、buildspec の変更をできるだけ少なくして、Docker のビルドが再び動くようにする必要があります。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "プロジェクトを EC2 のコンピューティングに戻す。"
+        },
+        {
+          "key": "B",
+          "text": "プロジェクトの環境で privilegedMode を true にする。"
+        },
+        {
+          "key": "C",
+          "text": "Lambda のコンピューティングのまま、privilegedMode を true にする。"
+        },
+        {
+          "key": "D",
+          "text": "Lambda のコンピューティングのまま、ビルドのタイムアウトを 60 分に上げる。"
+        },
+        {
+          "key": "E",
+          "text": "Lambda のコンピューティングのまま、Docker 用のリザーブドキャパシティのフリートに切り替える。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+        "per_choice": {
+          "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+          "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+          "C": "Lambda の計算は privileged モードに対応しない。",
+          "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+          "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0008",
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "stem": "EC2 のコンピューティングを使う CodeBuild プロジェクトで、約 3 時間かかる統合テスト一式を実行しています。テストはまだ実行中なのに、毎回のビルドが 60 分で止まり、失敗として記録されます。プロジェクトのタイムアウトの設定は一度も変更されていません。チームは、最も少ない運用の手間で、テスト一式を 1 回のビルドで完了させたいと考えています。チームは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "速く動くように、プロジェクトを AWS Lambda のコンピューティングに移す。"
+        },
+        {
+          "key": "B",
+          "text": "プロジェクトの timeoutInMinutes を 4320 に設定する。"
+        },
+        {
+          "key": "C",
+          "text": "プロジェクトの timeoutInMinutes を 240 に設定する。"
+        },
+        {
+          "key": "D",
+          "text": "テスト一式を、それぞれ 60 分未満で動く 3 つのプロジェクトに分ける。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "timeoutInMinutes は、終わらないビルドを止めるまでの分数で、5 から 2160（36 時間）まで決められる。指定しないと既定の 60 分になる。Lambda の計算は 15 分を超える実行に対応しない。",
+        "per_choice": {
+          "A": "Lambda の計算は 15 分を超える実行に対応しない。",
+          "B": "決められるのは 2160 分（36 時間）まで。",
+          "C": "正しい。既定の 60 分を、3 時間の試験が終わる長さに延ばす。",
+          "D": "プロジェクトを分けることになり、1 つのビルドで終える要件にも反する。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0009",
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "single",
+      "stem": "ある会社は AWS CodeBuild でアプリケーションをビルドしています。ソースリポジトリにある buildspec ファイルでは、データベースのパスワードと社内サービスのエンドポイントを平文の環境変数として定義しており、パスワードがビルドログに表示されています。セキュリティチームは、ソースコードに認証情報を置かないこと、データベースのパスワードを定期的にローテーションすること、シークレットの値を CodeBuild のログで隠すことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "両方の値を Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。データベースのパスワードを変更してパラメータを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "B",
+          "text": "パスワードを AWS KMS キーで暗号化し、暗号文を buildspec ファイルにコミットして、ビルドのコマンドで復号する。パスワードと暗号文を四半期ごとに手作業で変更する。"
+        },
+        {
+          "key": "C",
+          "text": "パスワードを自動ローテーションを設定した AWS Secrets Manager に保存し、buildspec の env の secrets-manager セクションで参照する。エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。CodeBuild のサービスロールに読み取り権限を与える。"
+        },
+        {
+          "key": "D",
+          "text": "両方の値を buildspec ファイルから CodeBuild プロジェクトの設定にある平文の環境変数へ移す。プロジェクトへのコンソールアクセスを制限し、パスワードはスケジュールに沿って手作業で変更する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager はシークレットの自動ローテーションを設定でき、buildspec の env の secrets-manager や parameter-store で指定した値は CodeBuild のログで隠されます。認証情報は Secrets Manager、暗号化が要る設定値は Parameter Store の SecureString という AWS の勧める分け方にも合い、自前のコードも要りません。",
+        "per_choice": {
+          "A": "ソースから消えログでも隠れますが、ローテーションの Lambda 関数を自分で書いて保守する必要があり、オーバーヘッドが大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+          "B": "暗号文とはいえ認証情報をソースコードに置いており要件に反します。手作業の変更も手間がかかります。",
+          "C": "正しい。ソースから認証情報が消え、Secrets Manager の自動ローテーションで定期変更を自前のコード無しで満たし、env の secrets-manager・parameter-store で指定した値はログで隠されます。",
+          "D": "ソースからは消えますが平文のままで、ログでも隠されず、ローテーションも手作業です。AWS は機密の値を Parameter Store などに置くことを勧めています。"
+        }
+      }
+    },
+    {
+      "id": "q-1.1-0010",
+      "services": [
+        "AWS CodeBuild",
+        "AWS Secrets Manager",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "multi",
+      "stem": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。"
+        },
+        {
+          "key": "B",
+          "text": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。"
+        },
+        {
+          "key": "C",
+          "text": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。"
+        },
+        {
+          "key": "D",
+          "text": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。"
+        },
+        {
+          "key": "E",
+          "text": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "secrets-manager の参照では json-key を指定すると、その キーの値だけを取り出せます（指定しなければシークレットの全文）。認証情報ではないが暗号化が要る値は Parameter Store の SecureString に置き、CodeBuild のサービスロールに ssm:GetParameters を与えて parameter-store で参照します。",
+        "per_choice": {
+          "A": "正しい。json-key を指定すれば、その キーの値だけがビルドに渡り、解析のスクリプトも要りません。",
+          "B": "正しい。暗号化が要る設定値には SecureString が勧められており、parameter-store で取るにはサービスロールに ssm:GetParameters が必要です。",
+          "C": "動きますが、AWS は API キーなどのシークレットには Secrets Manager を勧めており、推奨に従うという要件に合いません。",
+          "D": "json-key を付けないとシークレットの全文が渡り、1 つのキーだけ渡す要件に反し、jq による独自の解析も加わります。",
+          "E": "暗号化して保存するという要件に反します。平文の値はソースに残ります。"
+        }
+      }
+    }
+  ]
+}

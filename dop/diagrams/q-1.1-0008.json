@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0008",
+  "source": "flowchart TB\n  subgraph R[\"EC2 コンピューティング\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"統合テスト 約 3 時間\" }\n    TO[\"✔ C: timeoutInMinutes を 240 に\"]\n  end\n  CB -. \"⚠ 今: 既定 60 分で停止\" .-> FAIL[\"ビルド失敗\"]\n  TO == \"✔ C: 3 時間が収まる\" ==> CB\n  X1[\"⚠ A: Lambda は 15 分超に対応しない\"] -.-> CB\n  X2[\"⚠ B: 上限は 2160 分（4320 は不可）\"] -.-> TO\n  X3[\"⚠ D: 3 分割は 1 回のビルドの要件に反する\"] -.-> CB\n",
+  "alt": "約 3 時間の統合テストが既定の 60 分で止まる問題の図。timeoutInMinutes を 240 にすると 1 回のビルドで終わる（C）。上限は 2160 分なので 4320 は不可（B）、Lambda は 15 分超に対応しない（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

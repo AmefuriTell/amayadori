@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0001",
+  "source": "flowchart TB\n  U[\"セキュリティチーム\"]\n  subgraph R[\"アカウント\"]\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ（古いイメージも）\" }\n  INS@{ svc: \"Amazon Inspector\", label: \"✔ C: 拡張スキャンで継続的に評価\" }\n    BAS[\"⚠ A: 基本スキャンは push の時だけ\"]\n    LAM[\"⚠ B: Lambda で毎日の手動スキャン（手間・OS のみ）\"]\n  end\n  U -- \"要件: 自動で継続チェック\" --> ECR\n  ECR == \"✔ C: イメージ情報\" ==> INS\n  INS == \"新しい脆弱性で再評価\" ==> ECR\n  BAS -.-> ECR\n  LAM -.-> ECR\n",
+  "alt": "ECR のイメージを継続的に自動チェックする図。拡張スキャンで Inspector と連携すると古いイメージも再評価される（C）。基本スキャンの push 時のみ（A）や Lambda の自作（B）は不十分。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

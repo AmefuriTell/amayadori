@@ -1,0 +1,8 @@
+{
+  "id": "q-1.1-0002",
+  "source": "flowchart TB\n  PUB([\"公開の npmjs\"])\n  subgraph DOM[\"1 つの CodeArtifact ドメイン\"]\n  SH@{ svc: \"AWS CodeArtifact\", label: \"✔ A: 共有リポジトリ（外部接続あり）\" }\n  T1@{ svc: \"AWS CodeArtifact\", label: \"チーム 1 のリポジトリ\" }\n  T2@{ svc: \"AWS CodeArtifact\", label: \"チーム 2 のリポジトリ\" }\n  end\n  BLD[\"各チームのビルド\"]\n  PUB == \"✔ A: 外部接続でパッケージ取り込み\" ==> SH\n  SH == \"✔ B: アップストリーム\" ==> T1\n  SH == \"✔ B: アップストリーム\" ==> T2\n  T1 -- \"社内＋公開パッケージ\" --> BLD\n  PUB -. \"⚠ E: 各チームが個別に接続すると一元管理できない\" .-> T2\n",
+  "alt": "各チームのリポジトリが共有リポジトリをアップストリームにし、共有リポジトリだけが npmjs への外部接続を持つ図。取り込みを一元管理できる（A と B）。各チームに外部接続を足す（E）は一元管理にならない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

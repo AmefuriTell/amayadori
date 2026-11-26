@@ -84,7 +84,10 @@
           "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECR のイメージを継続的に自動チェックする図。拡張スキャンで Inspector と連携すると古いイメージも再評価される（C）。基本スキャンの push 時のみ（A）や Lambda の自作（B）は不十分。"
+      }
     },
     {
       "id": "q-1.1-0002",
@@ -152,7 +155,10 @@
           "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "各チームのリポジトリが共有リポジトリをアップストリームにし、共有リポジトリだけが npmjs への外部接続を持つ図。取り込みを一元管理できる（A と B）。各チームに外部接続を足す（E）は一元管理にならない。"
+      }
     },
     {
       "id": "q-1.1-0003",
@@ -212,7 +218,10 @@
           "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudFormation が作った GitHub への接続は PENDING のままで、パイプラインはアクセスできない。コンソールで接続を編集してセットアップすると AVAILABLE になる（D）。待つ（A）や CLI で作り直す（B）では変わらない。"
+      }
     },
     {
       "id": "q-1.1-0004",
@@ -271,7 +280,10 @@
           "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ソースアクションを full clone にすると CodeBuild が git のメタデータ込みで clone でき、バージョン計算が動く（B）。full clone の出力は CodeBuild のアクションしか使えないので CodeDeploy には直接渡せない（A）。"
+      }
     },
     {
       "id": "q-1.1-0005",
@@ -329,7 +341,10 @@
           "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GitHub の release で始まるタグが作られた時だけ CodePipeline を始める図。トリガーのフィルターに Tags と release* を設定する（C）。ブランチフィルター（A）、自作コード（B）、手動（D）は要件に合わない。"
+      }
     },
     {
       "id": "q-1.1-0006",
@@ -390,7 +405,10 @@
           "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "build フェーズのテストが失敗してもログをアップロードしたい。アップロードを finally ブロックに移すと、失敗しても実行され、フェーズは失敗のままになる（A）。on-failure は Lambda では使えない（B）。"
+      }
     },
     {
       "id": "q-1.1-0007",
@@ -463,7 +481,10 @@
           "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Docker イメージをビルドして ECR に push する CodeBuild を Lambda から戻す図。Lambda コンピューティングは Docker ビルドに対応しないので EC2 に戻し（A）、privilegedMode を true にする（B）。"
+      }
     },
     {
       "id": "q-1.1-0008",
@@ -520,7 +541,10 @@
           "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "約 3 時間の統合テストが既定の 60 分で止まる問題の図。timeoutInMinutes を 240 にすると 1 回のビルドで終わる（C）。上限は 2160 分なので 4320 は不可（B）、Lambda は 15 分超に対応しない（A）。"
+      }
     },
     {
       "id": "q-1.1-0009",
@@ -587,7 +611,10 @@
           "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeBuild の buildspec から認証情報を取り除く図。パスワードは自動ローテーションの Secrets Manager、エンドポイントは Parameter Store の SecureString から参照する（C）。Lambda の自作（A）や平文（D）は不適切。"
+      }
     },
     {
       "id": "q-1.1-0010",
@@ -661,7 +688,10 @@
           "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "1 つの JSON シークレットから API キー 1 つだけをビルドに渡し、暗号化が要るエンドポイントは Parameter Store の SecureString に置く図。json-key を指定する（A）、parameter-store で参照する（B）のが正解。"
+      }
     },
     {
       "id": "q-1.1-0011",
