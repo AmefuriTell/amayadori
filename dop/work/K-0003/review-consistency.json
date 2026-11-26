@@ -3,91 +3,21 @@
     {
       "id": "s01",
       "issues": [
-        { "kind": "flow", "severity": "中", "detail": "地図（bullets・図・台本）の「2 作り方」は CodeBuild と Image Builder だけで、s11 の RAM での共有を予告していない。一方、まとめ s16 の表には「recipe・RAM 共有」があり、地図とまとめが合わない。", "suggest": "地図の 2 の部に「作った物の共有（RAM）」を足す。図の IB の箱に「RAM で共有」を一行足すなど。" },
-        { "kind": "terms", "severity": "軽", "detail": "1 の部の名前が、図は「1 置き場所と守り」、bullet は「1 置き場所」、s16 は「1 置き場所: 守りは domain と入口」と揺れている。", "suggest": "bullet も「1 置き場所と守り」にそろえる。" },
-        { "kind": "unsupported", "severity": "軽", "detail": "台本の「アーティファクト、つまりビルドで使ったり作ったりする物」という定義は根拠に無い。", "suggest": "定義を言い切らず、「この講義では、パッケージやイメージのような物をアーティファクトと呼びます」のように、扱う物を挙げる形にする。" }
-      ]
-    },
-    {
-      "id": "s04",
-      "issues": [
-        { "kind": "unsupported", "severity": "中", "detail": "台本の締め「守りの設定を、リポジトリごとではなく、ドメインの単位で考える」は根拠に無い。S3 は「domain で複数の repository に組織の policy を当てられる」と言うだけで、repository ごとの設定を否定していない。受験者が「repository 単位の policy は無い・使わない」と覚えかねない。", "suggest": "「ドメインの単位でも、まとめて考えられる」と、できる事として言う。「ではなく」を外す。" }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "攻撃の呼び方が、bullet は「dependency substitution 対策」、s15 の表は「置き換え攻撃」、台本は「依存関係の置き換えの攻撃」と揺れている。", "suggest": "画面の表記を dependency substitution（台本では読みと日本語の言い換えを一度だけ）にそろえる。s15 の表も同じ語にする。" }
-      ]
-    },
-    {
-      "id": "s06",
-      "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "表の「creation templates」が、s07 の題「repository creation templates」と表記がそろっていない。", "suggest": "表でも repository creation templates と書く。" }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "台本の締め「自動で作られたリポジトリにも、守りと片付けの設定が最初から入る」は、template を決めた場合に限る話を一般の話のように言っている。", "suggest": "「テンプレートで決めておけば、自動で作られたリポジトリにも……入る」と条件を付ける。" },
-        { "kind": "mismatch", "severity": "軽", "detail": "図の下の箱の「policy・lifecycle・tag」は、台本の「リポジトリポリシー、ライフサイクルポリシー、リソースのタグ」を縮めていて、tag が tag immutability と紛れる。", "suggest": "「repository policy・lifecycle policy・resource tag」と書く。" }
-      ]
-    },
-    {
-      "id": "s08",
-      "issues": [
-        { "kind": "flow", "severity": "軽", "detail": "2 の部「作り方」に置いているが、s08 の中身は CodeBuild がパッケージを取ってくる（使う）話で、アーティファクトを作る話ではない。題の「作る」と合わず、受験者が buildspec の成果物の出力までここで扱ったと思いかねない（根拠も login だけ）。", "suggest": "部の説明を「作るときに使う物を取ってくる」とはっきり言う。地図の箱も「CodeBuild: ビルドで npm を取る」にする。" }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "図は「build・validation・test」、bullet は「build・検証・test」と、同じ段の表記がそろっていない。", "suggest": "どちらかにそろえる（AWS の表記どおり build・validation・test）。" }
-      ]
-    },
-    {
-      "id": "s11",
-      "issues": [
-        { "kind": "unsupported", "severity": "中", "detail": "台本の「前提が三つあります」は、根拠の前提の節から写した文を、前提はこれだけと言い切っている。S15 に前提の一覧の全部があるとは書かれていない。", "suggest": "「前提のうち、ここでは三つを押さえます」と言う。" },
-        { "kind": "unsupported", "severity": "中", "detail": "題「作った物を RAM で共有」は、Image Builder で作った出力（AMI・コンテナイメージ）を RAM で共有するように読める。根拠 S15 が言うのは「Image Builder の resource」で、出力の AMI を RAM で共有するとは書いていない。s15 の誤りの元になっている。", "suggest": "題を「Image Builder の resource を RAM で共有」にし、台本でも出力の AMI とは言わない。" }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        { "kind": "unsupported", "severity": "中", "detail": "台本の締め「版の中身がいつ変わったかは、リビジョンで追えます」は根拠に無い。S4 は revision が assets と metadata の組を示す文字列で、更新のたびに新しく作られるとだけ言う。時刻の情報があると誤って覚えかねない。", "suggest": "「中身が変わったかどうかは、リビジョンで見分けられます」にとどめる。" }
+        { "kind": "terms", "severity": "中", "detail": "台本の「イーシーツーイメージビルダーでイメージを作り、ほかのアカウントと共有する形」は、作ったイメージ（出力の AMI など）を共有するように聞こえる。s11 では「共有するのは Image Builder の resource で、出力した AMI の共有の話ではない」と言い、s15・s16 も resource と呼んでいる。1 回目の global の指摘（resource と出力の呼び分け）が地図の台本に残っており、聞き手は s01 と s11 で食い違う事を聞く。図の箱「作る・RAM で共有」も何を共有するかが無い。", "suggest": "台本を「イメージビルダーでイメージを作る形と、イメージビルダーのリソースを、ほかのアカウントと共有する形」にする。図の箱も「作る・resource を RAM で共有」とする（s16 の箱「recipe・RAM で共有」も同じく resource を入れるとよい）。" }
       ]
     },
     {
       "id": "s13",
       "issues": [
-        { "kind": "mismatch", "severity": "中", "detail": "bullet の「すぐには消えない」は、台本の「その場で消えるとは限りません」と表の「条件を満たして 24 時間内」と食い違う。根拠 S8 は「24 時間以内に expire すると見込む」で、すぐ消えないとは言っていない。また bullet と台本は「消える」、表は expire で、expire と削除が同じだと受け取られる。", "suggest": "bullet を「expire は 24 時間内の目安」などにし、台本も「期限切れになる」と言う（消える、と言い換えない）。" },
-        { "kind": "unsupported", "severity": "軽", "detail": "台本の「ルールが複数あるときは、優先度で順番が決まります」は、S8 の「番号が小さいほど優先が高い」より踏み込んでいる。", "suggest": "「ルールには優先度があり、番号が小さいほど優先が高い」とだけ言う。" }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "台本・bullet の「ルールは、古さか、数で、リソースを消します」は、Deprecate・Disable のルールも消すように聞こえる。S12 の「Deletes ... by age or by count」は削除の話。", "suggest": "「消すときの基準は、古さか数です」と、削除に絞って言う。" },
-        { "kind": "terms", "severity": "軽", "detail": "bullet は「age か count」（小文字）、表は「AGE・COUNT」と表記がそろっていない。", "suggest": "AWS の表記どおり AGE・COUNT にそろえる。" }
+        { "kind": "mismatch", "severity": "軽", "detail": "表は「数が小さいほど高い」、bullet は「小さい番号が上」、台本は「番号が小さいほど」と、priority の言い方が少しずつ違う。", "suggest": "表も「番号が小さいほど高い」にそろえる。" }
       ]
     },
     {
       "id": "s15",
       "issues": [
-        { "kind": "fact", "severity": "重", "detail": "表の「暗号化 AMI を共有 → RAM と KMS key 共有」と台本の「イメージビルダーで作った、暗号化したイメージを……ラムで共有」は、根拠 S15 の「Image Builder の resource を RAM で共有する」を、出力の AMI の共有にすり替えている。受験者が「暗号化した AMI は RAM で共有する」と誤って覚える。", "suggest": "条件を「暗号化した Image Builder の resource を共有」、方法を「RAM で共有・KMS key も明示的に共有」にし、台本も resource と言う。" },
-        { "kind": "mismatch", "severity": "中", "detail": "表の「古い image を消す → lifecycle policy」は、台本の「使わなくなったコンテナイメージ → イーシーアールのライフサイクルポリシー」と食い違う。根拠 S7 は unused images の片付けで、「古さ（age）で消す」のは Image Builder の lifecycle rule（S12）。表だけ見ると、どちらのサービスの話か分からず、取り違える。", "suggest": "表を「使わない container image を片付け → ECR の lifecycle policy」にする。Image Builder の行（age・count で image resource を消す → lifecycle rule）を分けて足す。" }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        { "kind": "mismatch", "severity": "軽", "detail": "台本の 3 の部には revision があるが、bullet「3 寿命: rule の順と数え方」と表の 3 の行には無い。s01 の地図の 3 には revision がある。", "suggest": "表の 3 の部に「CodeArtifact: revision」の行を足し、bullet も「revision・rule の順と数え方」にする。" }
+        { "kind": "terms", "severity": "軽", "detail": "表の「古い Image Builder image」と台本の「イメージビルダーのイメージを古さや数で」は、s14 で教えた「数える物は image resource」と呼び方がそろっていない。また条件が「古い」だけで、台本の「数」が表に無い。", "suggest": "表を「古い・多い image resource」、台本を「イメージビルダーのイメージリソースを、古さや数で片付けたいなら」にする。" }
       ]
     }
   ],
-  "global": [
-    { "severity": "中", "detail": "Image Builder の「resource」「image resource」と、出力の「AMI・コンテナイメージ」の区別がスライドをまたいで揺れている（s11 の題「作った物」、s15 の「暗号化 AMI」）。s14 ではこの区別を注意点として教えているのに、s11・s15 で崩れている。", "suggest": "Image Builder の resource と出力の AMI・container image を、全スライドで呼び分ける。" },
-    { "severity": "軽", "detail": "AWS RAM の読みが、s11 は「エーダブリューエスラム」、s15 は「ラム」とそろっていない。", "suggest": "どちらかにそろえる。" }
-  ]
+  "global": []
 }

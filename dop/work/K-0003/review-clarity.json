@@ -1,103 +1,23 @@
 {
   "slides": [
     {
-      "id": "s01",
-      "issues": [
-        { "kind": "leap", "severity": "軽", "detail": "地図の『3 寿命』に revision が入っているが、revision は版の見分け方で、片付けとのつながりが地図からは分からない。また s11 の RAM 共有が地図に無く、『2 作り方』に入る理由も見えない。", "suggest": "地図の 3 部の箱を『3 版と寿命（revision・lifecycle）』と言い換え、2 部の Image Builder の箱に『作る・RAM で共有』を足す。台本の二つ目の部の説明にも『作った物の共有』を一言入れる。" }
-      ]
-    },
-    {
       "id": "s03",
       "issues": [
-        { "kind": "leap", "severity": "軽", "detail": "external connection・認証・public にできない、の三つが一枚に並び、最後の『public にはできない』が付け足しに聞こえる。なぜ external connection を使うのか（公開リポジトリを直接使わずに取り込む理由）も語られない。", "suggest": "台本を『外から入れる道（external connection）』→『中の物を使う人は必ず認証が要る』→『だから誰でも取れる公開はできない』の順に言い換え、認証と public 不可を一つの話にまとめる。" }
-      ]
-    },
-    {
-      "id": "s04",
-      "issues": [
-        { "kind": "jargon", "severity": "中", "detail": "『アセットとメタデータ』が説明なしに出る。s12 の revision の定義でも同じ語が前提になるため、ここで分からないと s12 も分からなくなる。", "suggest": "最初に出るこのスライドで、資料にある範囲で『パッケージの中身のファイル（アセット）と、それを説明する情報（メタデータ）』のように一言言い換える。s12 でも同じ言い換えを繰り返す。" }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        { "kind": "jargon", "severity": "中", "detail": "依存関係の置き換えの攻撃（dependency substitution）が名前だけで、どういう事が起きる攻撃かが無い。問題文は攻撃の様子で書かれることが多く、名前だけ覚えても対応付けられない。", "suggest": "C2 で根拠資料に攻撃の説明があればそれを一文で言い換えて入れる。無ければ、図の二つの入口（外からの取り込みと社内の publish）が同じパッケージの新しい版の入口だ、と台本で強調し、『どちらの入口から入れるかを決める仕組み』と言い換える。長いカタカナ（ディペンデンシーサブスティテューションアタック）は日本語の後に一度だけにする。" }
+        { "kind": "listen", "severity": "軽", "detail": "「そのうえで、リポジトリのパッケージを、誰でも取れる形で公開することはできません」の「そのうえで」は、認証が要る事と公開できない事のつながりを示さず、耳では付け足しに聞こえる。", "suggest": "「また、」または「認証が要るので、」のように、つなぎを言い換える（新しい事実は足さない）。" }
       ]
     },
     {
       "id": "s06",
       "issues": [
-        { "kind": "listen", "severity": "中", "detail": "機能を『一つ目・二つ目・三つ目』と数える途中で『くわしくは三つ目の部で』と言うため、耳では三つ目の機能と三つ目の部が混ざる。講義全体でも『一つ目』が部・機能・前提に使い回されている。", "suggest": "部は『第三部』『片付けの部』のように呼び方を変え、機能の数え上げの中では部の番号を言わない（『片付けの所でくわしく見ます』）。" }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        { "kind": "jargon", "severity": "中", "detail": "pull through cache・create on push・replication が名前だけで、どんな時に ECR がリポジトリを作るのかが分からない。図でも三つの箱が説明なしに並ぶ。", "suggest": "根拠資料にある範囲で各語に一言の言い換えを付ける（台本と図の箱の 2 行目）。足せない場合は、三つの名前を詳しく覚える必要はなく『自分で作らずに repository ができる場面』とまとめて言う形にし、図の上に『ECR が自動で repository を作る場面』という枠を付ける。" },
-        { "kind": "visual", "severity": "軽", "detail": "台本は『図のいちばん下の箱』と言うが、設定の一覧は箱ではなく ECR アイコンの下の文字で、5 行の縦長ラベルになっていて読みにくい。末尾の『tag』は tag immutability の tag（イメージのタグ）と紛らわしい。", "suggest": "設定の一覧を別の箱に分け、『resource tag』と書く。台本は『図のいちばん下』と言う。" }
-      ]
-    },
-    {
-      "id": "s08",
-      "issues": [
-        { "kind": "visual", "severity": "軽", "detail": "steps の 2 段目『login の成功を待つ』が独立した手順に見え、buildspec の段（pre-build と build）の区切りが図から読めない。", "suggest": "段を二つ（pre-build: login で取り先を CodeArtifact に / build: npm install）にし、矢印に『成功した後』と書く。" }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        { "kind": "visual", "severity": "中", "detail": "pipeline から AMI へは『作る』、ECR へは『作り元と配布先の Region』と矢印の意味がそろっていない。ECR への矢印が Region へ送る事を表しているように読める。", "suggest": "AMI と ECR の矢印をどちらも『作る』にそろえ、ECR の箱の中に『保管: ビルドの Region と配布先の Region』と書く。台本の最後の『ビルドを動かしたリージョンと、配布する先のリージョンです』も『保管される場所は、…の二つです』と文として完結させる。" },
-        { "kind": "leap", "severity": "中", "detail": "ここでは『recipe が build・validation・test の段を決める』と言い、s10 では『recipe は base image と components、component は build か test』と言う。validation がどこに入るのか、段を決めるのが recipe なのか component なのかが分からなくなる。", "suggest": "s09 では recipe を『何を作るか（s10 で中身）』と短く言うだけにし、build・validation・test の段の話は s10 にまとめる。s10 で validation と component の関係を資料の範囲で一言触れる、触れられなければ s09 の図からも validation を外す。" }
+        { "kind": "listen", "severity": "軽", "detail": "台本の「片付けの部で見ます」に当たる部は、地図では「第三部 版と寿命」という名前で、「片付けの部」という呼び名は出てこない。bullet は「第三部でくわしく」。", "suggest": "台本を「第三部の、版と寿命の所で見ます」のように、地図の名前で言う（機能の数え上げとは別の呼び方なので混ざらない）。" }
       ]
     },
     {
       "id": "s10",
       "issues": [
-        { "kind": "listen", "severity": "軽", "detail": "『コンプライアンスの検証が挙がっています』は資料の引用を読んでいるように聞こえる。", "suggest": "『例えば、ソフトウェアを入れる、コンプライアンスを確かめる、といった事ができます』と言い換える。" }
-      ]
-    },
-    {
-      "id": "s11",
-      "issues": [
-        { "kind": "listen", "severity": "軽", "detail": "三つの前提を数えた後に『相手は、アカウント、組織、OU のどれかです』が来るので、四つ目の前提に聞こえる。OU も説明が無い。", "suggest": "相手の話を前提の前に移す（『RAM で、アカウント・組織・OU、つまり組織の中の単位、に共有できます。前提が三つあります』）。" }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        { "kind": "visual", "severity": "中", "detail": "package version から二本の矢印が並んで出ており、一つの版が二つの revision を同時に持つように見える。台本の要点『同じ版でも更新のたびに revision が変わる』が図から伝わらない。", "suggest": "左から右への時間の並びにする: 『版 1.0 / revision A』→（更新）→『版 1.0 / revision B（今の組）』。版の番号が変わらず revision だけ変わる事を図で見せる。" },
-        { "kind": "leap", "severity": "軽", "detail": "片付けの部の最初に revision が来る理由が無く、なぜ寿命の話なのかが分からない。", "suggest": "冒頭で『片付ける前に、まず同じ版の中身が変わった事をどう見分けるかを見ます』のようにつなぎを入れる。" }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        { "kind": "listen", "severity": "軽", "detail": "試験で問われやすい『24 時間内』が画面の表だけにあり、台本は『目安は画面の表に』とだけ言う。音声だけで聞く人には残らない。", "suggest": "台本でも『条件を満たしてから 24 時間以内』と一度言う（表と同じ事実なので新しい事実ではない）。" }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        { "kind": "listen", "severity": "中", "detail": "台本は『非推奨・無効・削除のルール』と日本語で言い、画面は Deprecate→Disable→Delete と英語。耳と目の語が結び付かない。", "suggest": "台本で『デプリケート、つまり非推奨』のように英語名を一度ずつ添える。" },
-        { "kind": "exam", "severity": "中", "detail": "このスライドの一番の引っかけ（AGE は AMI・コンテナの作成日ではなく image resource の作成日、COUNT は recipe の版ごとの image resource の数）が、表では『AGE・COUNT の元: image resource』の一行だけで意味が読み取れない。『一度の実行: resource ごとに一つ』も何のための注意か分からない。", "suggest": "表を『数える物: × AMI・コンテナ / ○ Image Builder の image resource』『古さの起点: × AMI の作成日 / ○ image resource の作成日（ビルド完了時）』『数の単位: recipe の版ごと』と、誤りと正しい方を並べる形に作り直す。目的の行は bullets か台本だけに回して表を絞る。" }
-      ]
-    },
-    {
-      "id": "s15",
-      "issues": [
-        { "kind": "exam", "severity": "中", "detail": "『古い image を消す → lifecycle policy』は、ECR のコンテナイメージか Image Builder の AMI かが書かれておらず、二つの lifecycle を混ぜて覚えるおそれがある。", "suggest": "行を二つに分ける: 『古いコンテナイメージを ECR から消す → ECR lifecycle policy』『Image Builder の古い image を消す → Image Builder の lifecycle rule』。" },
-        { "kind": "exam", "severity": "中", "detail": "講義で教えた判断のうち、パッケージなら CodeArtifact・コンテナイメージなら ECR という置き場所の選び分け、CodeBuild は pre-build で login、自動作成の repository の設定は creation template、Image Builder lifecycle の数え方、ECR は 24 時間内で即時ではない、が表に無い。", "suggest": "既に講義で言った事から、上の判断を行として足す（新しい事実は不要）。表が長くなるなら部ごとに 2 枚に分ける。" }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        { "kind": "exam", "severity": "中", "detail": "3 部の行が『ECR・Image Builder / rule の順・数え方』と一つにまとめられ、ECR の priority（番号が小さいほど先）と Image Builder の rule の順（Deprecate→Disable→Delete）が同じ『順』として混ざって覚えられやすい。", "suggest": "行を二つに分ける: 『ECR: priority は小さい番号が上・24 時間内』『Image Builder: Deprecate→Disable→Delete・image resource で数える』。台本も別々に言う。" }
+        { "kind": "visual", "severity": "軽", "detail": "bullet の 1 行目が「段: build・validation・test」なのに、手順の図は build component と test component だけで、validation が図のどこにも無い。画面だけ見ると、validation が抜けたように見える。notes の理由（根拠に validation と component の関係が無い）は妥当。", "suggest": "bullet の 1 行目を「recipe が段を決める」程度にし、三つの段の名前は台本だけで言う。または図の題に「component の使い方」と付け、段の話とは別だと見せる。" }
       ]
     }
   ],
-  "global": [
-    { "severity": "軽", "detail": "bullets と図は英語の語（managed・publish・expire・origin など）、台本はカタカナや日本語の言い換えで、画面と音声の語がずれる所がある。", "suggest": "台本で日本語を言った直後に画面の英語の語を一度添える、または bullets の方を台本の日本語に寄せる。" },
-    { "severity": "軽", "detail": "機能の紹介が中心で、『この条件ならこちら、あちらではない』という比べ方が少ない（s15 まで判断の形が出てこない）。", "suggest": "各部の最後の台本に、s15 の該当行を一文で先取りして言う（例: s05 の最後に『置き換えの攻撃を防ぐ、と問題文にあればこれです』）。" }
-  ]
+  "global": []
 }

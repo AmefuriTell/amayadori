@@ -98,3 +98,4 @@ fetched: 2026-11-26
 - knowledge: 「security scans」（セキュリティスキャン）の種類と段階の使い分け。取れた公式ページに無かった（Inspector 系のページは未取得）。
 - knowledge: 「acceptance tests」「user interface tests」の使い分け。S2・S12 は Device Farm の種類と用途の説明にとどまり、受け入れ試験と UI 試験をどの段階で使い分けるかは取れなかった（CloudWatch Synthetics は 404）。
 - skills: 「Invoking AWS services in a pipeline for testing」のうち、CodePipeline の Invoke アクションのページ（action-reference-Invoke）は 404 のまま。S13 の Lambda の呼び出しで代えた。
+- skills: 「Measuring application health based on application exit codes」（終了コードで健全さを測る）。取れた公式ページに exit code の記述が無かった。S8 は「フェーズの中のコマンドが失敗するとフェーズが失敗する」までで、終了コードには触れていない（K-0002 の C3 の指摘で記録）。
