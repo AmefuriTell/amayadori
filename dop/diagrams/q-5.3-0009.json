@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0009",
+  "source": "flowchart TB\n  subgraph ASGX[\"ASG\"]\n    ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"グループ\" }\n    INS@{ svc: \"Amazon EC2\", label: \"新しいインスタンス（ASG が起動、約 4 分）<br/>ヘルスチェックの猶予期間を 4 分より長く\" }\n  end\n  ELB@{ svc: \"Elastic Load Balancing\", label: \"ALB のヘルスチェック\" }\n  ELB -- \"ヘルスチェック\" --> INS\n  ASG == \"✔ D: 猶予期間を延長\" ==> INS\n  A[\"⚠ A: ELB のヘルスチェックを無効にする（要件に反する）\"]\n  A -.-> ELB\n  B[\"⚠ B: 希望する容量を増やす（同じ入れ替え）\"]\n  B -.-> ASG\n  C[\"⚠ C: 手作業で入れ替え、プロセスを停止\"]\n  C -.-> INS\n",
+  "alt": "アプリの起動に 4 分かかるのに ELB のヘルスチェックで入れ替えられてしまう。猶予期間を起動時間より長くすれば、ヘルスチェックを残したまま解決する(D)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

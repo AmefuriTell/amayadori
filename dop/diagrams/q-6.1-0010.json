@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0010",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph SMG[\"シークレット\"]\n    S1@{ svc: \"AWS Secrets Manager\", label: \"アプリのユーザーのシークレット<br/>交代ユーザーの戦略でローテーション\" }\n    S2@{ svc: \"AWS Secrets Manager\", label: \"✔ B: スーパーユーザーのシークレット\" }\n  end\n  DB@{ svc: \"Amazon RDS\", label: \"データベース\" }\n  APP -- \"接続\" --> DB\n  S1 == \"✔ A: 交代ユーザー\" ==> DB\n  S2 -- \"ユーザーを複製する権限\" --> DB\n  C[\"⚠ C: シングルユーザーの戦略（最も高い可用性ではない）\"]\n  C -.-> S1\n  D[\"⚠ D: マスターユーザーで接続する\"]\n  D -.-> APP\n  E[\"⚠ E: RDS Proxy 経由（交代ユーザーに非対応）\"]\n  E -.-> DB\n",
+  "alt": "アプリのユーザーのシークレットを交代ユーザーの戦略でローテーションし(A)、ユーザーの複製に使うスーパーユーザーのシークレットを別に用意する(B)と、高い可用性を保てる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

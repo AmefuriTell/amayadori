@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0002",
+  "source": "flowchart TB\n  AC@{ svc: \"AWS AppConfig\", label: \"デプロイ（配信中＋ベイク時間）\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"ロールバックのモニターのアラーム<br/>ALARM か INSUFFICIENT_DATA\" }\n  IAM@{ svc: \"AWS IAM\", label: \"先にアクセス許可を設定\" }\n  PREV[\"前の設定データ\"]\n  CODE[\"アプリのコードの前のバージョン\"]\n  IAM -. \"✔ B: アラームを読む権限\" .-> AC\n  CW -- \"✔ A: 状態で判断\" --> AC\n  AC == \"自動で戻す\" ==> PREV\n  W1[\"⚠ C: オペレーターの承認を待つ\"]\n  W2[\"⚠ D: コードを再デプロイして戻す\"]\n  W3[\"⚠ E: 100% に届いたら監視をやめる\"]\n  W1 -.-> AC\n  W2 -.-> CODE\n  W3 -.-> CW\n",
+  "alt": "AppConfig のロールバックの仕組みの図。配信中にモニターのアラームが ALARM か INSUFFICIENT_DATA になると自動で前の設定データに戻り（A）、そのためには先に権限の設定が要る（B）。人の承認やコードの再デプロイは無い。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

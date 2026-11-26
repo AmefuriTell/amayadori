@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0011",
+  "source": "flowchart TB\n  subgraph VPC[\"プライベートサブネット\"]\n    FN@{ svc: \"AWS Lambda\", label: \"ローテーションの関数\" }\n    DB@{ svc: \"Amazon RDS\", label: \"データベース<br/>（今: 関数が届かず失敗）\" }\n  end\n  SM@{ svc: \"AWS Secrets Manager\", label: \"シークレット<br/>（ここからローテーション開始）\" }\n  FN == \"✔ A: 同じ VPC・SG\" ==> DB\n  FN == \"✔ A: 届く\" ==> SM\n  B[\"⚠ B: タイムアウトとメモリーを増やす（ネットワークは直らない）\"]\n  B -.-> FN\n  C[\"⚠ C: スケジュールの間隔を長くする（接続は直らない）\"]\n  C -.-> SM\n  D[\"⚠ D: 管理者のポリシーを付ける（原因は権限でない）\"]\n  D -.-> FN\n",
+  "alt": "Lambda のローテーション関数は Secrets Manager とデータベースの両方にネットワークで届く必要がある。データベースと同じ VPC とセキュリティグループに置いて両方に届くようにする(A)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0003",
+  "source": "flowchart TB\n  subgraph ORG[\"組織（信頼ゾーン）\"]\n    S3A@{ svc: \"Amazon S3\", label: \"バケット（リソースベースのポリシー）\" }\n    RL@{ svc: \"AWS IAM\", label: \"ロール（信頼ポリシー）\" }\n    AA@{ svc: \"IAM Access Analyzer\", label: \"外部アクセスのアナライザー<br/>（リソースごとに検出）\" }\n  end\n  EXT[\"組織の外のプリンシパル\"]\n  SEC[\"セキュリティチーム\"]\n  EXT -. \"アクセスを許可している\" .-> S3A\n  EXT -. \"アクセスを許可している\" .-> RL\n  S3A -- \"ポリシー\" --> AA\n  RL -- \"ポリシー\" --> AA\n  AA == \"✔ D: 検出結果\" ==> SEC\n  A[\"⚠ A: 最終アクセス情報（外部共有は見つけられない）\"]\n  A -.-> RL\n  B[\"⚠ B: すべてのロールに境界（共有は見つけられない）\"]\n  B -.-> RL\n  C[\"⚠ C: ポリシーを読むスクリプト（保守が要る）\"]\n  C -.-> S3A\n",
+  "alt": "IAM Access Analyzer で組織を信頼ゾーンにすると、組織外に共有されている S3 バケットや IAM ロールをリソースごとの検出結果として得られる(D)。スクリプトの保守は不要。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

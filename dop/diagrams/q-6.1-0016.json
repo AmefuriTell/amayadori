@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0016",
+  "source": "flowchart TB\n  subgraph EC2G[\"EC2 インスタンス\"]\n    INS@{ svc: \"Amazon EC2\", label: \"インスタンスプロファイル（ロールは 1 つだけ）\" }\n  end\n  ROLE@{ svc: \"AWS IAM\", label: \"既存のロール<br/>（ポリシーに SQS の書き込みを足す）\" }\n  S3B@{ svc: \"Amazon S3\", label: \"アプリのデータ\" }\n  SQS@{ svc: \"Amazon SQS\", label: \"キュー\" }\n  INS --> ROLE\n  ROLE -- \"読み取り\" --> S3B\n  ROLE == \"✔ C: SQS 書き込み\" ==> SQS\n  A[\"⚠ A: ロール数の上限を上げる（上げられない）\"]\n  A -.-> INS\n  B[\"⚠ B: ロールを入れ替える（S3 を読めなくなる）\"]\n  B -.-> ROLE\n  D[\"⚠ D: IAM ユーザーのキーを置く（長期のキーが増える）\"]\n  D -.-> INS\n",
+  "alt": "インスタンスプロファイルに入れられるロールは 1 つだけで上限は上げられない。既存のロールのポリシーに SQS の権限を足せば、両方の権限を持たせられる(C)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

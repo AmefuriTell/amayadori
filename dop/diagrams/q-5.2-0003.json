@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0003",
+  "source": "flowchart TB\n  PS@{ svc: \"AWS Systems Manager\", label: \"Parameter Store: /app/db-endpoint\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"パラメータ更新のルール\" }\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation ランブック\" }\n  AP[\"aws:approve（シニアエンジニアの承認）\"]\n  FL[\"インスタンスのフリート\"]\n  PS -- \"更新イベント\" --> EB\n  EB == \"✔ D: ターゲットに指定\" ==> AUT\n  AUT --> AP\n  AP == \"承認後に再起動\" ==> FL\n  W1[\"⚠ A: Lambda のコードを書き、返信を待つ\"]\n  W2[\"⚠ B: 承認の手順無しですぐ再起動\"]\n  W3[\"⚠ C: 毎朝の履歴確認と手作業\"]\n  W1 -.-> EB\n  W2 -.-> FL\n  W3 -.-> PS\n",
+  "alt": "Parameter Store の更新で、承認後にアプリを再起動する図。更新イベントの EventBridge ルールで、aws:approve の手順を含む Automation ランブックを始める（D）。コード無しで、承認を待ってから再起動する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

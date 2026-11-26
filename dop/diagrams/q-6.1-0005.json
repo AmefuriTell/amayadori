@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0005",
+  "source": "flowchart TB\n  subgraph TEAMS[\"40 チーム\"]\n    R1@{ svc: \"AWS IAM\", label: \"ロール（タグ: Project=X）\" }\n  end\n  POL@{ svc: \"AWS IAM\", label: \"1 つのポリシー（タグ一致で許可）\" }\n  subgraph RES[\"毎週増えるリソース\"]\n    B@{ svc: \"Amazon S3\", label: \"バケット（タグ: Project=X）\" }\n    T@{ svc: \"Amazon DynamoDB\", label: \"テーブル（タグ: Project=X）\" }\n  end\n  R1 -- \"プリンシパルのタグ\" --> POL\n  POL == \"✔ D: タグ一致のみ\" ==> B\n  POL == \"✔ D: タグ一致のみ\" ==> T\n  W1[\"⚠ A: ARN を毎晩書き足す（ポリシーが減らない）\"]\n  W1 -.-> R1\n  W2[\"⚠ B: 職務機能のポリシー（プロジェクトごとに絞れない）\"]\n  W2 -.-> R1\n  W3[\"⚠ C: 完全なアクセス（最小権限に反する）\"]\n  W3 -.-> B\n",
+  "alt": "プロジェクトのタグをロールとリソースに付け、タグが一致する時だけ許す 1 つのポリシーにする ABAC なら、リソースが増えてもポリシーを更新しなくてよい(D)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

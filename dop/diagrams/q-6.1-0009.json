@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0009",
+  "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    SM@{ svc: \"AWS Secrets Manager\", label: \"マスターユーザーのシークレット<br/>マネージドローテーション（Lambda 不要）\" }\n    AU@{ svc: \"Amazon Aurora\", label: \"DB クラスター\" }\n  end\n  SM == \"✔ C: パスワードを変える\" ==> AU\n  A[\"⚠ A: Lambda 関数でローテーション（関数の保守）\"]\n  A -.-> SM\n  B[\"⚠ B: 自作の Lambda が 30 日ごとにパスワード変更\"]\n  B -.-> AU\n  D[\"⚠ D: SecureString へ移し手作業で変更\"]\n  D -.-> SM\n",
+  "alt": "Aurora のマスターユーザーの認証情報には Secrets Manager のマネージドローテーションがあり、サービスが設定と管理を行うので Lambda 関数の保守が要らない(C)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

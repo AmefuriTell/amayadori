@@ -1,0 +1,8 @@
+{
+  "id": "q-5.3-0006",
+  "source": "flowchart TB\n  subgraph ECSX[\"ECS（Fargate）\"]\n    TK@{ svc: \"AWS Fargate\", label: \"新しいサービスのタスク\" }\n    ER@{ svc: \"AWS IAM\", label: \"タスク実行ロール\" }\n  end\n  ECR@{ svc: \"Amazon ECR\", label: \"プライベートリポジトリ\" }\n  ER == \"✔ D: プル権限だけ追加\" ==> ECR\n  ECR -- \"イメージ\" --> TK\n  A[\"⚠ A: タスクロールに権限を足す（プルに使われない）\"]\n  A -.-> TK\n  B[\"⚠ B: インスタンスロールに足す（Fargate に効かない）\"]\n  B -.-> TK\n  C[\"⚠ C: リポジトリのポリシーで誰でもプル可（最小権限に反する）\"]\n  C -.-> ECR\n",
+  "alt": "Fargate でイメージをプルするのはタスク実行ロール。そこに ECR のプル権限だけを足すのが最小権限で正解(D)。タスクロールやインスタンスロールでは直らない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
