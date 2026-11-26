@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0004",
+  "source": "flowchart TB\n  APP[\"CDK のアプリ\"]\n  CMD[\"✔ A: cdk bootstrap を 1 回<br/>環境の引数を 2 つ渡す\"]\n  subgraph E1[\"us-east-1\"]\n    T1@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n    B1@{ svc: \"Amazon S3\", label: \"アセットのバケット\" }\n    R1@{ svc: \"Amazon ECR\", label: \"イメージのリポジトリ\" }\n  end\n  subgraph E2[\"eu-west-1\"]\n    T2@{ svc: \"AWS CloudFormation\", label: \"CDKToolkit スタック\" }\n    B2@{ svc: \"Amazon S3\", label: \"アセットのバケット\" }\n    R2@{ svc: \"Amazon ECR\", label: \"イメージのリポジトリ\" }\n  end\n  BADBC[\"⚠ B: 準備なしではアセットを置けない<br/>⚠ C: S3・ECR を手で作る\"]\n  APP --> CMD\n  CMD == \"✔ A\" ==> T1\n  CMD == \"✔ A\" ==> T2\n  T1 -- \"作る\" --> B1\n  T1 -- \"作る\" --> R1\n  T2 -- \"作る\" --> B2\n  T2 -- \"作る\" --> R2\n  BADBC -.-> APP\n  D[\"⚠ D: us-east-1 だけでは<br/>eu-west-1 が不足\"] -.-> T2",
+  "alt": "CDK のアプリを 2 つの環境に初めてデプロイする図。cdk bootstrap に環境を 2 つ指定して 1 回実行すると、各環境に CDKToolkit スタックと S3・ECR ができる（A）。片方だけ（D）や準備なしは不足。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

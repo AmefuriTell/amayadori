@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0008",
+  "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  DA@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ A: 委任管理者（プラットフォーム）\" }\n  SSM@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ B: StackSet は管理アカウントに作られる\" }\n  OU[\"組織のアカウント\"]\n  BADD[\"⚠ D: 委任管理者は同時に 5 つまで（10 ではない）\"]\n  MGMT -- \"委任管理者に登録\" --> DA\n  DA -- \"作る・管理\" --> SSM\n  SSM -- \"スタックを展開\" --> OU\n  BADD -.-> MGMT\n  MGMT -. \"⚠ C: OU に絞れない\" .-> DA\n  DA -. \"⚠ E: service-managed も作れる\" .-> SSM\n",
+  "alt": "メンバーアカウントを StackSets の委任管理者に登録すると、管理アカウントにサインインせずに service-managed の StackSet を作れる図。StackSet 自体は管理アカウントに作られる（A、B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0009",
+  "source": "flowchart TB\n  DEV([\"プロダクトチーム\"])\n  AC@{ svc: \"AWS AppConfig\", label: \"✔ B: 機能フラグ＋段階的な戦略\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"エラー率のアラーム\" }\n  APP[\"ECS のウェブアプリ\"]\n  BADA[\"⚠ A: 一度にすべて・戻すのも人の操作\"]\n  BADC[\"⚠ C: Parameter Store で手作業の変更・復旧\"]\n  DEV -- \"フラグを変更\" --> AC\n  AC == \"✔ B: 一部から全員へ\" ==> APP\n  CW -- \"ALARM（環境に指定）\" --> AC\n  AC == \"✔ B: 自動で元に戻す\" ==> APP\n  BADA -.-> AC\n  BADC -.-> DEV\n  DEV -. \"⚠ D: 設定の変更にデプロイが要る\" .-> APP\n",
+  "alt": "機能フラグを AWS AppConfig に置き、段階的なデプロイ戦略で一部から全員へ展開する図。環境に指定した CloudWatch アラームが ALARM になると自動で前の設定に戻る（B）。D はコードの再デプロイが要る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

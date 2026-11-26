@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0010",
+  "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"既存の S3 バケット（JSON の設定）\" }\n  PR@{ svc: \"AWS AppConfig\", label: \"✔ A: 設定プロファイル（ソースは S3）\" }\n  LV@{ svc: \"AWS Lambda\", label: \"✔ B: draft-07 のバリデーター\" }\n  APP[\"アプリケーション\"]\n  BADC[\"⚠ C: インラインは 4.X だけで draft-07 に使えない\"]\n  BADD[\"⚠ D: ホスト型へ移すと S3 に置いたままの要件に反する\"]\n  BADE[\"⚠ E: 届いた後に手で戻すだけ\"]\n  S3 -- \"設定データ\" --> PR\n  PR -- \"デプロイ時に検証\" --> LV\n  PR == \"✔ A: 通ったものだけ\" ==> APP\n  BADC -.-> PR\n  BADD -.-> S3\n  BADE -.-> APP\n",
+  "alt": "S3 の JSON 設定を、AppConfig の設定プロファイル（ソースは S3）と Lambda のバリデーターで draft-07 の検証をしてからアプリに届ける図（A と B）。インラインのスキーマは 4.X だけで、D は要件に反する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

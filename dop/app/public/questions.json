@@ -4012,7 +4012,10 @@
           "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "本番の CloudFormation スタックの更新の図。変更セットで実行前に置き換えや削除を確かめ、S3 バケットに DeletionPolicy: Retain を付けて残す（B）。直接の UpdateStack（A）や指定なし（C）は要件に合わない。"
+      }
     },
     {
       "id": "q-2.1-0002",
@@ -4076,7 +4079,10 @@
           "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ネットワークのスタックの export 値を変える図。import 中は変更も削除もできないので先に import を外し（A）、別アカウントのスタックは Fn::GetStackOutput で出力を読む（B）。"
+      }
     },
     {
       "id": "q-2.1-0003",
@@ -4139,7 +4145,10 @@
           "quote": "if the Role property of the DeploymentPreference object is not specified, AWS SAM also generates an AWS::IAM::Role CloudFormation resource."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SAM の Lambda 関数に AutoPublishAlias と DeploymentPreference を書くと、エイリアスと CodeDeploy のリソースを SAM が作り、CodeDeploy が通信を移す（D）。手で書く B や CodeDeploy 無しの A は不適切。"
+      }
     },
     {
       "id": "q-2.1-0004",
@@ -4203,7 +4212,10 @@
           "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CDK のアプリを 2 つの環境に初めてデプロイする図。cdk bootstrap に環境を 2 つ指定して 1 回実行すると、各環境に CDKToolkit スタックと S3・ECR ができる（A）。片方だけ（D）や準備なしは不足。"
+      }
     },
     {
       "id": "q-2.1-0005",
@@ -4265,7 +4277,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "要件の「2 を超えたら止める」は、failure tolerance を「許す失敗の数」とする S2 の言い方に合わせた"
+      "note": "要件の「2 を超えたら止める」は、failure tolerance を「許す失敗の数」とする S2 の言い方に合わせた",
+      "diagram": {
+        "alt": "StackSet の更新を、同時 10 アカウント・障害耐性 2・Sequential で行う図。10 個ずつ、1 リージョンずつ進み、失敗が 2 を超えると止まる（C）。A は Parallel、B は 100 同時、D は耐性 10 で要件に反する。"
+      }
     },
     {
       "id": "q-2.1-0006",
@@ -4326,7 +4341,10 @@
           "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "StackSet の更新が耐性 0 の既定の Strict モードで 1 アカウントずつになる図。同時実行モードを SOFT_FAILURE_TOLERANCE にすると失敗の数に関わらず 20 アカウントずつ動く（A）。D では解決しない。"
+      }
     },
     {
       "id": "q-2.1-0007",
@@ -4387,7 +4405,10 @@
           "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "StackSet の既定値はそのままに、eu-west-1 の本番のスタックインスタンスだけ InstanceType の値を上書きする図（B）。更新で値が残り、ドリフトにもならない。A、C は要件に合わない。"
+      }
     },
     {
       "id": "q-2.1-0008",
@@ -4460,7 +4481,10 @@
           "quote": "Your organization can have up to five registered delegated administrators at one time."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "メンバーアカウントを StackSets の委任管理者に登録すると、管理アカウントにサインインせずに service-managed の StackSet を作れる図。StackSet 自体は管理アカウントに作られる（A、B）。"
+      }
     },
     {
       "id": "q-2.1-0009",
@@ -4522,7 +4546,10 @@
           "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "機能フラグを AWS AppConfig に置き、段階的なデプロイ戦略で一部から全員へ展開する図。環境に指定した CloudWatch アラームが ALARM になると自動で前の設定に戻る（B）。D はコードの再デプロイが要る。"
+      }
     },
     {
       "id": "q-2.1-0010",
@@ -4592,7 +4619,10 @@
           "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 の JSON 設定を、AppConfig の設定プロファイル（ソースは S3）と Lambda のバリデーターで draft-07 の検証をしてからアプリに届ける図（A と B）。インラインのスキーマは 4.X だけで、D は要件に反する。"
+      }
     },
     {
       "id": "q-2.1-0011",

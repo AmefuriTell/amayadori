@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0007",
+  "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet（InstanceType の既定値）\" }\n  O[\"その他のアカウント: 既定値\"]\n  P[\"eu-west-1 の本番: 上書きした大きい値\"]\n  BADD[\"⚠ D: StackSet に無いパラメータは上書きできない\"]\n  SS -- \"既定値\" --> O\n  SS == \"✔ B: そのスタックだけ上書き\" ==> P\n  SS -. \"⚠ A: 全スタックが変わる\" .-> O\n  BADD -.-> SS\n  SS -. \"⚠ C: StackSet が 2 つになる\" .-> P\n",
+  "alt": "StackSet の既定値はそのままに、eu-west-1 の本番のスタックインスタンスだけ InstanceType の値を上書きする図（B）。更新で値が残り、ドリフトにもならない。A、C は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
