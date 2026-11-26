@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0009",
+  "source": "flowchart TB\n  SCH[\"毎週のスケジュール\"]\n  subgraph IB[\"✔ C: Image Builder\"]\n    BLD@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>ビルドコンポーネント（パッチ・強化）\" }\n    TST@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>テストコンポーネント（確認）\" }\n  end\n  AMI@{ svc: \"Amazon EC2\", label: \"強化した AMI\" }\n  DIST[\"配布設定: 合格した AMI だけ配布\"]\n  TEAM[\"チーム\"]\n  BADB[\"⚠ B: 毎週の開始が手作業\"]\n  BADA[\"⚠ A: Lambda でオーケストレーションを自作して保守\"]\n  BADD[\"⚠ D: テスト無し → 未確認の AMI が渡る\"]\n  SCH -- \"自動で開始\" --> BLD\n  BLD -- \"作る\" --> AMI\n  AMI -- \"確認\" --> TST\n  TST -- \"合格のみ\" --> DIST\n  DIST -- \"配布\" --> TEAM\n  BADA -.-> SCH\n  BADB -.-> SCH\n  BADD -.-> DIST",
+  "alt": "スケジュールで毎週 Image Builder のパイプラインを動かし、ビルドコンポーネントでパッチと強化、テストコンポーネントで確認、合格した AMI だけを配布する（C）。手作業の開始（B）やテスト無し（D）は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

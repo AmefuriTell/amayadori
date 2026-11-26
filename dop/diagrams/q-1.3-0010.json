@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0010",
+  "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    PIPE@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>パイプライン（AMI をビルド）\" }\n    LT1@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    LT2@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  subgraph AP[\"ap-southeast-2\"]\n    LT3@{ svc: \"Amazon EC2\", label: \"起動テンプレート\" }\n  end\n  BAD[\"⚠ A: setDefaultVersion false → デフォルトは古い AMI のまま\"]\n  BADBC[\"⚠ B: リージョンごとに別パイプライン・手作業の更新<br/>⚠ C: Lambda のコピー処理を保守\"]\n  PIPE == \"✔ D: 配布 + 新版をデフォルトに\" ==> LT1\n  PIPE == \"✔ D: AMI を配布 + 新版\" ==> LT2\n  PIPE == \"✔ D: AMI を配布 + 新版\" ==> LT3\n  BAD -.-> LT2\n  BADBC -.-> PIPE",
+  "alt": "Image Builder の配布設定に 3 つのリージョンの配布を追加し、各配布で起動テンプレートを指定して setDefaultVersion を true のままにすると、新しい AMI がデフォルトバージョンになる（D）。false にすると古い AMI のまま（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

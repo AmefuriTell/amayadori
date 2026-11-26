@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0006",
+  "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（buildspec の env）\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"prod/db の JSON キー password\" }\n  SSM@{ svc: \"AWS Systems Manager\", label: \"Parameter Store: API のエンドポイント\" }\n  ROLE[\"サービスロール: ssm:GetParameters\"]\n  BADC[\"⚠ C・E: 平文の環境変数・リポジトリに書くと見える\"]\n  BADD[\"⚠ D: json-key 無しは秘密の全文が返る\"]\n  SM == \"✔ A: secrets-manager prod/db:password\" ==> CB\n  SSM == \"✔ B: parameter-store の対応付け\" ==> CB\n  ROLE -- \"権限\" --> SSM\n  BADC -.-> CB\n  BADD -.-> SM",
+  "alt": "CodeBuild の buildspec の env で、Secrets Manager のパスワードは json-key を付けて値だけ取り（A）、Parameter Store の値は parameter-store の対応付けとサービスロールの権限で取る（B）。平文の環境変数や json-key 無しは要件に反する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
