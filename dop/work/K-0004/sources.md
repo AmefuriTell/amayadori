@@ -144,3 +144,44 @@ fetched: 2026-11-26
 url: https://docs.aws.amazon.com/lambda/latest/dg/configuring-alias-routing.html#configuring-alias-routing
 fetched: 2026-11-26
 > You can use a weighted alias to split traffic between two different versions of the same function. With this approach, you can test new versions of your functions with a small percentage of traffic and quickly roll back if necessary. This is known as a canary deployment. Canary deployments differ from blue/green deployments by exposing the new version to only a portion of requests rather than switching all traffic at once.
+
+## S19 Create a deployment group for an EC2/On-Premises blue/green deployment (console) — Create a deployment group for an EC2/On-Premises blue/green deployment (console)
+url: https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html#deployment-groups-create-blue-green
+fetched: 2026-11-26
+> identify the instances in your original environment (that is, the
+> instances you want to replace or that are running the current
+> application revision).
+> automatically, causing traffic to be rerouted to
+> them. Instances in the original environment are then
+> deregistered.
+
+## S20 CodeDeploy blue/green deployments for Amazon ECS — CodeDeploy blue/green deployments for Amazon ECS
+url: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html#deployment-type-bluegreen
+fetched: 2026-11-26
+> There are three ways traffic can shift during a blue/green deployment:
+> Canary — Traffic is shifted in two
+> increments.
+> Linear — Traffic is shifted in
+> equal increments with an equal number of minutes between each increment.
+> All-at-once — All traffic is
+> shifted from the original task set to the updated task set all at
+> once.
+> You must configure the service to use either an Application Load Balancer or Network Load Balancer.
+
+## S21 Network Load Balancer resources for Amazon ECS blue/green, linear and canary deployments — Network Load Balancer resources for Amazon ECS blue/green, linear and canary deployments
+url: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/nlb-resources-for-blue-green.html#nlb-resources-for-blue-green
+fetched: 2026-11-26
+> When your configuration includes a Network Load Balancer, Amazon ECS adds a 10 minute delay to the following
+> lifecycle stages:
+> TEST_TRAFFIC_SHIFT
+> PRODUCTION_TRAFFIC_SHIFT
+
+## S22 AppSpec 'hooks' section for an Amazon ECS deployment — List of lifecycle event hooks for an Amazon ECS deployment
+url: https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-list-ecs
+fetched: 2026-11-26
+> BeforeInstall – Use to run tasks before the replacement task set
+> is created. One target group is associated with the original task set. If an
+> optional test listener is specified, it is associated with the original task set. A
+> rollback is not possible at this point.
+> AfterInstall – Use to run tasks after the replacement task set is
+> created and one of the target groups is associated with it.
