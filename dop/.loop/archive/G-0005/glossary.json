@@ -1,0 +1,264 @@
+{
+  "item": "G-0005",
+  "entries": [
+    {
+      "id": "sqs",
+      "name": "Amazon SQS",
+      "aliases": [
+        "Amazon SQS"
+      ],
+      "reading": "エスキューエス",
+      "summary": "メッセージを一時的にためておく「キュー（順番待ちの列）」を提供するサービス。送る側と受け取る側を直接つながずに済むので、分かれたソフトウェアの部品どうしを、互いに強く頼らない形（疎結合）でつなげられる。",
+      "features": [
+        {
+          "title": "標準キューと FIFO キュー",
+          "text": "メッセージは複数のサーバーにしまわれる。標準キューは「少なくとも 1 回」届ける。FIFO キューは「必ず 1 回だけ」処理する。",
+          "source_id": "S2"
+        },
+        {
+          "title": "可視性タイムアウト",
+          "text": "受け取ったメッセージはキューに残るが、しばらくほかの受け取り手から見えなくなる。その間に、ほかの受け取り手が同じメッセージを処理しないようにする。",
+          "source_id": "S3"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "標準キューは同じメッセージが 2 回以上届くことがある前提で作る。1 回だけの処理が要る時は FIFO キューを考える。",
+          "source_id": "S2"
+        },
+        {
+          "text": "処理に時間がかかるとほかの受け取り手が同じメッセージを処理してしまう場面では、可視性タイムアウトを考える。",
+          "source_id": "S3"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html#sqs-benefits",
+          "source_id": "S2",
+          "quote": "Standard queues support at-least-once message delivery, and FIFO queues support exactly-once message processing and high-throughput mode."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+          "source_id": "S3",
+          "quote": "This invisibility is controlled by the visibility timeout, which ensures that other consumers cannot process the same message while you are working on it."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "vpc",
+      "name": "Amazon VPC",
+      "aliases": [
+        "Amazon VPC"
+      ],
+      "reading": "ブイピーシー",
+      "summary": "自分で決めた、ほかと論理的に分けられた仮想のネットワークの中で、AWS のリソースを動かせるサービス。自社のデータセンターのネットワークに近い物を、AWS の上に作れる。",
+      "features": [
+        {
+          "title": "サブネット",
+          "text": "VPC の中の IP アドレスの範囲。1 つのサブネットは 1 つのアベイラビリティーゾーンの中に置く。",
+          "source_id": "S5"
+        },
+        {
+          "title": "ルートテーブルとゲートウェイ",
+          "text": "ルートテーブルで、サブネットやゲートウェイからの通信の行き先を決める。ゲートウェイは VPC を別のネットワークにつなぐ（例: インターネットゲートウェイでインターネットへ）。",
+          "source_id": "S5"
+        },
+        {
+          "title": "VPC エンドポイント",
+          "text": "インターネットゲートウェイや NAT の装置を使わずに、AWS のサービスへ非公開でつなぐ。",
+          "source_id": "S5"
+        },
+        {
+          "title": "フローログ",
+          "text": "VPC の中のネットワークインターフェイスに出入りする IP の通信の情報を記録する。",
+          "source_id": "S5"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "インターネットを通らずに AWS のサービスへつなぎたい場面では、VPC エンドポイントを考える。",
+          "source_id": "S5"
+        },
+        {
+          "text": "サブネットは 1 つのアベイラビリティーゾーンの中にしか置けない、という決まりが、構成を考える時の前提になる。",
+          "source_id": "S5"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html",
+          "source_id": "S4",
+          "quote": "you can launch AWS resources in a logically isolated virtual network that you've defined."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html#amazon-vpc-features",
+          "source_id": "S5",
+          "quote": "Use a VPC endpoint to connect to AWS services privately, without the use of an internet gateway or NAT device."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "codeartifact",
+      "name": "AWS CodeArtifact",
+      "aliases": [
+        "AWS CodeArtifact"
+      ],
+      "reading": "コードアーティファクト",
+      "summary": "アプリ開発で使うソフトウェアのパッケージ（部品のまとまり）を、組織の中でしまって共有するための、管理された置き場（リポジトリ）のサービス。",
+      "features": [
+        {
+          "title": "外部の公開リポジトリとつなぐ",
+          "text": "非公開の CodeArtifact のリポジトリと、npmjs.com や Maven Central のような公開のリポジトリをつなげられる。パッケージを求められた時に、公開のリポジトリから取ってきて保存する。",
+          "source_id": "S6"
+        },
+        {
+          "title": "ドメインとリポジトリ",
+          "text": "パッケージはリポジトリにしまう。どのリポジトリも 1 つのドメインに属する。",
+          "source_id": "S7"
+        },
+        {
+          "title": "アップストリーム",
+          "text": "同じドメインの中で、あるリポジトリを別のリポジトリのアップストリーム（上流）にすると、上流で使えるパッケージを下流でも使える。",
+          "source_id": "S7"
+        },
+        {
+          "title": "認証が要る",
+          "text": "パッケージを出したり使ったりするには、サービスへの認証が要る。",
+          "source_id": "S7"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "公開のパッケージを組織の中のリポジトリを通して使いたい場面では、外部の公開リポジトリへの接続を考える。",
+          "source_id": "S6"
+        },
+        {
+          "text": "チームごとのリポジトリから共通のパッケージを使いたい場面では、同じドメインの中でアップストリームを設定する形を考える。",
+          "source_id": "S7"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "source_id": "S6",
+          "quote": "You can create a connection between your private CodeArtifact repository and an external, public repository, such as npmjs.com or Maven Central."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work",
+          "source_id": "S7",
+          "quote": "Every CodeArtifact repository is a member of a single CodeArtifact domain."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "control-tower",
+      "name": "AWS Control Tower",
+      "aliases": [
+        "AWS Control Tower"
+      ],
+      "reading": "コントロールタワー",
+      "summary": "たくさんの AWS アカウントを使う環境を、決められた良いやり方（ベストプラクティス）に沿って用意し、統制するためのサービス。AWS Organizations などほかのサービスを組み合わせて、1 時間かからずに土台（ランディングゾーン）を作る。",
+      "features": [
+        {
+          "title": "ランディングゾーン",
+          "text": "セキュリティとコンプライアンスの良いやり方に沿って作られた、複数アカウントの環境。",
+          "source_id": "S9"
+        },
+        {
+          "title": "コントロール（ガードレール）",
+          "text": "AWS の環境全体を続けて統制するための、大きな決まり。",
+          "source_id": "S9"
+        },
+        {
+          "title": "Account Factory",
+          "text": "設定を変えられるアカウントのひな形。承認済みの設定で、新しいアカウントを決まった形で用意できる。",
+          "source_id": "S9"
+        },
+        {
+          "title": "ほかのサービスの組み合わせ",
+          "text": "AWS Organizations・AWS Service Catalog・AWS IAM Identity Center などをまとめて動かし、リソースを代わりに用意・管理する。",
+          "source_id": "S8"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "新しいアカウントを、承認済みの設定でいつも同じ形に用意したい場面では、Account Factory を考える。",
+          "source_id": "S9"
+        }
+      ],
+      "compare": [
+        {
+          "with": "AWS Organizations",
+          "text": "Control Tower は Organizations などのサービスを組み合わせて、複数アカウントの環境（ランディングゾーン）を作る。",
+          "source_id": "S8"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "source_id": "S8",
+          "quote": "AWS Control Tower offers a straightforward way to set up and govern an AWS multi-account environment, following prescriptive best practices."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features",
+          "source_id": "S9",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "macie",
+      "name": "Amazon Macie",
+      "aliases": [
+        "Amazon Macie"
+      ],
+      "reading": "メイシー",
+      "summary": "機械学習とパターンの一致で、Amazon S3 に置かれたデータの中の機密データ（守るべきデータ）を見つけ、知らせるデータセキュリティのサービス。",
+      "features": [
+        {
+          "title": "検出結果",
+          "text": "S3 のオブジェクトに機密データを見つけると、検出結果を作って知らせる。",
+          "source_id": "S10"
+        },
+        {
+          "title": "自動化された機密データ検出",
+          "text": "S3 のデータ全体のどこに機密データがありそうかを、広く見渡せるようにする。",
+          "source_id": "S11"
+        },
+        {
+          "title": "機密データ検出ジョブ",
+          "text": "より深く、的を絞った分析をする。",
+          "source_id": "S11"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "S3 全体を広く見渡したい時は自動化された機密データ検出、決めたデータを深く調べたい時は機密データ検出ジョブ、という使い分けが問われる。",
+          "source_id": "S11"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "source_id": "S10",
+          "quote": "If Macie detects sensitive data in an S3 object, Macie generates a finding to notify you of the sensitive data that it found."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features",
+          "source_id": "S11",
+          "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate. Sensitive data discovery jobs provide deeper, more targeted analysis."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}

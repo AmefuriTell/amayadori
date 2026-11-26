@@ -1,0 +1,62 @@
+{
+  "id": "cloudtrail",
+  "name": "AWS CloudTrail",
+  "aliases": [
+    "AWS CloudTrail"
+  ],
+  "reading": "クラウドトレイル",
+  "summary": "AWS アカウントの中で、ユーザー・ロール・AWS サービスが行った操作を「イベント」として記録するサービス。監査・統制・コンプライアンスに使う。",
+  "features": [
+    {
+      "title": "証跡（トレイル）",
+      "text": "AWS の操作の記録を取り、Amazon S3 のバケットに届けて保存する。CloudWatch Logs や Amazon EventBridge にも届けられる。",
+      "source_id": "S10"
+    },
+    {
+      "title": "管理イベント",
+      "text": "アカウントのリソースそのものを管理する操作の記録（コントロールプレーンの操作とも呼ぶ）。証跡は既定で管理イベントを記録する。",
+      "source_id": "S11"
+    },
+    {
+      "title": "データイベント",
+      "text": "リソースの上や中で行われた操作の記録（データプレーンの操作とも呼ぶ）。量が多くなりやすい。",
+      "source_id": "S12"
+    },
+    {
+      "title": "CloudTrail Lake の受付停止",
+      "text": "CloudTrail Lake（イベントをイベントデータストアにためる仕組み）は、2026 年 5 月 31 日から新しい顧客の受付を止めている。",
+      "source_id": "S0"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "既定の証跡が記録するのは管理イベント。データの読み書きのような操作まで記録したい時は、データイベントを考える。",
+      "source_id": "S11"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html",
+      "source_id": "S0",
+      "quote": "AWS CloudTrail Lake will no longer be open to new customers starting on May 31, 2026."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html#cloudtrail-user-guide",
+      "source_id": "S10",
+      "quote": "Actions taken by a user, role, or an AWS service are recorded as events in CloudTrail."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-management-events",
+      "source_id": "S11",
+      "quote": "By default, CloudTrail trails and CloudTrail Lake event data stores log management events."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-data-events",
+      "source_id": "S12",
+      "quote": "Data events provide information about the resource operations performed on or in a resource."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

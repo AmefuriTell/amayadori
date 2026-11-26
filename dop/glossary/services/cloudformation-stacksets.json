@@ -1,0 +1,68 @@
+{
+  "id": "cloudformation-stacksets",
+  "name": "AWS CloudFormation StackSets",
+  "aliases": [
+    "AWS CloudFormation StackSets"
+  ],
+  "reading": "クラウドフォーメーション スタックセッツ",
+  "summary": "CloudFormation のスタック（テンプレートから作ったリソースのまとまり）を、複数の AWS アカウントと複数のリージョンへ、1 回の操作で作る・更新する・消すための仕組み。",
+  "features": [
+    {
+      "title": "StackSet",
+      "text": "決めたアカウントとリージョンに置く多くのスタックの入れ物。どのスタックも同じテンプレートから作るが、パラメータで 1 つずつ変えられる。",
+      "source_id": "S7"
+    },
+    {
+      "title": "スタックインスタンス",
+      "text": "あるリージョンの、ある対象のアカウントにあるスタックを指す物。スタックを作れなかった時は、その理由を見せる。1 つの StackSet だけに属する。",
+      "source_id": "S7"
+    },
+    {
+      "title": "2 つのアクセス許可のモデル",
+      "text": "セルフマネージドでは、アカウントをまたいでデプロイするための IAM ロールを自分で作る。サービスマネージドでは、AWS Organizations で管理するアカウントにデプロイでき、IAM ロールは StackSets が作る。",
+      "source_id": "S8"
+    },
+    {
+      "title": "自動デプロイ",
+      "text": "サービスマネージドでは、あとから組織に加わるアカウントにも自動でデプロイするように設定できる。",
+      "source_id": "S8"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "組織に新しく加わるアカウントにも、決まったリソースを自動で配りたい場面では、サービスマネージドのアクセス許可と自動デプロイを考える。",
+      "source_id": "S8"
+    },
+    {
+      "text": "アカウントごとに少しだけ値を変えたい場面では、同じテンプレートのまま、スタックごとのパラメータで変える形を考える。",
+      "source_id": "S7"
+    }
+  ],
+  "compare": [
+    {
+      "with": "AWS CloudFormation",
+      "text": "StackSets は、CloudFormation のスタックの働きを広げ、多くのアカウントとリージョンのスタックを 1 回の操作で作る・更新する・消せるようにする。",
+      "source_id": "S6"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+      "source_id": "S6",
+      "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset",
+      "source_id": "S7",
+      "quote": "Each stack is based on the same CloudFormation template, but you can customize individual stacks using parameters."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset-permission-models",
+      "source_id": "S8",
+      "quote": "With this model, you can also turn on automatic deployments to accounts that you add to your organization in the future."
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

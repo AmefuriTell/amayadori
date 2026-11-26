@@ -1,13 +1,285 @@
 {
   "names": {
+    "Amazon Aurora": "aurora",
+    "AWS Backup": "backup",
+    "AWS CloudFormation StackSets": "cloudformation-stacksets",
+    "AWS CloudFormation": "cloudformation",
+    "AWS CloudTrail": "cloudtrail",
+    "Amazon CloudWatch Logs": "cloudwatch-logs",
     "Amazon CloudWatch": "cloudwatch",
+    "AWS CodeArtifact": "codeartifact",
+    "AWS CodeBuild": "codebuild",
+    "AWS CodeDeploy": "codedeploy",
+    "AWS CodePipeline": "codepipeline",
+    "AWS Config": "config",
+    "AWS Control Tower": "control-tower",
+    "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
+    "Amazon EC2": "ec2",
+    "Amazon ECR": "ecr",
+    "Amazon ECS": "ecs",
+    "Elastic Load Balancing": "elastic-load-balancing",
+    "Amazon EventBridge": "eventbridge",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
     "AWS Lambda": "lambda",
+    "Amazon Macie": "macie",
     "AWS Organizations": "organizations",
-    "Amazon S3": "s3"
+    "Amazon RDS": "rds",
+    "Amazon S3": "s3",
+    "Amazon SNS": "sns",
+    "Amazon SQS": "sqs",
+    "AWS Step Functions": "step-functions",
+    "AWS Systems Manager": "systems-manager",
+    "Amazon VPC": "vpc"
   },
   "pages": {
+    "aurora": {
+      "id": "aurora",
+      "name": "Amazon Aurora",
+      "reading": "オーロラ",
+      "summary": "MySQL や PostgreSQL と互換のある、フルマネージドのリレーショナルデータベース。性能の高いストレージを持ち、ストレージは必要に応じて自動で大きくなる。",
+      "features": [
+        {
+          "title": "グローバルデータベース",
+          "text": "複数の AWS リージョンにまたがる 1 つのデータベース。世界中から速く読め、リージョン全体の障害からも復旧できる。"
+        },
+        {
+          "title": "フェイルオーバー",
+          "text": "障害が起きた時、クラスターに読み込み用のインスタンス（リーダー）があれば、その 1 つを新しいプライマリ（主のインスタンス）に昇格させる。これは切り替えの方法の 1 つ。可用性を上げるため、2 つ以上のアベイラビリティーゾーンにリーダーを 1 つ以上置くことが勧められている。"
+        }
+      ],
+      "exam_points": [
+        "リージョン全体の障害に備えたい場面では、Aurora のグローバルデータベースを考える。",
+        "障害の時にプライマリを切り替えられるようにしたい場面では、別のアベイラビリティーゾーンにリーダーを置く形を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html#CHAP_AuroraOverview",
+          "quote": "Amazon Aurora (Aurora) is a fully managed relational database engine that's compatible with MySQL and PostgreSQL."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.GlobalDatabase.html#Concepts.Aurora_Fea_Regions_DB-eng.Feature.GlobalDatabase",
+          "quote": "An Aurora global database is a single database that spans multiple AWS Regions, enabling low-latency global reads and disaster recovery from any Region-wide outage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-failover.html#aurora-failover",
+          "quote": "we recommend that you create at least one or more reader instances in two or more different Availability Zones."
+        }
+      ]
+    },
+    "backup": {
+      "id": "backup",
+      "name": "AWS Backup",
+      "reading": "バックアップ",
+      "summary": "AWS のいろいろなサービスや社内のデータを守るバックアップを、1 か所にまとめて自動で行うフルマネージドのサービス。バックアップの決まりの設定と、その動きの確認を 1 か所でできる。",
+      "features": [
+        {
+          "title": "バックアッププラン",
+          "text": "バックアップの決まり（バックアッププラン）を作り、守りたい AWS のリソースに当てる。"
+        },
+        {
+          "title": "Vault Lock",
+          "text": "バックアップを入れておく保管庫（ボールト）に任意で付けるロック。ガバナンスモードとコンプライアンスモードの 2 つがあり、コンプライアンスモードのロックは、どのユーザーも AWS も変えたり消したりできない。"
+        }
+      ],
+      "exam_points": [
+        "誰にもバックアップの保管庫のロックを変えたり消したりさせたくない場面では、コンプライアンスモードの Vault Lock を考える。",
+        "多くのリソースのバックアップを 1 つの決まりでまとめて自動にしたい場面では、バックアッププランを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#whatisbackup",
+          "quote": "AWS Backup is a fully-managed service that makes it easy to centralize and automate data protection across AWS services, in the cloud, and on premises."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#policy-based-backup-solution",
+          "quote": "With AWS Backup, you can create backup policies known as backup plans."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html#vault-lock",
+          "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+        }
+      ]
+    },
+    "cloudformation-stacksets": {
+      "id": "cloudformation-stacksets",
+      "name": "AWS CloudFormation StackSets",
+      "reading": "クラウドフォーメーション スタックセッツ",
+      "summary": "CloudFormation のスタック（テンプレートから作ったリソースのまとまり）を、複数の AWS アカウントと複数のリージョンへ、1 回の操作で作る・更新する・消すための仕組み。",
+      "features": [
+        {
+          "title": "StackSet",
+          "text": "決めたアカウントとリージョンに置く多くのスタックの入れ物。どのスタックも同じテンプレートから作るが、パラメータで 1 つずつ変えられる。"
+        },
+        {
+          "title": "スタックインスタンス",
+          "text": "あるリージョンの、ある対象のアカウントにあるスタックを指す物。スタックを作れなかった時は、その理由を見せる。1 つの StackSet だけに属する。"
+        },
+        {
+          "title": "2 つのアクセス許可のモデル",
+          "text": "セルフマネージドでは、アカウントをまたいでデプロイするための IAM ロールを自分で作る。サービスマネージドでは、AWS Organizations で管理するアカウントにデプロイでき、IAM ロールは StackSets が作る。"
+        },
+        {
+          "title": "自動デプロイ",
+          "text": "サービスマネージドでは、あとから組織に加わるアカウントにも自動でデプロイするように設定できる。"
+        }
+      ],
+      "exam_points": [
+        "組織に新しく加わるアカウントにも、決まったリソースを自動で配りたい場面では、サービスマネージドのアクセス許可と自動デプロイを考える。",
+        "アカウントごとに少しだけ値を変えたい場面では、同じテンプレートのまま、スタックごとのパラメータで変える形を考える。"
+      ],
+      "compare": [
+        {
+          "with": "AWS CloudFormation",
+          "text": "StackSets は、CloudFormation のスタックの働きを広げ、多くのアカウントとリージョンのスタックを 1 回の操作で作る・更新する・消せるようにする。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset",
+          "quote": "Each stack is based on the same CloudFormation template, but you can customize individual stacks using parameters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset-permission-models",
+          "quote": "With this model, you can also turn on automatic deployments to accounts that you add to your organization in the future."
+        }
+      ]
+    },
+    "cloudformation": {
+      "id": "cloudformation",
+      "name": "AWS CloudFormation",
+      "reading": "クラウドフォーメーション",
+      "summary": "欲しい AWS のリソースをテンプレート（設計図のファイル）に書くと、その通りに作って設定してくれるサービス。リソースの管理にかける手間を減らせる。",
+      "features": [
+        {
+          "title": "テンプレートで作る",
+          "text": "EC2 インスタンスや RDS の DB インスタンスなど、欲しいリソースをテンプレートに書くと、CloudFormation が用意と設定を受け持つ。"
+        },
+        {
+          "title": "変更セット",
+          "text": "テンプレートから作ったリソースのまとまり（スタック）を変える時、その変更が動いているリソースにどう影響するか（消える・置き換わるか）を、実行する前に見られる。変更セットを実行すると決めた時だけ変更する。"
+        },
+        {
+          "title": "ドリフトの検出",
+          "text": "スタックの実際の設定が、期待した設定から変わって（ずれて）いないかを見つける。プロパティが消されたり値が変えられたりしたリソースを、ずれているとみなす。"
+        }
+      ],
+      "exam_points": [
+        "本番のスタックを更新する前に、消えたり置き換わったりするリソースが無いか確かめたい場面では、変更セットを考える。",
+        "スタックの実際の設定が、期待した設定とずれていないかを確かめたい場面では、ドリフトの検出を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome",
+          "quote": "You create a template that describes all the AWS resources that you want"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html#what-is-drift",
+          "quote": "Drift detection enables you to detect whether a stack's actual configuration differs, or has drifted, from its expected configuration."
+        }
+      ]
+    },
+    "cloudtrail": {
+      "id": "cloudtrail",
+      "name": "AWS CloudTrail",
+      "reading": "クラウドトレイル",
+      "summary": "AWS アカウントの中で、ユーザー・ロール・AWS サービスが行った操作を「イベント」として記録するサービス。監査・統制・コンプライアンスに使う。",
+      "features": [
+        {
+          "title": "証跡（トレイル）",
+          "text": "AWS の操作の記録を取り、Amazon S3 のバケットに届けて保存する。CloudWatch Logs や Amazon EventBridge にも届けられる。"
+        },
+        {
+          "title": "管理イベント",
+          "text": "アカウントのリソースそのものを管理する操作の記録（コントロールプレーンの操作とも呼ぶ）。証跡は既定で管理イベントを記録する。"
+        },
+        {
+          "title": "データイベント",
+          "text": "リソースの上や中で行われた操作の記録（データプレーンの操作とも呼ぶ）。量が多くなりやすい。"
+        },
+        {
+          "title": "CloudTrail Lake の受付停止",
+          "text": "CloudTrail Lake（イベントをイベントデータストアにためる仕組み）は、2026 年 5 月 31 日から新しい顧客の受付を止めている。"
+        }
+      ],
+      "exam_points": [
+        "既定の証跡が記録するのは管理イベント。データの読み書きのような操作まで記録したい時は、データイベントを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting on May 31, 2026."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html#cloudtrail-user-guide",
+          "quote": "Actions taken by a user, role, or an AWS service are recorded as events in CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-management-events",
+          "quote": "By default, CloudTrail trails and CloudTrail Lake event data stores log management events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-concepts.html#cloudtrail-concepts-data-events",
+          "quote": "Data events provide information about the resource operations performed on or in a resource."
+        }
+      ]
+    },
+    "cloudwatch-logs": {
+      "id": "cloudwatch-logs",
+      "name": "Amazon CloudWatch Logs",
+      "reading": "クラウドウォッチ ログズ",
+      "summary": "EC2 インスタンス・CloudTrail・自分のアプリなど、いろいろな所のログ（記録）を 1 か所に集めて、保存・監視・検索できるサービス。",
+      "features": [
+        {
+          "title": "ログを 1 か所に集める",
+          "text": "システム・アプリ・AWS サービスのログを、1 つの規模を広げやすいサービスにまとめる。クエリ言語（検索のための言葉）でログを検索でき、機密のデータを隠すこともできる。"
+        },
+        {
+          "title": "保持期間",
+          "text": "ログは既定では消えずにずっと残る。ロググループごとに、無期限か 1 日〜10 年の保持期間を決められる。アカウント全体や、名前の先頭が同じロググループにまとめて決めることもできる。"
+        },
+        {
+          "title": "ログから数値を作る",
+          "text": "たとえばアプリのログのエラーの数を数えて CloudWatch のメトリクスにし、決めた値を超えたら通知できる。"
+        }
+      ],
+      "exam_points": [
+        "ログを決まった期間だけ残したい時は、ロググループの保持期間を決める（既定では消えずにずっと残る）。",
+        "アプリのログのエラーの数が決めた値を超えた時に通知したい場面で、CloudWatch Logs のこの機能が使える。"
+      ],
+      "compare": [
+        {
+          "with": "Amazon CloudWatch",
+          "text": "CloudWatch Logs はログを集めて保存・検索する部分。ログから作った数値は CloudWatch のメトリクスとして使う。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#WhatIsCloudWatchLogs",
+          "quote": "CloudWatch Logs enables you to centralize the logs from all of your systems, applications, and AWS services that you use, in a single, highly scalable service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#cloudwatch-logs-features",
+          "quote": "By default, logs are kept indefinitely and never expire."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html#cloudwatch-logs-features",
+          "quote": "CloudWatch Logs can track the number of errors that occur in your application logs and send you a notification whenever the rate of errors exceeds a threshold you specify."
+        }
+      ]
+    },
     "cloudwatch": {
       "id": "cloudwatch",
       "name": "Amazon CloudWatch",
@@ -44,6 +316,479 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html#cloudwatch-logs-overview",
           "quote": "Create metric filters to extract numerical values from logs and generate CloudWatch metrics, which you can use for alerting and dashboards."
+        }
+      ]
+    },
+    "codeartifact": {
+      "id": "codeartifact",
+      "name": "AWS CodeArtifact",
+      "reading": "コードアーティファクト",
+      "summary": "アプリ開発で使うソフトウェアのパッケージ（部品のまとまり）を、組織の中でしまって共有するための、管理された置き場（リポジトリ）のサービス。",
+      "features": [
+        {
+          "title": "外部の公開リポジトリとつなぐ",
+          "text": "非公開の CodeArtifact のリポジトリと、npmjs.com や Maven Central のような公開のリポジトリをつなげられる。パッケージを求められた時に、公開のリポジトリから取ってきて保存する。"
+        },
+        {
+          "title": "ドメインとリポジトリ",
+          "text": "パッケージはリポジトリにしまう。どのリポジトリも 1 つのドメインに属する。"
+        },
+        {
+          "title": "アップストリーム",
+          "text": "同じドメインの中で、あるリポジトリを別のリポジトリのアップストリーム（上流）にすると、上流で使えるパッケージを下流でも使える。"
+        },
+        {
+          "title": "認証が要る",
+          "text": "パッケージを出したり使ったりするには、サービスへの認証が要る。"
+        }
+      ],
+      "exam_points": [
+        "公開のパッケージを組織の中のリポジトリを通して使いたい場面では、外部の公開リポジトリへの接続を考える。",
+        "チームごとのリポジトリから共通のパッケージを使いたい場面では、同じドメインの中でアップストリームを設定する形を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "quote": "You can create a connection between your private CodeArtifact repository and an external, public repository, such as npmjs.com or Maven Central."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work",
+          "quote": "Every CodeArtifact repository is a member of a single CodeArtifact domain."
+        }
+      ]
+    },
+    "codebuild": {
+      "id": "codebuild",
+      "name": "AWS CodeBuild",
+      "reading": "コードビルド",
+      "summary": "クラウドでソースコードのビルド（コンパイル）とテストを行い、デプロイできる成果物（アーティファクト）を作るサービス。ビルド用のサーバーを自分で用意・管理する必要がない。",
+      "features": [
+        {
+          "title": "フルマネージドのビルド",
+          "text": "ソースコードのコンパイル・ユニットテスト・成果物の作成を行う。よく使う言語やツール（Maven・Gradle など）の環境が用意されており、自分のツールを入れた環境も使える。ビルドの要求が増えると自動で規模を広げる。"
+        },
+        {
+          "title": "パイプラインの一部として動く",
+          "text": "コンソール・AWS CLI・SDK から動かせるほか、AWS CodePipeline のビルドやテストのステージにアクションとして入れられる。"
+        },
+        {
+          "title": "テストレポート",
+          "text": "buildspec ファイルにレポートグループとテストの情報を書くと、ビルドの中で動いたテストの結果をレポートとして残せる。テストを動かすたびに新しいレポートができる。"
+        }
+      ],
+      "exam_points": [
+        "ビルド用のサーバーを管理せずにビルドとテストを自動化したい場面で、CodeBuild が選択肢になる。",
+        "テストの結果を CodeBuild で見たい時は、buildspec にレポートグループを書く形になる。"
+      ],
+      "compare": [
+        {
+          "with": "AWS CodePipeline",
+          "text": "CodePipeline はリリースの流れ全体（ステージとアクション）を受け持ち、CodeBuild はその中のビルドやテストのアクションとして動く。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html#welcome",
+          "quote": "CodeBuild compiles your source code, runs unit tests, and produces artifacts that are ready to deploy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/welcome.html#welcome-quick-look",
+          "quote": "you can add CodeBuild as a build or test action to the build or test stage of a pipeline in AWS CodePipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+          "quote": "To create a test report, you add a report group name to the buildspec file of a build project with information about your test cases."
+        }
+      ]
+    },
+    "codedeploy": {
+      "id": "codedeploy",
+      "name": "AWS CodeDeploy",
+      "reading": "コードデプロイ",
+      "summary": "アプリケーションのデプロイ（新しい版を配って動かすこと）を自動にするサービス。EC2 インスタンス・社内のサーバー・Lambda 関数・ECS のサービスに配れる。",
+      "features": [
+        {
+          "title": "インプレースデプロイ",
+          "text": "各インスタンスでアプリを止め、新しい版を入れて起動し、確かめる。使えるのは EC2/オンプレミスのデプロイだけ。"
+        },
+        {
+          "title": "Blue/Green デプロイ",
+          "text": "元のインスタンスの集まりを、別の新しいインスタンスの集まりに置き換える。新しい方をロードバランサーに登録して、通信をそちらへ回す。"
+        },
+        {
+          "title": "AppSpec ファイル",
+          "text": "CodeDeploy 専用のファイルで、デプロイの時に CodeDeploy にさせる動きを決める。"
+        }
+      ],
+      "exam_points": [
+        "各インスタンスを止めて新しい版に入れ替えるインプレースと、新しいインスタンスの集まりに通信を回す Blue/Green の違いが問われる。インプレースは EC2/オンプレミスでだけ使える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome",
+          "quote": "CodeDeploy is a deployment service that automates application deployments to Amazon EC2 instances, on-premises instances, serverless Lambda functions, or Amazon ECS services."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview",
+          "quote": "Only deployments that use the EC2/On-Premises compute platform can use in-place deployments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview-in-place",
+          "quote": "The AppSpec file is unique to CodeDeploy. It defines the deployment actions you want CodeDeploy to execute."
+        }
+      ]
+    },
+    "codepipeline": {
+      "id": "codepipeline",
+      "name": "AWS CodePipeline",
+      "reading": "コードパイプライン",
+      "summary": "ソフトウェアをリリースするまでの手順（ソースの取得・ビルド・テスト・デプロイなど）を形にし、目に見えるようにして、自動で流す継続的デリバリーのサービス。",
+      "features": [
+        {
+          "title": "リリースの流れを自動化",
+          "text": "リリースの手順をステージとして形にし、変更があるたびに自動で流す。"
+        },
+        {
+          "title": "ステージ",
+          "text": "環境を分け、その環境に同時に入る変更の数を抑えるための単位。各ステージには、アーティファクト（ソースコードなどの成果物）に対して行うアクションが入る。"
+        },
+        {
+          "title": "アクション",
+          "text": "アクションの種類は、ソース・ビルド・テスト・デプロイ・承認・呼び出し。アクションは順番にも並列にも動かせる。"
+        }
+      ],
+      "exam_points": [
+        "ビルドとテストなどを同時に動かしたい場面では、アクションを並列に並べる形を考える（順番にも並列にも動かせる）。",
+        "ソースの取得からデプロイまでを自動でつなぎたい場面で、CodePipeline のステージとアクションの組み合わせが選択肢になる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html#welcome",
+          "quote": "AWS CodePipeline is a continuous delivery service you can use to model, visualize, and automate the steps required to release your software."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/concepts.html#concepts-stages",
+          "quote": "Valid CodePipeline action types are source, build, test, deploy, approval, and invoke. Actions can run in series or in parallel."
+        }
+      ]
+    },
+    "config": {
+      "id": "config",
+      "name": "AWS Config",
+      "reading": "コンフィグ",
+      "summary": "AWS アカウントの中のリソースの設定を詳しく見られるようにするサービス。リソースどうしの関係や、過去の設定も記録するので、設定がどう変わってきたかが分かる。",
+      "features": [
+        {
+          "title": "Config ルール",
+          "text": "リソースの設定を決まり（ルール）で評価する。決まりに反するリソースを「非準拠」とし、通知を送る。"
+        },
+        {
+          "title": "修復とコンフォーマンスパック",
+          "text": "ルールで非準拠になったリソースを修復できる。いくつかのルールを 1 つのまとまり（コンフォーマンスパック）として入れて見張れる。"
+        },
+        {
+          "title": "アグリゲーター",
+          "text": "複数のアカウントとリージョンの設定と準拠のデータを、1 つのアカウントとリージョンに集める。"
+        }
+      ],
+      "exam_points": [
+        "決まりに反した設定を見つけて直したい場面では、Config ルールと修復を考える。",
+        "多くのアカウントとリージョンの準拠の状態を 1 か所で見たい場面では、アグリゲーターを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#scenarios-resource-administration",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#config-features",
+          "quote": "An aggregator collects AWS Config configuration and compliance data from multiple AWS accounts and AWS Regions into a single account and Region."
+        }
+      ]
+    },
+    "control-tower": {
+      "id": "control-tower",
+      "name": "AWS Control Tower",
+      "reading": "コントロールタワー",
+      "summary": "たくさんの AWS アカウントを使う環境を、決められた良いやり方（ベストプラクティス）に沿って用意し、統制するためのサービス。AWS Organizations などほかのサービスを組み合わせて、1 時間かからずに土台（ランディングゾーン）を作る。",
+      "features": [
+        {
+          "title": "ランディングゾーン",
+          "text": "セキュリティとコンプライアンスの良いやり方に沿って作られた、複数アカウントの環境。"
+        },
+        {
+          "title": "コントロール（ガードレール）",
+          "text": "AWS の環境全体を続けて統制するための、大きな決まり。"
+        },
+        {
+          "title": "Account Factory",
+          "text": "設定を変えられるアカウントのひな形。承認済みの設定で、新しいアカウントを決まった形で用意できる。"
+        },
+        {
+          "title": "ほかのサービスの組み合わせ",
+          "text": "AWS Organizations・AWS Service Catalog・AWS IAM Identity Center などをまとめて動かし、リソースを代わりに用意・管理する。"
+        }
+      ],
+      "exam_points": [
+        "新しいアカウントを、承認済みの設定でいつも同じ形に用意したい場面では、Account Factory を考える。"
+      ],
+      "compare": [
+        {
+          "with": "AWS Organizations",
+          "text": "Control Tower は Organizations などのサービスを組み合わせて、複数アカウントの環境（ランディングゾーン）を作る。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "quote": "AWS Control Tower offers a straightforward way to set up and govern an AWS multi-account environment, following prescriptive best practices."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html#features",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        }
+      ]
+    },
+    "ec2-auto-scaling": {
+      "id": "ec2-auto-scaling",
+      "name": "Amazon EC2 Auto Scaling",
+      "reading": "イーシーツー オートスケーリング",
+      "summary": "アプリケーションの負荷に合わせて、ちょうどよい数の EC2 インスタンス（仮想サーバー）がそろうようにするサービス。インスタンスのまとまり（Auto Scaling グループ）の最小と最大の数を守る。",
+      "features": [
+        {
+          "title": "Auto Scaling グループ",
+          "text": "インスタンスのまとまりに最小と最大の数を決めると、その範囲を守る。スケーリングポリシーを決めると、需要に合わせてインスタンスを起動・終了する。"
+        },
+        {
+          "title": "ヘルスチェックと置き換え",
+          "text": "インスタンスの状態を見張り、終了したり正常でなくなったりしたインスタンスを置き換えて、希望する数を保つ。アプリに合わせた独自のヘルスチェックも決められる。"
+        },
+        {
+          "title": "インスタンスの更新とライフサイクルフック",
+          "text": "AMI や起動テンプレートを変えた時、インスタンスの更新で少しずつ入れ替えられる。ライフサイクルフックで、起動の時や終了の前に独自の処理を動かせる。"
+        }
+      ],
+      "exam_points": [
+        "インスタンスを終了する前や起動した時に決まった処理を挟みたい場面では、ライフサイクルフックを考える。",
+        "起動テンプレートを変えたインスタンスへ少しずつ入れ替えたい場面では、インスタンスの更新を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#what-is-amazon-ec2-auto-scaling",
+          "quote": "Amazon EC2 Auto Scaling helps you ensure that you have the correct number of Amazon EC2 instances available to handle the load for your application."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#ec2-auto-scaling-features",
+          "quote": "you can define custom health checks that are specific to your application to verify that it's responding as expected."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html#ec2-auto-scaling-features",
+          "quote": "Lifecycle hooks are useful for defining custom actions that are invoked as new instances launch or before instances are terminated."
+        }
+      ]
+    },
+    "ec2": {
+      "id": "ec2",
+      "name": "Amazon EC2",
+      "reading": "イーシーツー",
+      "summary": "AWS のクラウドの中で、必要な時に必要なだけ使える計算の能力（仮想サーバー）を提供するサービス。1 台の仮想サーバーを EC2 インスタンスという。",
+      "features": [
+        {
+          "title": "インスタンス",
+          "text": "EC2 インスタンスはクラウドの中の仮想サーバー。ハードウェアの費用を減らし、アプリを早く作って動かせる。"
+        },
+        {
+          "title": "インスタンスタイプ",
+          "text": "インスタンスタイプごとに、計算・メモリ・ストレージの能力が違う。動かすアプリの要件に合わせて選ぶ。"
+        },
+        {
+          "title": "AMI（マシンイメージ）",
+          "text": "インスタンスを用意して起動するのに要るソフトウェアをまとめた物。起動の時に必ず指定し、選んだインスタンスタイプと合っている必要がある。"
+        }
+      ],
+      "exam_points": [
+        "インスタンスを起動する時は、インスタンスタイプ（ハードウェアの能力）と AMI（起動するソフトウェア）を決める。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html#concepts",
+          "quote": "An EC2 instance is a virtual server in the AWS Cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-types",
+          "quote": "Each instance type offers different compute, memory, and storage capabilities, and is grouped in an instance family based on these capabilities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html#AMIs",
+          "quote": "You must specify an AMI when you launch an instance."
+        }
+      ]
+    },
+    "ecr": {
+      "id": "ecr",
+      "name": "Amazon ECR",
+      "reading": "イーシーアール",
+      "summary": "コンテナイメージ（コンテナを動かすための元になる物）を置いておく場所（レジストリ）を、AWS が管理して提供するサービス。安全で、規模を広げやすく、信頼できる。",
+      "features": [
+        {
+          "title": "プライベートリポジトリと権限",
+          "text": "非公開のリポジトリに、AWS IAM を使ったリソースベースのアクセス許可を付けられる。決めたユーザーや EC2 インスタンスだけがリポジトリとイメージを使える。"
+        },
+        {
+          "title": "ライフサイクルポリシー",
+          "text": "決まり（ルール）を作って、使っていないイメージを片付けられる。決まりは、リポジトリに当てる前に試せる。"
+        },
+        {
+          "title": "イメージのスキャン",
+          "text": "コンテナイメージのソフトウェアの脆弱性（弱点）を見つける。リポジトリごとに「プッシュした時にスキャン」を設定でき、新しく置いたイメージを毎回スキャンする。"
+        },
+        {
+          "title": "レプリケーション（複製）",
+          "text": "イメージを別のリージョンや別のアカウントへ複製できる。レジストリの設定として、リージョンごとに決める。"
+        }
+      ],
+      "exam_points": [
+        "使わなくなった古いイメージを自動で片付けたい場面では、ライフサイクルポリシーを考える。",
+        "置いたイメージの脆弱性を毎回確かめたい場面では、プッシュした時のスキャンを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr",
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features",
+          "quote": "Each repository can be configured to scan on push. This ensures that each new image pushed to the repository is scanned."
+        }
+      ]
+    },
+    "ecs": {
+      "id": "ecs",
+      "name": "Amazon ECS",
+      "reading": "イーシーエス",
+      "summary": "コンテナで作ったアプリケーションを、デプロイ・管理・拡張しやすくするフルマネージドのコンテナオーケストレーション（多くのコンテナをまとめて動かす管理）のサービス。",
+      "features": [
+        {
+          "title": "主な部品",
+          "text": "タスク定義はアプリの設計図。クラスターはアプリが動く土台。タスクはバッチの仕事のように動いて終わるアプリ。サービスは長く動き続ける、状態を持たないアプリ。"
+        },
+        {
+          "title": "Fargate",
+          "text": "サーバーレスの、使った分だけ払う計算の仕組み。サーバーの管理や容量の計画をしなくてよい。"
+        },
+        {
+          "title": "ほかの道具とつながる",
+          "text": "Amazon ECR などの AWS の道具や、Docker などの外の道具とつながっている。"
+        }
+      ],
+      "exam_points": [
+        "コンテナを動かすサーバーを管理したくない場面では、Fargate を考える。",
+        "動き続けるアプリには「サービス」、動いて終わる仕事には「タスク」を使う、という部品の違いが問われる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#Welcome",
+          "quote": "Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#welcome-terminology",
+          "quote": "With Fargate you don't need to manage servers, handle capacity planning, or isolate container workloads for security."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#ecs-features",
+          "quote": "Task An application such as a batch job that performs work, and then stops. Service A long running stateless application."
+        }
+      ]
+    },
+    "elastic-load-balancing": {
+      "id": "elastic-load-balancing",
+      "name": "Elastic Load Balancing",
+      "reading": "エラスティック ロードバランシング",
+      "summary": "入ってくる通信を、EC2 インスタンス・コンテナ・IP アドレスなどの複数の届け先（ターゲット）に自動で振り分けるサービス。1 つまたは複数のアベイラビリティーゾーンにまたがって振り分けられる。",
+      "features": [
+        {
+          "title": "振り分けとヘルスチェック",
+          "text": "登録した届け先の状態を見張り、正常な届け先にだけ通信を送る。ヘルスチェックを設定すると、計算のリソースの状態を見張り、正常な物にだけ要求を送るようにできる。"
+        },
+        {
+          "title": "可用性と耐障害性",
+          "text": "仕事を複数のサーバーに分けることで、アプリが止まりにくく、壊れにくくなる。"
+        },
+        {
+          "title": "自動の拡張",
+          "text": "入ってくる通信の量の変化に合わせて、ロードバランサーの処理の能力を自動で広げる。"
+        },
+        {
+          "title": "ロードバランサーの種類",
+          "text": "複数の種類のロードバランサーがあり、用途に一番合う物を選ぶ。"
+        }
+      ],
+      "exam_points": [
+        "異常なサーバーに通信を送らないようにしたい場面では、ロードバランサーのヘルスチェックを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#what-is-load-balancing",
+          "quote": "It monitors the health of its registered targets, and routes traffic only to the healthy targets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#load-balancer-benefits",
+          "quote": "Using a load balancer increases the availability and fault tolerance of your applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#elb-features",
+          "quote": "Elastic Load Balancing supports multiple load balancer types."
+        }
+      ]
+    },
+    "eventbridge": {
+      "id": "eventbridge",
+      "name": "Amazon EventBridge",
+      "reading": "イベントブリッジ",
+      "summary": "「何かが起きた」という知らせ（イベント）を使って、アプリケーションの部品どうしをつなぐサーバーレスのサービス。イベントを受け取り、絞り込み、形を変えて、届け先に送る。",
+      "features": [
+        {
+          "title": "イベントバス",
+          "text": "イベントを受け取って、0 個以上の届け先（ターゲット）に配る中継役。多くの送り元から多くの届け先へイベントを振り分けるのに向く。"
+        },
+        {
+          "title": "ルールとイベントパターン",
+          "text": "イベントが届くと、そのイベントバスのルールごとに、イベントがルールのパターンに合うかを確かめる。"
+        },
+        {
+          "title": "ターゲットへの配信と変換",
+          "text": "ルールに合ったイベントを、そのルールのターゲットへ送る。送る前にイベントの形を変えることもできる。1 つのルールのターゲットは 5 個まで。"
+        }
+      ],
+      "exam_points": [
+        "AWS のサービスや自分のアプリで起きたことをきっかけに、別の処理を自動で動かしたい場面では、EventBridge のルールでイベントを絞り込み、ターゲットに送る形を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is",
+          "quote": "Amazon EventBridge is a serverless service that uses events to connect application components together"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html#eb-event-bus",
+          "quote": "Rules associated with the event bus evaluate events as they arrive. Each rule checks whether an event matches the rule's pattern."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html#eb-what-is-how-it-works",
+          "quote": "For each event that matches a rule, EventBridge then sends the event to the targets specified for that rule."
         }
       ]
     },
@@ -124,6 +869,40 @@
         }
       ]
     },
+    "macie": {
+      "id": "macie",
+      "name": "Amazon Macie",
+      "reading": "メイシー",
+      "summary": "機械学習とパターンの一致で、Amazon S3 に置かれたデータの中の機密データ（守るべきデータ）を見つけ、知らせるデータセキュリティのサービス。",
+      "features": [
+        {
+          "title": "検出結果",
+          "text": "S3 のオブジェクトに機密データを見つけると、検出結果を作って知らせる。"
+        },
+        {
+          "title": "自動化された機密データ検出",
+          "text": "S3 のデータ全体のどこに機密データがありそうかを、広く見渡せるようにする。"
+        },
+        {
+          "title": "機密データ検出ジョブ",
+          "text": "より深く、的を絞った分析をする。"
+        }
+      ],
+      "exam_points": [
+        "S3 全体を広く見渡したい時は自動化された機密データ検出、決めたデータを深く調べたい時は機密データ検出ジョブ、という使い分けが問われる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "quote": "If Macie detects sensitive data in an S3 object, Macie generates a finding to notify you of the sensitive data that it found."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features",
+          "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate. Sensitive data discovery jobs provide deeper, more targeted analysis."
+        }
+      ]
+    },
     "organizations": {
       "id": "organizations",
       "name": "AWS Organizations",
@@ -163,6 +942,40 @@
         }
       ]
     },
+    "rds": {
+      "id": "rds",
+      "name": "Amazon RDS",
+      "reading": "アールディーエス",
+      "summary": "AWS のクラウドで、リレーショナルデータベース（表の形でデータを持つデータベース）を用意・運用・拡張しやすくするサービス。よくあるデータベースの管理の作業を受け持つ。",
+      "features": [
+        {
+          "title": "管理の作業を受け持つ",
+          "text": "バックアップ・ソフトウェアのパッチ・障害の自動の検出と復旧を RDS が受け持つ。"
+        },
+        {
+          "title": "バックアップと復元",
+          "text": "自動バックアップを有効にしたり、自分でスナップショットを取ったりでき、それを使ってデータベースを復元できる。"
+        },
+        {
+          "title": "高い可用性とリードレプリカ",
+          "text": "プライマリの DB インスタンスと、同期している予備（セカンダリ）の DB インスタンスを持ち、問題が起きたら予備に切り替えられる（フェイルオーバー）。読み込みを増やしたい時はリードレプリカ（プライマリから複製される読み込み用のインスタンス）を使える。"
+        }
+      ],
+      "exam_points": [
+        "問題が起きた時に予備へ切り替えたい（可用性を上げたい）場面と、読み込みの量を増やしたい場面で、予備の DB インスタンスとリードレプリカの使い分けが問われる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html#Welcome",
+          "quote": "Amazon Relational Database Service (Amazon RDS) is a web service that makes it easier to set up, operate, and scale a relational database in the AWS Cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html#Welcome.Concepts.on-prem",
+          "quote": "You can also use read replicas to increase read scaling."
+        }
+      ]
+    },
     "s3": {
       "id": "s3",
       "name": "Amazon S3",
@@ -199,6 +1012,192 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#features-data-processing",
           "quote": "Event notifications – Trigger workflows that use Amazon Simple Notification Service (Amazon SNS), Amazon Simple Queue Service (Amazon SQS), and AWS Lambda when a change is made to your S3 resources."
+        }
+      ]
+    },
+    "sns": {
+      "id": "sns",
+      "name": "Amazon SNS",
+      "reading": "エスエヌエス",
+      "summary": "メッセージを送る側（発行者）から受け取る側（サブスクライバー）へ届けるフルマネージドのサービス。発行者は「トピック」という窓口にメッセージを送り、受け取る側を待たずに（非同期で）やり取りする。",
+      "features": [
+        {
+          "title": "トピック",
+          "text": "発行者はトピックにメッセージを送る。トピックが窓口となり、いろいろな所にいる複数のサブスクライバーにメッセージを届ける。"
+        },
+        {
+          "title": "アプリ向けと人向け",
+          "text": "アプリどうしのやり取り（A2A）と、携帯電話やメールアドレスなど人に届けるやり取り（A2P）の両方に使える。"
+        },
+        {
+          "title": "ファンアウト",
+          "text": "トピックに送った 1 つのメッセージを複製し、SQS のキュー・Lambda 関数・HTTP(S) のエンドポイント・Firehose などの複数の届け先に送る。並行して処理できる。"
+        }
+      ],
+      "exam_points": [
+        "1 つのメッセージを複数の SQS のキューや Lambda 関数に同時に配りたい場面では、SNS のファンアウトを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#welcome",
+          "quote": "Publishers communicate asynchronously with subscribers by sending messages to a topic, which is a logical access point and communication channel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#how-it-works",
+          "quote": "SNS supports both Application-to-Application (A2A) and Application-to-Person (A2P) messaging"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#SNSFanoutScenario",
+          "quote": "The Fanout scenario is when a message published to an SNS topic is replicated and pushed to multiple endpoints"
+        }
+      ]
+    },
+    "sqs": {
+      "id": "sqs",
+      "name": "Amazon SQS",
+      "reading": "エスキューエス",
+      "summary": "メッセージを一時的にためておく「キュー（順番待ちの列）」を提供するサービス。送る側と受け取る側を直接つながずに済むので、分かれたソフトウェアの部品どうしを、互いに強く頼らない形（疎結合）でつなげられる。",
+      "features": [
+        {
+          "title": "標準キューと FIFO キュー",
+          "text": "メッセージは複数のサーバーにしまわれる。標準キューは「少なくとも 1 回」届ける。FIFO キューは「必ず 1 回だけ」処理する。"
+        },
+        {
+          "title": "可視性タイムアウト",
+          "text": "受け取ったメッセージはキューに残るが、しばらくほかの受け取り手から見えなくなる。その間に、ほかの受け取り手が同じメッセージを処理しないようにする。"
+        }
+      ],
+      "exam_points": [
+        "標準キューは同じメッセージが 2 回以上届くことがある前提で作る。1 回だけの処理が要る時は FIFO キューを考える。",
+        "処理に時間がかかるとほかの受け取り手が同じメッセージを処理してしまう場面では、可視性タイムアウトを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html#sqs-benefits",
+          "quote": "Standard queues support at-least-once message delivery, and FIFO queues support exactly-once message processing and high-throughput mode."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
+          "quote": "This invisibility is controlled by the visibility timeout, which ensures that other consumers cannot process the same message while you are working on it."
+        }
+      ]
+    },
+    "step-functions": {
+      "id": "step-functions",
+      "name": "AWS Step Functions",
+      "reading": "ステップファンクションズ",
+      "summary": "いくつかの手順（ステップ）をつないだ流れ（ワークフロー）を作り、処理を自動にするサービス。ワークフローの 1 つ 1 つの手順を「ステート」と呼ぶ。",
+      "features": [
+        {
+          "title": "Standard ワークフロー",
+          "text": "各手順が必ず 1 回だけ実行される。1 年まで動かせる。"
+        },
+        {
+          "title": "Express ワークフロー",
+          "text": "各手順は少なくとも 1 回実行され、2 回以上実行されることもある。5 分まで動かせる。"
+        },
+        {
+          "title": "エラー処理",
+          "text": "失敗した手順をやり直したり（Retry）、失敗を受け止めて代わりの手順を自動で動かしたり（Catch）できる。"
+        }
+      ],
+      "exam_points": [
+        "長く動く処理や、手順を必ず 1 回だけ動かしたい処理には Standard、短く 2 回動いても困らない処理には Express、という使い分けが問われる。",
+        "失敗した手順のやり直しや、失敗した時の別の手順は、Retry と Catch で決める。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome",
+          "quote": "In Step Functions, state machines are called workflows, which are a series of event-driven steps. Each step in a workflow is called a state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-workflows",
+          "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#application",
+          "quote": "You can retry failed tasks, or catch failed tasks and automatically run alternative steps."
+        }
+      ]
+    },
+    "systems-manager": {
+      "id": "systems-manager",
+      "name": "AWS Systems Manager",
+      "reading": "システムズ マネージャー",
+      "summary": "AWS・社内のデータセンター・ほかのクラウドにあるサーバー（ノード）を、まとめて見て、管理し、操作するためのサービス。サーバーにログインせずに、パッチ当てやコマンドの実行などを多くのサーバーに行える。",
+      "features": [
+        {
+          "title": "いろいろな道具の集まり",
+          "text": "Run Command・Session Manager・Automation・Parameter Store などの道具がある。パッチをまとめて当てる、受信のポートを開けずに安全につなぐ、遠くからコマンドを動かす、アプリが使うデータを安全にしまう、よくある管理の作業を自動にする、などができる。"
+        },
+        {
+          "title": "ログインせずに管理",
+          "text": "サーバーにログインせずに、多くのノードを安全に遠くから管理できる。レジストリの編集・ユーザーの管理・ソフトウェアやパッチの導入など、よくある管理の作業をまとめて自動にできる。"
+        },
+        {
+          "title": "アカウントとリージョンをまたぐ",
+          "text": "1 つのコンソールで、AWS アカウントやリージョンをまたいでノードの作業ができる。"
+        }
+      ],
+      "exam_points": [
+        "多くのサーバーにパッチを当てる・コマンドを動かす作業を、ログインせずに自動にしたい場面で、Systems Manager の道具が選択肢になる。",
+        "アプリが使うデータを安全にしまいたい場面で、Systems Manager の道具が選択肢になる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#what-is-systems-manager",
+          "quote": "AWS Systems Manager helps you centrally view, manage, and operate nodes at scale in AWS, on-premises, and multicloud environments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#features",
+          "quote": "Tools consist of the individual capabilities of Systems Manager and their features such as Run Command, Session Manager, Automation, and Parameter Store."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html#benefits",
+          "quote": "Systems Manager provides safe and secure remote management of your nodes at scale without logging into your servers."
+        }
+      ]
+    },
+    "vpc": {
+      "id": "vpc",
+      "name": "Amazon VPC",
+      "reading": "ブイピーシー",
+      "summary": "自分で決めた、ほかと論理的に分けられた仮想のネットワークの中で、AWS のリソースを動かせるサービス。自社のデータセンターのネットワークに近い物を、AWS の上に作れる。",
+      "features": [
+        {
+          "title": "サブネット",
+          "text": "VPC の中の IP アドレスの範囲。1 つのサブネットは 1 つのアベイラビリティーゾーンの中に置く。"
+        },
+        {
+          "title": "ルートテーブルとゲートウェイ",
+          "text": "ルートテーブルで、サブネットやゲートウェイからの通信の行き先を決める。ゲートウェイは VPC を別のネットワークにつなぐ（例: インターネットゲートウェイでインターネットへ）。"
+        },
+        {
+          "title": "VPC エンドポイント",
+          "text": "インターネットゲートウェイや NAT の装置を使わずに、AWS のサービスへ非公開でつなぐ。"
+        },
+        {
+          "title": "フローログ",
+          "text": "VPC の中のネットワークインターフェイスに出入りする IP の通信の情報を記録する。"
+        }
+      ],
+      "exam_points": [
+        "インターネットを通らずに AWS のサービスへつなぎたい場面では、VPC エンドポイントを考える。",
+        "サブネットは 1 つのアベイラビリティーゾーンの中にしか置けない、という決まりが、構成を考える時の前提になる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html",
+          "quote": "you can launch AWS resources in a logically isolated virtual network that you've defined."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html#amazon-vpc-features",
+          "quote": "Use a VPC endpoint to connect to AWS services privately, without the use of an internet gateway or NAT device."
         }
       ]
     }
