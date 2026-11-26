@@ -1,35 +1,35 @@
 {
- "item": "D-0033",
- "diagrams": [
-  {
-   "id": "q-6.1-0011",
-   "source": "flowchart TB\n  subgraph VPC[\"Amazon VPC（プライベートサブネット）\"]\n    FN@{ svc: \"AWS Lambda\", label: \"ローテーションの関数\" }\n    DB@{ svc: \"Amazon RDS\", label: \"データベース\" }\n  end\n  SM@{ svc: \"AWS Secrets Manager\", label: \"シークレット\" }\n  SM -- \"ローテーション開始\" --> FN\n  FN == \"✔ A: 同じ VPC・SG に置く\" ==> DB\n  FN == \"✔ A: Secrets Manager にも届く\" ==> SM\n  FN -. \"⚠ 今: DB に届かず失敗\" .-> DB\n  FN -. \"⚠ B・C・D: ネットワークは直らない\" .-> SM\n",
-   "alt": "Lambda のローテーション関数は Secrets Manager とデータベースの両方にネットワークで届く必要がある。データベースと同じ VPC とセキュリティグループに置いて両方に届くようにする(A)。"
-  },
-  {
-   "id": "q-6.1-0012",
-   "source": "flowchart TB\n  JST[\"日本時間 02:00〜03:00（トラフィック最少）\"]\n  subgraph SMG[\"AWS Secrets Manager（スケジュールは UTC）\"]\n    SM@{ svc: \"AWS Secrets Manager\", label: \"ローテーションのスケジュール\" }\n    WIN[\"ローテーションウィンドウ\"]\n  end\n  JST -- \"UTC では 17:00 開始\" --> SM\n  SM == \"✔ C: cron(0 17 * * ? *) + 1 時間\" ==> WIN\n  SM -. \"⚠ A: UTC の 02:00 は日本時間 11:00\" .-> WIN\n  SM -. \"⚠ B: 分が 0 でないと使えない\" .-> WIN\n  WIN -. \"⚠ D: 長いウィンドウは外れるおそれ\" .-> JST\n",
-   "alt": "日本時間 02:00 は UTC の 17:00 で、cron の分は 0 にし、ウィンドウは 1 時間にする。cron(0 17 * * ? *) と 1 時間のウィンドウの組み合わせ(C)が、少ない時間帯の外で動くおそれが最小。"
-  },
-  {
-   "id": "q-6.1-0013",
-   "source": "flowchart TB\n  ADM[\"管理者（MFA デバイスあり）\"]\n  subgraph AWSA[\"AWS\"]\n    STS@{ svc: \"AWS STS\", label: \"GetSessionToken\" }\n    POL@{ svc: \"AWS IAM\", label: \"MultiFactorAuthPresent が true の時だけ許可\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"TerminateInstances\" }\n  end\n  ADM -- \"✔ D: シリアル番号と MFA コード\" --> STS\n  STS -- \"一時的な認証情報\" --> ADM\n  ADM == \"一時的な認証情報で要求\" ==> POL\n  POL --> EC2\n  ADM -. \"⚠ A・C: アクセスキーは条件キーを含まない\" .-> POL\n  ADM -. \"⚠ B: ルートユーザーは不可\" .-> POL\n",
-   "alt": "MFA の条件キーは AssumeRole や GetSessionToken で得た一時的な認証情報にだけ入る。MFA の情報を付けて GetSessionToken を呼び、その認証情報で要求する(D)。アクセスキーでは通らない。"
-  },
-  {
-   "id": "q-6.1-0014",
-   "source": "flowchart TB\n  subgraph DC[\"自前のデータセンター\"]\n    CA[\"自前の CA\"]\n    SRV[\"バックアップのサーバー\"]\n  end\n  subgraph AWSA[\"AWS\"]\n    RA@{ svc: \"IAM Roles Anywhere\", label: \"トラストアンカー（会社の CA を参照）\" }\n    S3B@{ svc: \"Amazon S3\", label: \"バックアップ先のバケット\" }\n  end\n  CA -- \"X.509 証明書\" --> SRV\n  SRV -- \"証明書で認証\" --> RA\n  RA == \"✔ C: 一時的な認証情報\" ==> SRV\n  SRV -- \"アップロード\" --> S3B\n  SRV -. \"⚠ A・B・D: 長期のキーが残る\" .-> S3B\n",
-   "alt": "IAM Roles Anywhere のトラストアンカーに会社の CA を登録すると、サーバーは証明書と引き換えに一時的な認証情報を得られ、長期の認証情報の管理をやめられる(C)。"
-  },
-  {
-   "id": "q-6.1-0015",
-   "source": "flowchart TB\n  subgraph CI[\"外部の CI サービス\"]\n    JOB[\"デプロイのジョブ\"]\n    IDP[\"OIDC 対応の IdP\"]\n  end\n  subgraph AWSA[\"AWS アカウント\"]\n    OIDC@{ svc: \"AWS IAM\", label: \"IAM OIDC ID プロバイダー（IdP を信頼）\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"フェデレーションのジョブが引き受けるロール\" }\n    STS@{ svc: \"AWS STS\", label: \"一時的な認証情報\" }\n  end\n  IDP -- \"OIDC トークン\" --> JOB\n  JOB -- \"ロールを引き受ける\" --> OIDC\n  OIDC --> ROLE\n  ROLE == \"✔ B: 一時的な認証情報\" ==> STS\n  STS --> JOB\n  JOB -. \"⚠ A・D: 長期のキーを配り続ける\" .-> ROLE\n  JOB -. \"⚠ C: 新しい CA の運用が増える\" .-> OIDC\n",
-   "alt": "CI の OIDC トークンを信頼する IAM OIDC ID プロバイダーとロールを作れば、ジョブは長期のキー無しで一時的な認証情報を得られる(B)。Roles Anywhere は CA の運用が増える。"
-  },
-  {
-   "id": "q-6.1-0016",
-   "source": "flowchart TB\n  subgraph EC2G[\"EC2 インスタンス\"]\n    INS@{ svc: \"Amazon EC2\", label: \"インスタンスプロファイル（ロールは 1 つだけ）\" }\n  end\n  ROLE@{ svc: \"AWS IAM\", label: \"✔ C: 既存のロールに SQS の権限を足す\" }\n  S3B@{ svc: \"Amazon S3\", label: \"アプリのデータ\" }\n  SQS@{ svc: \"Amazon SQS\", label: \"キュー\" }\n  INS --> ROLE\n  ROLE -- \"読み取り\" --> S3B\n  ROLE == \"書き込み（追加）\" ==> SQS\n  INS -. \"⚠ A: 1 つの上限は上げられない\" .-> ROLE\n  ROLE -. \"⚠ B: 入れ替えると S3 を読めなくなる\" .-> S3B\n  INS -. \"⚠ D: 長期のキーが増える\" .-> SQS\n",
-   "alt": "インスタンスプロファイルに入れられるロールは 1 つだけで上限は上げられない。既存のロールのポリシーに SQS の権限を足せば、両方の権限を持たせられる(C)。"
-  }
- ]
+  "item": "D-0033",
+  "diagrams": [
+    {
+      "id": "q-6.1-0011",
+      "source": "flowchart TB\n  subgraph VPC[\"Amazon VPC（プライベートサブネット）\"]\n    FN@{ svc: \"AWS Lambda\", label: \"ローテーションの関数\" }\n    DB@{ svc: \"Amazon RDS\", label: \"データベース\" }\n  end\n  SM@{ svc: \"AWS Secrets Manager\", label: \"シークレット\" }\n  SM -- \"ローテーション開始\" --> FN\n  FN == \"✔ A: 同じ VPC・SG に置く\" ==> DB\n  FN == \"✔ A: Secrets Manager にも届く\" ==> SM\n  FN -. \"⚠ 今: DB に届かず失敗\" .-> DB\n  FN -. \"⚠ B・C・D: ネットワークは直らない\" .-> SM\n",
+      "alt": "Lambda のローテーション関数は Secrets Manager とデータベースの両方にネットワークで届く必要がある。データベースと同じ VPC とセキュリティグループに置いて両方に届くようにする(A)。"
+    },
+    {
+      "id": "q-6.1-0012",
+      "source": "flowchart TB\n  JST[\"日本時間 02:00〜03:00（トラフィック最少）\"]\n  subgraph SMG[\"AWS Secrets Manager（スケジュールは UTC）\"]\n    SM@{ svc: \"AWS Secrets Manager\", label: \"ローテーションのスケジュール\" }\n    WIN[\"ローテーションウィンドウ\"]\n  end\n  JST -- \"UTC では 17:00 開始\" --> SM\n  SM == \"✔ C: cron(0 17 * * ? *) + 1 時間\" ==> WIN\n  SM -. \"⚠ A: UTC の 02:00 は日本時間 11:00\" .-> WIN\n  SM -. \"⚠ B: 分が 0 でないと使えない\" .-> WIN\n  WIN -. \"⚠ D: 長いウィンドウは外れるおそれ\" .-> JST\n",
+      "alt": "日本時間 02:00 は UTC の 17:00 で、cron の分は 0 にし、ウィンドウは 1 時間にする。cron(0 17 * * ? *) と 1 時間のウィンドウの組み合わせ(C)が、少ない時間帯の外で動くおそれが最小。"
+    },
+    {
+      "id": "q-6.1-0013",
+      "source": "flowchart TB\n  ADM[\"管理者（MFA デバイスあり）\"]\n  subgraph AWSA[\"AWS\"]\n    STS@{ svc: \"AWS STS\", label: \"GetSessionToken\" }\n    POL@{ svc: \"AWS IAM\", label: \"MultiFactorAuthPresent が true の時だけ許可\" }\n    EC2@{ svc: \"Amazon EC2\", label: \"TerminateInstances\" }\n  end\n  ADM -- \"✔ D: シリアル番号と MFA コード\" --> STS\n  STS -- \"一時的な認証情報\" --> ADM\n  ADM == \"一時的な認証情報で要求\" ==> POL\n  POL --> EC2\n  ADM -. \"⚠ A・C: アクセスキーは条件キーを含まない\" .-> POL\n  ADM -. \"⚠ B: ルートユーザーは不可\" .-> POL\n",
+      "alt": "MFA の条件キーは AssumeRole や GetSessionToken で得た一時的な認証情報にだけ入る。MFA の情報を付けて GetSessionToken を呼び、その認証情報で要求する(D)。アクセスキーでは通らない。"
+    },
+    {
+      "id": "q-6.1-0014",
+      "source": "flowchart TB\n  subgraph DC[\"自前のデータセンター\"]\n    CA[\"自前の CA\"]\n    SRV[\"バックアップのサーバー\"]\n  end\n  subgraph AWSA[\"AWS\"]\n    RA[\"IAM Roles Anywhere<br/>トラストアンカー（会社の CA を参照）\"]\n    S3B@{ svc: \"Amazon S3\", label: \"バックアップ先のバケット\" }\n  end\n  CA -- \"X.509 証明書\" --> SRV\n  SRV -- \"証明書で認証\" --> RA\n  RA == \"✔ C: 一時的な認証情報\" ==> SRV\n  SRV -- \"アップロード\" --> S3B\n  SRV -. \"⚠ A・B・D: 長期のキーが残る\" .-> S3B\n",
+      "alt": "IAM Roles Anywhere のトラストアンカーに会社の CA を登録すると、サーバーは証明書と引き換えに一時的な認証情報を得られ、長期の認証情報の管理をやめられる(C)。"
+    },
+    {
+      "id": "q-6.1-0015",
+      "source": "flowchart TB\n  subgraph CI[\"外部の CI サービス\"]\n    JOB[\"デプロイのジョブ\"]\n    IDP[\"OIDC 対応の IdP\"]\n  end\n  subgraph AWSA[\"AWS アカウント\"]\n    OIDC@{ svc: \"AWS IAM\", label: \"IAM OIDC ID プロバイダー（IdP を信頼）\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"フェデレーションのジョブが引き受けるロール\" }\n    STS@{ svc: \"AWS STS\", label: \"一時的な認証情報\" }\n  end\n  IDP -- \"OIDC トークン\" --> JOB\n  JOB -- \"ロールを引き受ける\" --> OIDC\n  OIDC --> ROLE\n  ROLE == \"✔ B: 一時的な認証情報\" ==> STS\n  STS --> JOB\n  JOB -. \"⚠ A・D: 長期のキーを配り続ける\" .-> ROLE\n  JOB -. \"⚠ C: 新しい CA の運用が増える\" .-> OIDC\n",
+      "alt": "CI の OIDC トークンを信頼する IAM OIDC ID プロバイダーとロールを作れば、ジョブは長期のキー無しで一時的な認証情報を得られる(B)。Roles Anywhere は CA の運用が増える。"
+    },
+    {
+      "id": "q-6.1-0016",
+      "source": "flowchart TB\n  subgraph EC2G[\"EC2 インスタンス\"]\n    INS@{ svc: \"Amazon EC2\", label: \"インスタンスプロファイル（ロールは 1 つだけ）\" }\n  end\n  ROLE@{ svc: \"AWS IAM\", label: \"✔ C: 既存のロールに SQS の権限を足す\" }\n  S3B@{ svc: \"Amazon S3\", label: \"アプリのデータ\" }\n  SQS@{ svc: \"Amazon SQS\", label: \"キュー\" }\n  INS --> ROLE\n  ROLE -- \"読み取り\" --> S3B\n  ROLE == \"書き込み（追加）\" ==> SQS\n  INS -. \"⚠ A: 1 つの上限は上げられない\" .-> ROLE\n  ROLE -. \"⚠ B: 入れ替えると S3 を読めなくなる\" .-> S3B\n  INS -. \"⚠ D: 長期のキーが増える\" .-> SQS\n",
+      "alt": "インスタンスプロファイルに入れられるロールは 1 つだけで上限は上げられない。既存のロールのポリシーに SQS の権限を足せば、両方の権限を持たせられる(C)。"
+    }
+  ]
 }
