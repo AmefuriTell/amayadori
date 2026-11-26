@@ -1,5 +1,6 @@
 {
   "names": {
+    "Amazon API Gateway": "api-gateway",
     "AWS AppConfig": "appconfig",
     "Amazon Aurora": "aurora",
     "AWS Backup": "backup",
@@ -72,9 +73,56 @@
     "AWS Security Token Service (AWS STS)": "sts",
     "AWS Systems Manager": "systems-manager",
     "Amazon VPC": "vpc",
-    "AWS WAF": "waf"
+    "AWS WAF": "waf",
+    "AWS X-Ray": "x-ray"
   },
   "pages": {
+    "api-gateway": {
+      "id": "api-gateway",
+      "name": "Amazon API Gateway",
+      "reading": "エーピーアイゲートウェイ",
+      "summary": "REST・HTTP・WebSocket の API を、どんな規模でも作る・公開する・保守する・監視する・守るための AWS のサービス。アプリケーションが裏のサービス（EC2 で動く処理や Lambda のコードなど）を使うための「玄関（フロントドア）」の役をする。",
+      "features": [
+        {
+          "title": "API の種類",
+          "text": "状態を持つ WebSocket の API と、状態を持たない HTTP・REST の API に対応する。"
+        },
+        {
+          "title": "大量の呼び出しの受け付け",
+          "text": "最大で数十万の同時の API 呼び出しを受けて処理し、トラフィックの管理・認可とアクセス制御・監視・API のバージョンの管理を行う。"
+        },
+        {
+          "title": "認証と保護",
+          "text": "IAM のポリシー、Lambda オーソライザー関数、Amazon Cognito のユーザープールで認証できる。AWS WAF と組み合わせて、よくある Web の攻撃から API を守れる。"
+        },
+        {
+          "title": "カナリアリリース",
+          "text": "API のトラフィックを、決めた割合でランダムに本番のリリースとカナリアのリリースに分ける。新しい機能はカナリアを通るトラフィックにだけ見える。割合は後から変えられる。"
+        }
+      ],
+      "exam_points": [
+        "変更を安全に出す方法として、少しの割合のトラフィックだけを新しい版（カナリア）に流すカナリアリリースのデプロイを押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#welcome",
+          "quote": "Amazon API Gateway is an AWS service for creating, publishing, maintaining, monitoring, and securing REST, HTTP, and WebSocket APIs at any scale."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#api-gateway-overview-aws-backbone",
+          "quote": "These tasks include traffic management, authorization and access control, monitoring, and API version management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#api-gateway-overview-features",
+          "quote": "Canary release deployments for safely rolling out changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/canary-release.html#api-gateway-canary-release-deployment-overview",
+          "quote": "The updated API features are only visible to API traffic through the canary."
+        }
+      ]
+    },
     "appconfig": {
       "id": "appconfig",
       "name": "AWS AppConfig",
@@ -2571,6 +2619,49 @@
         {
           "url": "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html#waf-intro",
           "quote": "exceed a specified number of requests in a minute or in five minutes."
+        }
+      ]
+    },
+    "x-ray": {
+      "id": "x-ray",
+      "name": "AWS X-Ray",
+      "reading": "エックスレイ",
+      "summary": "アプリケーションが受けたリクエストのデータを集め、そのリクエストが下流の AWS のリソース・マイクロサービス・データベース・Web API へ出した呼び出しまで含めて、見たり絞り込んだりできるサービス。問題や性能を良くできる所を見つけるのに使う。",
+      "features": [
+        {
+          "title": "セグメントとトレース",
+          "text": "サービスからのデータをセグメントとして受け取り、同じリクエストのセグメントをまとめてトレースにする。"
+        },
+        {
+          "title": "トレースマップ",
+          "text": "クライアント、フロントのサービス、そこから呼ばれる裏のサービスを図で示す。ボトルネックやレイテンシー（応答の遅れ）の急な増加を見つけるのに使う。"
+        },
+        {
+          "title": "SDK とデーモン",
+          "text": "SDK はトレースのデータを直接送らず、UDP で待ち受けるデーモンのプロセスへセグメントの JSON 文書を送る。デーモンはそれをためて、まとめて X-Ray へ送る。"
+        }
+      ],
+      "exam_points": [
+        "リクエストが通ったサービスと呼び出しのどこで遅れや問題が起きているかを、トレースマップで探す使い方を押さえる。",
+        "X-Ray の SDK とデーモンは、セキュリティの修正だけを出す形になり、新しい機能は入らない。アプリケーションの計装（トレースを出す仕組みを組み込むこと）とトレースの送信には、OpenTelemetry への移行が勧められている。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-daemon-timeline.html#xray-sdk-daemon-timeline",
+          "quote": "We recommend that you migrate to OpenTelemetry solutions for instrumenting your application and sending traces to AWS X-Ray."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+          "quote": "AWS X-Ray is a service that collects data about requests that your application serves"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+          "quote": "Use the trace map to identify bottlenecks, latency spikes, and other issues to solve to improve the performance of your applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts",
+          "quote": "X-Ray then groups segments that have a common request into traces."
         }
       ]
     }
