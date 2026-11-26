@@ -3,27 +3,27 @@
   "diagrams": [
     {
       "id": "q-3.2-0011",
-      "source": "flowchart TB\n  subgraph USE1[\"us-east-1（パイプラインのリージョン）\"]\n    P@{ svc: \"AWS CodePipeline\", label: \"1 つのパイプライン\" }\n    B1@{ svc: \"Amazon S3\", label: \"アーティファクトバケット\" }\n    CF1@{ svc: \"AWS CloudFormation\", label: \"スタックのデプロイ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    B2@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF2@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  subgraph AP[\"ap-northeast-1\"]\n    B3@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF3@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  P --> CF1\n  P == \"✔ A: アクションを追加\" ==> CF2\n  P == \"✔ A: アクションを追加\" ==> CF3\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B2\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B3\n",
+      "source": "flowchart TB\n  subgraph USE1[\"us-east-1\"]\n    P@{ svc: \"AWS CodePipeline\", label: \"1 つのパイプライン（このリージョン）\" }\n    B1@{ svc: \"Amazon S3\", label: \"アーティファクトバケット\" }\n    CF1@{ svc: \"AWS CloudFormation\", label: \"スタックのデプロイ\" }\n  end\n  subgraph EU[\"eu-west-1\"]\n    B2@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF2@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  subgraph AP[\"ap-northeast-1\"]\n    B3@{ svc: \"Amazon S3\", label: \"✔ B: アーティファクトバケット\" }\n    CF3@{ svc: \"AWS CloudFormation\", label: \"✔ A: クロスリージョンのアクション\" }\n  end\n  P --> CF1\n  P == \"✔ A: アクションを追加\" ==> CF2\n  P == \"✔ A: アクションを追加\" ==> CF3\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B2\n  B1 -. \"成果物（コピーは CodePipeline）\" .-> B3\n  WC[\"⚠ C: コピーは CodePipeline が行うので Lambda は不要\"] -.- B1\n  WD[\"⚠ D: 別のパイプラインは要件違反\"] -.- P\n  WE[\"⚠ E: 他のリージョンにもバケットが必要\"] -.- B1\n",
       "alt": "us-east-1 の 1 つのパイプラインから eu-west-1 と ap-northeast-1 にも CloudFormation をデプロイする図。他リージョンのアクションをクロスリージョンのアクションとして足し（A）、各リージョンにアーティファクトバケットを作る（B）。コピーは CodePipeline が行う。"
     },
     {
       "id": "q-3.2-0012",
-      "source": "flowchart TB\n  U([\"世界中の利用者\"])\n  R@{ svc: \"Amazon Route 53\", label: \"ホストゾーン（✔ A: レイテンシーのレコード）\" }\n  subgraph W[\"us-west-2\"]\n    LW@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  subgraph S[\"ap-southeast-1\"]\n    LS@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  U -- \"DNS の問い合わせ\" --> R\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LW\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LS\n  X[\"⚠ B: 半分ずつで利用者の遠さを見ない\"] -.- R\n  Y[\"⚠ C: 別のサービスを足す要件違反・⚠ D: 全員が us-west-2 へ\"] -.- R\n",
+      "source": "flowchart TB\n  U([\"世界中の利用者\"])\n  R@{ svc: \"Amazon Route 53\", label: \"ホストゾーン（✔ A: レイテンシーのレコード）\" }\n  subgraph W[\"us-west-2\"]\n    LW@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  subgraph S[\"ap-southeast-1\"]\n    LS@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー\" }\n  end\n  U -- \"DNS の問い合わせ\" --> R\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LW\n  R == \"✔ A: 最もレイテンシーが低いリージョン\" ==> LS\n  X[\"⚠ B: 半分ずつで利用者の遠さを見ない・⚠ D: 全員が us-west-2 へ\"] -.- R\n  Y[\"⚠ C: Global Accelerator は別のサービスを足す要件違反\"] -.- U\n",
       "alt": "2 つのリージョンの ALB へ、利用者ごとに最もレイテンシーが低い方で応答させる図。Route 53 のホストゾーンに各ロードバランサーのレイテンシーのレコードを作る（A）。加重（B）や単一のレコード（D）は遠い利用者に不利。"
     },
     {
       "id": "q-3.2-0013",
-      "source": "flowchart TB\n  API([\"API\"])\n  F@{ svc: \"AWS Lambda\", label: \"関数（朝 08:00〜10:00 が山）\" }\n  AAS[\"Application Auto Scaling<br/>✔ D: 山の時間だけスケジュール\"]\n  API -- \"リクエスト\" --> F\n  AAS == \"✔ D: プロビジョニングされた同時実行（前もって初期化）\" ==> F\n  A[\"⚠ A: 予約された同時実行は前もって初期化しない\"] -.- F\n  B[\"⚠ B: 一日中の山の水準は使わない間も課金\"] -.- F\n  C[\"⚠ C: 上限を上げても初期化は変わらない\"] -.- F\n",
+      "source": "flowchart TB\n  API([\"API\"])\n  F@{ svc: \"AWS Lambda\", label: \"関数（朝 08:00〜10:00 が山）\" }\n  AAS@{ svc: \"Application Auto Scaling\", label: \"Application Auto Scaling<br/>山の時間だけスケジュール\" }\n  API -- \"リクエスト\" --> F\n  AAS == \"✔ D: プロビジョニングされた同時実行（前もって初期化）\" ==> F\n  A[\"⚠ A: 予約された同時実行は前もって初期化しない\"] -.- F\n  B[\"⚠ B: 一日中の山の水準は使わない間も課金\"] -.- F\n  C[\"⚠ C: 上限を上げても初期化は変わらない\"] -.- F\n",
       "alt": "朝の山で Lambda のコールドスタートによるレイテンシーが出る図。Application Auto Scaling で山の時間だけプロビジョニングされた同時実行を用意すれば、レイテンシーを下げつつ他の時間の費用を抑えられる（D）。"
     },
     {
       "id": "q-3.2-0014",
-      "source": "flowchart TB\n  subgraph ACC[\"1 つのリージョンのアカウントの同時実行数\"]\n    BT@{ svc: \"AWS Lambda\", label: \"バッチ処理の関数（イベントが一度に）\" }\n    PAY@{ svc: \"AWS Lambda\", label: \"利用者向けの決済の関数\" }\n    POOL[\"共有の同時実行\"]\n  end\n  BT -- \"ほとんどを使う\" --> POOL\n  POOL -. \"⚠ 決済がスロットリング\" .-> PAY\n  PAY == \"✔ B: 予約された同時実行（料金はかからない）\" ==> POOL\n  C[\"⚠ C: 一日中のプロビジョニングは使わない間も課金\"] -.- PAY\n  A[\"⚠ A: バッチ側のプロビジョニングは決済の分を守らず追加料金\"] -.- BT\n",
+      "source": "flowchart TB\n  subgraph ACC[\"1 リージョンのアカウント\"]\n    BT@{ svc: \"AWS Lambda\", label: \"バッチ処理の関数（イベントが一度に）\" }\n    PAY@{ svc: \"AWS Lambda\", label: \"利用者向けの決済の関数\" }\n    POOL[\"共有の同時実行\"]\n  end\n  BT -- \"ほとんどを使う\" --> POOL\n  POOL -. \"⚠ 決済がスロットリング\" .-> PAY\n  PAY == \"✔ B: 予約された同時実行（料金はかからない）\" ==> POOL\n  C[\"⚠ C: 一日中のプロビジョニングは使わない間も課金\"] -.- PAY\n  A[\"⚠ A: バッチ側のプロビジョニングは決済の分を守らず追加料金\"] -.- BT\n  DX[\"⚠ D: API Gateway のキャッシュは、イベントの同時実行の取り合いに効かない\"] -.- BT\n",
       "alt": "バッチ用の Lambda 関数が同時実行を使い切り、決済の関数がスロットリングされる図。決済の関数に予約された同時実行を設定すればその分を取っておけて、設定の料金もかからない（B）。プロビジョニング（A、C）は追加の料金がかかる。"
     },
     {
       "id": "q-3.2-0015",
-      "source": "flowchart TB\n  PT([\"提携先のクライアント\"])\n  subgraph GW[\"Amazon API Gateway の REST API\"]\n    UP[\"Amazon API Gateway<br/>✔ A: 使用量プラン（速さとバーストの上限）\"]\n    CA[\"✔ B: ステージのキャッシュ（TTL 600 秒）\"]\n  end\n  BE[\"バックエンド\"]\n  PT -- \"GET のリクエスト\" --> UP\n  UP -- \"上限内だけ\" --> CA\n  CA -. \"キャッシュに無い時だけ\" .-> BE\n  X[\"⚠ C: TTL 0 はキャッシュ無効・⚠ D: TTL は最大 3600 秒\"] -.- CA\n  Y[\"⚠ E: アカウント全体の上限は提携先ごとに分けられない\"] -.- UP\n",
+      "source": "flowchart TB\n  PT([\"提携先のクライアント\"])\n  subgraph GW[\"REST API\"]\n    UP@{ svc: \"Amazon API Gateway\", label: \"Amazon API Gateway<br/>✔ A: 使用量プラン（速さとバーストの上限）\" }\n    CA[\"✔ B: ステージのキャッシュ（TTL 600 秒）\"]\n  end\n  BE[\"バックエンド\"]\n  PT -- \"GET のリクエスト\" --> UP\n  UP -- \"上限内だけ\" --> CA\n  CA -. \"キャッシュに無い時だけ\" .-> BE\n  X[\"⚠ C: TTL 0 はキャッシュ無効・⚠ D: TTL は最大 3600 秒\"] -.- CA\n  Y[\"⚠ E: アカウント全体の上限は提携先ごとに分けられない\"] -.- UP\n",
       "alt": "提携先の過剰な GET を抑える API Gateway の図。提携先ごとに使用量プランで速さとバーストを制限し（A）、ステージのキャッシュを TTL 600 秒で有効にして繰り返しの GET をキャッシュから返す（B）。TTL 0 や 2 時間は不可。"
     }
   ]

@@ -3,37 +3,37 @@
  "diagrams": [
   {
    "id": "q-5.1-0001",
-   "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"Describe* などの読み取り専用の管理 API\" }\n  subgraph DEF[\"デフォルトのイベントバス\"]\n    EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  end\n  WF[\"調査のワークフロー\"]\n  CT -- \"管理イベント\" --> EB\n  EB == \"✔ A: ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS\" ==> WF\n  EB -. \"⚠ C: ただの ENABLED では読み取りに一致しない\" .-> WF\n  W[\"⚠ B: パートナーのバスは AWS のイベントを受けない / ⚠ D: コードを書く\"]\n  W -.- EB",
+   "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"Describe* などの読み取り専用の管理 API\" }\n  subgraph DEF[\"デフォルトのバス\"]\n    EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n  end\n  WF[\"調査のワークフロー\"]\n  PB[\"パートナーのイベントバス\"]\n  CT -- \"管理イベント\" --> EB\n  EB == \"✔ A: 状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS に\" ==> WF\n  EB -. \"⚠ C: 無効→有効（ただの ENABLED）では読み取りに一致しない\" .-> WF\n  PB -. \"⚠ B: AWS のイベントを受けない\" .-> WF\n  D[\"⚠ D: S3 のログを読む Lambda（コードを書く）\"]\n  D -.-> WF\n",
    "alt": "読み取り専用の管理 API の呼び出しで調査を始める EventBridge ルールの図。ルールの状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると読み取り専用の管理イベントにも一致する（A）。ただの有効では一致しない。"
   },
   {
    "id": "q-5.1-0002",
-   "source": "flowchart TB\n  subgraph STD[\"標準パーティションの多数のリージョン\"]\n    H1@{ svc: \"AWS Health\", label: \"アカウント固有のイベント\" }\n  end\n  subgraph PDX[\"米国西部（オレゴン）\"]\n    R1@{ svc: \"Amazon EventBridge\", label: \"✔ A: 中央のルール 1 つ\" }\n  end\n  subgraph IAD[\"米国東部（バージニア北部）\"]\n    R2@{ svc: \"Amazon EventBridge\", label: \"✔ B: グローバルなイベントのルール\" }\n  end\n  IAM@{ svc: \"AWS IAM\", label: \"リージョンに属さないイベント\" }\n  H1 -- \"全リージョンの分\" --> R1\n  IAM -- \"IAM の Health イベント\" --> R2\n  W[\"⚠ C: 各リージョンにルールが増える / ⚠ D: 簡素化統合では公開イベントは非対応 / ⚠ E: 主なリージョンだけでは集まらない\"]\n  W -.- R1",
+   "source": "flowchart TB\n  subgraph STD[\"標準の各リージョン\"]\n    H1@{ svc: \"AWS Health\", label: \"アカウント固有のイベント\" }\n  end\n  subgraph PDX[\"米国西部（オレゴン）\"]\n    R1@{ svc: \"Amazon EventBridge\", label: \"中央のルール 1 つ\" }\n  end\n  subgraph IAD[\"バージニア北部\"]\n    R2@{ svc: \"Amazon EventBridge\", label: \"グローバルなイベントのルール\" }\n  end\n  IAM@{ svc: \"AWS IAM\", label: \"リージョンに属さないイベント\" }\n  H1 == \"✔ A: 全リージョンの分\" ==> R1\n  IAM == \"✔ B: IAM の Health イベント\" ==> R2\n  C[\"⚠ C: 各リージョンにルール（数が増え IAM は受けられない）\"]\n  C -.-> H1\n  D[\"⚠ D: 簡素化された統合（公開イベントは対象外）\"]\n  D -.-> H1\n  E[\"⚠ E: 主なリージョンのルールだけ（他は集まらない）\"]\n  E -.-> H1\n",
    "alt": "リージョンごとの AWS Health イベントは米国西部（オレゴン）の中央ルール 1 つで集め、IAM のようなグローバルなイベントは米国東部（バージニア北部）のルールで受ける図（A と B）。"
   },
   {
    "id": "q-5.1-0003",
-   "source": "flowchart TB\n  subgraph ORG[\"AWS Organizations の組織\"]\n    M1[\"メンバーアカウント 1\"]\n    M2[\"メンバーアカウント 2\"]\n    subgraph OPS[\"運用アカウント（委任管理者）\"]\n      H@{ svc: \"AWS Health\", label: \"✔ D: 組織ビュー\" }\n      EB@{ svc: \"Amazon EventBridge\", label: \"ルール\" }\n    end\n  end\n  M1 -- \"Health のイベント\" --> H\n  M2 -- \"Health のイベント\" --> H\n  H == \"全アカウントを 1 か所に集約\" ==> EB\n  W[\"⚠ A: ルールは自分のアカウント分だけ / ⚠ B: 全アカウントへデプロイ / ⚠ C: 人の転送\"]\n  W -.- EB",
+   "source": "flowchart TB\n  M1[\"メンバーアカウント 1\"]\n  M2[\"メンバーアカウント 2\"]\n  subgraph OPS[\"運用アカウント\"]\n    H@{ svc: \"AWS Health\", label: \"組織ビュー（委任管理者）\" }\n    EB@{ svc: \"Amazon EventBridge\", label: \"ルール（今は運用アカウントの分だけ）\" }\n  end\n  M1 -- \"Health のイベント\" --> H\n  M2 -- \"Health のイベント\" --> H\n  H == \"✔ D: 全アカウントを 1 か所に集約\" ==> EB\n  A[\"⚠ A: 今のルールのまま（自分の分しか受けない）\"]\n  A -.-> EB\n  B[\"⚠ B: 全メンバーにルールをデプロイ\"]\n  B -.-> M2\n  C[\"⚠ C: 所有者が毎日確認して転送\"]\n  C -.-> M1\n",
    "alt": "組織の全アカウントの AWS Health イベントを 1 か所で受ける図。運用アカウントを委任管理者にして Health の組織ビューを使う（D）。EventBridge ルールだけでは自分のアカウントの分しか受けない。"
   },
   {
    "id": "q-5.1-0005",
-   "source": "flowchart TB\n  subgraph SQ[\"Amazon SQS のソースのキュー\"]\n    Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n    V[\"✔ A: 可視性タイムアウト 18 分（関数の 6 倍）\"]\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"関数（タイムアウト 3 分）\" }\n  DLQ@{ svc: \"Amazon SQS\", label: \"デッドレターキュー\" }\n  Q -- \"メッセージ（イベントソースマッピング）\" --> FN\n  Q == \"✔ B: maxReceiveCount 5 回で移す\" ==> DLQ\n  V -.- Q\n  W1[\"⚠ C: 30 秒では設定できない\"]\n  W2[\"⚠ D: maxReceiveCount 1 はすぐ DLQ へ\"]\n  W3[\"⚠ E: 関数のタイムアウトは可視性以下に\"]\n  W1 -.- V\n  W2 -.- DLQ\n  W3 -.- FN",
+   "source": "flowchart TB\n  subgraph SQ[\"ソースのキュー\"]\n    Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n    V[\"✔ A: 可視性タイムアウト 18 分（関数の 6 倍）\"]\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"関数（タイムアウト 3 分）\" }\n  DLQ@{ svc: \"Amazon SQS\", label: \"デッドレターキュー\" }\n  Q -- \"メッセージ（イベントソースマッピング）\" --> FN\n  Q == \"✔ B: maxReceiveCount 5 回で移す\" ==> DLQ\n  V -.- Q\n  C[\"⚠ C: 可視性タイムアウト 30 秒のまま（設定できない）\"]\n  C -.-> Q\n  D[\"⚠ D: maxReceiveCount 1（すぐ DLQ へ）\"]\n  D -.-> DLQ\n  E[\"⚠ E: 関数のタイムアウトを 20 分に（可視性以下が必要）\"]\n  E -.-> FN\n",
    "alt": "SQS の標準キューを Lambda で処理する設定の図。関数のタイムアウト 3 分に対し、可視性タイムアウトは 6 倍の 18 分（A）、maxReceiveCount は 5 回にして数回やり直してからデッドレターキューへ送る（B）。"
   },
   {
    "id": "q-5.1-0006",
-   "source": "flowchart TB\n  Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n  FN@{ svc: \"AWS Lambda\", label: \"関数（バッチサイズ 10）\" }\n  Q -- \"10 件のバッチ\" --> FN\n  FN == \"✔ C: batchItemFailures に失敗の ID だけ返す\" ==> Q\n  M[\"イベントソースマッピング: ReportBatchItemFailures を有効\"]\n  M -.- FN\n  FN -. \"⚠ A: 例外を投げるとバッチ全体が失敗\" .-> Q\n  W[\"⚠ B: 待ち時間が延びるだけ / ⚠ D: バッチサイズ 1 は要件に反する\"]\n  W -.- Q",
+   "source": "flowchart TB\n  Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n  FN@{ svc: \"AWS Lambda\", label: \"関数（バッチサイズ 10）\" }\n  M[\"イベントソースマッピング: ReportBatchItemFailures を有効\"]\n  Q -- \"10 件のバッチ\" --> FN\n  FN == \"✔ C: batchItemFailures に失敗の ID だけ返す\" ==> Q\n  M -.- FN\n  FN -. \"⚠ A: 例外を投げるとバッチ全体が失敗\" .-> Q\n  B[\"⚠ B: 可視性タイムアウトを長く（待つだけ）\"]\n  B -.-> Q\n  D[\"⚠ D: バッチサイズを 1 に（要件に反する）\"]\n  D -.-> FN\n",
    "alt": "SQS のバッチ処理で 1 件の失敗が全件の再処理になる問題の図。イベントソースマッピングで ReportBatchItemFailures を有効にし、失敗したメッセージの ID を batchItemFailures で返せば失敗分だけやり直せる（C）。"
   },
   {
    "id": "q-5.1-0007",
-   "source": "flowchart TB\n  subgraph KDS[\"Kinesis のデータストリーム（変えない）\"]\n    S@{ svc: \"Amazon Kinesis Data Streams\", label: \"4 つのシャード\" }\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"関数\" }\n  S -- \"シャードごとのレコード\" --> FN\n  M[\"✔ A: ParallelizationFactor を 10 に\"]\n  M == \"各シャードから同時に 10 バッチまで\" ==> FN\n  O[\"同じパーティションキーの順序は保たれる\"]\n  O -.- FN\n  W1[\"⚠ B: 最大は 10\"]\n  W2[\"⚠ C: ストリームを変えることになる\"]\n  W3[\"⚠ D: 仕組みを作り直す\"]\n  W1 -.- M\n  W2 -.- S\n  W3 -.- S",
+   "source": "flowchart TB\n  subgraph KDS[\"データストリーム\"]\n    S@{ svc: \"Amazon Kinesis Data Streams\", label: \"4 つのシャード（変えない）\" }\n  end\n  ESM[\"イベントソースマッピング\"]\n  FN@{ svc: \"AWS Lambda\", label: \"関数\" }\n  S -- \"シャードごとのレコード\" --> ESM\n  ESM --> FN\n  A[\"✔ A: ParallelizationFactor を 10 に\"]\n  A == \"各シャードから同時に 10 バッチまで\" ==> ESM\n  O[\"同じパーティションキーの順序は保たれる\"]\n  O -.- FN\n  B[\"⚠ B: 20 に（最大は 10）\"]\n  B -.-> ESM\n  C[\"⚠ C: シャードを足す（ストリームを変える）\"]\n  C -.-> S\n  D[\"⚠ D: SQS 標準キューへ移す（作り直し）\"]\n  D -.-> S\n",
    "alt": "Kinesis のストリームを処理する Lambda の遅れを直す図。イベントソースマッピングの ParallelizationFactor を最大の 10 にすると、各シャードから同時に処理するバッチが増え、キーごとの順序も保たれる（A）。"
   },
   {
    "id": "q-5.1-0008",
-   "source": "flowchart TB\n  PUB[\"発行者（変えられない）\"]\n  T@{ svc: \"Amazon SNS\", label: \"注文のトピック\" }\n  Q1@{ svc: \"Amazon SQS\", label: \"配送チームのキュー\" }\n  Q2@{ svc: \"Amazon SQS\", label: \"キュー 2（全注文）\" }\n  Q3@{ svc: \"Amazon SQS\", label: \"キュー 3（全注文）\" }\n  PUB -- \"注文（属性なし）\" --> T\n  T == \"✔ B: MessageBody のフィルター region=EU\" ==> Q1\n  T --> Q2\n  T --> Q3\n  T -. \"⚠ A: MessageAttributes には合う物が無い\" .-> Q1\n  W[\"⚠ C: 全部読んで捨てる / ⚠ D: 発行者の変更が必要\"]\n  W -.- Q1",
+   "source": "flowchart TB\n  PUB[\"発行者（変えられない）\"]\n  T@{ svc: \"Amazon SNS\", label: \"注文のトピック\" }\n  Q1@{ svc: \"Amazon SQS\", label: \"配送チームのキュー\" }\n  Q2@{ svc: \"Amazon SQS\", label: \"キュー 2（全注文）\" }\n  Q3@{ svc: \"Amazon SQS\", label: \"キュー 3（全注文）\" }\n  PUB -- \"注文（属性なし）\" --> T\n  T == \"✔ B: MessageBody のフィルター region=EU\" ==> Q1\n  T --> Q2\n  T --> Q3\n  T -. \"⚠ A: MessageAttributes のフィルター（合う物が無い）\" .-> Q1\n  C[\"⚠ C: 全部読んで EU 以外を削除\"]\n  C -.-> Q1\n  D[\"⚠ D: EU 用トピックへ送り直す（発行者の変更が必要）\"]\n  D -.-> PUB\n",
    "alt": "SNS の注文トピックから 3 つの SQS キューへのファンアウトの図。配送チームのキューだけ、購読に MessageBody の範囲のフィルターポリシーで region が EU の注文に絞る（B）。他の 2 つは全注文を受ける。"
   }
  ]

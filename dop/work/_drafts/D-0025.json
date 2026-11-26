@@ -18,7 +18,7 @@
     },
     {
       "id": "q-4.2-0014",
-      "source": "flowchart TB\n  S3B[\"S3 の VPC フローログ<br/>（日付・リージョンで分割）\"]\n  ATH[\"Amazon Athena<br/>クエリ\"]\n  GLUE[\"AWS Glue<br/>Data Catalog\"]\n  WB[\"⚠ B: ジョブの保守が残る\"]\n  WC[\"⚠ C: 全ファイルを読み、かえって遅い\"]\n  WD[\"⚠ D: 写す手間と費用が大きい\"]\n  ATH -. \"⚠ 今: GetPartitions を毎回呼ぶ\" .-> GLUE\n  ATH == \"✔ A: 射影で自分で組み立てる\" ==> S3B\n  WB -.- ATH\n  WC -.- S3B\n  WD -.- S3B\n",
+      "source": "flowchart TB\n  S3B@{ svc: \"Amazon S3\", label: \"VPC フローログ（日付・リージョンで分割）\" }\n  ATH@{ svc: \"Amazon Athena\", label: \"Amazon Athena<br/>クエリ\" }\n  GLUE@{ svc: \"AWS Glue\", label: \"AWS Glue<br/>Data Catalog\" }\n  WB[\"⚠ B: ジョブの保守が残る\"]\n  WC[\"⚠ C: 全ファイルを読み、かえって遅い\"]\n  WD[\"⚠ D: 写す手間と費用が大きい\"]\n  ATH -. \"⚠ 今: GetPartitions を毎回呼ぶ\" .-> GLUE\n  ATH == \"✔ A: 射影で自分で組み立てる\" ==> S3B\n  WB -.- GLUE\n  WC -.- S3B\n  WD -.- S3B\n",
       "alt": "パーティションの多い VPC フローログを Athena で速くクエリする図。パーティション射影を有効にすると、Data Catalog への呼び出しを避けて速くなり、毎日のパーティション追加も不要になる（A）。"
     }
   ]

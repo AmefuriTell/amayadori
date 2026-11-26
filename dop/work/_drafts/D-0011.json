@@ -3,32 +3,32 @@
   "diagrams": [
     {
       "id": "q-2.1-0011",
-      "source": "flowchart TB\n  SM[\"AWS Systems Manager State Manager<br/>✔ C: 関連付け（スケジュール＋タグ Env=prod）\"]\n  CFG[\"承認済みの構成\"]\n  EC2@{ svc: \"Amazon EC2\", label: \"Env=prod の 400 台（後から起動も）\" }\n  CFG -- \"適用する内容\" --> SM\n  SM == \"✔ C: スケジュールで適用し直す\" ==> EC2\n  EC2 -. \"⚠ A: 起動時だけ、既存には入らない\" .-> CFG\n  SM -. \"⚠ B: Lambda と SSH の保守が要る\" .-> EC2\n",
+      "source": "flowchart TB\n  CFG[\"承認済みの構成\"]\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ C: State Manager の関連付け（スケジュール + タグ Env=prod）\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"Env=prod の 400 台（後から起動も）\" }\n  BADA[\"⚠ A: ユーザーデータの cron は起動時だけ。既存には入らない\"]\n  BADB[\"⚠ B: Lambda と SSH の保守が要る\"]\n  BADD[\"⚠ D: 毎週の手作業で比べて直す\"]\n  CFG -- \"適用する内容\" --> SM\n  SM == \"✔ C: スケジュールで適用し直す\" ==> EC2\n  BADA -.-> EC2\n  BADB -.-> EC2\n  BADD -.-> EC2",
       "alt": "State Manager の関連付けで、承認済みの構成をスケジュールで適用し、タグ Env=prod で対象を決める図。後から起動した EC2 にも当たり、追加の費用もない（C）。A のユーザーデータや B の Lambda は手間が大きい。"
     },
     {
       "id": "q-2.1-0012",
-      "source": "flowchart TB\n  RES[\"S3 バケットとセキュリティグループ\"]\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 構成の記録\" }\n  PACK@{ svc: \"AWS Config\", label: \"✔ A: コンフォーマンスパック（ルールの一式）\" }\n  SEC([\"セキュリティチーム\"])\n  RES -- \"構成\" --> CFG\n  PACK == \"✔ A: 1 つの単位でデプロイ・評価\" ==> CFG\n  CFG == \"基準に反したら通知\" ==> SEC\n  PACK -. \"⚠ B: ルールを 1 つずつ作る\" .-> CFG\n",
+      "source": "flowchart TB\n  RES[\"S3 バケットとセキュリティグループ\"]\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 構成の記録\" }\n  PACK@{ svc: \"AWS Config\", label: \"✔ A: コンフォーマンスパック（ルールの一式）\" }\n  SEC([\"セキュリティチーム\"])\n  RES -- \"構成\" --> CFG\n  PACK == \"✔ A: 1 つの単位でデプロイ・評価\" ==> CFG\n  CFG == \"基準に反したら通知\" ==> SEC\n  BADB[\"⚠ B: ルールを 1 つずつ作る → 一式を 1 つの単位にできない\"]\n  BADCD[\"⚠ C: Lambda を書いて保守・記録も残らない<br/>⚠ D: 毎月の手作業で通知が遅れる\"]\n  BADB -.-> PACK\n  BADCD -.-> RES\n",
       "alt": "AWS Config で S3 バケットとセキュリティグループの構成を記録し、ルールの一式をコンフォーマンスパックとして 1 つの単位でデプロイして評価し、基準違反を通知する図（A）。B はルールを 1 つずつ作る手間が増える。"
     },
     {
       "id": "q-2.1-0013",
-      "source": "flowchart TB\n  PT([\"プラットフォームチーム\"])\n  SC@{ svc: \"AWS Service Catalog\", label: \"✔ C: ポートフォリオ（起動の制約付き）\" }\n  DEV([\"開発者\"])\n  ROLE@{ svc: \"AWS IAM\", label: \"起動の制約の IAM ロール\" }\n  CF@{ svc: \"AWS CloudFormation\", label: \"承認済みの環境のスタック\" }\n  PT -- \"承認済みのテンプレートを登録\" --> SC\n  DEV -- \"起動・更新・終了\" --> SC\n  SC == \"✔ C: ロールを引き受ける\" ==> ROLE\n  ROLE -- \"リソースを作る\" --> CF\n  DEV -. \"⚠ A: 制約なしだと開発者に権限が要る\" .-> CF\n",
+      "source": "flowchart TB\n  PT([\"プラットフォームチーム\"])\n  SC@{ svc: \"AWS Service Catalog\", label: \"✔ C: ポートフォリオ（起動の制約付き）\" }\n  DEV([\"開発者\"])\n  ROLE@{ svc: \"AWS IAM\", label: \"起動の制約の IAM ロール\" }\n  CF@{ svc: \"AWS CloudFormation\", label: \"承認済みの環境のスタック\" }\n  PT -- \"承認済みのテンプレートを登録\" --> SC\n  DEV -- \"起動・更新・終了\" --> SC\n  SC == \"✔ C: ロールを引き受ける\" ==> ROLE\n  ROLE -- \"リソースを作る\" --> CF\n  BADBD[\"⚠ B: 管理者権限は広すぎる<br/>⚠ D: プラットフォームチームが全部起動する手間\"]\n  DEV -. \"⚠ A: 制約なしだと開発者に権限が要る\" .-> CF\n  BADBD -.-> DEV\n",
       "alt": "Service Catalog のポートフォリオに起動の制約を付けると、開発者は承認済みの製品だけを起動でき、リソースは起動の制約の IAM ロールが作るので開発者に CloudFormation などの権限が要らない（C）。A は制約なしで権限が要る。"
     },
     {
       "id": "q-2.1-0014",
-      "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"✔ D: プロアクティブなコントロール\" }\n  HK@{ svc: \"AWS CloudFormation\", label: \"CloudFormation Hooks\" }\n  DEP[\"各アカウントのデプロイ\"]\n  BAD([\"暗号化されていない設定\"])\n  CT == \"✔ D: Hooks として有効に\" ==> HK\n  DEP -- \"リソースを用意する前\" --> HK\n  HK == \"✔ D: 準拠しなければ止める\" ==> BAD\n  CT -. \"⚠ A: 自分でルールを書いて保守\" .-> HK\n  DEP -. \"⚠ B: 作った後に見つけても遅い\" .-> BAD\n",
+      "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"✔ D: プロアクティブなコントロール\" }\n  HK@{ svc: \"AWS CloudFormation\", label: \"CloudFormation Hooks\" }\n  DEP[\"各アカウントのデプロイ\"]\n  BAD([\"暗号化されていない設定\"])\n  CT == \"✔ D: Hooks として有効に\" ==> HK\n  DEP -- \"リソースを用意する前\" --> HK\n  HK == \"✔ D: 準拠しなければ止める\" ==> BAD\n  BADA[\"⚠ A: 自分でルールを書いて保守\"]\n  BADB[\"⚠ B: 作った後に見つけても遅い\"]\n  BADC[\"⚠ C: 手作業のレビューは追いつかない\"]\n  BADA -.-> HK\n  BADB -.-> BAD\n  BADC -.-> DEP\n",
       "alt": "Control Tower のプロアクティブなコントロールは CloudFormation Hooks として動き、リソースを用意する前に暗号化されていない設定などを止める図（D）。コードを書かずに済む。A は自作で保守が要り、B は作った後で遅い。"
     },
     {
       "id": "q-2.1-0015",
-      "source": "flowchart TB\n  APP@{ svc: \"AWS CDK\", label: \"CDK のアプリ（多くのスタック）\" }\n  AS[\"✔ B: Aspect（1 つの決まり）\"]\n  BK[\"すべてのバケット（他チームのパターン内も）\"]\n  OUT([\"暗号化されていないバケットを報告\"])\n  APP -- \"スコープのすべてのコンストラクト\" --> AS\n  AS == \"✔ B: 訪れて確かめる\" ==> BK\n  BK --> OUT\n  APP -. \"⚠ A: Mixin は各バケットに付ける\" .-> BK\n  APP -. \"⚠ C: 定義を L1 に置き換える\" .-> BK\n",
+      "source": "flowchart TB\n  APP@{ svc: \"AWS CDK\", label: \"CDK のアプリ（多くのスタック）\" }\n  AS[\"✔ B: Aspect（1 つの決まり）\"]\n  BK[\"すべてのバケット（他チームのパターン内も）\"]\n  OUT([\"暗号化されていないバケットを報告\"])\n  APP -- \"スコープのすべてのコンストラクト\" --> AS\n  AS == \"✔ B: 訪れて確かめる\" ==> BK\n  BK --> OUT\n  BADA[\"⚠ A: Mixin は各バケットに付ける必要がある\"]\n  BADC[\"⚠ C: 定義を L1 に置き換える（決まりにならない）\"]\n  BADD[\"⚠ D: 各チームの手作業で漏れが出る\"]\n  BADA -.-> BK\n  BADC -.-> BK\n  BADD -.-> APP\n",
       "alt": "CDK のアプリ全体のコンストラクトを Aspect が訪れ、暗号化されていない S3 バケットを 1 つの決まりで報告する図（B）。Mixin は特定のコンストラクトに機能を足すもので、A は各バケットへの付与が要る。C は定義を直すことになる。"
     },
     {
       "id": "q-2.1-0016",
-      "source": "flowchart TB\n  SEC([\"セキュリティチーム\"])\n  REG@{ svc: \"AWS CloudFormation\", label: \"✔ D: レジストリのモジュール（強化した設定）\" }\n  TPL@{ svc: \"AWS CloudFormation\", label: \"各チームのテンプレート\" }\n  SEC -- \"新しいバージョンを出す\" --> REG\n  REG == \"✔ D: テンプレートに含める\" ==> TPL\n  TPL -- \"同じ強化設定\" --> STK[\"各チームのスタック\"]\n  SEC -. \"⚠ A: 写しが散らばる\" .-> TPL\n  SEC -. \"⚠ C: 毎回の手作業の見直し\" .-> STK\n",
+      "source": "flowchart TB\n  SEC([\"セキュリティチーム\"])\n  REG@{ svc: \"AWS CloudFormation\", label: \"✔ D: レジストリのモジュール（強化した設定）\" }\n  TPL@{ svc: \"AWS CloudFormation\", label: \"各チームのテンプレート\" }\n  SEC -- \"新しいバージョンを出す\" --> REG\n  REG == \"✔ D: テンプレートに含める\" ==> TPL\n  TPL -- \"同じ強化設定\" --> STK[\"各チームのスタック\"]\n  BADA[\"⚠ A: 写しが散らばる\"]\n  BADB[\"⚠ B: StackSet は各チームのテンプレートに含める仕組みではない\"]\n  BADC[\"⚠ C: 毎回の手作業の見直し\"]\n  BADA -.-> TPL\n  BADB -.-> TPL\n  BADC -.-> STK\n",
       "alt": "強化したリソースの設定を CloudFormation のモジュールとしてレジストリに入れ、各チームが自分のテンプレートに含める図。指針が変わったらモジュールの新しいバージョンを出して 1 か所で更新できる（D）。A は写しが散り、C は手作業。"
     }
   ]

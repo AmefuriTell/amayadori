@@ -8,7 +8,7 @@
     },
     {
       "id": "q-4.1-0012",
-      "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  subgraph VPC[\"VPC\"]\n    FN@{ svc: \"AWS Lambda\", label: \"流す関数\" }\n    OS[\"Amazon OpenSearch Service<br/>ドメイン（VPC アクセス）\"]\n  end\n  OA[\"✔ A: 実行ロールが lambda.amazonaws.com を信頼<br/>AWSLambdaVPCAccessExecutionRole を付ける\"]\n  OB[\"✔ B: 送り元は Standard のログクラス\"]\n  WC[\"⚠ C: 作った後にアクセスの種類は変えられない\"]\n  WE[\"⚠ E: 信頼先は logs ではなく lambda\"]\n  LG -- \"サブスクリプション\" --> FN\n  FN -- \"書き込み\" --> OS\n  OA -.- FN\n  OB -.- LG\n  WC -.- OS\n  WE -.- OA\n",
+      "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  subgraph VPC[\"VPC\"]\n    FN@{ svc: \"AWS Lambda\", label: \"流す関数\" }\n    OS@{ svc: \"Amazon OpenSearch Service\", label: \"Amazon OpenSearch Service<br/>ドメイン（VPC アクセス）\" }\n  end\n  OA[\"✔ A: 実行ロールが lambda.amazonaws.com を信頼<br/>AWSLambdaVPCAccessExecutionRole を付ける\"]\n  OB[\"✔ B: 送り元は Standard のログクラス\"]\n  WC[\"⚠ C: 作った後にアクセスの種類は変えられない\"]\n  WE[\"⚠ E: 信頼先は logs ではなく lambda\"]\n  LG -- \"サブスクリプション\" --> FN\n  FN -- \"書き込み\" --> OS\n  OA -.- FN\n  OB -.- LG\n  WC -.- OS\n  WE -.- FN\n",
       "alt": "CloudWatch Logs から VPC アクセスの OpenSearch Service へ Lambda で流す図。Lambda の実行ロールに lambda.amazonaws.com の信頼と AWSLambdaVPCAccessExecutionRole を付け（A）、送り元は Standard のログクラスにする（B）。"
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "id": "q-4.1-0015",
-      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"証跡\" }\n    B@{ svc: \"Amazon S3\", label: \"届け先のバケット\" }\n    KEY@{ svc: \"AWS KMS\", label: \"✔ A: カスタマーマネージドキー\" }\n  end\n  AUD[\"監査担当のセキュリティロール\"]\n  OB[\"✔ B: キーポリシーに<br/>復号の権限を先に足す\"]\n  WC[\"⚠ C: us-east-1 のキーは使えない\"]\n  WDE[\"⚠ D・E: SSE-C は使えず<br/>権限が後だと読めない\"]\n  CT -- \"ログ・ダイジェスト\" --> B\n  CT -. \"✔ A: キーポリシーで許可\" .-> KEY\n  AUD -- \"読む\" --> B\n  OB -.- AUD\n  WC -.- KEY\n  WDE -.- B\n",
+      "source": "flowchart TB\n  subgraph EU[\"eu-west-1\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"証跡\" }\n    B@{ svc: \"Amazon S3\", label: \"届け先のバケット\" }\n    KEY@{ svc: \"AWS KMS\", label: \"✔ A: カスタマーマネージドキー\" }\n  end\n  AUD[\"監査担当のセキュリティロール\"]\n  OB[\"✔ B: キーポリシーに<br/>復号の権限を先に足す\"]\n  WC[\"⚠ C: us-east-1 のキーは使えない\"]\n  WD[\"⚠ D: SSE-C は使えない\"]\n  WE[\"⚠ E: 権限が後だと<br/>その間は読めない\"]\n  CT -- \"ログ・ダイジェスト\" --> B\n  CT -. \"✔ A: キーポリシーで許可\" .-> KEY\n  AUD -- \"読む\" --> B\n  OB -.- AUD\n  WC -.- KEY\n  WD -.- B\n  WE -.- AUD\n",
       "alt": "CloudTrail のログを KMS キーで暗号化し、監査担当がすぐ読めるようにする図。バケットと同じ eu-west-1 にキーを作り CloudTrail に使わせ（A）、監査担当に復号の権限を先に与える（B）。"
     }
   ]
