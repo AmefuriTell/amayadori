@@ -1,0 +1,219 @@
+{
+  "item": "C-0077",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company encrypts sensitive objects in Amazon S3 with AWS KMS. Auditors require the company to define who can use the key in its own key policy, to be able to disable the key or schedule it for deletion, and to audit activity on the key. The company wants to avoid running its own hardware. Which type of key should the company use with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "An AWS owned key that the S3 service owns and manages for use in multiple accounts."
+        },
+        {
+          "key": "B",
+          "text": "A customer managed key that the company creates in its account and manages with its own key policy."
+        },
+        {
+          "key": "C",
+          "text": "Keys in an AWS CloudHSM cluster that the company manages, with users that it manages outside IAM."
+        },
+        {
+          "key": "D",
+          "text": "An AWS managed key that S3 creates and uses on the company's behalf in the company's account."
+        }
+      ],
+      "explanation": {
+        "summary": "カスタマーマネージドキーは自分のアカウントで作り、所有し、管理するキーで、キーポリシー・IAM ポリシー・グラント、有効と無効、削除の予定などを完全に管理できます。キーの寿命と使い方を完全に管理したい場合に勧められています。",
+        "per_choice": {
+          "A": "AWS 所有のキーは、ポリシーを変えることも、操作を監査することも、削除することもできません。",
+          "B": "正しい。自分のキーポリシーで使える人を決め、無効化や削除の予定もでき、自前のハードウェアも要りません。",
+          "C": "要件は満たせますが、HSM のクラスターと利用者を自分で管理することになり、オーバーヘッドが大きくなります。",
+          "D": "AWS マネージドキーは AWS のサービスが会社の代わりに作り、管理し、使うキーで、新しいサービス向けには作られていない古い種類です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-mgn-key",
+          "source_id": "S2",
+          "quote": "You have full control over these KMS keys, including establishing and maintaining their key policies, IAM policies, and grants, enabling and disabling them"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-owned-key",
+          "source_id": "S4",
+          "quote": "you cannot change their policies, you cannot audit activities on these keys, and you cannot delete them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "source_id": "S3",
+          "quote": "AWS managed keys are KMS keys in your account that are created, managed, and used on your behalf by an AWS service integrated with AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts",
+          "source_id": "S1",
+          "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "source_id": "S0",
+          "quote": "AWS managed keys are a legacy key type that is no longer being created for new AWS services as of 2021."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An Application Load Balancer uses an Amazon-issued public certificate from AWS Certificate Manager (ACM). The certificate was validated by email, and last year it expired because nobody acted on the renewal emails. The company wants future renewals to happen automatically without any human action and without changing the certificate that the load balancer references. Which solution meets these requirements with the LEAST operational effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Request a new ACM certificate that uses DNS validation and attach it to the load balancer once, so that ACM renews it automatically."
+        },
+        {
+          "key": "B",
+          "text": "Keep email validation, and create a calendar reminder for the team to approve the renewal email every year."
+        },
+        {
+          "key": "C",
+          "text": "Issue certificates through ACME certificate automation so that ACM managed renewal renews them."
+        },
+        {
+          "key": "D",
+          "text": "Create an Amazon CloudWatch alarm on the days to expiry, and replace the certificate on the load balancer by hand when the alarm fires."
+        }
+      ],
+      "explanation": {
+        "summary": "ACM は Amazon が発行した SSL/TLS の証明書をマネージド更新します。DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせます。更新しても証明書の ARN は変わらないので、ロードバランサーの参照を変えずに済みます。",
+        "per_choice": {
+          "A": "正しい。DNS 検証の証明書は ACM が自動で更新し、ARN も変わらないため、付け替えは最初の 1 回だけです。",
+          "B": "人の操作が毎年要り、要件に反します。",
+          "C": "ACME の証明書の自動化で発行した証明書は、ACM のマネージド更新の対象外です。",
+          "D": "気づけるだけで、付け替えは手作業のままで、参照する証明書も変わります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "source_id": "S7",
+          "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "source_id": "S7",
+          "quote": "When ACM renews a certificate, the certificate's Amazon Resource Name (ARN) remains the same."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "source_id": "S7",
+          "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0003",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "An application writes millions of new objects every day to an Amazon S3 bucket that uses SSE-KMS with one customer managed key. The AWS KMS request charges have become a large part of the monthly bill. The company must keep using the same customer managed key. Which change will reduce the KMS request costs the MOST?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn on automatic key rotation for the customer managed key so that new key material is used every year."
+        },
+        {
+          "key": "B",
+          "text": "Create a separate customer managed key for each prefix in the bucket so that requests are spread across keys."
+        },
+        {
+          "key": "C",
+          "text": "Configure an S3 Bucket Key for the bucket so that S3 sends fewer requests to AWS KMS for new objects."
+        },
+        {
+          "key": "D",
+          "text": "Request a higher AWS KMS request quota so that the application is not throttled during peaks."
+        }
+      ],
+      "explanation": {
+        "summary": "SSE-KMS でバケットレベルのキー（S3 バケットキー）を使うと、S3 から AWS KMS へのリクエストが減り、KMS のリクエストの費用を最大 99% 減らせます。設定した時点でバケットにあるオブジェクトはバケットキーを使いませんが、この会社の費用の多くは新しいオブジェクトの書き込みから来ています。",
+        "per_choice": {
+          "A": "ローテーションは今のキーの素材を変えるだけで、リクエストの数は減りません。",
+          "B": "キーを分けてもリクエストの総数は変わらず、バケットキーは同じ KMS キーで暗号化したオブジェクトの間でだけ共有されるので、かえって効果が下がります。",
+          "C": "正しい。同じカスタマーマネージドキーのまま、KMS へのリクエストを大きく減らせます。",
+          "D": "クォータを上げてもリクエストの数と費用は減りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "source_id": "S9",
+          "quote": "Using a bucket-level key for SSE-KMS can reduce AWS KMS request costs by up to 99 percent by decreasing the request traffic from Amazon S3 to AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "source_id": "S9",
+          "quote": "When you configure an S3 Bucket Key, objects that are already in the bucket do not use the S3 Bucket Key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "source_id": "S9",
+          "quote": "Amazon S3 will only share an S3 Bucket Key for objects encrypted by the same AWS KMS key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys",
+          "source_id": "S5",
+          "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0004",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A payment company must store its encryption keys in single-tenant hardware security modules that are FIPS 140-3 level 3 validated. Regulators also require that AWS cannot see the cryptographic data plane and that the company manages the HSM users itself, outside IAM. Which solution BEST meets these requirements?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Use AWS KMS customer managed keys with automatic key rotation turned on."
+        },
+        {
+          "key": "B",
+          "text": "Use AWS owned keys so that AWS manages the keys for the company."
+        },
+        {
+          "key": "C",
+          "text": "Use an AWS CloudHSM cluster in FIPS mode, and manage the HSM users in the cluster."
+        },
+        {
+          "key": "D",
+          "text": "Use AWS KMS customer managed keys, and control access to them only with IAM policies."
+        }
+      ],
+      "explanation": {
+        "summary": "AWS CloudHSM は、汎用・シングルテナントで、FIPS モードのクラスターでは FIPS 140-2 または FIPS 140-3 のレベル 3 の検証を受けた HSM を提供します。データプレーンはエンドツーエンドで暗号化されて AWS から見えず、利用者の管理は IAM のロールの外で自分で行います。",
+        "per_choice": {
+          "A": "キーのローテーションは良い運用ですが、シングルテナントの HSM や、IAM の外での利用者の管理という要件は満たしません。",
+          "B": "AWS 所有のキーは AWS が所有・管理し、ポリシーの変更も監査もできず、要件に合いません。",
+          "C": "正しい。シングルテナントの検証済みの HSM で、データプレーンは AWS から見えず、利用者を自分で管理します。",
+          "D": "利用者の管理が IAM になり、IAM の外で管理するという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "source_id": "S8",
+          "quote": "HSMs are general purpose, single tenant, and either FIPS 140-2 level-3 or FIPS 140-3 level-3 validated for clusters in FIPS mode"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "source_id": "S8",
+          "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
+        }
+      ]
+    }
+  ]
+}

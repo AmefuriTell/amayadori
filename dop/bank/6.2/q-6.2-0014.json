@@ -1,0 +1,62 @@
+{
+  "task": "6.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.2-0014",
+  "services": [
+    "AWS CloudHSM",
+    "AWS KMS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A payment company must store its encryption keys in single-tenant hardware security modules that are FIPS 140-3 level 3 validated. Regulators also require that AWS cannot see the cryptographic data plane and that the company manages the HSM users itself, outside IAM. Which solution BEST meets these requirements?",
+  "stem_ja": "ある決済の会社は、暗号化のキーを、FIPS 140-3 レベル 3 の検証を受けたシングルテナントのハードウェアセキュリティモジュール（HSM）に保存する必要があります。規制当局は、暗号のデータプレーンが AWS から見えないことと、会社が IAM の外で HSM の利用者を自分で管理することも求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use AWS KMS customer managed keys with automatic key rotation turned on.",
+      "text_ja": "自動のキーローテーションを有効にした AWS KMS のカスタマーマネージドキーを使う。"
+    },
+    {
+      "key": "B",
+      "text": "Use an AWS CloudHSM cluster in FIPS mode, and manage the HSM users in the cluster.",
+      "text_ja": "FIPS モードの AWS CloudHSM のクラスターを使い、クラスターの中で HSM の利用者を管理する。"
+    },
+    {
+      "key": "C",
+      "text": "Use AWS owned keys so that AWS manages the keys for the company.",
+      "text_ja": "AWS がキーを管理するよう、AWS 所有のキーを使う。"
+    },
+    {
+      "key": "D",
+      "text": "Use AWS KMS customer managed keys, and control access to them only with IAM policies.",
+      "text_ja": "AWS KMS のカスタマーマネージドキーを使い、IAM ポリシーだけでアクセスを管理する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "AWS CloudHSM は、汎用・シングルテナントで、FIPS モードのクラスターでは FIPS 140-2 または FIPS 140-3 のレベル 3 の検証を受けた HSM を提供します。データプレーンはエンドツーエンドで暗号化されて AWS から見えず、利用者の管理は IAM のロールの外で自分で行います。",
+    "per_choice": {
+      "A": "キーのローテーションは良い運用ですが、シングルテナントの HSM や、IAM の外での利用者の管理という要件は満たしません。",
+      "B": "正しい。シングルテナントの検証済みの HSM で、データプレーンは AWS から見えず、利用者を自分で管理します。",
+      "C": "AWS 所有のキーは AWS が所有・管理し、ポリシーの変更も監査もできず、要件に合いません。",
+      "D": "利用者の管理が IAM になり、IAM の外で管理するという要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+      "source_id": "S8",
+      "quote": "HSMs are general purpose, single tenant, and either FIPS 140-2 level-3 or FIPS 140-3 level-3 validated for clusters in FIPS mode"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+      "source_id": "S8",
+      "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,78 @@
+{
+  "task": "6.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.2-0011",
+  "services": [
+    "AWS KMS",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company encrypts sensitive objects in Amazon S3 with AWS KMS. Auditors require the company to define who can use the key in its own key policy, to be able to disable the key or schedule it for deletion, and to audit activity on the key. The company wants to avoid running its own hardware. Which type of key should the company use with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、Amazon S3 の機密のオブジェクトを AWS KMS で暗号化しています。監査人は、誰がキーを使えるかを会社自身のキーポリシーで決めること、キーを無効にしたり削除を予定したりできること、キーの操作を監査できることを求めています。会社は、自前のハードウェアを動かすことは避けたいと考えています。運用上のオーバーヘッドが最も少なく使えるキーの種類はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "An AWS owned key that the S3 service owns and manages for use in multiple accounts.",
+      "text_ja": "S3 のサービスが複数のアカウントで使うために所有・管理する、AWS 所有のキー。"
+    },
+    {
+      "key": "B",
+      "text": "Keys in an AWS CloudHSM cluster that the company manages, with users that it manages outside IAM.",
+      "text_ja": "会社が管理する AWS CloudHSM のクラスターのキーと、IAM の外で管理する利用者。"
+    },
+    {
+      "key": "C",
+      "text": "An AWS managed key that S3 creates and uses on the company's behalf in the company's account.",
+      "text_ja": "S3 が会社のアカウントで会社の代わりに作って使う、AWS マネージドキー。"
+    },
+    {
+      "key": "D",
+      "text": "A customer managed key that the company creates in its account and manages with its own key policy.",
+      "text_ja": "会社が自分のアカウントで作り、自分のキーポリシーで管理するカスタマーマネージドキー。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "カスタマーマネージドキーは自分のアカウントで作り、所有し、管理するキーで、キーポリシー・IAM ポリシー・グラント、有効と無効、削除の予定などを完全に管理できます。キーの寿命と使い方を完全に管理したい場合に勧められています。",
+    "per_choice": {
+      "A": "AWS 所有のキーは、ポリシーを変えることも、操作を監査することも、削除することもできません。",
+      "B": "要件は満たせますが、HSM のクラスターと利用者を自分で管理することになり、オーバーヘッドが大きくなります。",
+      "C": "AWS マネージドキーは AWS のサービスが会社の代わりに作り、管理し、使うキーで、新しいサービス向けには作られていない古い種類です。",
+      "D": "正しい。自分のキーポリシーで使える人を決め、無効化や削除の予定もでき、自前のハードウェアも要りません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-mgn-key",
+      "source_id": "S2",
+      "quote": "You have full control over these KMS keys, including establishing and maintaining their key policies, IAM policies, and grants, enabling and disabling them"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-owned-key",
+      "source_id": "S4",
+      "quote": "you cannot change their policies, you cannot audit activities on these keys, and you cannot delete them."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+      "source_id": "S3",
+      "quote": "AWS managed keys are KMS keys in your account that are created, managed, and used on your behalf by an AWS service integrated with AWS KMS."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts",
+      "source_id": "S1",
+      "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+      "source_id": "S0",
+      "quote": "AWS managed keys are a legacy key type that is no longer being created for new AWS services as of 2021."
+    }
+  ],
+  "note": "AWS マネージドキーは 2021 年から新しいサービス向けには作られていない（S0）。この問題は、どの時点でもカスタマーマネージドキーが正解になる形にしている（P-009）。",
+  "last_checked": "2026-11-26"
+}
