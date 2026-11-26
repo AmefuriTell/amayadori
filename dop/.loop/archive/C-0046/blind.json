@@ -1,0 +1,63 @@
+{
+  "item": "C-0046",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch",
+        "AWS Systems Manager Parameter Store"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は、Systems Manager のマネージドノードである 300 台の Amazon Linux の EC2 インスタンスを動かしています。運用チームは、すべてのインスタンスのメモリの使用率とディスク容量の使用率を Amazon CloudWatch で見る必要があります。すべてのインスタンスは 1 か所に保存した 1 つのエージェントの設定を使う必要があり、インスタンスのロールは追加の権限無しで AWS 管理の CloudWatchAgentServerPolicy を使うことにしています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CloudWatch エージェントの設定を、名前が AmazonCloudWatch- で始まるパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。"
+        },
+        {
+          "key": "B",
+          "text": "CloudWatch エージェントの設定を /monitoring/cwagent-config というパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。"
+        },
+        {
+          "key": "C",
+          "text": "すべてのインスタンスに、メモリとディスクの使用量を読み、毎分 PutMetricData API で値を送る cron ジョブを追加する。"
+        },
+        {
+          "key": "D",
+          "text": "すべてのインスタンスに CloudWatch エージェントを入れ、エージェントの設定ファイルが変わるたびに各インスタンスへ手作業でコピーする。"
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "task": "4.1",
+      "services": [
+        "Amazon CloudWatch",
+        "AWS Lambda"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "AWS Lambda 関数が注文を処理しており、注文の種類（約 10 種類）ごとの注文の数をカスタムメトリクスとして公開する必要があります。関数のロールは Amazon CloudWatch Logs に書き込めますが、セキュリティチームはロールに cloudwatch:PutMetricData を与えません。会社は、思いがけず大量のカスタムメトリクスが作られることも避けたいと考えています。これらの要件を最も運用効率よく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、注文の種類をディメンションにする。"
+        },
+        {
+          "key": "B",
+          "text": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、リクエスト ID と注文の種類をディメンションにする。"
+        },
+        {
+          "key": "C",
+          "text": "注文ごとに関数から PutMetricData API を呼び、注文の種類をディメンションにする。"
+        },
+        {
+          "key": "D",
+          "text": "各注文を Amazon S3 バケットに書き、注文を数えてメトリクスを公開するスケジュールのジョブを EC2 インスタンスで動かす。"
+        }
+      ]
+    }
+  ]
+}

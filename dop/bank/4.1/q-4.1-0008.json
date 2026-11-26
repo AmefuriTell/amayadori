@@ -1,0 +1,68 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0008",
+  "services": [
+    "Amazon CloudWatch",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS Lambda function processes orders and must publish a custom metric for the number of orders by order type (about 10 types). The function's role can write to Amazon CloudWatch Logs, but the security team will not grant cloudwatch:PutMetricData to the role. The company also wants to avoid creating an unexpectedly large number of custom metrics. Which solution meets these requirements in the MOST operationally efficient way?",
+  "stem_ja": "AWS Lambda 関数が注文を処理しており、注文の種類（約 10 種類）ごとの注文の数をカスタムメトリクスとして公開する必要があります。関数のロールは Amazon CloudWatch Logs に書き込めますが、セキュリティチームはロールに cloudwatch:PutMetricData を与えません。会社は、思いがけず大量のカスタムメトリクスが作られることも避けたいと考えています。これらの要件を最も運用効率よく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Write the metric with the CloudWatch embedded metric format in the function's log output, and use the request ID and the order type as dimensions.",
+      "text_ja": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、リクエスト ID と注文の種類をディメンションにする。"
+    },
+    {
+      "key": "B",
+      "text": "Write the metric with the CloudWatch embedded metric format in the function's log output, and use the order type as the dimension.",
+      "text_ja": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、注文の種類をディメンションにする。"
+    },
+    {
+      "key": "C",
+      "text": "Call the PutMetricData API from the function for each order, and use the order type as the dimension.",
+      "text_ja": "注文ごとに関数から PutMetricData API を呼び、注文の種類をディメンションにする。"
+    },
+    {
+      "key": "D",
+      "text": "Write each order to an Amazon S3 bucket, and run a scheduled job on an EC2 instance that counts the orders and publishes the metric.",
+      "text_ja": "各注文を Amazon S3 バケットに書き、注文を数えてメトリクスを公開するスケジュールのジョブを EC2 インスタンスで動かす。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "埋め込みメトリクス形式は、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作り、logs:PutLogEvents の権限があれば cloudwatch:PutMetricData は要りません。ディメンションの組み合わせごとにメトリクスが作られるので、リクエスト ID のような値の種類が多いディメンションは避けます。",
+    "per_choice": {
+      "A": "リクエスト ID は値の種類が多く、組み合わせごとにメトリクスが作られて、大量のカスタムメトリクスになります。",
+      "B": "正しい。ログに書くだけでメトリクスができ、注文の種類（約 10 種類）だけをディメンションにするのでメトリクスの数も抑えられます。",
+      "C": "cloudwatch:PutMetricData の権限が必要で、セキュリティチームの決定に反します。",
+      "D": "動きますが、関数とは別の仕組みを作って動かし続ける必要があり、手間が大きくなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+      "source_id": "S7",
+      "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+      "source_id": "S7",
+      "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+      "source_id": "S7",
+      "quote": "the embedded metric format will by design create a custom metric corresponding to each unique dimension combination."
+    }
+  ],
+  "note": "公式のドキュメントは、新しい実装には OpenTelemetry（OTLP）でメトリクスを送ることを勧めている（S3・S7）。この問題は「PutMetricData の権限が無く、ログには書ける」という条件で埋め込みメトリクス形式を選ばせる。試験とずれるかもしれない（P-009）。",
+  "last_checked": "2026-11-26"
+}
