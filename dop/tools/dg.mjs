@@ -5,23 +5,15 @@
 // 出来上がりは diagrams/<問題 ID>.json（図の元）と app/public/diagrams/<問題 ID>.svg（絵）。
 import fs from 'node:fs';
 import path from 'node:path';
-import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, setResult, writeReport, rel } from './lib/io.mjs';
+import { CODE, paths, readJSON, writeJSON, emit, main, ToolError, today, setResult, writeReport } from './lib/io.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, concludeBatch } from './lib/step.mjs';
 import { iconMap, cleanIcon, renderAll } from './lib/diagram.mjs';
 
 const SEVERE = new Set(['fact', 'unsupported', 'unreadable']);
 const MILD = new Set(['unclear', 'style']);
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
-function itemIdOf(arg) {
-  const id = typeof arg === 'string' ? (arg.match(/D-[0-9]{4}/)?.[0] ?? arg) : null;
-  if (!id || !ITEM_ID.test(id) || !id.startsWith('D-')) throw new ToolError('図の項目 ID（例 D-0001）を渡す');
-  return id;
-}
-
-function requireState(id, state) {
-  const s = readJSON(paths.state(), { state: 'S0_pick', item: null });
-  if (s.state !== state || s.item !== id) throw new ToolError(`この操作は ${id} が ${state} の時だけ（今は ${s.state}${s.item ? ` / ${s.item}` : ''}）`);
-}
+const itemIdOf = (arg) => idOf(arg, { prefix: 'D', message: '図の項目 ID（例 D-0001）を渡す' });
 
 function loadBatch(id) {
   const b = readJSON(paths.work(id, 'diagrams.json'), null);
@@ -72,12 +64,7 @@ async function gateDiagrams(id) {
   return { fails, batch, results };
 }
 
-function failToFeedback(id, step, fails) {
-  const byD = {};
-  for (const f of fails) (byD[f.id ?? '(束)'] ??= []).push({ kind: f.check, detail: f.message });
-  writeJSON(paths.work(id, 'feedback.json'), { from: step, diagrams: byD });
-  appendLine(paths.work(id, 'history.jsonl'), { step, kinds: [...new Set(fails.map((f) => f.check))] });
-}
+const failToFeedback = (id, step, fails) => toFeedback(id, step, fails, { idField: 'id', key: 'diagrams' });
 
 const commands = {
   // 公式のアイコン集（展開したフォルダ）から、config/icon-map.json の分だけ assets/aws-icons/ に写す
@@ -136,37 +123,7 @@ const commands = {
   verdict(args) {
     const id = itemIdOf(args._[0]);
     requireState(id, 'C3_verify');
-    const batch = loadBatch(id);
-    const v = readJSON(paths.work(id, 'verify.json'), null);
-    if (!v || !Array.isArray(v.diagrams)) throw new ToolError(`work/${id}/verify.json が無い（検証役が書く）`);
-    const hist = readJSON(paths.work(id, 'dhistory.json'), {});
-    const results = {};
-    const feedback = {};
-    const kinds = new Set();
-    let anyCounted = false;
-    for (const d of batch.diagrams) {
-      const x = v.diagrams.find((y) => y.id === d.id);
-      if (!x) throw new ToolError(`verify.json に ${d.id} が無い`);
-      const issues = Array.isArray(x.issues) ? x.issues : [];
-      issues.forEach((i) => kinds.add(i.kind));
-      const severe = issues.some((i) => SEVERE.has(i.kind)) || (x.verdict === 'fix' && !issues.every((i) => MILD.has(i.kind)));
-      const mild = issues.some((i) => MILD.has(i.kind));
-      let verdict = severe || (mild && x.verdict === 'fix') ? 'fix' : 'ok';
-      if (x.verdict === 'drop') verdict = 'drop';
-      if (verdict === 'fix' && severe) { hist[d.id] = (hist[d.id] ?? 0) + 1; if (hist[d.id] >= 2) verdict = 'drop'; else anyCounted = true; }
-      results[d.id] = verdict;
-      if (verdict === 'fix') feedback[d.id] = issues;
-    }
-    const kept = batch.diagrams.filter((d) => results[d.id] !== 'drop');
-    writeJSON(paths.work(id, 'dhistory.json'), hist);
-    writeJSON(paths.work(id, 'diagrams.json'), { ...batch, diagrams: kept });
-    const result = !kept.length ? 'drop' : Object.keys(feedback).length ? 'fix' : 'pass';
-    if (result === 'fix') writeJSON(paths.work(id, 'feedback.json'), { from: 'C3_verify', diagrams: feedback });
-    writeJSON(paths.work(id, 'verdict.json'), { diagrams: results });
-    appendLine(paths.work(id, 'history.jsonl'), { step: 'C3_verify', result, kinds: [...kinds] });
-    setResult(id, 'C3_verify', result, { count: anyCounted });
-    const n = (k) => Object.values(results).filter((r) => r === k).length;
-    emit({ ok: true, summary: `ok ${n('ok')} / fix ${n('fix')} / drop ${n('drop')} → loop advance --result ${result}`, extra: { result } });
+    concludeBatch({ id, batch: loadBatch(id), batchFile: 'diagrams.json', key: 'diagrams', histFile: 'dhistory.json', severe: SEVERE, mild: MILD });
   },
 
   async gate(args) {

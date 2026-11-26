@@ -55,6 +55,8 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q export --task 1.4 --out <file.md>` | 人が読む時 | 条件 | 書いた数 | （人向け。AI は読まない） | 済 |
 | `Q linkcheck` | 週 1 | なし | 開けない URL | | 済 |
 | `node dop/tools/app.mjs data` | A2・A3 | なし | 配信用の問題数 | bank → app/public/questions.json | 済 |
+| `node dop/tools/refactor.mjs scan [--dry]` | loop start・app と refactor の loop close（自動）、人 | tools/・app/src の .mjs・.js | 直す所と足した項目（F-） | 測り方（config/refactor.json） | 済 |
+| `node dop/tools/refactor.mjs check <ID>` | A3（F-） | spec.json・base.json | 試験の不変・直す所の消えたか・全試験 | git の比べ方・unit と e2e の全部 | 済 |
 | `node dop/tools/app.mjs stamp` | A2（app/ を変えたら） | app/src・style.css | 版の番号 | index.html の import map・version.json（忘れると npm test が落ちる） | 済 |
 | `node dop/tools/app.mjs check <ID>` | A3 | spec.json・app/test・app/e2e | AC ごとの合否・画面写真 | 試験・e2e のログ全文 | 済 |
 | （アプリ）読み上げ | 利用者 | 問題と解説 | ブラウザの speechSynthesis で読む（A-0009） | 読み方の表は app/src/logic/speech.js の READINGS | 済 |

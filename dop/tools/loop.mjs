@@ -6,6 +6,10 @@ import path from 'node:path';
 import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel } from './lib/io.mjs';
 import { validate } from './lib/schema.mjs';
 import { coverage, exam, loadBank } from './lib/bank.mjs';
+import { addToBacklog, recordBase } from './refactor.mjs';
+
+// P-016: コードを測ってリファクタリングの項目を足す（本物の置き場の時だけ。試験の置き場 DOP_DATA ではしない）
+const autoScan = () => (process.env.DOP_DATA ? { added: [] } : addToBacklog());
 
 export function loadMachine() {
   const md = fs.readFileSync(path.join(CODE, 'loop', 'LOOP.md'), 'utf8');
@@ -28,8 +32,8 @@ const GUARDED = {
 const BACK = new Set(['fix', 'fail']);
 // S9 へ行く時の項目の終わり方
 const OUTCOME = { pass: 'done', ok: 'done', no_source: 'dropped', drop: 'dropped' };
-const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T', glossary: 'G', diagram: 'D' };
-const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', diagram: 'C2_author', app: 'A1_spec', learn: 'L1_learn' };
+const KIND_PREFIX = { content: 'C', app: 'A', learn: 'L', recheck: 'R', translate: 'T', glossary: 'G', diagram: 'D', refactor: 'F' };
+const FIRST_STATE = { content: 'C1_research', recheck: 'C1_research', translate: 'C2_author', glossary: 'C1_research', diagram: 'C2_author', refactor: 'A1_spec', app: 'A1_spec', learn: 'L1_learn' };
 
 function loadState() {
   return readJSON(paths.state(), { state: 'S0_pick', item: null, prev: null, session: { active: false, started: null, closed: 0 } });
@@ -54,6 +58,7 @@ const commands = {
     s.session = { active: true, started: new Date().toISOString(), closed: 0 };
     if (s.state === 'STOP') s.state = 'S0_pick';
     saveState(s);
+    autoScan();
     return commands.status({});
   },
 
@@ -89,6 +94,7 @@ const commands = {
     writeJSON(paths.work(item.id, 'item.json'), { ...item, task_info: taskInfo(item.task) });
     if (item.kind === 'recheck' || item.kind === 'translate') copyForRecheck(item);
     if (item.kind === 'diagram') copyContext(item);
+    if (item.kind === 'refactor') recordBase(item.id);
 
     s.state = FIRST_STATE[item.kind];
     s.item = item.id;
@@ -174,6 +180,7 @@ const commands = {
     const repeated = Object.entries(counts).filter(([, n]) => n >= 2).map(([kind, n]) => ({ kind, n }));
 
     appendLine(paths.runs(), { item: item.id, kind: item.kind, outcome, attempts: item.attempts ?? 0, repeated, closed: new Date().toISOString() });
+    if (item.kind === 'app' || item.kind === 'refactor') autoScan();
 
     let archived = null;
     if (fs.existsSync(paths.work(item.id))) {

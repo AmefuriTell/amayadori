@@ -134,3 +134,23 @@ S9 で書く。人が採否を決める（loop/steps/S9-close.md）。
   <change>問題ごとの図の元 diagrams/&lt;問題 ID&gt;.json（Mermaid の flowchart。サービスは X@{ svc: "…" } と名前で書く）を、dg.mjs がこの環境のブラウザで SVG にし app/public/diagrams/ に置く。アイコンは AWS 公式のアイコン集（aws.amazon.com/architecture/icons。構成図に使うことが認められている）から config/icon-map.json の分だけ assets/aws-icons/ に写す（共通）。図の箱を押すと事典（共通）を開く。作り方はループの図の項目（D-）: C2 で描き、C3 で検証役が問題・解説と絵を照らし、C4 で描けることを確かめて入れる。まず 3 問で試作してアプリで見てもらう</change>
 </proposal>
 ```
+
+```xml
+<proposal id="P-016" from="user" status="adopted">
+  <issue>リファクタリングもループに入れてほしい（利用者）。きっかけは「測って自動で足す」（利用者の回答）。今は q・g・dg に同じ処理の写しがあり、q.mjs・loop.mjs・main.js が 400 行を超えている</issue>
+  <kind>tool + doc</kind>
+  <change>refactor.mjs scan がコード（tools/・app/src）を測り（ファイル 400 行・関数 70 行・6 行の塊の重複。config/refactor.json）、超えた所をリファクタリングの項目（F-）として足す。loop start と、app・refactor の項目の loop close で自動で動く。F- は A1（直す計画と変えない物）→ A2 → A3 を通り、A3 は refactor.mjs check: 試験のファイルを変えていない（始めた時の git の位置と比べる）・直す所が消え新しく増えていない・unit と e2e の全部が通る、で確かめる</change>
+</proposal>
+```
+
+## F-0004（2026-11-26）から
+
+```xml
+<proposal id="P-017" from="F-0004" status="proposed">
+  <issue>検証役が fix と言い指摘を 1 つも書かなかった時、q（問題）は直しに回すが、g（事典）・dg（図）は通してしまう。g・dg を q から写した時の違いで、意図した物ではない。リファクタリングでは振る舞いを変えないので残した（step.mjs の judge の emptyFixSevere）</issue>
+  <kind>tool</kind>
+  <change>g・dg も q と同じく直しに回す（emptyFixSevere を true にする）。試験を 1 つ足す。人が決める</change>
+</proposal>
+```
+
+- refactor.mjs check の中の e2e の呼び方が誤っていて（フォルダーを渡していた）、F-0004 の A3 で見つけて直した。項目のコードの誤りではない。

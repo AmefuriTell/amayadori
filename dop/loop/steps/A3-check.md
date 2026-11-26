@@ -4,6 +4,7 @@
 <step id="A3_check" actor="tool">
   <purpose>acceptance を全部、機械で確かめる。</purpose>
   <actions>
+    <a>リファクタリングの項目（F-、P-016）では app.mjs check の代わりに node dop/tools/refactor.mjs check &lt;ID&gt; を呼ぶ。中で 試験のファイルを変えていないか（項目を始めた時の git の位置と比べる）→ findings が消え、新しい直す所が増えていないか → unit と e2e の全部が通るか、を確かめて札を書く。写真は見ない。</a>
     <a>node dop/tools/app.mjs check &lt;ID&gt; を呼ぶ。中で app data → unit → e2e を行い、AC の id ごとの合否を返す。ほかの項目の試験が落ちても失敗（前の機能を壊した）。</a>
     <a>ok なら出力の screenshots から幅 375 の写真を 1 枚だけ見て、見た目の崩れが無いかを確かめる。崩れていれば loop block で人に回さず、A2 へ戻す（loop advance --result fail は札が要るので、崩れを直す AC を spec.json に足して app check をもう一度呼ぶ）。</a>
   </actions>

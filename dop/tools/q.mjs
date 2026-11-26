@@ -3,10 +3,11 @@
 // 束は work/<ID>/questions.json に { "item": "<ID>", "questions": [ … ] } の形で置く。
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, ITEM_ID, rel, seeded, setResult, writeReport } from './lib/io.mjs';
+import { paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, rel, seeded, setResult, writeReport } from './lib/io.mjs';
 import { validate as validateSchema } from './lib/schema.mjs';
 import { normalize, ngrams, jaccard, questionText, parseSources, words } from './lib/text.mjs';
 import { jaErrors, changedBesidesJa } from './lib/ja.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback, judge, referenceErrors } from './lib/step.mjs';
 import { loadBank, coverage as bankCoverage, exam, taskIds, serviceStatus } from './lib/bank.mjs';
 
 const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -18,17 +19,7 @@ const MILD = new Set(['style', 'giveaway']);
 const DUP_FAIL = 0.6;
 const DUP_WARN = 0.4;
 
-function itemIdOf(arg) {
-  const id = typeof arg === 'string' ? (arg.match(/[CALRTGD]-[0-9]{4}/)?.[0] ?? arg) : null;
-  if (!id || !ITEM_ID.test(id)) throw new ToolError('項目 ID（例 C-0012）か work/<ID>/questions.json を渡す');
-  return id;
-}
-
-// bank や束を書き換えるコマンドは、ループがその工程にいる時だけ動かす
-function requireState(id, state) {
-  const s = readJSON(paths.state(), { state: 'S0_pick', item: null });
-  if (s.state !== state || s.item !== id) throw new ToolError(`この操作は ${id} が ${state} の時だけ（今は ${s.state}${s.item ? ` / ${s.item}` : ''}）`);
-}
+const itemIdOf = (arg) => idOf(arg, { message: '項目 ID（例 C-0012）か work/<ID>/questions.json を渡す' });
 
 function loadBatch(id) {
   const b = readJSON(paths.work(id, 'questions.json'));
@@ -90,15 +81,7 @@ export function checkBatch(id, batch = loadBatch(id)) {
     }
 
     // 出典: sources.md の S 番号と原文
-    (q.references ?? []).forEach((r, j) => {
-      if (!sources) { add(`/references/${j}`, `work/${id}/sources.md が無い`); return; }
-      const s = sources.find((x) => x.id === r.source_id);
-      if (!s) { add(`/references/${j}/source_id`, `${r.source_id} が sources.md に無い`); return; }
-      if (s.url && r.url && r.url.split('#')[0] !== s.url.split('#')[0]) add(`/references/${j}/url`, `${r.source_id} の url と違う`);
-      if (typeof r.quote === 'string' && !normalize(s.quote).includes(normalize(r.quote).replace(/^\.\.\.|\.\.\.$/g, '').trim())) {
-        add(`/references/${j}/quote`, `quote が ${r.source_id} の原文に無い（写すときは原文のまま）`);
-      }
-    });
+    referenceErrors(q.references, sources, add, id);
   });
   return errors;
 }
@@ -186,12 +169,7 @@ function linkFailures(questions) {
   return out;
 }
 
-function failToFeedback(id, step, fails) {
-  const byQ = {};
-  for (const f of fails) (byQ[f.qid ?? '(束)'] ??= []).push({ kind: f.check, detail: f.message });
-  writeJSON(paths.work(id, 'feedback.json'), { from: step, questions: byQ });
-  appendLine(paths.work(id, 'history.jsonl'), { step, kinds: [...new Set(fails.map((f) => f.check))] });
-}
+const failToFeedback = (id, step, fails) => toFeedback(id, step, fails, { idField: 'qid', key: 'questions' });
 
 // ---- 選択肢の並べ替え（正解の位置の偏りを直す） --------------------------------
 
@@ -271,21 +249,12 @@ const commands = {
       const match = [...e.blind.answer].sort().join() === [...q.answer].sort().join();
       const issues = Array.isArray(e.issues) ? e.issues : [];
       issues.forEach((i) => kinds.add(i.kind));
-      let verdict = 'ok';
-      const mildOnly = issues.length > 0 && issues.every((i) => MILD.has(i.kind));
       // P-011: 答えを見ずに解いて外れても、reveal の後に検証役が根拠と照らして ok とし、重い指摘も無いなら、
       // 問題の欠陥ではなく難しい問題として通す（low_confidence の印を付ける）
       const hardButSound = !match && e.verdict === 'ok' && !issues.some((i) => SEVERE.has(i.kind));
-      const severe = (!match && !hardButSound) || issues.some((i) => SEVERE.has(i.kind)) || (e.verdict === 'fix' && !mildOnly);
-      const mild = issues.some((i) => MILD.has(i.kind));
-      // P-005: 検証役が ok にした問題の言い回しの指摘は記録だけ（戻さない）
-      if (severe || (mild && e.verdict === 'fix')) verdict = 'fix';
-      if (e.verdict === 'drop') verdict = 'drop';
-      if (verdict === 'fix' && severe) {
-        qhist[q.id] = (qhist[q.id] ?? 0) + 1;
-        if (qhist[q.id] >= 2) verdict = 'drop';
-        else anyCounted = true;
-      }
+      const j = judge({ id: q.id, issues, said: e.verdict, severe: SEVERE, mild: MILD, hist: qhist, extraSevere: !match && !hardButSound });
+      const verdict = j.verdict;
+      if (j.counted) anyCounted = true;
       if (!match) kinds.add('blind_mismatch');
       results[q.id] = verdict;
       if (verdict === 'fix') feedback[q.id] = { blind: e.blind, match, issues };
