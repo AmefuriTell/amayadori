@@ -1,0 +1,11 @@
+{
+  "item": "F-0002",
+  "goal": "q.mjs（434 行）から、問題の束の検査（validate と gate の中身）を切り出し、q.mjs はコマンドだけにする",
+  "findings": ["file:tools/q.mjs"],
+  "plan": [
+    "tools/lib/qcheck.mjs に loadBatch・loadSources・checkBatch・lengthBias・gateBatch・linkFailures と、それらが使う決まり（QUALIFIER・BANNED・DUP_FAIL・DUP_WARN など）を移す",
+    "q.mjs は qcheck.mjs から読んで使い、checkBatch・lengthBias・gateBatch は q.mjs からも同じ名前で出し直す（hooks.mjs と試験が q.mjs から読んでいるため）"
+  ],
+  "invariants": ["q のコマンドの出力（JSON）・札・work/ と bank/ に書く物は変えない", "q.mjs から読める名前（checkBatch・lengthBias・gateBatch・placeAnswer）は変えない", "試験のファイルは変えない"],
+  "allow_test_changes": []
+}

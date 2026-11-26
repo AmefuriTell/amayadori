@@ -4,10 +4,13 @@ import { addAnswer, domainStats, skipEntry } from './logic/record.js';
 import { KINDS, addReport, issueUrl } from './logic/report.js';
 import { buildExport, exportFileName } from './logic/export.js';
 import { display } from './logic/lang.js';
-import { RATES, questionScript, answerScript } from './logic/speech.js';
 import { resume, snapshot } from './logic/progress.js';
-import { lookup, pageList } from './logic/glossary.js';
-import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, saveSpeech, loadProgress, saveProgress } from './storage.js';
+import { lookup } from './logic/glossary.js';
+import { loadAnswers, saveAnswers, clearAnswers, loadReports, saveReports, loadLang, saveLang, loadSpeech, loadProgress, saveProgress } from './storage.js';
+import { el } from './ui/el.js';
+import { showVersion, checkVersion } from './ui/version.js';
+import { openGlossary, serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } from './ui/glossary.js';
+import { createSpeech } from './ui/speech.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -25,49 +28,21 @@ const state = {
   spokenKey: null, // 最後に読んだ段（"問題の番号:答えたか"）。同じ段は読み直さない
 };
 
+const speech = createSpeech(state, () => render());
+const stopSpeech = () => speech.stop();
+const autoSpeak = (q, view) => speech.auto(q, view);
+const renderSpeech = () => speech.panel();
+const serviceLabel = (name) => glossaryLabel(name, state.glossary);
+function renderGlossaryList() {
+  progress.textContent = '';
+  glossaryList(app, state.glossary);
+}
+
 for (const tab of document.querySelectorAll('.tab')) {
   tab.addEventListener('click', () => { state.view = tab.dataset.view; render(); });
 }
 
-function el(tag, attrs = {}, ...children) {
-  const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v === false || v == null) continue;
-    if (k === 'class') node.className = v;
-    else if (k === 'text') node.textContent = v;
-    else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
-    else node.setAttribute(k, v === true ? '' : v);
-  }
-  for (const c of children.flat()) if (c != null) node.append(c);
-  return node;
-}
-
-// ---- 版（A-0011）: 読み込む先に版の番号が付いている。開いた時に最新の版を確かめ、古ければ知らせる ----
-const APP_VERSION = document.querySelector('meta[name=app-version]')?.content ?? '';
-
-function showVersion() {
-  const foot = document.querySelector('[data-testid=version]');
-  if (foot && APP_VERSION) foot.textContent = `版 ${APP_VERSION}`;
-}
-
-async function checkVersion() {
-  try {
-    const res = await fetch('public/version.json', { cache: 'no-cache' });
-    if (!res.ok) return;
-    const latest = (await res.json())?.version;
-    if (!latest || !APP_VERSION || latest === APP_VERSION || document.querySelector('[data-testid=update]')) return;
-    document.body.prepend(el('div', { class: 'update', role: 'status', 'data-testid': 'update' },
-      el('span', { text: '新しい版があります。' }),
-      el('button', { type: 'button', onclick: () => window.location.reload(), text: '読み込み直す' })));
-  } catch {
-    // 確かめられない時は何もしない（今の版のまま解ける）
-  }
-}
-
-// ---- サービス事典（A-0013、P-014）: 問題とは別のファイル。問題のサービス名から引く ----
-const dialog = el('dialog', { class: 'gloss', 'data-testid': 'glossary-dialog', 'aria-label': 'サービス事典' });
-document.body.append(dialog);
-
+// ---- サービス事典（A-0013、P-014）: 問題とは別のファイル。表示は ui/glossary.js ----
 async function loadGlossary() {
   try {
     const res = await fetch('public/glossary.json', { cache: 'no-cache' });
@@ -77,47 +52,6 @@ async function loadGlossary() {
   } catch {
     // 事典が無くても解ける
   }
-}
-
-function renderGlossaryPage(p) {
-  return el('article', { class: 'gloss-page', 'data-testid': 'glossary-page' },
-    el('h2', { class: 'gloss-name', text: p.name }),
-    p.reading ? el('p', { class: 'muted small', text: p.reading }) : null,
-    el('p', { text: p.summary }),
-    el('h3', { text: '主な機能' }),
-    el('ul', {}, p.features.map((f) => el('li', {}, el('strong', { text: `${f.title}: ` }), f.text))),
-    el('h3', { text: '試験のポイント' }),
-    el('ul', {}, p.exam_points.map((t) => el('li', { text: t }))),
-    p.compare?.length ? [el('h3', { text: '似たサービスとの違い' }), el('ul', {}, p.compare.map((c) => el('li', {}, el('strong', { text: `${c.with}: ` }), c.text)))] : null,
-    el('div', { class: 'refs' }, p.references.map((r) => el('figure', { class: 'ref' },
-      el('blockquote', { lang: 'en', text: r.quote }),
-      el('figcaption', {}, el('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', text: '出典（AWS 公式ドキュメント）' }))))),
-  );
-}
-
-function openGlossary(p) {
-  dialog.replaceChildren(renderGlossaryPage(p),
-    el('div', { class: 'actions' }, el('button', { type: 'button', onclick: () => dialog.close(), text: '閉じる' })));
-  if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
-  dialog.scrollTop = 0;
-}
-
-function serviceLabel(name) {
-  const p = lookup(state.glossary, name);
-  return p ? el('button', { type: 'button', class: 'svc', 'data-testid': 'service', onclick: () => openGlossary(p), text: name }) : el('span', { text: name });
-}
-
-function renderGlossaryList() {
-  progress.textContent = '';
-  const list = pageList(state.glossary);
-  app.replaceChildren(el('section', { class: 'card', 'data-testid': 'glossary' },
-    el('h2', { class: 'title', text: 'サービス事典' }),
-    list.length
-      ? el('ul', { class: 'gloss-list' }, list.map((p) => el('li', {},
-        el('button', { type: 'button', class: 'svc', onclick: () => openGlossary(p), text: p.name }),
-        el('span', { class: 'muted small', text: ` ${p.reading ?? ''}` }))))
-      : el('p', { class: 'muted', 'data-testid': 'glossary-empty', text: '事典はまだありません。' }),
-  ));
 }
 
 async function load() {
@@ -137,58 +71,6 @@ async function load() {
     progress.textContent = '';
     app.replaceChildren(el('p', { class: 'error', 'data-testid': 'load-error', text: `問題を読み込めません（${e.message}）。時間をおいて開き直してください。` }));
   }
-}
-
-// ---- 読み上げ（A-0009）: ブラウザの speechSynthesis。外へは送らない -------------
-const synth = typeof window.SpeechSynthesisUtterance === 'function' && window.speechSynthesis ? window.speechSynthesis : null;
-
-function speak(parts) {
-  if (!synth) return;
-  synth.cancel();
-  const voices = synth.getVoices?.() ?? [];
-  for (const p of parts) {
-    const u = new window.SpeechSynthesisUtterance(p.text);
-    u.lang = p.lang === 'ja' ? 'ja-JP' : 'en-US';
-    u.rate = state.speech.rate;
-    const voice = voices.find((v) => String(v.lang).replace('_', '-').startsWith(u.lang));
-    if (voice) u.voice = voice;
-    synth.speak(u);
-  }
-}
-
-function stopSpeech() {
-  if (synth && state.spokenKey) synth.cancel();
-  state.spokenKey = null;
-}
-
-// 問題が出た時と答えた時に 1 回だけ読む
-function autoSpeak(q, view) {
-  const key = `${state.index}:${state.answered}`;
-  if (!synth || !state.speech.on || key === state.spokenKey) return;
-  state.spokenKey = key;
-  speak(state.answered ? answerScript(q, grade(q, state.selected), state.skipped) : questionScript(view));
-}
-
-function setSpeech(change) {
-  state.speech = { ...state.speech, ...change };
-  saveSpeech(state.speech);
-}
-
-function renderSpeech() {
-  const on = state.speech.on;
-  return el('div', { class: 'speech', 'data-testid': 'speech' },
-    el('button', {
-      type: 'button', class: on ? '' : 'secondary', 'aria-pressed': on ? 'true' : 'false', disabled: !synth,
-      onclick: () => { setSpeech({ on: !on }); if (on) stopSpeech(); else state.spokenKey = null; render(); },
-      text: on ? '読み上げ オン' : '読み上げ',
-    }),
-    synth ? null : el('span', { class: 'muted small', 'data-testid': 'speech-hint', text: 'このブラウザは読み上げに対応していません' }),
-    synth && on ? el('button', { type: 'button', class: 'secondary', onclick: () => { state.spokenKey = null; render(); }, text: 'もう一度' }) : null,
-    synth && on ? el('label', { class: 'small' }, '速さ ', el('select', {
-      'aria-label': '読み上げの速さ',
-      onchange: (ev) => { setSpeech({ rate: Number(ev.target.value) }); },
-    }, RATES.map((r) => el('option', { value: String(r), selected: r === state.speech.rate, text: `${r}` })))) : null,
-  );
 }
 
 function render() {

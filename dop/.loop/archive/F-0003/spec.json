@@ -1,0 +1,14 @@
+{
+  "item": "F-0003",
+  "goal": "app/src/main.js（440 行）から、画面の状態（state）に強く頼らない塊を別のファイルに切り出し、main.js は解く画面の流れに集中させる",
+  "findings": ["file:app/src/main.js"],
+  "plan": [
+    "app/src/ui/el.js: 要素を作る el()",
+    "app/src/ui/version.js: 版の表示と、新しい版のお知らせ（A-0011）",
+    "app/src/ui/glossary.js: 事典のダイアログ・ページ・一覧・サービス名のボタン（A-0013）。事典のデータは引数で受け取る",
+    "app/src/ui/speech.js: ブラウザの読み上げ（A-0009）の声を出す部分。設定と『最後に読んだ段』は main.js の state を引数で受け取る",
+    "main.js はそれらを読んで使い、app.mjs stamp で読み込む先（import map）を付け直す"
+  ],
+  "invariants": ["画面の見た目と動き（data-testid・文言・押した時の動き）は変えない", "localStorage の鍵と形は変えない", "試験のファイルは変えない"],
+  "allow_test_changes": []
+}

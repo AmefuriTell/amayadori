@@ -9,6 +9,7 @@ DOP-C02 の問題を解く静的なページ。ビルドしない（素の HTML�
 | `index.html` | 入口。`version:start`〜`end` の間（版の meta・CSS・import map・main.js）は `node dop/tools/app.mjs stamp` が書く。手で直さない |
 | `style.css` | 見た目（明るい・暗いの配色は端末の設定に従う） |
 | `src/main.js` | 画面（読み込み・1 問ずつの表示・答えた後の解説・結果・記録・読み上げ・版のお知らせ） |
+| `src/ui/*.js` | 画面の部品（F-0003 で main.js から切り出した）: `el.js` 要素を作る、`version.js` 版のお知らせ、`glossary.js` 事典の表示、`speech.js` 読み上げ |
 | `src/storage.js` | localStorage の読み書き（使えない時も例外を外に出さない） |
 | `src/logic/*.js` | 画面に頼らない計算（採点・記録・報告・書き出し・言葉・読み上げの文・進み具合）。unit で試す |
 | `public/questions.json` | 配信用の問題。`node dop/tools/app.mjs data` が bank から作る。手で書かない |
