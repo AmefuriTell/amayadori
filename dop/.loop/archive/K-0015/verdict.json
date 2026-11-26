@@ -1,0 +1,75 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 8
+  },
+  "mild": [
+    {
+      "slide": "s07",
+      "from": "consistency",
+      "kind": "terms",
+      "severity": "軽",
+      "detail": "台本の「イベントブリッジの資料に合わせてランブックと呼びます」。根拠 S12 は Systems Manager のユーザーガイドの頁（EventBridge のイベントで automation を動かす）で、EventBridge の資料ではない。runbook の呼び方は S14（OpsCenter）にもある。",
+      "suggest": "「システムズマネージャーの資料に合わせてランブックと呼びます」とする。"
+    },
+    {
+      "slide": "s07",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "runbook を「オートメーションで動かす手順の定義」と言い換えるが、sources.md に runbook の定義は無い（S12 は target に指定できる事だけ）。理解のための大まかな言い換えとしては害は小さい。",
+      "suggest": "「大まかに言うと」を添えるか、「オートメーションで動かす物」までにとどめる。"
+    },
+    {
+      "slide": "s09",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "締めの「ノードを決めた状態に保つステートマネージャーと違い」と s16 の「ノードを保つステートマネージャーに対し、エーダブリューエスコンフィグはリソースを」は、ノードとリソースで対象が分かれるようにも聞こえる。S3 は State Manager が「managed nodes and AWS resources」の状態を保つと言い、S2 も association を AWS リソースに割り当てる構成と言う。見分けの軸（保つ か ルールで評価して直す か）自体は根拠どおり。",
+      "suggest": "対比を「決めた状態に保つステートマネージャーに対し、エーダブリューエスコンフィグはルールで評価して、違反した物を直す」とし、ノードとリソースの言い分けを外す（s16 も同じ）。"
+    },
+    {
+      "slide": "s14",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "AppConfig の変更を、表と bullets は「設定の変更」「設定を戻す」、台本と s08 は「構成の変更」と呼ぶ。s16 も画面は「設定を戻す」。s01 の「アプリの設定」で同じ物と分かるので食い違いは小さい。",
+      "suggest": "AppConfig の所は「設定の変更」か「構成の変更」のどちらかにそろえる。"
+    },
+    {
+      "slide": "s03",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "行名「資料の使い所 1・2」の Run Command の欄（よくある管理作業・多くのノードへまとめて）は、台本では「資料にあるのはできる事」と断っているが、画面だけだと選び分けの指針に見える。",
+      "suggest": "行名を「資料の使い所・できる事」とするか、Run Command の欄だけ「できる事」と分かる言葉にする。"
+    },
+    {
+      "slide": "s05",
+      "from": "clarity",
+      "kind": "jargon",
+      "severity": "軽",
+      "detail": "「望ましい容量」が説明無しで出る（言い換えを採らなかった理由は notes のとおり妥当）。理解の妨げは小さい。",
+      "suggest": "新しい事実を足さずに、英語の desired capacity をそのまま添える程度にとどめる。"
+    },
+    {
+      "slide": "s14",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "bullet「設定を戻す → AWS AppConfig」は、戻す条件（その変更がアラームを起こした時）が落ちる。表と台本、s16 の図には条件があるので誤解は小さい。",
+      "suggest": "「アラームで設定を戻す → AWS AppConfig」とする（s16 の図の言葉と同じ）。"
+    },
+    {
+      "slide": "s16",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "まとめの図で、ほかの項目には一言の手掛かり（保つ・一度きり・戻すのは実行中だけ）が付くが、lifecycle hook だけ名前のみで、台本でも触れない。",
+      "suggest": "「lifecycle hook 待ち状態で処理」と一言添える。"
+    }
+  ],
+  "verify_hash": "0b6f2ef562425539"
+}
