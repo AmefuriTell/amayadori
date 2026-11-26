@@ -1,0 +1,61 @@
+{
+  "task": "5.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.3-0008",
+  "services": [
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Auto Scaling group uses a launch lifecycle hook. A script on each new instance installs software and then completes the hook. After a recent change, the script fails on every instance and completes the hook with abandon. The team sees instances being terminated and replaced, and the group now launches new instances more slowly than before. What should a DevOps engineer do to restore normal scaling with the LEAST effort?",
+  "stem_ja": "ある Auto Scaling グループは、起動時のライフサイクルフックを使っています。新しい各インスタンスのスクリプトがソフトウェアを入れてから、フックを完了させます。最近の変更の後、スクリプトがすべてのインスタンスで失敗し、フックを abandon で完了させています。チームは、インスタンスが終了して入れ替わり、グループが新しいインスタンスを以前より遅く起動するようになったことに気づきました。最も少ない手間で通常のスケーリングに戻すために、DevOps エンジニアは何をすべきですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Find and fix the error in the script so that it completes the hook with continue.",
+      "text_ja": "スクリプトの誤りを見つけて直し、フックを continue で完了させるようにする。"
+    },
+    {
+      "key": "B",
+      "text": "Increase the lifecycle hook's timeout from one hour to two hours so that the script has more time.",
+      "text_ja": "スクリプトにより多くの時間を与えるため、ライフサイクルフックのタイムアウトを 1 時間から 2 時間に増やす。"
+    },
+    {
+      "key": "C",
+      "text": "Increase the group's maximum capacity so that more instances can be launched at the same time.",
+      "text_ja": "同時により多くのインスタンスを起動できるよう、グループの最大の容量を増やす。"
+    },
+    {
+      "key": "D",
+      "text": "Change the script to complete the hook with continue even when the installation fails.",
+      "text_ja": "インストールが失敗した時もフックを continue で完了させるよう、スクリプトを変える。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "起動時のフックを abandon で完了させると、独自の処理が失敗したとみなされ、インスタンスは終了して入れ替わります。フックが続けて失敗すると、Amazon EC2 Auto Scaling はインスタンスを起動する速さを制限するので、処理の恒久的な誤りを直す必要があります。",
+    "per_choice": {
+      "A": "正しい。誤りを直して continue で完了させれば、インスタンスがサービスに入り、起動の制限も起きなくなります。",
+      "B": "スクリプトは時間切れではなく失敗しているので、時間を延ばしても abandon のままです。",
+      "C": "失敗が続く間は起動の速さが制限されたままで、失敗するインスタンスが増えるだけです。",
+      "D": "ソフトウェアが入っていないインスタンスがサービスに入り、壊れた状態で動くことになります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+      "source_id": "S3",
+      "quote": "Otherwise, abandon indicates that your custom actions were unsuccessful, and that we can terminate and replace the instance."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+      "source_id": "S3",
+      "quote": "Amazon EC2 Auto Scaling limits the rate at which it allows instances to launch if the lifecycle hooks are failing consistently"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "x-ray",
+  "name": "AWS X-Ray",
+  "aliases": [
+    "AWS X-Ray"
+  ],
+  "reading": "エックスレイ",
+  "status": "verified",
+  "created": "2026-11-26",
+  "summary": "アプリケーションが受けたリクエストのデータを集め、そのリクエストが下流の AWS のリソース・マイクロサービス・データベース・Web API へ出した呼び出しまで含めて、見たり絞り込んだりできるサービス。問題や性能を良くできる所を見つけるのに使う。",
+  "features": [
+    {
+      "title": "セグメントとトレース",
+      "text": "サービスからのデータをセグメントとして受け取り、同じリクエストのセグメントをまとめてトレースにする。",
+      "source_id": "S3"
+    },
+    {
+      "title": "トレースマップ",
+      "text": "クライアント、フロントのサービス、そこから呼ばれる裏のサービスを図で示す。ボトルネックやレイテンシー（応答の遅れ）の急な増加を見つけるのに使う。",
+      "source_id": "S2"
+    },
+    {
+      "title": "SDK とデーモン",
+      "text": "SDK はトレースのデータを直接送らず、UDP で待ち受けるデーモンのプロセスへセグメントの JSON 文書を送る。デーモンはそれをためて、まとめて X-Ray へ送る。",
+      "source_id": "S2"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "リクエストが通ったサービスと呼び出しのどこで遅れや問題が起きているかを、トレースマップで探す使い方を押さえる。",
+      "source_id": "S2"
+    },
+    {
+      "text": "X-Ray の SDK とデーモンは、セキュリティの修正だけを出す形になり、新しい機能は入らない。アプリケーションの計装（トレースを出す仕組みを組み込むこと）とトレースの送信には、OpenTelemetry への移行が勧められている。",
+      "source_id": "S0"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-daemon-timeline.html#xray-sdk-daemon-timeline",
+      "source_id": "S0",
+      "quote": "We recommend that you migrate to OpenTelemetry solutions for instrumenting your application and sending traces to AWS X-Ray."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+      "source_id": "S1",
+      "quote": "AWS X-Ray is a service that collects data about requests that your application serves"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+      "source_id": "S2",
+      "quote": "Use the trace map to identify bottlenecks, latency spikes, and other issues to solve to improve the performance of your applications."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts",
+      "source_id": "S3",
+      "quote": "X-Ray then groups segments that have a common request into traces."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,126 @@
+{
+  "item": "G-0015",
+  "entries": [
+    {
+      "id": "x-ray",
+      "name": "AWS X-Ray",
+      "aliases": [
+        "AWS X-Ray"
+      ],
+      "reading": "エックスレイ",
+      "status": "draft",
+      "created": "2026-11-26",
+      "summary": "アプリケーションが受けたリクエストのデータを集め、そのリクエストが下流の AWS のリソース・マイクロサービス・データベース・Web API へ出した呼び出しまで含めて、見たり絞り込んだりできるサービス。問題や性能を良くできる所を見つけるのに使う。",
+      "features": [
+        {
+          "title": "セグメントとトレース",
+          "text": "サービスからのデータをセグメントとして受け取り、同じリクエストのセグメントをまとめてトレースにする。",
+          "source_id": "S3"
+        },
+        {
+          "title": "トレースマップ",
+          "text": "クライアント、フロントのサービス、そこから呼ばれる裏のサービスを図で示す。ボトルネックやレイテンシー（応答の遅れ）の急な増加を見つけるのに使う。",
+          "source_id": "S2"
+        },
+        {
+          "title": "SDK とデーモン",
+          "text": "SDK はトレースのデータを直接送らず、UDP で待ち受けるデーモンのプロセスへセグメントの JSON 文書を送る。デーモンはそれをためて、まとめて X-Ray へ送る。",
+          "source_id": "S2"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "リクエストが通ったサービスと呼び出しのどこで遅れや問題が起きているかを、トレースマップで探す使い方を押さえる。",
+          "source_id": "S2"
+        },
+        {
+          "text": "X-Ray の SDK とデーモンは、セキュリティの修正だけを出す形になり、新しい機能は入らない。アプリケーションの計装（トレースを出す仕組みを組み込むこと）とトレースの送信には、OpenTelemetry への移行が勧められている。",
+          "source_id": "S0"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-daemon-timeline.html#xray-sdk-daemon-timeline",
+          "source_id": "S0",
+          "quote": "We recommend that you migrate to OpenTelemetry solutions for instrumenting your application and sending traces to AWS X-Ray."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+          "source_id": "S1",
+          "quote": "AWS X-Ray is a service that collects data about requests that your application serves"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray",
+          "source_id": "S2",
+          "quote": "Use the trace map to identify bottlenecks, latency spikes, and other issues to solve to improve the performance of your applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts",
+          "source_id": "S3",
+          "quote": "X-Ray then groups segments that have a common request into traces."
+        }
+      ]
+    },
+    {
+      "id": "api-gateway",
+      "name": "Amazon API Gateway",
+      "aliases": [
+        "Amazon API Gateway"
+      ],
+      "reading": "エーピーアイゲートウェイ",
+      "status": "draft",
+      "created": "2026-11-26",
+      "summary": "REST・HTTP・WebSocket の API を、どんな規模でも作る・公開する・保守する・監視する・守るための AWS のサービス。アプリケーションが裏のサービス（EC2 で動く処理や Lambda のコードなど）を使うための「玄関（フロントドア）」の役をする。",
+      "features": [
+        {
+          "title": "API の種類",
+          "text": "状態を持つ WebSocket の API と、状態を持たない HTTP・REST の API に対応する。",
+          "source_id": "S6"
+        },
+        {
+          "title": "大量の呼び出しの受け付け",
+          "text": "最大で数十万の同時の API 呼び出しを受けて処理し、トラフィックの管理・認可とアクセス制御・監視・API のバージョンの管理を行う。",
+          "source_id": "S5"
+        },
+        {
+          "title": "認証と保護",
+          "text": "IAM のポリシー、Lambda オーソライザー関数、Amazon Cognito のユーザープールで認証できる。AWS WAF と組み合わせて、よくある Web の攻撃から API を守れる。",
+          "source_id": "S6"
+        },
+        {
+          "title": "カナリアリリース",
+          "text": "API のトラフィックを、決めた割合でランダムに本番のリリースとカナリアのリリースに分ける。新しい機能はカナリアを通るトラフィックにだけ見える。割合は後から変えられる。",
+          "source_id": "S7"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "変更を安全に出す方法として、少しの割合のトラフィックだけを新しい版（カナリア）に流すカナリアリリースのデプロイを押さえる。",
+          "source_id": "S6"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#welcome",
+          "source_id": "S4",
+          "quote": "Amazon API Gateway is an AWS service for creating, publishing, maintaining, monitoring, and securing REST, HTTP, and WebSocket APIs at any scale."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#api-gateway-overview-aws-backbone",
+          "source_id": "S5",
+          "quote": "These tasks include traffic management, authorization and access control, monitoring, and API version management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html#api-gateway-overview-features",
+          "source_id": "S6",
+          "quote": "Canary release deployments for safely rolling out changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/canary-release.html#api-gateway-canary-release-deployment-overview",
+          "source_id": "S7",
+          "quote": "The updated API features are only visible to API traffic through the canary."
+        }
+      ]
+    }
+  ]
+}

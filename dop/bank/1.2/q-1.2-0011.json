@@ -1,0 +1,73 @@
+{
+  "task": "1.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.2-0011",
+  "services": [
+    "AWS CodeBuild",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A team uses a report group that was created automatically from the reports section of a CodeBuild buildspec file. Auditors now require the raw test result files from every build to be kept for one year. The team notices that test reports can no longer be viewed after about a month. Which solution meets the audit requirement with the LEAST operational overhead?",
+  "stem_ja": "あるチームは、CodeBuild の buildspec ファイルの reports セクションから自動で作られたレポートグループを使っています。監査人は、すべてのビルドのテスト結果の元のファイルを 1 年間残すことを新たに求めています。チームは、テストのレポートが約 1 か月後に見られなくなることに気づきました。運用上のオーバーヘッドが最も少なく監査の要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Keep the current report group, and save screenshots of each test report before it expires.",
+      "text_ja": "今のレポートグループのまま、各テストのレポートが期限切れになる前に画面を保存する。"
+    },
+    {
+      "key": "B",
+      "text": "Keep the current report group, and rerun old builds whenever the auditors ask for results.",
+      "text_ja": "今のレポートグループのまま、監査人が結果を求めるたびに古いビルドを実行し直す。"
+    },
+    {
+      "key": "C",
+      "text": "Add a post_build command that runs a team-maintained script to copy result files to Amazon S3.",
+      "text_ja": "チームが保守するスクリプトで結果のファイルを Amazon S3 へコピーする post_build のコマンドを足す。"
+    },
+    {
+      "key": "D",
+      "text": "Create a report group that exports raw results to Amazon S3, and reference its ARN in the buildspec.",
+      "text_ja": "元の結果を Amazon S3 へエクスポートするレポートグループを作り、buildspec でその ARN を指定する。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "テストのレポートは作られてから 30 日で期限切れになり、見られなくなります。buildspec で作ったレポートグループは元のテスト結果のファイルをエクスポートしないため、コンソールか AWS CLI で作ったレポートグループを使い、buildspec ではその ARN を指定します。",
+    "per_choice": {
+      "A": "手作業で、元のテスト結果のファイルも残りません。",
+      "B": "実行し直しても当時の結果にはならず、すべてのビルドの元のファイルを残すことになりません。",
+      "C": "動きますが、コピーのスクリプトを保守する必要があり、レポートグループの機能を使うより手間がかかります。",
+      "D": "正しい。エクスポートするレポートグループをコンソールか AWS CLI で作り、buildspec から既存のレポートグループとして ARN で指定します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+      "source_id": "S1",
+      "quote": "A report expires 30 days after it was created. You cannot view an expired test report."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#test-report-group-create-buildspec",
+      "source_id": "S5",
+      "quote": "A report group created using the buildspec does not export raw test result files."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+      "source_id": "S6",
+      "quote": "Specify the ARN of an existing report group, or the name of a new report group."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#report-group-create",
+      "source_id": "S4",
+      "quote": "You can use the CodeBuild console, the AWS CLI, or a buildspec file to create a report group."
+    }
+  ],
+  "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。",
+  "last_checked": "2026-11-26"
+}

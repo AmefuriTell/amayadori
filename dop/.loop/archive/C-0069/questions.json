@@ -1,0 +1,332 @@
+{
+  "item": "C-0069",
+  "questions": [
+    {
+      "task": "5.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-5.3-0001",
+      "services": [
+        "Amazon ECS",
+        "AWS Fargate",
+        "Amazon ECR",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A new Amazon ECS service on AWS Fargate fails to start. The stopped tasks show a CannotPullContainerError that says the task can't pull the image and asks to check the role's permissions. The image is in a private Amazon ECR repository in the same account, and other services can pull it. The company must fix the problem while granting the LEAST privilege. What should a DevOps engineer do?",
+      "stem_ja": "AWS Fargate 上の新しい Amazon ECS のサービスが起動しません。停止したタスクには CannotPullContainerError が出ており、タスクがイメージをプルできないのでロールの権限を確かめるよう示されています。イメージは同じアカウントのプライベートな Amazon ECR リポジトリにあり、ほかのサービスはプルできています。会社は、最小の権限を与える形でこの問題を直す必要があります。DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add permissions to pull images from the ECR repository to the service's task role.",
+          "text_ja": "サービスのタスクロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Add permissions to pull images from the ECR repository to the task execution role of the task definition.",
+          "text_ja": "タスク定義のタスク実行ロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Add permissions to pull images from the ECR repository to the container instance role of the cluster.",
+          "text_ja": "クラスターのコンテナインスタンスロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        },
+        {
+          "key": "D",
+          "text": "Change the ECR repository policy so that any principal can pull images from the repository.",
+          "text_ja": "どのプリンシパルでもリポジトリからイメージをプルできるように、ECR リポジトリのポリシーを変える。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CannotPullContainerError の権限のエラーは、タスク定義のイメージをプルするロールの権限が足りないことを示します。Fargate のタスクではそのロールはタスク実行ロールで、EC2 のタスクではコンテナインスタンスロールです。",
+        "per_choice": {
+          "A": "Fargate でイメージをプルするのはタスク実行ロールで、タスクロールに足しても直らず、使わない権限が増えます。",
+          "B": "正しい。Fargate のタスクでイメージをプルするタスク実行ロールに、必要な権限だけを足します。",
+          "C": "コンテナインスタンスロールは EC2 のタスクで使うロールで、Fargate のタスクには効きません。",
+          "D": "プルはできるようになりますが、誰でもイメージを取れるようになり、最小の権限という要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "For tasks with the Fargate, this is the task execution role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "For tasks with EC2, this is the container instance role."
+        }
+      ]
+    },
+    {
+      "task": "5.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-5.3-0002",
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An Amazon ECS service keeps replacing its tasks. Each task shows PENDING for a short time and then disappears. An on-call engineer is paged 20 minutes after the problem starts and must find out why the tasks stopped as quickly as possible, before the information is gone. Which actions should the engineer take? (Choose TWO.)",
+      "stem_ja": "Amazon ECS のサービスがタスクを入れ替え続けています。各タスクは短い間 PENDING と表示された後、消えてしまいます。問題が始まって 20 分後に当番のエンジニアが呼ばれ、情報が消える前に、タスクが止まった理由をできるだけ早く突き止める必要があります。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Review the service events to see the actions that ECS took to maintain the service.",
+          "text_ja": "サービスのイベントを確認し、サービスを保つために ECS が取った動きを見る。"
+        },
+        {
+          "key": "B",
+          "text": "Describe the stopped tasks and read the stopCode, the stoppedReason, and each container reason.",
+          "text_ja": "停止したタスクを describe し、stopCode、stoppedReason、各コンテナの reason を読む。"
+        },
+        {
+          "key": "C",
+          "text": "Wait one day for the stopped tasks to collect, and then review them together in the ECS console.",
+          "text_ja": "停止したタスクがたまるまで 1 日待ってから、ECS のコンソールでまとめて確認する。"
+        },
+        {
+          "key": "D",
+          "text": "Increase the service's desired count so that more tasks start, and watch whether some of them stay running.",
+          "text_ja": "サービスの希望するタスクの数を増やしてより多くのタスクを起動し、そのうちいくつかが動き続けるかを見る。"
+        },
+        {
+          "key": "E",
+          "text": "Turn on access logs for the load balancer and look for errors in the logs that are delivered later.",
+          "text_ja": "ロードバランサーのアクセスログを有効にし、後で届くログの中からエラーを探す。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "サービスが作ったタスクでは、サービスを保つために ECS が取った動きがサービスのイベントに出ます。停止したタスクは stopCode・StoppedReason・コンテナの reason で止まった理由を示し、コンソールに出るのは 1 時間だけなので早めに確かめます。",
+        "per_choice": {
+          "A": "正しい。サービスが作ったタスクでは、ECS がサービスを保つために取った動き（タスクの停止と入れ替え）がサービスのイベントに出ます。",
+          "B": "正しい。停止したタスクの stopCode・stoppedReason・コンテナの reason が、止まった理由を直接示します。",
+          "C": "停止したタスクがコンソールに出るのは 1 時間だけで、1 日待つと情報が消えます。",
+          "D": "原因が分からないまま失敗するタスクを増やすだけで、理由の特定に役立ちません。",
+          "E": "タスクが起動の途中で消えているので、ロードバランサーのログに理由が出るとは限らず、後で届くので遅くなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "If your task was created by an Amazon ECS service, the actions that Amazon ECS takes to maintain the service are published in the service events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "Stopped tasks only appear in the console for 1 hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "StoppedReason - The reason the task stopped."
+        }
+      ]
+    },
+    {
+      "task": "5.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-5.3-0003",
+      "services": [
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Auto Scaling group uses a launch lifecycle hook. A script on each new instance installs software and then completes the hook. After a recent change, the script fails on every instance and completes the hook with abandon. The team sees instances being terminated and replaced, and the group now launches new instances more slowly than before. What should a DevOps engineer do to restore normal scaling with the LEAST effort?",
+      "stem_ja": "ある Auto Scaling グループは、起動時のライフサイクルフックを使っています。新しい各インスタンスのスクリプトがソフトウェアを入れてから、フックを完了させます。最近の変更の後、スクリプトがすべてのインスタンスで失敗し、フックを abandon で完了させています。チームは、インスタンスが終了して入れ替わり、グループが新しいインスタンスを以前より遅く起動するようになったことに気づきました。最も少ない手間で通常のスケーリングに戻すために、DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Increase the lifecycle hook's timeout from one hour to two hours so that the script has more time.",
+          "text_ja": "スクリプトにより多くの時間を与えるため、ライフサイクルフックのタイムアウトを 1 時間から 2 時間に増やす。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the group's maximum capacity so that more instances can be launched at the same time.",
+          "text_ja": "同時により多くのインスタンスを起動できるよう、グループの最大の容量を増やす。"
+        },
+        {
+          "key": "C",
+          "text": "Find and fix the error in the script so that it completes the hook with continue.",
+          "text_ja": "スクリプトの誤りを見つけて直し、フックを continue で完了させるようにする。"
+        },
+        {
+          "key": "D",
+          "text": "Change the script to complete the hook with continue even when the installation fails.",
+          "text_ja": "インストールが失敗した時もフックを continue で完了させるよう、スクリプトを変える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "起動時のフックを abandon で完了させると、独自の処理が失敗したとみなされ、インスタンスは終了して入れ替わります。フックが続けて失敗すると、Amazon EC2 Auto Scaling はインスタンスを起動する速さを制限するので、処理の恒久的な誤りを直す必要があります。",
+        "per_choice": {
+          "A": "スクリプトは時間切れではなく失敗しているので、時間を延ばしても abandon のままです。",
+          "B": "失敗が続く間は起動の速さが制限されたままで、失敗するインスタンスが増えるだけです。",
+          "C": "正しい。誤りを直して continue で完了させれば、インスタンスがサービスに入り、起動の制限も起きなくなります。",
+          "D": "ソフトウェアが入っていないインスタンスがサービスに入り、壊れた状態で動くことになります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "source_id": "S3",
+          "quote": "Otherwise, abandon indicates that your custom actions were unsuccessful, and that we can terminate and replace the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "source_id": "S3",
+          "quote": "Amazon EC2 Auto Scaling limits the rate at which it allows instances to launch if the lifecycle hooks are failing consistently"
+        }
+      ]
+    },
+    {
+      "task": "5.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-5.3-0004",
+      "services": [
+        "Amazon EC2 Auto Scaling",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Auto Scaling group behind an Application Load Balancer uses Elastic Load Balancing health checks. The application takes about 4 minutes to start. New instances are marked unhealthy and replaced before the application finishes starting, so the group never reaches its desired capacity. The company must keep the load balancer health checks to detect real failures. Which change resolves the issue with the LEAST effort?",
+      "stem_ja": "Application Load Balancer の後ろの Auto Scaling グループが、Elastic Load Balancing のヘルスチェックを使っています。アプリケーションの起動には約 4 分かかります。新しいインスタンスは、アプリケーションの起動が終わる前に unhealthy とされて入れ替えられるため、グループは希望する容量に達しません。会社は、本当の障害を見つけるために、ロードバランサーのヘルスチェックを残す必要があります。最も少ない手間で問題を解決する変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn off the Elastic Load Balancing health checks for the group and rely only on the EC2 status checks.",
+          "text_ja": "グループの Elastic Load Balancing のヘルスチェックを無効にし、EC2 のステータスチェックだけに頼る。"
+        },
+        {
+          "key": "B",
+          "text": "Set the group's health check grace period to a value longer than the application's startup time.",
+          "text_ja": "グループのヘルスチェックの猶予期間を、アプリケーションの起動の時間より長い値にする。"
+        },
+        {
+          "key": "C",
+          "text": "Increase the group's desired capacity so that some instances remain while others are replaced.",
+          "text_ja": "入れ替えられている間もいくつかのインスタンスが残るよう、グループの希望する容量を増やす。"
+        },
+        {
+          "key": "D",
+          "text": "Replace unhealthy instances manually after checking each one, and suspend the replacement process.",
+          "text_ja": "各インスタンスを確かめてから手作業で入れ替え、入れ替えのプロセスを停止する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Amazon EC2 Auto Scaling は、新しいインスタンスに組み込みの EC2 のステータスチェックを行い、有効にした追加のヘルスチェック（ELB など）は猶予期間の後に行います。猶予期間を起動の時間より長くすれば、起動中のインスタンスが入れ替えられず、ロードバランサーのヘルスチェックも残せます。",
+        "per_choice": {
+          "A": "入れ替えは止まりますが、ロードバランサーのヘルスチェックを残すという要件に反します。",
+          "B": "正しい。起動の間は ELB のヘルスチェックで入れ替えられず、起動の後は本当の障害を見つけられます。",
+          "C": "新しいインスタンスは同じように起動中に入れ替えられ、問題は解決しません。",
+          "D": "手作業が多く、自動の入れ替えも失われます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "source_id": "S2",
+          "quote": "Amazon EC2 Auto Scaling performs health checks on the instance by using the built-in Amazon EC2 status checks, and after a grace period, any optional health checks that you enabled for the group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "source_id": "S2",
+          "quote": "If any of the health checks fail, the instance is replaced."
+        }
+      ]
+    },
+    {
+      "task": "5.3",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-5.3-0005",
+      "services": [
+        "Amazon EKS",
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team copied an AWS CloudFormation node stack from its staging environment to add self-managed nodes to a production Amazon EKS cluster. The EC2 instances launch in private subnets and pass their status checks, but they never join the production cluster. The cluster and its other nodes are healthy. What is the MOST likely cause that the team should check first?",
+      "stem_ja": "あるチームは、本番の Amazon EKS クラスターにセルフマネージドのノードを足すため、ステージング環境の AWS CloudFormation のノードのスタックを写して使いました。EC2 インスタンスはプライベートサブネットで起動し、ステータスチェックも通りますが、本番のクラスターに参加しません。クラスターとほかのノードは正常です。チームが最初に確かめるべき、最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "One of the Availability Zones of the subnets doesn't have enough capacity to support the cluster.",
+          "text_ja": "サブネットのアベイラビリティーゾーンの 1 つに、クラスターを支える十分な容量が無い。"
+        },
+        {
+          "key": "B",
+          "text": "The ClusterName parameter in the node stack doesn't exactly match the name of the production cluster.",
+          "text_ja": "ノードのスタックの ClusterName パラメータが、本番のクラスターの名前と完全には一致していない。"
+        },
+        {
+          "key": "C",
+          "text": "The nodes in the private subnets were not assigned public IP addresses.",
+          "text_ja": "プライベートサブネットのノードに、パブリック IP アドレスが割り当てられていない。"
+        },
+        {
+          "key": "D",
+          "text": "The EC2 instances failed their status checks and were replaced before they could join.",
+          "text_ja": "EC2 インスタンスがステータスチェックに失敗し、参加する前に入れ替えられた。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ノードの CloudFormation テンプレートの ClusterName が、参加させたいクラスターの名前と完全に一致しないと、ノードの /var/lib/kubelet/kubeconfig の設定が誤り、ノードはクラスターに参加しません。ステージングから写したスタックでは、まずこの値を確かめます。",
+        "per_choice": {
+          "A": "容量不足は、クラスターを作る時に、指定したアベイラビリティーゾーンで起きるエラーです。インスタンスは起動しています。",
+          "B": "正しい。名前が違うと kubeconfig が誤り、起動して正常でもクラスターに参加しません。",
+          "C": "パブリック IP アドレスが要るのは、パブリックサブネットに置いたノードです。",
+          "D": "問題文ではインスタンスはステータスチェックを通っています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "The ClusterName in your node AWS CloudFormation template doesn’t exactly match the name of the cluster you want your nodes to join."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "the nodes will not join the cluster."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "Ensure that nodes deployed in public subnets are assigned a public IP address."
+        }
+      ]
+    }
+  ]
+}

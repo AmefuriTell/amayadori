@@ -1,0 +1,79 @@
+{
+  "task": "1.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.2-0012",
+  "services": [
+    "AWS CodePipeline",
+    "AWS CodeBuild"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A Python service is deployed by AWS CodePipeline. The team wants a separate stage that runs the unit tests before deployment, and wants each run's pytest results, which are written in JUnit XML, to be shown as test reports in AWS CodeBuild. The team wants to use managed features only. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "ある Python のサービスは AWS CodePipeline でデプロイされています。チームは、デプロイの前に単体テストを実行する別のステージを置き、JUnit XML で書かれる各回の pytest の結果を、AWS CodeBuild のテストのレポートとして見たいと考えています。チームはマネージドの機能だけを使いたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a stage with a CodeBuild action in the Test category that runs the CodeBuild project for the unit tests.",
+      "text_ja": "単体テストの CodeBuild プロジェクトを実行する、Test のカテゴリーの CodeBuild のアクションを持つステージを足す。"
+    },
+    {
+      "key": "B",
+      "text": "Add a reports section to the project's buildspec that points to the JUnit XML result files, using the default file format.",
+      "text_ja": "プロジェクトの buildspec に、JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式は既定のものを使う。"
+    },
+    {
+      "key": "C",
+      "text": "Add a reports section that points to the JUnit XML result files and set the file format to CLOVERXML.",
+      "text_ja": "JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式を CLOVERXML にする。"
+    },
+    {
+      "key": "D",
+      "text": "Turn on the BatchEnabled parameter of the CodeBuild action so that test reports are created.",
+      "text_ja": "テストのレポートが作られるよう、CodeBuild のアクションの BatchEnabled パラメータを有効にする。"
+    },
+    {
+      "key": "E",
+      "text": "Export the test results as environment variables and read them from the action's output variables.",
+      "text_ja": "テストの結果を環境変数としてエクスポートし、アクションの出力変数から読む。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "CodePipeline の CodeBuild のアクションは Build か Test のカテゴリーで、パイプラインの中でビルドやテストを実行できます。テストのレポートは buildspec の reports セクションで結果のファイルの場所を指定して作り、ファイル形式を指定しなければ JUNITXML として扱われます。",
+    "per_choice": {
+      "A": "正しい。Test のカテゴリーの CodeBuild のアクションで、デプロイの前にテストのステージを置けます。",
+      "B": "正しい。JUnit XML は既定の形式なので、reports セクションで場所を指定すればテストのレポートが作られます。",
+      "C": "CLOVERXML はコードカバレッジの形式で、JUnit XML の結果を正しく読めません。",
+      "D": "BatchEnabled は同じ実行の中で複数のビルドを動かすためのもので、レポートを作る設定ではありません。",
+      "E": "出力変数はビルドでエクスポートした環境変数を出すもので、テストのレポートにはなりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+      "source_id": "S7",
+      "quote": "Allows you to run builds and tests as part of your pipeline."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+      "source_id": "S7",
+      "quote": "Category: Build or Test"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+      "source_id": "S6",
+      "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild-config",
+      "source_id": "S8",
+      "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

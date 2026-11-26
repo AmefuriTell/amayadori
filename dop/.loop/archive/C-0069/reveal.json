@@ -1,0 +1,256 @@
+{
+  "item": "C-0069",
+  "questions": [
+    {
+      "id": "q-5.3-0001",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A new Amazon ECS service on AWS Fargate fails to start. The stopped tasks show a CannotPullContainerError that says the task can't pull the image and asks to check the role's permissions. The image is in a private Amazon ECR repository in the same account, and other services can pull it. The company must fix the problem while granting the LEAST privilege. What should a DevOps engineer do?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add permissions to pull images from the ECR repository to the service's task role."
+        },
+        {
+          "key": "B",
+          "text": "Add permissions to pull images from the ECR repository to the task execution role of the task definition."
+        },
+        {
+          "key": "C",
+          "text": "Add permissions to pull images from the ECR repository to the container instance role of the cluster."
+        },
+        {
+          "key": "D",
+          "text": "Change the ECR repository policy so that any principal can pull images from the repository."
+        }
+      ],
+      "explanation": {
+        "summary": "CannotPullContainerError の権限のエラーは、タスク定義のイメージをプルするロールの権限が足りないことを示します。Fargate のタスクではそのロールはタスク実行ロールで、EC2 のタスクではコンテナインスタンスロールです。",
+        "per_choice": {
+          "A": "Fargate でイメージをプルするのはタスク実行ロールで、タスクロールに足しても直らず、使わない権限が増えます。",
+          "B": "正しい。Fargate のタスクでイメージをプルするタスク実行ロールに、必要な権限だけを足します。",
+          "C": "コンテナインスタンスロールは EC2 のタスクで使うロールで、Fargate のタスクには効きません。",
+          "D": "プルはできるようになりますが、誰でもイメージを取れるようになり、最小の権限という要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "For tasks with the Fargate, this is the task execution role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "source_id": "S5",
+          "quote": "For tasks with EC2, this is the container instance role."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0002",
+      "answer": [
+        "A",
+        "B"
+      ],
+      "stem_en": "An Amazon ECS service keeps replacing its tasks. Each task shows PENDING for a short time and then disappears. An on-call engineer is paged 20 minutes after the problem starts and must find out why the tasks stopped as quickly as possible, before the information is gone. Which actions should the engineer take? (Choose TWO.)",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Review the service events to see the actions that ECS took to maintain the service."
+        },
+        {
+          "key": "B",
+          "text": "Describe the stopped tasks and read the stopCode, the stoppedReason, and each container reason."
+        },
+        {
+          "key": "C",
+          "text": "Wait one day for the stopped tasks to collect, and then review them together in the ECS console."
+        },
+        {
+          "key": "D",
+          "text": "Increase the service's desired count so that more tasks start, and watch whether some of them stay running."
+        },
+        {
+          "key": "E",
+          "text": "Turn on access logs for the load balancer and look for errors in the logs that are delivered later."
+        }
+      ],
+      "explanation": {
+        "summary": "サービスが作ったタスクでは、サービスを保つために ECS が取った動きがサービスのイベントに出ます。停止したタスクは stopCode・StoppedReason・コンテナの reason で止まった理由を示し、コンソールに出るのは 1 時間だけなので早めに確かめます。",
+        "per_choice": {
+          "A": "正しい。サービスが作ったタスクでは、ECS がサービスを保つために取った動き（タスクの停止と入れ替え）がサービスのイベントに出ます。",
+          "B": "正しい。停止したタスクの stopCode・stoppedReason・コンテナの reason が、止まった理由を直接示します。",
+          "C": "停止したタスクがコンソールに出るのは 1 時間だけで、1 日待つと情報が消えます。",
+          "D": "原因が分からないまま失敗するタスクを増やすだけで、理由の特定に役立ちません。",
+          "E": "タスクが起動の途中で消えているので、ロードバランサーのログに理由が出るとは限らず、後で届くので遅くなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "If your task was created by an Amazon ECS service, the actions that Amazon ECS takes to maintain the service are published in the service events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "Stopped tasks only appear in the console for 1 hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "source_id": "S4",
+          "quote": "StoppedReason - The reason the task stopped."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0003",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "An Auto Scaling group uses a launch lifecycle hook. A script on each new instance installs software and then completes the hook. After a recent change, the script fails on every instance and completes the hook with abandon. The team sees instances being terminated and replaced, and the group now launches new instances more slowly than before. What should a DevOps engineer do to restore normal scaling with the LEAST effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Increase the lifecycle hook's timeout from one hour to two hours so that the script has more time."
+        },
+        {
+          "key": "B",
+          "text": "Increase the group's maximum capacity so that more instances can be launched at the same time."
+        },
+        {
+          "key": "C",
+          "text": "Find and fix the error in the script so that it completes the hook with continue."
+        },
+        {
+          "key": "D",
+          "text": "Change the script to complete the hook with continue even when the installation fails."
+        }
+      ],
+      "explanation": {
+        "summary": "起動時のフックを abandon で完了させると、独自の処理が失敗したとみなされ、インスタンスは終了して入れ替わります。フックが続けて失敗すると、Amazon EC2 Auto Scaling はインスタンスを起動する速さを制限するので、処理の恒久的な誤りを直す必要があります。",
+        "per_choice": {
+          "A": "スクリプトは時間切れではなく失敗しているので、時間を延ばしても abandon のままです。",
+          "B": "失敗が続く間は起動の速さが制限されたままで、失敗するインスタンスが増えるだけです。",
+          "C": "正しい。誤りを直して continue で完了させれば、インスタンスがサービスに入り、起動の制限も起きなくなります。",
+          "D": "ソフトウェアが入っていないインスタンスがサービスに入り、壊れた状態で動くことになります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "source_id": "S3",
+          "quote": "Otherwise, abandon indicates that your custom actions were unsuccessful, and that we can terminate and replace the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "source_id": "S3",
+          "quote": "Amazon EC2 Auto Scaling limits the rate at which it allows instances to launch if the lifecycle hooks are failing consistently"
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0004",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "An Auto Scaling group behind an Application Load Balancer uses Elastic Load Balancing health checks. The application takes about 4 minutes to start. New instances are marked unhealthy and replaced before the application finishes starting, so the group never reaches its desired capacity. The company must keep the load balancer health checks to detect real failures. Which change resolves the issue with the LEAST effort?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Turn off the Elastic Load Balancing health checks for the group and rely only on the EC2 status checks."
+        },
+        {
+          "key": "B",
+          "text": "Set the group's health check grace period to a value longer than the application's startup time."
+        },
+        {
+          "key": "C",
+          "text": "Increase the group's desired capacity so that some instances remain while others are replaced."
+        },
+        {
+          "key": "D",
+          "text": "Replace unhealthy instances manually after checking each one, and suspend the replacement process."
+        }
+      ],
+      "explanation": {
+        "summary": "Amazon EC2 Auto Scaling は、新しいインスタンスに組み込みの EC2 のステータスチェックを行い、有効にした追加のヘルスチェック（ELB など）は猶予期間の後に行います。猶予期間を起動の時間より長くすれば、起動中のインスタンスが入れ替えられず、ロードバランサーのヘルスチェックも残せます。",
+        "per_choice": {
+          "A": "入れ替えは止まりますが、ロードバランサーのヘルスチェックを残すという要件に反します。",
+          "B": "正しい。起動の間は ELB のヘルスチェックで入れ替えられず、起動の後は本当の障害を見つけられます。",
+          "C": "新しいインスタンスは同じように起動中に入れ替えられ、問題は解決しません。",
+          "D": "手作業が多く、自動の入れ替えも失われます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "source_id": "S2",
+          "quote": "Amazon EC2 Auto Scaling performs health checks on the instance by using the built-in Amazon EC2 status checks, and after a grace period, any optional health checks that you enabled for the group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "source_id": "S2",
+          "quote": "If any of the health checks fail, the instance is replaced."
+        }
+      ]
+    },
+    {
+      "id": "q-5.3-0005",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A team copied an AWS CloudFormation node stack from its staging environment to add self-managed nodes to a production Amazon EKS cluster. The EC2 instances launch in private subnets and pass their status checks, but they never join the production cluster. The cluster and its other nodes are healthy. What is the MOST likely cause that the team should check first?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "One of the Availability Zones of the subnets doesn't have enough capacity to support the cluster."
+        },
+        {
+          "key": "B",
+          "text": "The ClusterName parameter in the node stack doesn't exactly match the name of the production cluster."
+        },
+        {
+          "key": "C",
+          "text": "The nodes in the private subnets were not assigned public IP addresses."
+        },
+        {
+          "key": "D",
+          "text": "The EC2 instances failed their status checks and were replaced before they could join."
+        }
+      ],
+      "explanation": {
+        "summary": "ノードの CloudFormation テンプレートの ClusterName が、参加させたいクラスターの名前と完全に一致しないと、ノードの /var/lib/kubelet/kubeconfig の設定が誤り、ノードはクラスターに参加しません。ステージングから写したスタックでは、まずこの値を確かめます。",
+        "per_choice": {
+          "A": "容量不足は、クラスターを作る時に、指定したアベイラビリティーゾーンで起きるエラーです。インスタンスは起動しています。",
+          "B": "正しい。名前が違うと kubeconfig が誤り、起動して正常でもクラスターに参加しません。",
+          "C": "パブリック IP アドレスが要るのは、パブリックサブネットに置いたノードです。",
+          "D": "問題文ではインスタンスはステータスチェックを通っています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "The ClusterName in your node AWS CloudFormation template doesn’t exactly match the name of the cluster you want your nodes to join."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "the nodes will not join the cluster."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "source_id": "S6",
+          "quote": "Ensure that nodes deployed in public subnets are assigned a public IP address."
+        }
+      ]
+    }
+  ]
+}

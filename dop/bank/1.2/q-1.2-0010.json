@@ -1,0 +1,71 @@
+{
+  "task": "1.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.2-0010",
+  "services": [
+    "AWS CodeBuild"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A Java team builds with AWS CodeBuild. The tests already produce a JaCoCo XML coverage file, but developers must download build artifacts to see the coverage. The team wants line and branch coverage for every build to appear in CodeBuild, and does not want to run or maintain any extra reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある Java のチームは AWS CodeBuild でビルドしています。テストは既に JaCoCo XML のカバレッジのファイルを出していますが、開発者はカバレッジを見るためにビルドのアーティファクトをダウンロードする必要があります。チームは、すべてのビルドの行カバレッジと分岐カバレッジを CodeBuild で見られるようにしたく、追加のレポートのツールを動かしたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a reports section to the buildspec file with the JaCoCo XML file location, and leave the file format unspecified.",
+      "text_ja": "buildspec ファイルに reports セクションを足して JaCoCo XML のファイルの場所を指定し、ファイル形式は指定しない。"
+    },
+    {
+      "key": "B",
+      "text": "Add a reports section to the buildspec file with a code coverage report group, the JaCoCo XML file location, and the JACOCOXML file format.",
+      "text_ja": "buildspec ファイルに reports セクションを足し、コードカバレッジのレポートグループ、JaCoCo XML のファイルの場所、JACOCOXML のファイル形式を指定する。"
+    },
+    {
+      "key": "C",
+      "text": "Upload the JaCoCo XML file to an Amazon S3 bucket after each build and host a static dashboard that parses it.",
+      "text_ja": "ビルドのたびに JaCoCo XML のファイルを Amazon S3 バケットへアップロードし、それを解析する静的なダッシュボードを公開する。"
+    },
+    {
+      "key": "D",
+      "text": "Run a self-hosted code quality server on Amazon EC2 and send the JaCoCo XML file to it from the build.",
+      "text_ja": "Amazon EC2 で自前のコード品質のサーバーを動かし、ビルドから JaCoCo XML のファイルを送る。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "CodeBuild はテストのコードカバレッジのレポートを作れ、行カバレッジと分岐カバレッジを示します。buildspec にコードカバレッジのレポートグループを設定してビルドを動かすと、ビルドごとにレポートが作られます。JaCoCo XML は対応する形式で、ファイル形式を指定しないと JUNITXML として扱われます。",
+    "per_choice": {
+      "A": "ファイル形式を指定しないと JUNITXML として扱われ、JaCoCo のカバレッジのレポートとして読まれません。",
+      "B": "正しい。対応する形式を指定したレポートグループで、ビルドごとのカバレッジのレポートが CodeBuild に出ます。",
+      "C": "動きますが、解析とダッシュボードを自分で作って保守する必要があります。",
+      "D": "動きますが、追加のツールを動かして保守することになり、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+      "source_id": "S2",
+      "quote": "CodeBuild allows you to generate code coverage reports for your tests."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report-create",
+      "source_id": "S3",
+      "quote": "To create a code coverage report, you run a build project that is configured with at least one code coverage report group in its buildspec file."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+      "source_id": "S6",
+      "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+      "source_id": "S2",
+      "quote": "JaCoCo XML"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

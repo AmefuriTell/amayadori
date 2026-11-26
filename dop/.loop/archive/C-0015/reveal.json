@@ -1,0 +1,199 @@
+{
+  "item": "C-0015",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "A company deploys an application with AWS CodeDeploy to 200 Amazon EC2 instances and 50 on-premises servers. All of them are already managed by AWS Systems Manager. The company wants the CodeDeploy agent to be installed on every server and to be updated to new versions automatically, without engineers logging in to the servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add an agent installation script to the EC2 user data, and install the agent on the on-premises servers by hand."
+        },
+        {
+          "key": "B",
+          "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package once on all servers, and update it by hand when a new version is released."
+        },
+        {
+          "key": "C",
+          "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package on all servers on a schedule so that new versions are installed."
+        },
+        {
+          "key": "D",
+          "text": "Add a cron job to each server that downloads the newest agent installer every week and runs it."
+        }
+      ],
+      "explanation": {
+        "summary": "Systems Manager を使うと、EC2 とオンプレミスのインスタンスに CodeDeploy エージェントを入れられ、1 回だけ入れることも、新しいバージョンを入れるスケジュールを組むこともできます。バージョン 2.0.x 以降は AWSCodeDeployAgentV2 のパッケージを選びます。",
+        "per_choice": {
+          "A": "EC2 では入りますが更新されず、オンプレミスのサーバーは手作業になります。",
+          "B": "ログインは要りませんが、新しいバージョンへの更新が手作業のままです。",
+          "C": "正しい。すべてのサーバーにログイン無しで入れ、スケジュールで新しいバージョンも入ります。",
+          "D": "動きますが、各サーバーの cron ジョブを作って保守する必要があり、手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "source_id": "S6",
+          "quote": "You can use the AWS Management Console or the AWS CLI to install the CodeDeploy agent to your Amazon EC2 or on-premises instances by using AWS Systems Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "source_id": "S6",
+          "quote": "With SSM, you can install the CodeDeploy once or set up a schedule to install new versions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "source_id": "S6",
+          "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "answer": [
+        "B"
+      ],
+      "stem_en": "A company is moving its applications from EC2 instances to AWS Lambda functions and Amazon ECS services, and will keep using AWS CodeDeploy for deployments on the new compute platforms. The platform team asks how the CodeDeploy agent should be set up for the new platforms. Which approach requires the LEAST operational effort while keeping deployments working?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Add the CodeDeploy agent as a sidecar container to every ECS task definition, and package it in a Lambda layer for every function."
+        },
+        {
+          "key": "B",
+          "text": "Do not install the CodeDeploy agent for the Lambda and ECS deployments, because the agent is required only for the EC2/On-Premises compute platform."
+        },
+        {
+          "key": "C",
+          "text": "Keep a small fleet of EC2 instances with the CodeDeploy agent so that the agent can deploy to Lambda and ECS."
+        },
+        {
+          "key": "D",
+          "text": "Install the CodeDeploy agent on the ECS container instances only, and use the EC2 compute platform for the Lambda functions."
+        }
+      ],
+      "explanation": {
+        "summary": "CodeDeploy エージェントは、EC2/オンプレミスのコンピューティングプラットフォームにデプロイする時だけ必要です。Amazon ECS や AWS Lambda のコンピューティングプラットフォームを使うデプロイでは要りません。",
+        "per_choice": {
+          "A": "エージェントは ECS と Lambda のデプロイでは要らないので、作業が増えるだけです。",
+          "B": "正しい。ECS と Lambda のデプロイにはエージェントが要らないので、用意する作業がありません。",
+          "C": "ECS と Lambda のデプロイにエージェントは要らず、EC2 を残す費用と手間が増えるだけです。",
+          "D": "ECS のデプロイにエージェントは要らず、Lambda 関数を EC2 のプラットフォームでデプロイすることもできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html",
+          "source_id": "S1",
+          "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "answer": [
+        "C"
+      ],
+      "stem_en": "An application revision is stored in an Amazon S3 bucket. CodeDeploy deployments to a new group of EC2 instances fail because the instances cannot download the revision, and installing the CodeDeploy agent also failed on some of them. The instances have an IAM instance profile whose role trusts ec2.amazonaws.com, but the role grants no Amazon S3 actions. Which change is the MOST secure way to fix the problem?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Make the revision bucket and the bucket that contains the CodeDeploy agent public so that any instance can read them."
+        },
+        {
+          "key": "B",
+          "text": "Add an inbound rule for port 443 to the instances' security group so that CodeDeploy can push the revision to them."
+        },
+        {
+          "key": "C",
+          "text": "Add s3:Get* and s3:List* for the revision bucket and the CodeDeploy agent bucket to the instance profile role."
+        },
+        {
+          "key": "D",
+          "text": "Restart the CodeDeploy agent on each instance with systemctl, and then redeploy the revision."
+        }
+      ],
+      "explanation": {
+        "summary": "アプリケーションを S3 バケットに置く時は、インスタンスプロファイルのロールに s3:Get* と s3:List* が要ります。CodeDeploy エージェントのある S3 バケットへのアクセスも与えないと、エージェントのインストールや更新でエラーが起きることがあります。",
+        "per_choice": {
+          "A": "取得はできるようになりますが、誰でも読めるようになり、安全ではありません。",
+          "B": "エージェントは 443 番ポートの HTTPS で外向きに通信するので、受信のルールを足しても直りません。",
+          "C": "正しい。必要なバケットへの読み取りだけを、インスタンスのロールに足します。",
+          "D": "原因は権限で、再起動しても S3 から取得できないままです。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "source_id": "S8",
+          "quote": "If \"s3:Get*\" and \"s3:List*\" are not in the list of specified actions, choose Edit to add them, and then choose Save."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "source_id": "S8",
+          "quote": "Make sure to give access to the Amazon S3 buckets that contain the CodeDeploy agent. Otherwise, an error might occur when the CodeDeploy agent is installed or updated on the instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-outbound-port",
+          "source_id": "S2",
+          "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "During an in-place CodeDeploy deployment, an Auto Scaling scale-in event terminated two instances while their lifecycle event scripts were running. The deployment status for those instances did not change to Failed until almost an hour later, which delayed the team's rollback decision. What is the MOST likely explanation?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "The CodeDeploy agent shut down when the instances were terminated, so CodeDeploy waited up to an hour before it marked the scripts as failed."
+        },
+        {
+          "key": "B",
+          "text": "The CodeDeploy agent deletes its log files after seven days, so the failure could not be reported until the logs were rotated."
+        },
+        {
+          "key": "C",
+          "text": "The instances were terminated before the first lifecycle event started, so the deployment waited for the full one-hour timeout."
+        },
+        {
+          "key": "D",
+          "text": "The CodeDeploy agent reports status only through inbound connections on port 443, which were closed by the security group."
+        }
+      ],
+      "explanation": {
+        "summary": "ライフサイクルイベントの最中にインスタンスが終了すると、CodeDeploy エージェントが止まってスクリプトを処理できなくなり、デプロイの状態が Failed になるまで最大 1 時間かかることがあります。ライフサイクルイベントの間や最初のイベントの前に終了した時は、5 分でタイムアウトします。",
+        "per_choice": {
+          "A": "正しい。スクリプトの実行中にエージェントが止まり、失敗と表示されるまで最大 1 時間かかります。",
+          "B": "ログの削除は 7 日後の話で、デプロイの状態の報告とは関係ありません。",
+          "C": "最初のライフサイクルイベントの前に終了した場合は、5 分でタイムアウトします。",
+          "D": "エージェントは 443 番ポートの HTTPS で外向きに通信します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "source_id": "S10",
+          "quote": "it might take up to an hour for the status of the deployment to be displayed as Failed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "source_id": "S10",
+          "quote": "If an instance is terminated between lifecycle events or before the first lifecycle event step starts, the timeout occurs after just five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-install-files",
+          "source_id": "S5",
+          "quote": "The agent deletes log files after seven days."
+        }
+      ]
+    }
+  ]
+}

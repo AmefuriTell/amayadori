@@ -1,0 +1,67 @@
+{
+  "task": "5.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.3-0010",
+  "services": [
+    "Amazon EKS",
+    "AWS CloudFormation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A team copied an AWS CloudFormation node stack from its staging environment to add self-managed nodes to a production Amazon EKS cluster. The EC2 instances launch in private subnets and pass their status checks, but they never join the production cluster. The cluster and its other nodes are healthy. What is the MOST likely cause that the team should check first?",
+  "stem_ja": "あるチームは、本番の Amazon EKS クラスターにセルフマネージドのノードを足すため、ステージング環境の AWS CloudFormation のノードのスタックを写して使いました。EC2 インスタンスはプライベートサブネットで起動し、ステータスチェックも通りますが、本番のクラスターに参加しません。クラスターとほかのノードは正常です。チームが最初に確かめるべき、最も可能性の高い原因はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "One of the Availability Zones of the subnets doesn't have enough capacity to support the cluster.",
+      "text_ja": "サブネットのアベイラビリティーゾーンの 1 つに、クラスターを支える十分な容量が無い。"
+    },
+    {
+      "key": "B",
+      "text": "The ClusterName parameter in the node stack doesn't exactly match the name of the production cluster.",
+      "text_ja": "ノードのスタックの ClusterName パラメータが、本番のクラスターの名前と完全には一致していない。"
+    },
+    {
+      "key": "C",
+      "text": "The nodes in the private subnets were not assigned public IP addresses.",
+      "text_ja": "プライベートサブネットのノードに、パブリック IP アドレスが割り当てられていない。"
+    },
+    {
+      "key": "D",
+      "text": "The EC2 instances failed their status checks and were replaced before they could join.",
+      "text_ja": "EC2 インスタンスがステータスチェックに失敗し、参加する前に入れ替えられた。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "ノードの CloudFormation テンプレートの ClusterName が、参加させたいクラスターの名前と完全に一致しないと、ノードの /var/lib/kubelet/kubeconfig の設定が誤り、ノードはクラスターに参加しません。ステージングから写したスタックでは、まずこの値を確かめます。",
+    "per_choice": {
+      "A": "容量不足は、クラスターを作る時に、指定したアベイラビリティーゾーンで起きるエラーです。インスタンスは起動しています。",
+      "B": "正しい。名前が違うと kubeconfig が誤り、起動して正常でもクラスターに参加しません。",
+      "C": "パブリック IP アドレスが要るのは、パブリックサブネットに置いたノードです。",
+      "D": "問題文ではインスタンスはステータスチェックを通っています。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+      "source_id": "S6",
+      "quote": "The ClusterName in your node AWS CloudFormation template doesn’t exactly match the name of the cluster you want your nodes to join."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+      "source_id": "S6",
+      "quote": "the nodes will not join the cluster."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+      "source_id": "S6",
+      "quote": "Ensure that nodes deployed in public subnets are assigned a public IP address."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

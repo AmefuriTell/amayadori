@@ -1,0 +1,67 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0013",
+  "services": [
+    "AWS CodeDeploy",
+    "Amazon EC2 Auto Scaling"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "During an in-place CodeDeploy deployment, an Auto Scaling scale-in event terminated two instances while their lifecycle event scripts were running. The deployment status for those instances did not change to Failed until almost an hour later, which delayed the team's rollback decision. What is the MOST likely explanation?",
+  "stem_ja": "CodeDeploy のインプレースデプロイの最中に、Auto Scaling のスケールインが、ライフサイクルイベントのスクリプトを実行中の 2 台のインスタンスを終了させました。それらのインスタンスのデプロイの状態は約 1 時間後まで Failed にならず、チームのロールバックの判断が遅れました。最も可能性の高い説明はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The CodeDeploy agent deletes its log files after seven days, so the failure could not be reported until the logs were rotated.",
+      "text_ja": "CodeDeploy エージェントは 7 日後にログファイルを消すため、ログがローテーションされるまで失敗を報告できなかった。"
+    },
+    {
+      "key": "B",
+      "text": "The CodeDeploy agent shut down when the instances were terminated, so CodeDeploy waited up to an hour before it marked the scripts as failed.",
+      "text_ja": "インスタンスの終了で CodeDeploy エージェントが止まったため、CodeDeploy はスクリプトを失敗とするまで最大 1 時間待った。"
+    },
+    {
+      "key": "C",
+      "text": "The instances were terminated before the first lifecycle event started, so the deployment waited for the full one-hour timeout.",
+      "text_ja": "インスタンスが最初のライフサイクルイベントの前に終了したため、デプロイは 1 時間のタイムアウトまで待った。"
+    },
+    {
+      "key": "D",
+      "text": "The CodeDeploy agent reports status only through inbound connections on port 443, which were closed by the security group.",
+      "text_ja": "CodeDeploy エージェントは 443 番ポートの受信の接続でだけ状態を報告し、それがセキュリティグループで閉じられていた。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "ライフサイクルイベントの最中にインスタンスが終了すると、CodeDeploy エージェントが止まってスクリプトを処理できなくなり、デプロイの状態が Failed になるまで最大 1 時間かかることがあります。ライフサイクルイベントの間や最初のイベントの前に終了した時は、5 分でタイムアウトします。",
+    "per_choice": {
+      "A": "ログの削除は 7 日後の話で、デプロイの状態の報告とは関係ありません。",
+      "B": "正しい。スクリプトの実行中にエージェントが止まり、失敗と表示されるまで最大 1 時間かかります。",
+      "C": "最初のライフサイクルイベントの前に終了した場合は、5 分でタイムアウトします。",
+      "D": "エージェントは 443 番ポートの HTTPS で外向きに通信します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+      "source_id": "S10",
+      "quote": "it might take up to an hour for the status of the deployment to be displayed as Failed."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+      "source_id": "S10",
+      "quote": "If an instance is terminated between lifecycle events or before the first lifecycle event step starts, the timeout occurs after just five minutes."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-install-files",
+      "source_id": "S5",
+      "quote": "The agent deletes log files after seven days."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

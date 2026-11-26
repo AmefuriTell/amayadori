@@ -1,0 +1,69 @@
+{
+  "task": "5.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.3-0006",
+  "services": [
+    "Amazon ECS",
+    "AWS Fargate",
+    "Amazon ECR",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A new Amazon ECS service on AWS Fargate fails to start. The stopped tasks show a CannotPullContainerError that says the task can't pull the image and asks to check the role's permissions. The image is in a private Amazon ECR repository in the same account, and other services can pull it. The company must fix the problem while granting the LEAST privilege. What should a DevOps engineer do?",
+  "stem_ja": "AWS Fargate 上の新しい Amazon ECS のサービスが起動しません。停止したタスクには CannotPullContainerError が出ており、タスクがイメージをプルできないのでロールの権限を確かめるよう示されています。イメージは同じアカウントのプライベートな Amazon ECR リポジトリにあり、ほかのサービスはプルできています。会社は、最小の権限を与える形でこの問題を直す必要があります。DevOps エンジニアは何をすべきですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add permissions to pull images from the ECR repository to the service's task role.",
+      "text_ja": "サービスのタスクロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+    },
+    {
+      "key": "B",
+      "text": "Add permissions to pull images from the ECR repository to the container instance role of the cluster.",
+      "text_ja": "クラスターのコンテナインスタンスロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+    },
+    {
+      "key": "C",
+      "text": "Change the ECR repository policy so that any principal can pull images from the repository.",
+      "text_ja": "どのプリンシパルでもリポジトリからイメージをプルできるように、ECR リポジトリのポリシーを変える。"
+    },
+    {
+      "key": "D",
+      "text": "Add permissions to pull images from the ECR repository to the task execution role of the task definition.",
+      "text_ja": "タスク定義のタスク実行ロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CannotPullContainerError の権限のエラーは、タスク定義のイメージをプルするロールの権限が足りないことを示します。Fargate のタスクではそのロールはタスク実行ロールで、EC2 のタスクではコンテナインスタンスロールです。",
+    "per_choice": {
+      "A": "Fargate でイメージをプルするのはタスク実行ロールで、タスクロールに足しても直らず、使わない権限が増えます。",
+      "B": "コンテナインスタンスロールは EC2 のタスクで使うロールで、Fargate のタスクには効きません。",
+      "C": "プルはできるようになりますが、誰でもイメージを取れるようになり、最小の権限という要件に反します。",
+      "D": "正しい。Fargate のタスクでイメージをプルするタスク実行ロールに、必要な権限だけを足します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+      "source_id": "S5",
+      "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+      "source_id": "S5",
+      "quote": "For tasks with the Fargate, this is the task execution role."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+      "source_id": "S5",
+      "quote": "For tasks with EC2, this is the container instance role."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

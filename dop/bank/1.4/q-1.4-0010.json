@@ -1,0 +1,67 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0010",
+  "services": [
+    "AWS CodeDeploy",
+    "AWS Systems Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company deploys an application with AWS CodeDeploy to 200 Amazon EC2 instances and 50 on-premises servers. All of them are already managed by AWS Systems Manager. The company wants the CodeDeploy agent to be installed on every server and to be updated to new versions automatically, without engineers logging in to the servers. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、AWS CodeDeploy で 200 台の Amazon EC2 インスタンスと 50 台のオンプレミスのサーバーにアプリケーションをデプロイしています。すべて AWS Systems Manager で管理されています。会社は、エンジニアがサーバーにログインせずに、すべてのサーバーに CodeDeploy エージェントを入れ、新しいバージョンへ自動で更新したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add an agent installation script to the EC2 user data, and install the agent on the on-premises servers by hand.",
+      "text_ja": "EC2 のユーザーデータにエージェントのインストールのスクリプトを足し、オンプレミスのサーバーには手作業でエージェントを入れる。"
+    },
+    {
+      "key": "B",
+      "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package once on all servers, and update it by hand when a new version is released.",
+      "text_ja": "Systems Manager ですべてのサーバーに AWSCodeDeployAgentV2 のパッケージを 1 回入れ、新しいバージョンが出たら手作業で更新する。"
+    },
+    {
+      "key": "C",
+      "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package on all servers on a schedule so that new versions are installed.",
+      "text_ja": "Systems Manager で、すべてのサーバーに AWSCodeDeployAgentV2 のパッケージをスケジュールで入れ、新しいバージョンが入るようにする。"
+    },
+    {
+      "key": "D",
+      "text": "Add a cron job to each server that downloads the newest agent installer every week and runs it.",
+      "text_ja": "各サーバーに、最新のエージェントのインストーラーを毎週ダウンロードして実行する cron ジョブを足す。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Systems Manager を使うと、EC2 とオンプレミスのインスタンスに CodeDeploy エージェントを入れられ、1 回だけ入れることも、新しいバージョンを入れるスケジュールを組むこともできます。バージョン 2.0.x 以降は AWSCodeDeployAgentV2 のパッケージを選びます。",
+    "per_choice": {
+      "A": "EC2 では入りますが更新されず、オンプレミスのサーバーは手作業になります。",
+      "B": "ログインは要りませんが、新しいバージョンへの更新が手作業のままです。",
+      "C": "正しい。すべてのサーバーにログイン無しで入れ、スケジュールで新しいバージョンも入ります。",
+      "D": "動きますが、各サーバーの cron ジョブを作って保守する必要があり、手間がかかります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+      "source_id": "S6",
+      "quote": "You can use the AWS Management Console or the AWS CLI to install the CodeDeploy agent to your Amazon EC2 or on-premises instances by using AWS Systems Manager."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+      "source_id": "S6",
+      "quote": "With SSM, you can install the CodeDeploy once or set up a schedule to install new versions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+      "source_id": "S6",
+      "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

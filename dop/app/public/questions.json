@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 178,
+  "count": 194,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -1290,6 +1290,211 @@
       ],
       "low_confidence": false,
       "note": "選択肢 C の「BeforeInstall はアプリを入れる前」は hooks の名前からの説明で、sources に直接の原文は無い"
+    },
+    {
+      "id": "q-1.2-0010",
+      "task": "1.2",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Java team builds with AWS CodeBuild. The tests already produce a JaCoCo XML coverage file, but developers must download build artifacts to see the coverage. The team wants line and branch coverage for every build to appear in CodeBuild, and does not want to run or maintain any extra reporting tool. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある Java のチームは AWS CodeBuild でビルドしています。テストは既に JaCoCo XML のカバレッジのファイルを出していますが、開発者はカバレッジを見るためにビルドのアーティファクトをダウンロードする必要があります。チームは、すべてのビルドの行カバレッジと分岐カバレッジを CodeBuild で見られるようにしたく、追加のレポートのツールを動かしたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a reports section to the buildspec file with the JaCoCo XML file location, and leave the file format unspecified.",
+          "text_ja": "buildspec ファイルに reports セクションを足して JaCoCo XML のファイルの場所を指定し、ファイル形式は指定しない。"
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the buildspec file with a code coverage report group, the JaCoCo XML file location, and the JACOCOXML file format.",
+          "text_ja": "buildspec ファイルに reports セクションを足し、コードカバレッジのレポートグループ、JaCoCo XML のファイルの場所、JACOCOXML のファイル形式を指定する。"
+        },
+        {
+          "key": "C",
+          "text": "Upload the JaCoCo XML file to an Amazon S3 bucket after each build and host a static dashboard that parses it.",
+          "text_ja": "ビルドのたびに JaCoCo XML のファイルを Amazon S3 バケットへアップロードし、それを解析する静的なダッシュボードを公開する。"
+        },
+        {
+          "key": "D",
+          "text": "Run a self-hosted code quality server on Amazon EC2 and send the JaCoCo XML file to it from the build.",
+          "text_ja": "Amazon EC2 で自前のコード品質のサーバーを動かし、ビルドから JaCoCo XML のファイルを送る。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "CodeBuild はテストのコードカバレッジのレポートを作れ、行カバレッジと分岐カバレッジを示します。buildspec にコードカバレッジのレポートグループを設定してビルドを動かすと、ビルドごとにレポートが作られます。JaCoCo XML は対応する形式で、ファイル形式を指定しないと JUNITXML として扱われます。",
+        "per_choice": {
+          "A": "ファイル形式を指定しないと JUNITXML として扱われ、JaCoCo のカバレッジのレポートとして読まれません。",
+          "B": "正しい。対応する形式を指定したレポートグループで、ビルドごとのカバレッジのレポートが CodeBuild に出ます。",
+          "C": "動きますが、解析とダッシュボードを自分で作って保守する必要があります。",
+          "D": "動きますが、追加のツールを動かして保守することになり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "quote": "CodeBuild allows you to generate code coverage reports for your tests."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report-create",
+          "quote": "To create a code coverage report, you run a build project that is configured with at least one code coverage report group in its buildspec file."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "quote": "JaCoCo XML"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.2-0011",
+      "task": "1.2",
+      "domain": 1,
+      "services": [
+        "AWS CodeBuild",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team uses a report group that was created automatically from the reports section of a CodeBuild buildspec file. Auditors now require the raw test result files from every build to be kept for one year. The team notices that test reports can no longer be viewed after about a month. Which solution meets the audit requirement with the LEAST operational overhead?",
+      "stem_ja": "あるチームは、CodeBuild の buildspec ファイルの reports セクションから自動で作られたレポートグループを使っています。監査人は、すべてのビルドのテスト結果の元のファイルを 1 年間残すことを新たに求めています。チームは、テストのレポートが約 1 か月後に見られなくなることに気づきました。運用上のオーバーヘッドが最も少なく監査の要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the current report group, and save screenshots of each test report before it expires.",
+          "text_ja": "今のレポートグループのまま、各テストのレポートが期限切れになる前に画面を保存する。"
+        },
+        {
+          "key": "B",
+          "text": "Keep the current report group, and rerun old builds whenever the auditors ask for results.",
+          "text_ja": "今のレポートグループのまま、監査人が結果を求めるたびに古いビルドを実行し直す。"
+        },
+        {
+          "key": "C",
+          "text": "Add a post_build command that runs a team-maintained script to copy result files to Amazon S3.",
+          "text_ja": "チームが保守するスクリプトで結果のファイルを Amazon S3 へコピーする post_build のコマンドを足す。"
+        },
+        {
+          "key": "D",
+          "text": "Create a report group that exports raw results to Amazon S3, and reference its ARN in the buildspec.",
+          "text_ja": "元の結果を Amazon S3 へエクスポートするレポートグループを作り、buildspec でその ARN を指定する。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "テストのレポートは作られてから 30 日で期限切れになり、見られなくなります。buildspec で作ったレポートグループは元のテスト結果のファイルをエクスポートしないため、コンソールか AWS CLI で作ったレポートグループを使い、buildspec ではその ARN を指定します。",
+        "per_choice": {
+          "A": "手作業で、元のテスト結果のファイルも残りません。",
+          "B": "実行し直しても当時の結果にはならず、すべてのビルドの元のファイルを残すことになりません。",
+          "C": "動きますが、コピーのスクリプトを保守する必要があり、レポートグループの機能を使うより手間がかかります。",
+          "D": "正しい。エクスポートするレポートグループをコンソールか AWS CLI で作り、buildspec から既存のレポートグループとして ARN で指定します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+          "quote": "A report expires 30 days after it was created. You cannot view an expired test report."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#test-report-group-create-buildspec",
+          "quote": "A report group created using the buildspec does not export raw test result files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Specify the ARN of an existing report group, or the name of a new report group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#report-group-create",
+          "quote": "You can use the CodeBuild console, the AWS CLI, or a buildspec file to create a report group."
+        }
+      ],
+      "low_confidence": false,
+      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。"
+    },
+    {
+      "id": "q-1.2-0012",
+      "task": "1.2",
+      "domain": 1,
+      "services": [
+        "AWS CodePipeline",
+        "AWS CodeBuild"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A Python service is deployed by AWS CodePipeline. The team wants a separate stage that runs the unit tests before deployment, and wants each run's pytest results, which are written in JUnit XML, to be shown as test reports in AWS CodeBuild. The team wants to use managed features only. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "ある Python のサービスは AWS CodePipeline でデプロイされています。チームは、デプロイの前に単体テストを実行する別のステージを置き、JUnit XML で書かれる各回の pytest の結果を、AWS CodeBuild のテストのレポートとして見たいと考えています。チームはマネージドの機能だけを使いたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a stage with a CodeBuild action in the Test category that runs the CodeBuild project for the unit tests.",
+          "text_ja": "単体テストの CodeBuild プロジェクトを実行する、Test のカテゴリーの CodeBuild のアクションを持つステージを足す。"
+        },
+        {
+          "key": "B",
+          "text": "Add a reports section to the project's buildspec that points to the JUnit XML result files, using the default file format.",
+          "text_ja": "プロジェクトの buildspec に、JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式は既定のものを使う。"
+        },
+        {
+          "key": "C",
+          "text": "Add a reports section that points to the JUnit XML result files and set the file format to CLOVERXML.",
+          "text_ja": "JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式を CLOVERXML にする。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on the BatchEnabled parameter of the CodeBuild action so that test reports are created.",
+          "text_ja": "テストのレポートが作られるよう、CodeBuild のアクションの BatchEnabled パラメータを有効にする。"
+        },
+        {
+          "key": "E",
+          "text": "Export the test results as environment variables and read them from the action's output variables.",
+          "text_ja": "テストの結果を環境変数としてエクスポートし、アクションの出力変数から読む。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "CodePipeline の CodeBuild のアクションは Build か Test のカテゴリーで、パイプラインの中でビルドやテストを実行できます。テストのレポートは buildspec の reports セクションで結果のファイルの場所を指定して作り、ファイル形式を指定しなければ JUNITXML として扱われます。",
+        "per_choice": {
+          "A": "正しい。Test のカテゴリーの CodeBuild のアクションで、デプロイの前にテストのステージを置けます。",
+          "B": "正しい。JUnit XML は既定の形式なので、reports セクションで場所を指定すればテストのレポートが作られます。",
+          "C": "CLOVERXML はコードカバレッジの形式で、JUnit XML の結果を正しく読めません。",
+          "D": "BatchEnabled は同じ実行の中で複数のビルドを動かすためのもので、レポートを作る設定ではありません。",
+          "E": "出力変数はビルドでエクスポートした環境変数を出すもので、テストのレポートにはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "quote": "Allows you to run builds and tests as part of your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "quote": "Category: Build or Test"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild-config",
+          "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
+        }
+      ],
+      "low_confidence": false
     },
     {
       "id": "q-1.3-0001",
@@ -2690,6 +2895,248 @@
         {
           "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
           "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0010",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Systems Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company deploys an application with AWS CodeDeploy to 200 Amazon EC2 instances and 50 on-premises servers. All of them are already managed by AWS Systems Manager. The company wants the CodeDeploy agent to be installed on every server and to be updated to new versions automatically, without engineers logging in to the servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、AWS CodeDeploy で 200 台の Amazon EC2 インスタンスと 50 台のオンプレミスのサーバーにアプリケーションをデプロイしています。すべて AWS Systems Manager で管理されています。会社は、エンジニアがサーバーにログインせずに、すべてのサーバーに CodeDeploy エージェントを入れ、新しいバージョンへ自動で更新したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add an agent installation script to the EC2 user data, and install the agent on the on-premises servers by hand.",
+          "text_ja": "EC2 のユーザーデータにエージェントのインストールのスクリプトを足し、オンプレミスのサーバーには手作業でエージェントを入れる。"
+        },
+        {
+          "key": "B",
+          "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package once on all servers, and update it by hand when a new version is released.",
+          "text_ja": "Systems Manager ですべてのサーバーに AWSCodeDeployAgentV2 のパッケージを 1 回入れ、新しいバージョンが出たら手作業で更新する。"
+        },
+        {
+          "key": "C",
+          "text": "Use Systems Manager to install the AWSCodeDeployAgentV2 package on all servers on a schedule so that new versions are installed.",
+          "text_ja": "Systems Manager で、すべてのサーバーに AWSCodeDeployAgentV2 のパッケージをスケジュールで入れ、新しいバージョンが入るようにする。"
+        },
+        {
+          "key": "D",
+          "text": "Add a cron job to each server that downloads the newest agent installer every week and runs it.",
+          "text_ja": "各サーバーに、最新のエージェントのインストーラーを毎週ダウンロードして実行する cron ジョブを足す。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Systems Manager を使うと、EC2 とオンプレミスのインスタンスに CodeDeploy エージェントを入れられ、1 回だけ入れることも、新しいバージョンを入れるスケジュールを組むこともできます。バージョン 2.0.x 以降は AWSCodeDeployAgentV2 のパッケージを選びます。",
+        "per_choice": {
+          "A": "EC2 では入りますが更新されず、オンプレミスのサーバーは手作業になります。",
+          "B": "ログインは要りませんが、新しいバージョンへの更新が手作業のままです。",
+          "C": "正しい。すべてのサーバーにログイン無しで入れ、スケジュールで新しいバージョンも入ります。",
+          "D": "動きますが、各サーバーの cron ジョブを作って保守する必要があり、手間がかかります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "You can use the AWS Management Console or the AWS CLI to install the CodeDeploy agent to your Amazon EC2 or on-premises instances by using AWS Systems Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "With SSM, you can install the CodeDeploy once or set up a schedule to install new versions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0011",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda",
+        "Amazon ECS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company is moving its applications from EC2 instances to AWS Lambda functions and Amazon ECS services, and will keep using AWS CodeDeploy for deployments on the new compute platforms. The platform team asks how the CodeDeploy agent should be set up for the new platforms. Which approach requires the LEAST operational effort while keeping deployments working?",
+      "stem_ja": "ある会社は、アプリケーションを EC2 インスタンスから AWS Lambda 関数と Amazon ECS のサービスへ移しており、新しいコンピューティングプラットフォームでも AWS CodeDeploy でデプロイし続けます。プラットフォームチームは、新しいプラットフォームで CodeDeploy エージェントをどう用意すべきかを尋ねています。デプロイを動かし続けつつ、運用の手間が最も少ない方法はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Do not install the CodeDeploy agent for the Lambda and ECS deployments, because the agent is required only for the EC2/On-Premises compute platform.",
+          "text_ja": "CodeDeploy エージェントは EC2/オンプレミスのコンピューティングプラットフォームでだけ必要なので、Lambda と ECS のデプロイでは入れない。"
+        },
+        {
+          "key": "B",
+          "text": "Add the CodeDeploy agent as a sidecar container to every ECS task definition, and package it in a Lambda layer for every function.",
+          "text_ja": "すべての ECS のタスク定義に CodeDeploy エージェントをサイドカーのコンテナとして足し、すべての関数で Lambda レイヤーにまとめる。"
+        },
+        {
+          "key": "C",
+          "text": "Keep a small fleet of EC2 instances with the CodeDeploy agent so that the agent can deploy to Lambda and ECS.",
+          "text_ja": "エージェントが Lambda と ECS へデプロイできるよう、CodeDeploy エージェントを入れた EC2 インスタンスを少し残しておく。"
+        },
+        {
+          "key": "D",
+          "text": "Install the CodeDeploy agent on the ECS container instances only, and use the EC2 compute platform for the Lambda functions.",
+          "text_ja": "ECS のコンテナインスタンスにだけ CodeDeploy エージェントを入れ、Lambda 関数には EC2 のコンピューティングプラットフォームを使う。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "CodeDeploy エージェントは、EC2/オンプレミスのコンピューティングプラットフォームにデプロイする時だけ必要です。Amazon ECS や AWS Lambda のコンピューティングプラットフォームを使うデプロイでは要りません。",
+        "per_choice": {
+          "A": "正しい。ECS と Lambda のデプロイにはエージェントが要らないので、用意する作業がありません。",
+          "B": "エージェントは ECS と Lambda のデプロイでは要らないので、作業が増えるだけです。",
+          "C": "ECS と Lambda のデプロイにエージェントは要らず、EC2 を残す費用と手間が増えるだけです。",
+          "D": "ECS のデプロイにエージェントは要らず、Lambda 関数を EC2 のプラットフォームでデプロイすることもできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html",
+          "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0012",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "AWS IAM",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application revision is stored in an Amazon S3 bucket. CodeDeploy deployments to a new group of EC2 instances fail because the instances cannot download the revision, and installing the CodeDeploy agent also failed on some of them. The instances have an IAM instance profile whose role trusts ec2.amazonaws.com, but the role grants no Amazon S3 actions. Which change is the MOST secure way to fix the problem?",
+      "stem_ja": "アプリケーションのリビジョンは Amazon S3 バケットに保存されています。新しい EC2 インスタンスのグループへの CodeDeploy のデプロイが、インスタンスがリビジョンをダウンロードできずに失敗し、一部のインスタンスでは CodeDeploy エージェントのインストールも失敗しました。インスタンスには、ec2.amazonaws.com を信頼するロールの IAM インスタンスプロファイルがありますが、そのロールは Amazon S3 のアクションを何も許していません。問題を直す最も安全な変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Make the revision bucket and the bucket that contains the CodeDeploy agent public so that any instance can read them.",
+          "text_ja": "どのインスタンスでも読めるように、リビジョンのバケットと CodeDeploy エージェントのあるバケットを公開する。"
+        },
+        {
+          "key": "B",
+          "text": "Add an inbound rule for port 443 to the instances' security group so that CodeDeploy can push the revision to them.",
+          "text_ja": "CodeDeploy がリビジョンをインスタンスへ送れるよう、インスタンスのセキュリティグループに 443 番ポートの受信のルールを足す。"
+        },
+        {
+          "key": "C",
+          "text": "Restart the CodeDeploy agent on each instance with systemctl, and then redeploy the revision.",
+          "text_ja": "各インスタンスで systemctl を使って CodeDeploy エージェントを再起動してから、リビジョンを再デプロイする。"
+        },
+        {
+          "key": "D",
+          "text": "Add s3:Get* and s3:List* for the revision bucket and the CodeDeploy agent bucket to the instance profile role.",
+          "text_ja": "インスタンスプロファイルのロールに、リビジョンのバケットと CodeDeploy エージェントのバケットへの s3:Get* と s3:List* を足す。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "アプリケーションを S3 バケットに置く時は、インスタンスプロファイルのロールに s3:Get* と s3:List* が要ります。CodeDeploy エージェントのある S3 バケットへのアクセスも与えないと、エージェントのインストールや更新でエラーが起きることがあります。",
+        "per_choice": {
+          "A": "取得はできるようになりますが、誰でも読めるようになり、安全ではありません。",
+          "B": "エージェントは 443 番ポートの HTTPS で外向きに通信するので、受信のルールを足しても直りません。",
+          "C": "原因は権限で、再起動しても S3 から取得できないままです。",
+          "D": "正しい。必要なバケットへの読み取りだけを、インスタンスのロールに足します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "quote": "If \"s3:Get*\" and \"s3:List*\" are not in the list of specified actions, choose Edit to add them, and then choose Save."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "quote": "Make sure to give access to the Amazon S3 buckets that contain the CodeDeploy agent. Otherwise, an error might occur when the CodeDeploy agent is installed or updated on the instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-outbound-port",
+          "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.4-0013",
+      "task": "1.4",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "During an in-place CodeDeploy deployment, an Auto Scaling scale-in event terminated two instances while their lifecycle event scripts were running. The deployment status for those instances did not change to Failed until almost an hour later, which delayed the team's rollback decision. What is the MOST likely explanation?",
+      "stem_ja": "CodeDeploy のインプレースデプロイの最中に、Auto Scaling のスケールインが、ライフサイクルイベントのスクリプトを実行中の 2 台のインスタンスを終了させました。それらのインスタンスのデプロイの状態は約 1 時間後まで Failed にならず、チームのロールバックの判断が遅れました。最も可能性の高い説明はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "The CodeDeploy agent deletes its log files after seven days, so the failure could not be reported until the logs were rotated.",
+          "text_ja": "CodeDeploy エージェントは 7 日後にログファイルを消すため、ログがローテーションされるまで失敗を報告できなかった。"
+        },
+        {
+          "key": "B",
+          "text": "The CodeDeploy agent shut down when the instances were terminated, so CodeDeploy waited up to an hour before it marked the scripts as failed.",
+          "text_ja": "インスタンスの終了で CodeDeploy エージェントが止まったため、CodeDeploy はスクリプトを失敗とするまで最大 1 時間待った。"
+        },
+        {
+          "key": "C",
+          "text": "The instances were terminated before the first lifecycle event started, so the deployment waited for the full one-hour timeout.",
+          "text_ja": "インスタンスが最初のライフサイクルイベントの前に終了したため、デプロイは 1 時間のタイムアウトまで待った。"
+        },
+        {
+          "key": "D",
+          "text": "The CodeDeploy agent reports status only through inbound connections on port 443, which were closed by the security group.",
+          "text_ja": "CodeDeploy エージェントは 443 番ポートの受信の接続でだけ状態を報告し、それがセキュリティグループで閉じられていた。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ライフサイクルイベントの最中にインスタンスが終了すると、CodeDeploy エージェントが止まってスクリプトを処理できなくなり、デプロイの状態が Failed になるまで最大 1 時間かかることがあります。ライフサイクルイベントの間や最初のイベントの前に終了した時は、5 分でタイムアウトします。",
+        "per_choice": {
+          "A": "ログの削除は 7 日後の話で、デプロイの状態の報告とは関係ありません。",
+          "B": "正しい。スクリプトの実行中にエージェントが止まり、失敗と表示されるまで最大 1 時間かかります。",
+          "C": "最初のライフサイクルイベントの前に終了した場合は、5 分でタイムアウトします。",
+          "D": "エージェントは 443 番ポートの HTTPS で外向きに通信します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "quote": "it might take up to an hour for the status of the deployment to be displayed as Failed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "quote": "If an instance is terminated between lifecycle events or before the first lifecycle event step starts, the timeout occurs after just five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-install-files",
+          "quote": "The agent deletes log files after seven days."
         }
       ],
       "low_confidence": false
@@ -9638,6 +10085,315 @@
       "low_confidence": false
     },
     {
+      "id": "q-5.3-0006",
+      "task": "5.3",
+      "domain": 5,
+      "services": [
+        "Amazon ECS",
+        "AWS Fargate",
+        "Amazon ECR",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A new Amazon ECS service on AWS Fargate fails to start. The stopped tasks show a CannotPullContainerError that says the task can't pull the image and asks to check the role's permissions. The image is in a private Amazon ECR repository in the same account, and other services can pull it. The company must fix the problem while granting the LEAST privilege. What should a DevOps engineer do?",
+      "stem_ja": "AWS Fargate 上の新しい Amazon ECS のサービスが起動しません。停止したタスクには CannotPullContainerError が出ており、タスクがイメージをプルできないのでロールの権限を確かめるよう示されています。イメージは同じアカウントのプライベートな Amazon ECR リポジトリにあり、ほかのサービスはプルできています。会社は、最小の権限を与える形でこの問題を直す必要があります。DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add permissions to pull images from the ECR repository to the service's task role.",
+          "text_ja": "サービスのタスクロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Add permissions to pull images from the ECR repository to the container instance role of the cluster.",
+          "text_ja": "クラスターのコンテナインスタンスロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Change the ECR repository policy so that any principal can pull images from the repository.",
+          "text_ja": "どのプリンシパルでもリポジトリからイメージをプルできるように、ECR リポジトリのポリシーを変える。"
+        },
+        {
+          "key": "D",
+          "text": "Add permissions to pull images from the ECR repository to the task execution role of the task definition.",
+          "text_ja": "タスク定義のタスク実行ロールに、ECR リポジトリからイメージをプルする権限を追加する。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CannotPullContainerError の権限のエラーは、タスク定義のイメージをプルするロールの権限が足りないことを示します。Fargate のタスクではそのロールはタスク実行ロールで、EC2 のタスクではコンテナインスタンスロールです。",
+        "per_choice": {
+          "A": "Fargate でイメージをプルするのはタスク実行ロールで、タスクロールに足しても直らず、使わない権限が増えます。",
+          "B": "コンテナインスタンスロールは EC2 のタスクで使うロールで、Fargate のタスクには効きません。",
+          "C": "プルはできるようになりますが、誰でもイメージを取れるようになり、最小の権限という要件に反します。",
+          "D": "正しい。Fargate のタスクでイメージをプルするタスク実行ロールに、必要な権限だけを足します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "quote": "For tasks with the Fargate, this is the task execution role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image",
+          "quote": "For tasks with EC2, this is the container instance role."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-5.3-0007",
+      "task": "5.3",
+      "domain": 5,
+      "services": [
+        "Amazon ECS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An Amazon ECS service keeps replacing its tasks. Each task shows PENDING for a short time and then disappears. An on-call engineer is paged 20 minutes after the problem starts and must find out why the tasks stopped as quickly as possible, before the information is gone. Which actions should the engineer take? (Choose TWO.)",
+      "stem_ja": "Amazon ECS のサービスがタスクを入れ替え続けています。各タスクは短い間 PENDING と表示された後、消えてしまいます。問題が始まって 20 分後に当番のエンジニアが呼ばれ、情報が消える前に、タスクが止まった理由をできるだけ早く突き止める必要があります。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Review the service events to see the actions that ECS took to maintain the service.",
+          "text_ja": "サービスのイベントを確認し、サービスを保つために ECS が取った動きを見る。"
+        },
+        {
+          "key": "B",
+          "text": "Describe the stopped tasks and read the stopCode, the stoppedReason, and each container reason.",
+          "text_ja": "停止したタスクを describe し、stopCode、stoppedReason、各コンテナの reason を読む。"
+        },
+        {
+          "key": "C",
+          "text": "Wait one day for the stopped tasks to collect, and then review them together in the ECS console.",
+          "text_ja": "停止したタスクがたまるまで 1 日待ってから、ECS のコンソールでまとめて確認する。"
+        },
+        {
+          "key": "D",
+          "text": "Increase the service's desired count so that more tasks start, and watch whether some of them stay running.",
+          "text_ja": "サービスの希望するタスクの数を増やしてより多くのタスクを起動し、そのうちいくつかが動き続けるかを見る。"
+        },
+        {
+          "key": "E",
+          "text": "Turn on access logs for the load balancer and look for errors in the logs that are delivered later.",
+          "text_ja": "ロードバランサーのアクセスログを有効にし、後で届くログの中からエラーを探す。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "サービスが作ったタスクでは、サービスを保つために ECS が取った動きがサービスのイベントに出ます。停止したタスクは stopCode・StoppedReason・コンテナの reason で止まった理由を示し、コンソールに出るのは 1 時間だけなので早めに確かめます。",
+        "per_choice": {
+          "A": "正しい。サービスが作ったタスクでは、ECS がサービスを保つために取った動き（タスクの停止と入れ替え）がサービスのイベントに出ます。",
+          "B": "正しい。停止したタスクの stopCode・stoppedReason・コンテナの reason が、止まった理由を直接示します。",
+          "C": "停止したタスクがコンソールに出るのは 1 時間だけで、1 日待つと情報が消えます。",
+          "D": "原因が分からないまま失敗するタスクを増やすだけで、理由の特定に役立ちません。",
+          "E": "タスクが起動の途中で消えているので、ロードバランサーのログに理由が出るとは限らず、後で届くので遅くなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "quote": "If your task was created by an Amazon ECS service, the actions that Amazon ECS takes to maintain the service are published in the service events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "quote": "Stopped tasks only appear in the console for 1 hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors",
+          "quote": "StoppedReason - The reason the task stopped."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-5.3-0008",
+      "task": "5.3",
+      "domain": 5,
+      "services": [
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Auto Scaling group uses a launch lifecycle hook. A script on each new instance installs software and then completes the hook. After a recent change, the script fails on every instance and completes the hook with abandon. The team sees instances being terminated and replaced, and the group now launches new instances more slowly than before. What should a DevOps engineer do to restore normal scaling with the LEAST effort?",
+      "stem_ja": "ある Auto Scaling グループは、起動時のライフサイクルフックを使っています。新しい各インスタンスのスクリプトがソフトウェアを入れてから、フックを完了させます。最近の変更の後、スクリプトがすべてのインスタンスで失敗し、フックを abandon で完了させています。チームは、インスタンスが終了して入れ替わり、グループが新しいインスタンスを以前より遅く起動するようになったことに気づきました。最も少ない手間で通常のスケーリングに戻すために、DevOps エンジニアは何をすべきですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Find and fix the error in the script so that it completes the hook with continue.",
+          "text_ja": "スクリプトの誤りを見つけて直し、フックを continue で完了させるようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the lifecycle hook's timeout from one hour to two hours so that the script has more time.",
+          "text_ja": "スクリプトにより多くの時間を与えるため、ライフサイクルフックのタイムアウトを 1 時間から 2 時間に増やす。"
+        },
+        {
+          "key": "C",
+          "text": "Increase the group's maximum capacity so that more instances can be launched at the same time.",
+          "text_ja": "同時により多くのインスタンスを起動できるよう、グループの最大の容量を増やす。"
+        },
+        {
+          "key": "D",
+          "text": "Change the script to complete the hook with continue even when the installation fails.",
+          "text_ja": "インストールが失敗した時もフックを continue で完了させるよう、スクリプトを変える。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "起動時のフックを abandon で完了させると、独自の処理が失敗したとみなされ、インスタンスは終了して入れ替わります。フックが続けて失敗すると、Amazon EC2 Auto Scaling はインスタンスを起動する速さを制限するので、処理の恒久的な誤りを直す必要があります。",
+        "per_choice": {
+          "A": "正しい。誤りを直して continue で完了させれば、インスタンスがサービスに入り、起動の制限も起きなくなります。",
+          "B": "スクリプトは時間切れではなく失敗しているので、時間を延ばしても abandon のままです。",
+          "C": "失敗が続く間は起動の速さが制限されたままで、失敗するインスタンスが増えるだけです。",
+          "D": "ソフトウェアが入っていないインスタンスがサービスに入り、壊れた状態で動くことになります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "quote": "Otherwise, abandon indicates that your custom actions were unsuccessful, and that we can terminate and replace the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html#lifecycle-hooks",
+          "quote": "Amazon EC2 Auto Scaling limits the rate at which it allows instances to launch if the lifecycle hooks are failing consistently"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-5.3-0009",
+      "task": "5.3",
+      "domain": 5,
+      "services": [
+        "Amazon EC2 Auto Scaling",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Auto Scaling group behind an Application Load Balancer uses Elastic Load Balancing health checks. The application takes about 4 minutes to start. New instances are marked unhealthy and replaced before the application finishes starting, so the group never reaches its desired capacity. The company must keep the load balancer health checks to detect real failures. Which change resolves the issue with the LEAST effort?",
+      "stem_ja": "Application Load Balancer の後ろの Auto Scaling グループが、Elastic Load Balancing のヘルスチェックを使っています。アプリケーションの起動には約 4 分かかります。新しいインスタンスは、アプリケーションの起動が終わる前に unhealthy とされて入れ替えられるため、グループは希望する容量に達しません。会社は、本当の障害を見つけるために、ロードバランサーのヘルスチェックを残す必要があります。最も少ない手間で問題を解決する変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn off the Elastic Load Balancing health checks for the group and rely only on the EC2 status checks.",
+          "text_ja": "グループの Elastic Load Balancing のヘルスチェックを無効にし、EC2 のステータスチェックだけに頼る。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the group's desired capacity so that some instances remain while others are replaced.",
+          "text_ja": "入れ替えられている間もいくつかのインスタンスが残るよう、グループの希望する容量を増やす。"
+        },
+        {
+          "key": "C",
+          "text": "Replace unhealthy instances manually after checking each one, and suspend the replacement process.",
+          "text_ja": "各インスタンスを確かめてから手作業で入れ替え、入れ替えのプロセスを停止する。"
+        },
+        {
+          "key": "D",
+          "text": "Set the group's health check grace period to a value longer than the application's startup time.",
+          "text_ja": "グループのヘルスチェックの猶予期間を、アプリケーションの起動の時間より長い値にする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "Amazon EC2 Auto Scaling は、新しいインスタンスに組み込みの EC2 のステータスチェックを行い、有効にした追加のヘルスチェック（ELB など）は猶予期間の後に行います。猶予期間を起動の時間より長くすれば、起動中のインスタンスが入れ替えられず、ロードバランサーのヘルスチェックも残せます。",
+        "per_choice": {
+          "A": "入れ替えは止まりますが、ロードバランサーのヘルスチェックを残すという要件に反します。",
+          "B": "新しいインスタンスは同じように起動中に入れ替えられ、問題は解決しません。",
+          "C": "手作業が多く、自動の入れ替えも失われます。",
+          "D": "正しい。起動の間は ELB のヘルスチェックで入れ替えられず、起動の後は本当の障害を見つけられます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "quote": "Amazon EC2 Auto Scaling performs health checks on the instance by using the built-in Amazon EC2 status checks, and after a grace period, any optional health checks that you enabled for the group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks",
+          "quote": "If any of the health checks fail, the instance is replaced."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-5.3-0010",
+      "task": "5.3",
+      "domain": 5,
+      "services": [
+        "Amazon EKS",
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team copied an AWS CloudFormation node stack from its staging environment to add self-managed nodes to a production Amazon EKS cluster. The EC2 instances launch in private subnets and pass their status checks, but they never join the production cluster. The cluster and its other nodes are healthy. What is the MOST likely cause that the team should check first?",
+      "stem_ja": "あるチームは、本番の Amazon EKS クラスターにセルフマネージドのノードを足すため、ステージング環境の AWS CloudFormation のノードのスタックを写して使いました。EC2 インスタンスはプライベートサブネットで起動し、ステータスチェックも通りますが、本番のクラスターに参加しません。クラスターとほかのノードは正常です。チームが最初に確かめるべき、最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "One of the Availability Zones of the subnets doesn't have enough capacity to support the cluster.",
+          "text_ja": "サブネットのアベイラビリティーゾーンの 1 つに、クラスターを支える十分な容量が無い。"
+        },
+        {
+          "key": "B",
+          "text": "The ClusterName parameter in the node stack doesn't exactly match the name of the production cluster.",
+          "text_ja": "ノードのスタックの ClusterName パラメータが、本番のクラスターの名前と完全には一致していない。"
+        },
+        {
+          "key": "C",
+          "text": "The nodes in the private subnets were not assigned public IP addresses.",
+          "text_ja": "プライベートサブネットのノードに、パブリック IP アドレスが割り当てられていない。"
+        },
+        {
+          "key": "D",
+          "text": "The EC2 instances failed their status checks and were replaced before they could join.",
+          "text_ja": "EC2 インスタンスがステータスチェックに失敗し、参加する前に入れ替えられた。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ノードの CloudFormation テンプレートの ClusterName が、参加させたいクラスターの名前と完全に一致しないと、ノードの /var/lib/kubelet/kubeconfig の設定が誤り、ノードはクラスターに参加しません。ステージングから写したスタックでは、まずこの値を確かめます。",
+        "per_choice": {
+          "A": "容量不足は、クラスターを作る時に、指定したアベイラビリティーゾーンで起きるエラーです。インスタンスは起動しています。",
+          "B": "正しい。名前が違うと kubeconfig が誤り、起動して正常でもクラスターに参加しません。",
+          "C": "パブリック IP アドレスが要るのは、パブリックサブネットに置いたノードです。",
+          "D": "問題文ではインスタンスはステータスチェックを通っています。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "quote": "The ClusterName in your node AWS CloudFormation template doesn’t exactly match the name of the cluster you want your nodes to join."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "quote": "the nodes will not join the cluster."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#ice",
+          "quote": "Ensure that nodes deployed in public subnets are assigned a public IP address."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-6.1-0001",
       "task": "6.1",
       "domain": 6,
@@ -10134,6 +10890,261 @@
         {
           "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
           "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0009",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "Amazon Aurora"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company stores the master user credentials of an Amazon Aurora DB cluster in AWS Secrets Manager. The security team requires the credentials to be rotated automatically. The DevOps team does not want to deploy, patch, or troubleshoot any rotation function and wants the service to configure and manage the rotation. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、Amazon Aurora の DB クラスターのマスターユーザーの認証情報を AWS Secrets Manager に保存しています。セキュリティチームは、認証情報を自動でローテーションすることを求めています。DevOps チームは、ローテーションの関数をデプロイしたり、パッチを当てたり、トラブルシューティングしたりしたくなく、サービスにローテーションの設定と管理を任せたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on rotation by Lambda function with the single user strategy, and maintain the rotation function.",
+          "text_ja": "シングルユーザーの戦略で Lambda 関数によるローテーションを有効にし、ローテーションの関数を保守する。"
+        },
+        {
+          "key": "B",
+          "text": "Write a scheduled AWS Lambda function that changes the master password and updates the secret every 30 days.",
+          "text_ja": "30 日ごとにマスターパスワードを変えてシークレットを更新する AWS Lambda 関数を書き、スケジュールで実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Use Secrets Manager managed rotation that Aurora offers for the master user credentials.",
+          "text_ja": "Aurora がマスターユーザーの認証情報に提供する、Secrets Manager のマネージドローテーションを使う。"
+        },
+        {
+          "key": "D",
+          "text": "Move the credentials to a SecureString parameter and have the database administrator change them every quarter.",
+          "text_ja": "認証情報を SecureString パラメータへ移し、データベースの管理者が四半期ごとに変える。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Aurora と RDS はマスターユーザーの認証情報のマネージドローテーションを提供しており、サービスがローテーションの設定と管理を行います。マネージドローテーションは Lambda 関数を使わないので、関数の保守も要りません。",
+        "per_choice": {
+          "A": "自動でローテーションできますが、ローテーションの関数を保守する必要があり、要件に反します。",
+          "B": "動きますが、独自の関数を書いて保守する必要があります。",
+          "C": "正しい。サービスがローテーションを設定・管理し、Lambda 関数を使わないので、関数の保守が要りません。",
+          "D": "手作業で、自動のローテーションになりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "Amazon Aurora offers managed rotation for master user credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "With managed rotation, you don't use an AWS Lambda function to update the secret and the credentials in the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "Managed rotation – For most managed secrets, you use managed rotation, where the service configures and manages rotation for you."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0010",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "Amazon RDS"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application connects directly to an Amazon RDS database by using a database user that has only the privileges that the application needs. The user's password is stored in AWS Secrets Manager and must be rotated automatically. The application must keep working with the highest availability while a rotation is in progress, and the application must not use the master user. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "あるアプリケーションは、アプリケーションに必要な権限だけを持つデータベースユーザーで、Amazon RDS のデータベースに直接接続しています。ユーザーのパスワードは AWS Secrets Manager に保存されており、自動でローテーションする必要があります。ローテーションの最中もアプリケーションは最も高い可用性で動き続ける必要があり、アプリケーションはマスターユーザーを使ってはいけません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Configure rotation for the application user's secret with the alternating users strategy.",
+          "text_ja": "アプリケーションのユーザーのシークレットに、交代ユーザー（alternating users）の戦略でローテーションを設定する。"
+        },
+        {
+          "key": "B",
+          "text": "Create a separate secret that stores database superuser credentials for the rotation to use.",
+          "text_ja": "ローテーションが使う、データベースのスーパーユーザーの認証情報を保存した別のシークレットを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Configure rotation for the application user's secret with the single user strategy.",
+          "text_ja": "アプリケーションのユーザーのシークレットに、シングルユーザーの戦略でローテーションを設定する。"
+        },
+        {
+          "key": "D",
+          "text": "Change the application to connect with the master user, and use managed rotation for the master user secret.",
+          "text_ja": "アプリケーションがマスターユーザーで接続するように変え、マスターユーザーのシークレットにマネージドローテーションを使う。"
+        },
+        {
+          "key": "E",
+          "text": "Place Amazon RDS Proxy between the application and the database, and use the alternating users strategy through the proxy.",
+          "text_ja": "アプリケーションとデータベースの間に Amazon RDS Proxy を置き、プロキシを通して交代ユーザーの戦略を使う。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "アプリケーションのユーザーで最も高い可用性を求める時は、交代ユーザー（alternating users）の戦略を使えます。この戦略では最初のユーザーを複製するので、スーパーユーザーの認証情報を保存したシークレットが別に必要です。",
+        "per_choice": {
+          "A": "正しい。アプリケーションのユーザーで最も高い可用性を得られる戦略です。",
+          "B": "正しい。交代ユーザーの戦略はユーザーを複製するため、多くのユーザーには無い権限を持つスーパーユーザーの認証情報が要ります。",
+          "C": "自動でローテーションできますが、最も高い可用性のための戦略ではありません。",
+          "D": "アプリケーションでマスターユーザーを使わないという要件と、最小の権限のユーザーを使う推奨に反します。",
+          "E": "Amazon RDS Proxy は交代ユーザーの戦略に対応していません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "For application users, for highest availability, you can use the Alternating users rotation strategy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "You need a secret with superuser credentials because rotation clones the first user, and most users do not have that permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "Note that Amazon RDS Proxy does not support the alternating users strategy."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0011",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager",
+        "AWS Lambda",
+        "Amazon RDS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A DevOps engineer turned on rotation by Lambda function for a secret of an Amazon RDS database that runs in private subnets. Rotation keeps failing, and Secrets Manager retries it several times. The function's permissions are correct, but the function cannot connect to the database. Which change will MOST likely fix the rotation?",
+      "stem_ja": "DevOps エンジニアは、プライベートサブネットで動く Amazon RDS のデータベースのシークレットに、Lambda 関数によるローテーションを有効にしました。ローテーションは失敗し続け、Secrets Manager が何度か再試行しています。関数の権限は正しいものの、関数がデータベースに接続できません。ローテーションを直せる可能性が最も高い変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Run the rotation function in the same VPC and security group as the database, and make sure it can also reach Secrets Manager.",
+          "text_ja": "ローテーションの関数をデータベースと同じ VPC とセキュリティグループで動かし、Secrets Manager にも届くようにする。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the timeout and the memory of the rotation function so that it has more time to connect.",
+          "text_ja": "接続により多くの時間をかけられるよう、ローテーションの関数のタイムアウトとメモリーを増やす。"
+        },
+        {
+          "key": "C",
+          "text": "Change the rotation schedule to a longer interval so that the function runs less often.",
+          "text_ja": "関数が動く回数が減るよう、ローテーションのスケジュールの間隔を長くする。"
+        },
+        {
+          "key": "D",
+          "text": "Attach an administrator policy to the function's execution role so that the function can call every AWS API.",
+          "text_ja": "関数がすべての AWS の API を呼べるよう、関数の実行ロールに管理者のポリシーをアタッチする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Lambda 関数によるローテーションでは、ローテーションの関数がネットワークを通して Secrets Manager とデータベースの両方に届く必要があります。勧められている VPC の構成では、関数をデータベースと同じ VPC とセキュリティグループに置きます。",
+        "per_choice": {
+          "A": "正しい。データベースと同じ VPC とセキュリティグループに置き、Secrets Manager にも届くようにすれば、関数が両方に接続できます。",
+          "B": "ネットワークで届かないので、時間を延ばしても接続できません。",
+          "C": "頻度を下げても、接続できないことは変わりません。",
+          "D": "権限は正しく、原因はネットワークです。権限を広げるだけで、最小の権限にも反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The last step is to make sure that the Lambda rotation function can access both Secrets Manager and your database through the network."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The rotation functions listed under Recommended VPC configurations have the same VPC and security group as the database, which helps the function access the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "If rotation fails, for example because Steps 3 and 4 are not yet completed, Secrets Manager retries the rotation process multiple times."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.1-0012",
+      "task": "6.1",
+      "domain": 6,
+      "services": [
+        "AWS Secrets Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company in Japan (UTC+9) wants a secret to be rotated every day only between 02:00 and 03:00 Japan time, when traffic is lowest. The DevOps engineer will configure the rotation schedule with a cron expression and a rotation window. Which configuration meets this requirement with the LEAST amount of risk of rotating outside the low-traffic hour?",
+      "stem_ja": "日本（UTC+9）にある会社は、トラフィックが最も少ない日本時間の 02:00 から 03:00 の間にだけ、毎日シークレットをローテーションしたいと考えています。DevOps エンジニアは、cron 式とローテーションウィンドウでローテーションのスケジュールを設定します。トラフィックの少ない 1 時間の外でローテーションするおそれが最も小さい設定はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "cron(0 2 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(0 2 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "B",
+          "text": "cron(30 17 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(30 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "C",
+          "text": "cron(0 17 * * ? *) with a rotation window of 1 hour.",
+          "text_ja": "cron(0 17 * * ? *) と、1 時間のローテーションウィンドウ。"
+        },
+        {
+          "key": "D",
+          "text": "cron(0 17 * * ? *) with the default rotation window that closes at the end of the day.",
+          "text_ja": "cron(0 17 * * ? *) と、日の終わりに閉じる既定のローテーションウィンドウ。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Secrets Manager のローテーションのスケジュールは UTC で、cron 式の分は 0 にする必要があります（ウィンドウは毎時ちょうどに始まる）。日本時間の 02:00 は UTC の 17:00 で、ウィンドウの中のどの時刻にもローテーションしうるので、ウィンドウを 1 時間にします。",
+        "per_choice": {
+          "A": "スケジュールは UTC なので、日本時間の 11:00 から 12:00 にローテーションしてしまいます。",
+          "B": "分が 0 でない cron 式は、Secrets Manager では使えません。",
+          "C": "正しい。UTC の 17:00 は日本時間の 02:00 で、1 時間のウィンドウの中でだけローテーションします。",
+          "D": "ウィンドウが長く、その中のどの時刻にもローテーションしうるため、トラフィックの少ない 1 時間の外で動くおそれがあります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotation schedules use UTC time zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "A cron expression for Secrets Manager must have 0 in the minutes field because Secrets Manager rotation windows start on the hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotates your secret at any time during the rotation window."
         }
       ],
       "low_confidence": false
