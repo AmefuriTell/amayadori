@@ -1,0 +1,266 @@
+{
+  "item": "G-0006",
+  "entries": [
+    {
+      "id": "sns",
+      "name": "Amazon SNS",
+      "aliases": [
+        "Amazon SNS"
+      ],
+      "reading": "エスエヌエス",
+      "summary": "メッセージを送る側（発行者）から受け取る側（サブスクライバー）へ届けるフルマネージドのサービス。発行者は「トピック」という窓口にメッセージを送り、受け取る側を待たずに（非同期で）やり取りする。",
+      "features": [
+        {
+          "title": "トピック",
+          "text": "発行者はトピックにメッセージを送る。トピックが窓口となり、いろいろな所にいる複数のサブスクライバーにメッセージを届ける。",
+          "source_id": "S2"
+        },
+        {
+          "title": "アプリ向けと人向け",
+          "text": "アプリどうしのやり取り（A2A）と、携帯電話やメールアドレスなど人に届けるやり取り（A2P）の両方に使える。",
+          "source_id": "S2"
+        },
+        {
+          "title": "ファンアウト",
+          "text": "トピックに送った 1 つのメッセージを複製し、SQS のキュー・Lambda 関数・HTTP(S) のエンドポイント・Firehose などの複数の届け先に送る。並行して処理できる。",
+          "source_id": "S3"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "1 つのメッセージを複数の SQS のキューや Lambda 関数に同時に配りたい場面では、SNS のファンアウトを考える。",
+          "source_id": "S3"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#welcome",
+          "source_id": "S1",
+          "quote": "Publishers communicate asynchronously with subscribers by sending messages to a topic, which is a logical access point and communication channel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#how-it-works",
+          "source_id": "S2",
+          "quote": "SNS supports both Application-to-Application (A2A) and Application-to-Person (A2P) messaging"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/welcome.html#SNSFanoutScenario",
+          "source_id": "S3",
+          "quote": "The Fanout scenario is when a message published to an SNS topic is replicated and pushed to multiple endpoints"
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "backup",
+      "name": "AWS Backup",
+      "aliases": [
+        "AWS Backup"
+      ],
+      "reading": "バックアップ",
+      "summary": "AWS のいろいろなサービスや社内のデータを守るバックアップを、1 か所にまとめて自動で行うフルマネージドのサービス。バックアップの決まりの設定と、その動きの確認を 1 か所でできる。",
+      "features": [
+        {
+          "title": "バックアッププラン",
+          "text": "バックアップの決まり（バックアッププラン）を作り、守りたい AWS のリソースに当てる。",
+          "source_id": "S5"
+        },
+        {
+          "title": "Vault Lock",
+          "text": "バックアップを入れておく保管庫（ボールト）に任意で付けるロック。ガバナンスモードとコンプライアンスモードの 2 つがあり、コンプライアンスモードのロックは、どのユーザーも AWS も変えたり消したりできない。",
+          "source_id": "S6"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "誰にもバックアップの保管庫のロックを変えたり消したりさせたくない場面では、コンプライアンスモードの Vault Lock を考える。",
+          "source_id": "S6"
+        },
+        {
+          "text": "多くのリソースのバックアップを 1 つの決まりでまとめて自動にしたい場面では、バックアッププランを考える。",
+          "source_id": "S5"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#whatisbackup",
+          "source_id": "S4",
+          "quote": "AWS Backup is a fully-managed service that makes it easy to centralize and automate data protection across AWS services, in the cloud, and on premises."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#policy-based-backup-solution",
+          "source_id": "S5",
+          "quote": "With AWS Backup, you can create backup policies known as backup plans."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html#vault-lock",
+          "source_id": "S6",
+          "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "config",
+      "name": "AWS Config",
+      "aliases": [
+        "AWS Config"
+      ],
+      "reading": "コンフィグ",
+      "summary": "AWS アカウントの中のリソースの設定を詳しく見られるようにするサービス。リソースどうしの関係や、過去の設定も記録するので、設定がどう変わってきたかが分かる。",
+      "features": [
+        {
+          "title": "Config ルール",
+          "text": "リソースの設定を決まり（ルール）で評価する。決まりに反するリソースを「非準拠」とし、通知を送る。",
+          "source_id": "S8"
+        },
+        {
+          "title": "修復とコンフォーマンスパック",
+          "text": "ルールで非準拠になったリソースを修復できる。いくつかのルールを 1 つのまとまり（コンフォーマンスパック）として入れて見張れる。",
+          "source_id": "S9"
+        },
+        {
+          "title": "アグリゲーター",
+          "text": "複数のアカウントとリージョンの設定と準拠のデータを、1 つのアカウントとリージョンに集める。",
+          "source_id": "S9"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "決まりに反した設定を見つけて直したい場面では、Config ルールと修復を考える。",
+          "source_id": "S9"
+        },
+        {
+          "text": "多くのアカウントとリージョンの準拠の状態を 1 か所で見たい場面では、アグリゲーターを考える。",
+          "source_id": "S9"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "source_id": "S7",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#scenarios-resource-administration",
+          "source_id": "S8",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#config-features",
+          "source_id": "S9",
+          "quote": "An aggregator collects AWS Config configuration and compliance data from multiple AWS accounts and AWS Regions into a single account and Region."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "step-functions",
+      "name": "AWS Step Functions",
+      "aliases": [
+        "AWS Step Functions"
+      ],
+      "reading": "ステップファンクションズ",
+      "summary": "いくつかの手順（ステップ）をつないだ流れ（ワークフロー）を作り、処理を自動にするサービス。ワークフローの 1 つ 1 つの手順を「ステート」と呼ぶ。",
+      "features": [
+        {
+          "title": "Standard ワークフロー",
+          "text": "各手順が必ず 1 回だけ実行される。1 年まで動かせる。",
+          "source_id": "S11"
+        },
+        {
+          "title": "Express ワークフロー",
+          "text": "各手順は少なくとも 1 回実行され、2 回以上実行されることもある。5 分まで動かせる。",
+          "source_id": "S11"
+        },
+        {
+          "title": "エラー処理",
+          "text": "失敗した手順をやり直したり（Retry）、失敗を受け止めて代わりの手順を自動で動かしたり（Catch）できる。",
+          "source_id": "S12"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "長く動く処理や、手順を必ず 1 回だけ動かしたい処理には Standard、短く 2 回動いても困らない処理には Express、という使い分けが問われる。",
+          "source_id": "S11"
+        },
+        {
+          "text": "失敗した手順のやり直しや、失敗した時の別の手順は、Retry と Catch で決める。",
+          "source_id": "S12"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome",
+          "source_id": "S10",
+          "quote": "In Step Functions, state machines are called workflows, which are a series of event-driven steps. Each step in a workflow is called a state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#welcome-workflows",
+          "source_id": "S11",
+          "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html#application",
+          "source_id": "S12",
+          "quote": "You can retry failed tasks, or catch failed tasks and automatically run alternative steps."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    },
+    {
+      "id": "aurora",
+      "name": "Amazon Aurora",
+      "aliases": [
+        "Amazon Aurora"
+      ],
+      "reading": "オーロラ",
+      "summary": "MySQL や PostgreSQL と互換のある、フルマネージドのリレーショナルデータベース。性能の高いストレージを持ち、ストレージは必要に応じて自動で大きくなる。",
+      "features": [
+        {
+          "title": "グローバルデータベース",
+          "text": "複数の AWS リージョンにまたがる 1 つのデータベース。世界中から速く読め、リージョン全体の障害からも復旧できる。",
+          "source_id": "S14"
+        },
+        {
+          "title": "フェイルオーバー",
+          "text": "障害が起きた時、クラスターに読み込み用のインスタンス（リーダー）があれば、その 1 つを新しいプライマリ（主のインスタンス）に昇格させる。これは切り替えの方法の 1 つ。可用性を上げるため、2 つ以上のアベイラビリティーゾーンにリーダーを 1 つ以上置くことが勧められている。",
+          "source_id": "S15"
+        }
+      ],
+      "exam_points": [
+        {
+          "text": "リージョン全体の障害に備えたい場面では、Aurora のグローバルデータベースを考える。",
+          "source_id": "S14"
+        },
+        {
+          "text": "障害の時にプライマリを切り替えられるようにしたい場面では、別のアベイラビリティーゾーンにリーダーを置く形を考える。",
+          "source_id": "S15"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html#CHAP_AuroraOverview",
+          "source_id": "S13",
+          "quote": "Amazon Aurora (Aurora) is a fully managed relational database engine that's compatible with MySQL and PostgreSQL."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.Aurora_Fea_Regions_DB-eng.Feature.GlobalDatabase.html#Concepts.Aurora_Fea_Regions_DB-eng.Feature.GlobalDatabase",
+          "source_id": "S14",
+          "quote": "An Aurora global database is a single database that spans multiple AWS Regions, enabling low-latency global reads and disaster recovery from any Region-wide outage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-failover.html#aurora-failover",
+          "source_id": "S15",
+          "quote": "we recommend that you create at least one or more reader instances in two or more different Availability Zones."
+        }
+      ],
+      "status": "draft",
+      "created": "2026-11-26"
+    }
+  ]
+}
