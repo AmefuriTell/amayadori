@@ -21,6 +21,7 @@
     "AWS Control Tower": "control-tower",
     "Amazon Data Firehose": "data-firehose",
     "Amazon Detective": "detective",
+    "Distributed Load Testing on AWS": "distributed-load-testing",
     "Amazon DynamoDB": "dynamodb",
     "Amazon EBS": "ebs",
     "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
@@ -53,14 +54,19 @@
     "AWS Resilience Hub": "resilience-hub",
     "Amazon Route 53": "route-53",
     "Amazon S3": "s3",
+    "AWS SAM": "sam",
+    "AWS Serverless Application Model (AWS SAM)": "sam",
+    "AWS Secrets Manager": "secrets-manager",
     "AWS Security Hub CSPM": "security-hub-cspm",
+    "AWS Service Catalog": "service-catalog",
     "Amazon SNS": "sns",
     "Amazon SQS": "sqs",
     "AWS Step Functions": "step-functions",
     "AWS STS": "sts",
     "AWS Security Token Service (AWS STS)": "sts",
     "AWS Systems Manager": "systems-manager",
-    "Amazon VPC": "vpc"
+    "Amazon VPC": "vpc",
+    "AWS WAF": "waf"
   },
   "pages": {
     "appconfig": {
@@ -844,6 +850,36 @@
         {
           "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#detective-features",
           "quote": "You can analyze the root cause for high severity GuardDuty findings using finding groups."
+        }
+      ]
+    },
+    "distributed-load-testing": {
+      "id": "distributed-load-testing",
+      "name": "Distributed Load Testing on AWS",
+      "reading": "ディストリビューテッド ロードテスティング",
+      "summary": "ソフトウェアの性能のテスト（負荷テスト）を大きな規模で自動にし、リリースの前にボトルネック（遅くなる所）を見つけるための、AWS のソリューション（組み立て済みの仕組み）。",
+      "features": [
+        {
+          "title": "サーバーを用意せずに多くの利用者をまねる",
+          "text": "サーバーを用意せずに、数千のつながった利用者が HTTP の要求を出し続ける様子をまねる。"
+        },
+        {
+          "title": "Fargate で動き、いろいろなスクリプトを使える",
+          "text": "ECS on AWS Fargate でテストのコンテナを動かす。JMeter・k6・Locust のスクリプトや、簡単な HTTP のエンドポイントの設定でテストを決められる。"
+        }
+      ],
+      "exam_points": [
+        "今ある JMeter のスクリプトで、サーバーを管理せずに大きな負荷テストをしたい場面では、Distributed Load Testing on AWS を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview",
+          "quote": "This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview",
+          "quote": "Customize your application tests using JMeter, k6, Locust test scripts, or simple HTTP endpoint configuration."
         }
       ]
     },
@@ -1889,6 +1925,83 @@
         }
       ]
     },
+    "sam": {
+      "id": "sam",
+      "name": "AWS Serverless Application Model (AWS SAM)",
+      "reading": "サム",
+      "summary": "サーバーレスのアプリケーション（サーバーを自分で管理しないアプリ）を、コードとして書いたインフラストラクチャ（IaC）で作るための、オープンソースの枠組み。短い書き方で、CloudFormation のリソースとサーバーレス用のリソースを書くと、デプロイの時にインフラストラクチャに変換される。",
+      "features": [
+        {
+          "title": "SAM テンプレート",
+          "text": "CloudFormation を広げた物で、サーバーレスのリソースを短く書ける。"
+        },
+        {
+          "title": "SAM CLI",
+          "text": "サーバーレスのアプリを作り、手元で試し、デプロイするためのコマンドラインの道具。"
+        },
+        {
+          "title": "コネクター",
+          "text": "SAM テンプレートの中で、AWS のリソースどうしの権限を決められる。"
+        },
+        {
+          "title": "sam sync",
+          "text": "SAM CLI の sam sync で、手元の変更をクラウドへ自動で反映できる。"
+        }
+      ],
+      "exam_points": [
+        "サーバーレスのリソースを CloudFormation より短く書きたい場面では、SAM テンプレートを考える。"
+      ],
+      "compare": [
+        {
+          "with": "AWS CloudFormation",
+          "text": "SAM テンプレートは CloudFormation を広げた物で、サーバーレスのリソースを短い書き方で書ける。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html#what-is-sam",
+          "quote": "developers declare CloudFormation resources and specialized serverless resources that are transformed to infrastructure during deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html#what-is-sam",
+          "quote": "AWS SAM Template - An extension of CloudFormation that provides simplified syntax for defining serverless resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html#what-is-sam-feature",
+          "quote": "Use AWS SAM connectors in your AWS SAM templates to define permissions between your AWS resources."
+        }
+      ]
+    },
+    "secrets-manager": {
+      "id": "secrets-manager",
+      "name": "AWS Secrets Manager",
+      "reading": "シークレッツ マネージャー",
+      "summary": "データベースの認証情報・アプリの認証情報・API キーなどの秘密（シークレット）を、作ってから捨てるまで管理し、取り出し、ローテーション（定期的な入れ替え）するサービス。",
+      "features": [
+        {
+          "title": "コードに書かずに取り出す",
+          "text": "コードに直接書いた認証情報の代わりに、要る時に Secrets Manager を呼んで取り出す。"
+        },
+        {
+          "title": "自動のローテーション",
+          "text": "シークレットを自動で入れ替える予定を決められる。長く使う秘密を短く使う物に替えられ、漏れた時の危険を減らす。認証情報がアプリに入っていないので、入れ替えのたびにアプリを直してデプロイしなくてよい。"
+        }
+      ],
+      "exam_points": [
+        "データベースのパスワードをコードに書かず、定期的に入れ替えたい場面では、Secrets Manager の自動のローテーションを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets."
+        }
+      ]
+    },
     "security-hub-cspm": {
       "id": "security-hub-cspm",
       "name": "AWS Security Hub CSPM",
@@ -1933,6 +2046,36 @@
         {
           "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation",
           "quote": "The aggregation Region is now called the home Region."
+        }
+      ]
+    },
+    "service-catalog": {
+      "id": "service-catalog",
+      "name": "AWS Service Catalog",
+      "reading": "サービスカタログ",
+      "summary": "AWS で使うことが承認された IT サービス（仮想マシンのイメージ・サーバー・ソフトウェア・データベース、アプリの構成一式など）のカタログを作って管理するサービス。よく使う物を一元的に管理し、統制とコンプライアンスを保ちやすくする。",
+      "features": [
+        {
+          "title": "ポートフォリオと製品",
+          "text": "管理者がカタログの製品をまとめてポートフォリオを作り、用意する時の制約やタグを付け、IAM のユーザーやグループにポートフォリオを使わせる。"
+        },
+        {
+          "title": "新しい版を広める",
+          "text": "製品を新しい版に更新すると、その製品を使っているすべてのポートフォリオに反映される。"
+        }
+      ],
+      "exam_points": [
+        "承認済みの構成だけを利用者に選ばせて用意させたい場面では、Service Catalog のポートフォリオと製品を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction",
+          "quote": "Service Catalog enables organizations to create and manage catalogs of IT services that are approved for AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction",
+          "quote": "Administrators assemble portfolios of products from their catalog, add constraints and resource tags to be used at provisioning"
         }
       ]
     },
@@ -2154,6 +2297,36 @@
         {
           "url": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html#amazon-vpc-features",
           "quote": "Use a VPC endpoint to connect to AWS services privately, without the use of an internet gateway or NAT device."
+        }
+      ]
+    },
+    "waf": {
+      "id": "waf",
+      "name": "AWS WAF",
+      "reading": "ワフ",
+      "summary": "守りたい Web アプリケーションに届く HTTP・HTTPS の要求を見張る、Web アプリケーションファイアウォール（Web の要求を選んで通す壁）のサービス。",
+      "features": [
+        {
+          "title": "条件で答え方を変える",
+          "text": "要求の送り元の IP アドレスや、クエリ文字列の値などの条件で、中身を返すか、403（禁止）を返すか、決めた答えを返すかを決める。"
+        },
+        {
+          "title": "ルールとレートベースのルール",
+          "text": "条件に合う要求を許可・ブロック・数える。条件に合ううえに、1 分か 5 分で決めた数を超えた要求をブロックしたり数えたりするルールも作れる。"
+        }
+      ],
+      "exam_points": [
+        "1 分や 5 分の間に決めた数を超える要求をブロックしたい場面では、WAF のレートベースのルールを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html#waf-intro",
+          "quote": "AWS WAF is a web application firewall that lets you monitor the HTTP and HTTPS requests that are forwarded to your protected web application resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html#waf-intro",
+          "quote": "exceed a specified number of requests in a minute or in five minutes."
         }
       ]
     }
