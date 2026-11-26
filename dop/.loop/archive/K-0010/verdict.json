@@ -1,0 +1,91 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 10
+  },
+  "mild": [
+    {
+      "slide": "s05",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "表の「続けて写す」のまとまりに S3 CRR と live replication が別の行で並ぶ。台本は「このように続けて自動で写す複製を、ライブレプリケーションと呼び」と S16・S17 をつなぐ言い方にとどめており、notes の理由は妥当。ただ画面だけでは別の仕組みに見える余地が少し残る。",
+      "suggest": "live replication の行の「仕組み」を「（続けて自動で写す複製の呼び名）」のように呼び名だと分かる書き方にする。字数は増えない（画面のみ）。"
+    },
+    {
+      "slide": "s07",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "表の「前提」の行で failover を「リージョンの停止」とする。S6 は「予定外の停止から戻る」、S7 は「停止したリージョンの primary」と言うだけで、前提条件として述べてはいない。誤りではないが、switchover の「全てが健全」（S14 の前提）と同じ重みに見える。",
+      "suggest": "「前提」の failover の欄を「―」にするか、行名を「場面」にして「リージョンの停止から戻る」とする。"
+    },
+    {
+      "slide": "s11",
+      "from": "consistency",
+      "kind": "fact",
+      "severity": "軽",
+      "detail": "bullet「どの段も本物のリソースを操作」は、steps の 1 段目「計画を立てる」も含むように読める。S13 の「本物のリソースに本当の操作」は実験の話。前回の中（3 段目だけに注）は直っている。",
+      "suggest": "bullet を「どの実験も本物のリソースを操作」にする。"
+    },
+    {
+      "slide": "s14",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "台本は switchover を「全てが健全なまま計画して切り替えたいなら」とするが、表の条件は「計画した保守で移す」だけで「全てが健全」が無い。前回の重（手動の failover の条件）と中（基盤の不具合の条件）は表・bullets・台本で直っている。",
+      "suggest": "表の条件を「全て健全で計画して移す」にする（画面のみ、台本の字数は増えない）。"
+    },
+    {
+      "slide": null,
+      "from": "consistency",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の重 2・中 8 はすべて直っている。手動の failover の書き込み停止は s07 の表・bullets、s14 の表・台本で「手動なら」の条件付き。RDS Multi-AZ は s06・s14・s16 で「基盤の不具合で」の条件が付く。Aurora の RPO は s02 で Global Database 一般の目安（ふつう秒）として述べ、s07 の failover の欄は「―」にした（notes の理由は妥当）。notes の採らなかった理由（CRR と live replication の言い方、戦略と RTO の長短を並べない、Systems Manager を扱わない）はいずれも根拠の範囲を守る判断で妥当。",
+      "suggest": "直す必要は無い。"
+    },
+    {
+      "slide": "s04",
+      "from": "clarity",
+      "kind": "listen",
+      "severity": "軽",
+      "detail": "台本の「この講義では、根拠のある前の二つを扱います」は作る側の言い方で、受験者には「根拠のある」が何を指すか分かりにくい。",
+      "suggest": "「この講義では、前の二つを扱います」と短くする（字数が減る）。"
+    },
+    {
+      "slide": "s07",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "RPO の行で switchover「0（先に同期）」の隣の failover が「―」だと、「failover もデータを失わない」や「RPO が無い」と読む人がいるかもしれない。表から値を外した notes の理由は妥当。",
+      "suggest": "failover の RPO の欄を「（この表では扱わない）」にするか、RPO の行を switchover の「確かめる所」に移して行ごと消す。"
+    },
+    {
+      "slide": "s07",
+      "from": "clarity",
+      "kind": "listen",
+      "severity": "軽",
+      "detail": "台本の「前の呼び名は画面のとおりです」は耳だけでは何も残らない。試験では大事でない情報なので、問題は小さい。",
+      "suggest": "この一文を消して字数を減らす（画面の行は残す）。"
+    },
+    {
+      "slide": "s12",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "pilot light と warm standby の判断の向き（すぐ処理が要る → warm standby、一手間を待てる → pilot light）は bullets・表・台本でそろい、前回の重は直っている。表の 1 列目の「処理の前の一手間を待てる」は少し長い。",
+      "suggest": "bullets と同じ「一手間を待てる」にそろえる。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の重 1・中 12 はすべて直っている（s03・s12 の判断の向き、s05 のまとまり分けと RTC の数字の読み上げ、s06 の 60〜120 秒の読み上げ、s07 の primary・secondary の言い換えと手動の条件、s08 のレイテンシーの言い換え、s10 の fail open の図、s12 の用語の見分けを bullets へ移した事、s14 の条件をそろえた事、s15 の fail open を ALB の行へ移した事、s05・s13・s14 で数字を RTO・RPO の側に結び付けた事）。台本は 4,987 字で上限に近いため、軽の提案は画面だけか字数が減る直し方にした。",
+      "suggest": "直す必要は無い。"
+    }
+  ],
+  "verify_hash": "f630badbdb47aec2"
+}

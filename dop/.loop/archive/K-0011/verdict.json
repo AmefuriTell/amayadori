@@ -1,0 +1,67 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 7
+  },
+  "mild": [
+    {
+      "slide": "s10",
+      "from": "consistency",
+      "kind": "flow",
+      "severity": "軽",
+      "detail": "ログの保存期間の話の中で、S3 Lifecycle への橋渡しに『第三部で、メトリクスストリームからエススリーへ流す形を見ました』を使っている。S3 に置かれるのはメトリクスで、試験ガイドの例（log storage lifecycles）のログとは別の物。誤りではないが、ログが metric streams で S3 に行くと取られる余地がある。",
+      "suggest": "台本の『第三部で、メトリクスストリームからエススリーへ流す形を見ました。』を『第三部で見たように、エススリーにもデータを置けます。』程度に縮め（字数減）、ログかメトリクスかを言い切らない。"
+    },
+    {
+      "slide": "s15",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "Essentials の行の確かめる所『変更不可』は、S1 では log class 全般（Standard も）の話。s09 の表は両方『できない』と正しいが、s15 では Essentials だけの性質に見える。",
+      "suggest": "『作った後は変更不可・OpenSearch 不可』とするか、台本の『作った後は変えられず』を『どちらのクラスも作った後は変えられず』に（+6 字。s15 の『その時々に』を削って相殺）。"
+    },
+    {
+      "slide": null,
+      "from": "consistency",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の中 3 件（s04 high-resolution の条件、s11 KMS も保存時の server-side、s13 default value を決める・0 でもよい）はすべて直っている。前回の軽（s03 表の network performance、s07・s14 の失敗した分、s08 bullet の『例』、s11 矢印に CreateLogGroup、s14 bullet、s15 KMS の key、s16 の勧めとカスタムメトリクス、『既定』→『デフォルト』）も反映済み。notes の採らなかった理由（flowchart TB のみ、デフォルト以外の配り方は S13 に無い、OpenTelemetry は notes に残す）は妥当。台本は 4,986 字で残り 14 字。",
+      "suggest": "このままでよい。足す直しは上の差し引きの範囲で。"
+    },
+    {
+      "slide": "s01",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "地図は 5 つの部が横に並び、前回の縦長は解消して読める。ただし 800x176 の細い帯で、箱の文字が小さい。s16 はラベルが増えたぶん文字がさらに小さい（800x174）。",
+      "suggest": "s16 の箱を 2 行以内に縮める（例:『AWS KMS の key（log group ごと・勧め）』を『KMS key は log group ごと』、『agent を配る カスタムメトリクス』を『agent・カスタムメトリクス』）。字数は台本に影響しない。"
+    },
+    {
+      "slide": "s08",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "図が 492x928 の縦長で、スライドに収めると左右が空く。内容は読める。",
+      "suggest": "必要なら CloudWatch のメトリクスと metric streams を 1 つの subgraph に入れて横幅を使う。急ぎではない。"
+    },
+    {
+      "slide": "s15",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "bullet『KMS の key → AWS KMS』は条件と方法が同じ語で、何を判断するのかが bullet から読めない。表と台本（鍵を関連付け、DescribeKey を確かめる）は分かる。",
+      "suggest": "bullet を『KMS で暗号化 → key を関連付け』にする（台本は変えない）。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の重 1（s13 default value）と中 13（s01・s16 の地図、s03 の読み上げ、s04 の period の読み上げ、s05 の default value の説明、s07 の配り方の言い換えと判断、s10 の S3 への橋渡しと『保持期間、リテンション』、s11 の『呼び出す側』、s14 の行、英語と和訳の結び付け）はすべて直っている。s14 の行は『条件 → 方法 → 確かめる所』で読める。新しい重・中は無い。",
+      "suggest": "このままでよい。台本は残り 14 字なので、上の軽を直すなら字数の要らない画面側だけにする。"
+    }
+  ],
+  "verify_hash": "26968224bfd1004c"
+}

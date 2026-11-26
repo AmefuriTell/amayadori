@@ -1,0 +1,107 @@
+{
+  "result": "pass",
+  "counts": {
+    "重": 0,
+    "中": 0,
+    "軽": 12
+  },
+  "mild": [
+    {
+      "slide": "s04",
+      "from": "consistency",
+      "kind": "unsupported",
+      "severity": "軽",
+      "detail": "台本の「コンテナインスタンスは、タスクを動かすイーシーツーインスタンスです」は言い切り。S4 は container instance resources と言うだけで定義は無い。notes では「と考えてください」と弱めて書いたとあるが、この文は弱まっていない（desired count の方だけ弱めてある）。",
+      "suggest": "「コンテナインスタンスは、ここでは、タスクを動かすイーシーツーインスタンスと考えてください」にそろえる。"
+    },
+    {
+      "slide": "s04",
+      "from": "consistency",
+      "kind": "fact",
+      "severity": "軽",
+      "detail": "図の CloudWatch の箱「届くまで指標もアラームも無い」。S3 は「無い指標にはアラームを作れない」で、bullets・台本もそう言う。図だけ「アラームが無い」になり少しずれる。",
+      "suggest": "「届くまで指標は無く アラームも作れない」にする。"
+    },
+    {
+      "slide": "s06",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "前回の重（Fargate と Fargate Spot の混同）は表・台本とも「Fargate と Auto Scaling group」に直っている。ただ bullet「strategy に Auto Scaling group を混ぜない」は、何と混ぜないかが画面に無く、「strategy に ASG は入れられない」とも読める。",
+      "suggest": "「strategy に Fargate と ASG を混ぜない」とする。"
+    },
+    {
+      "slide": "s13",
+      "from": "consistency",
+      "kind": "mismatch",
+      "severity": "軽",
+      "detail": "1 行目の確かめる所「使用率・比例・1 分以下」は、s03 で「条件ではなく勧め」と分けた 1 分以下を、条件と同列に並べている。この表の台本は 1 分以下に触れない。",
+      "suggest": "「使用率・比例（1 分以下は勧め）」にするか、1 分以下を外す。"
+    },
+    {
+      "slide": "s14",
+      "from": "consistency",
+      "kind": "terms",
+      "severity": "軽",
+      "detail": "条件「Auto Scaling group と併用」は、何と併用するか（Fargate）が表に無い。台本は「ファーゲートとオートスケーリンググループの容量を併せて使う」と言う。また s06 の中身が s13（Fargate Spot）と s14（strategy）に分かれ、「第 2 部の前半／後半」の境目が s06 の中にある。",
+      "suggest": "条件を「Fargate と ASG を併用」にする。タイトルの前半・後半はそのままでよいが、気になるなら Fargate Spot の行を s14 に移す。"
+    },
+    {
+      "slide": null,
+      "from": "consistency",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の重・中 5 件（s06 の Fargate／ASG、s08 の「ふつう要らない」、s13 の Service Auto Scaling の行、s14 のタイトル、s15 の Route 53 latency と Global Accelerator の書き分け）はすべて直っている。s12・s15 の書き分けは S17（lowest latency・レコードの値）と S18（AWS global network・nearest Region）に合う。notes の採らなかった理由（根拠に無い言い換えを避けた）は妥当。新しい重・中は見当たらない。",
+      "suggest": "上の軽だけ、余裕があれば直す。"
+    },
+    {
+      "slide": "s05",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "注記「既定の 100% では空きが無く 増やす間 PENDING」が右のインスタンスにだけ点線でつながり、右の 1 台だけの話に見える。",
+      "suggest": "注記を Auto Scaling group（targetCapacity）の箱につなぐ。"
+    },
+    {
+      "slide": "s06",
+      "from": "clarity",
+      "kind": "leap",
+      "severity": "軽",
+      "detail": "bullet「strategy に Auto Scaling group を混ぜない」は、何に混ぜないのかが画面だけでは取れない。表と台本で補えるので分からなくなるほどではない。",
+      "suggest": "「strategy に Fargate と ASG を混ぜない」とする。"
+    },
+    {
+      "slide": "s07",
+      "from": "clarity",
+      "kind": "listen",
+      "severity": "軽",
+      "detail": "「増減させる対象は、デプロイメントなど、画面にある物です」は耳だけだと何の事か取りにくい。",
+      "suggest": "「増減させる対象は、デプロイメントなど、ポッドをまとめて動かす物です」のように、画面に頼らない言い方にする（新しい事実は足さず、図の並びの言い換えで）。"
+    },
+    {
+      "slide": "s11",
+      "from": "clarity",
+      "kind": "visual",
+      "severity": "軽",
+      "detail": "1・2 の線はターゲットを囲む枠から出ていて前回の偏りは直ったが、枠に名前が無い。台本は「アプリケーションは、まずキャッシュに聞きます」と言うので、誰が聞くのか図とつながりにくい。",
+      "suggest": "枠に「アプリケーション」と名前を付ける。"
+    },
+    {
+      "slide": "s14",
+      "from": "clarity",
+      "kind": "exam",
+      "severity": "軽",
+      "detail": "条件「Auto Scaling group と併用」は相手（Fargate）が抜けていて、表だけ見返すと何と併用する時の話か残りにくい。",
+      "suggest": "「Fargate と ASG を併用」にする。"
+    },
+    {
+      "slide": null,
+      "from": "clarity",
+      "kind": null,
+      "severity": "軽",
+      "detail": "前回の中 13 件は直っている: s03（向かない例を比例の条件に結び付け）、s04（desired count・コンテナインスタンスの説明、CloudWatch を通る輪の図）、s05（100% は使い切る目標→PENDING の因果）、s06（capacity provider と strategy の言い換え、ASG＝EC2 の容量）、s08（ふつう要らない）、s09（疎結合の言い換え、送る側の箱）、s11（ラベルを LB に移し、両ターゲットを枠でまとめた）、s12（届け方を先頭、使う設定・見分ける所の一文）、s13（列名「方法・関わる仕組み」、起点の行）、s15（Route 53 latency と Global Accelerator を 2 行に分け、決め手を待ち時間最短／最も近い・レコードの値／AWS の網で書き分け）。s13〜s15 の行は「条件→方法→確かめる所」になっている。notes で採らなかった提案は、根拠に無い事を足さない理由で妥当。",
+      "suggest": "上の軽だけ、余裕があれば直す。"
+    }
+  ],
+  "verify_hash": "36b227c44a5d371f"
+}

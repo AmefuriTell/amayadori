@@ -1,0 +1,94 @@
+{
+  "slides": [
+    {
+      "id": "s05",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "前回の軽が残る。図で operation ID への点線が「スタックの作成が失敗」のノードから出ており、operation ID が作成の失敗だけの手がかりに見える。S7 はデプロイのイベント全般に付くという話（台本は「もう一つの手がかり」と分けている）。",
+          "suggest": "operation ID の箱を作成の失敗のノードから切り離し、「関係するイベントを追う」の別の箱から出すか、並べるだけにする。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「どちらも、インスタンスの側に残るログです」「立ち上げのときの設定を受け持つ仕組みと考えてよさそう」「cfn は CloudFormation を略した書き方と見てよい」は sources.md に無い。弱めた言い方なので誤って覚える害は小さい（notes の理由は妥当）。",
+          "suggest": "「インスタンスの側に残る」は「CloudWatch に出せば、インスタンスにつながずに見られる」という S3 の言い方に寄せる。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "前回の軽が残る。画面（タイトル・bullets・steps）に CloudFormation の名が無く、UPDATE_ROLLBACK_FAILED がどのサービスの状態かが台本でしか分からない。「原因しだいで手で直す」と条件は直っている。",
+          "suggest": "タイトルを「失敗したデプロイ 3: CloudFormation の UPDATE_ROLLBACK_FAILED」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "bullet「止まったタスクは 1 時間だけ表示」で「コンソールに」が落ちている（表・台本はコンソールと言う）。表は「ハード」、台本は「ハードウェア」と揺れる。EKS の条件（managed node group・EC2 ヘルスチェック基準・ソフトは検出しない）は直っている。",
+          "suggest": "bullet を「止まったタスクはコンソールに 1 時間だけ」にする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「EKS は、大まかに言うと、Kubernetes でコンテナを動かすサービス」は sources.md に無い。弱めた言い方で事実としても誤りではないので軽。",
+          "suggest": "このままでよいが、言うなら「大まかに言うと」を残す。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "前回の軽が残る。表の「EC2 の問題 → cloud-init・cfn ログ / CloudWatch に出す」で「インスタンスにつながずに見たいなら」の条件が落ちている（台本は条件付き）。",
+          "suggest": "確かめる所を「つながず見るなら CloudWatch」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "bullet「検査は EC2 ヘルスチェックに基づく」に主語（EKS の managed node group）が無く、すぐ上の Auto Scaling の bullet の話に見えうる。表と台本は managed node group と書いており、事実の誤りではない。",
+          "suggest": "bullet を「node group の検査は EC2 基準・ソフトは対象外」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "前回の軽が残る。bullet「まず根本原因の手がかりを探す」が台本で言われない。2 の部のラベルから s01 にあった canary が消えている。",
+          "suggest": "台本に一文足すか bullet を台本に合わせる。2 の部に canary を残す。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "軽",
+      "detail": "前回の中 5 件（s09 の CodeDeploy 自動ロールバックの設定先、s11 の EKS の条件、s13 の「原因しだいで」、s14 のサービス名、s15 の EKS の条件と呼び方）はどれも直っている。s09 は「自動にする設定先: deployment group か deployment」と「自動のきっかけ: 失敗か監視のしきい値」に分かれ S11 と合う。新しい重・中は見つからなかった。",
+      "suggest": "なし。"
+    }
+  ]
+}
