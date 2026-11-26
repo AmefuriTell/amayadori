@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0004",
+  "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"関数\" }\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"カスタムメトリクス\" }\n  OK[\"✔ A: 埋め込みメトリクス形式で書く<br/>必要なのは logs:PutLogEvents だけ\"]\n  WB[\"⚠ B: PutMetricData の同期呼び出しと<br/>権限が要る\"]\n  WC[\"⚠ C: メトリクスごとに<br/>フィルターが要る\"]\n  FN == \"ログ（埋め込み形式）\" ==> LG\n  LG -- \"非同期にメトリクス化\" --> CW\n  OK -.- FN\n  WB -.- CW\n  WC -.- LG\n",
+  "alt": "Lambda のカスタムメトリクスを出す図。埋め込みメトリクス形式でログに書けば、logs:PutLogEvents の権限だけで非同期にメトリクスができる（A）。PutMetricData やメトリクスごとのフィルターは要件に反する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

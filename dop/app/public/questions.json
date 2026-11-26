@@ -10156,7 +10156,10 @@
           "quote": "CloudWatch Logs supports only symmetric KMS keys. Do not use an asymmetric key to encrypt the data in your log groups."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "eu-west-1 の CloudWatch Logs のロググループを KMS キーで暗号化する図。キーポリシーに、ロググループの ARN の条件付きで CloudWatch Logs のサービスプリンシパルへの許可を足すのが正解（D）。非対称キーや別リージョンのキーは使えない。"
+      }
     },
     {
       "id": "q-4.1-0002",
@@ -10228,7 +10231,10 @@
           "quote": "CloudWatch Logs decrypts this data whenever it is requested."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudWatch Logs のロググループで、カード番号を見えなくして 90 日で自動削除する図。データ保護ポリシーでマスクし（A）、保持期間を 90 日にする（B）。KMS 暗号化やコードでの削除は要件に合わない。"
+      }
     },
     {
       "id": "q-4.1-0003",
@@ -10301,7 +10307,10 @@
           "quote": "Metric filters are supported only for log groups in the Standard log class."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ERROR を数えるメトリクスフィルターの図。フィルターは作った後のログしか数えず（A）、一致が無い時は既定値 0 を設定すると 0 を報告するので INSUFFICIENT_DATA を避けられる（B）。"
+      }
     },
     {
       "id": "q-4.1-0004",
@@ -10364,7 +10373,10 @@
           "quote": "No setup is required to use the embedded metric format."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Lambda のカスタムメトリクスを出す図。埋め込みメトリクス形式でログに書けば、logs:PutLogEvents の権限だけで非同期にメトリクスができる（A）。PutMetricData やメトリクスごとのフィルターは要件に反する。"
+      }
     },
     {
       "id": "q-4.1-0005",
@@ -10431,7 +10443,10 @@
           "quote": "Each stream can use either JSON format, OpenTelemetry 1.0.0, or OpenTelemetry 0.7.0 format."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudWatch のメトリクスを Parquet で S3 に届ける図。名前空間の include フィルターを持つメトリクスストリームを Firehose へ送り、Firehose で Parquet に変換する（D）。ストリームが直接出せる形式は JSON と OpenTelemetry だけ。"
+      }
     },
     {
       "id": "q-4.1-0006",
@@ -10504,7 +10519,10 @@
           "quote": "Each log group can have up to five subscription filters associated with it."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudWatch Logs のサブスクリプションフィルターから Lambda へ送る図。データは gzip で圧縮され base64 で awslogs.data に入り（A）、配信は少なくとも 1 回なので重複を処理できるようにする（B）。"
+      }
     },
     {
       "id": "q-4.1-0007",
@@ -10566,7 +10584,10 @@
           "quote": "Using AWS Systems Manager makes it easier to install the CloudWatch agent on a fleet of Amazon EC2 instances."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "300 台の EC2 に CloudWatch エージェントの 1 つの設定を使わせる図。設定を AmazonCloudWatch- で始まる名前で Parameter Store に置けば、管理ポリシーのままで読め、Systems Manager で一括で入れられる（C）。"
+      }
     },
     {
       "id": "q-4.1-0008",
@@ -10629,7 +10650,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "公式のドキュメントは、新しい実装には OpenTelemetry（OTLP）でメトリクスを送ることを勧めている（S3・S7）。この問題は「PutMetricData の権限が無く、ログには書ける」という条件で埋め込みメトリクス形式を選ばせる。試験とずれるかもしれない（P-009）。"
+      "note": "公式のドキュメントは、新しい実装には OpenTelemetry（OTLP）でメトリクスを送ることを勧めている（S3・S7）。この問題は「PutMetricData の権限が無く、ログには書ける」という条件で埋め込みメトリクス形式を選ばせる。試験とずれるかもしれない（P-009）。",
+      "diagram": {
+        "alt": "Lambda から注文の種類ごとのカスタムメトリクスを出す図。PutMetricData の権限が無いので、埋め込みメトリクス形式でログに書き、ディメンションを注文の種類だけにする（B）。リクエスト ID を付けるとメトリクスが大量にできる。"
+      }
     },
     {
       "id": "q-4.1-0009",
@@ -10694,7 +10718,10 @@
           "quote": "An account-level retention policy overrides the retention setting of the log group."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "/app/ で始まる既存と今後のロググループに 90 日の保持を使う図。アカウントレベルの保持ポリシーを RETROACTIVE で作ると、既存のものにも今後のものにも適用される（B）。NEW_ONLY では既存が無期限のまま。"
+      }
     },
     {
       "id": "q-4.1-0010",
@@ -10759,7 +10786,10 @@
           "quote": "There are no data retrieval charges for lifecycle transitions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 のライフサイクルのルールが小さなログファイルを移さない図。約 20 KB のオブジェクトは、既定で 128 KB より小さい物はどのストレージクラスへも移されないため、元のクラスのままで費用も下がらない（D）。"
+      }
     },
     {
       "id": "q-4.1-0011",

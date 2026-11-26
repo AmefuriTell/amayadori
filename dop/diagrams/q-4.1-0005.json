@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0005",
+  "source": "flowchart TB\n  CW@{ svc: \"Amazon CloudWatch\", label: \"AWS/EC2 と AWS/RDS のメトリクス\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム（Parquet に変換）\" }\n  DL@{ svc: \"Amazon S3\", label: \"データレイク\" }\n  OK[\"✔ D: 2 つの名前空間の include フィルター<br/>変換は Firehose で行う\"]\n  WA[\"⚠ A: ストリームが直接出せる形式は<br/>JSON と OpenTelemetry だけ\"]\n  WB[\"⚠ B: include と exclude の<br/>両方は置けない\"]\n  CW -- \"メトリクスストリーム\" --> FH\n  FH -- \"Parquet\" --> DL\n  OK -.- CW\n  WA -.- DL\n  WB -.- CW\n",
+  "alt": "CloudWatch のメトリクスを Parquet で S3 に届ける図。名前空間の include フィルターを持つメトリクスストリームを Firehose へ送り、Firehose で Parquet に変換する（D）。ストリームが直接出せる形式は JSON と OpenTelemetry だけ。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

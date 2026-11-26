@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0006",
+  "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  FN@{ svc: \"AWS Lambda\", label: \"処理する関数\" }\n  OA[\"✔ A: gzip + base64 で<br/>awslogs.data に入る\"]\n  OB[\"✔ B: 少なくとも 1 回の配信<br/>重複を処理できるように\"]\n  WC[\"⚠ C: 必ず 1 回だけではない\"]\n  WE[\"⚠ E: フィルターは最大 5 つ\"]\n  LG -- \"一致したイベント\" --> FN\n  OA -.- FN\n  OB -.- FN\n  WC -.- FN\n  WE -.- LG\n",
+  "alt": "CloudWatch Logs のサブスクリプションフィルターから Lambda へ送る図。データは gzip で圧縮され base64 で awslogs.data に入り（A）、配信は少なくとも 1 回なので重複を処理できるようにする（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

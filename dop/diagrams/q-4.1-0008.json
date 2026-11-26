@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0008",
+  "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"注文を処理する関数\" }\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"注文の種類ごとのメトリクス\" }\n  OK[\"✔ B: 埋め込みメトリクス形式<br/>ディメンションは注文の種類（約 10）だけ\"]\n  WA[\"⚠ A: リクエスト ID は値が多く<br/>メトリクスが大量にできる\"]\n  WC[\"⚠ C: PutMetricData の権限が要る\"]\n  FN -- \"ログ（埋め込み形式）\" --> LG\n  LG -- \"メトリクス化\" --> CW\n  OK -.- LG\n  WA -.- CW\n  WC -.- FN\n",
+  "alt": "Lambda から注文の種類ごとのカスタムメトリクスを出す図。PutMetricData の権限が無いので、埋め込みメトリクス形式でログに書き、ディメンションを注文の種類だけにする（B）。リクエスト ID を付けるとメトリクスが大量にできる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

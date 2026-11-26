@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0007",
+  "source": "flowchart TB\n  PS@{ svc: \"AWS Systems Manager Parameter Store\", label: \"AWS Systems Manager Parameter Store<br/>エージェントの設定\" }\n  SM[\"Systems Manager<br/>（エージェントを一括で入れる）\"]\n  EC2[\"EC2 インスタンス 300 台<br/>（CloudWatchAgentServerPolicy）\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"メモリ・ディスクのメトリクス\" }\n  OK[\"✔ C: パラメータ名が<br/>AmazonCloudWatch- で始まる\"]\n  WA[\"⚠ A: 名前が違うと管理ポリシーで読めない\"]\n  WB[\"⚠ B・D: 独自の cron や<br/>手作業のコピーになる\"]\n  SM -- \"インストール\" --> EC2\n  PS -- \"設定を読む\" --> EC2\n  EC2 -- \"メトリクス\" --> CW\n  OK -.- PS\n  WA -.- PS\n  WB -.- EC2\n",
+  "alt": "300 台の EC2 に CloudWatch エージェントの 1 つの設定を使わせる図。設定を AmazonCloudWatch- で始まる名前で Parameter Store に置けば、管理ポリシーのままで読め、Systems Manager で一括で入れられる（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
