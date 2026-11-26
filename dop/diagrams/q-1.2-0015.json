@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0015",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"テスト環境へのデプロイ\" }\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ A: 呼び出しアクションで状態マシン開始\" }\n    OV[\"✔ B: 出力変数（確かめた URL など）\"]\n  DP@{ svc: \"AWS CodePipeline\", label: \"次のデプロイのアクション\" }\n  end\n  CP --> SF\n  SF -- \"手順と分岐を実行\" --> OV\n  OV == \"✔ B: アクションの設定から参照\" ==> DP\n  C[\"⚠ C: 手動で URL を入力\"] -.-> DP\n  D[\"⚠ D: Device Farm は端末テスト用 / E: 自作コード・認証情報がログに残る\"] -.-> SF\n",
+  "alt": "結合テストのワークフローの値を次のデプロイへ渡す図。Step Functions の呼び出しアクションで状態マシンを開始し（A）、その出力変数を次のアクションの設定から参照する（B）。手動や自作コードは要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

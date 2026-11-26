@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0014",
+  "source": "flowchart TB\n  EXT[\"外部のテストシステム（約 40 分）\"]\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"Lambda の呼び出しアクション\" }\n  LF@{ svc: \"AWS Lambda\", label: \"同じ関数（上限 15 分）\" }\n    CT[\"✔ A: 継続トークンを返す（continue_job_later）\"]\n  end\n  CP -- \"呼び出し\" --> LF\n  LF -- \"テスト開始\" --> EXT\n  LF == \"✔ A: トークンを返す\" ==> CT\n  CT == \"✔ A: 再呼び出しで状態確認\" ==> LF\n  B[\"⚠ B: タイムアウトの上限は 15 分\"] -.-> LF\n  C[\"⚠ C: 手動承認は自動でない / D: 今のアクションをやめる\"] -.-> CP\n",
+  "alt": "約 40 分のテストを Lambda の 15 分制限を超えて待つ図。関数が継続トークンを返して後の呼び出しで状態を確かめ続けると、今のアクションと関数のまま待てる（A）。タイムアウトを 60 分にはできない（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

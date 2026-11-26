@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0012",
+  "source": "flowchart TB\n  subgraph R[\"アカウント\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"パイプライン\" }\n    ST[\"✔ A: Test カテゴリーの CodeBuild アクション（デプロイの前）\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"pytest 実行（JUnit XML）\" }\n    RP[\"✔ B: reports セクション（形式は既定の JUNITXML）\"]\n  end\n  CP --> ST\n  ST == \"✔ A: テストのステージ\" ==> CB\n  CB -- \"結果ファイル\" --> RP\n  RP == \"✔ B: テストレポート\" ==> OUT[\"レポートを見る\"]\n  C[\"⚠ C: CLOVERXML はカバレッジ形式\"] -.-> RP\n  D[\"⚠ D: BatchEnabled は複数ビルド用 / E: 出力変数はレポートでない\"] -.-> ST\n",
+  "alt": "デプロイ前のテストステージで pytest の JUnit XML を CodeBuild のテストレポートにする図。Test カテゴリーの CodeBuild アクションを足し（A）、buildspec の reports で既定の形式を使う（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

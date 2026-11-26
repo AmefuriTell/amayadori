@@ -1692,7 +1692,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。"
+      "note": "S3 へのエクスポートの設定の詳しい手順は sources.md に無い。buildspec で作ったレポートグループがエクスポートしない（S5）ことと、コンソール・CLI でも作れる（S4）ことから選ばせている。",
+      "diagram": {
+        "alt": "テストレポートは 30 日で見られなくなり、buildspec で作ったレポートグループは元ファイルをエクスポートしない。S3 にエクスポートするレポートグループを作り、buildspec で ARN を指定する（D）。"
+      }
     },
     {
       "id": "q-1.2-0012",
@@ -1765,7 +1768,10 @@
           "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "デプロイ前のテストステージで pytest の JUnit XML を CodeBuild のテストレポートにする図。Test カテゴリーの CodeBuild アクションを足し（A）、buildspec の reports で既定の形式を使う（B）。"
+      }
     },
     {
       "id": "q-1.2-0013",
@@ -1823,7 +1829,10 @@
           "quote": "Do not log the JSON event that CodePipeline sends to Lambda because this can result in user credentials being logged in CloudWatch Logs."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "クロスリージョンの Lambda 呼び出しアクションで、結果を CodePipeline のリージョンへ送ると完了しない。PutJobSuccessResult と PutJobFailureResult を関数のある eu-west-1 へ送る（C）。"
+      }
     },
     {
       "id": "q-1.2-0014",
@@ -1881,7 +1890,10 @@
           "quote": "This allows the action to continue and the function to succeed even if it exceeds a fifteen-minute runtime (a limit in Lambda)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "約 40 分のテストを Lambda の 15 分制限を超えて待つ図。関数が継続トークンを返して後の呼び出しで状態を確かめ続けると、今のアクションと関数のまま待てる（A）。タイムアウトを 60 分にはできない（B）。"
+      }
     },
     {
       "id": "q-1.2-0015",
@@ -1950,7 +1962,10 @@
           "quote": "This action produces output variables that can be referenced by the action configuration of a downstream action in the pipeline."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "結合テストのワークフローの値を次のデプロイへ渡す図。Step Functions の呼び出しアクションで状態マシンを開始し（A）、その出力変数を次のアクションの設定から参照する（B）。手動や自作コードは要件に合わない。"
+      }
     },
     {
       "id": "q-1.3-0001",

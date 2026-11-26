@@ -1,0 +1,8 @@
+{
+  "id": "q-1.2-0011",
+  "source": "flowchart TB\n  AUD[\"監査人（元ファイルを 1 年）\"]\n  subgraph R[\"アカウント\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（buildspec の reports）\" }\n    RG[\"✔ D: S3 へエクスポートするレポートグループ（ARN を指定）\"]\n  S3@{ svc: \"Amazon S3\", label: \"元のテスト結果ファイル\" }\n  end\n  CB -- \"結果\" --> RG\n  RG == \"✔ D: 元ファイルをエクスポート\" ==> S3\n  S3 --> AUD\n  A[\"⚠ 今: buildspec 作成のグループは約 30 日で見られなくなる・エクスポートもしない\"] -.-> CB\n  C[\"⚠ C: コピー用スクリプトの保守が要る\"] -.-> S3\n",
+  "alt": "テストレポートは 30 日で見られなくなり、buildspec で作ったレポートグループは元ファイルをエクスポートしない。S3 にエクスポートするレポートグループを作り、buildspec で ARN を指定する（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
