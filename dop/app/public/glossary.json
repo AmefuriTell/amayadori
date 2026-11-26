@@ -1,5 +1,6 @@
 {
   "names": {
+    "AWS CloudFormation StackSets": "cloudformation-stacksets",
     "AWS CloudFormation": "cloudformation",
     "AWS CloudTrail": "cloudtrail",
     "Amazon CloudWatch Logs": "cloudwatch-logs",
@@ -9,15 +10,67 @@
     "AWS CodePipeline": "codepipeline",
     "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
     "Amazon EC2": "ec2",
+    "Amazon ECR": "ecr",
+    "Amazon ECS": "ecs",
+    "Elastic Load Balancing": "elastic-load-balancing",
     "Amazon EventBridge": "eventbridge",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
     "AWS Lambda": "lambda",
     "AWS Organizations": "organizations",
+    "Amazon RDS": "rds",
     "Amazon S3": "s3",
     "AWS Systems Manager": "systems-manager"
   },
   "pages": {
+    "cloudformation-stacksets": {
+      "id": "cloudformation-stacksets",
+      "name": "AWS CloudFormation StackSets",
+      "reading": "クラウドフォーメーション スタックセッツ",
+      "summary": "CloudFormation のスタック（テンプレートから作ったリソースのまとまり）を、複数の AWS アカウントと複数のリージョンへ、1 回の操作で作る・更新する・消すための仕組み。",
+      "features": [
+        {
+          "title": "StackSet",
+          "text": "決めたアカウントとリージョンに置く多くのスタックの入れ物。どのスタックも同じテンプレートから作るが、パラメータで 1 つずつ変えられる。"
+        },
+        {
+          "title": "スタックインスタンス",
+          "text": "あるリージョンの、ある対象のアカウントにあるスタックを指す物。スタックを作れなかった時は、その理由を見せる。1 つの StackSet だけに属する。"
+        },
+        {
+          "title": "2 つのアクセス許可のモデル",
+          "text": "セルフマネージドでは、アカウントをまたいでデプロイするための IAM ロールを自分で作る。サービスマネージドでは、AWS Organizations で管理するアカウントにデプロイでき、IAM ロールは StackSets が作る。"
+        },
+        {
+          "title": "自動デプロイ",
+          "text": "サービスマネージドでは、あとから組織に加わるアカウントにも自動でデプロイするように設定できる。"
+        }
+      ],
+      "exam_points": [
+        "組織に新しく加わるアカウントにも、決まったリソースを自動で配りたい場面では、サービスマネージドのアクセス許可と自動デプロイを考える。",
+        "アカウントごとに少しだけ値を変えたい場面では、同じテンプレートのまま、スタックごとのパラメータで変える形を考える。"
+      ],
+      "compare": [
+        {
+          "with": "AWS CloudFormation",
+          "text": "StackSets は、CloudFormation のスタックの働きを広げ、多くのアカウントとリージョンのスタックを 1 回の操作で作る・更新する・消せるようにする。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset",
+          "quote": "Each stack is based on the same CloudFormation template, but you can customize individual stacks using parameters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stacksets-concepts-stackset-permission-models",
+          "quote": "With this model, you can also turn on automatic deployments to accounts that you add to your organization in the future."
+        }
+      ]
+    },
     "cloudformation": {
       "id": "cloudformation",
       "name": "AWS CloudFormation",
@@ -380,6 +433,126 @@
         }
       ]
     },
+    "ecr": {
+      "id": "ecr",
+      "name": "Amazon ECR",
+      "reading": "イーシーアール",
+      "summary": "コンテナイメージ（コンテナを動かすための元になる物）を置いておく場所（レジストリ）を、AWS が管理して提供するサービス。安全で、規模を広げやすく、信頼できる。",
+      "features": [
+        {
+          "title": "プライベートリポジトリと権限",
+          "text": "非公開のリポジトリに、AWS IAM を使ったリソースベースのアクセス許可を付けられる。決めたユーザーや EC2 インスタンスだけがリポジトリとイメージを使える。"
+        },
+        {
+          "title": "ライフサイクルポリシー",
+          "text": "決まり（ルール）を作って、使っていないイメージを片付けられる。決まりは、リポジトリに当てる前に試せる。"
+        },
+        {
+          "title": "イメージのスキャン",
+          "text": "コンテナイメージのソフトウェアの脆弱性（弱点）を見つける。リポジトリごとに「プッシュした時にスキャン」を設定でき、新しく置いたイメージを毎回スキャンする。"
+        },
+        {
+          "title": "レプリケーション（複製）",
+          "text": "イメージを別のリージョンや別のアカウントへ複製できる。レジストリの設定として、リージョンごとに決める。"
+        }
+      ],
+      "exam_points": [
+        "使わなくなった古いイメージを自動で片付けたい場面では、ライフサイクルポリシーを考える。",
+        "置いたイメージの脆弱性を毎回確かめたい場面では、プッシュした時のスキャンを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr",
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features",
+          "quote": "Each repository can be configured to scan on push. This ensures that each new image pushed to the repository is scanned."
+        }
+      ]
+    },
+    "ecs": {
+      "id": "ecs",
+      "name": "Amazon ECS",
+      "reading": "イーシーエス",
+      "summary": "コンテナで作ったアプリケーションを、デプロイ・管理・拡張しやすくするフルマネージドのコンテナオーケストレーション（多くのコンテナをまとめて動かす管理）のサービス。",
+      "features": [
+        {
+          "title": "主な部品",
+          "text": "タスク定義はアプリの設計図。クラスターはアプリが動く土台。タスクはバッチの仕事のように動いて終わるアプリ。サービスは長く動き続ける、状態を持たないアプリ。"
+        },
+        {
+          "title": "Fargate",
+          "text": "サーバーレスの、使った分だけ払う計算の仕組み。サーバーの管理や容量の計画をしなくてよい。"
+        },
+        {
+          "title": "ほかの道具とつながる",
+          "text": "Amazon ECR などの AWS の道具や、Docker などの外の道具とつながっている。"
+        }
+      ],
+      "exam_points": [
+        "コンテナを動かすサーバーを管理したくない場面では、Fargate を考える。",
+        "動き続けるアプリには「サービス」、動いて終わる仕事には「タスク」を使う、という部品の違いが問われる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#Welcome",
+          "quote": "Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#welcome-terminology",
+          "quote": "With Fargate you don't need to manage servers, handle capacity planning, or isolate container workloads for security."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html#ecs-features",
+          "quote": "Task An application such as a batch job that performs work, and then stops. Service A long running stateless application."
+        }
+      ]
+    },
+    "elastic-load-balancing": {
+      "id": "elastic-load-balancing",
+      "name": "Elastic Load Balancing",
+      "reading": "エラスティック ロードバランシング",
+      "summary": "入ってくる通信を、EC2 インスタンス・コンテナ・IP アドレスなどの複数の届け先（ターゲット）に自動で振り分けるサービス。1 つまたは複数のアベイラビリティーゾーンにまたがって振り分けられる。",
+      "features": [
+        {
+          "title": "振り分けとヘルスチェック",
+          "text": "登録した届け先の状態を見張り、正常な届け先にだけ通信を送る。ヘルスチェックを設定すると、計算のリソースの状態を見張り、正常な物にだけ要求を送るようにできる。"
+        },
+        {
+          "title": "可用性と耐障害性",
+          "text": "仕事を複数のサーバーに分けることで、アプリが止まりにくく、壊れにくくなる。"
+        },
+        {
+          "title": "自動の拡張",
+          "text": "入ってくる通信の量の変化に合わせて、ロードバランサーの処理の能力を自動で広げる。"
+        },
+        {
+          "title": "ロードバランサーの種類",
+          "text": "複数の種類のロードバランサーがあり、用途に一番合う物を選ぶ。"
+        }
+      ],
+      "exam_points": [
+        "異常なサーバーに通信を送らないようにしたい場面では、ロードバランサーのヘルスチェックを考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#what-is-load-balancing",
+          "quote": "It monitors the health of its registered targets, and routes traffic only to the healthy targets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#load-balancer-benefits",
+          "quote": "Using a load balancer increases the availability and fault tolerance of your applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html#elb-features",
+          "quote": "Elastic Load Balancing supports multiple load balancer types."
+        }
+      ]
+    },
     "eventbridge": {
       "id": "eventbridge",
       "name": "Amazon EventBridge",
@@ -531,6 +704,40 @@
         {
           "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html#features",
           "quote": "For example, service control policies (SCPs) enable you to control access to AWS resources, services, and Regions within your organization."
+        }
+      ]
+    },
+    "rds": {
+      "id": "rds",
+      "name": "Amazon RDS",
+      "reading": "アールディーエス",
+      "summary": "AWS のクラウドで、リレーショナルデータベース（表の形でデータを持つデータベース）を用意・運用・拡張しやすくするサービス。よくあるデータベースの管理の作業を受け持つ。",
+      "features": [
+        {
+          "title": "管理の作業を受け持つ",
+          "text": "バックアップ・ソフトウェアのパッチ・障害の自動の検出と復旧を RDS が受け持つ。"
+        },
+        {
+          "title": "バックアップと復元",
+          "text": "自動バックアップを有効にしたり、自分でスナップショットを取ったりでき、それを使ってデータベースを復元できる。"
+        },
+        {
+          "title": "高い可用性とリードレプリカ",
+          "text": "プライマリの DB インスタンスと、同期している予備（セカンダリ）の DB インスタンスを持ち、問題が起きたら予備に切り替えられる（フェイルオーバー）。読み込みを増やしたい時はリードレプリカ（プライマリから複製される読み込み用のインスタンス）を使える。"
+        }
+      ],
+      "exam_points": [
+        "問題が起きた時に予備へ切り替えたい（可用性を上げたい）場面と、読み込みの量を増やしたい場面で、予備の DB インスタンスとリードレプリカの使い分けが問われる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html#Welcome",
+          "quote": "Amazon Relational Database Service (Amazon RDS) is a web service that makes it easier to set up, operate, and scale a relational database in the AWS Cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html#Welcome.Concepts.on-prem",
+          "quote": "You can also use read replicas to increase read scaling."
         }
       ]
     },
