@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0013",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"Standard のロググループ\" }\n  MF[\"✔ A: メトリクスフィルター<br/>{ $.statusCode >= 500 かつ $.path = '/checkout' }\"]\n  M@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  AL[\"アラーム\"]\n  WB[\"⚠ B: パスを絞らず<br/>他のパスのエラーも数える\"]\n  WC[\"⚠ C: 構造の無いパターンは<br/>数値の比較ができない\"]\n  WD[\"⚠ D: 手作業でオーバーヘッドが大きい\"]\n  APP -- \"JSON のログ\" --> LG\n  LG --> MF\n  MF -- \"数\" --> M\n  M --> AL\n  WB -.- MF\n  WC -.- MF\n  WD -.- AL\n",
+  "alt": "JSON のログから /checkout の 500 以上のエラーを数えてアラームを鳴らす図。JSON のパターンで statusCode と path を組み合わせたメトリクスフィルターを作る（A）。パスを絞らない物や構造の無いパターンは要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

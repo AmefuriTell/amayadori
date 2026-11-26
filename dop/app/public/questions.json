@@ -10847,7 +10847,10 @@
           "quote": "we recommend that you use selection criteria in your account-level subscription filters to exclude log groups that ingest log data from resources that are part of the subscription delivery workflow."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アカウントレベルのサブスクリプションフィルターで再帰のループが起きる図。配信の仕組み自身のロググループが再び Firehose へ送られる。選択の条件でそのロググループを除外するのが正解（A）。"
+      }
     },
     {
       "id": "q-4.1-0012",
@@ -10921,7 +10924,10 @@
           "quote": "The domain can have either public access or VPC access, but you can't then modify the type of access after the domain is created."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudWatch Logs から VPC アクセスの OpenSearch Service へ Lambda で流す図。Lambda の実行ロールに lambda.amazonaws.com の信頼と AWSLambdaVPCAccessExecutionRole を付け（A）、送り元は Standard のログクラスにする（B）。"
+      }
     },
     {
       "id": "q-4.1-0013",
@@ -10987,7 +10993,10 @@
           "quote": "Filter patterns only return the log events that contain the terms you define."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "JSON のログから /checkout の 500 以上のエラーを数えてアラームを鳴らす図。JSON のパターンで statusCode と path を組み合わせたメトリクスフィルターを作る（A）。パスを絞らない物や構造の無いパターンは要件に合わない。"
+      }
     },
     {
       "id": "q-4.1-0014",
@@ -11053,7 +11062,10 @@
           "quote": "You can't associate a KMS key with an existing log group using the CloudWatch console."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "us-east-1 のロググループを KMS キーで暗号化する図。同じ us-east-1 に対称キーを作り、キーポリシーで CloudWatch Logs のサービスプリンシパルを許可して、AWS CLI で関連付ける（D）。非対称キーや別リージョンのキーは使えない。"
+      }
     },
     {
       "id": "q-4.1-0015",
@@ -11127,7 +11139,10 @@
           "quote": "Server-side encryption with customer-provided keys (SSE-C) is not supported for default encryption."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail のログを KMS キーで暗号化し、監査担当がすぐ読めるようにする図。バケットと同じ eu-west-1 にキーを作り CloudTrail に使わせ（A）、監査担当に復号の権限を先に与える（B）。"
+      }
     },
     {
       "id": "q-4.2-0001",

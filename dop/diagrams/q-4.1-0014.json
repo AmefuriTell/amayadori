@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0014",
+  "source": "flowchart TB\n  subgraph US[\"us-east-1\"]\n    LG@{ svc: \"Amazon CloudWatch Logs\", label: \"既存のロググループ\" }\n    KEY@{ svc: \"AWS KMS\", label: \"対称の KMS キー\" }\n    POL[\"✔ D: キーポリシーで同じリージョンの<br/>サービスプリンシパルを許可\"]\n  end\n  ENG[\"エンジニア\"]\n  WA[\"⚠ A: 非対称キーは使えない\"]\n  WB[\"⚠ B: us-west-2 のキーは使えない\"]\n  WC[\"⚠ C: ポリシー無しで<br/>コンソールでは関連付けられない\"]\n  ENG == \"✔ D: AWS CLI で関連付け\" ==> LG\n  LG -- \"新しく取り込むログを暗号化\" --> KEY\n  POL -.- KEY\n  WA -.- KEY\n  WB -.- KEY\n  WC -.- ENG\n",
+  "alt": "us-east-1 のロググループを KMS キーで暗号化する図。同じ us-east-1 に対称キーを作り、キーポリシーで CloudWatch Logs のサービスプリンシパルを許可して、AWS CLI で関連付ける（D）。非対称キーや別リージョンのキーは使えない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
