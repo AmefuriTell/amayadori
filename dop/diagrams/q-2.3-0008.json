@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0008",
+  "source": "flowchart TB\n  SRC[\"IoT データ（大量・高い頻度）\"]\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ D: Express ワークフロー\" }\n  SV[\"呼び出すサービス\"]\n  X1[\"⚠ A・C: Standard は長く動く処理向き\"]\n  X2[\"⚠ B: Express は waitForTaskToken を使えない\"]\n  SRC -- \"イベント\" --> SF\n  SF == \"リクエスト・レスポンス\" ==> SV\n  SV -- \"HTTP の応答\" --> SF\n  X1 -. \"Standard にすると\" .-> SF\n  X2 -. \"waitForTaskToken を使うと\" .-> SF\n",
+  "alt": "高い頻度で数秒の手順が動く IoT 取り込みの図。HTTP の応答で次に進めばよいので、リクエスト・レスポンス統合の Express ワークフロー（D）が正解で、Standard は長く動く処理向き、Express はコールバック待ちを使えない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

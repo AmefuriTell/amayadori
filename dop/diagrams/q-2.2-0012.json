@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0012",
+  "source": "flowchart TB\n  DEV([\"開発者\"])\n  PB@{ svc: \"AWS IAM\", label: \"✔ C: permissions boundary（決めた範囲）\" }\n  ROLE@{ svc: \"AWS IAM\", label: \"開発者が作る Lambda 用のロール\" }\n  PT([\"プラットフォームチーム（完全な管理者権限）\"])\n  DEV -- \"境界を付ける時だけ作れる\" --> ROLE\n  PB == \"✔ C: 広いポリシーでも超えられない\" ==> ROLE\n  PT -- \"影響なし\" --> ROLE\n  BADA[\"⚠ A: SCP はこのチームの管理者権限も制限する\"]\n  BADBD[\"⚠ B: RCP は開発者のロールの上限にならない<br/>⚠ D: 毎週の確認までは範囲を超えて使える\"]\n  BADA -.-> PT\n  BADBD -.-> ROLE\n",
+  "alt": "開発者がロールを作る時は、決めた範囲の管理ポリシーを permissions boundary に設定することを条件にする図（C）。広いポリシーを付けても境界を超えず、プラットフォームチームの権限は変わらない。A の SCP は管理者まで制限する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0011",
+  "source": "flowchart TB\n  subgraph VA[\"ベンダーの AWS アカウント\"]\n    VS[\"監視サービス\"]\n  end\n  subgraph CA[\"会社の AWS アカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ A: ロール（信頼ポリシーで外部 ID を必須）\" }\n    CW@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  end\n  STS@{ svc: \"AWS STS\", label: \"✔ B: AssumeRole（毎回、外部 ID）\" }\n  VS -- \"外部 ID を付けて\" --> STS\n  STS == \"一時的な認証情報\" ==> ROLE\n  ROLE -- \"読む\" --> CW\n  BADC[\"⚠ C: アクセスキーは長期の認証情報\"]\n  BADD[\"⚠ D: 外部 ID が無く混乱した代理を防げない\"]\n  BADE[\"⚠ E: SCP は権限を与えない\"]\n  BADC -.-> VS\n  BADD -.-> ROLE\n  BADE -.-> CA\n",
+  "alt": "ベンダーが会社のロールを AssumeRole で引き受け、一時的な認証情報でメトリクスを読む図。ロールの信頼ポリシーで外部 ID を必須にし（A）、AssumeRole のたびに外部 ID を指定する（B）。混乱した代理を防ぎ、長期の認証情報も渡さない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

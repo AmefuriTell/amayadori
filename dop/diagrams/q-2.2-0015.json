@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0015",
+  "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph REGS[\"3 つのリージョンそれぞれ\"]\n    DA@{ svc: \"Amazon GuardDuty\", label: \"✔ A: 各リージョンで同じ委任管理者（セキュリティ）\" }\n    MEM[\"メンバーアカウントの GuardDuty\"]\n  end\n  MGMT == \"✔ A: 3 リージョンのそれぞれで指定\" ==> DA\n  DA == \"✔ B: 有効にして管理\" ==> MEM\n  BADC[\"⚠ C: リージョンごとに別の委任管理者にしてはいけない\"]\n  BADD[\"⚠ D: us-east-1 だけでは足りない\"]\n  BADE[\"⚠ E: 各所有者の作業は中央管理でない\"]\n  BADC -.-> MGMT\n  BADD -.-> MGMT\n  BADE -.-> MEM\n",
+  "alt": "GuardDuty はリージョンのサービスなので、管理アカウントが 3 つのリージョンのそれぞれで同じセキュリティのアカウントを委任管理者に指定する図（A）。委任管理者は各リージョンでメンバーアカウントの GuardDuty を有効にして管理する（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

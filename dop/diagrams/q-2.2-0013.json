@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0013",
+  "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: 組織の Config ルール（PutOrganizationConfigRule）\" }\n  ORG@{ svc: \"AWS Organizations\", label: \"管理アカウントか委任管理者\" }\n  ACC[\"組織のアカウント 150 個（新しいアカウントも）\"]\n  SBX[\"サンドボックスのアカウント\"]\n  ORG -- \"中央で作成・更新\" --> CFG\n  CFG == \"✔ A: 共通のルールを配る\" ==> ACC\n  CFG -. \"除外するアカウントに指定\" .-> SBX\n  BADB[\"⚠ B: アグリゲーターはルールを配れない\"]\n  BADCD[\"⚠ C: 各所有者の手作業<br/>⚠ D: Lambda を作って保守\"]\n  BADB -.-> ACC\n  BADCD -.-> ACC\n",
+  "alt": "管理アカウントか委任管理者から PutOrganizationConfigRule で、組織のすべてのアカウントに同じ Config ルールを配り、サンドボックスのアカウントを除外する図（A）。新しいアカウントにも配られる。B のアグリゲーターはルールを配れない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

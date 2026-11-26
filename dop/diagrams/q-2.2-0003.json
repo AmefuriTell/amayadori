@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0003",
+  "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント（自動化は SCP の対象外）\" }\n  SCP@{ svc: \"AWS Organizations\", label: \"✔ B: OU に SCP（StopLogging・DeleteTrail を拒否）\" }\n  MEM[\"メンバーアカウントの管理者・全員\"]\n  CT@{ svc: \"AWS CloudTrail\", label: \"組織の証跡\" }\n  SCP == \"✔ B: 管理者も止められない\" ==> MEM\n  MEM -. \"停止の操作は拒否\" .-> CT\n  MGMT -- \"引き続き管理できる\" --> CT\n  BADA[\"⚠ A: IAM ポリシーは管理者が外せる\"]\n  BADCD[\"⚠ C: SCP は権限を与えず、IAM から外すと開発者の権限が変わる<br/>⚠ D: メンバーの権限を広く外すと開発者の権限が変わる\"]\n  BADA -.-> MEM\n  BADCD -.-> MEM\n",
+  "alt": "メンバーアカウントを含む OU に cloudtrail:StopLogging と DeleteTrail を拒否する SCP を付ける図（B）。管理者を含む全員の停止を防ぎ、管理アカウントの自動化には効かず、開発者の IAM は変わらない。A は管理者が外せる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

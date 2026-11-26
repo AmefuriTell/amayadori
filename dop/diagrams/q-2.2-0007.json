@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0007",
+  "source": "flowchart TB\n  TP@{ svc: \"AWS Organizations\", label: \"タグポリシー（CostCenter・EC2 に強制）\" }\n  REQ([\"タグ付けのリクエスト\"])\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス<br/>✔ A: 合わない値は完了させず止める\" }\n  NOTAG[\"CostCenter タグが無いリソース\"]\n  REQ -- \"決まりに合わない値\" --> TP\n  TP == \"✔ A\" ==> EC2\n  TP -. \"✔ B: タグの無いリソースは評価しない\" .-> NOTAG\n  BADC[\"⚠ C: タグの無いリソースは評価も報告もされない\"]\n  BADD[\"⚠ D: 全機能を有効にした組織だけで使える\"]\n  BADC -.-> NOTAG\n  BADD -.-> TP\n  TP -. \"⚠ E: 指定した種類だけ強制される\" .-> EC2\n",
+  "alt": "AWS Organizations のタグポリシーで CostCenter を EC2 に強制する図。決まりに合わないタグ付けのリクエストは止まる（A）が、タグが無いリソースは評価されない（B）。強制は指定したリソースの種類だけ（E は誤り）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

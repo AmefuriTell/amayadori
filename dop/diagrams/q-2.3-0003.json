@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0003",
+  "source": "flowchart TB\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ A: State Manager の関連付け（毎日）\" }\n  N[\"Env=Prod のマネージドノード\"]\n  INV@{ svc: \"AWS Systems Manager\", label: \"✔ B: Inventory\" }\n  S3@{ svc: \"Amazon S3\", label: \"中央のバケット\" }\n  Q[\"コンプライアンスチーム\"]\n  X1[\"⚠ C: Inventory は集めるだけで入れない\"]\n  X2[\"⚠ D・E: 独自コードや今すぐパッチは要件に反する\"]\n  SM == \"タグで選び、無ければ入れる\" ==> N\n  N -- \"メタデータ\" --> INV\n  INV == \"集めて置く\" ==> S3\n  Q -- \"バージョンを照会\" --> S3\n  X1 -.-> INV\n  X2 -.-> SM\n",
+  "alt": "Env=Prod のタグのノードに State Manager の関連付けで毎日エージェントを入れ、Inventory でメタデータを中央の S3 に集めて照会する図。正解は A と B で、Inventory はソフトを入れない（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

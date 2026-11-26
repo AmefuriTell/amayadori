@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0016",
+  "source": "flowchart TB\n  GD@{ svc: \"Amazon GuardDuty\", label: \"不審な活動の検出結果\" }\n  DT@{ svc: \"Amazon Detective\", label: \"✔ B: ログのデータを自動で集める\" }\n  AN([\"分析担当\"])\n  LOG[\"CloudTrail・VPC フローログ\"]\n  LOG -- \"AWS のリソースのログ\" --> DT\n  GD -- \"検出結果\" --> DT\n  DT == \"✔ B: 根本の原因を素早く調べる\" ==> AN\n  BADAC[\"⚠ A: Config アグリゲーターは構成と準拠のデータ<br/>⚠ C: Control Tower のコントロールはガバナンス用\"]\n  BADD[\"⚠ D: 手作業でログを探す\"]\n  BADAC -.-> AN\n  BADD -.-> LOG\n",
+  "alt": "Amazon Detective は AWS のリソースのログのデータを自動で集め、GuardDuty の検出結果を分析担当が調べて根本の原因を素早く見つけるのを助ける図（B）。D はログを手作業で探す今のやり方で、時間がかかる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

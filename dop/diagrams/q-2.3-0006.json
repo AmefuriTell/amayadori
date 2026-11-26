@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0006",
+  "source": "flowchart TB\n  T@{ svc: \"AWS Step Functions\", label: \"Task ステート\" }\n  API[\"ときどきスロットリングする API\"]\n  R[\"✔ A: Retry 2 秒・5 回・倍々\"]\n  C[\"✔ B: States.ALL の Catch（最後に単独）\"]\n  N[\"NotifyOps ステート\"]\n  X1[\"⚠ C: MaxAttempts 0 は再試行しない\"]\n  X3[\"⚠ E: States.ALL を最初に置くと、再試行より前にすべて捕まる\"]\n  X2[\"⚠ D: TaskFailed はタイムアウトに合わない\"]\n  T -- \"呼び出し\" --> API\n  API -- \"スロットリング\" --> R\n  R -- \"再試行\" --> T\n  R -- \"尽きた\" --> C\n  T -- \"タイムアウトなど他のエラー\" --> C\n  C == \"Next\" ==> N\n  X1 -.-> R\n  X2 -.-> C\n  X3 -.-> C\n",
+  "alt": "Task ステートの再試行と Catch の図。スロットリングは 2 秒から倍にして 5 回まで Retry し（A）、尽きたものと他のエラーは States.ALL の Catch を最後に単独で置いて NotifyOps へ送る（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0005",
+  "source": "flowchart TB\n  A@{ svc: \"AWS Organizations\", label: \"組織 A（今の所属）\" }\n  B@{ svc: \"AWS Organizations\", label: \"組織 B の管理アカウント\" }\n  ACC[\"移るアカウント\"]\n  B == \"✔ A: 招待を送る\" ==> ACC\n  ACC == \"✔ A: 承諾する\" ==> B\n  A -- \"✔ B: 先に抜けなくてよい\" --- ACC\n  A -. \"⚠ C: 招待は組織 B の管理アカウントから\" .-> ACC\n  BADD[\"⚠ D: 招待で入ったアカウントに 4 日の待ちは無い\"]\n  BADD -.-> ACC\n  ACC -. \"⚠ E: 組織は 1 つしか入れない\" .-> B\n",
+  "alt": "組織 A のメンバーアカウントを組織 B に移す図。組織 B の管理アカウントが招待を送り、移るアカウントが承諾する（A）。先に組織 A を抜けたり単独で動いたりする必要はない（B）。C と E は誤り。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

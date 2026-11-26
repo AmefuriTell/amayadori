@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0010",
+  "source": "flowchart TB\n  ROOT@{ svc: \"AWS Organizations\", label: \"ルート: FullAWSAccess（許可）\" }\n  OU@{ svc: \"AWS Organizations\", label: \"✔ B: Sandbox OU の SCP に DynamoDB を足す\" }\n  ACC@{ svc: \"AWS Organizations\", label: \"メンバーアカウント: FullAWSAccess（許可）\" }\n  DEV@{ svc: \"AWS IAM\", label: \"開発者の IAM ポリシー（DynamoDB を許可）\" }\n  ROOT -- \"許可\" --> OU\n  OU == \"✔ B: 欠けていた Allow を足す\" ==> ACC\n  ACC --> DEV\n  OU -. \"⚠ 今: S3 と EC2 だけ\" .-> ACC\n  BADA[\"⚠ A: IAM ポリシーを足しても SCP が拒否する\"]\n  BADC[\"⚠ C: アカウントの段はすでに許可。足りないのは OU の段\"]\n  BADD[\"⚠ D: SCP は管理アカウントに効かず、メンバーの経路に入らない\"]\n  BADA -.-> DEV\n  BADC -.-> ACC\n  BADD -.-> ROOT\n",
+  "alt": "SCP は、ルートからアカウントまでの経路のすべての段に Allow が要る図。Sandbox OU の SCP が S3 と EC2 だけを許すので DynamoDB が拒否される。この段の Allow に DynamoDB を足す（B）。IAM ポリシー（A）では解決しない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

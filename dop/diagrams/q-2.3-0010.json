@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0010",
+  "source": "flowchart TB\n  PK@{ svc: \"AWS Systems Manager Distributor\", label: \"AWS Systems Manager Distributor<br/>エージェントのパッケージ（承認済み）\" }\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ D: State Manager の関連付け（スケジュール）\" }\n  N[\"全マネージドノード（入れ替わる）\"]\n  X1[\"⚠ A: Run Command は 1 回きり\"]\n  X2[\"⚠ B: 毎週の手作業\"]\n  X3[\"⚠ C: バージョンがばらつく\"]\n  PK -- \"承認済みのバージョン\" --> SM\n  SM == \"✔ D: 入れ直す\" ==> N\n  X1 -.-> N\n  X2 -.-> N\n  X3 -.-> N\n",
+  "alt": "Distributor でパッケージにした承認済みのエージェントを、State Manager の関連付けでスケジュールどおり全ノードに入れる図。入れ替わったノードや消えたエージェントにも自動で対応できる D が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

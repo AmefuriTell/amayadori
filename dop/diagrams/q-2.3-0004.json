@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0004",
+  "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット\" }\n  CFG@{ svc: \"AWS Config\", label: \"✔ A: Config ルール（作成・変更で評価）\" }\n  SSM@{ svc: \"AWS Systems Manager\", label: \"Automation のマネージドのドキュメント\" }\n  X1[\"⚠ B: 通知だけで修正は手作業\"]\n  X2[\"⚠ C: 独自の Lambda を書いて保守する\"]\n  X3[\"⚠ D: Inventory は設定を評価しない・毎日では遅い\"]\n  S3 -- \"作成・変更\" --> CFG\n  CFG == \"✔ A: 違反を noncompliant にして修復\" ==> SSM\n  SSM -- \"決められた操作で修正\" --> S3\n  X1 -.-> CFG\n  X2 -.-> SSM\n  X3 -.-> S3\n",
+  "alt": "S3 バケットの作成や変更を AWS Config のルールで評価し、違反したら Systems Manager Automation のマネージドのドキュメントで修復する図。コードを書かずに済む A が正解で、通知だけ（B）や独自 Lambda（C）は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0001",
+  "source": "flowchart TB\n  SEC([\"セキュリティチーム\"])\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ C: service-managed ＋ 自動デプロイ\" }\n  OU@{ svc: \"AWS Organizations\", label: \"Workloads OU（今あるものも今後のものも）\" }\n  ACC[\"各アカウント・2 つのリージョン\"]\n  SEC -- \"テンプレート\" --> SS\n  SS -- \"対象は OU\" --> OU\n  SS == \"✔ C: ロールは CloudFormation が作る\" ==> ACC\n  BADA[\"⚠ A: self-managed は各アカウントに実行ロールが要る\"]\n  BADB[\"⚠ B: 新しいアカウントごとに人がインスタンスを追加\"]\n  BADD[\"⚠ D: Lambda の作成と保守が要る\"]\n  BADA -.-> ACC\n  BADB -.-> OU\n  BADD -.-> OU\n",
+  "alt": "Workloads OU を対象に、service-managed のアクセス許可と自動デプロイを有効にした StackSet を作る図。IAM ロールは CloudFormation が作り、新しいアカウントにも自動で展開される（C）。A は実行ロールが要り、B は人の作業が要る。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

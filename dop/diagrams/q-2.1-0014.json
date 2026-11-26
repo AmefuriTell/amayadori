@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0014",
+  "source": "flowchart TB\n  CT@{ svc: \"AWS Control Tower\", label: \"✔ D: プロアクティブなコントロール\" }\n  HK@{ svc: \"AWS CloudFormation\", label: \"CloudFormation Hooks\" }\n  DEP[\"各アカウントのデプロイ\"]\n  BAD([\"暗号化されていない設定\"])\n  CT == \"✔ D: Hooks として有効に\" ==> HK\n  DEP -- \"リソースを用意する前\" --> HK\n  HK == \"✔ D: 準拠しなければ止める\" ==> BAD\n  BADA[\"⚠ A: 自分でルールを書いて保守\"]\n  BADB[\"⚠ B: 作った後に見つけても遅い\"]\n  BADC[\"⚠ C: 手作業のレビューは追いつかない\"]\n  BADA -.-> HK\n  BADB -.-> BAD\n  BADC -.-> DEP\n",
+  "alt": "Control Tower のプロアクティブなコントロールは CloudFormation Hooks として動き、リソースを用意する前に暗号化されていない設定などを止める図（D）。コードを書かずに済む。A は自作で保守が要り、B は作った後で遅い。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

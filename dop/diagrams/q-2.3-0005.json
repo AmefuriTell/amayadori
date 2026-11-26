@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0005",
+  "source": "flowchart TB\n  SF@{ svc: \"AWS Step Functions\", label: \"✔ C: Standard ワークフロー\" }\n  EXT[\"外部の承認システム\"]\n  MG[\"マネージャー（応答に最大 3 日）\"]\n  X1[\"⚠ A・D: Express は最長 5 分・1 回以上\"]\n  X2[\"⚠ B: 毎分のポーリングは要件に反する\"]\n  SF -- \"依頼とタスクトークン\" --> EXT\n  EXT --> MG\n  MG -- \"応答\" --> EXT\n  EXT == \"SendTaskSuccess で再開\" ==> SF\n  X1 -. \"Express にすると\" .-> SF\n  X2 -. \"ポーリングにすると\" .-> EXT\n",
+  "alt": "承認システムの応答を最大 3 日待つワークフローの図。.waitForTaskToken で止まり、SendTaskSuccess で再開する Standard ワークフロー（C）が正解で、Express は最長 5 分のため合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

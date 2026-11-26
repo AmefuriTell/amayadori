@@ -4683,7 +4683,10 @@
           "quote": "State Manager is available at no additional charge."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "State Manager の関連付けで、承認済みの構成をスケジュールで適用し、タグ Env=prod で対象を決める図。後から起動した EC2 にも当たり、追加の費用もない（C）。A のユーザーデータや B の Lambda は手間が大きい。"
+      }
     },
     {
       "id": "q-2.1-0012",
@@ -4744,7 +4747,10 @@
           "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Config で S3 バケットとセキュリティグループの構成を記録し、ルールの一式をコンフォーマンスパックとして 1 つの単位でデプロイして評価し、基準違反を通知する図（A）。B はルールを 1 つずつ作る手間が増える。"
+      }
     },
     {
       "id": "q-2.1-0013",
@@ -4807,7 +4813,10 @@
           "quote": "Without a launch constraint, end users must launch and manage products using their own IAM credentials."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Service Catalog のポートフォリオに起動の制約を付けると、開発者は承認済みの製品だけを起動でき、リソースは起動の制約の IAM ロールが作るので開発者に CloudFormation などの権限が要らない（C）。A は制約なしで権限が要る。"
+      }
     },
     {
       "id": "q-2.1-0014",
@@ -4869,7 +4878,10 @@
           "quote": "validate resource configurations against AWS best practices across your organization without writing code."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Control Tower のプロアクティブなコントロールは CloudFormation Hooks として動き、リソースを用意する前に暗号化されていない設定などを止める図（D）。コードを書かずに済む。A は自作で保守が要り、B は作った後で遅い。"
+      }
     },
     {
       "id": "q-2.1-0015",
@@ -4930,7 +4942,10 @@
           "quote": "Use Aspects when you want to enforce rules across your entire application or validate that constructs meet certain criteria. Use Mixins when you want to add a specific feature to a specific construct."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CDK のアプリ全体のコンストラクトを Aspect が訪れ、暗号化されていない S3 バケットを 1 つの決まりで報告する図（B）。Mixin は特定のコンストラクトに機能を足すもので、A は各バケットへの付与が要る。C は定義を直すことになる。"
+      }
     },
     {
       "id": "q-2.1-0016",
@@ -4987,7 +5002,10 @@
           "quote": "because modules are versioned, if security guidelines change over time, the module author can create a new version of the module that incorporates those changes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "強化したリソースの設定を CloudFormation のモジュールとしてレジストリに入れ、各チームが自分のテンプレートに含める図。指針が変わったらモジュールの新しいバージョンを出して 1 か所で更新できる（D）。A は写しが散り、C は手作業。"
+      }
     },
     {
       "id": "q-2.2-0001",
@@ -5045,7 +5063,10 @@
           "quote": "CloudFormation can automatically deploy additional stacks to new AWS Organizations accounts when they're added to your target organization or organizational units (OUs)."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Workloads OU を対象に、service-managed のアクセス許可と自動デプロイを有効にした StackSet を作る図。IAM ロールは CloudFormation が作り、新しいアカウントにも自動で展開される（C）。A は実行ロールが要り、B は人の作業が要る。"
+      }
     },
     {
       "id": "q-2.2-0002",
@@ -5108,7 +5129,10 @@
           "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Prod OU が対象の自動デプロイの StackSet は、アカウント単位のフィルターを考えないので、サンドボックスのアカウントにも展開される。対象でない別の OU に置けば展開されない（B）。A と D は効かない。"
+      }
     },
     {
       "id": "q-2.2-0003",
@@ -5171,7 +5195,10 @@
           "quote": "SCPs don't affect users or roles in the management account."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "メンバーアカウントを含む OU に cloudtrail:StopLogging と DeleteTrail を拒否する SCP を付ける図（B）。管理者を含む全員の停止を防ぎ、管理アカウントの自動化には効かず、開発者の IAM は変わらない。A は管理者が外せる。"
+      }
     },
     {
       "id": "q-2.2-0004",
@@ -5229,7 +5256,10 @@
           "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Control Tower の Account Factory で、承認済みのテンプレートから新しいアカウントを作ると、作成・登録・コントロールの適用まで自動で行われる図（D）。A はスクリプトを持ち続け、B は登録が手作業。"
+      }
     },
     {
       "id": "q-2.2-0005",
@@ -5301,7 +5331,10 @@
           "quote": "An account can only join one organization."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "組織 A のメンバーアカウントを組織 B に移す図。組織 B の管理アカウントが招待を送り、移るアカウントが承諾する（A）。先に組織 A を抜けたり単独で動いたりする必要はない（B）。C と E は誤り。"
+      }
     },
     {
       "id": "q-2.2-0006",
@@ -5360,7 +5393,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "解説 D の「一括請求は権限を与えない」は S7 の「管理アカウントが支払う」からの範囲で書いた"
+      "note": "解説 D の「一括請求は権限を与えない」は S7 の「管理アカウントが支払う」からの範囲で書いた",
+      "diagram": {
+        "alt": "招待で入ったメンバーアカウントには OrganizationAccountAccessRole が自動で作られないので、各アカウントで管理アカウントを信頼するロールを作る図（D）。招待し直し（A）や待つこと（B）、一括請求（C）では作られない。"
+      }
     },
     {
       "id": "q-2.2-0007",
@@ -5433,7 +5469,10 @@
           "quote": "Tag policies are available only in an organization that has all features enabled."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Organizations のタグポリシーで CostCenter を EC2 に強制する図。決まりに合わないタグ付けのリクエストは止まる（A）が、タグが無いリソースは評価されない（B）。強制は指定したリソースの種類だけ（E は誤り）。"
+      }
     },
     {
       "id": "q-2.2-0008",
@@ -5496,7 +5535,10 @@
           "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "既存の AWS Config のリソースがあると Control Tower への登録は失敗する。リソースを削除してから管理された OU にもう一度登録する（C）。既存のアカウントをログアーカイブにできるのは最初の設定の時だけ（A は誤り）。"
+      }
     },
     {
       "id": "q-2.2-0009",
@@ -5557,7 +5599,10 @@
           "quote": "SCPs don't affect users or roles in the management account. They affect only the member accounts in your organization."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "承認外のリージョンを拒否する SCP を Workloads OU にアタッチする図（D）。ルートユーザーを含む配下のすべてのアカウントと、後から入る新しいアカウントにも効く。B は管理アカウントには効かず、A の IAM ポリシーは管理者が外せる。"
+      }
     },
     {
       "id": "q-2.2-0010",
@@ -5615,7 +5660,10 @@
           "quote": "If a user or role has an IAM permission policy that grants access to an action that is either not allowed or explicitly denied by the applicable SCPs, the user or role can't perform that action."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SCP は、ルートからアカウントまでの経路のすべての段に Allow が要る図。Sandbox OU の SCP が S3 と EC2 だけを許すので DynamoDB が拒否される。この段の Allow に DynamoDB を足す（B）。IAM ポリシー（A）では解決しない。"
+      }
     },
     {
       "id": "q-2.2-0011",
@@ -5688,7 +5736,10 @@
           "quote": "No permissions are granted by an SCP."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ベンダーが会社のロールを AssumeRole で引き受け、一時的な認証情報でメトリクスを読む図。ロールの信頼ポリシーで外部 ID を必須にし（A）、AssumeRole のたびに外部 ID を指定する（B）。混乱した代理を防ぎ、長期の認証情報も渡さない。"
+      }
     },
     {
       "id": "q-2.2-0012",
@@ -5750,7 +5801,10 @@
           "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "開発者がロールを作る時は、決めた範囲の管理ポリシーを permissions boundary に設定することを条件にする図（C）。広いポリシーを付けても境界を超えず、プラットフォームチームの権限は変わらない。A の SCP は管理者まで制限する。"
+      }
     },
     {
       "id": "q-2.2-0013",
@@ -5812,7 +5866,10 @@
           "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "管理アカウントか委任管理者から PutOrganizationConfigRule で、組織のすべてのアカウントに同じ Config ルールを配り、サンドボックスのアカウントを除外する図（A）。新しいアカウントにも配られる。B のアグリゲーターはルールを配れない。"
+      }
     },
     {
       "id": "q-2.2-0014",
@@ -5874,7 +5931,10 @@
           "quote": "Aggregators do not provide mutating access into a source account or region."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "監査のアカウントに組織の AWS Config アグリゲーターを作ると、承認なしで組織のすべてのアカウントの構成と準拠のデータを 1 か所で読める図（C）。送り元は読むだけで変更できない。A の管理者権限は強すぎ、B はルールの配布。"
+      }
     },
     {
       "id": "q-2.2-0015",
@@ -5947,7 +6007,10 @@
           "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "GuardDuty はリージョンのサービスなので、管理アカウントが 3 つのリージョンのそれぞれで同じセキュリティのアカウントを委任管理者に指定する図（A）。委任管理者は各リージョンでメンバーアカウントの GuardDuty を有効にして管理する（B）。"
+      }
     },
     {
       "id": "q-2.2-0016",
@@ -6009,7 +6072,10 @@
           "quote": "A control is a high-level rule that provides ongoing governance for your overall AWS environment."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Amazon Detective は AWS のリソースのログのデータを自動で集め、GuardDuty の検出結果を分析担当が調べて根本の原因を素早く見つけるのを助ける図（B）。D はログを手作業で探す今のやり方で、時間がかかる。"
+      }
     },
     {
       "id": "q-2.3-0001",
@@ -6071,7 +6137,10 @@
           "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Organizations の 20 アカウント・3 リージョンのノードを、パッチポリシー 1 つで管理する図。毎日のスキャンと毎週のインストールを分けて設定できる C が正解で、場所ごとの作成（A・D）や手作業（B）は要件に反する。"
+      }
     },
     {
       "id": "q-2.3-0002",
@@ -6136,7 +6205,10 @@
           "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "7 日後に自動承認するパッチベースラインでは、昨日出た重大なパッチは未承認のため、準拠と出ても入っていない。承認済みパッチの一覧に足す A が正解で、他の承認の決まりを変えずに次の Scan and install で入る。"
+      }
     },
     {
       "id": "q-2.3-0003",
@@ -6209,7 +6281,10 @@
           "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Env=Prod のタグのノードに State Manager の関連付けで毎日エージェントを入れ、Inventory でメタデータを中央の S3 に集めて照会する図。正解は A と B で、Inventory はソフトを入れない（C）。"
+      }
     },
     {
       "id": "q-2.3-0004",
@@ -6276,7 +6351,10 @@
           "quote": "You can use Inventory to collect metadata from your managed nodes."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 バケットの作成や変更を AWS Config のルールで評価し、違反したら Systems Manager Automation のマネージドのドキュメントで修復する図。コードを書かずに済む A が正解で、通知だけ（B）や独自 Lambda（C）は要件に合わない。"
+      }
     },
     {
       "id": "q-2.3-0005",
@@ -6341,7 +6419,10 @@
           "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "承認システムの応答を最大 3 日待つワークフローの図。.waitForTaskToken で止まり、SendTaskSuccess で再開する Standard ワークフロー（C）が正解で、Express は最長 5 分のため合わない。"
+      }
     },
     {
       "id": "q-2.3-0006",
@@ -6413,7 +6494,10 @@
           "quote": "The name States.TaskFailed also acts a wildcard and matches any error except for States.Timeout."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Task ステートの再試行と Catch の図。スロットリングは 2 秒から倍にして 5 回まで Retry し（A）、尽きたものと他のエラーは States.ALL の Catch を最後に単独で置いて NotifyOps へ送る（B）。"
+      }
     },
     {
       "id": "q-2.3-0007",
@@ -6479,7 +6563,10 @@
           "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "非同期で呼ばれる Lambda 関数に、成功時と失敗時の送信先を別々に設定する図。コードを変えずに両方の記録が残る B が正解で、何もしないと再試行後の失敗イベントは捨てられる（C）。"
+      }
     },
     {
       "id": "q-2.3-0008",
@@ -6541,7 +6628,10 @@
           "quote": "Express Workflows only support Request Response integrations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "高い頻度で数秒の手順が動く IoT 取り込みの図。HTTP の応答で次に進めばよいので、リクエスト・レスポンス統合の Express ワークフロー（D）が正解で、Standard は長く動く処理向き、Express はコールバック待ちを使えない。"
+      }
     },
     {
       "id": "q-2.3-0009",
@@ -6602,7 +6692,10 @@
           "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Ansible のプレイブック一式を、State Manager の関連付けで Role=web のノードに毎日適用する図。勧められている AWS-ApplyAnsiblePlaybooks を使う A が正解で、B は非推奨のドキュメント、C は 1 回きりである。"
+      }
     },
     {
       "id": "q-2.3-0010",
@@ -6664,7 +6757,10 @@
           "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Distributor でパッケージにした承認済みのエージェントを、State Manager の関連付けでスケジュールどおり全ノードに入れる図。入れ替わったノードや消えたエージェントにも自動で対応できる D が正解。"
+      }
     },
     {
       "id": "q-2.3-0011",
@@ -6736,7 +6832,10 @@
           "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Run Command で 200 台に 1 回きりの変更を行う図。max-concurrency を 10%（A）、max-errors を 0（C）にすると、同時実行が 10 分の 1 以下で、最初のエラーで送信が止まる。"
+      }
     },
     {
       "id": "q-2.3-0012",
@@ -6795,7 +6894,10 @@
           "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "State Manager の関連付けと Patch Manager のパッチの準拠を Systems Manager Compliance で 1 か所に表示し、EventBridge のルールで修復を自動で始める図。独自ツールが要らない A が正解。"
+      }
     },
     {
       "id": "q-2.3-0013",
@@ -6857,7 +6959,10 @@
           "quote": "Using patch policies is the recommended method for configuring your patching operations."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "40 アカウント・4 リージョンのノードに、Quick Setup で作るパッチポリシー 1 つを組織全体へ当てる図。毎日のスキャンと毎週のインストールを別のスケジュールにできる A が正解で、場所ごとの設定（B）や手作業（C・D）は手間が大きい。"
+      }
     },
     {
       "id": "q-2.3-0014",
@@ -6918,7 +7023,10 @@
           "quote": "For each approval rule that you create, you can choose to specify an auto-approval delay or specify a patch approval cutoff date."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "公開から 7 日たった重要な更新だけを適用する図。承認ルールで 7 日の自動承認の遅延を使う独自のパッチベースライン（B）なら手作業が要らない。事前定義のベースラインは変えられない（A）。"
+      }
     },
     {
       "id": "q-2.3-0015",
@@ -6980,7 +7088,10 @@
           "quote": "Which one you choose depends on whether you need to automate system compliance or perform high-priority, time-sensitive tasks during periods you specify."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "日曜の決まった時間帯だけパッチを当てる図。メンテナンスウィンドウに最大の長さ・ターゲット・Lambda と Run Command のタスクを登録する D が正解で、State Manager（A）は時間帯内で複数のタスクを動かす用途に合わない。"
+      }
     },
     {
       "id": "q-2.3-0016",
@@ -7042,7 +7153,10 @@
           "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "脆弱なエージェントのバージョンが入ったノードを探す図。Inventory が 2,000 台のメタデータを中央の S3 に集め、組み込みのツールでクエリできる C が正解で、スクリプト（B）や手作業（D）は要件に反する。"
+      }
     },
     {
       "id": "q-3.1-0001",

@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0006",
+  "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph INV[\"招待のアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ D: OrganizationAccountAccessRole（自分で作る）\" }\n  end\n  MGMT -. \"⚠ ロールが自動で作られない\" .-> INV\n  ROLE == \"✔ D: 管理アカウントを信頼\" ==> MGMT\n  MGMT -- \"ロールに切り替える\" --> ROLE\n  BADA[\"⚠ A: 招待し直しても同じ\"]\n  BADB[\"⚠ B: 15 日は返事の期限。待ってもロールは作られない\"]\n  BADC[\"⚠ C: 一括請求はアクセス権ではない\"]\n  BADA -.-> INV\n  BADB -.-> INV\n  BADC -.-> MGMT\n",
+  "alt": "招待で入ったメンバーアカウントには OrganizationAccountAccessRole が自動で作られないので、各アカウントで管理アカウントを信頼するロールを作る図（D）。招待し直し（A）や待つこと（B）、一括請求（C）では作られない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

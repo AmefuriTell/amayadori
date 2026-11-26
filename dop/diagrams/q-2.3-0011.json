@@ -1,0 +1,8 @@
+{
+  "id": "q-2.3-0011",
+  "source": "flowchart TB\n  ENG[\"DevOps エンジニア\"]\n  RC@{ svc: \"AWS Systems Manager\", label: \"Run Command（1 回きり）\" }\n  N[\"200 台のマネージドノード\"]\n  X1[\"⚠ B: 既定は 50 で 4 分の 1 が同時に動く\"]\n  X2[\"⚠ D: 10% のエラーまで送信を続ける\"]\n  X3[\"⚠ E: 毎日の関連付けは 1 回きりでない\"]\n  ENG -- \"コマンド\" --> RC\n  RC == \"✔ A: 同時は 10% まで\" ==> N\n  N -- \"エラー\" --> RC\n  RC -. \"✔ C: max-errors 0 で送信停止\" .-> N\n  X1 -.-> RC\n  X2 -.-> RC\n  X3 -.-> RC\n",
+  "alt": "Run Command で 200 台に 1 回きりの変更を行う図。max-concurrency を 10%（A）、max-errors を 0（C）にすると、同時実行が 10 分の 1 以下で、最初のエラーで送信が止まる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

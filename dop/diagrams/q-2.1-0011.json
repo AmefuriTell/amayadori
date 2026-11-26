@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0011",
+  "source": "flowchart TB\n  CFG[\"承認済みの構成\"]\n  SM@{ svc: \"AWS Systems Manager\", label: \"✔ C: State Manager の関連付け（スケジュール + タグ Env=prod）\" }\n  EC2@{ svc: \"Amazon EC2\", label: \"Env=prod の 400 台（後から起動も）\" }\n  BADA[\"⚠ A: ユーザーデータの cron は起動時だけ。既存には入らない\"]\n  BADB[\"⚠ B: Lambda と SSH の保守が要る\"]\n  BADD[\"⚠ D: 毎週の手作業で比べて直す\"]\n  CFG -- \"適用する内容\" --> SM\n  SM == \"✔ C: スケジュールで適用し直す\" ==> EC2\n  BADA -.-> EC2\n  BADB -.-> EC2\n  BADD -.-> EC2",
+  "alt": "State Manager の関連付けで、承認済みの構成をスケジュールで適用し、タグ Env=prod で対象を決める図。後から起動した EC2 にも当たり、追加の費用もない（C）。A のユーザーデータや B の Lambda は手間が大きい。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

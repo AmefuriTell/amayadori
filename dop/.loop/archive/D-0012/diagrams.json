@@ -1,0 +1,55 @@
+{
+  "item": "D-0012",
+  "diagrams": [
+    {
+      "id": "q-2.2-0001",
+      "source": "flowchart TB\n  SEC([\"セキュリティチーム\"])\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"✔ C: service-managed ＋ 自動デプロイ\" }\n  OU@{ svc: \"AWS Organizations\", label: \"Workloads OU（今あるものも今後のものも）\" }\n  ACC[\"各アカウント・2 つのリージョン\"]\n  SEC -- \"テンプレート\" --> SS\n  SS -- \"対象は OU\" --> OU\n  SS == \"✔ C: ロールは CloudFormation が作る\" ==> ACC\n  BADA[\"⚠ A: self-managed は各アカウントに実行ロールが要る\"]\n  BADB[\"⚠ B: 新しいアカウントごとに人がインスタンスを追加\"]\n  BADD[\"⚠ D: Lambda の作成と保守が要る\"]\n  BADA -.-> ACC\n  BADB -.-> OU\n  BADD -.-> OU\n",
+      "alt": "Workloads OU を対象に、service-managed のアクセス許可と自動デプロイを有効にした StackSet を作る図。IAM ロールは CloudFormation が作り、新しいアカウントにも自動で展開される（C）。A は実行ロールが要り、B は人の作業が要る。"
+    },
+    {
+      "id": "q-2.2-0002",
+      "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet（自動デプロイ・対象は Prod OU）\" }\n  subgraph PROD[\"Prod OU（対象）\"]\n    SBX[\"サンドボックスのアカウント（フィルターで除外したのに展開された）\"]\n    PA[\"本番のアカウント\"]\n  end\n  OTH@{ svc: \"AWS Organizations\", label: \"✔ B: 対象でない別の OU\" }\n  BADA[\"⚠ A: 除外フィルターに足してもアカウント単位の絞り込みは効かない\"]\n  BADC[\"⚠ C: 自動デプロイを切ると本番の自動デプロイも止まる\"]\n  BADD[\"⚠ D: 自動デプロイは StackSet 単位。アカウントごとには切り替えられない\"]\n  SS -- \"自動デプロイ\" --> PA\n  SS -- \"自動デプロイ\" --> SBX\n  SBX == \"✔ B: 別の OU に置く\" ==> OTH\n  BADA -.-> SBX\n  BADC -.-> SS\n  BADD -.-> SS",
+      "alt": "Prod OU が対象の自動デプロイの StackSet は、アカウント単位のフィルターを考えないので、サンドボックスのアカウントにも展開される。対象でない別の OU に置けば展開されない（B）。A と D は効かない。"
+    },
+    {
+      "id": "q-2.2-0003",
+      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント（自動化は SCP の対象外）\" }\n  SCP@{ svc: \"AWS Organizations\", label: \"✔ B: OU に SCP（StopLogging・DeleteTrail を拒否）\" }\n  MEM[\"メンバーアカウントの管理者・全員\"]\n  CT@{ svc: \"AWS CloudTrail\", label: \"組織の証跡\" }\n  SCP == \"✔ B: 管理者も止められない\" ==> MEM\n  MEM -. \"停止の操作は拒否\" .-> CT\n  MGMT -- \"引き続き管理できる\" --> CT\n  BADA[\"⚠ A: IAM ポリシーは管理者が外せる\"]\n  BADCD[\"⚠ C: SCP は権限を与えず、IAM から外すと開発者の権限が変わる<br/>⚠ D: メンバーの権限を広く外すと開発者の権限が変わる\"]\n  BADA -.-> MEM\n  BADCD -.-> MEM\n",
+      "alt": "メンバーアカウントを含む OU に cloudtrail:StopLogging と DeleteTrail を拒否する SCP を付ける図（B）。管理者を含む全員の停止を防ぎ、管理アカウントの自動化には効かず、開発者の IAM は変わらない。A は管理者が外せる。"
+    },
+    {
+      "id": "q-2.2-0004",
+      "source": "flowchart TB\n  TEAM([\"チーム\"])\n  AF@{ svc: \"AWS Control Tower\", label: \"✔ D: Account Factory（承認済みのテンプレート）\" }\n  SC@{ svc: \"AWS Service Catalog\", label: \"プロビジョニングされた製品\" }\n  NEW[\"新しいアカウント（登録済み・コントロール適用済み）\"]\n  TEAM -- \"アカウントを依頼\" --> AF\n  AF -- \"上に作られている\" --> SC\n  AF == \"✔ D: 作成・登録・コントロールを自動\" ==> NEW\n  BADA[\"⚠ A: CreateAccount とスクリプトで適用し続ける\"]\n  BADB[\"⚠ B: コンソールで作り、登録が手作業\"]\n  BADC[\"⚠ C: Lambda の独自コード。登録もコントロールも付かない\"]\n  BADA -.-> NEW\n  BADB -.-> NEW\n  BADC -.-> NEW\n",
+      "alt": "Control Tower の Account Factory で、承認済みのテンプレートから新しいアカウントを作ると、作成・登録・コントロールの適用まで自動で行われる図（D）。A はスクリプトを持ち続け、B は登録が手作業。"
+    },
+    {
+      "id": "q-2.2-0005",
+      "source": "flowchart TB\n  A@{ svc: \"AWS Organizations\", label: \"組織 A（今の所属）\" }\n  B@{ svc: \"AWS Organizations\", label: \"組織 B の管理アカウント\" }\n  ACC[\"移るアカウント\"]\n  B == \"✔ A: 招待を送る\" ==> ACC\n  ACC == \"✔ A: 承諾する\" ==> B\n  A -- \"✔ B: 先に抜けなくてよい\" --- ACC\n  A -. \"⚠ C: 招待は組織 B の管理アカウントから\" .-> ACC\n  BADD[\"⚠ D: 招待で入ったアカウントに 4 日の待ちは無い\"]\n  BADD -.-> ACC\n  ACC -. \"⚠ E: 組織は 1 つしか入れない\" .-> B\n",
+      "alt": "組織 A のメンバーアカウントを組織 B に移す図。組織 B の管理アカウントが招待を送り、移るアカウントが承諾する（A）。先に組織 A を抜けたり単独で動いたりする必要はない（B）。C と E は誤り。"
+    },
+    {
+      "id": "q-2.2-0006",
+      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph INV[\"招待のアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ D: OrganizationAccountAccessRole（自分で作る）\" }\n  end\n  MGMT -. \"⚠ ロールが自動で作られない\" .-> INV\n  ROLE == \"✔ D: 管理アカウントを信頼\" ==> MGMT\n  MGMT -- \"ロールに切り替える\" --> ROLE\n  BADA[\"⚠ A: 招待し直しても同じ\"]\n  BADB[\"⚠ B: 15 日は返事の期限。待ってもロールは作られない\"]\n  BADC[\"⚠ C: 一括請求はアクセス権ではない\"]\n  BADA -.-> INV\n  BADB -.-> INV\n  BADC -.-> MGMT\n",
+      "alt": "招待で入ったメンバーアカウントには OrganizationAccountAccessRole が自動で作られないので、各アカウントで管理アカウントを信頼するロールを作る図（D）。招待し直し（A）や待つこと（B）、一括請求（C）では作られない。"
+    },
+    {
+      "id": "q-2.2-0007",
+      "source": "flowchart TB\n  TP@{ svc: \"AWS Organizations\", label: \"タグポリシー（CostCenter・EC2 に強制）\" }\n  REQ([\"タグ付けのリクエスト\"])\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス<br/>✔ A: 合わない値は完了させず止める\" }\n  NOTAG[\"CostCenter タグが無いリソース\"]\n  REQ -- \"決まりに合わない値\" --> TP\n  TP == \"✔ A\" ==> EC2\n  TP -. \"✔ B: タグの無いリソースは評価しない\" .-> NOTAG\n  BADC[\"⚠ C: タグの無いリソースは評価も報告もされない\"]\n  BADD[\"⚠ D: 全機能を有効にした組織だけで使える\"]\n  BADC -.-> NOTAG\n  BADD -.-> TP\n  TP -. \"⚠ E: 指定した種類だけ強制される\" .-> EC2\n",
+      "alt": "AWS Organizations のタグポリシーで CostCenter を EC2 に強制する図。決まりに合わないタグ付けのリクエストは止まる（A）が、タグが無いリソースは評価されない（B）。強制は指定したリソースの種類だけ（E は誤り）。"
+    },
+    {
+      "id": "q-2.2-0008",
+      "source": "flowchart TB\n  ACC[\"未登録の OU の既存アカウント\"]\n  CFGR@{ svc: \"AWS Config\", label: \"既存の設定レコーダーと配信チャネル\" }\n  CT@{ svc: \"AWS Control Tower\", label: \"管理された OU\" }\n  ACC --- CFGR\n  CFGR == \"✔ C: 先に削除する\" ==> ACC\n  ACC == \"✔ C: もう一度登録\" ==> CT\n  CFGR -. \"⚠ 残っていると登録に失敗\" .-> CT\n  BADB[\"⚠ B: 登録できるのは同じ組織の OU のアカウントだけ\"]\n  BADD[\"⚠ D: Config を残しても登録できない条件は変わらない\"]\n  BADB -.-> ACC\n  BADD -.-> CFGR\n  ACC -. \"⚠ A: ログアーカイブにできるのは最初の設定の時だけ\" .-> CT\n",
+      "alt": "既存の AWS Config のリソースがあると Control Tower への登録は失敗する。リソースを削除してから管理された OU にもう一度登録する（C）。既存のアカウントをログアーカイブにできるのは最初の設定の時だけ（A は誤り）。"
+    },
+    {
+      "id": "q-2.2-0009",
+      "source": "flowchart TB\n  SCP@{ svc: \"AWS Organizations\", label: \"✔ D: SCP（承認外のリージョンを Deny）\" }\n  subgraph WL[\"Workloads OU\"]\n    ACC[\"配下のアカウント（ルートユーザーも）\"]\n    NEWA[\"毎月入る新しいアカウント\"]\n  end\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  SCP == \"✔ D: OU にアタッチ\" ==> WL\n  BADA[\"⚠ A: IAM ポリシーは管理者が外せる\"]\n  BADB[\"⚠ B: SCP は管理アカウントには効かない\"]\n  BADC[\"⚠ C: ロールだけでルートユーザーは対象外。毎月の確認も要る\"]\n  BADA -.-> ACC\n  BADB -.-> MGMT\n  BADC -.-> ACC\n",
+      "alt": "承認外のリージョンを拒否する SCP を Workloads OU にアタッチする図（D）。ルートユーザーを含む配下のすべてのアカウントと、後から入る新しいアカウントにも効く。B は管理アカウントには効かず、A の IAM ポリシーは管理者が外せる。"
+    },
+    {
+      "id": "q-2.2-0010",
+      "source": "flowchart TB\n  ROOT@{ svc: \"AWS Organizations\", label: \"ルート: FullAWSAccess（許可）\" }\n  OU@{ svc: \"AWS Organizations\", label: \"✔ B: Sandbox OU の SCP に DynamoDB を足す\" }\n  ACC@{ svc: \"AWS Organizations\", label: \"メンバーアカウント: FullAWSAccess（許可）\" }\n  DEV@{ svc: \"AWS IAM\", label: \"開発者の IAM ポリシー（DynamoDB を許可）\" }\n  ROOT -- \"許可\" --> OU\n  OU == \"✔ B: 欠けていた Allow を足す\" ==> ACC\n  ACC --> DEV\n  OU -. \"⚠ 今: S3 と EC2 だけ\" .-> ACC\n  BADA[\"⚠ A: IAM ポリシーを足しても SCP が拒否する\"]\n  BADC[\"⚠ C: アカウントの段はすでに許可。足りないのは OU の段\"]\n  BADD[\"⚠ D: SCP は管理アカウントに効かず、メンバーの経路に入らない\"]\n  BADA -.-> DEV\n  BADC -.-> ACC\n  BADD -.-> ROOT\n",
+      "alt": "SCP は、ルートからアカウントまでの経路のすべての段に Allow が要る図。Sandbox OU の SCP が S3 と EC2 だけを許すので DynamoDB が拒否される。この段の Allow に DynamoDB を足す（B）。IAM ポリシー（A）では解決しない。"
+    }
+  ]
+}

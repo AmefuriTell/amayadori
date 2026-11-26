@@ -1,0 +1,8 @@
+{
+  "id": "q-2.2-0008",
+  "source": "flowchart TB\n  ACC[\"未登録の OU の既存アカウント\"]\n  CFGR@{ svc: \"AWS Config\", label: \"既存の設定レコーダーと配信チャネル\" }\n  CT@{ svc: \"AWS Control Tower\", label: \"管理された OU\" }\n  ACC --- CFGR\n  CFGR == \"✔ C: 先に削除する\" ==> ACC\n  ACC == \"✔ C: もう一度登録\" ==> CT\n  CFGR -. \"⚠ 残っていると登録に失敗\" .-> CT\n  BADB[\"⚠ B: 登録できるのは同じ組織の OU のアカウントだけ\"]\n  BADD[\"⚠ D: Config を残しても登録できない条件は変わらない\"]\n  BADB -.-> ACC\n  BADD -.-> CFGR\n  ACC -. \"⚠ A: ログアーカイブにできるのは最初の設定の時だけ\" .-> CT\n",
+  "alt": "既存の AWS Config のリソースがあると Control Tower への登録は失敗する。リソースを削除してから管理された OU にもう一度登録する（C）。既存のアカウントをログアーカイブにできるのは最初の設定の時だけ（A は誤り）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
