@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0005",
+  "source": "flowchart TB\n  subgraph SQ[\"ソースのキュー\"]\n    Q@{ svc: \"Amazon SQS\", label: \"標準キュー\" }\n    V[\"✔ A: 可視性タイムアウト 18 分（関数の 6 倍）\"]\n  end\n  FN@{ svc: \"AWS Lambda\", label: \"関数（タイムアウト 3 分）\" }\n  DLQ@{ svc: \"Amazon SQS\", label: \"デッドレターキュー\" }\n  Q -- \"メッセージ（イベントソースマッピング）\" --> FN\n  Q == \"✔ B: maxReceiveCount 5 回で移す\" ==> DLQ\n  V -.- Q\n  C[\"⚠ C: 可視性タイムアウト 30 秒のまま（設定できない）\"]\n  C -.-> Q\n  D[\"⚠ D: maxReceiveCount 1（すぐ DLQ へ）\"]\n  D -.-> DLQ\n  E[\"⚠ E: 関数のタイムアウトを 20 分に（可視性以下が必要）\"]\n  E -.-> FN\n",
+  "alt": "SQS の標準キューを Lambda で処理する設定の図。関数のタイムアウト 3 分に対し、可視性タイムアウトは 6 倍の 18 分（A）、maxReceiveCount は 5 回にして数回やり直してからデッドレターキューへ送る（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

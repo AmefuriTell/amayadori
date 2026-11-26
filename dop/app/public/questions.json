@@ -13131,7 +13131,10 @@
           "quote": "Partner event buses do not receive AWS events."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "読み取り専用の管理 API の呼び出しで調査を始める EventBridge ルールの図。ルールの状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると読み取り専用の管理イベントにも一致する（A）。ただの有効では一致しない。"
+      }
     },
     {
       "id": "q-5.1-0002",
@@ -13205,7 +13208,10 @@
           "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "リージョンごとの AWS Health イベントは米国西部（オレゴン）の中央ルール 1 つで集め、IAM のようなグローバルなイベントは米国東部（バージニア北部）のルールで受ける図（A と B）。"
+      }
     },
     {
       "id": "q-5.1-0003",
@@ -13264,7 +13270,10 @@
           "quote": "To receive organizational events for other accounts within your AWS Organizations, see Aggregating AWS Health events using organizational view and delegated administrator access."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "組織の全アカウントの AWS Health イベントを 1 か所で受ける図。運用アカウントを委任管理者にして Health の組織ビューを使う（D）。EventBridge ルールだけでは自分のアカウントの分しか受けない。"
+      }
     },
     {
       "id": "q-5.1-0004",
@@ -13394,7 +13403,10 @@
           "quote": "We recommend setting the maxReceiveCount on your source queue's redrive policy to at least 5."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SQS の標準キューを Lambda で処理する設定の図。関数のタイムアウト 3 分に対し、可視性タイムアウトは 6 倍の 18 分（A）、maxReceiveCount は 5 回にして数回やり直してからデッドレターキューへ送る（B）。"
+      }
     },
     {
       "id": "q-5.1-0006",
@@ -13456,7 +13468,10 @@
           "quote": "all messages in that batch become visible in the queue again by default, including messages that Lambda processed successfully."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SQS のバッチ処理で 1 件の失敗が全件の再処理になる問題の図。イベントソースマッピングで ReportBatchItemFailures を有効にし、失敗したメッセージの ID を batchItemFailures で返せば失敗分だけやり直せる（C）。"
+      }
     },
     {
       "id": "q-5.1-0007",
@@ -13519,7 +13534,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "選択肢 D の「キーごとの順序を保てない」は SQS standard の性質で、この束の sources には無い"
+      "note": "選択肢 D の「キーごとの順序を保てない」は SQS standard の性質で、この束の sources には無い",
+      "diagram": {
+        "alt": "Kinesis のストリームを処理する Lambda の遅れを直す図。イベントソースマッピングの ParallelizationFactor を最大の 10 にすると、各シャードから同時に処理するバッチが増え、キーごとの順序も保たれる（A）。"
+      }
     },
     {
       "id": "q-5.1-0008",
@@ -13581,7 +13599,10 @@
           "quote": "When the filter policy scope is set to MessageAttributes, each property name in the filter policy matches a message attribute name."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SNS の注文トピックから 3 つの SQS キューへのファンアウトの図。配送チームのキューだけ、購読に MessageBody の範囲のフィルターポリシーで region が EU の注文に絞る（B）。他の 2 つは全注文を受ける。"
+      }
     },
     {
       "id": "q-5.2-0001",

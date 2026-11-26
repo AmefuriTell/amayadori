@@ -1,0 +1,8 @@
+{
+  "id": "q-5.1-0008",
+  "source": "flowchart TB\n  PUB[\"発行者（変えられない）\"]\n  T@{ svc: \"Amazon SNS\", label: \"注文のトピック\" }\n  Q1@{ svc: \"Amazon SQS\", label: \"配送チームのキュー\" }\n  Q2@{ svc: \"Amazon SQS\", label: \"キュー 2（全注文）\" }\n  Q3@{ svc: \"Amazon SQS\", label: \"キュー 3（全注文）\" }\n  PUB -- \"注文（属性なし）\" --> T\n  T == \"✔ B: MessageBody のフィルター region=EU\" ==> Q1\n  T --> Q2\n  T --> Q3\n  T -. \"⚠ A: MessageAttributes のフィルター（合う物が無い）\" .-> Q1\n  C[\"⚠ C: 全部読んで EU 以外を削除\"]\n  C -.-> Q1\n  D[\"⚠ D: EU 用トピックへ送り直す（発行者の変更が必要）\"]\n  D -.-> PUB\n",
+  "alt": "SNS の注文トピックから 3 つの SQS キューへのファンアウトの図。配送チームのキューだけ、購読に MessageBody の範囲のフィルターポリシーで region が EU の注文に絞る（B）。他の 2 つは全注文を受ける。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
