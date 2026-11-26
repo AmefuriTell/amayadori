@@ -1,0 +1,69 @@
+{
+  "task": "6.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.3-0011",
+  "services": [
+    "Amazon GuardDuty",
+    "Amazon EventBridge",
+    "Amazon Data Firehose",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses Amazon GuardDuty. Its security policy now requires every GuardDuty finding to be kept for at least 1 year for investigations. The company wants each new finding to be stored automatically, without people downloading findings and without custom polling code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は Amazon GuardDuty を使っています。セキュリティのポリシーで、調査のために GuardDuty のすべての検出結果を少なくとも 1 年間残すことが求められるようになりました。会社は、人が検出結果をダウンロードしたり独自のポーリングのコードを書いたりせずに、新しい検出結果を自動で保存したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an EventBridge rule for GuardDuty findings that sends them to Amazon Data Firehose, which delivers them to Amazon S3.",
+      "text_ja": "GuardDuty の検出結果の EventBridge ルールを作り、Amazon Data Firehose へ送って、Firehose が Amazon S3 へ届ける。"
+    },
+    {
+      "key": "B",
+      "text": "Keep the findings in GuardDuty and review them in the GuardDuty console when an investigation is needed.",
+      "text_ja": "検出結果は GuardDuty に置いたままにし、調査が必要な時に GuardDuty のコンソールで確認する。"
+    },
+    {
+      "key": "C",
+      "text": "Ask a security engineer to export the findings from the console every week and upload the files to Amazon S3.",
+      "text_ja": "セキュリティのエンジニアが毎週コンソールから検出結果を出力し、ファイルを Amazon S3 へアップロードする。"
+    },
+    {
+      "key": "D",
+      "text": "Schedule an AWS Lambda function that calls the GuardDuty API every day, finds new findings, and writes them to Amazon S3.",
+      "text_ja": "毎日 GuardDuty の API を呼んで新しい検出結果を探し、Amazon S3 へ書く AWS Lambda 関数をスケジュールで実行する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "GuardDuty は検出結果を 90 日間保存し、すべての検出結果を自動で Amazon EventBridge にイベントとして送ります。EventBridge を使えば、検出結果を好きな保存先へ送り、好きなだけ長く残せます。",
+    "per_choice": {
+      "A": "正しい。GuardDuty が自動で送るイベントをルールで受け、コード無しで保存先へ届けて長く残せます。",
+      "B": "GuardDuty は検出結果を 90 日間しか保存しないため、1 年間残す要件を満たしません。",
+      "C": "人の作業が毎週必要で、要件に反します。",
+      "D": "動きますが、ポーリングのコードを書いて保守する必要があり、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+      "source_id": "S4",
+      "quote": "GuardDuty stores findings for 90 days."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+      "source_id": "S4",
+      "quote": "GuardDuty automatically publishes (sends) findings as events to Amazon EventBridge (formerly Amazon CloudWatch Events), a serverless event bus service."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+      "source_id": "S4",
+      "quote": "With EventBridge, you can send findings data to your preferred storage platform and store the data for as long as you like."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

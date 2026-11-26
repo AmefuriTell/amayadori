@@ -1,0 +1,218 @@
+{
+  "item": "C-0005",
+  "questions": [
+    {
+      "task": "1.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.1-0004",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon ECS",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Amazon ECS service is deployed with AWS CodeDeploy blue/green deployments behind a Network Load Balancer, and all traffic currently moves to the new task set at once. The team wants new versions to receive a small share of traffic first and the remaining traffic a few minutes later, so that problems affect fewer users. Which solution meets this requirement with the LEAST change to the deployment process?",
+      "stem_ja": "Amazon ECS のサービスが、Network Load Balancer の後ろで AWS CodeDeploy の Blue/Green デプロイでデプロイされており、今はすべてのトラフィックが一度に新しいタスクセットへ移ります。チームは、問題が起きても影響を受ける利用者が少なくなるよう、新しい版にまず一部のトラフィックを送り、残りを数分後に送りたいと考えています。デプロイの手順の変更を最も少なくしてこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSCanary10Percent5Minutes.",
+          "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSCanary10Percent5Minutes に変える。"
+        },
+        {
+          "key": "B",
+          "text": "Move the service behind an Application Load Balancer and use the CodeDeployDefault.ECSCanary10Percent5Minutes deployment configuration.",
+          "text_ja": "サービスを Application Load Balancer の後ろへ移し、CodeDeployDefault.ECSCanary10Percent5Minutes のデプロイ設定を使う。"
+        },
+        {
+          "key": "C",
+          "text": "Keep the Network Load Balancer and the CodeDeployDefault.ECSAllAtOnce configuration, and add a manual approval before each deployment.",
+          "text_ja": "Network Load Balancer と CodeDeployDefault.ECSAllAtOnce の設定のままにし、各デプロイの前に手動の承認を足す。"
+        },
+        {
+          "key": "D",
+          "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSLinear10PercentEvery1Minutes.",
+          "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSLinear10PercentEvery1Minutes に変える。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ECS のデプロイでは、カナリア・リニア・一括のデプロイ設定でトラフィックを移せますが、Network Load Balancer を使う場合は事前定義の CodeDeployDefault.ECSAllAtOnce しか使えません。一部を先に送るカナリアを使うには、Application Load Balancer に移す必要があります。",
+        "per_choice": {
+          "A": "Network Load Balancer では ECSAllAtOnce しか使えず、このカナリアの設定は使えません。",
+          "B": "正しい。ロードバランサーを変えれば、10% を先に送り残りを 5 分後に送るカナリアを使えます。",
+          "C": "承認を足しても、トラフィックは一度にすべて移り、一部を先に送る要件を満たしません。",
+          "D": "Network Load Balancer では ECSAllAtOnce しか使えず、リニアの設定も使えません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "source_id": "S2",
+          "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "source_id": "S2",
+          "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "source_id": "S2",
+          "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
+        }
+      ],
+      "low_confidence": true
+    },
+    {
+      "task": "1.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.1-0005",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses CodeDeploy in-place deployments to 12 EC2 instances. During deployments, at least three quarters of the instances must stay available to serve traffic, but deployments must finish as quickly as possible within that limit. Which deployment configuration is the MOST appropriate?",
+      "stem_ja": "ある会社は、12 台の EC2 インスタンスに CodeDeploy のインプレースデプロイを行っています。デプロイ中も、少なくとも 4 分の 3 のインスタンスがトラフィックを処理できる状態で残る必要がありますが、その範囲でデプロイをできるだけ早く終える必要があります。最も適切なデプロイ設定はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CodeDeployDefault.OneAtATime, which deploys to only one instance at a time.",
+          "text_ja": "1 度に 1 台のインスタンスにだけデプロイする CodeDeployDefault.OneAtATime。"
+        },
+        {
+          "key": "B",
+          "text": "CodeDeployDefault.HalfAtATime, which deploys to up to half of the instances at a time.",
+          "text_ja": "1 度に最大で半分のインスタンスにデプロイする CodeDeployDefault.HalfAtATime。"
+        },
+        {
+          "key": "C",
+          "text": "A custom deployment configuration with a minimum healthy hosts value of 75 percent.",
+          "text_ja": "最小正常ホスト数を 75% にした独自のデプロイ設定。"
+        },
+        {
+          "key": "D",
+          "text": "CodeDeployDefault.AllAtOnce, which deploys to as many instances as possible at once.",
+          "text_ja": "できるだけ多くのインスタンスに一度にデプロイする CodeDeployDefault.AllAtOnce。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "EC2/オンプレミスのデプロイ設定は、最小正常ホスト数で、デプロイ中にいつも残す必要があるインスタンスの数か割合を決めます。既定の設定が合わない時は、最小正常ホスト数を決めた独自のデプロイ設定を作れます。75% にすれば 12 台のうち 9 台を残しつつ、3 台ずつデプロイできます。",
+        "per_choice": {
+          "A": "残る台数の要件は満たしますが、1 台ずつなので最も時間がかかり、早く終える要件に合いません。",
+          "B": "最大で 6 台に同時にデプロイするため、残るのが半分になり、4 分の 3 を残す要件を満たしません。",
+          "C": "正しい。9 台を残す範囲で、できるだけ多くのインスタンスに同時にデプロイできます。",
+          "D": "すべてのインスタンスに一度にデプロイするため、残る台数の要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "source_id": "S1",
+          "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations-create.html#deployment-configurations-create-console",
+          "source_id": "S4",
+          "quote": "If you don't want to use one of the default deployment configurations provided with CodeDeploy, you can create your own using the following instructions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "source_id": "S1",
+          "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
+        }
+      ]
+    },
+    {
+      "task": "1.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-1.1-0006",
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team deploys AWS Lambda functions with CodeDeploy by using a canary deployment configuration. The team wants a deployment to stop and return to the last known good version automatically if the function's error rate goes above a threshold during the deployment. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "あるチームは、カナリアのデプロイ設定を使い、CodeDeploy で AWS Lambda 関数をデプロイしています。チームは、デプロイ中に関数のエラー率がしきい値を超えたら、デプロイを止めて、最後に正常だった版へ自動で戻したいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a CloudWatch alarm on the function's error rate, and add the alarm to the deployment group.",
+          "text_ja": "関数のエラー率の CloudWatch アラームを作り、そのアラームをデプロイグループに足す。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on automatic rollback for the deployment group when alarm thresholds are met.",
+          "text_ja": "アラームのしきい値に達した時の自動ロールバックを、デプロイグループで有効にする。"
+        },
+        {
+          "key": "C",
+          "text": "Choose Ignore alarm configuration so that deployments continue while the alarm is active.",
+          "text_ja": "アラームが発生している間もデプロイが続くよう、アラームの設定を無視する（Ignore alarm configuration）を選ぶ。"
+        },
+        {
+          "key": "D",
+          "text": "Add the alarm to the deployment group first, and create the CloudWatch alarm only after the first failed deployment.",
+          "text_ja": "先にアラームをデプロイグループに足し、CloudWatch アラームは最初にデプロイが失敗した後に作る。"
+        },
+        {
+          "key": "E",
+          "text": "Leave rollbacks off and create a new deployment of the previous revision by hand when the error rate is high.",
+          "text_ja": "ロールバックは無効のままにし、エラー率が高い時は前のリビジョンの新しいデプロイを手作業で作る。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudWatch アラームをデプロイグループに足すと、メトリクスがしきい値を超えた時にデプロイを止められます。アラームは先に CloudWatch で作っておく必要があります。アラームのしきい値に達した時のロールバックを有効にすると、CodeDeploy は最後に正常だったリビジョンを再デプロイします。",
+        "per_choice": {
+          "A": "正しい。エラー率を見るアラームで、しきい値を超えた時にデプロイを止められます。",
+          "B": "正しい。アラームが発生した時に、最後に正常だったリビジョンが自動で再デプロイされます。",
+          "C": "アラームを無視するとデプロイが続き、要件と逆になります。",
+          "D": "アラームは、デプロイグループに足す前に CloudWatch で作っておく必要があります。",
+          "E": "戻すのが手作業で、自動で戻すという要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "source_id": "S10",
+          "quote": "You can configure a deployment to stop when an Amazon CloudWatch alarm detects that a metric has fallen below or exceeded a defined threshold."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "source_id": "S10",
+          "quote": "You must have already created the alarm in CloudWatch before you can add it to a deployment group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "source_id": "S10",
+          "quote": "CodeDeploy will redeploy the last known good revision when one or more of the specified alarms is activated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-manual-rollbacks",
+          "source_id": "S6",
+          "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "item": "C-0005",
+  "questions": [
+    {
+      "id": "q-1.1-0004",
+      "task": "1.1",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon ECS",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Amazon ECS のサービスが、Network Load Balancer の後ろで AWS CodeDeploy の Blue/Green デプロイでデプロイされており、今はすべてのトラフィックが一度に新しいタスクセットへ移ります。チームは、問題が起きても影響を受ける利用者が少なくなるよう、新しい版にまず一部のトラフィックを送り、残りを数分後に送りたいと考えています。デプロイの手順の変更を最も少なくしてこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSCanary10Percent5Minutes に変える。"
+        },
+        {
+          "key": "B",
+          "text": "サービスを Application Load Balancer の後ろへ移し、CodeDeployDefault.ECSCanary10Percent5Minutes のデプロイ設定を使う。"
+        },
+        {
+          "key": "C",
+          "text": "Network Load Balancer と CodeDeployDefault.ECSAllAtOnce の設定のままにし、各デプロイの前に手動の承認を足す。"
+        },
+        {
+          "key": "D",
+          "text": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSLinear10PercentEvery1Minutes に変える。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0005",
+      "task": "1.1",
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "ある会社は、12 台の EC2 インスタンスに CodeDeploy のインプレースデプロイを行っています。デプロイ中も、少なくとも 4 分の 3 のインスタンスがトラフィックを処理できる状態で残る必要がありますが、その範囲でデプロイをできるだけ早く終える必要があります。最も適切なデプロイ設定はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "1 度に 1 台のインスタンスにだけデプロイする CodeDeployDefault.OneAtATime。"
+        },
+        {
+          "key": "B",
+          "text": "1 度に最大で半分のインスタンスにデプロイする CodeDeployDefault.HalfAtATime。"
+        },
+        {
+          "key": "C",
+          "text": "最小正常ホスト数を 75% にした独自のデプロイ設定。"
+        },
+        {
+          "key": "D",
+          "text": "できるだけ多くのインスタンスに一度にデプロイする CodeDeployDefault.AllAtOnce。"
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0006",
+      "task": "1.1",
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "あるチームは、カナリアのデプロイ設定を使い、CodeDeploy で AWS Lambda 関数をデプロイしています。チームは、デプロイ中に関数のエラー率がしきい値を超えたら、デプロイを止めて、最後に正常だった版へ自動で戻したいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "関数のエラー率の CloudWatch アラームを作り、そのアラームをデプロイグループに足す。"
+        },
+        {
+          "key": "B",
+          "text": "アラームのしきい値に達した時の自動ロールバックを、デプロイグループで有効にする。"
+        },
+        {
+          "key": "C",
+          "text": "アラームが発生している間もデプロイが続くよう、アラームの設定を無視する（Ignore alarm configuration）を選ぶ。"
+        },
+        {
+          "key": "D",
+          "text": "先にアラームをデプロイグループに足し、CloudWatch アラームは最初にデプロイが失敗した後に作る。"
+        },
+        {
+          "key": "E",
+          "text": "ロールバックは無効のままにし、エラー率が高い時は前のリビジョンの新しいデプロイを手作業で作る。"
+        }
+      ]
+    }
+  ]
+}

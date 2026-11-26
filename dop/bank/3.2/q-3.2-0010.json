@@ -1,0 +1,66 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0010",
+  "services": [
+    "AWS CloudFormation StackSets"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company must deploy the same CloudFormation template, with the same settings, to 30 accounts in 4 Regions. Updates must be applied with a single operation from an administrator account. If too many stack updates fail in a Region, the rollout must stop automatically so that engineers can troubleshoot quickly. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、同じ CloudFormation のテンプレートを同じ設定で、4 つのリージョンの 30 のアカウントにデプロイする必要があります。更新は管理者のアカウントから 1 回の操作で適用する必要があります。あるリージョンでスタックの更新の失敗が多すぎる時は、エンジニアが素早く調べられるよう、展開が自動で止まる必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Write a script that loops over every account and Region and runs a CloudFormation stack update in each one.",
+      "text_ja": "すべてのアカウントとリージョンを順に回り、それぞれで CloudFormation のスタックの更新を実行するスクリプトを書く。"
+    },
+    {
+      "key": "B",
+      "text": "Use CloudFormation StackSets from the administrator account, and set a low failure tolerance for the operations.",
+      "text_ja": "管理者のアカウントから CloudFormation StackSets を使い、操作の失敗の許容数を低く設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Create a pipeline with one CloudFormation deploy action for each of the 120 account and Region pairs.",
+      "text_ja": "120 のアカウントとリージョンの組ごとに 1 つの CloudFormation のデプロイのアクションを持つパイプラインを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Ask each account owner to update the stacks in their account from the console when a new template is released.",
+      "text_ja": "新しいテンプレートが出たら、各アカウントの所有者がコンソールから自分のアカウントのスタックを更新する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "StackSets は、管理者のアカウントで 1 つのテンプレートを管理し、1 回の操作で複数のアカウントとリージョンにスタックを作成・更新・削除できます。失敗の許容数を決めると、リージョンごとの失敗がそれを超えた時に操作が自動で止まり、数を低くするほど早く調べ始められます。",
+    "per_choice": {
+      "A": "動きますが、スクリプトと失敗の扱いを自分で作って保守する必要があります。",
+      "B": "正しい。1 回の操作で同じ設定を展開し、失敗が多すぎれば自動で止まります。",
+      "C": "動きますが、120 のアクションの管理が大きな手間になり、失敗の許容の仕組みもありません。",
+      "D": "1 回の操作にならず、手作業が多く、設定がそろう保証もありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+      "source_id": "S1",
+      "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+      "source_id": "S3",
+      "quote": "lets you specify the maximum number or percentage of stack operation failures that can occur, per Region, beyond which CloudFormation stops an operation automatically."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+      "source_id": "S3",
+      "quote": "A lower number or percentage means that the operation performs on fewer stacks, but you are able to start troubleshooting failed operations faster."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

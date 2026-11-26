@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 205,
+  "count": 218,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -726,6 +726,205 @@
         {
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
           "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0012",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon ECS",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Amazon ECS service is deployed with AWS CodeDeploy blue/green deployments behind a Network Load Balancer, and all traffic currently moves to the new task set at once. The team wants new versions to receive a small share of traffic first and the remaining traffic a few minutes later, so that problems affect fewer users. Which solution meets this requirement with the LEAST change to the deployment process?",
+      "stem_ja": "Amazon ECS のサービスが、Network Load Balancer の後ろで AWS CodeDeploy の Blue/Green デプロイでデプロイされており、今はすべてのトラフィックが一度に新しいタスクセットへ移ります。チームは、問題が起きても影響を受ける利用者が少なくなるよう、新しい版にまず一部のトラフィックを送り、残りを数分後に送りたいと考えています。デプロイの手順の変更を最も少なくしてこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSCanary10Percent5Minutes.",
+          "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSCanary10Percent5Minutes に変える。"
+        },
+        {
+          "key": "B",
+          "text": "Keep the Network Load Balancer and the CodeDeployDefault.ECSAllAtOnce configuration, and add a manual approval before each deployment.",
+          "text_ja": "Network Load Balancer と CodeDeployDefault.ECSAllAtOnce の設定のままにし、各デプロイの前に手動の承認を足す。"
+        },
+        {
+          "key": "C",
+          "text": "Keep the Network Load Balancer and change the deployment configuration to CodeDeployDefault.ECSLinear10PercentEvery1Minutes.",
+          "text_ja": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSLinear10PercentEvery1Minutes に変える。"
+        },
+        {
+          "key": "D",
+          "text": "Move the service behind an Application Load Balancer and use the CodeDeployDefault.ECSCanary10Percent5Minutes deployment configuration.",
+          "text_ja": "サービスを Application Load Balancer の後ろへ移し、CodeDeployDefault.ECSCanary10Percent5Minutes のデプロイ設定を使う。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "ECS のデプロイでは、カナリア・リニア・一括のデプロイ設定でトラフィックを移せますが、Network Load Balancer を使う場合は事前定義の CodeDeployDefault.ECSAllAtOnce しか使えません。一部を先に送るカナリアを使うには、Application Load Balancer に移す必要があります。",
+        "per_choice": {
+          "A": "Network Load Balancer では ECSAllAtOnce しか使えず、このカナリアの設定は使えません。",
+          "B": "承認を足しても、トラフィックは一度にすべて移り、一部を先に送る要件を満たしません。",
+          "C": "Network Load Balancer では ECSAllAtOnce しか使えず、リニアの設定も使えません。",
+          "D": "正しい。ロードバランサーを変えれば、10% を先に送り残りを 5 分後に送るカナリアを使えます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
+        }
+      ],
+      "low_confidence": true
+    },
+    {
+      "id": "q-1.1-0013",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "Amazon EC2"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses CodeDeploy in-place deployments to 12 EC2 instances. During deployments, at least three quarters of the instances must stay available to serve traffic, but deployments must finish as quickly as possible within that limit. Which deployment configuration is the MOST appropriate?",
+      "stem_ja": "ある会社は、12 台の EC2 インスタンスに CodeDeploy のインプレースデプロイを行っています。デプロイ中も、少なくとも 4 分の 3 のインスタンスがトラフィックを処理できる状態で残る必要がありますが、その範囲でデプロイをできるだけ早く終える必要があります。最も適切なデプロイ設定はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CodeDeployDefault.OneAtATime, which deploys to only one instance at a time.",
+          "text_ja": "1 度に 1 台のインスタンスにだけデプロイする CodeDeployDefault.OneAtATime。"
+        },
+        {
+          "key": "B",
+          "text": "CodeDeployDefault.HalfAtATime, which deploys to up to half of the instances at a time.",
+          "text_ja": "1 度に最大で半分のインスタンスにデプロイする CodeDeployDefault.HalfAtATime。"
+        },
+        {
+          "key": "C",
+          "text": "A custom deployment configuration with a minimum healthy hosts value of 75 percent.",
+          "text_ja": "最小正常ホスト数を 75% にした独自のデプロイ設定。"
+        },
+        {
+          "key": "D",
+          "text": "CodeDeployDefault.AllAtOnce, which deploys to as many instances as possible at once.",
+          "text_ja": "できるだけ多くのインスタンスに一度にデプロイする CodeDeployDefault.AllAtOnce。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "EC2/オンプレミスのデプロイ設定は、最小正常ホスト数で、デプロイ中にいつも残す必要があるインスタンスの数か割合を決めます。既定の設定が合わない時は、最小正常ホスト数を決めた独自のデプロイ設定を作れます。75% にすれば 12 台のうち 9 台を残しつつ、3 台ずつデプロイできます。",
+        "per_choice": {
+          "A": "残る台数の要件は満たしますが、1 台ずつなので最も時間がかかり、早く終える要件に合いません。",
+          "B": "最大で 6 台に同時にデプロイするため、残るのが半分になり、4 分の 3 を残す要件を満たしません。",
+          "C": "正しい。9 台を残す範囲で、できるだけ多くのインスタンスに同時にデプロイできます。",
+          "D": "すべてのインスタンスに一度にデプロイするため、残る台数の要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations-create.html#deployment-configurations-create-console",
+          "quote": "If you don't want to use one of the default deployment configurations provided with CodeDeploy, you can create your own using the following instructions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-1.1-0014",
+      "task": "1.1",
+      "domain": 1,
+      "services": [
+        "AWS CodeDeploy",
+        "AWS Lambda",
+        "Amazon CloudWatch"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A team deploys AWS Lambda functions with CodeDeploy by using a canary deployment configuration. The team wants a deployment to stop and return to the last known good version automatically if the function's error rate goes above a threshold during the deployment. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "あるチームは、カナリアのデプロイ設定を使い、CodeDeploy で AWS Lambda 関数をデプロイしています。チームは、デプロイ中に関数のエラー率がしきい値を超えたら、デプロイを止めて、最後に正常だった版へ自動で戻したいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a CloudWatch alarm on the function's error rate, and add the alarm to the deployment group.",
+          "text_ja": "関数のエラー率の CloudWatch アラームを作り、そのアラームをデプロイグループに足す。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on automatic rollback for the deployment group when alarm thresholds are met.",
+          "text_ja": "アラームのしきい値に達した時の自動ロールバックを、デプロイグループで有効にする。"
+        },
+        {
+          "key": "C",
+          "text": "Choose Ignore alarm configuration so that deployments continue while the alarm is active.",
+          "text_ja": "アラームが発生している間もデプロイが続くよう、アラームの設定を無視する（Ignore alarm configuration）を選ぶ。"
+        },
+        {
+          "key": "D",
+          "text": "Add the alarm to the deployment group first, and create the CloudWatch alarm only after the first failed deployment.",
+          "text_ja": "先にアラームをデプロイグループに足し、CloudWatch アラームは最初にデプロイが失敗した後に作る。"
+        },
+        {
+          "key": "E",
+          "text": "Leave rollbacks off and create a new deployment of the previous revision by hand when the error rate is high.",
+          "text_ja": "ロールバックは無効のままにし、エラー率が高い時は前のリビジョンの新しいデプロイを手作業で作る。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "CloudWatch アラームをデプロイグループに足すと、メトリクスがしきい値を超えた時にデプロイを止められます。アラームは先に CloudWatch で作っておく必要があります。アラームのしきい値に達した時のロールバックを有効にすると、CodeDeploy は最後に正常だったリビジョンを再デプロイします。",
+        "per_choice": {
+          "A": "正しい。エラー率を見るアラームで、しきい値を超えた時にデプロイを止められます。",
+          "B": "正しい。アラームが発生した時に、最後に正常だったリビジョンが自動で再デプロイされます。",
+          "C": "アラームを無視するとデプロイが続き、要件と逆になります。",
+          "D": "アラームは、デプロイグループに足す前に CloudWatch で作っておく必要があります。",
+          "E": "戻すのが手作業で、自動で戻すという要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "You can configure a deployment to stop when an Amazon CloudWatch alarm detects that a metric has fallen below or exceeded a defined threshold."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "You must have already created the alarm in CloudWatch before you can add it to a deployment group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "CodeDeploy will redeploy the last known good revision when one or more of the specified alarms is activated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-manual-rollbacks",
+          "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision"
         }
       ],
       "low_confidence": false
@@ -6045,6 +6244,190 @@
       "low_confidence": false
     },
     {
+      "id": "q-3.1-0010",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A Network Load Balancer is enabled in two Availability Zones. One zone has 2 registered targets and the other has 6. The 2 targets are overloaded while the other 6 are mostly idle. The company wants traffic to be spread evenly across all 8 targets without adding instances or changing the load balancer type. Which solution meets these requirements with the LEAST effort?",
+      "stem_ja": "Network Load Balancer が 2 つのアベイラビリティーゾーンで有効になっています。一方のゾーンには 2 つ、もう一方には 6 つのターゲットが登録されています。2 つのターゲットは負荷が高すぎ、残りの 6 つはほとんど暇です。会社は、インスタンスを足したりロードバランサーの種類を変えたりせずに、8 つのターゲット全体にトラフィックを均等に分けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on cross-zone load balancing for the Network Load Balancer.",
+          "text_ja": "Network Load Balancer のクロスゾーン負荷分散を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Launch 4 more instances in the zone that has 2 targets and register them.",
+          "text_ja": "ターゲットが 2 つのゾーンに 4 台のインスタンスを足して登録する。"
+        },
+        {
+          "key": "C",
+          "text": "Replace the Network Load Balancer with an Application Load Balancer, and turn off cross-zone load balancing on its target group.",
+          "text_ja": "Network Load Balancer を Application Load Balancer に置き換え、ターゲットグループでクロスゾーン負荷分散を無効にする。"
+        },
+        {
+          "key": "D",
+          "text": "Lower the health check interval so that the overloaded targets are removed from service sooner.",
+          "text_ja": "負荷が高すぎるターゲットがより早く外されるよう、ヘルスチェックの間隔を短くする。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "Network Load Balancer では、クロスゾーン負荷分散は既定で無効で、各ノードは自分のアベイラビリティーゾーンのターゲットにだけトラフィックを分けます。有効にすると、各ノードが有効なすべてのアベイラビリティーゾーンのターゲットに分けるので、ゾーンごとのターゲットの数が違っても全体に分かれます。設定はロードバランサーを作った後でもいつでも変えられます。",
+        "per_choice": {
+          "A": "正しい。インスタンスを足さず、種類も変えずに、すべてのターゲットにトラフィックを分けられます。",
+          "B": "偏りは減りますが、インスタンスを足さないという要件に反します。",
+          "C": "ロードバランサーの種類を変えるうえ、クロスゾーンを無効にするとゾーンごとの偏りがそのまま残ります。",
+          "D": "負荷の高いターゲットが外されるだけで、残りのターゲットの負荷がさらに高まり、均等には分かれません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "quote": "By default, each Network Load Balancer node distributes traffic across the registered targets in its Availability Zone only."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "quote": "If you turn on cross-zone load balancing, each Network Load Balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#cross-zone-load-balancing",
+          "quote": "After you create the load balancer, you can enable or disable cross-zone load balancing at any time."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0011",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Elastic Load Balancing",
+        "Amazon EC2 Auto Scaling"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Application Load Balancer is enabled in us-east-1a and us-east-1b. To improve availability, a team changed its Auto Scaling group to also launch instances in us-east-1c. The new instances in us-east-1c are healthy and registered in the target group, but they never receive traffic. What is the MOST likely cause?",
+      "stem_ja": "Application Load Balancer は us-east-1a と us-east-1b で有効になっています。可用性を高めるため、チームは Auto Scaling グループを us-east-1c でもインスタンスを起動するように変えました。us-east-1c の新しいインスタンスは正常で、ターゲットグループにも登録されていますが、トラフィックを一切受け取りません。最も可能性の高い原因はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Cross-zone load balancing is turned off at the load balancer level of the Application Load Balancer.",
+          "text_ja": "Application Load Balancer のロードバランサーのレベルで、クロスゾーン負荷分散が無効になっている。"
+        },
+        {
+          "key": "B",
+          "text": "us-east-1c is not enabled for the load balancer, so no load balancer node exists in that zone.",
+          "text_ja": "ロードバランサーで us-east-1c が有効になっておらず、そのゾーンにロードバランサーのノードが無い。"
+        },
+        {
+          "key": "C",
+          "text": "The Auto Scaling group balances instances equally across zones, so it stops new instances in us-east-1c.",
+          "text_ja": "Auto Scaling グループがゾーン間でインスタンスを均等に保つため、us-east-1c の新しいインスタンスを止める。"
+        },
+        {
+          "key": "D",
+          "text": "The health check marks the instances as healthy too quickly, so the load balancer ignores them.",
+          "text_ja": "ヘルスチェックがインスタンスを早く正常とみなしすぎるため、ロードバランサーが無視する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "ロードバランサーでアベイラビリティーゾーンを有効にすると、Elastic Load Balancing はそのゾーンにロードバランサーのノードを作ります。ターゲットを登録しても、そのゾーンを有効にしていなければ、登録したターゲットはトラフィックを受け取りません。",
+        "per_choice": {
+          "A": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は常に有効で、無効にできません。",
+          "B": "正しい。ゾーンを有効にしていないと、そのゾーンに登録したターゲットはトラフィックを受け取りません。",
+          "C": "Auto Scaling は有効なゾーン間でインスタンスの数を均等に保ちますが、それでトラフィックが来なくなるわけではありません。",
+          "D": "正常と判定されたターゲットは使われます。早く正常になっても無視されることはありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#availability-zones",
+          "quote": "If you register targets in an Availability Zone but do not enable the Availability Zone, these registered targets do not receive traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "With Application Load Balancers, cross-zone load balancing is always turned on at the load balancer level, and cannot be turned off."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "quote": "When the health checks exceed HealthyThresholdCount consecutive successes, the load balancer puts the target back in service."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.1-0012",
+      "task": "3.1",
+      "domain": 3,
+      "services": [
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An Application Load Balancer is enabled in three Availability Zones and has two target groups. Cross-zone load balancing is turned off at the target group level for both groups to keep traffic within each zone. One target group has targets in all three zones, but the other has targets in only two zones. Users intermittently receive HTTP 503 errors for the second group's paths. Which change BEST resolves the errors while keeping cross-zone load balancing off?",
+      "stem_ja": "Application Load Balancer は 3 つのアベイラビリティーゾーンで有効になっており、2 つのターゲットグループがあります。トラフィックを各ゾーンの中に留めるため、両方のグループでターゲットグループのレベルのクロスゾーン負荷分散を無効にしています。一方のターゲットグループには 3 つのゾーンすべてにターゲットがありますが、もう一方は 2 つのゾーンにしかありません。利用者は 2 つ目のグループのパスで、ときどき HTTP 503 のエラーを受け取ります。クロスゾーン負荷分散を無効のまま、エラーを最もよく解決する変更はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on target stickiness for the second target group so that each user stays on a working target.",
+          "text_ja": "各利用者が動いているターゲットに留まるよう、2 つ目のターゲットグループでターゲットのスティッキネスを有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Increase the health check interval of the second target group so that targets are not removed as often.",
+          "text_ja": "ターゲットが頻繁に外されないよう、2 つ目のターゲットグループのヘルスチェックの間隔を長くする。"
+        },
+        {
+          "key": "C",
+          "text": "Register targets for the second target group in the third Availability Zone as well.",
+          "text_ja": "2 つ目のターゲットグループのターゲットを、3 つ目のゾーンにも登録する。"
+        },
+        {
+          "key": "D",
+          "text": "Turn off cross-zone load balancing at the load balancer level as well.",
+          "text_ja": "ロードバランサーのレベルでも、クロスゾーン負荷分散を無効にする。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "クロスゾーン負荷分散を無効にすると、各ノードは自分のゾーンのターゲットにだけトラフィックを分けます。複数のターゲットグループがある時は、すべてのターゲットグループが同じゾーンに参加するようにし、空のゾーンを作らないようにします。空のゾーンに入ったリクエストは 503 エラーになります。",
+        "per_choice": {
+          "A": "クロスゾーン負荷分散が無効の時、ターゲットのスティッキネスは使えません。",
+          "B": "ターゲットが無いゾーンの問題で、ヘルスチェックの間隔を変えても解決しません。",
+          "C": "正しい。3 つ目のゾーンにもターゲットがあれば空のゾーンが無くなり、クロスゾーンを無効のまま 503 を防げます。",
+          "D": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は無効にできません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "ensure all target groups are participating in the same Availability Zones, within the configured Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "as this triggers a 503 error for all HTTP requests that enter the empty Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "Target stickiness is not supported when cross-zone load balancing is off."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
       "id": "q-3.2-0001",
       "task": "3.2",
       "domain": 3,
@@ -6623,6 +7006,199 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html#deployment-circuit-breaker",
           "quote": "The deployment circuit breaker is the rolling update mechanism that determines if the tasks reach a steady state."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0010",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS CloudFormation StackSets"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company must deploy the same CloudFormation template, with the same settings, to 30 accounts in 4 Regions. Updates must be applied with a single operation from an administrator account. If too many stack updates fail in a Region, the rollout must stop automatically so that engineers can troubleshoot quickly. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、同じ CloudFormation のテンプレートを同じ設定で、4 つのリージョンの 30 のアカウントにデプロイする必要があります。更新は管理者のアカウントから 1 回の操作で適用する必要があります。あるリージョンでスタックの更新の失敗が多すぎる時は、エンジニアが素早く調べられるよう、展開が自動で止まる必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Write a script that loops over every account and Region and runs a CloudFormation stack update in each one.",
+          "text_ja": "すべてのアカウントとリージョンを順に回り、それぞれで CloudFormation のスタックの更新を実行するスクリプトを書く。"
+        },
+        {
+          "key": "B",
+          "text": "Use CloudFormation StackSets from the administrator account, and set a low failure tolerance for the operations.",
+          "text_ja": "管理者のアカウントから CloudFormation StackSets を使い、操作の失敗の許容数を低く設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a pipeline with one CloudFormation deploy action for each of the 120 account and Region pairs.",
+          "text_ja": "120 のアカウントとリージョンの組ごとに 1 つの CloudFormation のデプロイのアクションを持つパイプラインを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each account owner to update the stacks in their account from the console when a new template is released.",
+          "text_ja": "新しいテンプレートが出たら、各アカウントの所有者がコンソールから自分のアカウントのスタックを更新する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "StackSets は、管理者のアカウントで 1 つのテンプレートを管理し、1 回の操作で複数のアカウントとリージョンにスタックを作成・更新・削除できます。失敗の許容数を決めると、リージョンごとの失敗がそれを超えた時に操作が自動で止まり、数を低くするほど早く調べ始められます。",
+        "per_choice": {
+          "A": "動きますが、スクリプトと失敗の扱いを自分で作って保守する必要があります。",
+          "B": "正しい。1 回の操作で同じ設定を展開し、失敗が多すぎれば自動で止まります。",
+          "C": "動きますが、120 のアクションの管理が大きな手間になり、失敗の許容の仕組みもありません。",
+          "D": "1 回の操作にならず、手作業が多く、設定がそろう保証もありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+          "quote": "lets you specify the maximum number or percentage of stack operation failures that can occur, per Region, beyond which CloudFormation stops an operation automatically."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+          "quote": "A lower number or percentage means that the operation performs on fewer stacks, but you are able to start troubleshooting failed operations faster."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0011",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS CodePipeline",
+        "AWS CloudFormation",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A pipeline in AWS CodePipeline runs in us-east-1. The company wants the same pipeline to deploy CloudFormation stacks in eu-west-1 and ap-northeast-1 as well, without creating separate pipelines and without writing code to move artifacts between Regions. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "AWS CodePipeline のパイプラインが us-east-1 で動いています。会社は、別のパイプラインを作らず、リージョン間でアーティファクトを動かすコードも書かずに、同じパイプラインで eu-west-1 と ap-northeast-1 にも CloudFormation のスタックをデプロイしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add CloudFormation deploy actions that run in eu-west-1 and ap-northeast-1 to the us-east-1 pipeline as cross-region actions.",
+          "text_ja": "us-east-1 のパイプラインに、eu-west-1 と ap-northeast-1 で動く CloudFormation のデプロイのアクションを、クロスリージョンのアクションとして足す。"
+        },
+        {
+          "key": "B",
+          "text": "Create an artifact bucket in eu-west-1 and in ap-northeast-1, in addition to the artifact bucket in the pipeline Region.",
+          "text_ja": "パイプラインのリージョンのアーティファクトのバケットに加えて、eu-west-1 と ap-northeast-1 にもアーティファクトのバケットを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that copies the artifacts from us-east-1 to the other Regions before each deployment.",
+          "text_ja": "各デプロイの前に、us-east-1 から他のリージョンへアーティファクトをコピーする AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "Create a separate pipeline in each Region and start them in order from the us-east-1 pipeline.",
+          "text_ja": "各リージョンに別のパイプラインを作り、us-east-1 のパイプラインから順に開始する。"
+        },
+        {
+          "key": "E",
+          "text": "Keep a single artifact bucket in us-east-1 and grant the other Regions read access to it.",
+          "text_ja": "us-east-1 の 1 つのアーティファクトのバケットだけにし、他のリージョンに読み取りの権限を与える。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "パイプラインとは別のリージョンで動くアクション（クロスリージョンのアクション）を足せます。その時は、パイプラインのリージョンに加え、アクションを動かす各リージョンにアーティファクトのバケットが要り、リージョン間のアーティファクトのコピーは CodePipeline が行います。",
+        "per_choice": {
+          "A": "正しい。1 つのパイプラインで、他のリージョンのアクションを動かせます。",
+          "B": "正しい。アクションを動かす各リージョンに、アーティファクトのバケットが 1 つずつ要ります。",
+          "C": "CodePipeline がコピーを行うので要らず、コードを書かない要件にも反します。",
+          "D": "別のパイプラインを作らないという要件に反します。",
+          "E": "アクションを動かす各リージョンにアーティファクトのバケットが必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "You can add actions to your pipeline that are in an AWS Region different from your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "you must have an artifact bucket in the pipeline Region and then you must have one artifact bucket per Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "CodePipeline handles the copying of artifacts from one AWS Region to the other Regions when performing cross-region actions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0012",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "Amazon Route 53",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs the same web application behind Application Load Balancers in us-west-2 and ap-southeast-1. Users around the world reach it through a domain in an Amazon Route 53 hosted zone. The company wants each user to be served from the Region that gives that user the lowest latency, while keeping DNS in Route 53 and without adding another service. Which solution BEST meets these requirements?",
+      "stem_ja": "ある会社は、同じ Web アプリケーションを us-west-2 と ap-southeast-1 の Application Load Balancer の後ろで動かしています。世界中の利用者は、Amazon Route 53 のホストゾーンのドメインでアクセスします。会社は、DNS を Route 53 のままにし、別のサービスを足さずに、各利用者をその利用者にとってレイテンシーが最も低いリージョンから応答させたいと考えています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create latency records for the load balancer in each Region in the Route 53 hosted zone.",
+          "text_ja": "Route 53 のホストゾーンに、各リージョンのロードバランサーのレイテンシーのレコードを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create weighted records that send 50 percent of queries to each Region's load balancer.",
+          "text_ja": "各リージョンのロードバランサーへ問い合わせの 50% ずつを送る加重のレコードを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS Global Accelerator standard accelerator with the two load balancers as endpoints.",
+          "text_ja": "2 つのロードバランサーをエンドポイントにした AWS Global Accelerator の標準のアクセラレーターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Create a simple record that points to the us-west-2 load balancer, and use ap-southeast-1 only for disaster recovery.",
+          "text_ja": "us-west-2 のロードバランサーを指すシンプルなレコードを作り、ap-southeast-1 は災害対策にだけ使う。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "アプリケーションを複数のリージョンで動かす時、レイテンシーベースのルーティングで、利用者の要求をレイテンシーが最も低いリージョンから処理できます。各リージョンのリソースにレイテンシーのレコードを作ると、Route 53 は問い合わせごとに利用者にとって最も低いレイテンシーのリージョンのレコードを選びます。",
+        "per_choice": {
+          "A": "正しい。Route 53 のまま、利用者ごとにレイテンシーが最も低いリージョンへ向けられます。",
+          "B": "利用者のレイテンシーに関係なく半分ずつに分けるだけです。",
+          "C": "近いリージョンへ向けられますが、別のサービスを足すことになり、要件に反します。",
+          "D": "すべての利用者が us-west-2 へ向かい、遠い利用者のレイテンシーが高いままです。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+          "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+          "quote": "To use latency-based routing, you create latency records for your resources in multiple AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator",
+          "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
         }
       ],
       "low_confidence": false
@@ -13156,6 +13732,273 @@
         {
           "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
           "quote": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0011",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "Amazon GuardDuty",
+        "Amazon EventBridge",
+        "Amazon Data Firehose",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses Amazon GuardDuty. Its security policy now requires every GuardDuty finding to be kept for at least 1 year for investigations. The company wants each new finding to be stored automatically, without people downloading findings and without custom polling code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は Amazon GuardDuty を使っています。セキュリティのポリシーで、調査のために GuardDuty のすべての検出結果を少なくとも 1 年間残すことが求められるようになりました。会社は、人が検出結果をダウンロードしたり独自のポーリングのコードを書いたりせずに、新しい検出結果を自動で保存したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an EventBridge rule for GuardDuty findings that sends them to Amazon Data Firehose, which delivers them to Amazon S3.",
+          "text_ja": "GuardDuty の検出結果の EventBridge ルールを作り、Amazon Data Firehose へ送って、Firehose が Amazon S3 へ届ける。"
+        },
+        {
+          "key": "B",
+          "text": "Keep the findings in GuardDuty and review them in the GuardDuty console when an investigation is needed.",
+          "text_ja": "検出結果は GuardDuty に置いたままにし、調査が必要な時に GuardDuty のコンソールで確認する。"
+        },
+        {
+          "key": "C",
+          "text": "Ask a security engineer to export the findings from the console every week and upload the files to Amazon S3.",
+          "text_ja": "セキュリティのエンジニアが毎週コンソールから検出結果を出力し、ファイルを Amazon S3 へアップロードする。"
+        },
+        {
+          "key": "D",
+          "text": "Schedule an AWS Lambda function that calls the GuardDuty API every day, finds new findings, and writes them to Amazon S3.",
+          "text_ja": "毎日 GuardDuty の API を呼んで新しい検出結果を探し、Amazon S3 へ書く AWS Lambda 関数をスケジュールで実行する。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "GuardDuty は検出結果を 90 日間保存し、すべての検出結果を自動で Amazon EventBridge にイベントとして送ります。EventBridge を使えば、検出結果を好きな保存先へ送り、好きなだけ長く残せます。",
+        "per_choice": {
+          "A": "正しい。GuardDuty が自動で送るイベントをルールで受け、コード無しで保存先へ届けて長く残せます。",
+          "B": "GuardDuty は検出結果を 90 日間しか保存しないため、1 年間残す要件を満たしません。",
+          "C": "人の作業が毎週必要で、要件に反します。",
+          "D": "動きますが、ポーリングのコードを書いて保守する必要があり、要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "quote": "GuardDuty stores findings for 90 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "quote": "GuardDuty automatically publishes (sends) findings as events to Amazon EventBridge (formerly Amazon CloudWatch Events), a serverless event bus service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html#guardduty_findings_eventbridge",
+          "quote": "With EventBridge, you can send findings data to your preferred storage platform and store the data for as long as you like."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0012",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "AWS Security Hub CSPM",
+        "Amazon GuardDuty",
+        "Amazon Inspector",
+        "Amazon Macie"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team receives findings from Amazon GuardDuty, Amazon Inspector, Amazon Macie, and a supported third-party product across several AWS accounts. Each source has its own console and finding format, and the team struggles to decide which issues to fix first. The team also wants to check its environment against security best practices. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティチームは、複数の AWS アカウントにまたがって、Amazon GuardDuty、Amazon Inspector、Amazon Macie、対応しているサードパーティの製品から検出結果を受け取っています。それぞれにコンソールと検出結果の形式があり、チームはどの問題から直すかを決めるのに苦労しています。チームは、環境をセキュリティのベストプラクティスに照らして確かめることも望んでいます。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Write AWS Lambda functions that convert each service's findings into one custom format and store them in a single DynamoDB table.",
+          "text_ja": "各サービスの検出結果を 1 つの独自の形式に変えて、1 つの DynamoDB テーブルに保存する AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "B",
+          "text": "Query the AWS CloudTrail logs with Amazon Athena every week to find security problems and rank them by hand.",
+          "text_ja": "毎週 Amazon Athena で AWS CloudTrail のログを調べてセキュリティの問題を探し、手作業で順位を付ける。"
+        },
+        {
+          "key": "C",
+          "text": "Use AWS Security Hub CSPM to collect the findings in the AWS Security Finding Format and to assess the environment against standards.",
+          "text_ja": "AWS Security Hub CSPM を使い、検出結果を AWS Security Finding Format で集め、標準に照らして環境を評価する。"
+        },
+        {
+          "key": "D",
+          "text": "Have the team review each service's console in each account every day and record the issues in a spreadsheet.",
+          "text_ja": "チームが毎日、各アカウントで各サービスのコンソールを確認し、問題を表計算シートに記録する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Security Hub CSPM は、AWS のアカウント・サービス・対応するサードパーティの製品からセキュリティのデータを集め、GuardDuty・Inspector・Macie などの検出結果も受け取ります。検出結果を標準の形式（ASFF）で扱い、提供元をまたいで関連付けて重要なものから並べ、環境をセキュリティの標準とベストプラクティスに照らして評価します。",
+        "per_choice": {
+          "A": "形式はそろえられますが、変換と保存の仕組みを作って保守する必要があり、優先順位付けや標準の評価もありません。",
+          "B": "CloudTrail のログは API の記録で、各サービスの検出結果をまとめるものではなく、手作業も多くなります。",
+          "C": "正しい。1 か所で標準の形式にそろえ、優先順位付けと標準に照らした評価ができます。",
+          "D": "毎日の手作業が多く、形式もそろいません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#what-is-securityhub",
+          "quote": "Security Hub CSPM also receives findings from other AWS services—such as Amazon GuardDuty, Amazon Inspector, and Amazon Macie— and supported third-party products."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#securityhub-benefits",
+          "quote": "Security Hub CSPM processes finding data using the AWS Security Finding Format (ASFF), a standard finding format."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#securityhub-benefits",
+          "quote": "Security Hub CSPM also correlates findings across providers to help you prioritize the most important ones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html#what-is-securityhub",
+          "quote": "helps you assess your AWS environment against security industry standards and best practices."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0013",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "AWS CloudTrail"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "Auditors require a company to prove that its AWS CloudTrail log files were not modified or deleted after CloudTrail delivered them to Amazon S3, and to show whether any log files were delivered during a given period. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "監査人は、ある会社に、AWS CloudTrail のログファイルが Amazon S3 へ届けられた後に変更も削除もされていないことを証明し、決まった期間にログファイルが届いたかどうかを示すよう求めています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on log file integrity validation for the trail so that CloudTrail delivers signed digest files.",
+          "text_ja": "CloudTrail が署名したダイジェストファイルを届けるよう、証跡のログファイルの整合性の検証を有効にする。"
+        },
+        {
+          "key": "B",
+          "text": "Use the AWS CLI to validate the log files against the digest files for the period that the auditors request.",
+          "text_ja": "監査人が求める期間について、AWS CLI でログファイルをダイジェストファイルと照らして検証する。"
+        },
+        {
+          "key": "C",
+          "text": "Assume that turning on log file integrity validation also validates the files automatically, and give the auditors the setting.",
+          "text_ja": "ログファイルの整合性の検証を有効にすればファイルも自動で検証されるとみなし、監査人にその設定を示す。"
+        },
+        {
+          "key": "D",
+          "text": "Query the log files with Amazon Athena and give the auditors the number of events for each day.",
+          "text_ja": "Amazon Athena でログファイルを調べ、監査人に日ごとのイベントの数を渡す。"
+        },
+        {
+          "key": "E",
+          "text": "Encrypt the log files with an AWS KMS key so that nobody can change them.",
+          "text_ja": "誰も変えられないよう、AWS KMS のキーでログファイルを暗号化する。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けるログファイルごとにハッシュを作り、1 時間ごとに署名したダイジェストファイルを届けます。ただし有効にするだけではファイルは検証されないので、AWS CLI などで検証します。これで変更・削除や、ある期間にログが届かなかったことを確かめられます。",
+        "per_choice": {
+          "A": "正しい。検証に使う署名付きのダイジェストファイルが S3 に届くようになります。",
+          "B": "正しい。有効にしただけでは検証されないので、AWS CLI でダイジェストファイルと照らして検証します。",
+          "C": "有効にしてもダイジェストファイルが届くだけで、ファイルの整合性は検証されません。",
+          "D": "イベントの数からは、ファイルが変更・削除されていないことを証明できません。",
+          "E": "暗号化しても、届いた後に変更・削除されていないことの証明にはなりません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+          "quote": "To determine whether a log file was modified, deleted, or unchanged after CloudTrail delivered it, you can use CloudTrail log file integrity validation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+          "quote": "Enabling log file integrity validation allows CloudTrail to deliver digest log files to your Amazon S3 bucket, but does not validate the integrity of the files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+          "quote": "To validate the integrity of CloudTrail log files, you can use the AWS CLI or create your own solution."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+          "quote": "or assert positively that no log files were delivered to your account during a given period of time."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-6.3-0014",
+      "task": "6.3",
+      "domain": 6,
+      "services": [
+        "Amazon Athena",
+        "AWS CloudTrail",
+        "Amazon S3"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security engineer must find out which IAM users deleted resources during the last 6 months and from which source IP addresses. CloudTrail log files for that period are already stored in an Amazon S3 bucket. The engineer needs to run ad hoc SQL queries and does not want to load the data into another database or manage servers. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティのエンジニアは、過去 6 か月にどの IAM ユーザーがどの送信元の IP アドレスからリソースを削除したかを調べる必要があります。その期間の CloudTrail のログファイルは、既に Amazon S3 バケットに保存されています。エンジニアはその場で SQL のクエリを実行したく、データを別のデータベースへ入れたりサーバーを管理したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Download all the log files to a laptop and search them with command-line tools.",
+          "text_ja": "すべてのログファイルをノートパソコンにダウンロードし、コマンドラインのツールで探す。"
+        },
+        {
+          "key": "B",
+          "text": "Load the log files into an Amazon RDS database and run SQL queries against it.",
+          "text_ja": "ログファイルを Amazon RDS のデータベースに読み込み、SQL のクエリを実行する。"
+        },
+        {
+          "key": "C",
+          "text": "Review the Amazon GuardDuty findings, which list every API call that deleted a resource.",
+          "text_ja": "リソースを削除したすべての API の呼び出しを一覧する、Amazon GuardDuty の検出結果を確認する。"
+        },
+        {
+          "key": "D",
+          "text": "Use Amazon Athena to query the CloudTrail log files directly in Amazon S3.",
+          "text_ja": "Amazon Athena を使い、Amazon S3 にある CloudTrail のログファイルを直接クエリする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CloudTrail のログには、コンソールからの操作も含めて、AWS のサービスへの API の呼び出しの詳細が入っています。Athena を使えば、ログファイルのある場所（LOCATION）を指定して、S3 のログファイルを直接クエリでき、送信元の IP アドレスや利用者で活動を絞り込めます。",
+        "per_choice": {
+          "A": "6 か月分のファイルを手で扱うことになり、SQL も使えず手間が大きくなります。",
+          "B": "SQL は使えますが、別のデータベースへ読み込み、そのデータベースを管理することになり、要件に反します。",
+          "C": "GuardDuty の検出結果は不審な活動の検出で、リソースを削除したすべての API の呼び出しの一覧ではありません。",
+          "D": "正しい。S3 のログを置いたまま SQL で調べられ、サーバーの管理も要りません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+          "quote": "You can use Athena to query these log files directly from Amazon S3, specifying the LOCATION of log files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+          "quote": "you can use queries to identify trends and further isolate activity by attributes, such as source IP address or user."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html#features-of-guardduty",
+          "quote": "When GuardDuty detects potential security threats associated with your AWS resources, it starts generating security findings"
         }
       ],
       "low_confidence": false

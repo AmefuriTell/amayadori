@@ -1,0 +1,66 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0012",
+  "services": [
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Application Load Balancer is enabled in three Availability Zones and has two target groups. Cross-zone load balancing is turned off at the target group level for both groups to keep traffic within each zone. One target group has targets in all three zones, but the other has targets in only two zones. Users intermittently receive HTTP 503 errors for the second group's paths. Which change BEST resolves the errors while keeping cross-zone load balancing off?",
+  "stem_ja": "Application Load Balancer は 3 つのアベイラビリティーゾーンで有効になっており、2 つのターゲットグループがあります。トラフィックを各ゾーンの中に留めるため、両方のグループでターゲットグループのレベルのクロスゾーン負荷分散を無効にしています。一方のターゲットグループには 3 つのゾーンすべてにターゲットがありますが、もう一方は 2 つのゾーンにしかありません。利用者は 2 つ目のグループのパスで、ときどき HTTP 503 のエラーを受け取ります。クロスゾーン負荷分散を無効のまま、エラーを最もよく解決する変更はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on target stickiness for the second target group so that each user stays on a working target.",
+      "text_ja": "各利用者が動いているターゲットに留まるよう、2 つ目のターゲットグループでターゲットのスティッキネスを有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Increase the health check interval of the second target group so that targets are not removed as often.",
+      "text_ja": "ターゲットが頻繁に外されないよう、2 つ目のターゲットグループのヘルスチェックの間隔を長くする。"
+    },
+    {
+      "key": "C",
+      "text": "Register targets for the second target group in the third Availability Zone as well.",
+      "text_ja": "2 つ目のターゲットグループのターゲットを、3 つ目のゾーンにも登録する。"
+    },
+    {
+      "key": "D",
+      "text": "Turn off cross-zone load balancing at the load balancer level as well.",
+      "text_ja": "ロードバランサーのレベルでも、クロスゾーン負荷分散を無効にする。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "クロスゾーン負荷分散を無効にすると、各ノードは自分のゾーンのターゲットにだけトラフィックを分けます。複数のターゲットグループがある時は、すべてのターゲットグループが同じゾーンに参加するようにし、空のゾーンを作らないようにします。空のゾーンに入ったリクエストは 503 エラーになります。",
+    "per_choice": {
+      "A": "クロスゾーン負荷分散が無効の時、ターゲットのスティッキネスは使えません。",
+      "B": "ターゲットが無いゾーンの問題で、ヘルスチェックの間隔を変えても解決しません。",
+      "C": "正しい。3 つ目のゾーンにもターゲットがあれば空のゾーンが無くなり、クロスゾーンを無効のまま 503 を防げます。",
+      "D": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は無効にできません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+      "source_id": "S6",
+      "quote": "ensure all target groups are participating in the same Availability Zones, within the configured Region."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+      "source_id": "S6",
+      "quote": "as this triggers a 503 error for all HTTP requests that enter the empty Availability Zone."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+      "source_id": "S5",
+      "quote": "Target stickiness is not supported when cross-zone load balancing is off."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

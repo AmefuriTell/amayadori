@@ -1,0 +1,75 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0011",
+  "services": [
+    "AWS CodePipeline",
+    "AWS CloudFormation",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A pipeline in AWS CodePipeline runs in us-east-1. The company wants the same pipeline to deploy CloudFormation stacks in eu-west-1 and ap-northeast-1 as well, without creating separate pipelines and without writing code to move artifacts between Regions. Which actions should a DevOps engineer take? (Choose TWO.)",
+  "stem_ja": "AWS CodePipeline のパイプラインが us-east-1 で動いています。会社は、別のパイプラインを作らず、リージョン間でアーティファクトを動かすコードも書かずに、同じパイプラインで eu-west-1 と ap-northeast-1 にも CloudFormation のスタックをデプロイしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add CloudFormation deploy actions that run in eu-west-1 and ap-northeast-1 to the us-east-1 pipeline as cross-region actions.",
+      "text_ja": "us-east-1 のパイプラインに、eu-west-1 と ap-northeast-1 で動く CloudFormation のデプロイのアクションを、クロスリージョンのアクションとして足す。"
+    },
+    {
+      "key": "B",
+      "text": "Create an artifact bucket in eu-west-1 and in ap-northeast-1, in addition to the artifact bucket in the pipeline Region.",
+      "text_ja": "パイプラインのリージョンのアーティファクトのバケットに加えて、eu-west-1 と ap-northeast-1 にもアーティファクトのバケットを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that copies the artifacts from us-east-1 to the other Regions before each deployment.",
+      "text_ja": "各デプロイの前に、us-east-1 から他のリージョンへアーティファクトをコピーする AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "D",
+      "text": "Create a separate pipeline in each Region and start them in order from the us-east-1 pipeline.",
+      "text_ja": "各リージョンに別のパイプラインを作り、us-east-1 のパイプラインから順に開始する。"
+    },
+    {
+      "key": "E",
+      "text": "Keep a single artifact bucket in us-east-1 and grant the other Regions read access to it.",
+      "text_ja": "us-east-1 の 1 つのアーティファクトのバケットだけにし、他のリージョンに読み取りの権限を与える。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "パイプラインとは別のリージョンで動くアクション（クロスリージョンのアクション）を足せます。その時は、パイプラインのリージョンに加え、アクションを動かす各リージョンにアーティファクトのバケットが要り、リージョン間のアーティファクトのコピーは CodePipeline が行います。",
+    "per_choice": {
+      "A": "正しい。1 つのパイプラインで、他のリージョンのアクションを動かせます。",
+      "B": "正しい。アクションを動かす各リージョンに、アーティファクトのバケットが 1 つずつ要ります。",
+      "C": "CodePipeline がコピーを行うので要らず、コードを書かない要件にも反します。",
+      "D": "別のパイプラインを作らないという要件に反します。",
+      "E": "アクションを動かす各リージョンにアーティファクトのバケットが必要です。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+      "source_id": "S9",
+      "quote": "You can add actions to your pipeline that are in an AWS Region different from your pipeline."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+      "source_id": "S10",
+      "quote": "you must have an artifact bucket in the pipeline Region and then you must have one artifact bucket per Region where you plan to execute an action."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+      "source_id": "S10",
+      "quote": "CodePipeline handles the copying of artifacts from one AWS Region to the other Regions when performing cross-region actions."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

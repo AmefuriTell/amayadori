@@ -1,0 +1,78 @@
+{
+  "task": "6.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.3-0013",
+  "services": [
+    "AWS CloudTrail"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "Auditors require a company to prove that its AWS CloudTrail log files were not modified or deleted after CloudTrail delivered them to Amazon S3, and to show whether any log files were delivered during a given period. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "監査人は、ある会社に、AWS CloudTrail のログファイルが Amazon S3 へ届けられた後に変更も削除もされていないことを証明し、決まった期間にログファイルが届いたかどうかを示すよう求めています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on log file integrity validation for the trail so that CloudTrail delivers signed digest files.",
+      "text_ja": "CloudTrail が署名したダイジェストファイルを届けるよう、証跡のログファイルの整合性の検証を有効にする。"
+    },
+    {
+      "key": "B",
+      "text": "Use the AWS CLI to validate the log files against the digest files for the period that the auditors request.",
+      "text_ja": "監査人が求める期間について、AWS CLI でログファイルをダイジェストファイルと照らして検証する。"
+    },
+    {
+      "key": "C",
+      "text": "Assume that turning on log file integrity validation also validates the files automatically, and give the auditors the setting.",
+      "text_ja": "ログファイルの整合性の検証を有効にすればファイルも自動で検証されるとみなし、監査人にその設定を示す。"
+    },
+    {
+      "key": "D",
+      "text": "Query the log files with Amazon Athena and give the auditors the number of events for each day.",
+      "text_ja": "Amazon Athena でログファイルを調べ、監査人に日ごとのイベントの数を渡す。"
+    },
+    {
+      "key": "E",
+      "text": "Encrypt the log files with an AWS KMS key so that nobody can change them.",
+      "text_ja": "誰も変えられないよう、AWS KMS のキーでログファイルを暗号化する。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "ログファイルの整合性の検証を有効にすると、CloudTrail は届けるログファイルごとにハッシュを作り、1 時間ごとに署名したダイジェストファイルを届けます。ただし有効にするだけではファイルは検証されないので、AWS CLI などで検証します。これで変更・削除や、ある期間にログが届かなかったことを確かめられます。",
+    "per_choice": {
+      "A": "正しい。検証に使う署名付きのダイジェストファイルが S3 に届くようになります。",
+      "B": "正しい。有効にしただけでは検証されないので、AWS CLI でダイジェストファイルと照らして検証します。",
+      "C": "有効にしてもダイジェストファイルが届くだけで、ファイルの整合性は検証されません。",
+      "D": "イベントの数からは、ファイルが変更・削除されていないことを証明できません。",
+      "E": "暗号化しても、届いた後に変更・削除されていないことの証明にはなりません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+      "source_id": "S8",
+      "quote": "To determine whether a log file was modified, deleted, or unchanged after CloudTrail delivered it, you can use CloudTrail log file integrity validation."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+      "source_id": "S10",
+      "quote": "Enabling log file integrity validation allows CloudTrail to deliver digest log files to your Amazon S3 bucket, but does not validate the integrity of the files."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro-enabling-and-using",
+      "source_id": "S10",
+      "quote": "To validate the integrity of CloudTrail log files, you can use the AWS CLI or create your own solution."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html#cloudtrail-log-file-validation-intro",
+      "source_id": "S8",
+      "quote": "or assert positively that no log files were delivered to your account during a given period of time."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

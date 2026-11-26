@@ -1,5 +1,6 @@
 {
   "names": {
+    "AWS Certificate Manager": "acm",
     "Amazon API Gateway": "api-gateway",
     "AWS AppConfig": "appconfig",
     "Amazon Aurora": "aurora",
@@ -9,6 +10,7 @@
     "AWS CloudFormation StackSets": "cloudformation-stacksets",
     "AWS CloudFormation": "cloudformation",
     "Amazon CloudFront": "cloudfront",
+    "AWS CloudHSM": "cloudhsm",
     "AWS CloudTrail": "cloudtrail",
     "Amazon CloudWatch Logs": "cloudwatch-logs",
     "Amazon CloudWatch Synthetics": "cloudwatch-synthetics",
@@ -78,6 +80,48 @@
     "AWS X-Ray": "x-ray"
   },
   "pages": {
+    "acm": {
+      "id": "acm",
+      "name": "AWS Certificate Manager",
+      "reading": "サーティフィケートマネージャー",
+      "summary": "Web サイトやアプリを守る SSL/TLS の証明書（通信を暗号化し、相手が本物かを示すための電子的な証明書）とそのキーを、作る・保存する・更新する手間を引き受けるサービス。",
+      "features": [
+        {
+          "title": "発行と取り込み",
+          "text": "証明書は ACM で直接発行するほか、他社の証明書を ACM に取り込んで、統合された AWS のサービスで使える。"
+        },
+        {
+          "title": "ドメインの範囲",
+          "text": "1 つのドメイン名、複数の決まったドメイン名、ワイルドカードのドメイン、またはその組み合わせを守れる。ワイルドカードの証明書はサブドメインをいくつでも守れる。"
+        },
+        {
+          "title": "マネージド更新",
+          "text": "Amazon が発行した証明書を、DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせる。"
+        },
+        {
+          "title": "サービスとの統合",
+          "text": "Elastic Load Balancing のロードバランサーや CloudFront のディストリビューションに、ACM の証明書を直接置ける。"
+        }
+      ],
+      "exam_points": [
+        "証明書の期限切れを防ぐには、DNS 検証にして ACM の自動の更新に任せる使い方を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview",
+          "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-services.html#acm-services",
+          "quote": "ACM is integrated with Elastic Load Balancing to deploy ACM certificates on the load balancer."
+        }
+      ]
+    },
     "api-gateway": {
       "id": "api-gateway",
       "name": "Amazon API Gateway",
@@ -389,6 +433,40 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/RequestAndResponseBehaviorOriginGroups.html#RequestAndResponseBehaviorOriginGroups",
           "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        }
+      ]
+    },
+    "cloudhsm": {
+      "id": "cloudhsm",
+      "name": "AWS CloudHSM",
+      "reading": "クラウドエイチエスエム",
+      "summary": "ハードウェアセキュリティモジュール（HSM。暗号の処理をし、暗号のキーを安全に保管する専用の機器）を AWS のクラウドで使えるサービス。使うアルゴリズムとキーを利用者が完全に管理する。",
+      "features": [
+        {
+          "title": "HSM の管理の自動化",
+          "text": "可用性の高い HSM を完全に管理でき、バックアップ・用意・設定・保守などの HSM の管理は自動で行われる。"
+        },
+        {
+          "title": "キーの操作",
+          "text": "セッションキー・トークンキー・対称キー・非対称のキーペアなどの暗号のキーを、作る・保存する・取り込む・取り出す・管理する・使うことができる。"
+        },
+        {
+          "title": "使う場面",
+          "text": "企業のセキュリティの標準に合わせる必要がある会社が、とても機密性の高いデータや、通信中・保存時の暗号化を守る秘密鍵の管理に使う。"
+        }
+      ],
+      "exam_points": [
+        "キーとアルゴリズムを完全に自分で管理する必要がある時の、専用の HSM の選択肢として押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "quote": "AWS CloudHSM gives you full control of the algorithms and keys you use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/use-cases.html#use-cases",
+          "quote": "Use AWS CloudHSM to manage private keys that protect highly confidential data, encryption in transit, and encryption at rest."
         }
       ]
     },

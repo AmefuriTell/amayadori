@@ -1,0 +1,68 @@
+{
+  "task": "6.3",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-6.3-0014",
+  "services": [
+    "Amazon Athena",
+    "AWS CloudTrail",
+    "Amazon S3"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security engineer must find out which IAM users deleted resources during the last 6 months and from which source IP addresses. CloudTrail log files for that period are already stored in an Amazon S3 bucket. The engineer needs to run ad hoc SQL queries and does not want to load the data into another database or manage servers. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "セキュリティのエンジニアは、過去 6 か月にどの IAM ユーザーがどの送信元の IP アドレスからリソースを削除したかを調べる必要があります。その期間の CloudTrail のログファイルは、既に Amazon S3 バケットに保存されています。エンジニアはその場で SQL のクエリを実行したく、データを別のデータベースへ入れたりサーバーを管理したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Download all the log files to a laptop and search them with command-line tools.",
+      "text_ja": "すべてのログファイルをノートパソコンにダウンロードし、コマンドラインのツールで探す。"
+    },
+    {
+      "key": "B",
+      "text": "Load the log files into an Amazon RDS database and run SQL queries against it.",
+      "text_ja": "ログファイルを Amazon RDS のデータベースに読み込み、SQL のクエリを実行する。"
+    },
+    {
+      "key": "C",
+      "text": "Review the Amazon GuardDuty findings, which list every API call that deleted a resource.",
+      "text_ja": "リソースを削除したすべての API の呼び出しを一覧する、Amazon GuardDuty の検出結果を確認する。"
+    },
+    {
+      "key": "D",
+      "text": "Use Amazon Athena to query the CloudTrail log files directly in Amazon S3.",
+      "text_ja": "Amazon Athena を使い、Amazon S3 にある CloudTrail のログファイルを直接クエリする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CloudTrail のログには、コンソールからの操作も含めて、AWS のサービスへの API の呼び出しの詳細が入っています。Athena を使えば、ログファイルのある場所（LOCATION）を指定して、S3 のログファイルを直接クエリでき、送信元の IP アドレスや利用者で活動を絞り込めます。",
+    "per_choice": {
+      "A": "6 か月分のファイルを手で扱うことになり、SQL も使えず手間が大きくなります。",
+      "B": "SQL は使えますが、別のデータベースへ読み込み、そのデータベースを管理することになり、要件に反します。",
+      "C": "GuardDuty の検出結果は不審な活動の検出で、リソースを削除したすべての API の呼び出しの一覧ではありません。",
+      "D": "正しい。S3 のログを置いたまま SQL で調べられ、サーバーの管理も要りません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+      "source_id": "S11",
+      "quote": "You can use Athena to query these log files directly from Amazon S3, specifying the LOCATION of log files."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/athena/latest/ug/cloudtrail-logs.html#cloudtrail-logs",
+      "source_id": "S11",
+      "quote": "you can use queries to identify trends and further isolate activity by attributes, such as source IP address or user."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html#features-of-guardduty",
+      "source_id": "S3",
+      "quote": "When GuardDuty detects potential security threats associated with your AWS resources, it starts generating security findings"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
