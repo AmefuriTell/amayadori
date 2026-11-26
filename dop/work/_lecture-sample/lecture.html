@@ -1,0 +1,123 @@
+<title>DOP 講義 1.4 試作</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one slide card at a time, controls docked under it; phone-first column, max 760px */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --fg: #17202a; --muted: #5b6875; --line: #d9e0e6;
+  --accent: #d4610a; --accent-ink: #ffffff; --ok: #1f7a4d; --chip: #eef1f4;
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171c; --surface: #1b2229; --fg: #e8edf2; --muted: #9aa7b3; --line: #2c3640;
+  --accent: #f08a3c; --accent-ink: #1b1106; --ok: #5cc28e; --chip: #232c35; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1b2229; --fg: #e8edf2; --muted: #9aa7b3; --line: #2c3640;
+  --accent: #f08a3c; --accent-ink: #1b1106; --ok: #5cc28e; --chip: #232c35; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: grid; gap: 4px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+h1 { font-family: var(--font-display); font-size: clamp(20px, 4.5vw, 28px); line-height: 1.35; margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 13px; }
+.slide { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: clamp(18px, 4vw, 32px); display: grid; gap: 14px; min-height: 320px; align-content: start; }
+.slide .num { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.slide h2 { font-family: var(--font-display); font-size: clamp(19px, 4vw, 26px); line-height: 1.4; margin: 0; text-wrap: balance; }
+.slide ul { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; font-size: clamp(15px, 3.4vw, 17px); }
+.slide li::marker { color: var(--accent); }
+details { border-top: 1px solid var(--line); padding-top: 10px; font-size: 13px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--fg); }
+details .script { white-space: pre-wrap; margin: 8px 0 0; }
+.ref { margin: 8px 0 0; padding: 8px 10px; background: var(--chip); border-radius: 6px; font-size: 12.5px; }
+.ref a { color: var(--accent); word-break: break-all; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; font-size: 15px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+button.play { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; min-width: 120px; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+label.auto { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.dots button { width: 30px; height: 30px; padding: 0; font-size: 12px; font-family: var(--font-mono); border-radius: 50%; }
+.dots button[aria-current="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.dots button.done { border-color: var(--ok); color: var(--ok); }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s linear; }
+footer { color: var(--muted); font-size: 12px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono&display=swap">
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow" id="eyebrow">DOP-C02 · Task 1.4</span>
+    <h1 id="title">講義を読み込んでいます</h1>
+    <span class="meta" id="meta"></span>
+  </header>
+  <section class="slide" id="slide" aria-live="polite">
+    <span class="num" id="num"></span>
+    <h2 id="stitle"></h2>
+    <ul id="bullets"></ul>
+    <details id="scriptBox"><summary>台本を読む</summary><p class="script" id="script"></p></details>
+    <details id="refBox"><summary>根拠（AWS 公式ドキュメントの原文）</summary><div id="refs"></div></details>
+  </section>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+  <div class="controls">
+    <button id="prev" type="button">前へ</button>
+    <button id="play" class="play" type="button">▶ 再生</button>
+    <button id="next" type="button">次へ</button>
+    <label class="auto"><input type="checkbox" id="auto" checked> 次のスライドへ自動で進む</label>
+  </div>
+  <nav class="dots" id="dots" aria-label="スライド"></nav>
+  <footer>
+    <span>音声: VOICEVOX:四国めたん</span>
+    <span>試作版です。根拠は AWS 公式ドキュメントの抜き出しだけを使っています。</span>
+  </footer>
+</div>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const audio = $('audio');
+let lec = null, i = 0, playing = false;
+const done = new Set();
+const SOURCE_URLS = window.SOURCE_URLS || {};
+
+function show(n) {
+  i = Math.max(0, Math.min(n, lec.slides.length - 1));
+  const s = lec.slides[i];
+  $('num').textContent = `${String(i + 1).padStart(2, '0')} / ${String(lec.slides.length).padStart(2, '0')}`;
+  $('stitle').textContent = s.title;
+  $('bullets').replaceChildren(...s.bullets.map((b) => Object.assign(document.createElement('li'), { textContent: b })));
+  $('script').textContent = s.narration;
+  $('refs').replaceChildren(...(s.refs || []).map((r) => {
+    const d = document.createElement('div'); d.className = 'ref';
+    const q = document.createElement('div'); q.textContent = `“${r.quote}”`;
+    d.append(q);
+    if (r.url) { const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.url; d.append(a); }
+    return d;
+  }));
+  $('prev').disabled = i === 0; $('next').disabled = i === lec.slides.length - 1;
+  [...$('dots').children].forEach((b, k) => { b.setAttribute('aria-current', String(k === i)); b.classList.toggle('done', done.has(k)); });
+  audio.src = `audio/${s.id}.mp3`;
+  $('bar').style.width = '0';
+  if (playing) audio.play().catch(() => setPlaying(false));
+}
+function setPlaying(p) { playing = p; $('play').textContent = p ? '❚❚ 一時停止' : '▶ 再生'; }
+
+$('play').onclick = () => { if (playing) { audio.pause(); setPlaying(false); } else { setPlaying(true); audio.play().catch(() => setPlaying(false)); } };
+$('prev').onclick = () => show(i - 1);
+$('next').onclick = () => show(i + 1);
+audio.ontimeupdate = () => { if (audio.duration) $('bar').style.width = `${(audio.currentTime / audio.duration) * 100}%`; };
+audio.onended = () => { done.add(i); if ($('auto').checked && i < lec.slides.length - 1) show(i + 1); else { setPlaying(false); show(i); } };
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') show(i + 1); if (e.key === 'ArrowLeft') show(i - 1); });
+
+fetch('lecture.json').then((r) => r.json()).then((data) => {
+  lec = data;
+  $('title').textContent = lec.title;
+  $('meta').textContent = `スライド ${lec.slides.length} 枚・約 ${lec.minutes} 分`;
+  $('dots').replaceChildren(...lec.slides.map((s, k) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = k + 1; b.onclick = () => show(k); b.setAttribute('aria-label', `${k + 1}. ${s.title}`); return b; }));
+  show(0);
+}).catch(() => { $('title').textContent = '講義を読み込めませんでした'; });
+</script>
