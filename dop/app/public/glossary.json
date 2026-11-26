@@ -63,6 +63,9 @@
     "AWS Service Catalog": "service-catalog",
     "Amazon SNS": "sns",
     "Amazon SQS": "sqs",
+    "AWS Systems Manager Compliance": "ssm-compliance",
+    "AWS Systems Manager Distributor": "ssm-distributor",
+    "AWS Systems Manager Run Command": "ssm-run-command",
     "AWS Systems Manager State Manager": "state-manager",
     "AWS Step Functions": "step-functions",
     "AWS STS": "sts",
@@ -2238,6 +2241,116 @@
         {
           "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html",
           "quote": "This invisibility is controlled by the visibility timeout, which ensures that other consumers cannot process the same message while you are working on it."
+        }
+      ]
+    },
+    "ssm-compliance": {
+      "id": "ssm-compliance",
+      "name": "AWS Systems Manager Compliance",
+      "reading": "コンプライアンス",
+      "summary": "Systems Manager で管理するサーバー（マネージドノード）の群れを調べ、パッチの適用や構成が決まりどおりになっているか（準拠しているか）を一覧にする Systems Manager の機能。",
+      "features": [
+        {
+          "title": "準拠の表示",
+          "text": "既定で、Patch Manager のパッチと State Manager の関連付けについて、今の準拠のデータを表示する。"
+        },
+        {
+          "title": "複数のアカウントとリージョン",
+          "text": "複数の AWS アカウントとリージョンのデータを集めてまとめ、準拠していない個々のリソースまで掘り下げて見られる。"
+        },
+        {
+          "title": "修復とレポート",
+          "text": "問題は Run Command、State Manager、Amazon EventBridge で修復できる。データを Amazon Athena と AWS Quick に渡して、全体のレポートを作れる。"
+        }
+      ],
+      "exam_points": [
+        "パッチと関連付けの準拠を 1 か所で見て、準拠していないノードを EventBridge などで修復につなぐ使い方を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
+        }
+      ]
+    },
+    "ssm-distributor": {
+      "id": "ssm-distributor",
+      "name": "AWS Systems Manager Distributor",
+      "reading": "ディストリビューター",
+      "summary": "ソフトウェアをパッケージ（インストールできる形のまとまり）にして、Systems Manager で管理するサーバー（マネージドノード）へ公開する Systems Manager の機能。",
+      "features": [
+        {
+          "title": "自分のソフトや AWS 提供のパッケージ",
+          "text": "自分のソフトウェアをパッケージにして公開できるほか、AmazonCloudWatchAgent のような AWS 提供のエージェントや、サードパーティのパッケージも探して公開できる。"
+        },
+        {
+          "title": "対象の指定",
+          "text": "パッケージの特定のバージョンを、ノード ID・AWS アカウント ID・タグ・リージョンで選んだノードに示す。"
+        },
+        {
+          "title": "配る時期",
+          "text": "1 回だけ、決まったスケジュールで、または既定のパッケージのバージョンが変わった時に、パッケージをデプロイできる。"
+        }
+      ],
+      "exam_points": [
+        "エージェントなどの決まったバージョンを、タグなどで選んだノードに、スケジュールで配り続ける使い方を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "Distributor helps you package and publish software to AWS Systems Manager managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor-features",
+          "quote": "You can choose to deploy packages one time, on a regular schedule, or whenever the default package version is changed to a different version."
+        }
+      ]
+    },
+    "ssm-run-command": {
+      "id": "ssm-run-command",
+      "name": "AWS Systems Manager Run Command",
+      "reading": "ランコマンド",
+      "summary": "Systems Manager で管理するサーバー（マネージドノード。EC2 インスタンスや、設定済みの EC2 以外のマシン）の構成を、離れた所から安全に管理する Systems Manager の機能。決まった管理の作業や 1 回きりの構成の変更を、多くのノードにまとめて行える。",
+      "features": [
+        {
+          "title": "1 回きりの変更をまとめて",
+          "text": "よくある管理の作業を自動にし、1 回きりの構成の変更を多くのノードに対して行える。"
+        },
+        {
+          "title": "同時実行の数（max-concurrency）",
+          "text": "同時にコマンドを実行するノードの数を max-concurrency で決める。"
+        },
+        {
+          "title": "エラーの上限（max-errors）",
+          "text": "何件のエラーまで許すかを max-errors で決め、超えるとそれ以上のノードへのコマンドの送信を止める。"
+        }
+      ],
+      "exam_points": [
+        "数百・数千台に送る時に、同時に処理するノードの数と、取り消すまでに許すエラーの数を決めて、誤った変更の影響を抑える方法を押さえる。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-multiple",
+          "quote": "You can limit how many nodes process a request simultaneously and how many errors can occur before the command is canceled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "quote": "You can control the number of managed nodes that run a command simultaneously by using the max-concurrency parameter"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+          "quote": "The parameter specifies how many errors are allowed before the system stops sending the command to additional managed nodes."
         }
       ]
     },

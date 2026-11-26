@@ -1,0 +1,107 @@
+{
+  "item": "C-0046",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "A company runs 300 Amazon Linux EC2 instances that are Systems Manager managed nodes. The operations team needs memory utilization and disk space utilization for every instance in Amazon CloudWatch. All instances must use one agent configuration that is stored centrally, and the instance role should use the AWS managed CloudWatchAgentServerPolicy without extra permissions. Which solution meets these requirements with the LEAST operational overhead?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Save the CloudWatch agent configuration in Parameter Store with a name that starts with AmazonCloudWatch-, and use Systems Manager to install and start the agent with that parameter on all instances."
+        },
+        {
+          "key": "B",
+          "text": "Save the CloudWatch agent configuration in Parameter Store as /monitoring/cwagent-config, and use Systems Manager to install and start the agent with that parameter on all instances."
+        },
+        {
+          "key": "C",
+          "text": "Add a cron job to every instance that reads memory and disk usage and sends the values with the PutMetricData API every minute."
+        },
+        {
+          "key": "D",
+          "text": "Install the CloudWatch agent on every instance, and copy the agent configuration file to each instance by hand whenever it changes."
+        }
+      ],
+      "explanation": {
+        "summary": "CloudWatch エージェントは mem_used_percent や disk_used_percent などのメトリクスを集めます。設定を Parameter Store に保存すれば、ほかのサーバーにエージェントを入れる時にその設定を使えますが、CloudWatchAgentServerPolicy が読めるのは AmazonCloudWatch- で始まる名前のパラメータだけです。",
+        "per_choice": {
+          "A": "正しい。1 つの設定を Parameter Store に置き、Systems Manager でまとめて入れられ、管理ポリシーのままで読めます。",
+          "B": "パラメータの名前が AmazonCloudWatch- で始まらないため、CloudWatchAgentServerPolicy では読めず、追加の権限が必要になります。",
+          "C": "動きますが、メトリクスを送る独自のスクリプトを 300 台で保守することになります。",
+          "D": "メトリクスは集められますが、設定を 1 か所に置いておらず、変更のたびに手作業のコピーが要ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html#linux-metrics-enabled-by-CloudWatch-agent",
+          "source_id": "S2",
+          "quote": "mem_used_percent The percentage of memory currently in use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#install-CloudWatch-Agent-on-EC2-Instance-fleet-ssm",
+          "source_id": "S11",
+          "quote": "The name must start with AmazonCloudWatch-, because the CloudWatchAgentServerPolicy managed policy can read only those parameters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm",
+          "source_id": "S9",
+          "quote": "Using AWS Systems Manager makes it easier to install the CloudWatch agent on a fleet of Amazon EC2 instances."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "answer": [
+        "A"
+      ],
+      "stem_en": "An AWS Lambda function processes orders and must publish a custom metric for the number of orders by order type (about 10 types). The function's role can write to Amazon CloudWatch Logs, but the security team will not grant cloudwatch:PutMetricData to the role. The company also wants to avoid creating an unexpectedly large number of custom metrics. Which solution meets these requirements in the MOST operationally efficient way?",
+      "choices_en": [
+        {
+          "key": "A",
+          "text": "Write the metric with the CloudWatch embedded metric format in the function's log output, and use the order type as the dimension."
+        },
+        {
+          "key": "B",
+          "text": "Write the metric with the CloudWatch embedded metric format in the function's log output, and use the request ID and the order type as dimensions."
+        },
+        {
+          "key": "C",
+          "text": "Call the PutMetricData API from the function for each order, and use the order type as the dimension."
+        },
+        {
+          "key": "D",
+          "text": "Write each order to an Amazon S3 bucket, and run a scheduled job on an EC2 instance that counts the orders and publishes the metric."
+        }
+      ],
+      "explanation": {
+        "summary": "埋め込みメトリクス形式は、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作り、logs:PutLogEvents の権限があれば cloudwatch:PutMetricData は要りません。ディメンションの組み合わせごとにメトリクスが作られるので、リクエスト ID のような値の種類が多いディメンションは避けます。",
+        "per_choice": {
+          "A": "正しい。ログに書くだけでメトリクスができ、注文の種類（約 10 種類）だけをディメンションにするのでメトリクスの数も抑えられます。",
+          "B": "リクエスト ID は値の種類が多く、組み合わせごとにメトリクスが作られて、大量のカスタムメトリクスになります。",
+          "C": "cloudwatch:PutMetricData の権限が必要で、セキュリティチームの決定に反します。",
+          "D": "動きますが、関数とは別の仕組みを作って動かし続ける必要があり、手間が大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "source_id": "S7",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "source_id": "S7",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "source_id": "S7",
+          "quote": "the embedded metric format will by design create a custom metric corresponding to each unique dimension combination."
+        }
+      ]
+    }
+  ]
+}

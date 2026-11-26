@@ -1,0 +1,79 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0008",
+  "services": [
+    "Amazon ECS",
+    "AWS Fargate"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company runs an interruption-tolerant queue worker as an Amazon ECS service on AWS Fargate. To reduce cost, the company wants most tasks to run on Fargate Spot. The service must keep processing even when Fargate Spot capacity is unavailable, and each task must finish its cleanup work before it stops when Spot capacity is reclaimed. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "ある会社は、中断に耐えられるキューのワーカーを、AWS Fargate 上の Amazon ECS のサービスとして動かしています。費用を下げるため、会社はほとんどのタスクを Fargate Spot で動かしたいと考えています。Fargate Spot の容量が使えない時もサービスは処理を続ける必要があり、Spot の容量が回収される時には、各タスクが止まる前に後片付けの処理を終える必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use a capacity provider strategy that includes both the FARGATE and FARGATE_SPOT capacity providers, with most tasks placed on FARGATE_SPOT.",
+      "text_ja": "FARGATE と FARGATE_SPOT の両方のキャパシティープロバイダーを含み、ほとんどのタスクを FARGATE_SPOT に置くキャパシティープロバイダー戦略を使う。"
+    },
+    {
+      "key": "B",
+      "text": "Use only the FARGATE_SPOT capacity provider, and rely on Fargate to replace Spot capacity with on-demand capacity when Spot is unavailable.",
+      "text_ja": "FARGATE_SPOT のキャパシティープロバイダーだけを使い、Spot が使えない時は Fargate が Spot の容量をオンデマンドの容量に置き換えることに任せる。"
+    },
+    {
+      "key": "C",
+      "text": "Handle the SIGTERM signal in the container to run the cleanup work, and keep the cleanup within the task's stopTimeout.",
+      "text_ja": "コンテナで SIGTERM のシグナルを受けて後片付けの処理を実行し、後片付けをタスクの stopTimeout の中に収める。"
+    },
+    {
+      "key": "D",
+      "text": "Use one capacity provider strategy that combines FARGATE_SPOT with an Auto Scaling group capacity provider for on-demand EC2 instances.",
+      "text_ja": "FARGATE_SPOT と、オンデマンドの EC2 インスタンス用の Auto Scaling グループのキャパシティープロバイダーを組み合わせた 1 つのキャパシティープロバイダー戦略を使う。"
+    },
+    {
+      "key": "E",
+      "text": "Run the service with a single task on FARGATE_SPOT so that only one task is affected by each interruption.",
+      "text_ja": "中断のたびに影響を受けるタスクが 1 つだけになるよう、FARGATE_SPOT 上の 1 つのタスクでサービスを動かす。"
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "Fargate は Spot の容量をオンデマンドの容量に置き換えないため、Spot が使えない時も処理を続けるには、戦略に FARGATE も入れておく必要があります。Spot の容量が回収される時は 2 分前に警告があり、コンテナの中で SIGTERM を受けて後片付けを行います（stopTimeout の既定は 30 秒）。",
+    "per_choice": {
+      "A": "正しい。ほとんどを Spot に置いて費用を下げつつ、FARGATE のタスクで Spot が使えない時も処理を続けられます。",
+      "B": "Fargate は Spot の容量をオンデマンドに置き換えないため、Spot が使えない間はタスクが起動できず処理が止まるおそれがあります。",
+      "C": "正しい。後片付けをするには、コンテナの中で SIGTERM を受ける必要があります。",
+      "D": "1 つのキャパシティープロバイダー戦略には、Fargate と Auto Scaling グループのキャパシティープロバイダーを一緒に入れられません。",
+      "E": "タスクが 1 つだけのサービスは、容量が戻るまで中断されたままになり、処理を続ける要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers-termination",
+      "source_id": "S3",
+      "quote": "Fargate doesn't replace Spot capacity with on-demand capacity."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers-termination",
+      "source_id": "S3",
+      "quote": "The SIGTERM signal must be received from within the container to perform any cleanup actions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers-termination",
+      "source_id": "S3",
+      "quote": "However, a capacity provider strategy can only contain either Fargate or Auto Scaling group capacity providers, but not both."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers-termination",
+      "source_id": "S3",
+      "quote": "A service with only one task is interrupted until capacity is available."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

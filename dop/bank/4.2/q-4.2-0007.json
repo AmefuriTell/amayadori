@@ -1,0 +1,72 @@
+{
+  "task": "4.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.2-0007",
+  "services": [
+    "AWS X-Ray",
+    "AWS Lambda"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An Amazon EventBridge schedule invokes a Lambda function through an alias named prod, which points to published version 12. No traces appear in AWS X-Ray. An engineer turned on Active tracing for the function in the Lambda console, which edited the unpublished version, but production invocations are still not traced. The company wants production invocations to be traced with the LEAST amount of effort. What should the engineer do?",
+  "stem_ja": "Amazon EventBridge のスケジュールが、prod というエイリアスを通して Lambda 関数を呼び出しています。prod は公開済みのバージョン 12 を指しています。AWS X-Ray にはトレースが表示されません。エンジニアが Lambda のコンソールで関数の Active tracing を有効にし、未公開のバージョンが変更されましたが、本番の呼び出しはまだトレースされません。会社は、最も少ない手間で本番の呼び出しをトレースしたいと考えています。エンジニアは何をすべきですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Publish a new version from the unpublished version that has Active tracing, and update the prod alias to point to it.",
+      "text_ja": "Active tracing を有効にした未公開のバージョンから新しいバージョンを公開し、prod エイリアスがそれを指すように更新する。"
+    },
+    {
+      "key": "B",
+      "text": "Change the tracing mode of version 12 to Active so that the prod alias keeps pointing to the same version.",
+      "text_ja": "prod エイリアスが同じバージョンを指したままになるよう、バージョン 12 のトレースのモードを Active に変える。"
+    },
+    {
+      "key": "C",
+      "text": "Add the AWSXRayDaemonWriteAccess managed policy to the execution role, and keep the prod alias pointing to version 12.",
+      "text_ja": "実行ロールに AWSXRayDaemonWriteAccess 管理ポリシーを追加し、prod エイリアスはバージョン 12 を指したままにする。"
+    },
+    {
+      "key": "D",
+      "text": "Set the function's X-Ray sampling rate to 100 percent so that every scheduled invocation is recorded.",
+      "text_ja": "関数の X-Ray のサンプリングレートを 100% にして、スケジュールの呼び出しをすべて記録する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "トレースのモードは、関数のバージョンを公開する時のバージョンごとの設定で、公開済みのバージョンでは変えられません。スケジュールで動く関数は Active tracing でサンプリングして記録するので、有効にした設定から新しいバージョンを公開し、エイリアスをそちらへ向けます。",
+    "per_choice": {
+      "A": "正しい。Active tracing を含む新しいバージョンを公開してエイリアスを向ければ、本番の呼び出しがトレースされます。",
+      "B": "公開済みのバージョンのトレースのモードは変えられません。",
+      "C": "権限は必要ですが、コンソールで有効にした時に追加されます。バージョン 12 は Active tracing ではないため、トレースは送られません。",
+      "D": "Lambda 関数の X-Ray のサンプリングレートは設定できません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+      "source_id": "S2",
+      "quote": "Tracing mode is part of the version-specific configuration when you publish a version of your function. You can't change the tracing mode on a published version."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-lambda.html#xray-services-lambda",
+      "source_id": "S1",
+      "quote": "If your Lambda function runs on a schedule, or is invoked by a service that is not instrumented, you can configure Lambda to sample and record invocations with active tracing."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+      "source_id": "S2",
+      "quote": "When you activate tracing in the Lambda console, Lambda adds the required permissions to your Event Function's execution role."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray",
+      "source_id": "S2",
+      "quote": "You can't configure the X-Ray sampling rate for your functions."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

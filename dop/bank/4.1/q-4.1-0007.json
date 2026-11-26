@@ -1,0 +1,67 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0007",
+  "services": [
+    "Amazon CloudWatch",
+    "AWS Systems Manager Parameter Store"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs 300 Amazon Linux EC2 instances that are Systems Manager managed nodes. The operations team needs memory utilization and disk space utilization for every instance in Amazon CloudWatch. All instances must use one agent configuration that is stored centrally, and the instance role should use the AWS managed CloudWatchAgentServerPolicy without extra permissions. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は、Systems Manager のマネージドノードである 300 台の Amazon Linux の EC2 インスタンスを動かしています。運用チームは、すべてのインスタンスのメモリの使用率とディスク容量の使用率を Amazon CloudWatch で見る必要があります。すべてのインスタンスは 1 か所に保存した 1 つのエージェントの設定を使う必要があり、インスタンスのロールは追加の権限無しで AWS 管理の CloudWatchAgentServerPolicy を使うことにしています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Save the CloudWatch agent configuration in Parameter Store as /monitoring/cwagent-config, and use Systems Manager to install and start the agent with that parameter on all instances.",
+      "text_ja": "CloudWatch エージェントの設定を /monitoring/cwagent-config というパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。"
+    },
+    {
+      "key": "B",
+      "text": "Add a cron job to every instance that reads memory and disk usage and sends the values with the PutMetricData API every minute.",
+      "text_ja": "すべてのインスタンスに、メモリとディスクの使用量を読み、毎分 PutMetricData API で値を送る cron ジョブを追加する。"
+    },
+    {
+      "key": "C",
+      "text": "Save the CloudWatch agent configuration in Parameter Store with a name that starts with AmazonCloudWatch-, and use Systems Manager to install and start the agent with that parameter on all instances.",
+      "text_ja": "CloudWatch エージェントの設定を、名前が AmazonCloudWatch- で始まるパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。"
+    },
+    {
+      "key": "D",
+      "text": "Install the CloudWatch agent on every instance, and copy the agent configuration file to each instance by hand whenever it changes.",
+      "text_ja": "すべてのインスタンスに CloudWatch エージェントを入れ、エージェントの設定ファイルが変わるたびに各インスタンスへ手作業でコピーする。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "CloudWatch エージェントは mem_used_percent や disk_used_percent などのメトリクスを集めます。設定を Parameter Store に保存すれば、ほかのサーバーにエージェントを入れる時にその設定を使えますが、CloudWatchAgentServerPolicy が読めるのは AmazonCloudWatch- で始まる名前のパラメータだけです。",
+    "per_choice": {
+      "A": "パラメータの名前が AmazonCloudWatch- で始まらないため、CloudWatchAgentServerPolicy では読めず、追加の権限が必要になります。",
+      "B": "動きますが、メトリクスを送る独自のスクリプトを 300 台で保守することになります。",
+      "C": "正しい。1 つの設定を Parameter Store に置き、Systems Manager でまとめて入れられ、管理ポリシーのままで読めます。",
+      "D": "メトリクスは集められますが、設定を 1 か所に置いておらず、変更のたびに手作業のコピーが要ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html#linux-metrics-enabled-by-CloudWatch-agent",
+      "source_id": "S2",
+      "quote": "mem_used_percent The percentage of memory currently in use."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#install-CloudWatch-Agent-on-EC2-Instance-fleet-ssm",
+      "source_id": "S11",
+      "quote": "The name must start with AmazonCloudWatch-, because the CloudWatchAgentServerPolicy managed policy can read only those parameters."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm",
+      "source_id": "S9",
+      "quote": "Using AWS Systems Manager makes it easier to install the CloudWatch agent on a fleet of Amazon EC2 instances."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

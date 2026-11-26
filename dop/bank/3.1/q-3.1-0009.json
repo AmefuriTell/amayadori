@@ -1,0 +1,79 @@
+{
+  "task": "3.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.1-0009",
+  "services": [
+    "Amazon CloudFront",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company serves a static website through an Amazon CloudFront distribution whose origin is an Amazon S3 bucket in us-east-1. Content is updated several times each day. If the us-east-1 bucket becomes unavailable, CloudFront must automatically serve the site's GET requests from a copy of the content in another Region, and the copy must stay current without scheduled jobs. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+  "stem_ja": "ある会社は、オリジンを us-east-1 の Amazon S3 バケットにした Amazon CloudFront ディストリビューションで、静的なウェブサイトを配信しています。コンテンツは 1 日に何度も更新されます。us-east-1 のバケットが使えなくなった場合、CloudFront はサイトへの GET リクエストに、別のリージョンにあるコンテンツの写しから自動で応答する必要があり、その写しはスケジュールしたジョブ無しで最新に保たれる必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Configure S3 Cross-Region Replication from the us-east-1 bucket to a bucket in us-west-2.",
+      "text_ja": "us-east-1 のバケットから us-west-2 のバケットへの S3 クロスリージョンレプリケーションを設定する。"
+    },
+    {
+      "key": "B",
+      "text": "Configure S3 Same-Region Replication from the us-east-1 bucket to a second bucket in us-east-1.",
+      "text_ja": "us-east-1 のバケットから us-east-1 の 2 つ目のバケットへの S3 同一リージョンレプリケーションを設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Create a CloudFront origin group with the us-east-1 bucket as the primary origin and the us-west-2 bucket as the secondary origin.",
+      "text_ja": "us-east-1 のバケットをプライマリオリジン、us-west-2 のバケットをセカンダリオリジンにした CloudFront のオリジングループを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Schedule an AWS Lambda function that copies new objects from the us-east-1 bucket to a bucket in us-west-2 every night.",
+      "text_ja": "毎晩、us-east-1 のバケットから us-west-2 のバケットへ新しいオブジェクトをコピーする AWS Lambda 関数をスケジュールで実行する。"
+    },
+    {
+      "key": "E",
+      "text": "Add the us-west-2 bucket as a second origin, and have an engineer change the default cache behavior to it when the primary bucket fails.",
+      "text_ja": "us-west-2 のバケットを 2 つ目のオリジンとして追加し、プライマリのバケットが使えなくなった時にエンジニアがデフォルトのキャッシュ動作をそちらへ変える。"
+    }
+  ],
+  "answer": [
+    "A",
+    "C"
+  ],
+  "explanation": {
+    "summary": "S3 クロスリージョンレプリケーションは、別のリージョンのバケットへオブジェクトを自動・非同期でコピーします。CloudFront のオリジングループは、プライマリのオリジンが使えないか失敗を示すステータスコードを返した時に、GET・HEAD・OPTIONS のリクエストを自動でセカンダリのオリジンへ切り替えます。",
+    "per_choice": {
+      "A": "正しい。別のリージョンの写しが、ジョブ無しで自動で最新に保たれます。",
+      "B": "写しは自動で保たれますが同じリージョンにあり、別のリージョンに写しを置くという要件に合いません。",
+      "C": "正しい。プライマリが使えない時、CloudFront が GET のリクエストを自動でセカンダリへ切り替えます。",
+      "D": "スケジュールしたジョブで、要件に反します。次の実行までは写しが古いままです。",
+      "E": "切り替えが手作業で、自動で応答するという要件に合いません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication",
+      "source_id": "S6",
+      "quote": "You can use replication to enable automatic, asynchronous copying of objects across Amazon S3 buckets."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#crr-scenario",
+      "source_id": "S8",
+      "quote": "S3 Cross-Region Replication (CRR) is used to copy objects across Amazon S3 buckets in different AWS Regions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+      "source_id": "S11",
+      "quote": "If the primary origin is unavailable, or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+      "source_id": "S12",
+      "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
