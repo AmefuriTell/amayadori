@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0007",
+  "source": "flowchart TB\n  GRP[\"DBA のグループ（15 人・出入りあり）<br/>10 アカウントずつ割り当て\"]\n    PS@{ svc: \"AWS IAM Identity Center\", label: \"Database Admin のアクセス許可セット（1 つ）\" }\n  subgraph ORG[\"25 アカウント\"]\n    ACC@{ svc: \"AWS Organizations\", label: \"各アカウントにロールを自動作成\" }\n  end\n  GRP == \"✔ B: グループに割当\" ==> PS\n  PS -- \"割り当て・ポリシー変更が届く\" --> ACC\n  A[\"⚠ A: 15 人に個別に割り当て（出入りで手間）\"]\n  A -.-> GRP\n  C[\"⚠ C: 25 個のロールを自分で作って更新\"]\n  C -.-> ACC\n  D[\"⚠ D: アカウントごとに 25 個の許可セット（変更の手間）\"]\n  D -.-> PS\n",
+  "alt": "1 つのアクセス許可セットを DBA のグループに割り当てれば、人の出入りはグループの変更だけで済み、ポリシー変更も全アカウントに届く(B)。個人への割り当てや 25 個の作成は手間が増える。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

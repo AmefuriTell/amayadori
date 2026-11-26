@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0002",
+  "source": "flowchart TB\n  subgraph ACC[\"AWS アカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"AdministratorAccess のロール\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"直近 90 日の活動の記録\" }\n    AA@{ svc: \"IAM Access Analyzer\", label: \"ポリシーを生成\" }\n    POL@{ svc: \"AWS IAM\", label: \"細かいポリシー\" }\n  end\n  STG[\"ステージングでテスト\"]\n  PROD[\"本番にデプロイ\"]\n  ROLE -- \"活動\" --> CT\n  CT -- \"ログ\" --> AA\n  AA == \"✔ B: 使ったアクションだけ\" ==> POL\n  POL -- \"ポリシー\" --> STG\n  STG -- \"問題なし\" --> PROD\n  A[\"⚠ A: 本番でサービスを外していく（失敗する）\"]\n  A -.-> PROD\n  C[\"⚠ C: 境界を付け Administrator はそのまま\"]\n  C -.-> ROLE\n  D[\"⚠ D: コードから手書き（手間）\"]\n  D -.-> POL\n",
+  "alt": "CloudTrail の活動記録から IAM Access Analyzer が実際に使ったアクションだけのポリシーを生成し、ステージングで試してから本番に出す(B)。手書きや本番での試行は不適切。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

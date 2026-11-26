@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0001",
+  "source": "flowchart TB\n  SEC[\"セキュリティチーム\"]\n  DEV[\"開発者\"]\n  TEAM[\"同じアカウントのほかのチーム\"]\n  subgraph ACC[\"共有アカウント\"]\n    PB@{ svc: \"AWS IAM\", label: \"管理ポリシー（S3 と DynamoDB だけ）\" }\n    ROLE@{ svc: \"AWS IAM\", label: \"開発者が作るロール\" }\n    FN@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  end\n  SEC -- \"ロール作成の条件\" --> DEV\n  DEV -- \"ロールを作る\" --> ROLE\n  PB == \"✔ C: 境界として必ず付ける\" ==> ROLE\n  ROLE -- \"実行ロール\" --> FN\n  A[\"⚠ A: 開発者自身に境界を付ける（作るロールの上限にならない）\"]\n  A -.-> DEV\n  B[\"⚠ B: SCP をアカウントに適用（他チームも止まる）\"]\n  B -.-> TEAM\n  D[\"⚠ D: 完全な IAM 権限を与え毎週外す\"]\n  D -.-> DEV\n",
+  "alt": "開発者が作る Lambda のロールには、S3 と DynamoDB だけの管理ポリシーを境界として必ず付ける条件でロール作成を許す(C)。他チームに影響する SCP や人手の確認は不適切。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

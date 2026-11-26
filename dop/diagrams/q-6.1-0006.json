@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0006",
+  "source": "flowchart TB\n  EMP[\"従業員（Department 属性あり）\"]\n    ATTR@{ svc: \"AWS IAM Identity Center\", label: \"✔ A: アクセス制御の属性に Department\" }\n    PS@{ svc: \"AWS IAM Identity Center\", label: \"✔ B: 1 つのアクセス許可セット\" }\n  subgraph ACC[\"AWS アカウント\"]\n    BK@{ svc: \"Amazon S3\", label: \"バケット（部署のタグ）<br/>PrincipalTag と部署タグが一致で許可\" }\n  end\n  EMP -- \"サインイン\" --> ATTR\n  ATTR -- \"セッションタグ\" --> PS\n  PS == \"✔ B: タグが一致\" ==> BK\n  C[\"⚠ C: 部署ごとの許可セットに ARN を並べる\"]\n  C -.-> BK\n  D[\"⚠ D: 従業員ごとに IAM ユーザーを作る\"]\n  D -.-> EMP\n  E[\"⚠ E: バケットポリシーにグループ名を書く\"]\n  E -.-> BK\n",
+  "alt": "Identity Center のアクセス制御の属性で Department をセッションタグとして渡し(A)、1 つのアクセス許可セットで PrincipalTag とバケットの部署タグが一致する時だけ許す(B)。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0004",
+  "source": "flowchart TB\n  ROLE@{ svc: \"AWS IAM\", label: \"IAM ロール\" }\n  subgraph POLS[\"適用されるポリシー\"]\n    ID[\"ID ポリシー: s3:* 許可・DeleteObject 拒否\"]\n    PB[\"境界: GetObject と PutObject だけ許可\"]\n  end\n  S3B@{ svc: \"Amazon S3\", label: \"バケット\" }\n  ROLE --> ID\n  ROLE --> PB\n  ID -- \"重なりだけ有効\" --> S3B\n  PB -- \"重なりだけ有効\" --> S3B\n  S3B == \"✔ A・C: 許可\" ==> OK[\"許可<br/>✔ A: GetObject<br/>✔ C: PutObject\"]\n  S3B -. \"⚠ B・D・E: 拒否\" .-> NG[\"拒否<br/>⚠ B・E: 境界が許さない<br/>⚠ D: 明示的な拒否\"]\n",
+  "alt": "実際の権限は ID ポリシーと境界の両方が許す操作だけ。GetObject と PutObject は許可される(A・C)。ListBucket と PutBucketPolicy は境界が許さず、DeleteObject は明示的な拒否で拒否される。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

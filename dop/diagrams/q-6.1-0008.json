@@ -1,0 +1,8 @@
+{
+  "id": "q-6.1-0008",
+  "source": "flowchart TB\n  subgraph VEN[\"ベンダーのアカウント\"]\n    VS[\"監視サービス（多くの顧客）\"]\n  end\n  OTHER[\"別の顧客<br/>（混乱した代理）\"]\n  subgraph CO[\"自社のアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"ロール（信頼ポリシー）<br/>ベンダーが顧客ごとに決めた ExternalId\" }\n    STS@{ svc: \"AWS STS\", label: \"ロールの引き受け\" }\n  end\n  OTHER -. \"ARN を渡す\" .-> VS\n  VS -- \"要求 + ExternalId\" --> STS\n  STS == \"✔ D: ExternalId\" ==> ROLE\n  A[\"⚠ A: 自社で決めた ExternalId（防げない）\"]\n  A -.-> ROLE\n  B[\"⚠ B: 条件なしでベンダーのアカウントを許可\"]\n  B -.-> ROLE\n  C[\"⚠ C: アクセスキー付きの IAM ユーザー\"]\n  C -.-> ROLE\n",
+  "alt": "ベンダーが顧客ごとに一意に作る ExternalId を信頼ポリシーの条件にすれば、別の顧客が ARN を渡してもベンダーはだまされない(D)。自社で決めた値や条件なしでは防げない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

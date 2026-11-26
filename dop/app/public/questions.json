@@ -15149,7 +15149,10 @@
           "quote": "When you delegate permissions to others, use permissions boundaries to set the maximum permissions that you delegate. A permissions boundary does not grant permissions on its own."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "開発者が作る Lambda のロールには、S3 と DynamoDB だけの管理ポリシーを境界として必ず付ける条件でロール作成を許す(C)。他チームに影響する SCP や人手の確認は不適切。"
+      }
     },
     {
       "id": "q-6.1-0002",
@@ -15208,7 +15211,10 @@
           "quote": "After you test each generated policy, you can deploy the policy to your production environment."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CloudTrail の活動記録から IAM Access Analyzer が実際に使ったアクションだけのポリシーを生成し、ステージングで試してから本番に出す(B)。手書きや本番での試行は不適切。"
+      }
     },
     {
       "id": "q-6.1-0003",
@@ -15272,7 +15278,10 @@
           "quote": "IAM provides last accessed information to help you identify the users, roles, permissions, policies, and credentials that you no longer need so that you can remove them."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "IAM Access Analyzer で組織を信頼ゾーンにすると、組織外に共有されている S3 バケットや IAM ロールをリソースごとの検出結果として得られる(D)。スクリプトの保守は不要。"
+      }
     },
     {
       "id": "q-6.1-0004",
@@ -15337,7 +15346,10 @@
           "quote": "An explicit deny in either of these policies overrides the allow."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "実際の権限は ID ポリシーと境界の両方が許す操作だけ。GetObject と PutObject は許可される(A・C)。ListBucket と PutBucketPolicy は境界が許さず、DeleteObject は明示的な拒否で拒否される。"
+      }
     },
     {
       "id": "q-6.1-0005",
@@ -15398,7 +15410,10 @@
           "quote": "ABAC requires fewer policies."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "プロジェクトのタグをロールとリソースに付け、タグが一致する時だけ許す 1 つのポリシーにする ABAC なら、リソースが増えてもポリシーを更新しなくてよい(D)。"
+      }
     },
     {
       "id": "q-6.1-0006",
@@ -15468,7 +15483,10 @@
           "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Identity Center のアクセス制御の属性で Department をセッションタグとして渡し(A)、1 つのアクセス許可セットで PrincipalTag とバケットの部署タグが一致する時だけ許す(B)。"
+      }
     },
     {
       "id": "q-6.1-0007",
@@ -15530,7 +15548,10 @@
           "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "1 つのアクセス許可セットを DBA のグループに割り当てれば、人の出入りはグループの変更だけで済み、ポリシー変更も全アカウントに届く(B)。個人への割り当てや 25 個の作成は手間が増える。"
+      }
     },
     {
       "id": "q-6.1-0008",
@@ -15592,7 +15613,10 @@
           "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ベンダーが顧客ごとに一意に作る ExternalId を信頼ポリシーの条件にすれば、別の顧客が ARN を渡してもベンダーはだまされない(D)。自社で決めた値や条件なしでは防げない。"
+      }
     },
     {
       "id": "q-6.1-0009",
@@ -15654,7 +15678,10 @@
           "quote": "Managed rotation – For most managed secrets, you use managed rotation, where the service configures and manages rotation for you."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Aurora のマスターユーザーの認証情報には Secrets Manager のマネージドローテーションがあり、サービスが設定と管理を行うので Lambda 関数の保守が要らない(C)。"
+      }
     },
     {
       "id": "q-6.1-0010",
@@ -15723,7 +15750,10 @@
           "quote": "Note that Amazon RDS Proxy does not support the alternating users strategy."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アプリのユーザーのシークレットを交代ユーザーの戦略でローテーションし(A)、ユーザーの複製に使うスーパーユーザーのシークレットを別に用意する(B)と、高い可用性を保てる。"
+      }
     },
     {
       "id": "q-6.1-0011",
