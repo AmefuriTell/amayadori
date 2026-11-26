@@ -1,102 +1,24 @@
 {
   "slides": [
     {
-      "id": "s01",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "地図の『2 作る・集める』の箱が『Account Factory・招待』になっていて、台本の二つ目にもアカウントファクトリーが入っている。しかし本文では Account Factory は s03『土台 2』で扱われ、まとめ s16 の地図では『1 土台 landing zone Account Factory』『2 作る・集める API・StackSets・招待』になっている。入口と出口の地図で Account Factory の置き場が違う。また s04 の『Service Catalog の API』は二つ目の部の最初のスライドなのに、s01 の画面にも台本にも出てこない。",
-          "suggest": "s01 の地図と台本を s16 にそろえる。1 土台に landing zone・Account Factory、2 作る・集めるに Service Catalog の API・StackSets・招待・組織の間の移動を置く（または s03 を作る 側へ移し、s16 を直す。どちらかに一本化する）。"
-        }
-      ]
-    },
-    {
-      "id": "s02",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "図は Control Tower の下に Organizations・Service Catalog・IAM Identity Center の 3 つだけを並べている。根拠 S1 は including（例）であり、alt と台本の『その中に』は合っているが、図だけを見ると『この 3 つで全部』に見える。",
-          "suggest": "Control Tower の箱のラベルか線の近くに『など』を足す（例: 題や箱に『ほかのサービスを組み合わせる（例）』）。"
-        },
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "台本で『リソースコントロールポリシー』を名前だけ出し、何かを説明していない。以後のスライドにも出てこない。",
-          "suggest": "名前を出すなら一言（Organizations のポリシーの一つ、など根拠の範囲で）添えるか、ここでは触れない。"
-        }
-      ]
-    },
-    {
-      "id": "s03",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "題が『土台 2: landing zone と Account Factory』で Account Factory を土台に置いているが、s01 の地図・台本では Account Factory は『2 作る・集める』。どの部の話かが講義の中で食い違う（s01 の指摘と同じ根）。",
-          "suggest": "s01 と s16 の地図とそろえる。土台に置くなら s01 を直す。"
-        },
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "表の列名が『根拠の説明』だが、OU の行『アカウントのまとまり』は根拠 S2 にある説明ではない（S2 は OU を入れ物の中身として挙げるだけ。S16 の『OU の中の全アカウント』から読み取れる程度）。",
-          "suggest": "列名を『意味』などにするか、OU の行の ref に S16 を添える。"
-        }
-      ]
-    },
-    {
-      "id": "s04",
-      "issues": [
-        {
-          "kind": "flow",
-          "severity": "軽",
-          "detail": "台本で『メンバーアカウントは、組織の中で、管理アカウントとは別に置かれるアカウント』と説明しているが、『管理アカウント』の説明は s06 で初めて出る。説明に未説明の語を使っている。",
-          "suggest": "s04 で管理アカウントにも一言（組織を管理する側のアカウント）を添え、s06 の説明は短くする。"
-        }
-      ]
-    },
-    {
       "id": "s05",
       "issues": [
         {
           "kind": "unsupported",
-          "severity": "軽",
-          "detail": "bullet『OU 間の移動でも起動』は条件が抜けている。根拠 S13 は moved between target OUs（対象の OU の間の移動）。台本は『対象の組織単位の間』と正しく言っているので画面だけが広い。",
-          "suggest": "『対象 OU 間の移動でも起動』にする。"
-        }
-      ]
-    },
-    {
-      "id": "s09",
-      "issues": [
-        {
-          "kind": "fact",
           "severity": "中",
-          "detail": "台本の『あるアカウントで権限が拒否されるのは、ルートからそのアカウントまでの経路のどこかの SCP が、その権限を拒否した時です』は、拒否される条件がそれだけであるように聞こえる。根拠 S8 は『経路のどの SCP でも拒否できる（can deny）』という十分条件で、拒否の理由がこれだけとは書いていない。受験者が『SCP の Deny が無ければ拒否されない』と覚えるおそれがある。",
-          "suggest": "『経路のどこか一つの SCP が拒否していれば、そのアカウントでは拒否されます』のように、十分条件の言い方にする。"
+          "detail": "図は『アカウント →（加わる・外れる・移る）→ 対象の組織・OU →（きっかけ）→ StackSets →（自動でデプロイ）→ アカウント』の輪で、外れたアカウントにも StackSets が同じ物をデプロイするように読める。根拠 S13 は、外れた時にも automatic deployments が動く（triggered）とだけ言い、何がどのアカウントへ入るかは書いていない。notes で『外れた時に何が起きるかは言わない』と決めた台本（出入りのたびに動く、加わる時が中心）とも、図が食い違う。受験者が『外れたアカウントにも自動でデプロイされる』と覚えるおそれがある。",
+          "suggest": "戻りの矢印のラベルを『加わったアカウントへ自動でデプロイ』にする。または戻りの矢印をやめ、StackSets の箱を『自動デプロイが動く』にして、デプロイ先を描かない。alt も同じに直す。"
         }
       ]
     },
     {
-      "id": "s10",
+      "id": "s08",
       "issues": [
         {
-          "kind": "terms",
+          "kind": "mismatch",
           "severity": "軽",
-          "detail": "表は『default のロール名』、台本は『既定の名前』。他のスライドでは英語の画面語と日本語の台本の対応を一言で示しているが、ここは示していない。",
-          "suggest": "表を『既定のロール名』にそろえるか、台本で既定＝デフォルトと一言添える。"
-        }
-      ]
-    },
-    {
-      "id": "s12",
-      "issues": [
-        {
-          "kind": "terms",
-          "severity": "軽",
-          "detail": "bullet は『委任管理者』『SLR』、台本は『委任された管理者』『サービスリンクロール』。SLR が台本で略語として結び付けられていない。",
-          "suggest": "bullet を『委任管理者ではサービスリンクロールに注意』にするか、台本で略して SLR と呼ぶと添える（読みはエスエルアール）。"
+          "detail": "図の左下のアカウントの箱は『自分の SCP も経路に入る』だけで『Deny が効く』が無い。台本と alt は『下の組織単位とアカウントに届いています』『全部で Deny が効く』と言っており、画面だけだとこの箱に Deny が効くかが読み取りにくい。",
+          "suggest": "左下の箱を『アカウント / Deny が効く / 自分の SCP も経路に入る』にする。"
         }
       ]
     },
@@ -104,10 +26,10 @@
       "id": "s13",
       "issues": [
         {
-          "kind": "terms",
+          "kind": "mismatch",
           "severity": "軽",
-          "detail": "題と表は『controls』、bullets は『control』、s01・s16 の地図は『controls』。単数と複数がまじる。",
-          "suggest": "画面は『controls』（S16 の表記）にそろえる。"
+          "detail": "表の『Security Hub CSPM 〃 中央設定と同時に使えない』は、主語が Security Hub CSPM に読め、『Security Hub CSPM は中央設定と同時に使えない』と取れる。台本と S17 は『中央設定と宣言型ポリシーは、同じ組織で同時に使えない』。",
+          "suggest": "セルを『宣言型と中央設定は同じ組織で併用不可』にする。"
         }
       ]
     },
@@ -116,45 +38,17 @@
       "issues": [
         {
           "kind": "mismatch",
-          "severity": "中",
-          "detail": "bullet『確かめる所も一緒に』と列名『選ぶ方法・確かめる所』があるのに、表の右の列には方法の名前しか無い。確かめる所（Service Catalog の API で自動化、SCP は権限を与えない、aggregator は読むだけで元を変えられない）は台本でだけ言っている。画面と台本が食い違い、画面だけで復習すると確かめる所が抜ける。",
-          "suggest": "右の列を『Account Factory（自動なら Service Catalog の API）』『SCP の Deny（権限は与えない）』『Config aggregator（読むだけ）』のように確かめる所を足すか、確かめる所の列を分ける。"
-        },
-        {
-          "kind": "flow",
           "severity": "軽",
-          "detail": "表に StackSets の自動デプロイ・controls・GuardDuty などの行が無く、s01 の地図で予告した四つの部のうち、統制の部が aggregator の 1 行だけ。",
-          "suggest": "s05 の台本にある『組織に加わるアカウントにも自動で同じ物を入れたい → StackSets の自動デプロイ』、s13 の『OU 全体に統制 → controls』などを 1〜2 行足す（各スライドの台本にある条件の言い方をそのまま使う）。"
-        }
-      ]
-    },
-    {
-      "id": "s16",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "中",
-          "detail": "bullet『統制は OU と組織の単位で』は根拠に無い一般化で、台本でも説明していない。しかも本文では GuardDuty の委任管理者はリージョン単位（S19）、aggregator はアカウントとリージョンをまたいで集める（S14）と言っており、それと食い違う。受験者が統制の単位を誤って覚えるおそれがある。",
-          "suggest": "『controls は OU 全体・GuardDuty はリージョン単位』のように、本文で言った単位をそのまま書く。台本でも同じ事を一言添える。"
-        },
-        {
-          "kind": "flow",
-          "severity": "中",
-          "detail": "まとめの地図（1 土台に Account Factory、2 に API・StackSets・招待）が、s01 の地図（2 に Account Factory・招待）と合わない。『最初の地図に戻ります』と言っているのに地図の中身が変わっている。",
-          "suggest": "s01 と同じ配置にそろえる（s01 の指摘と一緒に直す）。"
+          "detail": "bullets はセキュリティの 3 サービス（宣言型・Detective・GuardDuty）だが、台本はそれを『画面の要点に置きました』と言うだけで中身を読まない。表・題（入る・任せる・見張る）と bullets の話題もずれている。事実の食い違いは無い。",
+          "suggest": "台本で bullets の 3 つを 1 文ずつ読む（s13 で言った事実だけで足りる）。"
         }
       ]
     }
   ],
   "global": [
     {
-      "severity": "中",
-      "detail": "Account Factory と Service Catalog の API がどの部に属するかが、s01（2 作る・集める に Account Factory、API は無し）、s03（題が土台 2）、s04（作る 1）、s16（1 土台に Account Factory、2 に API）でばらばら。地図で予告→本文→まとめで同じ地図に戻る、という構成の決まりが崩れている。",
-      "suggest": "部の割り当てを 1 つに決め（例: 1 土台 = Control Tower・landing zone・Account Factory、2 作る・集める = Service Catalog の API・StackSets・招待・移動）、s01・s03・s04・s16 の題・地図・台本をそろえる。"
-    },
-    {
       "severity": "軽",
-      "detail": "根拠との食い違いで受験者が誤って覚える重い誤り（矢印の向き・招待の送り手・SCP が権限を与えない・aggregator が読むだけ等）は見つからなかった。s07 の招待の矢印、s09 の Deny の木、s12 の aggregator の向きは根拠どおり。",
+      "detail": "前回の中 7 件は直っている。s01・s16 の地図と s03（土台 2）・s04〜s06（作る・集める）の部の割り当てがそろった。s08 の Deny は十分条件の言い方になった。s14・s15 の表に『確かめる所』の列が入り、台本と一致する。s16 の『統制は OU と組織の単位で』は『controls は OU 全体、GuardDuty はリージョンごと』に改まり根拠どおり。登録（組織にいるアカウントを Control Tower へ、S4）と招待（アカウントを組織へ、S6・S7）は s04・s06・s14 で言い分けられ、根拠と合う。notes の不採用の理由（根拠に無い事実を足さない）はいずれも妥当。",
       "suggest": "なし（記録のみ）。"
     }
   ]

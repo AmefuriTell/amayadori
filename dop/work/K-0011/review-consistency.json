@@ -1,0 +1,133 @@
+{
+  "slides": [
+    {
+      "id": "s03",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本は S9 の例を全部読む（network performance metrics を含む）が、画面の表には network performance metrics の行が無い。表は「例」と書いてあるので誤りではないが、耳と目で数が合わない。",
+          "suggest": "表の「NVIDIA GPU・EFA・NVMe」の行に「・network performance」を足す。台本は変えない。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "S2 の「1・5・10・30 秒、60 秒の倍数で読める」は high-resolution のメトリクスで送った時の話。表では「読む period」の 2 行が「high-resolution」の行と別の行になり、条件が落ちている。どのメトリクスでも 1 秒の period で読める、と読める。台本の「読み出すときの期間は、画面の表のとおりです」も条件を言っていない。",
+          "suggest": "表の 2 行を「high-resolution を読む period | 1・5・10・30 秒、60 秒の倍数」の 1 行にまとめる。台本は「高分解能のときの、読み出す期間は、画面の表のとおりです」と 5 字ほど足し、直後の「一分より短い間の動きを、すぐに見たいときに役立ちます」の「すぐに」を削って差し引きを抑える。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "S13 は「throttling で届けられなかった分を最大 24 時間送り直し、その後に失敗した分を捨てる」。s14 の台本「二十四時間を過ぎた分は捨てられます」と表の「24 時間で捨てる」は、届いたデータまで 24 時間で消えるようにも聞こえる。s07 本文の言い方（失敗した分）が s14 で落ちている。",
+          "suggest": "s14 の表を「24 時間 送り直して捨てる」、台本を「送り直しても二十四時間を過ぎた分は捨てられます」に（+5 字。s14 の「ログを」の重複「ログをオープンサーチサービスに送りたいときも」を「オープンサーチサービスに送りたいときも」に削って相殺）。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "bullet「Data Firehose か S3 へ」は送り先がこの 2 つだけに見える。台本と alt は「ドキュメントに挙がる使い方のうち 2 つ」と正しく限定しているので、bullet で条件が落ちている。",
+          "suggest": "bullet を「例: Data Firehose・S3」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "S18 は「default は server-side の AES-GCM 256 ビットで at rest を暗号化。As an alternative, you can use AWS KMS for this encryption」、つまり KMS も同じ保存時の server-side の暗号化の代わりの鍵。図は「default: server-side」と「代わりに AWS KMS」を別の箱に分け、server-side の語が default 側にだけあるため、KMS は server-side ではない（client-side）と覚えるおそれがある。試験ガイドの knowledge に client-side と server-side の区別があるので誤りが目立つ。",
+          "suggest": "図の subgraph 名を「代わりに AWS KMS の key（同じ保存時の暗号化）」にする。台本の「その代わりに、…ケーエムエスの鍵を使うこともできます」を「この暗号化に、…ケーエムエスの鍵を使うこともできます」に（字数ほぼ同じ）。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本と alt は kms:DescribeKey が要る呼び出しを「CreateLogGroup に kmsKeyId を付ける、または AssociateKmsKey」の 2 つと言うが、図の矢印は AssociateKmsKey だけ。",
+          "suggest": "矢印のラベルを「CreateLogGroup（kmsKeyId）か AssociateKmsKey」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "S8 の勧めは「default value を決める、0 でもよい（even if the value is 0）」。表の「default value を 0」と台本の「デフォルト値をゼロに決めたかを確かめます」は、0 に決めることが勧めだと読み替えている。s05 の「0 でも決める」とも食い違い、受験者が「0 にする」と覚えるおそれがある。",
+          "suggest": "表を「default value を決めたか」、台本を「デフォルト値を決めたかを確かめます」にする（-3 字）。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "bullet「Kinesis が欠ける → 配り方」の「欠ける」は他のスライド・表・台本のどこにも無く、表と台本は「throttling」「スロットリングにかかる」。同じ条件を別の言葉で呼んでいる。",
+          "suggest": "bullet を「Kinesis で throttling → 配り方」にする。"
+        },
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "「配り方を見る」と言うが、既定（log stream ごと）以外にどんな配り方があるかは講義でも根拠でも出てこないので、見た後に何を選ぶかが分からない。",
+          "suggest": "根拠の無い選択肢は足さず、表の「選ぶ方法」を「既定の配り方（log stream ごと）を疑う」にする。C1 で S13 の配り方の他の値を写せるなら次の回で足す。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「自分の鍵で暗号化」「自分で選んだ鍵」は、S18 の「AWS KMS をこの暗号化に使える」より強い（誰が作った key かは根拠に無い）。",
+          "suggest": "表を「KMS の key で暗号化」、台本を「ケーエムエスの鍵で暗号化したいなら」にする（字数減）。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "図の第 4 部「AWS KMS log group ごとの key」は、s11 で「勧め」だった条件が落ち、決まりのように見える。",
+          "suggest": "ラベルを「AWS KMS key は log group ごとに（勧め）」にする。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本は第 1 部で「カスタムメトリクスを、ネームスペース、名前、ディメンションで形にしました」と言うが、図の第 1 部は「CloudWatch agent Systems Manager で配る」だけで、s01 の地図にあった「カスタムメトリクス」が消えている。",
+          "suggest": "第 1 部のラベルに「カスタムメトリクス」の行を足す（s01 と同じ）。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "軽",
+      "detail": "同じ語の呼び方が揺れる: 台本で s05・s11 は「デフォルト」、s07・s14 は「既定」。",
+      "suggest": "台本は「デフォルト」にそろえる（s07「配り方の既定」→「配り方のデフォルト」、s14「既定は」→「デフォルトは」。図・bullets の「既定」も合わせる）。"
+    },
+    {
+      "severity": "軽",
+      "detail": "台本の合計は 4,957 字で上限に近い。上の提案は差し引きでほぼ 0 字になるよう削る所を添えた。s03 の「一つ一つの中身は、この講義の根拠には書かれていないので、ここでは名前で覚えておきます」（約 40 字）も、足す必要が出た時に削れる候補。",
+      "suggest": "足す時は s03 の上の一文を「中身は扱わず、名前で覚えます」に縮めて余りを作る。"
+    }
+  ]
+}

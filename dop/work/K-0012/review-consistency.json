@@ -1,0 +1,94 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "予告と本文がずれている。台本ではメトリクスの部を「アラーム、異常検出、ダッシュボード」と予告するが、本文には名前空間（s02）とアラームの動作（s05）もある。図のラベルは「アラーム・ダッシュボード」だけで、異常検出も入っていない。s16 のまとめの図は「anomaly detection・アラームの動作・ダッシュボード」で、地図とそろっていない。",
+          "suggest": "地図の CloudWatch のラベルと台本の予告を、本文の 5 枚（名前空間・アラームが評価する物・異常検出・アラームの動作・ダッシュボード）にそろえる。s16 のラベルとも同じ並びにする。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "detail": "図で「リージョン A／B のリソース」が「監視のアカウント」の枠の外に置かれていて、別のアカウントのリソースのように見える。S6 が言うのは、同じアカウントでもリージョンをまたいで 1 つの画面で見られる、という事。",
+          "suggest": "リージョン A・B のリソースを「監視のアカウント」の枠の中に入れる。枠の外は「ほかのアカウントのリソース」だけにする。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "図で「gzip で送る」のラベルが Kinesis Data Streams への矢印にしか付いていない。S10 では、subscription filter で送るログはどの送り先でも gzip で圧縮される。図を見ると、Kinesis Data Streams の時だけ gzip になるように読める（台本と alt は正しい）。",
+          "suggest": "矢印のラベルは「送る」だけにし、「gzip で圧縮」はロググループの node に書く。または 4 本の矢印すべてに同じラベルを付ける。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "bullets が「しきい値無し → anomaly detection」になっていて、本文（s04）と表で付けた「固定の」（S1 の static threshold）が落ちている。異常検出にはしきい値が全く無い、と覚えさせてしまう。",
+          "suggest": "bullets を「固定のしきい値無し → anomaly detection」にする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "台本が「アカウントをまたぐときは、クロスアカウントオブザーバビリティの設定が要ります」と言い切っている。S6 にあるのは「設定でき、そのうえで作れる」（you can set up ... and then create）まで。",
+          "suggest": "「クロスアカウントオブザーバビリティを設定したうえで、監視のアカウントに作れます」と、s06 と同じ言い方にする。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "表の「選ぶ方法」と bullets（「順に処理 → Kinesis Data Streams」）が、サービス名だけになっている。台本と s08 では stream consumer（シャードを順に読む）に限った話。S9 では、Kinesis Data Streams の queue consumer は状態を持たない処理に向くとしている。条件が落ちて、Kinesis Data Streams なら必ず順に処理する、と覚えさせてしまう。",
+          "suggest": "表の「選ぶ方法」を「Kinesis Data Streams の stream consumer」に、bullets を「順に処理 → stream consumer」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "detail": "台本の「資料に無かった物」に挙がるのが、メトリクスの名前と Inspector だけ。s06 で断った Amazon Quick Sight が抜けている。また、図の Kinesis Data Streams のラベル「シャードを順に読む」も、stream consumer の条件が落ちている（s14 と同じ）。",
+          "suggest": "台本に「クイックサイトの可視化」を足す。図のラベルを「stream consumer はシャードを順に読む」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "画面は「Event history」、台本は「イベント履歴」で、対応を一度も言っていない。s15 も、画面は「Event history」、台本は「イベント履歴」。",
+          "suggest": "s12 の台本で最初に出る所を「イベント履歴、英語でイベントヒストリー」とし、s04 の「異常検出、英語でアノマリーディテクション」と同じ形にする。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "軽",
+      "detail": "表やまとめで短くした所で、本文の条件（「固定の」しきい値、stream consumer）が落ちる型が、くり返し出ている（s13・s14・s16）。",
+      "suggest": "条件の表 3 枚と s16 を直す時、短くした語ごとに本文の条件が残っているかを確かめる。"
+    }
+  ]
+}
