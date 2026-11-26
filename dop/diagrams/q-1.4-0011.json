@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0011",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ\" }\n  LAM@{ svc: \"AWS Lambda\", label: \"Lambda 関数\" }\n  ECS@{ svc: \"Amazon ECS\", label: \"ECS サービス\" }\n  EC2P[\"EC2/オンプレミスのサーバー\"]\n  BADB[\"⚠ B: サイドカー・レイヤーは作業が増えるだけ\"]\n  BADC[\"⚠ C: EC2 を残す費用と手間が増える\"]\n  BADD[\"⚠ D: Lambda は EC2 のプラットフォームでデプロイできない\"]\n  CD == \"✔ A: エージェント不要\" ==> LAM\n  CD == \"✔ A: エージェント不要\" ==> ECS\n  CD -- \"エージェントが必要\" --> EC2P\n  BADB -.-> ECS\n  BADC -.-> EC2P\n  BADD -.-> LAM",
+  "alt": "CodeDeploy エージェントが要るのは EC2/オンプレミスへのデプロイだけ。Lambda と ECS へのデプロイでは要らないので、用意する作業は無い（A）。サイドカーやレイヤー（B）や EC2 を残す案（C）は無駄。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

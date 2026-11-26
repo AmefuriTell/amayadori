@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0003",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application Load Balancer\" }\n  ORIG@{ svc: \"Amazon EC2\", label: \"元のインスタンス（✔ D: 切り替え後も動かす）\" }\n  REPL@{ svc: \"Amazon EC2\", label: \"置き換え先のインスタンス\" }\n  QA[\"QA チーム\"]\n  BADA[\"⚠ A: すぐ再ルーティング → 試験前に本番の通信が流れる\"]\n  BADE[\"⚠ E: in-place は同じインスタンスを更新 → 先に試験できず元も残らない\"]\n  BADC[\"⚠ C: 待機後に元を自動で終了 → 運用チームが決められない\"]\n  CD -- \"インスタンスを用意\" --> REPL\n  QA -- \"先に試験\" --> REPL\n  ALB -- \"今の通信\" --> ORIG\n  REPL == \"✔ B: 手で切り替えるまで未登録\" ==> ALB\n  BADA -.-> REPL\n  BADC -.-> ORIG\n  BADE -.-> CD",
+  "alt": "置き換え先のインスタンスは、再ルーティングを手で選ぶ設定（B）にすると切り替えるまでロードバランサーに登録されず、QA が先に試験できる。元のインスタンスは動かしたままにする（D）。すぐ切り替え（A）や自動終了（C）は合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

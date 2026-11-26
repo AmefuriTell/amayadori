@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0002",
+  "source": "flowchart TB\n  NET@{ svc: \"AWS CloudFormation\", label: \"ネットワークのスタック（サブネット ID を export）\" }\n  APP@{ svc: \"AWS CloudFormation\", label: \"同じアカウントのアプリのスタック 3 つ\" }\n  NEW@{ svc: \"AWS CloudFormation\", label: \"別アカウントの新しいスタック<br/>✔ B: Fn::GetStackOutput で読む\" }\n  NET -- \"ImportValue で import 中\" --> APP\n  APP == \"✔ A: 先に import を外す\" ==> NET\n  NET == \"✔ B: 出力を読む\" ==> NEW\n  NET -. \"⚠ C: ImportValue は同じアカウントだけ\" .-> NEW\n  APP -. \"⚠ D・E: import 中は値の変更も削除もできない\" .-> NET\n",
+  "alt": "ネットワークのスタックの export 値を変える図。import 中は変更も削除もできないので先に import を外し（A）、別アカウントのスタックは Fn::GetStackOutput で出力を読む（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0005",
+  "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（dist/ に出力）\" }\n  DIST[\"dist/ の中: assets/ と views/\"]\n  OUT[\"成果物の最上位: assets/ と views/（構造は保つ）\"]\n  BADB[\"⚠ B: dist/ ごと入り、最上位に中身が来ない\"]\n  BADC[\"⚠ C・D: discard-paths で構造が平らになる\"]\n  CB -- \"出力\" --> DIST\n  DIST == \"✔ A: files '**/*' + base-directory dist\" ==> OUT\n  DIST -.-> BADB\n  DIST -.-> BADC",
+  "alt": "buildspec の artifacts の設定の図。base-directory に dist、files に 「**/*」 を指定すると、dist の中身が最上位に入りサブディレクトリの構造も残る（A）。dist 付きの指定（B）や discard-paths（C・D）では要件を満たさない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

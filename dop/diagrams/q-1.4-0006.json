@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0006",
+  "source": "flowchart TB\n  CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（サービスロール）\" }\n  STS@{ svc: \"AWS STS\", label: \"sts:GetServiceBearerToken の権限\" }\n  CA@{ svc: \"AWS CodeArtifact\", label: \"GetAuthorizationToken\" }\n  NPM[\"npm でパッケージをインストール\"]\n  BADB[\"⚠ B: 管理者の権限まで付く（最小権限に反する）\"]\n  BADC[\"⚠ C: ルートユーザーはトークンを取れない\"]\n  BADD[\"⚠ D: 寿命を延ばしてもトークンを取れない\"]\n  CB -- \"⚠ 今はアクセス拒否\" --> CA\n  STS == \"✔ A: 足りない権限を追加\" ==> CB\n  CA -- \"認可トークン\" --> NPM\n  BADB -.-> CB\n  BADC -.-> CA\n  BADD -.-> CA",
+  "alt": "CodeBuild が CodeArtifact の認可トークンを取るには、codeartifact の権限に加えて sts:GetServiceBearerToken が要る。足りないこの権限だけを追加するのが最小権限の解決（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

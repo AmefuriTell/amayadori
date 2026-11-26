@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0014",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"新しいデプロイ\" }\n  STOP[\"ApplicationStop のスクリプト\"]\n  PREV[\"前に成功したリビジョンの AppSpec（壊れた物）\"]\n  NEW[\"新しいリビジョン（スクリプトを修正済み）\"]\n  BADB[\"⚠ B: 新しいリビジョンで直しても、動くのは前のスクリプト\"]\n  BADC[\"⚠ C: 新しい AppSpec のタイムアウトは前のスクリプトを直さない\"]\n  BADD[\"⚠ D: 作り直しは手間が大きく不要\"]\n  CD --> STOP\n  PREV -- \"スクリプトの出どころ\" --> STOP\n  STOP == \"✔ A: 失敗を無視して続ける\" ==> NEW\n  BADB -.-> PREV\n  BADC -.-> STOP\n  BADD -.-> CD",
+  "alt": "ApplicationStop は前に成功したリビジョンの AppSpec のスクリプトで動くので、新しいリビジョンで直しても失敗する。失敗を無視するオプションでデプロイを作り直せば、直したスクリプトを入れられる（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

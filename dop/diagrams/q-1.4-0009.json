@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0009",
+  "source": "flowchart TB\n  subgraph EC2[\"EC2 インスタンス\"]\n    AG@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy エージェント\" }\n    PROF@{ svc: \"AWS IAM\", label: \"✔ B: インスタンスプロファイルのロール\" }\n  end\n  S3@{ svc: \"Amazon S3\", label: \"deploy-artifacts バケット\" }\n  BADA[\"⚠ A: 全バケットの全操作 → 最小権限に反する\"]\n  BADC[\"⚠ C: 取得するのはインスタンスのエージェント。サービスロールではない\"]\n  BADD[\"⚠ D: バケットの公開は禁止\"]\n  PROF -- \"このバケットの読み取りだけ\" --> AG\n  AG == \"リビジョンの取得\" ==> S3\n  BADA -.-> PROF\n  BADC -.-> AG\n  BADD -.-> S3",
+  "alt": "CodeDeploy エージェントは、インスタンスプロファイルのロールの権限で S3 からリビジョンを取る。deploy-artifacts からの読み取りだけを許すロールを付けるのが最小権限（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

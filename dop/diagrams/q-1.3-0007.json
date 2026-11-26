@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0007",
+  "source": "flowchart TB\n  NET([\"インターネット（公開リポジトリ）\"])\n  subgraph VPC[\"VPC\"]\n    subgraph PRI[\"プライベートサブネット\"]\n      CB@{ svc: \"AWS CodeBuild\", label: \"ビルド（VPC・サブネット・SG を設定）\" }\n      RDS@{ svc: \"Amazon RDS\", label: \"データベース（非公開）\" }\n    end\n    NAT@{ svc: \"Amazon VPC\", label: \"✔ B: NAT ゲートウェイ\" }\n  end\n  BADD[\"⚠ A: RDS を公開 → 要件に反する<br/>⚠ D: VPC の設定なし → RDS に届かない\"]\n  CB -- \"統合テスト\" --> RDS\n  CB == \"✔ B: パッケージ取得\" ==> NAT\n  NAT --> NET\n  CB -. \"⚠ C: ルート無し\" .-> NET\n  BADD -.-> RDS",
+  "alt": "VPC のプライベートサブネットの CodeBuild が、RDS に統合テストを行い、NAT ゲートウェイ経由で公開リポジトリからパッケージを取る図（B）。ルートが無い構成（C）や VPC 設定なし（D）では片方に届かない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

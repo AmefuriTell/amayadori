@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0017",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"EC2 へのデプロイ\" }\n  RES[\"HEALTH_CONSTRAINTS で失敗・全イベントが Skipped\"]\n  AG@{ svc: \"AWS CodeDeploy\", label: \"✔ A: エージェントが入っていない・動いていない\" }\n  ROLE[\"✔ B: サービスロールに必要な権限が無い\"]\n  BADX[\"⚠ C: スクリプトの誤りなら、そのイベントは実行されて失敗<br/>⚠ D: AllowTraffic の失敗なら前のイベントは実行済み<br/>⚠ E: 終了保護はデプロイに無関係\"]\n  CD -- \"結果\" --> RES\n  AG == \"原因\" ==> RES\n  ROLE == \"原因\" ==> RES\n  BADX -.-> RES",
+  "alt": "すべてのライフサイクルイベントが Skipped で HEALTH_CONSTRAINTS になる時は、CodeDeploy エージェントが入っていない・動いていないこと（A）と、サービスロールの権限不足（B）を確かめる。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

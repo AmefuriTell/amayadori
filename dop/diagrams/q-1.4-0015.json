@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0015",
+  "source": "flowchart TB\n  CF@{ svc: \"AWS CloudFormation\", label: \"スタック（UPDATE_ROLLBACK_FAILED）\" }\n  DB[\"データベース（CloudFormation の外で削除済み）\"]\n  OK[\"UPDATE_ROLLBACK_COMPLETE（また更新できる）\"]\n  BADA[\"⚠ A: シグナルは、消えたデータベースには効かない\"]\n  BADB[\"⚠ B: スタックを削除する → 要件に反する\"]\n  BADC[\"⚠ C: 原因は権限ではない。待っても終わらない\"]\n  CF -- \"戻せない\" --> DB\n  CF == \"✔ D: ロールバックを続ける\" ==> OK\n  DB -. \"消えた物は飛ばす\" .-> OK\n  BADA -.-> DB\n  BADB -.-> CF\n  BADC -.-> CF",
+  "alt": "外で消されたデータベースに戻れず UPDATE_ROLLBACK_FAILED になったスタックは、ロールバックを続けて消えたリソースを飛ばすと UPDATE_ROLLBACK_COMPLETE に戻り、削除せずに更新できる（D）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

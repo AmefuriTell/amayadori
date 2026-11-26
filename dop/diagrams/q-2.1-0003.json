@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0003",
+  "source": "flowchart TB\n  FN@{ svc: \"AWS Lambda\", label: \"AWS::Serverless::Function（SAM）\" }\n  AL@{ svc: \"AWS Lambda\", label: \"エイリアスとバージョン\" }\n  BADC[\"⚠ C: CodeDeploy を使わず、重みを変えるスクリプトを保守\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"アプリケーション・デプロイグループ・ロール\" }\n  FN == \"✔ D: AutoPublishAlias\" ==> AL\n  FN == \"✔ D: DeploymentPreference\" ==> CD\n  CD -- \"通信を移す\" --> AL\n  FN -. \"⚠ A: エイリアスだけ\" .-> AL\n  BADC -.-> AL\n  FN -. \"⚠ B: 手で書くと長くなる\" .-> CD\n",
+  "alt": "SAM の Lambda 関数に AutoPublishAlias と DeploymentPreference を書くと、エイリアスと CodeDeploy のリソースを SAM が作り、CodeDeploy が通信を移す（D）。手で書く B や CodeDeploy 無しの A は不適切。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

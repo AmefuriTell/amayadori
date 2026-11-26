@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0006",
+  "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新（200 アカウント）\" }\n  ST[\"既定の Strict: 同時数が 耐性+1 に縛られ 1 つずつ\"]\n  SF[\"✔ A: Soft: 失敗に関わらず 20 アカウントずつ\"]\n  BADBC[\"⚠ B: リージョンの並列はアカウントの同時数と無関係<br/>⚠ C: StackSet を 10 個に分けると管理の手間\"]\n  BADD[\"⚠ D: 200 に増やしても Strict のまま 1 つずつ\"]\n  OP -. \"⚠ 今: 耐性 0\" .-> ST\n  BADBC -.-> OP\n  BADD -.-> ST\n  OP == \"✔ A: SOFT_FAILURE_TOLERANCE\" ==> SF\n",
+  "alt": "StackSet の更新が耐性 0 の既定の Strict モードで 1 アカウントずつになる図。同時実行モードを SOFT_FAILURE_TOLERANCE にすると失敗の数に関わらず 20 アカウントずつ動く（A）。D では解決しない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

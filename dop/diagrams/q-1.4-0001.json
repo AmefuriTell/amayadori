@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0001",
+  "source": "flowchart TB\n  USERS[\"本番のトラフィック\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"デプロイ設定\" }\n  OLD@{ svc: \"AWS Lambda\", label: \"旧バージョン\" }\n  NEW@{ svc: \"AWS Lambda\", label: \"新バージョン\" }\n  BADB[\"⚠ B: linear は 1 分ごとに 10% → 全部移るまで約 10 分\"]\n  BADC[\"⚠ C: AllAtOnce は一度に全部\"]\n  BADD[\"⚠ D: update-alias のスクリプトを自分で保守\"]\n  USERS --> CD\n  CD -- \"最初は 90%\" --> OLD\n  CD -- \"✔ A: 最初に 10%\" --> NEW\n  CD == \"✔ A: 5 分後に残り 90%\" ==> NEW\n  BADB -.-> CD\n  BADC -.-> CD\n  BADD -.-> OLD",
+  "alt": "CodeDeploy の LambdaCanary10Percent5Minutes は、最初に 10% を新バージョンへ送り、5 分後に残り 90% を移す（A）。linear（B）は全部移るまで約 10 分、AllAtOnce（C）は一度に全部で要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

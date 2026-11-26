@@ -1,0 +1,8 @@
+{
+  "id": "q-1.3-0001",
+  "source": "flowchart TB\n  PUSH[\"イメージのプッシュ\"]\n  ECR@{ svc: \"Amazon ECR\", label: \"リポジトリ（ライフサイクルポリシー）\" }\n  R1[\"✔ A: 優先度 1: release タグを選ぶ（上限 10000）\"]\n  R2[\"優先度 2: プッシュから 90 日で削除\"]\n  KEEP[\"release のイメージは残る\"]\n  DEL[\"ほかのイメージは 90 日後に削除\"]\n  BAD[\"⚠ B: 優先度を逆にすると、全イメージの 90 日の規則が先に効き release も消える\"]\n  BADCD[\"⚠ C: untagged に tagPrefixList は使えない<br/>⚠ D: 1 規則に両方は書けず release も消える\"]\n  PUSH -- \"イメージ\" --> ECR\n  ECR -- \"規則\" --> R1\n  R1 == \"合った物は優先度 2 で消えない\" ==> KEEP\n  R1 -- \"合わない物\" --> R2\n  R2 --> DEL\n  BAD -.-> ECR\n  BADCD -.-> ECR",
+  "alt": "ECR のライフサイクルポリシーで release タグのイメージを優先度 1 の規則で選び、上限を大きくして残す（A）。優先度 2 の 90 日の削除はほかのイメージだけに効く。優先度を逆にすると release も消える（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

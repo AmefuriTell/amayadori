@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0004",
+  "source": "flowchart TB\n  USERS[\"受信トラフィック\"]\n  subgraph EB[\"Elastic Beanstalk の環境\"]\n    OLD@{ svc: \"AWS Elastic Beanstalk\", label: \"旧バージョンのインスタンス\" }\n    NEW@{ svc: \"AWS Elastic Beanstalk\", label: \"新バージョンのインスタンス（新しい一式）\" }\n  end\n  OK[\"正常なら全部を新へ移し、旧を自動で削除\"]\n  BADA[\"⚠ A: Immutable は一部を一定時間だけ流す仕組みではない\"]\n  BADD[\"⚠ D: 環境を 2 つ持ち、重みを手作業で変える\"]\n  BADC[\"⚠ C: ローリングは 10% を 30 分流す形にならない\"]\n  USERS -- \"90%\" --> OLD\n  USERS == \"✔ B: 10% を 30 分\" ==> NEW\n  NEW -- \"問題なし\" --> OK\n  BADA -.-> NEW\n  BADC -.-> OLD\n  BADD -.-> USERS",
+  "alt": "Elastic Beanstalk のデプロイポリシーを TrafficSplitting にして割合 10%、評価時間 30 分にすると、新バージョンへ 10% を 30 分流し、問題なければ全部を移して旧インスタンスを削除する（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

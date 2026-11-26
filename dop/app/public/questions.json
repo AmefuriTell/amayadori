@@ -2030,7 +2030,10 @@
           "quote": "A lifecycle policy rule may specify either tagPatternList or tagPrefixList, but not both."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECR のライフサイクルポリシーで release タグのイメージを優先度 1 の規則で選び、上限を大きくして残す（A）。優先度 2 の 90 日の削除はほかのイメージだけに効く。優先度を逆にすると release も消える（B）。"
+      }
     },
     {
       "id": "q-1.3-0002",
@@ -2158,7 +2161,10 @@
           "quote": "we recommend a single production domain that contains all published artifacts."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "1 つの KMS キーで暗号化した 1 つのドメインの中に、チームごとのリポジトリを置く図。中央のチームはドメインポリシーで使えるアカウントや取得元を 1 か所で管理する（D）。ドメインを分ける案（A）や共有リポジトリ 1 つ（B）は要件に合わない。"
+      }
     },
     {
       "id": "q-1.3-0004",
@@ -2233,7 +2239,10 @@
           "quote": "Each repository is a member of a single domain and can't be moved to a different domain."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "アカウント B の CodeBuild が、アカウント A の ECR からイメージを、CodeArtifact からパッケージを取る図。ECR はリポジトリポリシー（A）、CodeArtifact はドメインポリシーとロールのトークン（B）で許す。公開や長期のアクセスキーは要件に反する。"
+      }
     },
     {
       "id": "q-1.3-0005",
@@ -2294,7 +2303,10 @@
           "quote": "'**/*' represents all files recursively."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "buildspec の artifacts の設定の図。base-directory に dist、files に 「**/*」 を指定すると、dist の中身が最上位に入りサブディレクトリの構造も残る（A）。dist 付きの指定（B）や discard-paths（C・D）では要件を満たさない。"
+      }
     },
     {
       "id": "q-1.3-0006",
@@ -2364,7 +2376,10 @@
           "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeBuild の buildspec の env で、Secrets Manager のパスワードは json-key を付けて値だけ取り（A）、Parameter Store の値は parameter-store の対応付けとサービスロールの権限で取る（B）。平文の環境変数や json-key 無しは要件に反する。"
+      }
     },
     {
       "id": "q-1.3-0007",
@@ -2427,7 +2442,10 @@
           "quote": "You need a NAT gateway or NAT instance to use CodeBuild with your VPC so that CodeBuild can reach public endpoints"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "VPC のプライベートサブネットの CodeBuild が、RDS に統合テストを行い、NAT ゲートウェイ経由で公開リポジトリからパッケージを取る図（B）。ルートが無い構成（C）や VPC 設定なし（D）では片方に届かない。"
+      }
     },
     {
       "id": "q-1.3-0008",
@@ -2499,7 +2517,10 @@
           "quote": "Layers usually contain library dependencies, a custom runtime, or configuration files."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "共有ライブラリは .zip のレイヤーにして 5 つの .zip の関数で共有する（A）。payments は既存の関数の種類を変えられないので、コンテナイメージから新しい関数を作る（B）。"
+      }
     },
     {
       "id": "q-1.3-0009",
@@ -2560,7 +2581,10 @@
           "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "スケジュールで毎週 Image Builder のパイプラインを動かし、ビルドコンポーネントでパッチと強化、テストコンポーネントで確認、合格した AMI だけを配布する（C）。手作業の開始（B）やテスト無し（D）は要件に合わない。"
+      }
     },
     {
       "id": "q-1.3-0010",
@@ -2626,7 +2650,10 @@
           "quote": "The pipeline automatically distributes your image to the Region where it runs the build, and you can add image distribution for other Regions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Image Builder の配布設定に 3 つのリージョンの配布を追加し、各配布で起動テンプレートを指定して setDefaultVersion を true のままにすると、新しい AMI がデフォルトバージョンになる（D）。false にすると古い AMI のまま（A）。"
+      }
     },
     {
       "id": "q-1.3-0011",
@@ -2696,7 +2723,10 @@
           "quote": "Sends an event to Amazon EventBridge for each finding."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Image Builder で Inspector のスキャンを有効にして許容より重大な検出なら AMI を失敗させ（A）、検出結果のイベントを EventBridge のルールで SNS に流して自動通知する（B）。独自スキャナーや手作業の確認は要件に反する。"
+      }
     },
     {
       "id": "q-1.3-0012",
@@ -2757,7 +2787,10 @@
           "quote": "When you update a distribution configuration, the changes apply only to images that Image Builder creates after the update."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Image Builder のライフサイクルポリシーに、90 日後に非推奨・180 日後に削除のルールを置くと、既存の古い AMI にも適用されてスナップショットの費用が減る（B）。配布設定の変更（A）は今後のイメージだけに効く。"
+      }
     },
     {
       "id": "q-1.3-0013",
@@ -2823,7 +2856,10 @@
           "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Image Builder のコンテナレシピで Dockerfile から定期的にイメージを作り、テストに合格したら us-east-1 の ECR に配布し、配布設定に eu-central-1 を足してコピーも置く（A）。AMI 出力（B）や手作業のコピー（C）は合わない。"
+      }
     },
     {
       "id": "q-1.4-0001",
@@ -2877,7 +2913,10 @@
           "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy の LambdaCanary10Percent5Minutes は、最初に 10% を新バージョンへ送り、5 分後に残り 90% を移す（A）。linear（B）は全部移るまで約 10 分、AllAtOnce（C）は一度に全部で要件に合わない。"
+      }
     },
     {
       "id": "q-1.4-0002",
@@ -2936,7 +2975,10 @@
           "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと ECSAllAtOnce しか使えない。Application Load Balancer に替えて ECSCanary10Percent5Minutes を使うと、10% を 5 分流してから残りを移せる（D）。"
+      }
     },
     {
       "id": "q-1.4-0003",
@@ -3002,7 +3044,10 @@
           "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "置き換え先のインスタンスは、再ルーティングを手で選ぶ設定（B）にすると切り替えるまでロードバランサーに登録されず、QA が先に試験できる。元のインスタンスは動かしたままにする（D）。すぐ切り替え（A）や自動終了（C）は合わない。"
+      }
     },
     {
       "id": "q-1.4-0004",
@@ -3059,7 +3104,10 @@
           "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Elastic Beanstalk のデプロイポリシーを TrafficSplitting にして割合 10%、評価時間 30 分にすると、新バージョンへ 10% を 30 分流し、問題なければ全部を移して旧インスタンスを削除する（B）。"
+      }
     },
     {
       "id": "q-1.4-0005",
@@ -3116,7 +3164,10 @@
           "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Elastic Beanstalk の blue/green。新バージョンを別の環境に置き、専用の URL で試験してから環境 URL のスワップで即座に切り替え、もう一度入れ替えれば戻せる（C）。インプレースの更新（A・B）や、すぐ終了（D）は合わない。"
+      }
     },
     {
       "id": "q-1.4-0006",
@@ -3179,7 +3230,10 @@
           "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeBuild が CodeArtifact の認可トークンを取るには、codeartifact の権限に加えて sts:GetServiceBearerToken が要る。足りないこの権限だけを追加するのが最小権限の解決（A）。"
+      }
     },
     {
       "id": "q-1.4-0007",
@@ -3236,7 +3290,10 @@
           "quote": "When the lifetime expires, you must fetch another token."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeArtifact の認可トークンの寿命は最大 12 時間で自動では延びないので、14 時間のジョブは開始時の 1 回だけだと終盤に切れる。期限が切れる前に新しいトークンを取り直す（D）。"
+      }
     },
     {
       "id": "q-1.4-0008",
@@ -3308,7 +3365,10 @@
           "quote": "but they aren't directly accessible by the containers in the task."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ECR からイメージを取るのはエージェントで、権限はタスク実行ロールに付ける（A）。コンテナ内のアプリが S3 に書く権限はタスクの IAM ロールに付ける（B）。ロールを逆にすると届かない（C・D）。"
+      }
     },
     {
       "id": "q-1.4-0009",
@@ -3368,7 +3428,10 @@
           "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy エージェントは、インスタンスプロファイルのロールの権限で S3 からリビジョンを取る。deploy-artifacts からの読み取りだけを許すロールを付けるのが最小権限（B）。"
+      }
     },
     {
       "id": "q-1.4-0010",
@@ -3430,7 +3493,10 @@
           "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Systems Manager でスケジュールを組み、AWSCodeDeployAgentV2 のパッケージを EC2 とオンプレミスの全サーバーに、ログイン無しで入れて新バージョンにも更新する（C）。手作業や cron は手間が増える。"
+      }
     },
     {
       "id": "q-1.4-0011",
@@ -3485,7 +3551,10 @@
           "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy エージェントが要るのは EC2/オンプレミスへのデプロイだけ。Lambda と ECS へのデプロイでは要らないので、用意する作業は無い（A）。サイドカーやレイヤー（B）や EC2 を残す案（C）は無駄。"
+      }
     },
     {
       "id": "q-1.4-0012",
@@ -3548,7 +3617,10 @@
           "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インスタンスプロファイルのロールに S3 の権限が無いので、リビジョンとエージェントを取れない。2 つのバケットへの s3:Get* と s3:List* をロールに足すのが最も安全（D）。公開（A）などでは直らない。"
+      }
     },
     {
       "id": "q-1.4-0013",
@@ -3610,7 +3682,10 @@
           "quote": "The agent deletes log files after seven days."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "実行中のインスタンスがスケールインで終了すると CodeDeploy エージェントが止まり、デプロイが Failed になるまで最大 1 時間かかる（B）。最初のイベントの前に終了した時は 5 分でタイムアウトする（C）。"
+      }
     },
     {
       "id": "q-1.4-0014",
@@ -3671,7 +3746,10 @@
           "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ApplicationStop は前に成功したリビジョンの AppSpec のスクリプトで動くので、新しいリビジョンで直しても失敗する。失敗を無視するオプションでデプロイを作り直せば、直したスクリプトを入れられる（A）。"
+      }
     },
     {
       "id": "q-1.4-0015",
@@ -3732,7 +3810,10 @@
           "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "外で消されたデータベースに戻れず UPDATE_ROLLBACK_FAILED になったスタックは、ロールバックを続けて消えたリソースを飛ばすと UPDATE_ROLLBACK_COMPLETE に戻り、削除せずに更新できる（D）。"
+      }
     },
     {
       "id": "q-1.4-0016",
@@ -3790,7 +3871,10 @@
           "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ログに原因が出ない AllowTraffic の失敗は、ふつうロードバランサーのヘルスチェックの設定の誤りが原因（B）。それより前のイベントが動いているので、ApplicationStop（A）やエージェント（C）は原因ではない。"
+      }
     },
     {
       "id": "q-1.4-0017",
@@ -3858,7 +3942,10 @@
           "quote": "The service role for CodeDeploy might not have required permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "すべてのライフサイクルイベントが Skipped で HEALTH_CONSTRAINTS になる時は、CodeDeploy エージェントが入っていない・動いていないこと（A）と、サービスロールの権限不足（B）を確かめる。"
+      }
     },
     {
       "id": "q-2.1-0001",
@@ -3925,7 +4012,10 @@
           "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "本番の CloudFormation スタックの更新の図。変更セットで実行前に置き換えや削除を確かめ、S3 バケットに DeletionPolicy: Retain を付けて残す（B）。直接の UpdateStack（A）や指定なし（C）は要件に合わない。"
+      }
     },
     {
       "id": "q-2.1-0002",
@@ -3989,7 +4079,10 @@
           "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ネットワークのスタックの export 値を変える図。import 中は変更も削除もできないので先に import を外し（A）、別アカウントのスタックは Fn::GetStackOutput で出力を読む（B）。"
+      }
     },
     {
       "id": "q-2.1-0003",
@@ -4052,7 +4145,10 @@
           "quote": "if the Role property of the DeploymentPreference object is not specified, AWS SAM also generates an AWS::IAM::Role CloudFormation resource."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "SAM の Lambda 関数に AutoPublishAlias と DeploymentPreference を書くと、エイリアスと CodeDeploy のリソースを SAM が作り、CodeDeploy が通信を移す（D）。手で書く B や CodeDeploy 無しの A は不適切。"
+      }
     },
     {
       "id": "q-2.1-0004",
@@ -4116,7 +4212,10 @@
           "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CDK のアプリを 2 つの環境に初めてデプロイする図。cdk bootstrap に環境を 2 つ指定して 1 回実行すると、各環境に CDKToolkit スタックと S3・ECR ができる（A）。片方だけ（D）や準備なしは不足。"
+      }
     },
     {
       "id": "q-2.1-0005",
@@ -4178,7 +4277,10 @@
         }
       ],
       "low_confidence": false,
-      "note": "要件の「2 を超えたら止める」は、failure tolerance を「許す失敗の数」とする S2 の言い方に合わせた"
+      "note": "要件の「2 を超えたら止める」は、failure tolerance を「許す失敗の数」とする S2 の言い方に合わせた",
+      "diagram": {
+        "alt": "StackSet の更新を、同時 10 アカウント・障害耐性 2・Sequential で行う図。10 個ずつ、1 リージョンずつ進み、失敗が 2 を超えると止まる（C）。A は Parallel、B は 100 同時、D は耐性 10 で要件に反する。"
+      }
     },
     {
       "id": "q-2.1-0006",
@@ -4239,7 +4341,10 @@
           "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "StackSet の更新が耐性 0 の既定の Strict モードで 1 アカウントずつになる図。同時実行モードを SOFT_FAILURE_TOLERANCE にすると失敗の数に関わらず 20 アカウントずつ動く（A）。D では解決しない。"
+      }
     },
     {
       "id": "q-2.1-0007",
@@ -4300,7 +4405,10 @@
           "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "StackSet の既定値はそのままに、eu-west-1 の本番のスタックインスタンスだけ InstanceType の値を上書きする図（B）。更新で値が残り、ドリフトにもならない。A、C は要件に合わない。"
+      }
     },
     {
       "id": "q-2.1-0008",
@@ -4373,7 +4481,10 @@
           "quote": "Your organization can have up to five registered delegated administrators at one time."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "メンバーアカウントを StackSets の委任管理者に登録すると、管理アカウントにサインインせずに service-managed の StackSet を作れる図。StackSet 自体は管理アカウントに作られる（A、B）。"
+      }
     },
     {
       "id": "q-2.1-0009",
@@ -4435,7 +4546,10 @@
           "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "機能フラグを AWS AppConfig に置き、段階的なデプロイ戦略で一部から全員へ展開する図。環境に指定した CloudWatch アラームが ALARM になると自動で前の設定に戻る（B）。D はコードの再デプロイが要る。"
+      }
     },
     {
       "id": "q-2.1-0010",
@@ -4505,7 +4619,10 @@
           "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "S3 の JSON 設定を、AppConfig の設定プロファイル（ソースは S3）と Lambda のバリデーターで draft-07 の検証をしてからアプリに届ける図（A と B）。インラインのスキーマは 4.X だけで、D は要件に反する。"
+      }
     },
     {
       "id": "q-2.1-0011",

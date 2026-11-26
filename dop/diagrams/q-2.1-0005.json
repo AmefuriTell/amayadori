@@ -1,0 +1,8 @@
+{
+  "id": "q-2.1-0005",
+  "source": "flowchart TB\n  OP@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSet の更新\" }\n  R1[\"リージョン 1: 10 アカウントずつ\"]\n  R2[\"リージョン 2: 10 アカウントずつ\"]\n  STOP([\"停止\"])\n  BADD[\"⚠ D: 耐性 10 だと 2 を超えても止まらない\"]\n  OP == \"✔ C: Sequential（1 リージョンずつ）\" ==> R1\n  R1 == \"終わったら次へ\" ==> R2\n  R1 -. \"✔ C: 失敗が 2 を超える\" .-> STOP\n  BADD -.-> STOP\n  OP -. \"⚠ A: Parallel は同時に複数\" .-> R2\n  OP -. \"⚠ B: 同時 100 は多すぎる\" .-> R1\n",
+  "alt": "StackSet の更新を、同時 10 アカウント・障害耐性 2・Sequential で行う図。10 個ずつ、1 リージョンずつ進み、失敗が 2 を超えると止まる（C）。A は Parallel、B は 100 同時、D は耐性 10 で要件に反する。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
