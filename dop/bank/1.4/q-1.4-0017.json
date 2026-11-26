@@ -1,0 +1,73 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0017",
+  "services": [
+    "AWS CodeDeploy"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A CodeDeploy deployment to EC2 instances fails with error code HEALTH_CONSTRAINTS, and every lifecycle event on every instance shows as Skipped. Which are the MOST likely causes that a DevOps engineer should check? (Choose TWO.)",
+  "stem_ja": "EC2 インスタンスへの CodeDeploy のデプロイが、エラーコード HEALTH_CONSTRAINTS で失敗し、すべてのインスタンスのすべてのライフサイクルイベントが Skipped と表示されています。DevOps エンジニアが確かめるべき、最も可能性の高い原因はどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "The CodeDeploy agent is not installed or not running on the instances.",
+      "text_ja": "インスタンスで CodeDeploy エージェントが入っていないか、動いていない。"
+    },
+    {
+      "key": "B",
+      "text": "The CodeDeploy service role does not have the required permissions.",
+      "text_ja": "CodeDeploy のサービスロールに必要な権限が無い。"
+    },
+    {
+      "key": "C",
+      "text": "The ApplicationStop script in the new revision has an error.",
+      "text_ja": "新しいリビジョンの ApplicationStop のスクリプトに誤りがある。"
+    },
+    {
+      "key": "D",
+      "text": "The load balancer health check path is wrong.",
+      "text_ja": "ロードバランサーのヘルスチェックのパスが誤っている。"
+    },
+    {
+      "key": "E",
+      "text": "The stack for the instances has termination protection enabled.",
+      "text_ja": "インスタンスのスタックで終了保護が有効になっている。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "EC2 やオンプレミスのデプロイですべてのライフサイクルイベントが飛ばされ、HEALTH_CONSTRAINTS で失敗する時の主な原因には、CodeDeploy エージェントが入っていないか動いていないこと（メモリーやディスクの不足で止まることもある）と、CodeDeploy のサービスロールに必要な権限が無いことがあります。",
+    "per_choice": {
+      "A": "正しい。エージェントが動いていなければ、どのライフサイクルイベントも実行されません。",
+      "B": "正しい。サービスロールの権限が足りないことも、すべてのイベントが飛ばされる原因になります。",
+      "C": "スクリプトの誤りなら、そのイベントは実行されて失敗し、すべてが Skipped にはなりません。",
+      "D": "AllowTraffic で失敗するなら、それより前のイベントは実行されています。",
+      "E": "スタックの終了保護はスタックの削除を止めるもので、デプロイのライフサイクルイベントには関係ありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+      "source_id": "S4",
+      "quote": "The CodeDeploy agent might not be installed or running on the instance."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+      "source_id": "S4",
+      "quote": "The CodeDeploy agent might stop running because an instance is running low on memory or hard disk space."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+      "source_id": "S4",
+      "quote": "The service role for CodeDeploy might not have required permissions."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

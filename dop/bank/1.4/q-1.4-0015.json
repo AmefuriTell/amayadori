@@ -1,0 +1,66 @@
+{
+  "task": "1.4",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-1.4-0015",
+  "services": [
+    "AWS CloudFormation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A CloudFormation stack update failed, and the rollback then also failed. The stack is now in the UPDATE_ROLLBACK_FAILED state because the rollback tries to return to a database instance that someone deleted outside CloudFormation. The team wants the stack back in a working state so that it can be updated again, without deleting the stack. Which action BEST meets this requirement?",
+  "stem_ja": "CloudFormation のスタックの更新が失敗し、その後のロールバックも失敗しました。ロールバックが、誰かが CloudFormation の外で削除したデータベースインスタンスへ戻ろうとするため、スタックは UPDATE_ROLLBACK_FAILED の状態です。チームは、スタックを削除せずに動く状態へ戻し、また更新できるようにしたいと考えています。この要件を最もよく満たす操作はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Use the signal-resource command to send success signals to the database resource, and then retry the update.",
+      "text_ja": "signal-resource コマンドでデータベースのリソースに成功のシグナルを送り、その後に更新をやり直す。"
+    },
+    {
+      "key": "B",
+      "text": "Delete the stack with the RetainResources parameter, and create a new stack from the template.",
+      "text_ja": "RetainResources パラメータを付けてスタックを削除し、テンプレートから新しいスタックを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Grant the CloudFormation service more IAM permissions, and wait for the rollback to finish by itself.",
+      "text_ja": "CloudFormation のサービスにより多くの IAM の権限を与え、ロールバックが自分で終わるのを待つ。"
+    },
+    {
+      "key": "D",
+      "text": "Continue the update rollback and skip the deleted database resource so that the stack reaches UPDATE_ROLLBACK_COMPLETE.",
+      "text_ja": "更新のロールバックを続け、削除されたデータベースのリソースを飛ばして、スタックを UPDATE_ROLLBACK_COMPLETE にする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "依存するリソースが元の状態に戻れない時、ロールバックは失敗して UPDATE_ROLLBACK_FAILED になります。原因によっては、ロールバックを続けて動く状態（UPDATE_ROLLBACK_COMPLETE）に戻し、また更新できます。CloudFormation の外で消したリソースのように戻せない物は、ロールバックを続ける時に飛ばせます。",
+    "per_choice": {
+      "A": "シグナルを送る方法は、必要な数のシグナルを受け取れなかった時の対処で、消えたデータベースには効きません。",
+      "B": "スタックを削除しないという要件に反します。",
+      "C": "原因は権限ではなく、待ってもロールバックは終わりません。",
+      "D": "正しい。消えたリソースを飛ばしてロールバックを終え、スタックを削除せずに更新できる状態に戻せます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+      "source_id": "S10",
+      "quote": "A dependent resource can't return to its original state, causing the rollback to fail (UPDATE_ROLLBACK_FAILED state)."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+      "source_id": "S10",
+      "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+      "source_id": "S10",
+      "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
