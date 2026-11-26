@@ -6,7 +6,12 @@
   "試験ガイドの EC2 Auto Scaling groups の設定、Amazon EKS autoscalers、ALB target groups の health check、metric filters、S3 から OpenSearch Service・CloudWatch Logs への配送、エージェントの導入手順、rule ごとの remediation 設定は、sources.md に根拠が無いので扱わなかった（sources.md の「覆えなかった行」）。S3 でログファイルを処理する話も、根拠（S18）はイベントで Lambda のコードを動かす所までなので、ログファイルとは書かなかった。",
   "ECS capacity provider は試験ガイドの言葉だが、根拠（S14）は cluster auto scaling の言い方なので、その名で書き、capacity provider とは呼ばなかった。",
   "EventBridge のターゲットに SNS・Lambda を挙げる事は根拠（S19・S20）に無いので、ターゲットは「送り先」とだけ書いた。",
-  "地図の 6 つの部は、試験ガイドの knowledge（通知と動作・自動の拡張・イベント駆動・ヘルスチェック）と skills（custom metrics・エージェント・Config rules の修復）の観点をそのまま並べた物。"
+  "地図の 6 つの部は、試験ガイドの knowledge（通知と動作・自動の拡張・イベント駆動・ヘルスチェック）と skills（custom metrics・エージェント・Config rules の修復）の観点をそのまま並べた物。",
+  "C3 1 回目への返事（一部だけ採った提案）",
+  "clarity s07: ターゲットトラッキングとプロビジョンドは、根拠に定義が無いので「と考えてよいでしょう」「と考えてください」の弱い言い方で一言だけ説明した。",
+  "clarity s12: INSUFFICIENT_DATA は「選ぶ方法」ではないので表の行から外し、bullets と台本の「なお」に置いた。",
+  "clarity s05: 部の名前を「数値を集める」から「数値とエージェント」に変え、s01・s13・s16 もそろえた。SSM Agent が動く場所のうちエッジの機器・仮想マシンは図に入れず、台本も「サーバーなど」とした。",
+  "consistency s03: 「使える条件」の言い切りをやめ、表を SNS・Lambda・EC2 のアクションの相手を比べる形に組み直した（clarity s03 の提案も兼ねる）。"
  ],
  "slides": [
   {
@@ -15,14 +20,14 @@
    "bullets": [
     "扱う 6 つの部",
     "並びは扱う順。流れではない",
-    "最後に条件から選ぶ表"
+    "最後に条件から選ぶ 4 枚の表"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph P3[\"3 自動の拡張\"]\n    C@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling<br/>ECS・RDS・DynamoDB\" }\n  end\n  subgraph P2[\"2 数値を集める\"]\n    B@{ svc: \"Amazon CloudWatch\", label: \"custom metrics<br/>と 2 つのエージェント\" }\n  end\n  subgraph P1[\"1 アラーム\"]\n    A@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>通知と動作\" }\n  end\n  subgraph P6[\"6 ヘルスチェック\"]\n    G@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>health check\" }\n  end\n  subgraph P5[\"5 設定の修復\"]\n    F@{ svc: \"AWS Config\", label: \"AWS Config rules<br/>と Automation\" }\n  end\n  subgraph P4[\"4 イベント\"]\n    E@{ svc: \"Amazon EventBridge\", label: \"S3 イベント通知<br/>と EventBridge\" }\n  end\n  P3 ~~~ P6\n  P2 ~~~ P5\n  P1 ~~~ P4\n",
-    "alt": "講義の地図。扱う 6 つの部を、扱う順に 2 段に並べる。矢印は無く、処理の流れではない。1 アラーム（CloudWatch alarm の通知と動作）、2 数値を集める（custom metrics と 2 つのエージェント）、3 自動の拡張（Auto Scaling と ECS・RDS・DynamoDB）、4 イベント（S3 イベント通知と EventBridge）、5 設定の修復（AWS Config rules と Automation）、6 ヘルスチェック（Route 53 の health check）。"
+    "source": "flowchart TB\n  subgraph P3[\"3 自動の拡張\"]\n    C@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling<br/>ECS・RDS・DynamoDB\" }\n  end\n  subgraph P2[\"2 数値とエージェント\"]\n    B[\"custom metrics<br/>CloudWatch agent<br/>SSM Agent\"]\n  end\n  subgraph P1[\"1 アラーム\"]\n    A@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>通知と動作\" }\n  end\n  subgraph P6[\"6 ヘルスチェック\"]\n    G@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>health check\" }\n  end\n  subgraph P5[\"5 設定の修復\"]\n    F@{ svc: \"AWS Config\", label: \"AWS Config rules<br/>と Automation document\" }\n  end\n  subgraph P4[\"4 イベント\"]\n    E@{ svc: \"Amazon EventBridge\", label: \"S3 イベント通知<br/>と EventBridge\" }\n  end\n  P3 ~~~ P6\n  P2 ~~~ P5\n  P1 ~~~ P4\n",
+    "alt": "講義の地図。扱う 6 つの部を、扱う順に 2 段に並べる。矢印は無く、処理の流れではない。1 アラーム（CloudWatch alarm の通知と動作）、2 数値とエージェント（custom metrics、CloudWatch agent、SSM Agent）、3 自動の拡張（Auto Scaling と ECS・RDS・DynamoDB）、4 イベント（S3 イベント通知と EventBridge）、5 設定の修復（AWS Config rules と Automation document）、6 ヘルスチェック（Route 53 の health check）。"
    },
-   "narration": "この講義では、複雑な環境の監視と、イベントへの対応を自動にする方法を学びます。画面の地図は、扱う六つの部を、扱う順に並べた物です。処理の流れではありません。一つ目はアラームです。状態が変わったときの通知と動作を見ます。二つ目は、数値を集める部です。自分で決めた数値の送り方と、二つのエージェントを見ます。三つ目は、自動の拡張です。アラームから容量を増減する仕組みと、サービスごとの仕組みを見ます。四つ目はイベントです。エススリーのイベント通知と、イベントブリッジを見ます。五つ目は設定の修復、六つ目はヘルスチェックです。最後に、問題文の条件から方法を選ぶ表で締めます。",
+   "narration": "この講義では、複雑な環境の監視と、イベントへの対応を自動にする方法を学びます。画面の地図は、扱う六つの部を、扱う順に並べた物です。処理の流れではありません。一つ目はアラームです。状態が変わったときの通知と動作を見ます。アラームは、このあと自動の拡張やヘルスチェックでも、起点としてもう一度出てきます。二つ目は、数値とエージェントの部です。自分で決めた数値の送り方と、二つのエージェントを見ます。三つ目は自動の拡張、四つ目はイベント、五つ目は設定の修復、六つ目はヘルスチェックです。最後に、問題文の条件から方法を選ぶ表を四枚見て締めます。",
    "refs": [
     {
      "source_id": "S1",
@@ -46,10 +51,10 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>状態が変わる\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"SNS トピック\" }\n  SUB[\"購読者<br/>人もアプリも\"]\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>独自の処理\" }\n  AL -- \"通知\" --> SNS\n  SNS --> SUB\n  AL -- \"呼び出す\" --> LA\n",
-    "alt": "CloudWatch alarm の状態が変わると、SNS トピックで購読者（人もアプリケーションも）に通知する。また Lambda 関数を呼び出して独自の処理を動かす。状態の例は ALARM（しきい値の外）と INSUFFICIENT_DATA（始まったばかり・数値が無い・データが足りない）。"
+    "source": "flowchart TB\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>状態が変わる<br/>例: ALARM\" }\n  SNS@{ svc: \"Amazon SNS\", label: \"SNS トピック\" }\n  SUB[\"購読者<br/>人もアプリも\"]\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>独自の処理\" }\n  AL -- \"通知\" --> SNS\n  SNS --> SUB\n  AL -- \"呼び出す\" --> LA\n",
+    "alt": "CloudWatch alarm の状態が変わる（例: ALARM になる）と、SNS トピックで購読者（人もアプリケーションも）に通知する。また Lambda 関数を呼び出して独自の処理を動かす。状態の例は ALARM（しきい値の外）と INSUFFICIENT_DATA（始まったばかり・数値が無い・データが足りない）。"
    },
-   "narration": "クラウドウォッチのアラームは、数値を見張って、状態を変えます。状態の例を二つ挙げます。アラームという名前の状態は、数値や式が、決めたしきい値の外にあるときです。しきい値とは、境目の値のことです。インサフィシェントデータは、データが足りない状態です。アラームが始まったばかりのとき、数値が無いとき、判断に足りるデータが無いときに、この状態になります。状態が変わったときの動作として、まず通知があります。エスエヌエスのトピックで、一人以上の購読者に知らせます。購読者は、人でもアプリケーションでもかまいません。もう一つは、ラムダ関数を呼ぶ方法です。状態の変化に合わせて独自の処理を自動にするには、これが一番簡単な方法だとされています。",
+   "narration": "クラウドウォッチのアラームは、数値を見張って、状態を変えます。状態の例です。アラームという名前の状態は、数値や式が、決めたしきい値の外にあるときです。しきい値とは、境目の値のことです。インサフィシェントデータは、データが足りない状態です。アラームが始まったばかりのとき、数値が無いとき、判断に足りるデータが無いときに、この状態になります。状態が変わったときの動作として、まず通知があります。エスエヌエスのトピックで、一人以上の購読者に知らせます。購読者は、人でもアプリケーションでもかまいません。もう一つは、ラムダ関数を呼ぶ方法です。状態の変化に合わせて独自の処理を自動にするには、これが一番簡単な方法だとされています。",
    "refs": [
     {
      "source_id": "S5",
@@ -74,25 +79,25 @@
    "visual": {
     "type": "compare",
     "columns": [
-     "項目",
-     "内容"
+     "アラームの動作",
+     "相手"
     ],
     "rows": [
      [
-      "使える条件",
-      "EC2 の数値のアラーム"
+      "SNS トピックで通知",
+      "購読者（人・アプリ）"
      ],
      [
-      "動作の例",
-      "停止・終了"
+      "Lambda 関数を呼ぶ",
+      "独自の処理"
      ],
      [
-      "動作の例",
-      "再起動・復旧"
+      "EC2 のアクション",
+      "インスタンスそのもの"
      ]
     ]
    },
-   "narration": "次は、イーシーツーのアクションです。インスタンスとは、イーシーツーで動く一台一台のサーバーのこと、と考えてください。イーシーツーの数値をもとにしたアラームは、インスタンスに対する動作もできます。ここに条件があります。使えるのは、イーシーツーの数値を見るアラームのときです。動作の例は、停止、終了、再起動、復旧です。どれも、インスタンスそのものに対する動作です。試験ガイドには、イーシーツーの自動の復旧という言葉があります。アラームの動作の一つとして復旧を選べる、という形で押さえておきましょう。",
+   "narration": "次は、イーシーツーのアクションです。インスタンスとは、イーシーツーで動く一台一台のサーバーのこと、と考えてください。イーシーツーの数値をもとにしたアラームは、インスタンスに対する動作もできます。動作の例は、停止、終了、再起動、復旧です。前のスライドの通知やラムダとは違い、どれもインスタンスそのものに対する動作です。試験ガイドには、イーシーツーの自動の復旧という言葉があります。アラームの動作の一つとして復旧を選べる、という形で押さえておきましょう。",
    "refs": [
     {
      "source_id": "S2",
@@ -105,16 +110,16 @@
    "id": "s04",
    "title": "アラーム 3: composite alarm",
    "bullets": [
-    "まとめた段階でだけ動く",
-    "アラームの騒がしさを減らす",
+    "まとめた段階でだけ動作する",
+    "個々のアラームでは通知しない",
     "例: ウェブサーバーの担当へ"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph WS[\"ウェブサーバーのアラーム\"]\n    A1[\"アラーム\"]\n    A2[\"アラーム\"]\n    A3[\"アラーム\"]\n  end\n  CA@{ svc: \"Amazon CloudWatch\", label: \"composite alarm<br/>まとめた段階\" }\n  TM[\"ウェブサーバーの<br/>担当チームへ通知\"]\n  WS -- \"どれか一つが鳴る\" --> CA\n  CA --> TM\n",
-    "alt": "ウェブサーバーに関係するアラームのどれか一つが鳴ると、composite alarm が、まとめた段階で一つの通知をウェブサーバーの担当チームに送る。ドキュメントに挙がる例。"
+    "source": "flowchart TB\n  subgraph WS[\"個々のアラームは通知しない\"]\n    A1[\"アラーム\"]\n    A2[\"アラーム\"]\n    A3[\"アラーム\"]\n  end\n  CA@{ svc: \"Amazon CloudWatch\", label: \"composite alarm<br/>ここでだけ動作\" }\n  TM[\"ウェブサーバーの<br/>担当チームへ通知\"]\n  WS -- \"どれかが ALARM\" --> CA\n  CA --> TM\n",
+    "alt": "ウェブサーバーに関係する個々のアラームは、それ自身では通知しない。どれかが ALARM の状態になると、それらをまとめた composite alarm の所でだけ動作し、ウェブサーバーの担当チームに通知を送る。ドキュメントに挙がる例。"
    },
-   "narration": "アラームが増えると、通知が多すぎることがあります。そこで使えるのが、コンポジットアラームです。コンポジットアラームを使うと、まとめた段階でだけ動作を起こして、アラームの騒がしさを減らせます。ドキュメントの例はこうです。ウェブサーバーに関係するアラームのどれか一つが鳴ったら、ウェブサーバーの担当チームに通知を送る、コンポジットアラームを作ります。",
+   "narration": "アラームが増えると、通知が多すぎることがあります。そこで使えるのが、コンポジットアラームです。コンポジットアラームは、いくつかのアラームをまとめるアラームと考えてください。個々のアラームの所では知らせず、まとめたコンポジットアラームの所でだけ知らせます。だから、アラームの騒がしさを減らせます。ドキュメントの例はこうです。ウェブサーバーに関係するアラームのどれかがアラームの状態になったら、ウェブサーバーの担当チームに通知を送る、コンポジットアラームを作ります。",
    "refs": [
     {
      "source_id": "S6",
@@ -125,18 +130,18 @@
   },
   {
    "id": "s05",
-   "title": "数値を集める: custom metrics とエージェント",
+   "title": "数値とエージェント",
    "bullets": [
-    "PutMetricData か AWS CLI",
+    "custom metrics: PutMetricData・CLI",
     "CloudWatch agent: 数値・ログ・トレース",
-    "SSM Agent: 更新・管理・設定"
+    "SSM Agent: 数値でなく管理"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  APP[\"自分の数値<br/>custom metrics\"]\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch\" }\n  subgraph SV[\"EC2・オンプレミスのサーバー\"]\n    CWA[\"CloudWatch agent<br/>数値・ログ・トレース\"]\n    SSMA[\"SSM Agent<br/>更新・管理・設定\"]\n  end\n  SM@{ svc: \"AWS Systems Manager\", label: \"Systems Manager\" }\n  APP -- \"PutMetricData・CLI\" --> CW\n  CWA -- \"集める\" --> CW\n  SSMA -- \"管理できるように\" --> SM\n",
-    "alt": "自分の数値（custom metrics）は PutMetricData の API か AWS CLI で CloudWatch に送る。EC2 やオンプレミスのサーバーの上では、CloudWatch agent が数値・ログ・トレースを集め、SSM Agent が Systems Manager による更新・管理・設定を可能にする。"
+    "source": "flowchart TB\n  subgraph M[\"CloudWatch へ\"]\n    APP[\"自分の数値<br/>custom metrics\"]\n    CWA[\"CloudWatch agent<br/>数値・ログ・トレース\"]\n  end\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch\" }\n  subgraph G[\"Systems Manager へ\"]\n    SSMA[\"SSM Agent<br/>更新・管理・設定\"]\n  end\n  SM@{ svc: \"AWS Systems Manager\", label: \"Systems Manager\" }\n  APP -- \"PutMetricData・CLI\" --> CW\n  CWA -- \"集める\" --> CW\n  SSMA -- \"数値ではなく管理\" --> SM\n",
+    "alt": "左は CloudWatch へ送る物。自分の数値（custom metrics）は PutMetricData の API か AWS CLI で送り、CloudWatch agent は数値・ログ・トレースを集める。右は Systems Manager のための物。SSM Agent は数値を集めるのではなく、Systems Manager による更新・管理・設定を可能にする。"
    },
-   "narration": "ここからは、数値を集める部です。まず、自分で決めた数値です。これをカスタムメトリクスと呼びます。送り方は、プットメトリックデータというエーピーアイか、エーダブリューエスのコマンドラインです。次に、エージェントです。エージェントとは、サーバーの上で動いて仕事をするソフトウェアのこと、と考えてください。クラウドウォッチエージェントは、数値とログとトレースを集めます。トレースは、処理の道筋の記録と考えてよいでしょう。動く場所は、イーシーツー、オンプレミス、つまり自分たちで持つサーバー、そしてコンテナのアプリケーションです。既定で付いてくる基本の監視よりも、広く見られるようになります。もう一つは、エスエスエムエージェントです。イーシーツー、エッジの機器、オンプレミスのサーバー、仮想マシンで動きます。システムズマネージャーが、これらを更新し、管理し、設定できるようにします。",
+   "narration": "二つ目は、数値とエージェントの部です。まず、自分で決めた数値です。これをカスタムメトリクスと呼びます。送り方は、プットメトリックデータというエーピーアイか、エーダブリューエスのコマンドラインです。次に、エージェントです。エージェントとは、サーバーの上で動いて仕事をするソフトウェアのこと、と考えてください。クラウドウォッチエージェントは、数値とログとトレースを集めます。トレースは、処理の道筋の記録と考えてよいでしょう。集める相手は、イーシーツー、オンプレミス、つまり自分たちで持つサーバー、そしてコンテナのアプリケーションです。既定で付いてくる基本の監視よりも、広く見られるようになります。もう一つのエスエスエムエージェントは、数値を集める物ではありません。イーシーツーやオンプレミスのサーバーなどで動き、システムズマネージャーが、それらを更新し、管理し、設定できるようにします。試験ガイドのエージェントの観点で、二つを並べています。",
    "refs": [
     {
      "source_id": "S7",
@@ -160,15 +165,15 @@
    "title": "自動の拡張 1: アラームと scaling policy",
    "bullets": [
     "metric alarm が scaling policy を",
-    "EC2 は EC2 Auto Scaling",
-    "それ以外は Application Auto Scaling"
+    "EC2 → EC2 Auto Scaling",
+    "例: ECS サービス → Application"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>metric alarm\" }\n  EAS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>Auto Scaling group<br/>の EC2\" }\n  AAS[\"Application Auto Scaling<br/>それ以外のリソース<br/>例: ECS サービス・<br/>DynamoDB の表\"]\n  AL -- \"scaling policy\" --> EAS\n  AL -- \"scaling policy\" --> AAS\n",
-    "alt": "CloudWatch の metric alarm が Auto Scaling の scaling policy を動かし、容量を足したり減らしたりする。EC2 Auto Scaling は Auto Scaling group の EC2 インスタンスを、Application Auto Scaling はそれ以外のリソース（例: ECS サービス、DynamoDB の表、Aurora のレプリカ、Spot Fleet）を増減する。"
+    "source": "flowchart TB\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>metric alarm\" }\n  EAS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>Auto Scaling group<br/>の EC2\" }\n  AAS[\"Application Auto Scaling<br/>ほかのリソースの例:<br/>ECS サービス・<br/>DynamoDB の表\"]\n  AL -- \"scaling policy\" --> EAS\n  AL -- \"scaling policy\" --> AAS\n",
+    "alt": "CloudWatch の metric alarm が Auto Scaling の scaling policy を動かし、容量を足したり減らしたりする。EC2 Auto Scaling は Auto Scaling group の EC2 インスタンスを増減する。Application Auto Scaling はほかのリソースを増減し、例として ECS サービス、DynamoDB の表、Aurora のレプリカ、Spot Fleet が挙がる。"
    },
-   "narration": "三つ目の部は、自動の拡張です。クラウドウォッチの数値のアラームは、オートスケーリングのスケーリングポリシーを動かして、容量を足したり減らしたりできます。スケーリングポリシーは、容量をどう増減するかの決まり、と考えてください。オートスケーリングには二つあります。イーシーツーオートスケーリングは、オートスケーリンググループの中の、イーシーツーのインスタンスを増減します。オートスケーリンググループは、まとめて増減するインスタンスの集まりです。アプリケーションオートスケーリングは、それ以外のリソースを増減します。例として、イーシーエスのサービス、ダイナモディービーの表、オーロラのレプリカ、スポットフリートが挙がっています。増減したい物がイーシーツーか、それ以外かで、使う仕組みが変わります。",
+   "narration": "三つ目の部は、自動の拡張です。クラウドウォッチの数値のアラームを、メトリックアラームと呼びます。メトリックアラームは、オートスケーリングのスケーリングポリシーを動かして、容量、つまり増減する量を、足したり減らしたりできます。スケーリングポリシーは、容量をどう増減するかの決まり、と考えてください。イーシーツーオートスケーリングは、オートスケーリンググループの中の、イーシーツーのインスタンスを増減します。オートスケーリンググループは、まとめて増減するインスタンスの集まりです。アプリケーションオートスケーリングは、ほかのリソースを増減します。例として、イーシーエスのサービス、ダイナモディービーの表、オーロラのレプリカ、スポットフリートが挙がっています。",
    "refs": [
     {
      "source_id": "S4",
@@ -186,7 +191,7 @@
    "id": "s07",
    "title": "自動の拡張 2: サービスごとの仕組み",
    "bullets": [
-    "ECS: cluster auto scaling",
+    "ECS: サービスとクラスターは別",
     "RDS: storage autoscaling",
     "DynamoDB auto scaling"
    ],
@@ -199,6 +204,11 @@
     ],
     "rows": [
      [
+      "Application Auto Scaling",
+      "ECS のサービス",
+      "アラームから"
+     ],
+     [
       "ECS cluster auto scaling",
       "Auto Scaling group",
       "タスクの使用量で"
@@ -210,12 +220,12 @@
      ],
      [
       "DynamoDB auto scaling",
-      "provisioned 容量",
+      "provisioned の容量",
       "実際の通信量で"
      ]
     ]
    },
-   "narration": "次は、サービスごとに用意された仕組みを三つ見ます。一つ目は、イーシーエスのクラスターオートスケーリングです。タスクは、イーシーエスで動かすコンテナの単位、と考えてください。イーシーエスは、クラウドウォッチの数値を二つと、ターゲットトラッキングのスケーリングポリシーを、オートスケーリンググループに作ります。そのうえで、タスクが使うリソースの量に合わせて、増やす動きと減らす動きをイーシーエスが受け持ちます。二つ目は、アールディーエスのストレージオートスケーリングです。これを有効にしていると、データベースの空きが少なくなったことをアールディーエスが見つけて、ストレージを自動で増やします。三つ目は、ダイナモディービーオートスケーリングです。アプリケーションオートスケーリングを使い、実際の通信の量に合わせて、プロビジョンドの読み書きの容量を変えます。",
+   "narration": "次は、サービスごとの仕組みです。まずイーシーエスです。前のスライドのアプリケーションオートスケーリングが増減するのは、イーシーエスのサービスでした。ここで見るクラスターオートスケーリングが増減するのは、オートスケーリンググループです。タスクは、イーシーエスで動かすコンテナの単位、と考えてください。イーシーエスは、クラウドウォッチの数値を二つと、ターゲットトラッキングのスケーリングポリシーを作ります。ターゲットトラッキングは、目標の値に合わせて増減する種類、と考えてよいでしょう。そのうえで、タスクが使うリソースの量に合わせて、増減をイーシーエスが受け持ちます。次に、アールディーエスのストレージオートスケーリングです。有効にしていると、データベースの空きが少なくなったとき、ストレージを自動で増やします。最後に、ダイナモディービーオートスケーリングです。アプリケーションオートスケーリングを使い、実際の通信の量に合わせて、プロビジョンドのスループットの容量を変えます。あらかじめ割り当てておく処理の量、と考えてください。",
    "refs": [
     {
      "source_id": "S14",
@@ -231,6 +241,11 @@
      "source_id": "S16",
      "quote": "Amazon DynamoDB auto scaling uses the AWS Application Auto Scaling service to dynamically adjust provisioned throughput capacity on your behalf, in response to actual traffic patterns.",
      "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.html#AutoScaling"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Application Auto Scaling scales other resources, such as Amazon ECS services",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-actions.html#alarm-actions-auto-scaling"
     }
    ]
   },
@@ -240,14 +255,14 @@
    "bullets": [
     "決まった種類のイベントで",
     "Lambda 関数で独自のコード",
-    "少なくとも 1 回届く"
+    "1 回だけとは限らない"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット<br/>決まった種類の<br/>イベント\" }\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>独自のコード\" }\n  NT[\"届き方<br/>少なくとも 1 回<br/>ふつう数秒、1 分以上も\"]\n  S3 -- \"イベント通知\" --> LA\n  LA ~~~ NT\n",
-    "alt": "S3 バケットで決まった種類のイベントが起きると、S3 がイベント通知で Lambda 関数を呼び、独自のコードを動かす。届き方は少なくとも 1 回で、ふつうは数秒、ときに 1 分以上かかる。"
+    "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット<br/>決まった種類の<br/>イベント\" }\n  LA@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>独自のコード\" }\n  NT[\"届き方<br/>少なくとも 1 回<br/>1 回だけとは限らない<br/>ふつう数秒、1 分以上も\"]\n  S3 -- \"イベント通知\" --> LA\n  LA ~~~ NT\n",
+    "alt": "S3 バケットで決まった種類のイベントが起きると、S3 がイベント通知で Lambda 関数を呼び、独自のコードを動かす。届き方は少なくとも 1 回で、1 回だけとは限らない。ふつうは数秒、ときに 1 分以上かかる。"
    },
-   "narration": "四つ目の部は、イベントです。何かが起きたことに応じて、別の処理を動かす形です。エススリーのイベント通知は、バケットで起きたことを知らせる仕組みです。バケットは、エススリーでデータを入れる入れ物です。届け先の一つがラムダです。決まった種類のイベントをエススリーが見つけると、イベントをラムダに渡して、関数を呼びます。こうして、バケットのイベントに応じて、独自のコードを動かせます。届き方にも注意します。イベント通知は、少なくとも一回届くように作られています。ふつうはすぐに届きますが、時間がかかることもあります。",
+   "narration": "四つ目の部は、イベントです。何かが起きたことに応じて、別の処理を動かす形です。エススリーのイベント通知は、バケットで起きたことを知らせる仕組みです。バケットは、エススリーでデータを入れる入れ物です。届け先の一つがラムダです。決まった種類のイベントをエススリーが見つけると、イベントをラムダに渡して、関数を呼びます。こうして、バケットのイベントに応じて、独自のコードを動かせます。届き方にも注意します。イベント通知は、少なくとも一回届くように作られています。少なくとも、なので、一回だけとは限らない、という言い方です。ふつうは数秒で届きますが、一分以上かかることもあります。",
    "refs": [
     {
      "source_id": "S18",
@@ -266,19 +281,19 @@
    "title": "イベント 2: EventBridge の event pattern",
    "bullets": [
     "有効にすると全イベントが届く",
-    "ルールで別のターゲットへ",
-    "パターンに合えば送る"
+    "選ぶのは EventBridge 側",
+    "パターンに合えばターゲットへ"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット<br/>配送を有効に\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge\" }\n  RU[\"ルール<br/>event pattern\"]\n  TG[\"ターゲット<br/>送り先\"]\n  S3 -- \"全てのイベント\" --> EB\n  EB --> RU\n  RU -- \"合うときだけ\" --> TG\n",
-    "alt": "S3 バケットで EventBridge への配送を有効にすると、全てのイベントが EventBridge に届く。EventBridge のルールの event pattern がイベントに合うときだけ、イベントをターゲット（送り先）に送る。"
+    "source": "flowchart TB\n  S3@{ svc: \"Amazon S3\", label: \"S3 バケット<br/>配送を有効に\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge\" }\n  RU[\"ルール<br/>event pattern で選ぶ\"]\n  TG[\"ターゲット<br/>送り先\"]\n  S3 -- \"全てのイベント\" --> EB\n  EB --> RU\n  RU -- \"合うときだけ\" --> TG\n",
+    "alt": "S3 バケットで EventBridge への配送を有効にすると、全てのイベントが EventBridge に届く。選ぶのは EventBridge の側で、ルールの event pattern がイベントに合うときだけ、イベントをターゲット（送り先）に送る。"
    },
-   "narration": "エススリーのイベントは、イベントブリッジにも送れます。イベントブリッジは、ほかの届け先と違い、バケットごとに、送るか送らないかを切り替えるだけです。送るようにすると、全てのイベントがイベントブリッジに届きます。そのうえで、イベントブリッジのルールを使って、イベントをさらに別のターゲットへ回せます。ターゲットとは、イベントの送り先です。どのイベントを送るかを決めるのが、イベントパターンです。イベントパターンは、合わせる相手のイベントと同じ構造で書きます。パターンがイベントに合えば、ターゲットに送ります。合うか合わないかのどちらかです。決まったイベントのときだけ知らせたい、という場面では、このイベントパターンを書きます。",
+   "narration": "エススリーのイベントは、イベントブリッジにも送れます。前のスライドでは、決まった種類のイベントのときに、ラムダを呼びました。イベントブリッジでは違います。バケットごとに、送るか送らないかを切り替えるだけで、送るようにすると、全てのイベントがイベントブリッジに届きます。選ぶのは、イベントブリッジの側です。ルールを使い、イベントを別のターゲットへ回せます。ターゲットとは、イベントの送り先です。どのイベントを送るかを決めるのが、イベントパターンです。イベントパターンは、合わせる相手のイベントと同じ構造で書きます。パターンがイベントに合えば、ターゲットに送ります。",
    "refs": [
     {
      "source_id": "S19",
-     "quote": "If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets.",
+     "quote": "Unlike other destinations, you can either enable or disable events to be delivered to EventBridge for a bucket. If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets.",
      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html#eventbridge-dest"
     },
     {
@@ -317,7 +332,7 @@
      }
     ]
    },
-   "narration": "五つ目の部は、設定の修復です。エーダブリューエスコンフィグは、リソースの設定を評価するサービスです。評価するには、エーダブリューエスコンフィグのルールを作ります。ルールは、あるべき設定を表す物です。ルールに合わないリソースを、準拠していないリソースと呼びます。そのリソースを直すのが、修復です。エーダブリューエスコンフィグは、システムズマネージャーのオートメーションのドキュメントを使って修復します。このドキュメントに、準拠していないリソースに対して行う処理を書いておきます。ルールで外れを見つけ、オートメーションのドキュメントで直す、という組み合わせです。",
+   "narration": "五つ目の部は、設定の修復です。エーダブリューエスコンフィグは、リソースの設定を評価するサービスです。評価するには、エーダブリューエスコンフィグのルールを作ります。ルールは、あるべき設定を表す物です。ルールに合わないリソースを、準拠していないリソースと呼びます。そのリソースを直すのが、修復です。エーダブリューエスコンフィグは、システムズマネージャーのオートメーションドキュメントを使って修復します。このドキュメントに、準拠していないリソースに対して行う処理を書いておきます。ルールで外れを見つけ、オートメーションドキュメントで直す、という組み合わせです。",
    "refs": [
     {
      "source_id": "S10",
@@ -335,20 +350,25 @@
    "id": "s11",
    "title": "ヘルスチェック: Route 53",
    "bullets": [
-    "相手に直接要求を送る形",
-    "CloudWatch alarm を使う形",
-    "アラームと同じデータを見る"
+    "相手に直接たずねる形",
+    "アラームを使う形",
+    "例: 正常なホストの数"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph H2[\"アラームを使う\"]\n    R2@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>health check\" }\n    AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>同じデータ\" }\n  end\n  subgraph H1[\"相手に直接たずねる\"]\n    R1@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>決めた間隔で要求\" }\n    EP[\"アプリや<br/>サーバーなど\"]\n  end\n  R1 -- \"インターネット越し\" --> EP\n  R2 -- \"同じデータを見る\" --> AL\n",
-    "alt": "Route 53 の health check の 2 つの形を左右に並べる。左は、決めた間隔でインターネット越しにアプリやサーバーなどへ要求を送り、届くか・使えるか・動くかを確かめる形。右は、先に作った CloudWatch alarm と同じデータを見る形。"
+    "source": "flowchart TB\n  subgraph H2[\"アラームを使う形\"]\n    direction TB\n    R2@{ svc: \"Amazon Route 53\", label: \"Route 53 health check<br/>同じデータを見る\" }\n    AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>例: 正常なホストの数\" }\n  end\n  subgraph H1[\"相手に直接たずねる形\"]\n    direction TB\n    R1@{ svc: \"Amazon Route 53\", label: \"Route 53 health check<br/>決めた間隔で要求\" }\n    EP[\"アプリや<br/>サーバーなど\"]\n  end\n  R1 -- \"インターネット越し\" --> EP\n  R2 --> AL\n",
+    "alt": "Route 53 の health check の 2 つの形を並べる。1 つ目は、決めた間隔でインターネット越しにアプリやサーバーなどへ要求を送り、届くか・使えるか・動くかを確かめる形。2 つ目は、先に作った CloudWatch alarm と同じデータを見る形。数値の例は、Elastic Load Balancing で正常とされるホストの数や、DynamoDB で読み取りが抑えられた回数。"
    },
-   "narration": "六つ目の部は、ヘルスチェックです。ヘルスチェックは、相手が正しく動いているかを確かめる仕組みです。ルートフィフティースリーのヘルスチェックを、二つの形で見ます。一つ目は、相手に直接たずねる形です。ルートフィフティースリーは、決めた間隔で、インターネット越しに、アプリケーションやサーバーなどへ自動で要求を送ります。届くか、使えるか、正しく動くかを確かめます。二つ目は、クラウドウォッチのアラームを使う形です。先にアラームを作り、そのアラームが見ているのと同じデータを見るヘルスチェックを作ります。",
+   "narration": "六つ目の部は、ヘルスチェックです。ヘルスチェックは、相手が正しく動いているかを確かめる仕組みです。ルートフィフティースリーのヘルスチェックを、二つの形で見ます。一つ目は、相手に直接たずねる形です。ルートフィフティースリーは、決めた間隔で、インターネット越しに、アプリケーションやサーバーなどへ自動で要求を送ります。届くか、使えるか、正しく動くかを確かめます。二つ目は、アラームを使う形です。先にクラウドウォッチのアラームを作り、そのアラームと同じデータを見るヘルスチェックを作ります。ドキュメントの例は、ダイナモディービーで読み取りが抑えられた回数や、イラスティックロードバランシングで正常とされるホストの数です。こうした数値で判断したいときは、この形です。",
    "refs": [
     {
      "source_id": "S12",
      "quote": "Route 53 submits automated requests over the internet to your application, server, or other resource to verify that it's reachable, available, and functional.",
+     "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types"
+    },
+    {
+     "source_id": "S13",
+     "quote": "You can create CloudWatch alarms that monitor the status of CloudWatch metrics, such as the number of throttled read events for an Amazon DynamoDB database or the number of Elastic Load Balancing hosts that are considered healthy.",
      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types"
     },
     {
@@ -364,7 +384,7 @@
    "bullets": [
     "知らせる → SNS",
     "独自の処理 → Lambda",
-    "まとめて → composite alarm"
+    "判断できない状態: INSUFFICIENT_DATA"
    ],
    "visual": {
     "type": "compare",
@@ -382,7 +402,7 @@
      [
       "状態の変化で独自処理",
       "Lambda 関数",
-      "一番簡単な自動化"
+      "独自処理の自動化で一番簡単"
      ],
      [
       "EC2 を復旧・再起動",
@@ -392,16 +412,11 @@
      [
       "通知が多すぎる",
       "composite alarm",
-      "まとめた段階で動く"
-     ],
-     [
-      "開始直後・データ不足",
-      "INSUFFICIENT_DATA",
-      "ALARM とは別の状態"
+      "まとめた所でだけ動作"
      ]
     ]
    },
-   "narration": "ここからは、問題文の条件から方法を選ぶ表です。地図の部に合わせて四枚あります。まず、アラームです。状態が変わったら人に知らせたい、とあれば、エスエヌエスのトピックです。購読者は人でもアプリケーションでもよい点を確かめます。状態の変化で独自の処理を動かしたいなら、ラムダ関数です。インスタンスを復旧や再起動させたいなら、イーシーツーのアクションです。イーシーツーの数値を見るアラームのときに使えます。通知が多すぎるなら、コンポジットアラームで、まとめた段階でだけ動かします。始まったばかりやデータ不足で判断できないときの状態は、インサフィシェントデータです。",
+   "narration": "ここからは、問題文の条件から方法を選ぶ表です。六つの部を四枚の表にまとめます。最後の一枚は、四つ目から六つ目の部です。まず、アラームです。状態が変わったら人に知らせたい、とあれば、エスエヌエスのトピックです。状態の変化で独自の処理を動かしたいなら、ラムダ関数です。インスタンスを復旧や再起動させたいなら、イーシーツーのアクションです。イーシーツーの数値をもとにしたアラームで使えます。通知が多すぎるなら、コンポジットアラームで、まとめた所でだけ動かします。なお、始まったばかりやデータ不足で判断できないときの状態は、インサフィシェントデータです。",
    "refs": [
     {
      "source_id": "S1",
@@ -427,11 +442,11 @@
   },
   {
    "id": "s13",
-   "title": "条件から選ぶ 2: 数値を集める",
+   "title": "条件から選ぶ 2: 数値とエージェント",
    "bullets": [
     "自分の数値 → PutMetricData",
     "詳しく集める → CloudWatch agent",
-    "SSM で管理 → SSM Agent"
+    "管理 → SSM Agent"
    ],
    "visual": {
     "type": "compare",
@@ -452,9 +467,9 @@
       "数値・ログ・トレース"
      ],
      [
-      "SSM で更新・設定",
+      "Systems Manager で管理",
       "SSM Agent",
-      "Systems Manager 用"
+      "更新・管理・設定"
      ],
      [
       "オンプレミスも対象",
@@ -463,7 +478,7 @@
      ]
     ]
    },
-   "narration": "次は、数値を集める部です。自分で決めた数値を送りたいなら、プットメトリックデータです。コマンドラインからも送れます。既定の基本の監視より詳しく、数値やログやトレースを集めたいなら、クラウドウォッチエージェントです。システムズマネージャーで、サーバーを更新し、管理し、設定したいなら、エスエスエムエージェントです。どちらのエージェントも、イーシーツーだけでなく、オンプレミスのサーバーでも動きます。",
+   "narration": "次は、数値とエージェントの部です。自分で決めた数値を送りたいなら、プットメトリックデータです。コマンドラインからも送れます。既定の基本の監視より詳しく、数値やログやトレースを集めたいなら、クラウドウォッチエージェントです。システムズマネージャーで、サーバーを更新し、管理し、設定したいなら、エスエスエムエージェントです。どちらのエージェントも、イーシーツーだけでなく、オンプレミスのサーバーでも使えます。",
    "refs": [
     {
      "source_id": "S7",
@@ -479,6 +494,11 @@
      "source_id": "S9",
      "quote": "AWS Systems Manager Agent (SSM Agent) is Amazon software that runs on Amazon Elastic Compute Cloud (Amazon EC2) instances, edge devices, on-premises servers, and virtual machines (VMs).",
      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html#ssm-agent"
+    },
+    {
+     "source_id": "S8",
+     "quote": "collects metrics, logs, and traces from your Amazon EC2 instances, on-premises servers, and containerized applications",
+     "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html#Install-CloudWatch-Agent"
     }
    ]
   },
@@ -486,46 +506,46 @@
    "id": "s14",
    "title": "条件から選ぶ 3: 自動の拡張",
    "bullets": [
-    "アラームで増減 → scaling policy",
-    "EC2 以外 → Application Auto Scaling",
+    "EC2 → EC2 Auto Scaling",
+    "ECS サービスなど → Application Auto Scaling",
     "RDS は有効にしたとき"
    ],
    "visual": {
     "type": "compare",
     "columns": [
-     "問題文の条件",
+     "増やす物",
      "選ぶ方法",
      "確かめる所"
     ],
     "rows": [
      [
-      "アラームで容量を増減",
-      "scaling policy",
-      "EC2 は EC2 Auto Scaling"
+      "EC2 のインスタンス",
+      "EC2 Auto Scaling",
+      "アラームが policy を"
      ],
      [
-      "EC2 以外を増減",
+      "ECS サービス・表など",
       "Application Auto Scaling",
-      "例: ECS サービス"
+      "例: Aurora のレプリカ"
      ],
      [
-      "ECS のタスクの量で",
+      "ECS の Auto Scaling group",
       "cluster auto scaling",
-      "ECS が数値と方針を作る"
+      "タスクの使用量で"
      ],
      [
-      "RDS の空きが減る",
+      "RDS のストレージ",
       "storage autoscaling",
       "有効にしたときだけ"
      ],
      [
-      "DynamoDB を通信量で",
+      "DynamoDB の容量",
       "DynamoDB auto scaling",
-      "provisioned の容量"
+      "実際の通信量で"
      ]
     ]
    },
-   "narration": "自動の拡張です。アラームで容量を増やしたり減らしたりしたい、とあれば、スケーリングポリシーです。イーシーツーなら、イーシーツーオートスケーリングです。イーシーエスのサービスのように、イーシーツー以外なら、アプリケーションオートスケーリングです。イーシーエスで、タスクが使う量に合わせてオートスケーリンググループを増減したいなら、クラスターオートスケーリングです。イーシーエスが、数値とスケーリングポリシーを作ります。アールディーエスの空きが足りなくなるなら、ストレージオートスケーリングです。有効にしていることが条件です。ダイナモディービーの容量を通信の量に合わせたいなら、ダイナモディービーオートスケーリングです。",
+   "narration": "自動の拡張です。似た名前が続くので、増やす物から考えます。増やす物がイーシーツーのインスタンスなら、イーシーツーオートスケーリングです。増やす物が、イーシーエスのサービスや、ダイナモディービーの表のような物なら、アプリケーションオートスケーリングです。増やす物が、イーシーエスのクラスターのオートスケーリンググループなら、クラスターオートスケーリングです。増やす物がアールディーエスのストレージなら、ストレージオートスケーリングです。有効にしていることが条件です。増やす物がダイナモディービーの容量で、通信の量に合わせたいなら、ダイナモディービーオートスケーリングです。",
    "refs": [
     {
      "source_id": "S4",
@@ -534,7 +554,7 @@
     },
     {
      "source_id": "S3",
-     "quote": "Application Auto Scaling scales other resources",
+     "quote": "Application Auto Scaling scales other resources, such as Amazon ECS services, Amazon DynamoDB tables, Amazon Aurora replicas, and Spot Fleets.",
      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-actions.html#alarm-actions-auto-scaling"
     },
     {
@@ -558,9 +578,9 @@
    "id": "s15",
    "title": "条件から選ぶ 4: イベント・設定の修復・ヘルスチェック",
    "bullets": [
-    "S3 のイベント → Lambda",
-    "決まったイベント → event pattern",
-    "外れた設定 → Automation"
+    "S3: イベント通知か EventBridge か",
+    "外れた設定 → Automation document",
+    "動いているか → health check"
    ],
    "visual": {
     "type": "compare",
@@ -571,19 +591,19 @@
     ],
     "rows": [
      [
-      "S3 の変化でコード実行",
+      "S3 の決まった種類で",
       "S3 イベント通知と Lambda",
-      "少なくとも 1 回届く"
+      "1 回だけとは限らない"
      ],
      [
-      "決まったイベントだけ",
+      "S3 の全イベントから選ぶ",
       "EventBridge のルール",
       "event pattern"
      ],
      [
       "あるべき設定から外れる",
       "AWS Config rules",
-      "Automation で修復"
+      "Automation document"
      ],
      [
       "外から動くか確かめる",
@@ -591,18 +611,23 @@
       "決めた間隔で要求"
      ],
      [
-      "アラームの数値で判断",
+      "ホストの数などで判断",
       "Route 53 health check",
       "アラームと同じデータ"
      ]
     ]
    },
-   "narration": "最後の表は、イベント、設定の修復、ヘルスチェックです。エススリーのバケットのイベントでコードを動かしたいなら、イベント通知とラムダです。少なくとも一回届く点を確かめます。決まったイベントのときだけ送りたいなら、イベントブリッジのルールとイベントパターンです。あるべき設定から外れたリソースを直したいなら、エーダブリューエスコンフィグのルールと、オートメーションのドキュメントです。インターネット越しに動いているかを確かめたいなら、ルートフィフティースリーのヘルスチェックです。アラームと同じデータで判断したいなら、アラームを使うヘルスチェックを作ります。",
+   "narration": "最後の表は、四つ目から六つ目の部です。エススリーの決まった種類のイベントで、ラムダのコードを動かしたいなら、イベント通知とラムダです。一回だけとは限らない点を確かめます。エススリーの全てのイベントを受けて、その中から選んで送りたいなら、イベントブリッジのルールとイベントパターンです。あるべき設定から外れたリソースを直したいなら、エーダブリューエスコンフィグのルールと、オートメーションドキュメントです。インターネット越しに動いているかを確かめたいなら、ルートフィフティースリーのヘルスチェックです。正常なホストの数のような数値で判断したいなら、アラームを使う形のヘルスチェックです。",
    "refs": [
     {
      "source_id": "S17",
      "quote": "Amazon S3 event notifications are designed to be delivered at least once.",
      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html#EventNotifications"
+    },
+    {
+     "source_id": "S19",
+     "quote": "If you enable delivery, all events are sent to EventBridge.",
+     "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html#eventbridge-dest"
     },
     {
      "source_id": "S20",
@@ -636,10 +661,10 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph P3[\"3 自動の拡張\"]\n    C@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling<br/>scaling policy\" }\n  end\n  subgraph P2[\"2 数値を集める\"]\n    B@{ svc: \"Amazon CloudWatch\", label: \"custom metrics<br/>CloudWatch agent<br/>SSM Agent\" }\n  end\n  subgraph P1[\"1 アラーム\"]\n    A@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>SNS・Lambda・EC2\" }\n  end\n  subgraph P6[\"6 ヘルスチェック\"]\n    G@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>2 つの health check\" }\n  end\n  subgraph P5[\"5 設定の修復\"]\n    F@{ svc: \"AWS Config\", label: \"AWS Config rules<br/>Automation で修復\" }\n  end\n  subgraph P4[\"4 イベント\"]\n    E@{ svc: \"Amazon EventBridge\", label: \"S3 イベント通知<br/>event pattern\" }\n  end\n  P3 ~~~ P6\n  P2 ~~~ P5\n  P1 ~~~ P4\n",
-    "alt": "講義の地図に戻ったまとめ。6 つの部を扱った順に 2 段に並べる。矢印は無く、処理の流れではない。1 アラーム（SNS・Lambda・EC2 のアクション）、2 数値を集める（custom metrics、CloudWatch agent、SSM Agent）、3 自動の拡張（Auto Scaling と scaling policy）、4 イベント（S3 イベント通知と event pattern）、5 設定の修復（AWS Config rules と Automation）、6 ヘルスチェック（Route 53 の 2 つの health check）。"
+    "source": "flowchart TB\n  subgraph P3[\"3 自動の拡張\"]\n    C@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling<br/>増やす物で選ぶ\" }\n  end\n  subgraph P2[\"2 数値とエージェント\"]\n    B[\"custom metrics<br/>CloudWatch agent<br/>SSM Agent\"]\n  end\n  subgraph P1[\"1 アラーム\"]\n    A@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch alarm<br/>SNS・Lambda・EC2<br/>composite alarm\" }\n  end\n  subgraph P6[\"6 ヘルスチェック\"]\n    G@{ svc: \"Amazon Route 53\", label: \"Route 53<br/>2 つの health check\" }\n  end\n  subgraph P5[\"5 設定の修復\"]\n    F@{ svc: \"AWS Config\", label: \"AWS Config rules<br/>Automation document\" }\n  end\n  subgraph P4[\"4 イベント\"]\n    E@{ svc: \"Amazon EventBridge\", label: \"S3 イベント通知<br/>event pattern\" }\n  end\n  P3 ~~~ P6\n  P2 ~~~ P5\n  P1 ~~~ P4\n",
+    "alt": "講義の地図に戻ったまとめ。6 つの部を扱った順に 2 段に並べる。矢印は無く、処理の流れではない。1 アラーム（SNS・Lambda・EC2 のアクション・composite alarm）、2 数値とエージェント（custom metrics、CloudWatch agent、SSM Agent）、3 自動の拡張（増やす物で Auto Scaling を選ぶ）、4 イベント（S3 イベント通知と event pattern）、5 設定の修復（AWS Config rules と Automation document）、6 ヘルスチェック（Route 53 の 2 つの health check）。"
    },
-   "narration": "まとめです。最初の地図に戻ります。並びは扱った順で、流れではありません。一つ目のアラームでは、状態の変化を、エスエヌエスで知らせ、ラムダで処理し、イーシーツーのアクションでインスタンスを動かしました。コンポジットアラームで、通知を減らせました。二つ目の数値を集める部では、プットメトリックデータと、二つのエージェントを見ました。三つ目の自動の拡張では、スケーリングポリシーと、サービスごとの仕組みを見ました。四つ目のイベントでは、エススリーのイベント通知と、イベントブリッジのイベントパターンを見ました。五つ目は、エーダブリューエスコンフィグのルールとオートメーションによる修復、六つ目は、ルートフィフティースリーの二つの形のヘルスチェックでした。問題文で迷ったら、四枚の表に戻ってください。",
+   "narration": "まとめです。最初の地図に戻ります。並びは扱った順で、流れではありません。一つ目のアラームでは、状態の変化を、エスエヌエスで知らせ、ラムダで処理し、イーシーツーのアクションでインスタンスを動かしました。コンポジットアラームは、まとめた所でだけ知らせて通知を減らします。二つ目の部では、自分の数値の送り方と、二つのエージェントを見ました。三つ目の自動の拡張では、増やす物から仕組みを選びました。四つ目のイベントでは、エススリーのイベント通知と、イベントブリッジのイベントパターンを見ました。五つ目はエーダブリューエスコンフィグのルールとオートメーションドキュメントによる修復、六つ目はルートフィフティースリーの二つの形のヘルスチェックでした。問題文で迷ったら、四枚の表に戻ってください。",
    "refs": [
     {
      "source_id": "S4",

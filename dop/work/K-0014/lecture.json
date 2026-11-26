@@ -11,11 +11,35 @@
     "最後に条件から選ぶ表"
    ],
    "visual": {
-    "type": "mermaid",
-    "source": "flowchart TB\n  subgraph R[\"受け取る部\"]\n    direction LR\n    EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>event bus・<br/>別アカウント\" }\n    HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>対応と Region\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>読み取りだけの<br/>管理イベント\" }\n    EB ~~~ HE ~~~ CT\n  end\n  subgraph P[\"処理する部\"]\n    direction LR\n    DL[\"target に<br/>届かない時\"]\n    SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>fan out・<br/>filter policy\" }\n    RD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis・SQS<br/>読み手と Lambda\" }\n    SF@{ svc: \"AWS Step Functions\", label: \"Pipes と<br/>Step Functions\" }\n    DL ~~~ SN ~~~ RD ~~~ SF\n  end\n  R ~~~ P\n",
-    "alt": "講義の地図。扱う順に箱を並べた物で、矢印は無く、処理の流れではない。上の段は受け取る部で、EventBridge の event bus と別アカウントからの送り方、AWS Health の対応と Region、CloudTrail の読み取りだけの管理イベントを扱う。下の段は処理する部で、target に届かない時、SNS の fan out と filter policy、Kinesis と SQS の読み手と Lambda、Pipes と Step Functions を扱う。"
+    "type": "compare",
+    "columns": [
+     "受け取る部",
+     "処理する部"
+    ],
+    "rows": [
+     [
+      "EventBridge の event bus",
+      "target に届かない時"
+     ],
+     [
+      "別アカウントから",
+      "SNS の fan out"
+     ],
+     [
+      "AWS Health のイベント",
+      "Kinesis の読み手"
+     ],
+     [
+      "AWS Health と Region",
+      "Lambda で読む"
+     ],
+     [
+      "CloudTrail の管理イベント",
+      "Pipes・Step Functions"
+     ]
+    ]
    },
-   "narration": "この講義では、イベントを受け取り、それに応じて処理し、知らせ、対応する仕組みを学びます。講義は二つの部に分けます。画面の地図は扱う順に並べた物で、処理の流れではありません。前半の受け取る部では、イベントブリッジのイベントバスと、別のアカウントからの送り方、エーダブリューエスヘルスと、クラウドトレイルのイベントの受け方を見ます。後半の処理する部では、ターゲットに届かないときの備え、エスエヌエスのファンアウトとフィルターポリシー、キネシスとエスキューエスの読み手とラムダ、最後にパイプスとステップファンクションズです。締めに、条件から方法を選ぶ表を三枚見ます。",
+   "narration": "この講義では、イベントを受け取り、それに応じて処理し、知らせ、対応する仕組みを学びます。画面の表が、講義の地図です。左が前半の受け取る部、右が後半の処理する部で、上から扱う順に並べています。処理の流れではありません。受け取る部では、イベントブリッジのイベントバスと別のアカウントからの送り方、エーダブリューエスヘルス、クラウドトレイルを見ます。処理する部では、ターゲットに届かないときの備え、エスエヌエスのファンアウト、キネシスの二つの読み手、ラムダで読む方法、パイプスとステップファンクションズです。締めに、条件から方法を選ぶ表を三枚見ます。",
    "refs": [
     {
      "source_id": "S1",
@@ -42,7 +66,7 @@
     "source": "flowchart TB\n  SRC[\"イベントの元\"]\n  EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>event bus<br/>振り分け役\" }\n  T1[\"target\"]\n  T2[\"target\"]\n  SRC -- \"イベント\" --> EB\n  EB -- \"届ける\" --> T1\n  EB --> T2\n",
     "alt": "イベントの元が出したイベントを EventBridge の event bus が受け取り、target へ届ける。event bus は振り分け役で、届ける先の target は 0 個以上。図の target 2 つは例。"
    },
-   "narration": "イベント駆動のアーキテクチャとは、イベントを出したり、イベントに応じたりして動く、疎結合な部品で組む作り方です。疎結合とは、部品どうしが強く結び付いていないことです。イベントブリッジは、イベントで部品をつなぐ、サーバーレスのサービスです。中心になるのがイベントバスです。イベントバスは振り分け役で、イベントを受け取り、ゼロ個以上のターゲットへ届けます。ターゲットとは、イベントを届ける先のことです。ポーリングやウェブフックの仕組みも、イベントで置き換えられます。一方で、こうした作りは、全体の状態が後からそろう、結果整合になることが多いとされます。そのため、重複の扱いや、全体の正確な状態をつかむことが難しくなります。この点は、後半で効いてきます。",
+   "narration": "イベント駆動のアーキテクチャとは、イベントを出したり、イベントに応じたりして動く、疎結合な部品で組む作り方です。疎結合とは、部品どうしが強く結び付いていないことです。イベントブリッジは、イベントで部品をつなぐサービスです。中心になるのがイベントバスです。イベントバスは振り分け役で、イベントを受け取り、ゼロ個以上のターゲットへ届けます。ターゲットとは、イベントを届ける先のことです。一方で、こうした作りは、全体の状態が後からそろう、結果整合になることが多いとされます。そのため、重複の扱いや、全体の正確な状態をつかむことが難しくなります。この重複の話は、後半の、同じ物を何度処理しても困らないように作る話につながります。",
    "refs": [
     {
      "source_id": "S1",
@@ -53,11 +77,6 @@
      "source_id": "S1",
      "quote": "Event buses are routers that receive events and delivers them to zero or more targets.",
      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html#eb-what-is"
-    },
-    {
-     "source_id": "S17",
-     "quote": "Both of these mechanisms can be replaced by events, which can be filtered, routed, and pushed downstream to consuming microservices.",
-     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#polling-webhooks-events"
     },
     {
      "source_id": "S16",
@@ -72,14 +91,14 @@
    "bullets": [
     "受け取る側の bus にポリシー",
     "resource-based policy",
-    "例は source と detail-type で絞る"
+    "例: source と detail-type の値"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph A1[\"送る側のアカウント\"]\n    SND[\"イベントを送る物\"]\n  end\n  subgraph A2[\"受け取る側のアカウント\"]\n    CB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>central-event-bus\" }\n    POL[\"resource-based policy<br/>例: source と detail-type<br/>が決まった物だけ\"]\n  end\n  SND -- \"イベントを送る\" --> CB\n  POL -. \"bus に付ける\" .-> CB\n",
-    "alt": "送る側のアカウントから、受け取る側のアカウントの central-event-bus へイベントを送る。許可は resource-based policy で書き、受け取る側の bus に付ける。例のポリシーは、source と detail-type の値が決まったイベントだけを許す。"
+    "source": "flowchart TB\n  subgraph A1[\"送る側のアカウント\"]\n    SND[\"イベントを送る物\"]\n  end\n  subgraph A2[\"受け取る側のアカウント\"]\n    CB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>central-event-bus\" }\n    POL[\"resource-based policy<br/>例: イベントの source と<br/>detail-type の値で絞る\"]\n  end\n  SND -- \"イベントを送る\" --> CB\n  POL -. \"bus に付ける\" .-> CB\n",
+    "alt": "送る側のアカウントから、受け取る側のアカウントの central-event-bus へイベントを送る。許可は resource-based policy で書き、受け取る側の bus に付ける。例のポリシーは、イベントに入っている source と detail-type という項目の値が決まったイベントだけを許す。"
    },
-   "narration": "イベントバスへは、別のアカウントからイベントを送ることもできます。ドキュメントの例では、あるアカウントに、別のアカウントにある、セントラルイベントバスという名前のバスへ、イベントを送る許可を与えています。許可は、リソースベースのポリシー、つまりリソースの側に付けるポリシーで書きます。付ける先は、イベントを受け取る側のアカウントの、そのバスです。送る側ではありません。この例では、さらに、ソースとディテールタイプの値が決まったイベントだけに絞っています。この絞り方は例の書き方で、いつも絞らなければならない、という意味ではありません。",
+   "narration": "イベントバスへは、別のアカウントからイベントを送ることもできます。ドキュメントの例を見ます。まず、送る側のアカウントがあります。受け取る側のアカウントには、セントラルイベントバスというバスがあります。例では、送る側に、このバスへイベントを送る許可を与えています。許可は、リソースベースポリシー、つまりリソースの側に付けるポリシーで書きます。付ける先は、受け取る側のバスです。この例では、さらに、イベントに入っている、ソースとディテールタイプという項目の値が決まったイベントだけに絞っています。この絞り方は例の書き方で、いつも絞るという意味ではありません。",
    "refs": [
     {
      "source_id": "S8",
@@ -99,14 +118,14 @@
    "bullets": [
     "ルールで検知して対応",
     "少なくとも 1 回届けようとする",
-    "public は最大 1 時間後から"
+    "public: ルール作成から最大 1 時間"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>のイベント\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>のルール\" }\n  AC[\"対応の例<br/>記録・通知・是正など\"]\n  HE -- \"少なくとも 1 回\" --> RU\n  RU -- \"当てはまれば\" --> AC\n",
+    "source": "flowchart TB\n  HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>のイベント\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>のルール\" }\n  AC[\"対応の例<br/>記録・通知・是正など\"]\n  HE -- \"少なくとも 1 回<br/>届けようとする\" --> RU\n  RU -- \"当てはまれば\" --> AC\n",
     "alt": "AWS Health はイベントを少なくとも 1 回 EventBridge へ届けようとする。EventBridge のルールに当てはまったイベントに応じて、情報の記録、通知、是正の対応などをとる。これらは例。"
    },
-   "narration": "エーダブリューエスヘルスのイベントは、イベントブリッジで検知し、それに応じて動けます。そのために、ルールを作ります。ルールとは、届いたイベントを照らし合わせて、当てはまる物を選ぶための決まりです。イベントの種類に応じて、情報を記録する、別のイベントを起こす、通知を送る、是正の対応をとる、といったことができます。これらは例で、ほかの対応もとれます。届け方では、二つ押さえます。一つ目、ヘルスはイベントを、少なくとも一回は届けようとします。二つ目、ヘルスダッシュボードに出る公開のイベントは、ルールを作ってから送られ始めるまで、最大で一時間かかることがあります。",
+   "narration": "エーダブリューエスヘルスのイベントは、イベントブリッジで検知し、それに応じて動けます。そのために、ルールを作ります。ルールとは、届いたイベントを照らし合わせて、当てはまる物を選ぶ決まりです。イベントの種類に応じて、情報の記録、別のイベントを起こす、通知、是正の対応、といったことができます。これらは例です。届け方では、二つ押さえます。一つ目、ヘルスはイベントを、少なくとも一回は届けようとします。一回より多く届くこともありうる、と読めます。二つ目、パブリックイベント、つまりヘルスダッシュボードに出る公開のイベントは、ルールを作ってから送られ始めるまで、最大で一時間かかることがあります。",
    "refs": [
     {
      "source_id": "S2",
@@ -129,9 +148,9 @@
    "id": "s05",
    "title": "受け取る部 4: AWS Health と Region",
    "bullets": [
-    "Region ごとにルールを作れる",
-    "simplified integration は 1 つ",
-    "global イベントは us-east-1"
+    "Region ごとのルール",
+    "simplified は 1 つのルール",
+    "global は US East (N. Virginia)"
    ],
    "visual": {
     "type": "compare",
@@ -145,8 +164,8 @@
       "受けたい Region に作る"
      ],
      [
-      "simplified",
-      "複数 Region を 1 つで"
+      "simplified の対象",
+      "アカウント固有・複数 Region"
      ],
      [
       "simplified の制限",
@@ -158,11 +177,11 @@
      ],
      [
       "global イベント",
-      "US East にルール"
+      "US East (N. Virginia)"
      ]
     ]
    },
-   "narration": "ヘルスのイベントは、リージョンとの関係に気をつけます。一つのやり方は、受けたいリージョンごとにルールを作ることです。複数のリージョンから、アカウントに固有のイベントを集めたいが、ルールは一つにしたい、という場合は、シンプリファイドインテグレーション、つまり簡単にした連携が合います。ただし、制限が二つあります。公開のイベントは、この連携では受けられません。また、この連携がすすめられるのは、対応が必要な種類のイベントを取り込む場合だけです。もう一つ、リージョンに属さないイベントもあります。こうしたグローバルなイベントを受けるには、米国東部、バージニア北部のリージョンに、ルールを作る必要があります。",
+   "narration": "ヘルスのイベントは、リージョンとの関係に気をつけます。まず呼び方です。自分のアカウントに固有のイベントと、ダッシュボードに出るパブリックイベントがあります。ほかに、アクションリクワイアード、つまり対応が必要なイベントと、リージョンに属さないグローバルイベントが出てきます。受け方の一つは、受けたいリージョンごとにルールを作ることです。もう一つが、シンプリファイドインテグレーションで、複数のリージョンのアカウント固有のイベントを、一つのルールで受けたいときに合います。制限が一つあり、パブリックイベントは受けられません。なので、パブリックイベントも要るなら、リージョンごとのルールを使うことになります。また、この連携がすすめられるのは、アクションリクワイアードのイベントを取り込む場合だけです。グローバルイベントを受けるには、ユーエスイースト、バージニア北部のリージョンにルールを作ります。",
    "refs": [
     {
      "source_id": "S7",
@@ -195,16 +214,16 @@
    "id": "s06",
    "title": "受け取る部 5: CloudTrail の管理イベント",
    "bullets": [
-    "default event bus のルールで",
+    "default event bus のルール",
     "管理の操作が見えるイベント",
-    "有効にしただけでは読み取りは除く"
+    "有効にしただけでは照らし合わせない"
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  SV[\"AWS のサービスへの<br/>管理の操作\"]\n  CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>を通して届く\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>default event bus<br/>のルール\" }\n  NOTE[\"有効にしただけの<br/>ルールは、読み取り<br/>だけの管理イベントを<br/>照らし合わせない\"]\n  SV -- \"管理イベント\" --> CT\n  CT --> RU\n  RU ~~~ NOTE\n",
-    "alt": "AWS のサービスへの管理の操作が、管理イベントとして CloudTrail を通して EventBridge の default event bus に届き、そこのルールで受ける。ルールを有効にしただけの状態では、CloudTrail を通して届く読み取りだけの管理イベントは照らし合わせない。"
+    "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>を通して届く\" }\n  RU@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>default event bus<br/>のルール\" }\n  NOTE[\"状態が有効だけの<br/>ルールは<br/>照らし合わせない\"]\n  CT -- \"読み取りだけの管理イベント\" --> RU\n  RU -.- NOTE\n",
+    "alt": "CloudTrail を通して、読み取りだけの管理イベントが EventBridge の default event bus に届き、そこのルールで受ける。ルールに付けた注意として、状態を有効にしただけのルールは、読み取りだけの管理イベントを照らし合わせない。"
    },
-   "narration": "クラウドトレイルを通して、エーダブリューエスのサービスの管理イベントを受けることもできます。管理イベントとは、アカウントのリソースに対して行われた、管理の操作を見えるようにするイベントです。ここで取り上げるのは、そのうちの、読み取りだけの管理イベントです。これを受けるルールは、デフォルトのイベントバスに置けます。気をつけたいのは、ルールの状態です。ルールをただ有効にしただけでは、イベントブリッジは、クラウドトレイルを通して届く、読み取りだけの管理イベントを照らし合わせません。読み取りだけの操作まで拾いたい、という問題文なら、ルールの状態の設定を確かめます。",
+   "narration": "クラウドトレイルを通して、エーダブリューエスのサービスの管理イベントを受けることもできます。管理イベントとは、アカウントのリソースに対する管理の操作を、見えるようにするイベントです。ここで取り上げるのは、そのうちの読み取りだけの管理イベントです。これを受けるルールは、デフォルトイベントバスに置けます。気をつけたいのは、ルールをただ有効にしただけでは、読み取りだけの管理イベントを照らし合わせない点です。読み取りだけの操作まで拾いたい問題文なら、ルールを有効にしただけで済ませている選択肢は、足りないと判断できます。",
    "refs": [
     {
      "source_id": "S3",
@@ -260,7 +279,7 @@
      ]
     ]
    },
-   "narration": "ここから、処理する部です。まず、イベントブリッジがターゲットの呼び出しに失敗したときです。イベントブリッジは、リトライポリシーにある二つの上限、回数と時間の、どちらかに達するまで再試行します。上限に達すると、エスキューエスのキューに記録を書きます。このように、届けられなかった物を残すキューを、デッドレターキューと呼びます。デッドレターキューが無いと、再試行を使い切ったイベントは捨てられ、残る跡は、イベンツドロップトというメトリクスだけです。メトリクスとは、数で表した観測の値です。ドキュメントは、両方を受け手を作るときに設定するよう述べています。",
+   "narration": "ここから、処理する部です。まず、イベントブリッジがターゲットの呼び出しに失敗したときです。イベントブリッジは、リトライポリシーにある二つの上限の、どちらかに達するまで再試行します。既定では、五回か、三百秒です。上限に達すると、オンフェイリャーコンフィギュレーションで指定した、エスキューエスのキューに記録を書きます。このキューを、デッドレターキューと呼びます。デッドレターキューが無いと、再試行を使い切ったイベントは捨てられ、残る跡は、イベンツドロップトというメトリクス、つまり観測の数値だけです。ドキュメントは、リトライポリシーとデッドレターキューの両方を、ターゲットを作るときに設定するよう述べています。",
    "refs": [
     {
      "source_id": "S15",
@@ -278,16 +297,16 @@
    "id": "s08",
    "title": "処理する部 2: SNS から SQS への fan out",
    "bullets": [
-    "SNS: push で多くの購読者へ",
+    "SNS: push で複数の購読者へ",
     "SQS: polling で受け取る",
-    "キューに残り後から処理"
+    "キューに残り後から処理できる"
    ],
    "visual": {
     "type": "mermaid",
     "source": "flowchart TB\n  PUB[\"発行する側\"]\n  SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>topic\" }\n  Q1@{ svc: \"Amazon SQS\", label: \"SQS<br/>queue\" }\n  Q2@{ svc: \"Amazon SQS\", label: \"SQS<br/>queue\" }\n  A1[\"アプリケーション\"]\n  A2[\"アプリケーション\"]\n  PUB -- \"発行\" --> SN\n  SN -- \"push\" --> Q1\n  SN --> Q2\n  Q1 -. \"polling で受ける\" .-> A1\n  Q2 -.-> A2\n",
     "alt": "発行する側が SNS の topic にメッセージを発行すると、SNS は購読している SQS の queue それぞれへ push で送る。メッセージは queue に残り、アプリケーションが polling で受け取って、後から処理できる。点線は polling で受ける向き。queue 2 つは例。"
    },
-   "narration": "ここでは、一つのメッセージを、複数の受け手に広げて配る形を、ファンアウトと呼びます。エスエヌエスは、急ぎのメッセージを、プッシュの仕組みで、複数の購読者へ送るサービスです。エスキューエスは、分散したアプリケーションがメッセージをやり取りするキューのサービスで、受け手がポーリング、つまり取りに行く形で受けます。エスキューエスのキューを、エスエヌエスのトピックに購読させます。トピックは、メッセージを発行する先です。すると、トピックに発行するだけで、エスエヌエスが、購読したキューへメッセージを送ります。メッセージはキューに残るので、ほかのアプリケーションが後から処理できます。",
+   "narration": "ここでは、一つのメッセージを複数の受け手に配る形を、ファンアウトと呼びます。複数の受け手へ届けること自体は、イベントバスもできます。この形で押さえたいのは、配ったメッセージがキューに残り、受け手が後から取りに行ける点です。エスエヌエスは、急ぎのメッセージを、プッシュの仕組みで、複数の購読者へ送ります。エスキューエスは、受け手がポーリング、つまり取りに行く形で受けるキューのサービスです。エスキューエスのキューを、エスエヌエスのトピック、つまり発行する先に購読させます。すると、トピックに発行するだけで、エスエヌエスが購読したキューへ送ります。メッセージはキューに残るので、ほかのアプリケーションが後から処理できます。",
    "refs": [
     {
      "source_id": "S5",
@@ -321,10 +340,10 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>topic\" }\n  SA[\"購読 A<br/>filter policy 無し\"]\n  SB[\"購読 B<br/>filter policy あり\"]\n  SN -- \"全部届く\" --> SA\n  SN -- \"条件に合う物だけ\" --> SB\n",
+    "source": "flowchart TB\n  SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>topic\" }\n  SA[\"購読 A<br/>filter policy 無し\"]\n  SB[\"購読 B<br/>filter policy あり<br/>属性か本文の項目で判定\"]\n  SN -- \"全部届く\" --> SA\n  SN -- \"条件に合う物だけ\" --> SB\n",
     "alt": "SNS の topic の購読のうち、filter policy の無い購読 A には全てのメッセージが届く。filter policy を付けた購読 B には、条件を全て満たすメッセージだけが届く。"
    },
-   "narration": "エスエヌエスのトピックの購読者は、何もしなければ、トピックに発行された全てのメッセージを受けます。一部のメッセージだけを受けたいときは、購読に、フィルターポリシーを付けます。フィルターポリシーでは、プロパティの名前ごとに、値の一覧を書きます。メッセージの属性、または本文の中のプロパティが、ポリシーの条件を全て満たしたときだけ、エスエヌエスはその購読者へ送ります。気をつけたいのは、変えた後です。フィルターポリシーを足したり変えたりしても、すっかり効くまでに、最大で十五分かかります。",
+   "narration": "エスエヌエスのトピックの購読者は、何もしなければ、トピックに発行された全てのメッセージを受けます。一部のメッセージだけを受けたいときは、購読に、フィルターポリシーを付けます。フィルターポリシーでは、項目の名前ごとに、値の一覧を書きます。メッセージに付けた属性か、本文の中の項目が、ポリシーの条件を全て満たしたときだけ、エスエヌエスはその購読者へ送ります。気をつけたいのは、変えた後です。フィルターポリシーを足したり変えたりしても、すっかり効くまでに、最大で十五分かかります。",
    "refs": [
     {
      "source_id": "S12",
@@ -350,11 +369,11 @@
   },
   {
    "id": "s10",
-   "title": "処理する部 4: stream と queue の読み手",
+   "title": "処理する部 4: Kinesis の 2 つの読み手",
    "bullets": [
+    "SQS とは別の話",
     "stream consumer: shard を順に",
-    "queue consumer: 1 件ずつ独立",
-    "queue consumer は冪等に作る"
+    "queue consumer: 1 件ずつ・冪等に"
    ],
    "visual": {
     "type": "compare",
@@ -386,12 +405,12 @@
      ],
      [
       "作り方",
-      "表には無し",
+      "—",
       "冪等にする"
      ]
     ]
    },
-   "narration": "キネシスデータストリームズのドキュメントは、ストリームのデータを読む物を、二つに分けて説明しています。ストリームの読み手は、シャードの記録を順に読みます。シャードは、ストリームの中の区切りと考えてください。順に読むので、前の記録に依る処理に向きます。例は、その場での分析や、異常の検知です。キューの読み手は、記録を一つずつ独立して受け、記録ごとの処理に向きます。例は注文の処理です。キューは、各記録を少なくとも一回は届けますが、書いた順とは限りません。そのため、べきとうに作ります。べきとうとは、同じ記録を二回以上処理しても困らないことです。なお、ラムダでキネシスを処理するとき、標準のイテレーターでは、ラムダがシャードごとにポーリングし、一つのバッチには一つのシャードの記録だけが入ります。",
+   "narration": "キネシスデータストリームズのドキュメントは、記録の読み手を、ストリームコンシューマーとキューコンシューマーの二つに分けています。先に断っておくと、ここで言うキューコンシューマーは、エスキューエスのことではありません。キネシスのドキュメントの中での分け方です。ストリームコンシューマーは、シャードの記録を順に読みます。シャードは、ストリームの中の区切りと考えてください。順に読むので、前の記録に依る処理に向きます。例は、その場での分析や異常の検知です。キューコンシューマーは、記録を一つずつ独立して受け、記録ごとの処理に向きます。例は注文の処理です。各記録は少なくとも一回届きますが、書いた順とは限りません。そのため、べきとう、つまり同じ記録を二回以上処理しても困らないように作ります。前半の、重複の扱いの難しさへの答えの一つです。",
    "refs": [
     {
      "source_id": "S6",
@@ -407,6 +426,53 @@
      "source_id": "S6",
      "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream, so design your queue consumer to be idempotent, so that processing the same record more than once is safe.",
      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "処理する部 5: Lambda で Kinesis と SQS を読む",
+   "bullets": [
+    "pull は event source mapping",
+    "Kinesis: 1 バッチ 1 shard",
+    "SQS: 既定はバッチ全部が戻る"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "Kinesis",
+     "SQS"
+    ],
+    "rows": [
+     [
+      "取り方",
+      "標準 iterator は shard ごと",
+      "Lambda が polling"
+     ],
+     [
+      "バッチ",
+      "1 つの shard の記録",
+      "visibility timeout で隠れる"
+     ],
+     [
+      "エラー（既定）",
+      "—",
+      "バッチ全部が再び見える"
+     ],
+     [
+      "扱いを変える",
+      "—",
+      "partial batch responses"
+     ]
+    ]
+   },
+   "narration": "ラムダの関数をイベントで動かす方法は二つあります。直接呼び出すプッシュと、イベントソースマッピングによるプルです。プルでは、ラムダの側が、キューやストリームから取りに行き、記録をバッチ、つまりまとめた束で受け取ります。キネシスでは、標準のイテレーターのとき、ラムダがシャードごとにポーリングし、一つのバッチには一つのシャードの記録だけが入ります。エスキューエスでは、ラムダがキューをポーリングし、関数を同期で呼び出します。受け取ったメッセージはキューに残ったまま、可視性タイムアウトの間だけ隠れます。既定では、バッチの処理でエラーになると、タイムアウトの後、そのバッチの全てのメッセージがまた見えるようになります。そのため、同じメッセージを何度処理しても、意図しない副作用が出ないように書きます。この既定の扱いを変えたいときは、部分的なバッチレスポンスを返すように設定します。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "Events can trigger a Lambda function in two ways: through direct invocation (push) and event source mappings (pull).",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#concepts-event-driven-architectures"
     },
     {
      "source_id": "S11",
@@ -417,52 +483,6 @@
      "source_id": "S11",
      "quote": "Each batch contains records from a single shard/data stream.",
      "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#kinesis-polling-and-batching"
-    }
-   ]
-  },
-  {
-   "id": "s11",
-   "title": "処理する部 5: Lambda で SQS を読む",
-   "bullets": [
-    "push と pull の 2 通り",
-    "pull は event source mapping",
-    "既定はエラーでバッチ全部が戻る"
-   ],
-   "visual": {
-    "type": "compare",
-    "columns": [
-     "点",
-     "SQS の event source mapping"
-    ],
-    "rows": [
-     [
-      "取り方",
-      "Lambda が polling"
-     ],
-     [
-      "呼び方",
-      "関数を同期で呼ぶ"
-     ],
-     [
-      "処理の間",
-      "visibility timeout で隠れる"
-     ],
-     [
-      "エラーの時（既定）",
-      "バッチ全部が再び見える"
-     ],
-     [
-      "扱いを変える",
-      "partial batch responses"
-     ]
-    ]
-   },
-   "narration": "ラムダの関数をイベントで動かす方法は二つあります。直接呼び出すプッシュの形と、イベントソースマッピングによるプルの形です。プルの形では、ラムダの側が、キューやストリームからイベントを取りに行きます。エスキューエスの場合、ラムダがキューをポーリングし、関数を同期で呼び出します。バッチを受け取っても、メッセージはキューに残ったまま、可視性タイムアウトの間だけ隠れます。既定では、関数がバッチの処理でエラーになると、タイムアウトが切れた後、そのバッチの全てのメッセージが、またキューに見えるようになります。そのため、関数は、同じメッセージを何度処理しても、意図しない副作用が出ないように書きます。部分的なバッチレスポンスを返すように設定して、エラーの扱いを変えることもできます。",
-   "refs": [
-    {
-     "source_id": "S4",
-     "quote": "Events can trigger a Lambda function in two ways: through direct invocation (push) and event source mappings (pull).",
-     "url": "https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html#concepts-event-driven-architectures"
     },
     {
      "source_id": "S9",
@@ -494,7 +514,7 @@
     "source": "flowchart TB\n  subgraph G1[\"Pipes: 1 対 1\"]\n    SRC[\"source 1 つ\"]\n    PI@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>Pipes\" }\n    TGT[\"target 1 つ\"]\n  end\n  subgraph G2[\"ワークフロー\"]\n    SF@{ svc: \"AWS Step Functions\", label: \"Step Functions<br/>段ごとにエラーを扱う\" }\n    F1@{ svc: \"AWS Lambda\", label: \"Lambda<br/>仕事 A\" }\n    F2@{ svc: \"AWS Lambda\", label: \"Lambda<br/>仕事 B\" }\n  end\n  G1 ~~~ G2\n  SRC --> PI\n  PI -- \"処理して届ける\" --> TGT\n  SF -- \"調整する\" --> F1\n  SF --> F2\n",
     "alt": "上は EventBridge Pipes で、1 つの source からイベントを受け、処理して 1 つの target へ届ける。下は Step Functions のワークフローで、仕事ごとに分けた Lambda の関数の間のデータの流れを調整し、段ごとにエラーを扱う。"
    },
-   "narration": "最後は、処理をつなぐ二つの形です。イベントブリッジパイプスは、一対一の連携のための物です。一つのパイプは、一つのソースからイベントを受け、処理して、一つのターゲットへ届けます。ゼロ個以上のターゲットへ届けるイベントバスとは、ここが違います。ステップファンクションズは、ラムダの関数とほかのサービスとの連携を、目に見えるワークフローとして調整するサービスです。関数の間のデータの流れを調整し、それぞれの段でエラーを扱います。ドキュメントは、仕事ごとに別々のラムダ関数を書き、ワークフローの管理はステップファンクションズに任せるよう述べています。",
+   "narration": "最後は、処理をつなぐ二つの形です。イベントブリッジパイプスは、一対一の連携のための物です。一つのパイプは、一つのソースからイベントを受け、処理して、一つのターゲットへ届けます。ゼロ個以上のターゲットへ届けるイベントバスとは、ここが違います。ステップファンクションズは、ラムダの関数とほかのサービスとの連携を、ワークフローとして調整するサービスです。関数の間のデータの流れを調整し、それぞれの段でエラーを扱います。ドキュメントは、仕事ごとに別々のラムダ関数を書き、ワークフローの管理はステップファンクションズに任せるよう述べています。",
    "refs": [
     {
      "source_id": "S1",
@@ -518,8 +538,8 @@
    "title": "条件から選ぶ 1: 受け取る部",
    "bullets": [
     "別アカウント → 受け取る側の bus",
-    "1 つのルールで → simplified",
-    "読み取りだけ → ルールの状態"
+    "1 つのルール → simplified",
+    "読み取りだけ → 有効だけでは不足"
    ],
    "visual": {
     "type": "compare",
@@ -532,36 +552,41 @@
      [
       "別アカウントから送る",
       "受け取る側の bus",
-      "resource-based"
+      "resource-based policy"
      ],
      [
-      "複数 Region を 1 つで",
+      "固有・複数 Region を 1 つで",
       "simplified",
-      "public は不可"
+      "action-required 向け"
      ],
      [
       "public イベントも要る",
       "Region ごとのルール",
-      "最大 1 時間後から"
+      "ルール作成から最大 1 時間"
      ],
      [
       "Region に属さない",
-      "US East にルール",
+      "US East (N. Virginia)",
       "global イベント"
      ],
      [
       "読み取りだけの管理",
-      "default bus のルール",
-      "有効だけでは除く"
+      "default event bus",
+      "有効だけの選択肢は外す"
      ]
     ]
    },
-   "narration": "ここからは、問題文に出る条件から方法を選ぶ表です。一枚目は、受け取る部です。別のアカウントからイベントを送りたいなら、受け取る側のバスに、リソースベースのポリシーを付けます。複数のリージョンのアカウント固有のイベントを、一つのルールで受けたいなら、簡単にした連携です。ただし、公開のイベントは受けられないので、公開のイベントも要るなら選べません。リージョンごとにルールを作り、届き始めるまで最大で一時間かかることも覚えておきます。リージョンに属さないグローバルなイベントなら、米国東部、バージニア北部にルールです。読み取りだけの管理イベントなら、デフォルトのイベントバスのルールで、有効にしただけでは除かれる点を確かめます。",
+   "narration": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、受け取る部です。別のアカウントから送りたいなら、受け取る側のバスに、リソースベースポリシーを付けます。複数のリージョンのアカウント固有のイベントを、一つのルールで受けたいなら、シンプリファイドインテグレーションです。すすめられるのは、アクションリクワイアードのイベントの場合だけです。パブリックイベントも要るなら、この連携では受けられないので、リージョンごとのルールです。ルールを作ってから最大一時間かかります。グローバルイベントなら、ユーエスイースト、バージニア北部にルールです。読み取りだけの管理イベントなら、デフォルトイベントバスのルールで、有効にしただけの選択肢は外します。",
    "refs": [
     {
      "source_id": "S8",
      "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events.",
      "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html#eb-event-bus-example-policy-cross-account-custom-bus-source"
+    },
+    {
+     "source_id": "S7",
+     "quote": "Simplified integration is only recommended for ingesting action-required AWS Health events.",
+     "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html#choosing-a-region"
     },
     {
      "source_id": "S7",
@@ -594,8 +619,8 @@
    "id": "s14",
    "title": "条件から選ぶ 2: 処理する部の届け方",
    "bullets": [
-    "失いたくない → dead-letter queue",
-    "多くの受け手 → SNS と SQS",
+    "target 失敗 → dead-letter queue",
+    "キューに残す → SNS と SQS",
     "1 対 1 → Pipes"
    ],
    "visual": {
@@ -607,14 +632,14 @@
     ],
     "rows": [
      [
-      "届かない物を残す",
+      "target に届かない",
       "dead-letter queue",
       "無いと捨てられる"
      ],
      [
-      "1 つを多くの受け手へ",
+      "配ってキューに残す",
       "SNS に SQS を購読",
-      "キューに残る"
+      "後から処理できる"
      ],
      [
       "一部のメッセージだけ",
@@ -633,7 +658,7 @@
      ]
     ]
    },
-   "narration": "二枚目は、処理する部のうち、届け方です。ターゲットに届かなかったイベントを失いたくないなら、エスキューエスのデッドレターキューです。無いと、イベントは捨てられます。一つのメッセージを多くの受け手へ配り、後から処理させたいなら、エスエヌエスのトピックに、エスキューエスのキューを購読させます。一部のメッセージだけを受けたいなら、購読のフィルターポリシーで、効くまで最大で十五分かかります。一つのソースから一つのターゲットへつなぐなら、イベントブリッジパイプスです。複数のラムダ関数を段に分けてつなぎ、段ごとにエラーを扱いたいなら、ステップファンクションズです。",
+   "narration": "二枚目は、処理する部のうち、届け方です。イベントブリッジがターゲットに届けられなかったイベントを残したいなら、デッドレターキューです。無いと捨てられます。配ったメッセージをキューに残し、後から処理させたいなら、エスエヌエスのトピックにエスキューエスのキューを購読させます。一部のメッセージだけなら、フィルターポリシーで、効くまで最大十五分です。一つのソースから一つのターゲットへつなぐなら、パイプスです。複数のラムダ関数を段に分け、段ごとにエラーを扱いたいなら、ステップファンクションズです。",
    "refs": [
     {
      "source_id": "S15",
@@ -666,9 +691,9 @@
    "id": "s15",
    "title": "条件から選ぶ 3: 処理する部の読み手",
    "bullets": [
-    "順序と状態 → stream consumer",
+    "前の記録に依る → stream consumer",
     "1 件ずつ独立 → queue consumer",
-    "SQS を Lambda で → 冪等に"
+    "SQS を Lambda で → 冪等に書く"
    ],
    "visual": {
     "type": "compare",
@@ -679,33 +704,33 @@
     ],
     "rows": [
      [
-      "前の記録に依る処理",
+      "Kinesis: 前の記録に依る",
       "stream consumer",
       "shard を順に"
      ],
      [
-      "記録ごとに独立",
+      "Kinesis: 記録ごとに独立",
       "queue consumer",
       "冪等にする"
      ],
      [
-      "Kinesis を Lambda で",
-      "shard ごとに polling",
-      "1 バッチ 1 shard"
-     ],
-     [
-      "SQS を Lambda で",
+      "Lambda で Kinesis",
       "event source mapping",
-      "エラーで全部戻る"
+      "標準 iterator は shard ごと"
      ],
      [
-      "エラーの扱いを変える",
-      "partial batch",
+      "Lambda で SQS",
+      "event source mapping",
+      "既定はエラーで全部戻る"
+     ],
+     [
+      "既定の扱いを変える",
+      "partial batch responses",
       "SQS の mapping"
      ]
     ]
    },
-   "narration": "三枚目は、処理する部のうち、読み手です。ある記録の処理が前の記録に依るなら、ストリームの読み手です。シャードの記録を順に読みます。記録ごとに独立して処理するなら、キューの読み手で、べきとうに作ります。キネシスをラムダで処理するなら、標準のイテレーターでは、ラムダがシャードごとにポーリングし、一つのバッチは一つのシャードの記録です。エスキューエスをラムダで処理するなら、イベントソースマッピングです。既定では、エラーでバッチ全部がまた見えるようになるので、同じメッセージを何度処理しても困らないように書きます。そのエラーの扱いを変えたいなら、部分的なバッチレスポンスを返す設定にします。",
+   "narration": "三枚目は、処理する部のうち、読み手です。まず、キネシスのドキュメントの二つの読み手です。前の記録に依る処理なら、ストリームコンシューマーで、シャードを順に読みます。記録ごとに独立した処理なら、キューコンシューマーで、べきとうに作ります。次に、ラムダで読むときは、どちらもイベントソースマッピングです。キネシスでは、標準のイテレーターのとき、シャードごとにポーリングします。エスキューエスでは、既定で、エラーのときにバッチ全部がまた見えるので、同じメッセージを何度処理しても困らないように書きます。その既定の扱いを変えたいなら、部分的なバッチレスポンスを返す設定にします。",
    "refs": [
     {
      "source_id": "S6",
@@ -743,11 +768,35 @@
     "迷ったら 3 枚の表に戻る"
    ],
    "visual": {
-    "type": "mermaid",
-    "source": "flowchart TB\n  subgraph R[\"受け取る部\"]\n    direction LR\n    EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>受け取る側の<br/>bus に policy\" }\n    HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>Region と global\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>有効だけでは<br/>読み取りを除く\" }\n    EB ~~~ HE ~~~ CT\n  end\n  subgraph P[\"処理する部\"]\n    direction LR\n    DL[\"target に<br/>届かない時<br/>dead-letter queue\"]\n    SN@{ svc: \"Amazon SNS\", label: \"SNS<br/>SQS へ fan out\" }\n    RD@{ svc: \"Amazon Kinesis Data Streams\", label: \"Kinesis・SQS<br/>冪等に作る\" }\n    SF@{ svc: \"AWS Step Functions\", label: \"Pipes は 1 対 1<br/>Step Functions<br/>は段\" }\n    DL ~~~ SN ~~~ RD ~~~ SF\n  end\n  R ~~~ P\n",
-    "alt": "講義の地図に戻ったまとめ。扱った順に並べた物で、処理の流れではない。受け取る部は、EventBridge で受け取る側の bus に policy を付けること、AWS Health の Region と global イベント、CloudTrail のルールは有効にしただけでは読み取りだけの管理イベントを除くこと。処理する部は、target に届かない時の dead-letter queue、SNS から SQS への fan out、Kinesis と SQS の読み手を冪等に作ること、Pipes は 1 対 1、Step Functions は段ごとにつなぐこと。"
+    "type": "compare",
+    "columns": [
+     "受け取る部",
+     "処理する部"
+    ],
+    "rows": [
+     [
+      "EventBridge の event bus",
+      "target に届かない時"
+     ],
+     [
+      "別アカウントから",
+      "SNS の fan out"
+     ],
+     [
+      "AWS Health のイベント",
+      "Kinesis の読み手"
+     ],
+     [
+      "AWS Health と Region",
+      "Lambda で読む"
+     ],
+     [
+      "CloudTrail の管理イベント",
+      "Pipes・Step Functions"
+     ]
+    ]
    },
-   "narration": "まとめです。最初の地図に戻ります。並びは扱った順で、処理の流れではありません。受け取る部では、別のアカウントから送るとき、受け取る側のバスにポリシーを付けました。ヘルスでは、リージョンごとのルール、簡単にした連携、グローバルなイベントの置き場所を区別しました。クラウドトレイルの読み取りだけの管理イベントは、ルールを有効にしただけでは照らし合わされません。処理する部では、届かないイベントをデッドレターキューに残すこと、エスエヌエスからエスキューエスへのファンアウト、キューの読み手はべきとうに作ること、パイプスは一対一、ステップファンクションズは段ごとにつなぐことを見ました。問題文で迷ったら、三枚の表に戻ってください。",
+   "narration": "まとめです。最初の地図の表に戻ります。受け取る部では、別のアカウントから送るとき、受け取る側のバスにポリシーを付けました。ヘルスでは、リージョンごとのルールとシンプリファイドインテグレーションの使い分け、グローバルイベントの置き場所を見ました。クラウドトレイルの読み取りだけの管理イベントは、有効にしただけのルールでは照らし合わされません。処理する部では、デッドレターキュー、ファンアウトとフィルターポリシー、キネシスの二つの読み手、ラムダでの読み方、パイプスとステップファンクションズを見ました。重複がありうるキューコンシューマーと、エスキューエスを読むラムダは、べきとうに作ります。迷ったら、三枚の表に戻ってください。",
    "refs": [
     {
      "source_id": "S1",
@@ -758,8 +807,21 @@
      "source_id": "S6",
      "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream, so design your queue consumer to be idempotent, so that processing the same record more than once is safe.",
      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction"
+    },
+    {
+     "source_id": "S9",
+     "quote": "For this reason, your function code must be able to process the same message multiple times without unintended side effects.",
+     "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-polling-behavior"
     }
    ]
   }
+ ],
+ "notes": [
+  "C3 への返事（1 回目。採らなかった提案と、一部だけ採った提案）",
+  "s01・s16 の地図: Kinesis と SQS を分けると図の箱が 8 個になり、上限の 7 個を超える。そのため地図を compare の表（左が受け取る部、右が処理する部、上から扱う順）にした。矢印が無いので流れにも見えない。まとめも同じ表に戻る。",
+  "s06: 読み取りだけの管理イベントも照らし合わせるルールの状態の名前は、sources.md に無いので書かなかった。「状態を確かめる」は消して、「有効にしただけの選択肢は足りない」という判断の形にした。",
+  "s05: 4 種類のイベントの関係のうち、根拠で比べられているのはアカウント固有と public だけ。action-required と global がそれらとどう重なるかは根拠に無いので、呼び方を分けて示すだけにした。「public も要るなら Region ごとのルール」は、simplified が public を受けられない事からの推論として「〜を使うことになります」の形で言った。",
+  "s11: 「同期で呼び出す」の言い換え（終わりを待つ、など）は根拠に無いので付けなかった。partial batch responses は「既定の扱いを変えたい時の設定」と、既定の行と対にして言うところまでにした。",
+  "s07: subscriber を「ターゲット」と訳してそろえた。"
  ]
 }
