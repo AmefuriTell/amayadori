@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0011",
+  "source": "flowchart TB\n  EC2@{ svc: \"Amazon EC2\", label: \"新しいインスタンスの起動\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"起動イベントのルール\" }\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation: エージェントを入れるランブック\" }\n  EC2 -- \"起動のイベント\" --> EB\n  EB == \"✔ A: ターゲットに指定\" ==> AUT\n  AUT -- \"エージェントを導入\" --> EC2\n  W1[\"⚠ B: ランブックを始めるだけの Lambda\"]\n  W2[\"⚠ C: 各チームの起動テンプレートに頼る\"]\n  W3[\"⚠ D: 手作業で最大 1 日の空白\"]\n  W1 -.-> AUT\n  W2 -.-> EC2\n  W3 -.-> EC2\n",
+  "alt": "新しい EC2 が起動するたびにセキュリティエージェントを入れる図。起動イベントの EventBridge ルールのターゲットに Systems Manager Automation のランブックを指定する（A）。コード無しで起動ごとに自動で動く。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

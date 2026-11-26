@@ -1,0 +1,8 @@
+{
+  "id": "q-5.2-0012",
+  "source": "flowchart TB\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation: 事前定義の再起動ランブック\" }\n  subgraph FLEET[\"400 台の EC2\"]\n    G[\"同時に再起動: 20 台まで（concurrency 20）\"]\n  end\n  AUT == \"✔ B: 1 回実行\" ==> G\n  G -. \"失敗が増えたら\" .-> S[\"error threshold（低め）で自動で止まる\"]\n  W1[\"⚠ A: 400 台が一度に再起動\"]\n  W2[\"⚠ C: 失敗を数える Lambda を作る\"]\n  W3[\"⚠ D: 手作業で 1 日 1 グループ\"]\n  W1 -.-> G\n  W2 -.-> AUT\n  W3 -.-> G\n",
+  "alt": "400 台の EC2 の再起動を安全に進める図。事前定義のランブックを 1 回実行し、同時実行数を 20、エラーのしきい値を低くすれば、20 台ずつ進み、失敗が増えると自動で止まる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
