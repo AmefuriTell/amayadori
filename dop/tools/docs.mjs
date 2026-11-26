@@ -8,6 +8,7 @@ import { htmlSections, parseSources, ALLOWED_URL } from './lib/text.mjs';
 
 const MIN_SOURCES = 2;
 const MAX_WORDS = 300;
+const LECTURE_MIN_SOURCES = 8;
 const MIN_BODY_WORDS = 50;
 
 function slug(url) {
@@ -65,7 +66,7 @@ export function formatErrors(md) {
   return errors;
 }
 
-export function checkSources(md, rawText) {
+export function checkSources(md, rawText, { minSources = MIN_SOURCES } = {}) {
   const list = parseSources(md);
   const errors = [];
   const ids = new Set();
@@ -87,7 +88,7 @@ export function checkSources(md, rawText) {
   if (rawText === undefined) errors.push({ id: '(全体)', message: '原文の控え（work/<ID>/raw/*.md）が無い。docs fetch で取るか、WebFetch で取った本文を raw/ に .md で置く' });
   // S0 は廃止などの告知の欄なので、根拠の数には入れない
   const n = list.filter((s) => s.id && s.id !== 'S0').length;
-  if (n < MIN_SOURCES) errors.push({ id: '(全体)', message: `根拠が ${MIN_SOURCES} つ未満（${n}）。足りなければ loop advance --result no_source` });
+  if (n < minSources) errors.push({ id: '(全体)', message: `根拠が ${minSources} つ未満（${n}）。足りなければ loop advance --result no_source` });
   return { list, errors };
 }
 
@@ -153,7 +154,8 @@ const commands = {
     const rawDir = paths.work(id, 'raw');
     const rawFiles = fs.existsSync(rawDir) ? fs.readdirSync(rawDir).filter((f) => f.endsWith('.md')) : [];
     const rawText = rawFiles.length ? rawFiles.map((f) => fs.readFileSync(`${rawDir}/${f}`, 'utf8')).join('\n') : undefined;
-    const { list, errors } = checkSources(fs.readFileSync(file, 'utf8'), rawText);
+    // 講義（K-）は task の knowledge と skills を全部覆うので、根拠を多く要る
+    const { list, errors } = checkSources(fs.readFileSync(file, 'utf8'), rawText, { minSources: id.startsWith('K-') ? LECTURE_MIN_SOURCES : MIN_SOURCES });
     if (!errors.length) setResult(id, 'C1_research', 'ok');
     emit({
       ok: !errors.length,

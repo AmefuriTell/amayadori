@@ -22,7 +22,7 @@ const ev = input();
 const file = String(ev.tool_input?.file_path ?? ev.tool_input?.notebook_path ?? '').replace(/\\/g, '/');
 
 if (mode === 'post-write') {
-  const m = file.match(/(?:^|\/)dop\/work\/([CALRTGDF]-[0-9]{4})\/questions\.json$/);
+  const m = file.match(/(?:^|\/)dop\/work\/([CALRTGDFK]-[0-9]{4})\/questions\.json$/);
   if (m) {
     let errors;
     try { errors = checkBatch(m[1]); } catch (e) { block(`questions.json を読めない: ${e.message}`); }

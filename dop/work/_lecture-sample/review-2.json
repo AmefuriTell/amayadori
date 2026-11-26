@@ -1,0 +1,253 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "where": "narration「それぞれで、トラフィックの移し方、要る準備と権限、失敗したときの調べ方を押さえます」",
+          "detail": "EC2・ECS・Lambda の『それぞれで』三点を押さえると予告しているが、失敗の調べ方は EC2（s09・s10）だけ、Lambda の準備・権限はどのスライドにも無い。予告と本文が合わない（1 回目の global の指摘が残っている）。",
+          "suggest": "『EC2 では失敗の調べ方まで、ECS では権限と制約まで』のように、デプロイ先ごとに扱う範囲を言い分けるか、『それぞれで』を外す。"
+        },
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "where": "visual（Beanstalk ノード「in-place・blue/green・canary」）",
+          "detail": "前半で一枚使う Immutable ポリシー（s03）が地図に無い。台本の前半の列挙にも無い。",
+          "suggest": "ラベルを『in-place・blue/green・Immutable・canary』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "narration「トラフィックはすぐに新しい版へ向きます。ただし、古い環境は…古いレコードが期限切れになるまで残します」",
+          "detail": "『すぐに向く』と言った直後に『古い環境を残す』と続くので、初学者には矛盾に聞こえる。DNS の古いレコードがしばらく使われ続けるので古い環境にも人が来る、という一言が無い（1 回目 clarity の CNAME/DNS の指摘が一部残っている）。",
+          "suggest": "『古いレコードを覚えている利用者は、しばらく古い環境に来るからです』のように理由を一言足す。"
+        },
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "bullets 3「古い DNS レコードの期限切れまで残す」",
+          "detail": "何を残すのか（古い環境）が画面から抜けている。",
+          "suggest": "『古い環境は DNS レコードの期限切れまで残す』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "where": "bullets 1「既定のポリシーは All at once」と narration",
+          "detail": "台本は『ポリシーが五つ』とは言うが、既定が All at once であることを言っていない。画面の一行目が耳では一度も出てこない。",
+          "suggest": "台本に『何も指定しないときはオールアットワンス、つまり全部を一度に更新します』を足すか、bullet を『ポリシーは 5 つ』に替える。"
+        },
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "narration「ローリングというポリシーで、デプロイが途中で止まったときの問題も、防げる」",
+          "detail": "ローリングが何か（少しずつ入れ替える）を言っていないので、『途中で止まると何が困るのか』が分からない（1 回目 clarity の指摘が残っている）。",
+          "suggest": "『少しずつ入れ替えるローリングでは、途中で止まると古い版と新しい版が混ざったままになります』程度を足すか、根拠に無い説明を避けるならこの一文を削る。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "where": "bullets 2「設定: Traffic split と評価時間」と visual「evaluation time」",
+          "detail": "同じ設定を bullets は日本語『評価時間』、図は英語『evaluation time』で書いている。根拠の設定名は『Traffic splitting evaluation time』。",
+          "suggest": "どちらかにそろえる（例: 『Traffic split と evaluation time』）。"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s06",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "flow",
+          "severity": "中",
+          "where": "narration 後半・visual の CodeArtifact の囲み",
+          "detail": "図の取り違え（agent が token を取る、CodeArtifact と STS がつながる）は直った。しかし CodeArtifact が、題の『成果物を取りに行く』の中でどこに入るのか（誰が、何のために token を取るのか）が今も言われない。EC2 の話と並べてあるので、『EC2 の instance profile にも CodeArtifact の二つの権限が要る』と覚える人が出る。",
+          "suggest": "『これは CodeDeploy とは別に、パッケージマネージャーでコードアーティファクトから部品を取る場合の話です』のように場面を一言で切り分ける。根拠（C-0014 S2『To use a package manager with a CodeArtifact repository…』）の範囲で言える。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "where": "visual「S3: 成果物と agent」",
+          "detail": "成果物のバケットと agent のバケットが一つのノードになっていて、agent が自分の成果物バケットにあるように読める。根拠（C-0015 S8）は『the Amazon S3 buckets that contain the CodeDeploy agent』と言うだけで、同じバケットとは言っていない。",
+          "suggest": "『S3: 成果物』と『S3: agent の置き場』に分けるか、ラベルを『S3（成果物・agent の各バケット）』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "verdict": "ok",
+      "issues": []
+    },
+    {
+      "id": "s08",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "where": "bullets「LB」「original」・visual「replacement environment」",
+          "detail": "LB はここが初出で、画面では略称しか出ない（台本はロードバランサー）。original／replacement も画面は英語、台本は『元の』『置き換え用の』で、対応を一度も言っていない。",
+          "suggest": "図の 1 行目を『replacement（置き換え用）environment』、3 行目を『original（元の）』のように、初出だけ併記する。"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "clarity",
+          "severity": "中",
+          "where": "bullets 2「3 つの event は前回の AppSpec」・visual 行「ApplicationStop」・narration「アプリケーションストップなどの三つの段階」",
+          "detail": "三つが何か（ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic）が画面にも台本にも揃って出ない。台本は名前を画面に任せる方針なのに、表には ApplicationStop しか無い。『前回の AppSpec で動くのはこの三つだけ、他は今回の AppSpec』という試験の要点が覚えられない。",
+          "suggest": "表の行を『ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic で失敗』にし、bullet を『この 3 つだけ前回の AppSpec』にする。"
+        },
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "visual 行「全 event が skip → agent・ロールの権限」",
+          "detail": "台本は『サービスロール』と言い分けたが、表は『ロールの権限』だけで、s06 の instance profile と区別できない（1 回目 clarity のサービスロールの指摘は台本では直り、画面に残っている）。",
+          "suggest": "『agent・service role の権限』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "中",
+          "where": "visual 行「インスタンスが無い → group の tag 設定」と narration「デプロイグループのタグ」",
+          "detail": "このスライドの『group』は Auto Scaling group の意味で使われているので、表は『Auto Scaling group の tag』と読める。根拠（C-0016 S9）は『Check your deployment group settings to make sure the tags…』で、確かめるのは deployment group の設定。台本は正しいが画面と食い違う。",
+          "suggest": "『deployment group の tag 設定』と書く。デプロイグループ自体も初出なので、『デプロイ先のインスタンスを、タグなどで決めておく設定』と一言添える。"
+        },
+        {
+          "kind": "flow",
+          "severity": "軽",
+          "where": "narration「起動に時間がかかりすぎると、タイムアウトとして扱われます」",
+          "detail": "タイムアウトになった後どうなるかを言わない。根拠（C-0016 S7）の要点は『more than five minutes』と『The service fails all current and future deployments to the instance』で、5 分という数字も結果も台本に無い（表には『5 分超』『timeout で失敗』だけ）。",
+          "suggest": "『起動に 5 分より長くかかるとタイムアウトになり、そのインスタンスへの今と今後のデプロイが失敗します』にする。"
+        },
+        {
+          "kind": "fact",
+          "severity": "軽",
+          "where": "narration「版の誤り」・visual「health check・版」",
+          "detail": "根拠は『An error in the application revision』（版の中の誤り）。『版の誤り』だと『違う版を指定した』とも聞こえる。",
+          "suggest": "『新しい版そのものの誤り』『版の中のエラー』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "narration 末尾「イーシーエスのドキュメントは、イーシーエス自身のブルーグリーンデプロイを勧めています。この講義では、コードデプロイの形を扱います」",
+          "detail": "勧められている別の方法があると言うだけで、聞き手が問題文でどちらを選べばよいかの手がかりが無い（1 回目 clarity の指摘が軽くなって残っている）。",
+          "suggest": "根拠に違いの記述が無いので、『問題文にコードデプロイと書かれていれば、この形です』程度で区切るか、この一文を削る。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "where": "narration「コードデプロイでイーシーエスにデプロイするときは、ブルーグリーンの形を取ります」",
+          "detail": "根拠（C-0017 S3）は CodeDeploy の blue/green を説明するページで、『CodeDeploy で ECS へは blue/green だけ』とは書いていない。",
+          "suggest": "『コードデプロイでイーシーエスにブルーグリーンでデプロイするときは』と言い換える。"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "clarity",
+          "severity": "中",
+          "where": "bullets 3「CodeDeployToECS: 3 MB」・visual 行「CodeDeployToECS」",
+          "detail": "画面には CodePipeline の語が一度も出ない。台本も『コードパイプラインの制約』『アクション』と言うだけで、CodePipeline が何か、CodeDeployToECS が CodePipeline のアクションであることを説明していない（1 回目の flow の指摘が残っている）。画面だけ見ると『CodeDeploy で ECS にデプロイすると成果物は 3 MB まで』と誤って覚える。",
+          "suggest": "bullet を『CodePipeline の CodeDeployToECS: ZIP 3 MB』にし、台本で『コードパイプライン、つまりビルドからデプロイまでをつなぐサービスの、イーシーエス向けのデプロイの段では』と一言足す。"
+        },
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "narration「タスク定義のファイル」",
+          "detail": "タスク定義が何か（どのイメージをどう動かすかを書いた ECS の設定）が講義のどこにも無い。",
+          "suggest": "初出で『コンテナの動かし方を書いたタスク定義』と一言添える。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "verdict": "fix",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "重",
+          "where": "visual の表（Lambda 列「5 分後」「1 分ごと」）・narration「違うのは、あらかじめ用意された設定の、時間の数字です」",
+          "detail": "ECS の抜き出し（C-0017 S3）は『The following pre-defined … are available』として五つを並べており一覧と読めるが、Lambda の抜き出し（C-0017 S1）は三つの例を引いているだけで、それが Lambda の用意された設定のすべてだとは書いていない。それなのに表は『Lambda は 5 分後だけ・1 分ごとだけ』と言い切り、台本は『ECS と Lambda の違いは数字』と比べさせている。受験者が『15 分の canary は ECS だけ』のように誤った区別を覚える恐れがある。",
+          "suggest": "比べる表をやめ、『Lambda の例: LambdaCanary10Percent5Minutes など』と例として示す。比べさせたいなら、Lambda の用意された設定の一覧を根拠に足してから表にする。"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "where": "visual 行「使えない時間を避ける → blue/green」・narration",
+          "detail": "根拠（C-0017 S6）は Beanstalk の in-place で使えない時間が出るので blue/green で避ける、という Beanstalk の話。表は条件だけを書いていて、どのサービスでも blue/green が答えに読める。",
+          "suggest": "行を『Beanstalk で使えない時間を避ける → blue/green（CNAME 入れ替え）』にする。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "verdict": "ok",
+      "issues": [
+        {
+          "kind": "clarity",
+          "severity": "軽",
+          "where": "visual の表（列「新しい版への入口」と「前提」）",
+          "detail": "EC2 の『LB への登録』と Beanstalk の『環境 URL』は blue/green のときの入口で、s07 の EC2 in-place や s03 の Immutable には当てはまらない。また Lambda の『前提』が『版を指す目印』で、前提ではなく alias の説明になっている。",
+          "suggest": "列名を『blue/green の入口』にし、Lambda の前提は『agent は要らない』など前提にあたる物にする。"
+        }
+      ]
+    }
+  ],
+  "fixed_from_round1": "直った物: s01 の予告と画面のずれ（前半 Beanstalk／後半 CodeDeploy の二部構成になり、図・bullets・台本がそろった）。s02 の図（Beanstalk がトラフィックを中継する絵、『DNS が切れる』、blue＝古いの対応）。s03 の mutable／immutable の独自の軸（Immutable ポリシーの説明に絞り、blue/green との違いを一言で言うようになった）。s05 の一本鎖の図と『特定の版＝一度だけ』の誤り。s06 の重い指摘（agent が CodeArtifact の token を取る図、CodeArtifact と STS を結ぶ線）。s07（旧）の Stopped の分かれ道を手順に並べた件と bullets と図のずれ（in-place と blue/green を s07・s08 に分けた）。s08（旧）の『前回の AppSpec』の言い過ぎ、どこを見るか（View events → View logs）、lifecycle event・AppSpec の定義。s10（旧）の『既定』の二つの意味（『用意された設定』に統一）。s11（旧）の CodeDeploy が alias を操作する図。s13（旧）のまとめの『速さはミニマムヘルシーホスト』の誤り、ECS 行の AllAtOnce 抜け。agent の五回の繰り返し、長いカタカナの読み上げ（名前を画面に回した）も直った。残った物: CodeArtifact がデプロイのどの場面の話か（s06・中）、CodePipeline の説明と画面に CodePipeline が出ない件（s12・中）、ローリングの説明無し（s03・軽）、DNS の古いレコードで古い環境を残す理由（s02・軽）、ECS 自身の blue/green を勧める一文の位置付け（s11・軽）、s01 の『それぞれで』の予告が Lambda・ECS の権限や失敗の調べ方に届かない件（軽）。",
+  "global": [
+    "[unsupported・重] s13 の ECS と Lambda の数字の比べ方は、抜き出しが Lambda の設定の一覧ではないのに一覧として比べている。今回いちばん誤って覚えさせる恐れがある所。",
+    "[terms・軽] 画面は英語（replacement・original・health check・event・LB・task set）、台本は日本語（置き換え用・元の・ヘルスチェック・段階・ロードバランサー・タスクセット）という分担は全体でそろっている。ただし各語の初出で一度だけ両方を並べる所が無く、event と『段階』、original と『元の』の対応は聞き手に任されている。初出だけ併記するとよい。",
+    "[clarity・軽] 講義の中で説明されないまま使われる語: デプロイグループ（s10）、タスク定義（s12）、CodePipeline・アクション（s12）、ローリング（s03）。いずれも初出で一言の説明を足すとよい。",
+    "[長さ] 台本は計 4,447 字で、1 回目（4,555 字・約 10 分 9 秒）と同じくらい。10 分の枠に収まる見込み。"
+  ]
+}

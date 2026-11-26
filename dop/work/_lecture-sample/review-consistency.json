@@ -1,0 +1,281 @@
+{
+ "slides": [
+  {
+   "id": "s01",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "where": "bullets と narration",
+     "detail": "[軽] 台本は目標を四つ挙げるが、bullets は三つ（in-place／blue/green、mutable／immutable、失敗の調べ方）で、二つ目（EC2・ECS・Lambda でのトラフィックの移し方）と三つ目（agent と成果物を取りに行く権限）が画面に無い。一方で図の中心は三つ目の agent の要否で、bullets と図が別のことを示している。",
+     "suggest": "bullets を台本の四つにそろえる（例: 『in-place／blue/green・mutable／immutable』『EC2・ECS・Lambda の移し方』『agent と権限が要る環境』『失敗したらどこから調べるか』）。"
+    },
+    {
+     "kind": "unsupported",
+     "where": "visual.alt",
+     "detail": "[軽] alt に『三つへトラフィックを移す地図』とあるが、EC2 の in-place（s07）はトラフィックを移す説明ではなく、図のラベルも agent の要否だけ。",
+     "suggest": "alt を『CodeDeploy のデプロイ先三つと、agent が要るのは EC2 だけ』に合わせる。"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "fact",
+     "where": "visual（mermaid）: 利用者 → Beanstalk → blue／green",
+     "detail": "[中] 図では利用者のトラフィックが Beanstalk のノードを通って blue か green へ流れるように描かれている。根拠は『Elastic Beanstalk swaps the CNAME records of the old and new environments』（C-0017 S6）で、切り替えは CNAME（DNS）の入れ替えであり、Beanstalk がトラフィックを中継するとは書かれていない。",
+     "suggest": "中央のノードを『環境 URL（CNAME）』にし、Beanstalk は『CNAME を入れ替える』操作の主体として横に置く。"
+    },
+    {
+     "kind": "fact",
+     "where": "visual: blue ノード『DNS が切れるまで残す』",
+     "detail": "[中] 根拠は『do not terminate your old environment until the DNS changes are propagated and your old DNS records expire』。『DNS が切れる』は意味がずれる（台本は正しく『行き渡り、古いレコードが期限切れになるまで』と言っている）。",
+     "suggest": "『古い DNS レコードが期限切れになるまで残す』に直す。"
+    },
+    {
+     "kind": "unsupported",
+     "where": "visual: 『blue: 古い環境』『green: 新しい版の環境』",
+     "detail": "[軽] blue＝古い、green＝新しいという対応は抜き出しに無い（根拠は old／new environment とだけ言う）。",
+     "suggest": "根拠に合わせ『古い環境』『新しい環境』と書くか、講義の約束として台本で一言断る。"
+    },
+    {
+     "kind": "mismatch",
+     "where": "bullets 1–2 と visual",
+     "detail": "[軽] bullets の三つのうち二つは in-place の話だが、図は blue/green だけ。",
+     "suggest": "図に in-place（同じ環境を更新・短時間止まることがある）を一つ足すか、bullets を blue/green 寄りにする。"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "where": "title・visual と bullets",
+     "detail": "[中] 題と表は mutable と immutable の比較だが、bullets は『Beanstalk の既定は AllAtOnce』『ポリシーは 5 種類』『途中で止まった rolling を防ぐ』で、mutable／immutable の違いを一つも言っていない。三つ目は主語（Immutable）が抜けていて、何が rolling を防ぐのか画面だけでは読めない。",
+     "suggest": "bullets を『mutable: 今のインスタンスを書き換え』『immutable: 別の Auto Scaling group に新しい一式』『Immutable は途中で止まった rolling を防ぐ』のように表と合わせる。"
+    },
+    {
+     "kind": "unsupported",
+     "where": "visual の mutable 列（今のものを書き換え／今のインスタンス／手を加える）",
+     "detail": "[軽] mutable という語と定義は抜き出しに無く、講義の約束（台本で『この講義では…と呼んで区別します』と断っている）。ただし、5 つのポリシーのどれが mutable にあたるかは台本でも表でも言っておらず、根拠にも無い。ポリシー名を並べた後に mutable／immutable との対応が無いので、二つの話がつながらない。",
+     "suggest": "ポリシーと mutable の対応は根拠が無いので言い切らず、『Immutable は新しい一式を別に作る＝immutable の例』だけを結ぶ。"
+    },
+    {
+     "kind": "terms",
+     "where": "visual『別の Auto Scaling』",
+     "detail": "[軽] 台本は『別のオートスケーリンググループ』、根拠は『a separate Auto Scaling group』。",
+     "suggest": "『別の Auto Scaling group』にそろえる。"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "verdict": "ok",
+   "issues": [
+    {
+     "kind": "terms",
+     "where": "bullets・visual『Immutable と同じ』",
+     "detail": "[軽] ここの Immutable はポリシー名（大文字）、s01・s03・s13 の immutable は考え方（小文字）。同じ語の大小で別の物を指しているので、聞き手が混同しやすい。",
+     "suggest": "ポリシー名のときは『Immutable ポリシー』と書き分ける（global 参照）。"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "where": "visual: SSM → EC2 → CodeDeploy → 『ECS・Lambda agent は要らない』",
+     "detail": "[中] 一本の鎖で描かれているため、EC2 上の agent を経由して CodeDeploy が ECS・Lambda にデプロイするように読める。根拠（C-0015 S1）は『The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform』で、ECS・Lambda は EC2 の agent と無関係の別のデプロイ先。",
+     "suggest": "CodeDeploy から EC2 と ECS・Lambda へ枝分かれさせ（s01 と同じ形）、agent が要るのは EC2 側だけと示す。"
+    },
+    {
+     "kind": "fact",
+     "where": "narration『特定の版を一度だけ入れることも、新しい版を決まった日程で入れることもできます』",
+     "detail": "[軽] 根拠では版の選び方（『install a specific version or choose to always install the latest version』）と回数（『install the CodeDeploy once or set up a schedule to install new versions』）は別の選択肢で、『特定の版＝一度だけ』の組み合わせにはなっていない。",
+     "suggest": "『一度だけ入れることも、決まった日程で新しい版を入れることもできます』と、版の指定とは切り離す。"
+    },
+    {
+     "kind": "terms",
+     "where": "bullets『SSM』と visual『Systems Manager』",
+     "detail": "[軽] 同じスライドの中で呼び方が二つある。",
+     "suggest": "『Systems Manager（SSM）』と一度書いてからどちらかにそろえる。"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "unsupported",
+     "where": "visual: 『EC2: CodeDeploy agent』 → CodeArtifact『token を取る』",
+     "detail": "[重] 図は CodeDeploy agent が CodeArtifact の token を取るように描いているが、根拠（C-0014 S1・S2）は GetAuthorizationToken を呼ぶのに要る権限と token の期限を言うだけで、CodeDeploy agent や EC2 の instance profile が CodeArtifact を使うとは書いていない。台本も主語を言わずに『パッケージをコードアーティファクトから取る場合は』としている。",
+     "suggest": "CodeArtifact の部分は EC2／agent から切り離し、『パッケージマネージャーを使う IAM user・role』を主語にした別の小さな図にする（根拠: 『your IAM user or role must allow sts:GetServiceBearerToken』）。"
+    },
+    {
+     "kind": "fact",
+     "where": "visual: CodeArtifact と STS を結ぶ点線『両方の権限が要る』",
+     "detail": "[中] 根拠は『Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required』で、呼び出す側の IAM に両方の権限が要るという意味。図では CodeArtifact と STS のサービス同士がつながっているように見える。",
+     "suggest": "呼び出す側（IAM user・role）から『codeartifact:GetAuthorizationToken』『sts:GetServiceBearerToken』の二つの権限が出る形にする。"
+    },
+    {
+     "kind": "flow",
+     "where": "スライド全体",
+     "detail": "[軽] CodeArtifact はこの講義でここに初めて出るが、デプロイ戦略とどう関係するのか（何のパッケージを、誰が取るのか）の説明が無い。",
+     "suggest": "台本の冒頭で、CodeArtifact はパッケージの置き場であり、そこから取るには何が要るかを一言説明する。"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "fact",
+     "where": "visual（steps）: 3 番目『待ち時間切れ: 手動のままなら Stopped』",
+     "detail": "[中] 手順の一つとして並べているので、Stopped になった後も 4『元を登録解除』、5『元のインスタンス』へ進むように読める。根拠（C-0017 S2）では、待ち時間内に切り替えないとデプロイは Stopped になる。これは分かれ道であり、その後の登録解除・終了には進まない。",
+     "suggest": "3 番目を手順から外し、2『トラフィックを移す（すぐか、手動か）』の注記に『手動で待ち時間を過ぎると Stopped』として入れる。"
+    },
+    {
+     "kind": "mismatch",
+     "where": "bullets と visual",
+     "detail": "[中] bullets は in-place の『minimum healthy hosts』と『既定は OneAtATime』だけで、図はすべて blue/green の流れ。台本の後半（blue/green）に対応する bullet が無い。",
+     "suggest": "『blue/green: 移した後、元は一度に登録解除』のような bullet を一つ足す。"
+    },
+    {
+     "kind": "terms",
+     "where": "bullets『既定は OneAtATime』",
+     "detail": "[軽] s03 の『Beanstalk の既定は AllAtOnce』と並ぶと、どのサービスの既定か区別しにくい。",
+     "suggest": "『CodeDeploy の既定: CodeDeployDefault.OneAtATime』と書く。"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "fact",
+     "where": "bullets『前回の AppSpec のスクリプトが走る』",
+     "detail": "[中] 根拠（C-0016 S1）は ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic の三つだけが前回成功したデプロイの AppSpec から実行され、『All other scripts are run from the AppSpec file in the current deployment』と明記している。bullet はすべてのスクリプトが前回のものだと読める。",
+     "suggest": "『ApplicationStop など 3 つは前回の AppSpec』と範囲を限る。"
+    },
+    {
+     "kind": "fact",
+     "where": "bullets『agent は空き容量不足でも止まる』",
+     "detail": "[軽] 根拠は『low on memory or hard disk space』。『空き容量』だとディスクだけに読める（台本はメモリとディスクの両方を言っている）。",
+     "suggest": "『agent はメモリ・ディスク不足でも止まる』にする。"
+    },
+    {
+     "kind": "flow",
+     "where": "スライド全体と s01 の四つ目の目標",
+     "detail": "[中] s01 は『デプロイが失敗したときに、どこから調べればよいか』を予告したが、このスライドは原因の候補を並べるだけで、どこを見るかを言っていない。根拠（C-0016 S1）には『On the details page for the deployment, choose View events … choose View logs. Or use the AWS CLI to call the get-deployment-instance command.』がある。",
+     "suggest": "台本と図の最初に『デプロイの詳細 → View events → インスタンスの View logs、または get-deployment-instance』を入れる。"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "verdict": "ok",
+   "issues": []
+  },
+  {
+   "id": "s10",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "terms",
+     "where": "bullets『既定: AllAtOnce・Linear・Canary』・narration『移し方の既定の設定は三種類』",
+     "detail": "[中] ここの『既定』は pre-defined（あらかじめ用意された設定）の意味だが、s03『Beanstalk の既定は AllAtOnce』と s07『既定は OneAtATime』では default（指定しないときに使われるもの）の意味で使っている。根拠も『The following pre-defined linear and canary deployment configuration are available』で、ECS の default を言っていない。",
+     "suggest": "s10 は『定義済み』『あらかじめ用意された設定』に変え、『既定』は default だけに使う。"
+    },
+    {
+     "kind": "terms",
+     "where": "visual『ECS: replacement task set』と narration『置き換え用のタスクセット』",
+     "detail": "[軽] 同じ物を図は英語、台本は日本語で呼び、s07 の図では『置き換え環境』と書いている。",
+     "suggest": "表記を一つに決めてそろえる（global 参照）。"
+    },
+    {
+     "kind": "flow",
+     "where": "bullets『成果物 ZIP は 3 MB まで』・narration『コードパイプラインから』",
+     "detail": "[軽] CodePipeline はここで初めて出るが説明が無く、bullet には CodePipeline（CodeDeployToECS action）の条件が書かれていないので、ECS の blue/green 全般の制限に読める。根拠は『The maximum artifact ZIP size in the CodeDeployToECS deploy action is 3 MB』。",
+     "suggest": "bullet を『CodePipeline の CodeDeployToECS: ZIP 3 MB まで』にする。"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "unsupported",
+     "where": "visual: CodeDeploy → alias『canary・linear 等』",
+     "detail": "[軽] 根拠（C-0017 S1・S4）は CodeDeploy のデプロイ設定がトラフィックの移し方を決めること、alias が二つの version の間でトラフィックを分けられることを別々に言うだけで、CodeDeploy が alias を操作して移すとは書いていない。台本もそのつながりを言っていない。",
+     "suggest": "根拠が足りるまでは矢印のラベルを外し、台本と同じく二つを並べて示す。そうでなければ、CodeDeploy が alias を切り替えるという根拠を足す。"
+    },
+    {
+     "kind": "terms",
+     "where": "bullets『Canary』『Linear』と visual『canary・linear』、visual『version』と narration『版』",
+     "detail": "[軽] 同じ講義の中で大文字と小文字、英語と日本語が混じっている（s04・s12 は canary）。",
+     "suggest": "global の表記の決まりにそろえる。"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "mismatch",
+     "where": "bullets・visual と narration",
+     "detail": "[軽] 台本は観点を五つ挙げるが、表は四行で五つ目（失敗の切り分け）が無い。bullets は一つ目が『Beanstalk: Traffic splitting』（台本の二つ目の一部）で、blue/green・agent・NLB の制約が無いので、三つの表し方がそろっていない。",
+     "suggest": "表に『失敗 → agent・権限・health check・tag・hook の名前』の行を足し、bullets は表の行の見出しと合わせる。"
+    },
+    {
+     "kind": "unsupported",
+     "where": "title『試験で問われやすい』",
+     "detail": "[軽] 試験でよく出るという事実は抜き出しに無い。",
+     "suggest": "『判断の観点』とするか、根拠を足す。"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "verdict": "fix",
+   "issues": [
+    {
+     "kind": "fact",
+     "where": "visual: ECS 行『linear・canary』",
+     "detail": "[中] s10 では ECS の定義済み設定に ECSAllAtOnce があり、NLB を使う場合はそれしか使えない（『When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported.』）。同じスライドの bullet『ECS: LB の種類の制約』とも合わない。Lambda 行は『canary・linear 等』で、書き方もそろっていない。",
+     "suggest": "ECS・Lambda とも『canary・linear・all-at-once』にそろえる。"
+    },
+    {
+     "kind": "fact",
+     "where": "narration『入れ替えの速さは、ミニマムヘルシーホストで決めます』・visual EC2 行『healthy hosts』",
+     "detail": "[中] 根拠（C-0017 S1）は minimum healthy hosts を『the number or percentage of instances that must remain available at any time during a deployment』と定義している。これは残しておく台数の下限で、『速さ』とは書いていない。表の『移し方』の行に入れるのもずれていて、EC2 の blue/green の移し方（すぐ／手動、元は一度に登録解除）が抜けている。",
+     "suggest": "『デプロイ中に使える状態で残す台数を minimum healthy hosts で決める』と言い直し、表の表記も『minimum healthy hosts』と省略せずに書く。"
+    },
+    {
+     "kind": "flow",
+     "where": "まとめ全体と s01 の予告",
+     "detail": "[中] s01 で予告した四つのうち、四つ目の『失敗したときにどこから調べるか』（s08・s09）がまとめに無い。三つ目の権限も EC2 の instance profile だけで、s10 のタスク実行ロールに触れていない。Beanstalk の Traffic splitting も無い。",
+     "suggest": "台本に『失敗したら agent・権限・health check・tag・hook の名前の順に確かめる』『ECS はタスク実行ロールで image を取る』を足す。"
+    }
+   ]
+  }
+ ],
+ "global": [
+  "[terms・中] 『既定』の意味が二つある。s03・s07 では default、s10 では pre-defined の意味で使っている。default にだけ使い、pre-defined は『定義済み』とする。",
+  "[terms・中] 置き換え先の呼び方が、s07 の図で『置き換え環境』、台本で『置き換え用の環境』、s10 の図で『replacement task set』、台本で『置き換え用のタスクセット』とばらばら。replacement と置き換えのどちらに統一するか決める。",
+  "[terms・軽] Immutable（Beanstalk のポリシー名）と immutable（講義の軸）、Canary・Linear（s11 の bullets）と canary・linear（他）、AllAtOnce・all-at-once・ECSAllAtOnce、Traffic splitting と TrafficSplitting、version（s11 の図）と版（台本・s09 の図）、Systems Manager と SSM、instance profile と profile（s13）が混じっている。ポリシー・設定の名前は根拠の表記どおり、考え方は小文字、と決めてそろえる。",
+  "[flow・中] mutable／immutable は根拠に無い講義独自の軸（s03 で断っている）なのに、s01・s13 では in-place／blue/green と並ぶ『二つの軸』として扱っている。二つの軸がどう関係するか（たとえば blue/green と Immutable の違い）は、どこでも説明していない。まとめで二つの軸として出すなら、s03 で関係を一言説明するか、根拠のある範囲にとどめる。",
+  "[flow・軽] s01 の目標の三つ目『成果物を取りに行く権限が、どの環境で要るか』のうち、Lambda の権限はどのスライドにも無い。目標の書き方を EC2 と ECS に限るか、根拠を足す。",
+  "[terms・軽] agent は講義の中では一貫して CodeDeploy agent の意味で使っている。ただし s10 の根拠（C-0014 S5・S6）は『Amazon ECS container and Fargate agents』という別の agent に触れていて、s05・s11 の『ECS・Lambda は agent 不要』と混同されやすい。s10 でタスク実行ロールを説明するときは、『CodeDeploy agent とは別の ECS の agent』であることを避けて言わないか、はっきり区別する。"
+ ]
+}

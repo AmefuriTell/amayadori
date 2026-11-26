@@ -21,11 +21,12 @@ export const paths = {
   bank: (...p) => path.join(DATA, 'bank', ...p),
   glossary: (...p) => path.join(DATA, 'glossary', ...p),
   diagrams: (...p) => path.join(DATA, 'diagrams', ...p),
+  lectures: (...p) => path.join(DATA, 'lectures', ...p),
   config: (name) => path.join(CODE, 'config', name),
   schema: (name) => path.join(CODE, 'schemas', name),
 };
 
-export const ITEM_ID = /^[CALRTGDF]-[0-9]{4}$/;
+export const ITEM_ID = /^[CALRTGDFK]-[0-9]{4}$/;
 
 export function readJSON(file, fallback) {
   if (!fs.existsSync(file)) {

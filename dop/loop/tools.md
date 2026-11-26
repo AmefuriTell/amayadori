@@ -33,6 +33,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `L seed [--task 1.1] [--dry]` | 人（初め・試験ガイドの更新時） | config/exam.json | 足した項目数・タスク別の問題数 | 試験ガイドの skills の一覧 | 済 |
 | `L seed --glossary [--size 5] [--dry]` | 人（P-014） | bank の services と glossary/ | 足した事典の項目（G-）の数 | 事典に無いサービスの一覧 | 済 |
 | `L seed --diagram [--ids q-…,q-…] [--size 10] [--dry]` | 人（P-015）。ふだんは loop close が自動で足す | bank | 足した図の項目（D-） | 図の無い問題の一覧 | 済 |
+| `L seed --lecture [--tasks 1.4,2.1] [--dry]` | 人 | config/exam.json・lectures/ | 足した講義の項目（K-、task ごとに 1 つ） | 講義がもうある task | 済 |
 | `L seed --translate [--size 10] [--dry]` | 人（P-012） | bank | 足した訳の項目（T-）の数 | 日本語版の無い問題の一覧 | 済 |
 | `L block --reason "…"` | 進められない時 | 理由 | state=HUMAN | | 済 |
 | `L resume [--to <state>]` | 人が決めた後 | なし | state, doc | | 済 |
@@ -46,6 +47,7 @@ AI が読まなくてよい作業は全部ここに入れる。AI はこの表�
 | `Q publish <ID>` | C4 | work/<ID>/ | bank に入れた問題 ID | 並べ替え・番号の振り方 | 済 |
 | `node dop/tools/g.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（G-） | work/<ID>/glossary.json・verify.json | 誤り・結論・入れたページ | スキーマ・根拠の照合・名前の重複 | 済 |
 | `node dop/tools/dg.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（D-） | work/<ID>/diagrams.json・verify.json | 誤り・結論・入れた図 | Mermaid・アイコン・ブラウザで描くこと | 済 |
+| `node dop/tools/lec.mjs validate\|verdict\|gate\|publish <ID>` | C2〜C4（K-） | work/<ID>/lecture.json・review-*.json | 誤り・結論・公開した講義 | 図を描く・VOICEVOX（Docker）で音声・アクセント辞書（config/accents.json） | 済 |
 | `node dop/tools/dg.mjs icons --from <dir>` | 人（公式のアイコン集の更新時） | config/icon-map.json | 写した数 | 公式の集の中身 | 済 |
 | `node dop/tools/g.mjs list` | いつでも | なし | 事典のページと名前 | glossary/ の全体 | 済 |
 | `Q find [--task --service --text --id]` | どこでも | 条件 | id・task・services・問題文の先頭 | bank の全体 | 済 |

@@ -1,0 +1,498 @@
+{
+ "task": "1.4",
+ "title": "インスタンス・コンテナ・サーバーレスのデプロイ戦略",
+ "minutes": 12,
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義で分かるようになること",
+   "bullets": [
+    "in-place／blue/green の違い",
+    "mutable／immutable の違い",
+    "EC2・ECS・Lambda でトラフィックをどう移すか",
+    "CodeDeploy agent と権限の要否",
+    "デプロイ失敗時にどこから調べるか"
+   ],
+   "narration": "この講義では、インスタンス、コンテナ、サーバーレスの三つの環境で、アプリケーションをどう入れ替えるかを学びます。聞き終えたときに、次の四つが言えるようになることが目標です。一つ目は、インプレースとブルーグリーン、ミュータブルとイミュータブルの違いです。二つ目は、イーシーツー、イーシーエス、ラムダのそれぞれで、コードデプロイがトラフィックをどう移すかです。三つ目は、コードデプロイエージェントと、成果物を取りに行く権限が、どの環境で要るかです。四つ目は、デプロイが失敗したときに、どこから調べればよいかです。問題集に入る前の地図として聞いてください。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "When you deploy to an AWS Lambda compute platform, the deployment configuration specifies the way traffic is shifted to the new Lambda function versions in your application."
+    },
+    {
+     "file": "C-0015",
+     "source": "S1",
+     "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "全体像1: in-place と blue/green",
+   "bullets": [
+    "in-place: 動いている環境をそのまま更新",
+    "Beanstalk の in-place 更新は短時間止まることがある",
+    "blue/green: 新しい版を別の環境に用意して切り替え",
+    "Elastic Beanstalk は CNAME の入れ替えで即切り替え"
+   ],
+   "narration": "まず全体像です。デプロイの方法は、大きく二つに分けられます。一つは、いま動いている環境の上で、そのまま新しい版に入れ替えるインプレースです。エラスティックビーンストークの説明では、インプレースで更新すると、短い間、利用者からアプリケーションが使えなくなることがある、とされています。もう一つがブルーグリーンです。新しい版を別の環境に用意して、準備ができたらトラフィックをそちらへ切り替えます。ビーンストークでは、二つの環境のシーネームを入れ替えることで、新しい版へすぐに切り替えられます。ただし、古い環境は、ディーエヌエスの変更が行き渡り、古いレコードが期限切れになるまで終了してはいけません。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S6",
+     "quote": "Because AWS Elastic Beanstalk performs an in-place update when you update your application versions, your application might become unavailable to users for a short period of time."
+    },
+    {
+     "file": "C-0017",
+     "source": "S6",
+     "quote": "To do this, deploy the new version to a separate environment, and then swap the CNAMEs of the two environments to redirect traffic to the new version instantly."
+    },
+    {
+     "file": "C-0017",
+     "source": "S6",
+     "quote": "However, do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "全体像2: mutable と immutable",
+   "bullets": [
+    "mutable: 既存のインスタンスを書き換える",
+    "immutable: 新しいインスタンス一式を別に起動",
+    "Beanstalk の既定は AllAtOnce",
+    "Immutable は失敗時に元のインスタンスに触れない"
+   ],
+   "narration": "次は、ミュータブルとイミュータブルです。この講義では、いま動いているインスタンスに手を加えて新しい版にするやり方をミュータブル、新しいインスタンスをまるごと作って入れ替えるやり方をイミュータブルと呼んで区別します。エラスティックビーンストークのデプロイポリシーには、オールアットワンス、ローリング、ローリングウィズアディショナルバッチ、イミュータブル、トラフィックスプリッティングの五つがあります。何も指定しなければ、オールアットワンスです。イミュータブルでは、新しい版のインスタンスを一式、別のオートスケーリンググループに立ち上げます。古いインスタンスは、その横で動き続けます。新しいインスタンスがヘルスチェックに通らなければ、新しい方だけが終了されます。元のインスタンスには手が付きません。途中まで進んで止まったローリングデプロイの問題も防げる、と説明されています。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "By default, your environment uses all-at-once deployments."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "Immutable deployments perform an immutable update to launch a full set of new instances running the new version of the application in a separate Auto Scaling group"
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "If the new instances don't pass health checks, Elastic Beanstalk terminates them, leaving the original instances untouched."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "The following values are supported: AllAtOnce, Rolling, RollingWithAdditionalBatch, Immutable, TrafficSplitting."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "alongside the instances running the old version."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "Immutable deployments can prevent issues caused by partially completed rolling deployments."
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "canary の基本形: Beanstalk の Traffic splitting",
+   "bullets": [
+    "Immutable と同じく新しいインスタンス一式を起動",
+    "決めた割合のトラフィックだけを新しい版へ",
+    "設定は Traffic split と評価時間（分）",
+    "健全なら全トラフィックを移し、古い方を終了"
+   ],
+   "narration": "イミュータブルの形に、カナリアの考え方を足したものが、トラフィックスプリッティングです。ビーンストークは、イミュータブルと同じように、新しいインスタンスを一式立ち上げます。そのうえで、入ってくるトラフィックのうち、決めた割合だけを新しい版へ送ります。設定するのは二つです。最初に新しい版へ送る割合と、評価する時間です。評価する時間は、分で指定します。評価する時間のあいだ新しいインスタンスが健全なままなら、すべてのトラフィックを新しい方へ送り、古いインスタンスを終了します。一部のトラフィックだけを流して様子を見る。これが、カナリアテストの基本の形です。このあと出てくるコードデプロイのカナリアも、同じ考え方です。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "In a traffic-splitting deployment, Elastic Beanstalk launches a full set of new instances just like during an immutable deployment."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "Traffic splitting evaluation time – The time period, in minutes, that Elastic Beanstalk waits after an initial healthy deployment before proceeding to shift all incoming client traffic"
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "It then forwards a specified percentage of incoming client traffic to the new application version for a specified evaluation period."
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "EC2: CodeDeploy agent",
+   "bullets": [
+    "agent が要るのは EC2/On-Premises だけ",
+    "ECS と Lambda には agent は不要",
+    "通信は HTTPS、port 443 の outbound",
+    "Systems Manager で導入・定期更新できる"
+   ],
+   "narration": "ここから、プラットフォームごとの違いに進みます。最初はイーシーツーです。コードデプロイでイーシーツーやオンプレミスのサーバーにデプロイするときは、インスタンスにコードデプロイエージェントを入れる必要があります。逆に、イーシーエスとラムダへのデプロイでは、エージェントは要りません。エージェントは、ポート四百四十三番のエイチティーティーピーエスで、外向きに通信します。エージェントを入れる方法として、システムズマネージャーを使うこともできます。特定の版を一度だけ入れることも、新しい版を決まった日程で入れることもできます。エージェントが動いているかどうかは、アマゾンリナックスなどでは、インスタンスにサインインして、システムシーティーエルのステータスで確かめます。",
+   "refs": [
+    {
+     "file": "C-0015",
+     "source": "S1",
+     "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+    },
+    {
+     "file": "C-0015",
+     "source": "S2",
+     "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
+    },
+    {
+     "file": "C-0015",
+     "source": "S6",
+     "quote": "With SSM, you can install the CodeDeploy once or set up a schedule to install new versions."
+    },
+    {
+     "file": "C-0015",
+     "source": "S11",
+     "quote": "To see if the CodeDeploy agent is installed and running, sign in to the instance, and run the following command: systemctl status codedeploy-agent."
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "成果物を取りに行く権限: instance profile と CodeArtifact",
+   "bullets": [
+    "EC2 には IAM instance profile で S3 などへの権限",
+    "S3 なら s3:Get* と s3:List* を確認",
+    "CodeArtifact: 2 つの権限が両方必要",
+    "トークンは既定 12 時間、15 分〜12 時間で設定可"
+   ],
+   "narration": "次は、成果物を取りに行くための権限です。イーシーツーのインスタンスは、アプリケーションが置かれたエススリーのバケットや、ギットハブのリポジトリにアクセスできなければなりません。その権限は、アイアムのインスタンスプロファイルで与えます。エススリーに置く場合は、許可する操作に、エススリーのゲットとリストが入っているかを確かめます。エージェントそのものが置かれたバケットへの権限が無いと、エージェントの導入や更新でエラーになることがあります。パッケージをコードアーティファクトから取る場合は、ゲットオーソリゼーショントークンを呼ぶのに、二つの権限が両方とも必要です。コードアーティファクトの権限と、エスティーエスのゲットサービスベアラートークンです。トークンの有効期間は、既定で十二時間です。十五分から十二時間までの間で設定できます。期限が切れたら、取り直します。",
+   "refs": [
+    {
+     "file": "C-0014",
+     "source": "S7",
+     "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+    },
+    {
+     "file": "C-0015",
+     "source": "S8",
+     "quote": "If \"s3:Get*\" and \"s3:List*\" are not in the list of specified actions, choose Edit to add them, and then choose Save."
+    },
+    {
+     "file": "C-0015",
+     "source": "S8",
+     "quote": "Make sure to give access to the Amazon S3 buckets that contain the CodeDeploy agent. Otherwise, an error might occur when the CodeDeploy agent is installed or updated on the instances."
+    },
+    {
+     "file": "C-0014",
+     "source": "S2",
+     "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+    },
+    {
+     "file": "C-0014",
+     "source": "S1",
+     "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+    },
+    {
+     "file": "C-0014",
+     "source": "S1",
+     "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "EC2: deployment configuration と blue/green",
+   "bullets": [
+    "in-place: minimum healthy hosts で残す数",
+    "既定は CodeDeployDefault.OneAtATime",
+    "blue/green は即時か手動で traffic rerouting",
+    "元の instance は終了するか、残すかを選ぶ"
+   ],
+   "narration": "イーシーツーへのデプロイで、どのくらいずつ入れ替えるかを決めるのが、デプロイ設定です。インプレースでは、ミニマムヘルシーホストという値で、デプロイ中に使える状態で残しておくインスタンスの数か割合を決めます。デプロイ設定を指定しなければ、コードデプロイデフォルトのワンアットアタイムが使われます。ブルーグリーンでは、置き換え用の環境に新しい版を入れ、ロードバランサーのトラフィックをそちらへ移します。すぐに切り替えるか、自分で切り替えるかを選べます。自分で切り替える設定で、決めた待ち時間を過ぎても切り替えなければ、デプロイはストップの状態になります。切り替えが終わると、元の環境のインスタンスは、デプロイ設定に関係なく一度に登録を解除されます。そのあと、元のインスタンスを待ち時間の後に終了するか、動かしたまま残すかを選べます。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+    },
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "If you don't specify a deployment configuration, CodeDeploy uses the CodeDeployDefault.OneAtATime deployment configuration."
+    },
+    {
+     "file": "C-0017",
+     "source": "S2",
+     "quote": "If the wait time you specify passes without traffic being rerouted, the deployment status is changed to Stopped."
+    },
+    {
+     "file": "C-0017",
+     "source": "S2",
+     "quote": "Note: After traffic is successfully routed to the replacement environment, instances in the original environment are deregistered all at once no matter which deployment configuration was selected."
+    },
+    {
+     "file": "C-0017",
+     "source": "S2",
+     "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
+    },
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "through the use of a 'minimum healthy hosts' value and an optional 'minimum healthy hosts per zone' value"
+    },
+    {
+     "file": "C-0017",
+     "source": "S2",
+     "quote": "I will choose whether to reroute traffic: Instances in the replacement environment are not registered with the specified load balancers and target groups unless you manually reroute traffic."
+    },
+    {
+     "file": "C-0017",
+     "source": "S2",
+     "quote": "the instances that were deregistered from the load balancers and target groups are terminated following the wait period you specify."
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "EC2: デプロイが失敗したときの調べ方",
+   "bullets": [
+    "全 event が skip → agent・service role",
+    "ApplicationStop などは前回の AppSpec のスクリプト",
+    "前回が壊れていれば失敗を無視して再デプロイ",
+    "AllowTraffic 失敗でログ無し → ELB health check"
+   ],
+   "narration": "デプロイが失敗したときの調べ方です。まずエージェントです。すべてのライフサイクルイベントがスキップされた場合、エージェントが入っていないか、動いていないことが原因の一つです。メモリやディスクの空きが足りないと、エージェントが止まることもあります。コードデプロイのサービスロールの権限が足りないことも、原因になります。次はスクリプトです。アプリケーションストップ、ビフォーブロックトラフィック、アフターブロックトラフィックの三つは、前回成功したデプロイのアップスペックファイルにあるスクリプトが実行されます。前回のスクリプトそのものが壊れているときは、これらの失敗を無視する指定をして、デプロイし直します。最後に、ブルーグリーンでアロートラフィックが失敗し、ログに原因が出ない場合です。多くは、ロードバランサーのヘルスチェックの設定の誤りが原因です。",
+   "refs": [
+    {
+     "file": "C-0016",
+     "source": "S4",
+     "quote": "The CodeDeploy agent might not be installed or running on the instance. The CodeDeploy agent might stop running because an instance is running low on memory or hard disk space."
+    },
+    {
+     "file": "C-0016",
+     "source": "S4",
+     "quote": "The service role for CodeDeploy might not have required permissions."
+    },
+    {
+     "file": "C-0016",
+     "source": "S1",
+     "quote": "During a deployment, the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+    },
+    {
+     "file": "C-0016",
+     "source": "S2",
+     "quote": "Use the AWS CLI to call the create-deployment command and include the --ignore-application-stop-failures option."
+    },
+    {
+     "file": "C-0016",
+     "source": "S3",
+     "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing for the Classic Load Balancer, Application Load Balancer, or Network Load Balancer"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "EC2: Auto Scaling と組み合わせるときの注意",
+   "bullets": [
+    "lifecycle hook の名前が一致しないと自動デプロイが失敗",
+    "デプロイ失敗で起動と終了がくり返されることがある",
+    "再起動に 5 分を超えると timeout 扱い",
+    "no instances found → デプロイグループの tag"
+   ],
+   "narration": "オートスケーリンググループと組み合わせるときの注意です。コードデプロイとオートスケーリングは、ライフサイクルフックを使って、起動したインスタンスにどの版を入れるかを決めています。両方でフックの名前が一致していないと、自動のデプロイが止まったり、失敗したりします。新しいインスタンスへのデプロイが成功しないと、インスタンスが作られてはすぐ終了される、というくり返しが起きることがあります。原因には、オートスケーリンググループのヘルスチェックの失敗や、アプリケーションの版の誤りがあります。また、デプロイ先のインスタンスを再起動して、起動に五分より長くかかると、コードデプロイはタイムアウトとして扱います。デプロイ先のインスタンスが見つからない、というエラーが出たら、デプロイグループのタグの設定を確かめます。",
+   "refs": [
+    {
+     "file": "C-0016",
+     "source": "S8",
+     "quote": "Automatic deployments can stop or fail if lifecycle hooks and information about these hooks do not match exactly in Amazon EC2 Auto Scaling and CodeDeploy."
+    },
+    {
+     "file": "C-0016",
+     "source": "S6",
+     "quote": "Possible causes include: Failed Amazon EC2 Auto Scaling group health checks. An error in the application revision."
+    },
+    {
+     "file": "C-0016",
+     "source": "S7",
+     "quote": "The instance is rebooted, but it takes more than five minutes for the instance to start. CodeDeploy treats this as a timeout."
+    },
+    {
+     "file": "C-0016",
+     "source": "S9",
+     "quote": "Check your deployment group settings to make sure the tags for your EC2 instances or Auto Scaling groups correctly identify the instances you want to deploy to, and then try again."
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "ECS: CodeDeploy の blue/green",
+   "bullets": [
+    "元の task set から replacement task set へ移す",
+    "AllAtOnce・Linear・Canary の既定設定",
+    "ALB か NLB が必須。NLB は ECSAllAtOnce のみ",
+    "image の pull は task execution role の役目"
+   ],
+   "narration": "次はコンテナ、イーシーエスです。コードデプロイによるイーシーエスのブルーグリーンでは、本番のトラフィックを、元のタスクセットから置き換え用のタスクセットへ移します。移し方の既定の設定は三種類です。一度に全部を移すオールアットワンス。十パーセントずつ、一分ごと、または三分ごとに移すリニア。最初に十パーセントを移し、五分後か十五分後に残りの九十パーセントを移すカナリアです。サービスには、アプリケーションロードバランサーか、ネットワークロードバランサーが必要です。ネットワークロードバランサーを使う場合は、オールアットワンスしか使えません。なお、イーシーエスのドキュメントは、イーシーエス自身のブルーグリーンデプロイを使うことを勧めています。権限では、イーシーアールからイメージを取ってくるのは、タスク実行ロールの役目です。コンテナの中のアプリケーションが使う権限は、タスクロールの方で考えます。コードパイプラインからこの方法でデプロイする場合、タスク定義ファイルを入れた成果物のジップは、三メガバイトまでです。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "Then CodeDeploy reroutes the production traffic from the original task set to the replacement task set according to the traffic rerouting settings for the deployment group."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "CodeDeployDefault.ECSCanary10Percent15Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "You must configure the service to use either an Application Load Balancer or Network Load Balancer."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "We recommend that you use the Amazon ECS blue/green deployment."
+    },
+    {
+     "file": "C-0014",
+     "source": "S6",
+     "quote": "The task execution role should have these permissions to allow the Amazon ECS container and Fargate agents to pull container images on your behalf."
+    },
+    {
+     "file": "C-0014",
+     "source": "S5",
+     "quote": "For the IAM permissions that your application code inside the container needs to run, see Amazon ECS task IAM role."
+    },
+    {
+     "file": "C-0016",
+     "source": "S14",
+     "quote": "The maximum artifact ZIP size in the CodeDeployToECS deploy action is 3 MB."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "CodeDeployDefault.ECSLinear10PercentEvery3Minutes: Shifts 10 percent of traffic every 3 minutes until all traffic is shifted."
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "Lambda: alias とトラフィックの移し方",
+   "bullets": [
+    "alias は更新できる、version へのポインタ",
+    "alias を新 version に向けるか、2 つに分ける",
+    "CodeDeploy: canary・linear・all-at-once",
+    "例: LambdaCanary10Percent5Minutes"
+   ],
+   "narration": "最後はサーバーレス、ラムダです。ラムダでは、エイリアスが鍵になります。エイリアスは、関数の版を指す目印で、あとから向き先を変えられます。新しい版を出したら、エイリアスを新しい版に向け直すか、二つの版の間でトラフィックを分けます。コードデプロイでラムダにデプロイするときは、デプロイ設定が、新しい版へのトラフィックの移し方を決めます。選べるのは、カナリア、リニア、オールアットワンスです。たとえば、ラムダのカナリア十パーセント五分という設定は、最初に十パーセントを移し、五分後に残りの九十パーセントを移します。ラムダのリニア十パーセント一分ごとという設定は、一分ごとに十パーセントずつ移します。オールアットワンスは、一度に全部を移します。ラムダでも、コードデプロイエージェントは要りません。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S4",
+     "quote": "A Lambda alias is a pointer to a function version that you can update."
+    },
+    {
+     "file": "C-0017",
+     "source": "S4",
+     "quote": "When you deploy a new version, you can update the alias to use the new version, or split traffic between two versions."
+    },
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
+    },
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+    },
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "CodeDeployDefault.LambdaLinear10PercentEvery1Minute: Shifts 10 percent of traffic every minute until all traffic is shifted."
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "試験で問われやすい判断の観点",
+   "bullets": [
+    "止めたくない → blue/green（Beanstalk の説明）",
+    "一部だけ試す → canary や Traffic splitting",
+    "agent が要るのは EC2/On-Premises だけ",
+    "ECS で NLB なら ECSAllAtOnce のみ",
+    "失敗は agent・権限・health check・tag・hook"
+   ],
+   "narration": "ここまでの事実から言える、判断の観点を整理します。一つ目は、利用者から使えなくなる時間を避けたい、という条件です。ビーンストークの説明では、インプレースの更新で短い間使えなくなることがあり、それを避ける方法としてブルーグリーンが挙げられています。二つ目は、一部のトラフィックだけで試したい、という条件です。この場合はカナリアです。ラムダとイーシーエスではコードデプロイのデプロイ設定で、ビーンストークではトラフィックスプリッティングで実現できます。三つ目は、エージェントが要るかどうかです。要るのは、イーシーツーとオンプレミスだけです。四つ目は、組み合わせの制約です。イーシーエスでネットワークロードバランサーを使うなら、オールアットワンスしか選べません。五つ目は、失敗の切り分けです。エージェント、権限、ヘルスチェック、タグ、ライフサイクルフックの名前を、一つずつ確かめます。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S6",
+     "quote": "Because AWS Elastic Beanstalk performs an in-place update when you update your application versions, your application might become unavailable to users for a short period of time."
+    },
+    {
+     "file": "C-0017",
+     "source": "S5",
+     "quote": "Traffic-splitting deployments let you perform canary testing as part of your application deployment."
+    },
+    {
+     "file": "C-0015",
+     "source": "S1",
+     "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+    },
+    {
+     "file": "C-0016",
+     "source": "S4",
+     "quote": "The CodeDeploy agent might not be installed or running on the instance."
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "まとめ",
+   "bullets": [
+    "in-place／blue/green と mutable／immutable",
+    "EC2: agent・instance profile・設定",
+    "ECS: task set の入れ替えと LB の制約",
+    "Lambda: alias と traffic の移し方"
+   ],
+   "narration": "まとめです。デプロイの方法は、まずインプレースかブルーグリーンか、ミュータブルかイミュータブルか、という二つの軸で整理します。イーシーツーでは、コードデプロイエージェントと、成果物を取りに行くためのインスタンスプロファイルが前提です。入れ替えの速さは、ミニマムヘルシーホストで決めます。イーシーエスでは、タスクセットを入れ替え、トラフィックをリニアやカナリアで移します。ロードバランサーの種類による制約に注意します。ラムダでは、エイリアスが版を指し、コードデプロイがカナリア、リニア、オールアットワンスでトラフィックを移します。このあと問題集を解きながら、どの条件でどの方法を選ぶかを確かめてください。",
+   "refs": [
+    {
+     "file": "C-0017",
+     "source": "S1",
+     "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+    },
+    {
+     "file": "C-0017",
+     "source": "S3",
+     "quote": "Then CodeDeploy reroutes the production traffic from the original task set to the replacement task set according to the traffic rerouting settings for the deployment group."
+    },
+    {
+     "file": "C-0017",
+     "source": "S4",
+     "quote": "A Lambda alias is a pointer to a function version that you can update."
+    }
+   ]
+  }
+ ]
+}

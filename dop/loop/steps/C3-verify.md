@@ -84,3 +84,13 @@
 - verdict が ok の図に重い種類（fact・unsupported・unreadable）を書くと、dg verdict は判定せずに止まる（P-021）。検証役に直してもらう。
 - 図の点検の項目（check: true）も同じ手順。context.json は見直した後の問題なので、今の図がそれと食い違っていないかを見る。合っていれば pass で入れ直し（last_checked が進む）、食い違えば fix で書き直しに回る。
 - 同じ verify.json に dg verdict を 2 回呼んでも、2 回目は前の結論を返すだけ（P-019）。
+
+## 講義の項目（K-）の検証
+
+検証役を 2 人、別々の新しい文脈で起こす（互いの結果は見せない）。どちらも work/&lt;ID&gt;/lecture.json・sources.md・preview/&lt;スライド id&gt;.png（図の絵）を見る。Web は使わない。
+
+- 整合性の検証役 → work/&lt;ID&gt;/review-consistency.json。fact（根拠と食い違う。図の矢印・つながりも）・unsupported（根拠に無い事を言い切る。図・表・bullets も）・mismatch（同じスライドで画面と台本が違う）・terms（スライドをまたいで呼び方・表記がそろわない）・flow（説明していない語を前提にする、予告とまとめが本文と合わない）。
+- 分かりやすさの検証役 → work/&lt;ID&gt;/review-clarity.json。初めて学ぶ受験者の目で、jargon（説明の無い専門用語）・leap（話の飛び、なぜその方法かが分からない）・visual（図が言いたい事を示さない、読めない）・listen（耳で追えない台本）・exam（試験の判断が印象に残らない）。直し方の提案は、新しい事実を足さずに順番・言い換え・図の作り直しで。
+- 形: { "slides": [ { "id", "issues": [ { "kind", "severity": "重|中|軽", "detail", "suggest" } ] } ], "global": [ { "severity", "detail", "suggest" } ] }。重 = 受験者が誤って覚える、中 = 分からなくなる・食い違う、軽 = 言い回し。
+- 進行役は lec verdict を呼ぶ。重か中が 1 つでもあれば fix（C2 へ、attempts を数える）、軽だけなら pass。
+

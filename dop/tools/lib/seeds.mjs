@@ -144,6 +144,21 @@ export function copyCurrentDiagrams(item) {
   writeJSON(paths.work(item.id, 'diagrams.json'), { item: item.id, check: true, diagrams });
 }
 
+// 講義の項目（K-）を、試験ガイドの task ごとに 1 つ足す。講義がもうある task と、講義の項目が残っている task は足さない。--tasks 1.4,2.1 で絞れる
+export function seedLecture(args) {
+  const ex = exam();
+  const backlog = loadBacklog();
+  const pending = new Set(backlog.filter((b) => b.kind === 'lecture' && b.status !== 'done').map((b) => b.task));
+  const only = typeof args.tasks === 'string' ? new Set(args.tasks.split(',').map((t) => t.trim())) : null;
+  const tasks = ex.domains.flatMap((d) => d.tasks).filter((t) => (!only || only.has(t.id)) && !pending.has(t.id) && !fs.existsSync(paths.lectures(`${t.id}.json`)));
+  const add = tasks.map((t) => ({ kind: 'lecture', task: t.id, priority: Number(args.priority ?? 2), source: 'lecture', title: `講義 ${t.id}: ${t.title}` }));
+  if (!args.dry) {
+    for (const item of add) { item.id = nextId(backlog, 'lecture'); item.status = 'todo'; item.attempts = 0; backlog.push(item); }
+    saveBacklog(backlog);
+  }
+  emit({ ok: true, summary: `${args.dry ? '（試しに）' : ''}講義の項目 ${add.length} 個を足した`, extra: { added: add.map((a) => a.id ?? a.task) } });
+}
+
 // 図を描く人が読む問題の中身（日本語の問題文・選択肢・答え・解説・補足）。bank は読ませない
 export function copyContext(item) {
   const qs = [];
