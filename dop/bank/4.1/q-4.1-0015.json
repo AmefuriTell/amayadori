@@ -1,0 +1,80 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0015",
+  "services": [
+    "AWS CloudTrail",
+    "AWS KMS",
+    "Amazon S3"
+  ],
+  "type": "multi",
+  "select_count": 2,
+  "stem": "A company wants its CloudTrail trail to encrypt log files and digest files with a customer managed KMS key instead of SSE-S3. Auditors in a security role must be able to read the files as soon as the change is made. The trail delivers to an S3 bucket in eu-west-1. Which actions should a DevOps engineer take before updating the trail to use the key? (Choose TWO.)",
+  "stem_ja": "ある会社は、CloudTrail の証跡のログファイルとダイジェストファイルを、SSE-S3 ではなくカスタマーマネージドの KMS キーで暗号化したいと考えています。セキュリティのロールの監査担当は、変更した時からすぐにファイルを読める必要があります。証跡は eu-west-1 の S3 バケットへ届けています。証跡をキーを使うように更新する前に、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create the KMS key in eu-west-1 and add key policy statements that allow CloudTrail to use the key for encryption.",
+      "text_ja": "eu-west-1 に KMS キーを作り、CloudTrail が暗号化にキーを使えるようにするキーポリシーの文を足す。"
+    },
+    {
+      "key": "B",
+      "text": "Add key policy statements that grant decrypt permissions to the auditors' security role.",
+      "text_ja": "監査担当のセキュリティのロールに復号の権限を与える、キーポリシーの文を足す。"
+    },
+    {
+      "key": "C",
+      "text": "Create the KMS key in us-east-1 so that CloudTrail can use it for trails in every Region.",
+      "text_ja": "CloudTrail がすべてのリージョンの証跡で使えるよう、us-east-1 に KMS キーを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Set the bucket's default encryption to SSE-C so that the auditors can provide their own keys.",
+      "text_ja": "監査担当が自分のキーを渡せるよう、バケットのデフォルト暗号化を SSE-C にする。"
+    },
+    {
+      "key": "E",
+      "text": "Leave the key policy unchanged, and grant decrypt permissions to the auditors after they report access errors.",
+      "text_ja": "キーポリシーは変えず、監査担当がアクセスのエラーを報告した後に復号の権限を与える。"
+    }
+  ],
+  "answer": [
+    "A",
+    "B"
+  ],
+  "explanation": {
+    "summary": "CloudTrail で SSE-KMS を使うには KMS キーを作って管理し、CloudTrail が暗号化に使い、利用者が復号できるようにするポリシーをキーに付けます。キーは、ログファイルを受け取る S3 バケットと同じリージョンに作る必要があります。復号の権限を証跡の設定より先に入れておかないと、権限の無い利用者は権限を与えるまで暗号化されたファイルを読めません。",
+    "per_choice": {
+      "A": "正しい。バケットと同じリージョンのキーで、CloudTrail が暗号化に使えるようにします。",
+      "B": "正しい。先に復号の権限を入れておけば、変更した時からすぐ読めます。",
+      "C": "キーはログファイルを受け取るバケットと同じリージョン（eu-west-1）に作る必要があります。",
+      "D": "SSE-C はデフォルト暗号化に使えません。",
+      "E": "変更から権限を与えるまでの間、監査担当がファイルを読めず、要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms",
+      "source_id": "S10",
+      "quote": "The KMS key that you choose must be created in the same AWS Region as the Amazon S3 bucket that receives your log files and digest files."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+      "source_id": "S11",
+      "quote": "Add policy sections to the key that enable CloudTrail to encrypt and users to decrypt log files and digest files."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+      "source_id": "S11",
+      "quote": "If you do not perform this step before adding the key to your trail configuration, users without decrypt permissions cannot read encrypted files until you grant them those permissions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-bucket-encryption.html#default-bucket-encryption",
+      "source_id": "S12",
+      "quote": "Server-side encryption with customer-provided keys (SSE-C) is not supported for default encryption."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

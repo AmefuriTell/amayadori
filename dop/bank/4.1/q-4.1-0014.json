@@ -1,0 +1,72 @@
+{
+  "task": "4.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-4.1-0014",
+  "services": [
+    "Amazon CloudWatch Logs",
+    "AWS KMS"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An existing CloudWatch Logs log group in us-east-1 stores application logs with the default encryption. A new security policy requires all newly ingested log data in this log group to be encrypted with a customer managed AWS KMS key. Which solution BEST meets this requirement?",
+  "stem_ja": "us-east-1 の既存の CloudWatch Logs のロググループが、既定の暗号化でアプリケーションのログを保存しています。新しいセキュリティのポリシーで、このロググループに新しく取り込むすべてのログデータを、カスタマーマネージドの AWS KMS キーで暗号化することが求められました。この要件を最もよく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an asymmetric key in us-east-1 that allows the CloudWatch Logs principal, and associate it with the log group.",
+      "text_ja": "CloudWatch Logs のプリンシパルを許す非対称のキーを us-east-1 に作り、ロググループに関連付ける。"
+    },
+    {
+      "key": "B",
+      "text": "Create a symmetric KMS key in us-west-2, and associate it with the log group in us-east-1.",
+      "text_ja": "us-west-2 に対称の KMS キーを作り、us-east-1 のロググループに関連付ける。"
+    },
+    {
+      "key": "C",
+      "text": "Create a symmetric KMS key without changing its key policy, and associate it with the existing log group in the CloudWatch console.",
+      "text_ja": "キーポリシーを変えずに対称の KMS キーを作り、CloudWatch のコンソールで既存のロググループに関連付ける。"
+    },
+    {
+      "key": "D",
+      "text": "Create a symmetric key in us-east-1 that allows the CloudWatch Logs principal, and associate it by using the AWS CLI.",
+      "text_ja": "CloudWatch Logs のプリンシパルを許す対称のキーを us-east-1 に作り、AWS CLI で関連付ける。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "KMS による暗号化は、作る時か作った後にロググループへ KMS キーを関連付けて有効にし、その後に取り込むデータがそのキーで暗号化されます。CloudWatch Logs は対称の KMS キーにだけ対応し、キーポリシーで、キーと同じリージョンの CloudWatch Logs のサービスプリンシパルに使う権限を与えます。既存のロググループへの関連付けはコンソールではできません。",
+    "per_choice": {
+      "A": "CloudWatch Logs は対称の KMS キーにだけ対応し、非対称のキーは使ってはいけません。",
+      "B": "サービスプリンシパルはキーと同じリージョンにある必要があり、ほかのリージョンのキーは使えません。",
+      "C": "KMS キーは既定で持ち主しか使えないので、キーポリシーで権限を与える必要があり、既存のロググループへの関連付けもコンソールではできません。",
+      "D": "正しい。対称のキー、同じリージョンのサービスプリンシパルへの権限、API か CLI での関連付けがそろっています。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+      "source_id": "S1",
+      "quote": "Encryption using AWS KMS is enabled at the log group level, by associating a KMS key with a log group, either when you create the log group or after it exists."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+      "source_id": "S2",
+      "quote": "CloudWatch Logs supports only symmetric KMS keys."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-lg",
+      "source_id": "S5",
+      "quote": "This service principal must be in the same AWS Region where the KMS key is stored."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encryption-limits",
+      "source_id": "S4",
+      "quote": "You can't associate a KMS key with an existing log group using the CloudWatch console."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
