@@ -308,7 +308,7 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>パイプライン\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドやテストのアクション\" }\n  CT[\"CodeBuild のコンテナ<br/>buildspec のコマンド\"]\n  CP -- \"アクションを実行\" --> CB\n  CB -- \"コンテナの中で\" --> CT\n",
+    "source": "flowchart TB\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>パイプライン\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドとテスト\" }\n  CT[\"CodeBuild のコンテナ<br/>buildspec のコマンド\"]\n  CP -- \"アクションを実行\" --> CB\n  CB -- \"コンテナの中で\" --> CT\n",
     "alt": "CodePipeline のパイプラインが CodeBuild のビルドやテストのアクションを実行すると、buildspec に書いたコマンドが CodeBuild のコンテナの中で動く。"
    },
    "narration": "ここから後半です。コードパイプラインは、変更をビルドし、テストし、デプロイするまでの流れを、パイプラインとしてつなぐサービスです。パイプラインの中の一つ一つの仕事を、アクションと呼びます。コードビルドのアクションを使うと、ビルドとテストを、パイプラインの一部として動かせます。コードビルドのビルドやテストのアクションを動かすと、ビルドスペックに書いたコマンドが、コードビルドのコンテナの中で動きます。前半で見たビルドスペックが、パイプラインの中でもそのまま使われる、ということです。",
@@ -574,7 +574,7 @@
    ],
    "visual": {
     "type": "mermaid",
-    "source": "flowchart TB\n  subgraph A[\"前半: ビルドで試す\"]\n    PR[\"プルリクエスト\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>失敗でフェーズが失敗<br/>レポートは自動でまとめる\" }\n  end\n  subgraph B[\"後半: 流れの中で試す\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n    DF@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末で並列\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda<br/>動きを自分で決める\" }\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>1 時間で返事\" }\n  end\n  LT[\"Distributed Load Testing<br/>サーバー無しで負荷\"]\n  PR -- \"webhook\" --> CB\n  CB -- \"流れの中でも使う\" --> CP\n  CP -- \"テストのアクション\" --> DF\n  CP -- \"Lambda のアクション\" --> L\n  CD -- \"デプロイ後の検証\" --> L\n",
+    "source": "flowchart TB\n  subgraph A[\"前半: ビルドで試す\"]\n    PR[\"プルリクエスト\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>失敗でフェーズ失敗<br/>レポートは一つに\" }\n  end\n  subgraph B[\"後半: 流れの中で試す\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n    DF@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末で並列\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda<br/>動きを自分で決める\" }\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>1 時間で返事\" }\n  end\n  LT[\"Distributed Load Testing<br/>サーバー無しで負荷\"]\n  PR -- \"webhook\" --> CB\n  CB -- \"流れの中でも使う\" --> CP\n  CP -- \"テストのアクション\" --> DF\n  CP -- \"Lambda のアクション\" --> L\n  CD -- \"デプロイ後の検証\" --> L\n",
     "alt": "講義の地図に戻ったまとめ。前半の CodeBuild は、コマンドの失敗でフェーズが失敗し、並列のレポートは自動でまとまる。後半は CodePipeline から Device Farm で端末を並列に試し、Lambda で動きを自分で決める。CodeDeploy のデプロイ後の検証は 1 時間のうちに結果を返す。Distributed Load Testing はサーバー無しで負荷をかける。"
    },
    "narration": "まとめです。最初の地図に戻ります。前半では、コードビルドでテストを動かす所を見ました。テストの種類の例は、単体テスト、設定のテスト、機能のテストです。プルリクエストのときだけ動かすには、ウェブフックのフィルターグループを使います。コマンドが一つでも失敗すると、フェーズが失敗します。ファイナリーは、失敗しても動きます。結果はテストレポートとコードカバレッジに残し、ファンアウトで並列に流せば、レポートは自動で一つにまとまります。後半では、コードパイプラインのアクションとして、コードビルド、デバイスファーム、ラムダを呼ぶ方法を見ました。コードデプロイのデプロイ後の検証では、一時間のうちに結果を返します。大きな負荷は、分散負荷試験のソリューションでかけます。迷ったら、さっきの表に戻ってください。",
