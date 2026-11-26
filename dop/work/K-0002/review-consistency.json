@@ -1,0 +1,196 @@
+{
+  "slides": [
+    {
+      "id": "s01",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "図の矢印が「CodeBuild → CodePipeline（流れの中でも使う）」の向き。根拠 S11 では CodePipeline がアクションとして CodeBuild を動かす（s09 の図も CP → CB）。この向きだと CodeBuild がパイプラインを起動するように読める。alt と台本（後半は CodePipeline から CodeBuild・Device Farm・Lambda を呼ぶ）とも合わない。",
+          "suggest": "矢印を CP → CB（ラベル例「CodeBuild のアクション」）に向け直す。前半と後半のつながりを示したいなら、線ではなく箱の文言で示す。"
+        },
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "Lambda の箱が 1 つで、CodePipeline の「Lambda のアクション」と CodeDeploy の「デプロイ後の検証」の両方の矢印がそこに入る。パイプラインの Lambda アクション（S13）と CodeDeploy の AfterAllowTraffic フックの Lambda（S5）が同じ仕組みのように見える。",
+          "suggest": "Lambda の箱を 2 つに分ける（「Lambda アクション」と「AfterAllowTraffic の Lambda」）か、CodeDeploy 側の箱の文言に検証を入れて線を 1 本にする。s15 も同じに直す。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "台本は負荷試験を後半で扱うと言うが、図では Distributed Load Testing の箱が前半・後半のどちらの枠にも入らず、線も無い。bullets の「後半: パイプラインから呼ぶ」にも CodeDeploy の検証と負荷試験は当てはまらない。",
+          "suggest": "負荷試験の箱を後半の枠に入れる。bullets を「後半: パイプラインとデプロイ後」などにする。"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「単体テストは、小さな部品を一つずつ確かめる」「機能のテストは、決まった機能が求めたとおりに動くか」という定義は根拠 S1 に無い（用語の一言説明としては許される範囲）。",
+          "suggest": "用語説明として残すなら一般的な言い回しのままでよい。断定を弱めるか、根拠の範囲に収める。"
+        },
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "表の列名「根拠に挙がる例」の「根拠」は作り手側の言葉で、受験者には何を指すか分からない。",
+          "suggest": "「ドキュメントに挙がる例」にする（s03・s04 の台本の「ドキュメントの例」とそろう）。"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「どんなイベントでもビルドすると、むだが増えます」は根拠 S6 に無い理由づけ。",
+          "suggest": "「ドキュメントの例のように、ビルドするイベントを絞れます」程度にする。"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "軽",
+          "detail": "表の行名「ブランチの ref」と「head ref」は、どちらもブランチなので区別が付きにくい。台本は「ブランチの名前」「変更を出す側の名前」と言っており、画面と呼び方が合わない。",
+          "suggest": "行名を「取り込む先（base ref）」「変更を出す側（head ref）」にして台本とそろえる。"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「テストが失敗したときにも必ず動かしたい処理は、ここに書きます」の「必ず」は言い過ぎ。S8 が言うのは commands ブロックのコマンドが失敗しても finally が動く、まで。",
+          "suggest": "「コマンドのブロックで失敗しても動かしたい処理は、ここに書きます」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "図の「SUCCEEDED か FAILED」と bullets の「状態は SUCCEEDED・FAILED」は、状態がこの 2 つだけと言い切っている。根拠 S9 は 2 つの状態を挙げているだけで、これで全部とは言っていない。受験者が状態は 2 種類だけと覚えるおそれ。",
+          "suggest": "図を「状態の例: SUCCEEDED・FAILED」にし、bullets も「状態の例」とする。台本も「状態には、例えば次の物があります」とする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「レポートグループは、テストレポートを入れる入れ物です」は根拠 S7 に無い定義。",
+          "suggest": "用語説明として残すなら言い切りを弱める。"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "issues": [
+        {
+          "kind": "mismatch",
+          "severity": "中",
+          "detail": "bullets の「テストが通った割合」は、テストの合格率と読める。台本と根拠 S3 のカバレッジは「テストがコードのどれだけを通ったか（文や分かれ道のうちいくつか）」で、意味が違う。受験者がカバレッジを合格率と取り違えるおそれ。また S3 は「how many」で、割合とは言っていない。",
+          "suggest": "bullets を「テストが通ったコードの量」などにして、合格率と読めないようにする。"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "bullets の「レポートは自動で 1 つに」は、S10 の「同じ（identical）レポートをまとめる」という条件を落としている。台本では「同じレポート」と言っているので、画面と台本でも少しずれる。",
+          "suggest": "「同じレポートは自動で 1 つに」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "軽",
+          "detail": "「もう一つの方法が、ラムダ関数です」は、テストのために呼べる物が CodeBuild・Device Farm・Lambda の 3 つだけのように聞こえる。根拠には、これで全部とは書かれていない（sources.md の覆えなかった行にも Invoke アクションが取れなかったとある）。",
+          "suggest": "「ほかの方法の一つが、ラムダ関数です」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "issues": [
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "根拠 S5 は AppSpec hooks の「Lambda の hooks 関数の例」（URL は ECS のサンプル）だけ。台本の「コードデプロイには、デプロイの途中の決まった時点で、ラムダ関数を呼ぶ仕組みがあります。これをフックと呼びます」は、どのデプロイでもフックが Lambda 関数だと一般化している。ある条件の話を一般の話として書いている。",
+          "suggest": "「ドキュメントの例では、フックとしてラムダ関数を使います」のように、例であることを示す。一般の仕組みの説明は根拠の範囲に収める。"
+        },
+        {
+          "kind": "mismatch",
+          "severity": "中",
+          "detail": "steps の図が、3「CodeDeploy を呼び返す」の次に 4「1 時間で知らせが無い → 失敗とみなす」を並べている。呼び返したのに知らせが無い、という順の流れに読めて食い違う。4 は 3 が起きなかった場合の分かれ道で、台本も「返事が来ないときは」と別の場合として話している。",
+          "suggest": "steps は 1〜3 までにし、「1 時間のうちに知らせが無ければ失敗」は別の注記か compare の行に移す。"
+        },
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "画面の「Succeeded か Failed」（フックの結果）と s06 の「SUCCEEDED・FAILED」（レポートの状態）は別の物だが、台本ではどちらも「サクシーデッド」「フェイルド」と読む。同じ物と覚えるおそれが少しある。",
+          "suggest": "s12 の台本で「コードデプロイに返す結果は、成功か失敗です」のように言い分ける。"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "issues": [
+        {
+          "kind": "terms",
+          "severity": "軽",
+          "detail": "画面は「Distributed Load Testing」、台本は正式名「ディストリビューテッドロードテスティングオンエーダブリューエス」を読み、以降は「分散負荷試験のソリューション」と呼ぶ。画面にも正式名（Distributed Load Testing on AWS）を一度出すとそろう。",
+          "suggest": "表の列名を「Distributed Load Testing on AWS」にする。"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "issues": [
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "図の CodeDeploy の箱が「1 時間で返事」。根拠 S5 では、返事をするのは検証の Lambda 関数で、CodeDeploy は 1 時間のうちに知らせを受けなければデプロイを失敗とみなす。CodeDeploy が 1 時間で返事をするように読める。台本の「コードデプロイのデプロイ後の検証では、一時間のうちに結果を返します」も主語があいまいで、時間制限であることが伝わらない。",
+          "suggest": "箱を「CodeDeploy<br/>1 時間返事無しで失敗」などにし、台本を「検証の関数が一時間のうちに結果を返さないと、デプロイは失敗になります」にする。"
+        },
+        {
+          "kind": "unsupported",
+          "severity": "中",
+          "detail": "図の CodeBuild の箱が「レポートは一つに」と条件なしで書かれている。S10 では、まとまるのは fanout の batch build で、同じレポートだけ。普通のビルドでもレポートが一つにまとまるように読める（alt と台本は条件を言っている）。",
+          "suggest": "「fanout はレポートを一つに」にする。"
+        },
+        {
+          "kind": "fact",
+          "severity": "中",
+          "detail": "s01 と同じく、矢印が CodeBuild → CodePipeline の向きで、Lambda の箱が CodePipeline のアクションと CodeDeploy の検証で共有されている。",
+          "suggest": "s01 と同じ直し方をする（CP → CB の向き、Lambda の箱を分ける）。"
+        }
+      ]
+    }
+  ],
+  "global": [
+    {
+      "severity": "軽",
+      "detail": "「試験」が、試験ガイド（exam）の意味と、負荷試験・回帰試験・性能の試験（test）の意味の両方で使われている。ほかのスライドでは test を「テスト」と呼んでおり、s13 だけ「試験」になっている。",
+      "suggest": "test は「テスト」にそろえる（負荷テスト、回帰テスト）。「試験」は試験ガイドだけに使う。"
+    },
+    {
+      "severity": "軽",
+      "detail": "地図の枠名（前半: ビルドで試す／後半: 流れの中で試す）と bullets（前半: CodeBuild でテスト／後半: パイプラインから呼ぶ）、まとめの bullets（CodeBuild で動かして残す）で、前半・後半の言い方が少しずつ違う。",
+      "suggest": "s01 と s15 で、枠名と bullets の前半・後半の言い方をそろえる。"
+    }
+  ]
+}
