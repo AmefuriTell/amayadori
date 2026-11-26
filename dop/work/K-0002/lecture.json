@@ -1,0 +1,605 @@
+{
+ "task": "1.2",
+ "title": "CI/CD パイプラインへの自動テストの組み込み",
+ "slides": [
+  {
+   "id": "s01",
+   "title": "この講義の地図",
+   "bullets": [
+    "前半: CodeBuild でテスト",
+    "後半: パイプラインから呼ぶ",
+    "最後に条件から選ぶ表"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph A[\"前半: ビルドで試す\"]\n    PR[\"プルリクエスト\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>種類・PR・失敗<br/>レポート・並列\" }\n  end\n  subgraph B[\"後半: 流れの中で試す\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n    DF@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末で試す\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda<br/>独自の処理\" }\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>デプロイ後\" }\n  end\n  LT[\"Distributed Load Testing<br/>負荷の試験\"]\n  PR -- \"webhook\" --> CB\n  CB -- \"流れの中でも使う\" --> CP\n  CP -- \"テストのアクション\" --> DF\n  CP -- \"Lambda のアクション\" --> L\n  CD -- \"デプロイ後の検証\" --> L\n",
+    "alt": "講義の地図。前半はプルリクエストから webhook で CodeBuild を動かし、テストの種類・失敗の扱い・レポート・並列を見る。後半は CodePipeline から CodeBuild・Device Farm・Lambda をアクションとして呼ぶ方法、CodeDeploy のデプロイ後の検証、Distributed Load Testing の負荷試験を見る。"
+   },
+   "narration": "この講義では、ビルドとデプロイの流れの中に、自動のテストを組み込む方法を学びます。講義は二部に分かれます。前半は、コードビルドというビルドのサービスで、テストを動かす所を見ます。テストの種類、プルリクエストでビルドを動かす方法、コマンドが失敗したときの扱い、テストレポートとコードカバレッジ、そしてテストを並列に流す方法です。後半は、コードパイプラインの流れの中から、テストのためにサービスを呼ぶ方法です。コードビルド、デバイスファーム、ラムダを見ます。そのあと、コードデプロイでデプロイした後の検証と、大きな負荷をかける試験を扱います。最後に、問題文の条件から方法を選ぶ表で締めます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "You can create tests such as unit tests, configuration tests, and functional tests.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting"
+    },
+    {
+     "source_id": "S11",
+     "quote": "Allows you to run builds and tests as part of your pipeline.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild"
+    },
+    {
+     "source_id": "S14",
+     "quote": "Distributed Load Testing on AWS helps you automate performance testing of your software applications at scale to identify bottlenecks before you release your application.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "title": "前半 1: テストの種類",
+   "bullets": [
+    "unit・configuration・functional",
+    "どれも「例」の一部",
+    "レポートを作れる道具なら可"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "区分",
+     "根拠に挙がる例"
+    ],
+    "rows": [
+     [
+      "テストの種類",
+      "unit tests"
+     ],
+     [
+      "",
+      "configuration tests"
+     ],
+     [
+      "",
+      "functional tests"
+     ],
+     [
+      "フレームワーク",
+      "Surefire JUnit plugin"
+     ],
+     [
+      "",
+      "TestNG・Cucumber"
+     ]
+    ]
+   },
+   "narration": "まず、テストの種類です。コードビルドのテストレポートの説明では、作れるテストの例として、三つが挙がっています。単体テスト、設定のテスト、機能のテストです。単体テストは、小さな部品を一つずつ確かめるテストです。機能のテストは、決まった機能が求めたとおりに動くかを確かめます。これらは例であって、作れるテストがこれだけに限られるわけではありません。テストを書く道具を、テストフレームワークと呼びます。決まった形式のレポートファイルを作れるフレームワークなら、どれでもテストケースを書けます。例として、ジェイユニットのシュアファイアプラグイン、テストエヌジー、キューカンバーが挙がっています。名前は画面の表に置きます。",
+   "refs": [
+    {
+     "source_id": "S1",
+     "quote": "You can create tests such as unit tests, configuration tests, and functional tests.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting"
+    },
+    {
+     "source_id": "S1",
+     "quote": "Create your test cases with any test framework that can create report files in one of these formats (for example, Surefire JUnit plugin, TestNG, or Cucumber).",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "title": "前半 2: プルリクエストでビルドする",
+   "bullets": [
+    "webhook でビルドを起動",
+    "プッシュのたびに作り直す",
+    "filter group で絞る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  GH[\"GitHub のリポジトリ\"]\n  FG[\"filter group<br/>条件に合うイベントだけ\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドとテスト\" }\n  GH -- \"webhook\" --> FG\n  FG -- \"合えば起動\" --> CB\n",
+    "alt": "GitHub のリポジトリで起きたイベントが webhook で CodeBuild に届く。filter group の条件に合うイベントのときだけ、CodeBuild がビルドとテストを始める。"
+   },
+   "narration": "次は、プルリクエストのときにビルドとテストを動かす方法です。プルリクエストとは、変更を取り込んでほしいと頼む仕組みです。ウェブフックは、リポジトリで何かが起きたときに、外へ知らせる仕組みです。コードビルドでギットハブのリポジトリを使うときは、プロジェクトを作る画面で、コードの変更がプッシュされるたびにビルドし直す、という項目を選びます。これで、リポジトリのイベントでビルドが始まるようになります。ただ、どんなイベントでもビルドすると、むだが増えます。そこで、ウェブフックのフィルターグループを使います。フィルターグループは、ビルドを始めるイベントの条件をまとめた物です。ドキュメントの例では、プルリクエストのときだけビルドを動かしています。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "Select Rebuild every time a code change is pushed to this repository when you create your project.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook-events-console.html#github-webhook-events-console"
+    },
+    {
+     "source_id": "S6",
+     "quote": "In this example, a webhook filter group triggers a build for pull requests only:",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook-events-console.html#github-webhook-events-console"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "title": "前半 3: filter group の条件",
+   "bullets": [
+    "PR の作成・更新・再オープン",
+    "ブランチ名は正規表現",
+    "取り込む前にテスト"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "条件",
+     "例の値"
+    ],
+    "rows": [
+     [
+      "イベント",
+      "PR の作成・更新・再オープン"
+     ],
+     [
+      "ブランチの ref",
+      "^refs/heads/main$"
+     ],
+     [
+      "head ref",
+      "^refs/heads/branch1$"
+     ],
+     [
+      "書き方",
+      "正規表現"
+     ]
+    ]
+   },
+   "narration": "ドキュメントの例を、もう少し細かく見ます。一つ目のフィルターグループは、プルリクエストが作られたとき、更新されたとき、もう一度開かれたときに当てはまります。さらに、ブランチの名前と、変更を出す側の名前を、正規表現で絞っています。正規表現とは、文字の並びの型を書く方法です。この例では、メインのブランチに向けた、決まったブランチからのプルリクエストのときだけ、ビルドが動きます。正規表現の値は、画面の表に置きます。試験ガイドには、プルリクエストを作るときや、コードを取り込むときに、ビルドやテストを動かす、という項目があります。コードビルドでは、このウェブフックとフィルターグループで、その形を作れます。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "The first filter group specifies pull requests that are created, updated, or reopened on branches with Git reference names that match the regular expression ^refs/heads/main$ and head references that match ^refs/heads/branch1$.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook-events-console.html#github-webhook-events-console"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "title": "前半 4: コマンドの失敗と finally",
+   "bullets": [
+    "buildspec はフェーズに分ける",
+    "1 つ失敗でフェーズが失敗",
+    "finally は失敗しても動く"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph BS[\"buildspec のフェーズ\"]\n    CMD[\"commands<br/>テストのコマンド\"]\n    FIN[\"finally<br/>失敗しても動く\"]\n  end\n  PH[\"フェーズが失敗\"]\n  CMD -- \"一つでも失敗\" --> PH\n  CMD -.-> FIN\n",
+    "alt": "buildspec のフェーズの中で、commands のコマンドが一つでも失敗すると、そのフェーズは失敗になる。finally のブロックのコマンドは、commands で失敗があっても動く。"
+   },
+   "narration": "ここでは、テストが失敗したときに、ビルドの中でどう扱われるかを見ます。ビルドスペックとは、コードビルドで動かすコマンドを書くファイルです。コマンドは、フェーズ、つまり段階ごとに分けて書きます。フェーズの中のコマンドが一つでも失敗すると、そのフェーズは失敗になります。テストのコマンドが失敗すれば、それはフェーズの失敗として表れます。もう一つ覚えておきたいのが、ファイナリーのブロックです。ファイナリーに書いたコマンドは、コマンドのブロックで失敗があっても動きます。テストが失敗したときにも必ず動かしたい処理は、ここに書きます。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "If any command in a phase fails, the phase fails.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+    },
+    {
+     "source_id": "S8",
+     "quote": "The commands in a finally block are run even if a command in the commands block fails.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "title": "前半 5: テストレポート",
+   "bullets": [
+    "buildspec に report group",
+    "ビルドの実行中に作られる",
+    "状態は SUCCEEDED・FAILED"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  BS[\"buildspec<br/>report group を 1〜5 個\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドを実行\" }\n  TR[\"テストレポート<br/>SUCCEEDED か FAILED\"]\n  BS -- \"プロジェクトを実行\" --> CB\n  CB -- \"実行中に作る\" --> TR\n",
+    "alt": "buildspec に report group を 1 から 5 個書いたビルドプロジェクトを実行すると、CodeBuild が実行中にテストレポートを作る。レポートの状態は、全て成功なら SUCCEEDED、一部が成功しなければ FAILED。"
+   },
+   "narration": "テストの結果をまとめて見られるようにするのが、テストレポートです。テストレポートを作るには、ビルドスペックに、レポートグループを書いたビルドプロジェクトを動かします。レポートグループは、テストレポートを入れる入れ物です。一つのビルドスペックに書けるのは、一つから五つまでです。テストレポートは、ビルドの実行中に作られます。レポートには状態があります。全てのテストケースが成功すれば、サクシーデッドです。一部のテストケースが成功しなければ、フェイルドです。状態の名前は、画面に置きます。",
+   "refs": [
+    {
+     "source_id": "S7",
+     "quote": "To create a test report, you run a build project that is configured with one to five report groups in its buildspec file.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-create.html#report-create"
+    },
+    {
+     "source_id": "S7",
+     "quote": "A test report is created during the run.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-create.html#report-create"
+    },
+    {
+     "source_id": "S9",
+     "quote": "SUCCEEDED: All test cases were successful.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-report.html#test-report"
+    },
+    {
+     "source_id": "S9",
+     "quote": "FAILED: Some of the test cases were not successful.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-report.html#test-report"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "title": "前半 6: コードカバレッジ",
+   "bullets": [
+    "テストが通った割合",
+    "line coverage: 文",
+    "branch coverage: 分かれ道"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "カバレッジ",
+     "測る物"
+    ],
+    "rows": [
+     [
+      "line coverage",
+      "文のうち通った数"
+     ],
+     [
+      "branch coverage",
+      "分かれ道のうち通った数"
+     ],
+     [
+      "分かれ道の例",
+      "if 文・case 文"
+     ]
+    ]
+   },
+   "narration": "コードカバレッジとは、テストがコードのどれだけを通ったかを表す数字です。コードビルドでは、テストのコードカバレッジのレポートを作れます。カバレッジには二つの測り方があります。ラインカバレッジは、文のうち、いくつをテストが通ったかを測ります。ブランチカバレッジは、分かれ道を見ます。イフ文やケース文のように、処理が分かれる所で、ありうる道のうち、いくつをテストが通ったかを測ります。試験ガイドには、単体テストとコードカバレッジを自動にする、という項目があります。単体テストの結果も、カバレッジも、コードビルドのレポートとして残せます。",
+   "refs": [
+    {
+     "source_id": "S3",
+     "quote": "CodeBuild allows you to generate code coverage reports for your tests.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Line coverage measures how many statements your tests cover.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report"
+    },
+    {
+     "source_id": "S3",
+     "quote": "Branch coverage measures how many branches your tests cover out of every possible branch of a control structure, such as an if or case statement.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "title": "前半 7: batch build の fanout",
+   "bullets": [
+    "1 つの仕事を複数のビルドへ",
+    "テストを並列に流す",
+    "レポートは自動で 1 つに"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  BB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>batch build の fanout\" }\n  B1[\"ビルド<br/>テストの一部\"]\n  B2[\"ビルド<br/>テストの一部\"]\n  B3[\"ビルド<br/>テストの一部\"]\n  UR[\"一つにまとめたレポート<br/>batch build に付く\"]\n  BB -- \"分ける\" --> B1\n  BB --> B2\n  BB --> B3\n  B1 -- \"レポート\" --> UR\n  B2 --> UR\n  B3 --> UR\n",
+    "alt": "CodeBuild の batch build の fanout が、一つの仕事を複数のビルドに分けてテストを並列に流す。それぞれのビルドが作ったテストレポートを、CodeBuild が一つのレポートにまとめ、batch build に付ける。"
+   },
+   "narration": "テストが多いと、ビルドに時間がかかります。コードビルドのバッチビルドは、複数のビルドをまとめて動かす仕組みです。その中のビルドファンアウトは、一つの仕事を、バッチの中の複数のビルドに分けます。これで、テストを並列に流せます。ファンアウトのバッチビルドでは、一つ一つのビルドが、それぞれテストレポートを作ります。そのあと、コードビルドは、別々のビルドが作った同じレポートを、自動で一つのレポートにまとめます。まとめたレポートは、バッチビルドに付きます。分けて流しても、結果は一か所で見られます。",
+   "refs": [
+    {
+     "source_id": "S4",
+     "quote": "A build fanout defines a task that will be split into multiple builds in the batch. This can be used for running tests in parallel.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html#batch_build_fanout"
+    },
+    {
+     "source_id": "S10",
+     "quote": "When executing fanout batch builds, each individual build generates test reports.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/parallel-test-auto-merge.html#parallel-test-auto-merge.how"
+    },
+    {
+     "source_id": "S10",
+     "quote": "CodeBuild then automatically consolidates identical reports from different builds into a unified report, which is attached to the batch build.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/parallel-test-auto-merge.html#parallel-test-auto-merge.how"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "title": "後半 1: パイプラインの CodeBuild",
+   "bullets": [
+    "アクションとして足す",
+    "ビルドとテストを流れの中で",
+    "コンテナで buildspec を実行"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>パイプライン\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドやテストのアクション\" }\n  CT[\"CodeBuild のコンテナ<br/>buildspec のコマンド\"]\n  CP -- \"アクションを実行\" --> CB\n  CB -- \"コンテナの中で\" --> CT\n",
+    "alt": "CodePipeline のパイプラインが CodeBuild のビルドやテストのアクションを実行すると、buildspec に書いたコマンドが CodeBuild のコンテナの中で動く。"
+   },
+   "narration": "ここから後半です。コードパイプラインは、変更をビルドし、テストし、デプロイするまでの流れを、パイプラインとしてつなぐサービスです。パイプラインの中の一つ一つの仕事を、アクションと呼びます。コードビルドのアクションを使うと、ビルドとテストを、パイプラインの一部として動かせます。コードビルドのビルドやテストのアクションを動かすと、ビルドスペックに書いたコマンドが、コードビルドのコンテナの中で動きます。前半で見たビルドスペックが、パイプラインの中でもそのまま使われる、ということです。",
+   "refs": [
+    {
+     "source_id": "S11",
+     "quote": "Allows you to run builds and tests as part of your pipeline.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild"
+    },
+    {
+     "source_id": "S11",
+     "quote": "When you run a CodeBuild build or test action, commands specified in the buildspec are run inside of a CodeBuild container.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "後半 2: Device Farm で端末を試す",
+   "bullets": [
+    "Android・iOS のアプリ",
+    "複数の端末で並列に",
+    "パイプラインのテストのアクション"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n  DF@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末のテストプール\" }\n  D1[\"端末\"]\n  D2[\"端末\"]\n  D3[\"端末\"]\n  CP -- \"テストのアクション\" --> DF\n  DF -- \"並列に試す\" --> D1\n  DF --> D2\n  DF --> D3\n",
+    "alt": "CodePipeline のテストのアクションが AWS Device Farm を使う。Device Farm は端末のテストプールとテストフレームワークで、アプリを複数の端末で並列に試す。"
+   },
+   "narration": "デバイスファームは、アプリケーションを端末で試すサービスです。アプリとテストをアップロードすると、自動のテストを、複数の端末で並列に動かせます。対象は、アンドロイドとアイオーエスの、ネイティブのアプリとハイブリッドのアプリです。パイプラインでは、デバイスファームを使うテストのアクションを設定できます。デバイスファームは、端末を集めたテストプールと、テストフレームワークを使って、決まった端末の上でアプリケーションを試します。スマートフォンのアプリを、いくつもの端末で、パイプラインの中で試したいときの候補です。",
+   "refs": [
+    {
+     "source_id": "S2",
+     "quote": "Device Farm allows you to run automated tests on multiple devices in parallel by uploading your app and tests.",
+     "url": "https://docs.aws.amazon.com/devicefarm/latest/developerguide/welcome.html#automated-test-intro"
+    },
+    {
+     "source_id": "S2",
+     "quote": "Device Farm supports testing of native and hybrid Android and iOS apps.",
+     "url": "https://docs.aws.amazon.com/devicefarm/latest/developerguide/welcome.html#automated-test-intro"
+    },
+    {
+     "source_id": "S12",
+     "quote": "In your pipeline, you can configure a test action that uses AWS Device Farm to run and test your application on devices.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-DeviceFarm.html#action-reference-DeviceFarm"
+    },
+    {
+     "source_id": "S12",
+     "quote": "Device Farm uses test pools of devices and testing frameworks to test applications on specific devices.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-DeviceFarm.html#action-reference-DeviceFarm"
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "後半 3: Lambda をアクションに",
+   "bullets": [
+    "Lambda 関数をアクションに",
+    "ほぼどんな仕事も書ける",
+    "パイプラインの動きを変える"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph P[\"パイプライン\"]\n    A1@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドとテスト\" }\n    A2@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末のテスト\" }\n    A3@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>自分で書く処理\" }\n  end\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n  CP -- \"アクション\" --> P\n",
+    "alt": "CodePipeline のパイプラインには、CodeBuild のビルドとテスト、Device Farm の端末のテストのほか、自分で書いた Lambda 関数もアクションとして足せる。"
+   },
+   "narration": "試験ガイドには、パイプラインの中で、テストのためにエーダブリューエスのサービスを呼ぶ、という項目があります。ここまでのコードビルドとデバイスファームは、その例です。もう一つの方法が、ラムダ関数です。ラムダは、自分で書いた関数を動かすサービスです。ラムダ関数を作り、アクションとしてパイプラインに足せます。ラムダでは、ほとんどどんな仕事でも関数として書けます。そのため、パイプラインの動きを、自分の目的に合わせて変えられます。決まったアクションでは足りないときの選び方です。",
+   "refs": [
+    {
+     "source_id": "S13",
+     "quote": "You can create Lambda functions and add them as actions in your pipelines.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function"
+    },
+    {
+     "source_id": "S13",
+     "quote": "Because Lambda allows you to write functions to perform almost any task, you can customize the way your pipeline works.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function"
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "後半 4: デプロイ後の検証",
+   "bullets": [
+    "AfterAllowTraffic の Lambda",
+    "結果を CodeDeploy へ返す",
+    "返事が無ければ失敗"
+   ],
+   "visual": {
+    "type": "steps",
+    "items": [
+     {
+      "label": "トラフィックを流す",
+      "note": "CodeDeploy のデプロイ"
+     },
+     {
+      "label": "AfterAllowTraffic の Lambda",
+      "note": "検証のテストを動かす"
+     },
+     {
+      "label": "CodeDeploy を呼び返す",
+      "note": "Succeeded か Failed を渡す"
+     },
+     {
+      "label": "1 時間で知らせが無い",
+      "note": "デプロイは失敗とみなす"
+     }
+    ]
+   },
+   "narration": "テストは、ビルドの前後だけではありません。デプロイの後にも確かめられます。コードデプロイには、デプロイの途中の決まった時点で、ラムダ関数を呼ぶ仕組みがあります。これをフックと呼びます。アフターアロウトラフィックは、名前のとおり、トラフィックを流した後に呼ばれるフックです。ドキュメントの例では、このラムダ関数が、検証のテストを動かします。テストが終わると、関数はコードデプロイを呼び返し、サクシーデッドかフェイルドの結果を渡します。気をつけたいのは、返事が来ないときです。検証の関数から一時間のうちに知らせが無いと、デプロイは失敗したとみなされます。",
+   "refs": [
+    {
+     "source_id": "S5",
+     "quote": "Following completion of the validation tests, the Lambda AfterAllowTraffic function calls back CodeDeploy and delivers a result of Succeeded or Failed.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-section-structure-ecs-sample-function"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The deployment is considered to have failed if CodeDeploy is not notified by the Lambda validation function within one hour.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-section-structure-ecs-sample-function"
+    }
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "後半 5: 大きな負荷をかける試験",
+   "bullets": [
+    "リリース前にボトルネック",
+    "サーバーを用意しない",
+    "cron で定期の回帰試験"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "点",
+     "Distributed Load Testing"
+    ],
+    "rows": [
+     [
+      "目的",
+      "リリース前にボトルネック"
+     ],
+     [
+      "負荷",
+      "数万の同時の仮想ユーザー"
+     ],
+     [
+      "サーバー",
+      "用意しなくてよい"
+     ],
+     [
+      "スクリプト",
+      "JMeter・k6・Locust"
+     ],
+     [
+      "日程",
+      "すぐ・日時・cron で定期"
+     ]
+    ]
+   },
+   "narration": "最後は、大きな負荷をかける試験です。ディストリビューテッドロードテスティングオンエーダブリューエスという、エーダブリューエスのソリューションがあります。長いので、ここでは分散負荷試験のソリューションと呼びます。目的は、アプリケーションの性能の試験を、大きな規模で自動にし、リリースの前にボトルネック、つまり遅くなる所を見つけることです。サーバーを用意しなくても、数千人の利用者が、決まった速さでエイチティーティーピーのリクエストを送る様子を作れます。同時に数万の仮想の利用者まで作れます。試験の書き方は、ジェイメーター、ケーシックス、ローカストのスクリプトのほか、スクリプトを書かない簡単な試験もできます。試験は、すぐに動かすことも、日時を決めることも、クロン式で定期的に動かすこともできます。定期的に動かせば、自動の回帰試験になります。",
+   "refs": [
+    {
+     "source_id": "S14",
+     "quote": "Distributed Load Testing on AWS helps you automate performance testing of your software applications at scale to identify bottlenecks before you release your application.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview"
+    },
+    {
+     "source_id": "S14",
+     "quote": "This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Supports JMeter, k6, and Locust test scripts, as well as simple HTTP endpoint testing without requiring custom scripts.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features"
+    },
+    {
+     "source_id": "S15",
+     "quote": "Simulates tens of thousands of concurrent virtual users to stress test your application under realistic load conditions.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features"
+    },
+    {
+     "source_id": "S16",
+     "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features"
+    }
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "条件から方法を選ぶ",
+   "bullets": [
+    "条件の言葉に印を付ける",
+    "印から方法を引く",
+    "確かめる所も一緒に"
+   ],
+   "visual": {
+    "type": "compare",
+    "columns": [
+     "問題文の条件",
+     "選ぶ方法・確かめる所"
+    ],
+    "rows": [
+     [
+      "PR の時だけビルド",
+      "webhook の filter group"
+     ],
+     [
+      "テストの時間を縮めたい",
+      "batch build の fanout"
+     ],
+     [
+      "iOS・Android の端末",
+      "Device Farm のアクション"
+     ],
+     [
+      "トラフィック後に検証",
+      "AfterAllowTraffic"
+     ],
+     [
+      "数万人の負荷を定期で",
+      "Distributed Load Testing"
+     ]
+    ]
+   },
+   "narration": "問題文に出る条件から、方法を選ぶ表です。プルリクエストのときだけビルドしたい、とあれば、ウェブフックのフィルターグループです。正規表現の条件も確かめます。テストに時間がかかるので縮めたい、とあれば、バッチビルドのファンアウトで並列に流します。レポートが自動で一つにまとまる点も押さえます。アンドロイドやアイオーエスのアプリを、いくつもの端末で試したい、とあれば、デバイスファームのテストのアクションです。トラフィックを流した後に確かめたい、とあれば、アフターアロウトラフィックのラムダ関数です。一時間のうちに結果を返す点を確かめます。大勢の利用者の負荷を、サーバーを用意せずに定期的にかけたい、とあれば、分散負荷試験のソリューションです。",
+   "refs": [
+    {
+     "source_id": "S6",
+     "quote": "In this example, a webhook filter group triggers a build for pull requests only:",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook-events-console.html#github-webhook-events-console"
+    },
+    {
+     "source_id": "S4",
+     "quote": "This can be used for running tests in parallel.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html#batch_build_fanout"
+    },
+    {
+     "source_id": "S12",
+     "quote": "In your pipeline, you can configure a test action that uses AWS Device Farm to run and test your application on devices.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-DeviceFarm.html#action-reference-DeviceFarm"
+    },
+    {
+     "source_id": "S5",
+     "quote": "The deployment is considered to have failed if CodeDeploy is not notified by the Lambda validation function within one hour.",
+     "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#reference-appspec-file-structure-hooks-section-structure-ecs-sample-function"
+    },
+    {
+     "source_id": "S16",
+     "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html#features"
+    }
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "まとめ",
+   "bullets": [
+    "前半: CodeBuild で動かして残す",
+    "後半: パイプラインから呼ぶ",
+    "迷ったら条件の表に戻る"
+   ],
+   "visual": {
+    "type": "mermaid",
+    "source": "flowchart TB\n  subgraph A[\"前半: ビルドで試す\"]\n    PR[\"プルリクエスト\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>失敗でフェーズが失敗<br/>レポートは自動でまとめる\" }\n  end\n  subgraph B[\"後半: 流れの中で試す\"]\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline\" }\n    DF@{ svc: \"AWS Device Farm\", label: \"AWS Device Farm<br/>端末で並列\" }\n    L@{ svc: \"AWS Lambda\", label: \"Lambda<br/>動きを自分で決める\" }\n    CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>1 時間で返事\" }\n  end\n  LT[\"Distributed Load Testing<br/>サーバー無しで負荷\"]\n  PR -- \"webhook\" --> CB\n  CB -- \"流れの中でも使う\" --> CP\n  CP -- \"テストのアクション\" --> DF\n  CP -- \"Lambda のアクション\" --> L\n  CD -- \"デプロイ後の検証\" --> L\n",
+    "alt": "講義の地図に戻ったまとめ。前半の CodeBuild は、コマンドの失敗でフェーズが失敗し、並列のレポートは自動でまとまる。後半は CodePipeline から Device Farm で端末を並列に試し、Lambda で動きを自分で決める。CodeDeploy のデプロイ後の検証は 1 時間のうちに結果を返す。Distributed Load Testing はサーバー無しで負荷をかける。"
+   },
+   "narration": "まとめです。最初の地図に戻ります。前半では、コードビルドでテストを動かす所を見ました。テストの種類の例は、単体テスト、設定のテスト、機能のテストです。プルリクエストのときだけ動かすには、ウェブフックのフィルターグループを使います。コマンドが一つでも失敗すると、フェーズが失敗します。ファイナリーは、失敗しても動きます。結果はテストレポートとコードカバレッジに残し、ファンアウトで並列に流せば、レポートは自動で一つにまとまります。後半では、コードパイプラインのアクションとして、コードビルド、デバイスファーム、ラムダを呼ぶ方法を見ました。コードデプロイのデプロイ後の検証では、一時間のうちに結果を返します。大きな負荷は、分散負荷試験のソリューションでかけます。迷ったら、さっきの表に戻ってください。",
+   "refs": [
+    {
+     "source_id": "S8",
+     "quote": "If any command in a phase fails, the phase fails.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+    },
+    {
+     "source_id": "S10",
+     "quote": "CodeBuild then automatically consolidates identical reports from different builds into a unified report, which is attached to the batch build.",
+     "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/parallel-test-auto-merge.html#parallel-test-auto-merge.how"
+    },
+    {
+     "source_id": "S13",
+     "quote": "You can create Lambda functions and add them as actions in your pipelines.",
+     "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function"
+    },
+    {
+     "source_id": "S14",
+     "quote": "This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers.",
+     "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html#solution-overview"
+    }
+   ]
+  }
+ ]
+}
