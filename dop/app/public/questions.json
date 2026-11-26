@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 215,
+  "count": 218,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -7006,6 +7006,199 @@
         {
           "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html#deployment-circuit-breaker",
           "quote": "The deployment circuit breaker is the rolling update mechanism that determines if the tasks reach a steady state."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0010",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS CloudFormation StackSets"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company must deploy the same CloudFormation template, with the same settings, to 30 accounts in 4 Regions. Updates must be applied with a single operation from an administrator account. If too many stack updates fail in a Region, the rollout must stop automatically so that engineers can troubleshoot quickly. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は、同じ CloudFormation のテンプレートを同じ設定で、4 つのリージョンの 30 のアカウントにデプロイする必要があります。更新は管理者のアカウントから 1 回の操作で適用する必要があります。あるリージョンでスタックの更新の失敗が多すぎる時は、エンジニアが素早く調べられるよう、展開が自動で止まる必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Write a script that loops over every account and Region and runs a CloudFormation stack update in each one.",
+          "text_ja": "すべてのアカウントとリージョンを順に回り、それぞれで CloudFormation のスタックの更新を実行するスクリプトを書く。"
+        },
+        {
+          "key": "B",
+          "text": "Use CloudFormation StackSets from the administrator account, and set a low failure tolerance for the operations.",
+          "text_ja": "管理者のアカウントから CloudFormation StackSets を使い、操作の失敗の許容数を低く設定する。"
+        },
+        {
+          "key": "C",
+          "text": "Create a pipeline with one CloudFormation deploy action for each of the 120 account and Region pairs.",
+          "text_ja": "120 のアカウントとリージョンの組ごとに 1 つの CloudFormation のデプロイのアクションを持つパイプラインを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each account owner to update the stacks in their account from the console when a new template is released.",
+          "text_ja": "新しいテンプレートが出たら、各アカウントの所有者がコンソールから自分のアカウントのスタックを更新する。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "StackSets は、管理者のアカウントで 1 つのテンプレートを管理し、1 回の操作で複数のアカウントとリージョンにスタックを作成・更新・削除できます。失敗の許容数を決めると、リージョンごとの失敗がそれを超えた時に操作が自動で止まり、数を低くするほど早く調べ始められます。",
+        "per_choice": {
+          "A": "動きますが、スクリプトと失敗の扱いを自分で作って保守する必要があります。",
+          "B": "正しい。1 回の操作で同じ設定を展開し、失敗が多すぎれば自動で止まります。",
+          "C": "動きますが、120 のアクションの管理が大きな手間になり、失敗の許容の仕組みもありません。",
+          "D": "1 回の操作にならず、手作業が多く、設定がそろう保証もありません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+          "quote": "lets you specify the maximum number or percentage of stack operation failures that can occur, per Region, beyond which CloudFormation stops an operation automatically."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-concepts.html#stackset-ops-options",
+          "quote": "A lower number or percentage means that the operation performs on fewer stacks, but you are able to start troubleshooting failed operations faster."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0011",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "AWS CodePipeline",
+        "AWS CloudFormation",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "A pipeline in AWS CodePipeline runs in us-east-1. The company wants the same pipeline to deploy CloudFormation stacks in eu-west-1 and ap-northeast-1 as well, without creating separate pipelines and without writing code to move artifacts between Regions. Which actions should a DevOps engineer take? (Choose TWO.)",
+      "stem_ja": "AWS CodePipeline のパイプラインが us-east-1 で動いています。会社は、別のパイプラインを作らず、リージョン間でアーティファクトを動かすコードも書かずに、同じパイプラインで eu-west-1 と ap-northeast-1 にも CloudFormation のスタックをデプロイしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add CloudFormation deploy actions that run in eu-west-1 and ap-northeast-1 to the us-east-1 pipeline as cross-region actions.",
+          "text_ja": "us-east-1 のパイプラインに、eu-west-1 と ap-northeast-1 で動く CloudFormation のデプロイのアクションを、クロスリージョンのアクションとして足す。"
+        },
+        {
+          "key": "B",
+          "text": "Create an artifact bucket in eu-west-1 and in ap-northeast-1, in addition to the artifact bucket in the pipeline Region.",
+          "text_ja": "パイプラインのリージョンのアーティファクトのバケットに加えて、eu-west-1 と ap-northeast-1 にもアーティファクトのバケットを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that copies the artifacts from us-east-1 to the other Regions before each deployment.",
+          "text_ja": "各デプロイの前に、us-east-1 から他のリージョンへアーティファクトをコピーする AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "Create a separate pipeline in each Region and start them in order from the us-east-1 pipeline.",
+          "text_ja": "各リージョンに別のパイプラインを作り、us-east-1 のパイプラインから順に開始する。"
+        },
+        {
+          "key": "E",
+          "text": "Keep a single artifact bucket in us-east-1 and grant the other Regions read access to it.",
+          "text_ja": "us-east-1 の 1 つのアーティファクトのバケットだけにし、他のリージョンに読み取りの権限を与える。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "パイプラインとは別のリージョンで動くアクション（クロスリージョンのアクション）を足せます。その時は、パイプラインのリージョンに加え、アクションを動かす各リージョンにアーティファクトのバケットが要り、リージョン間のアーティファクトのコピーは CodePipeline が行います。",
+        "per_choice": {
+          "A": "正しい。1 つのパイプラインで、他のリージョンのアクションを動かせます。",
+          "B": "正しい。アクションを動かす各リージョンに、アーティファクトのバケットが 1 つずつ要ります。",
+          "C": "CodePipeline がコピーを行うので要らず、コードを書かない要件にも反します。",
+          "D": "別のパイプラインを作らないという要件に反します。",
+          "E": "アクションを動かす各リージョンにアーティファクトのバケットが必要です。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "You can add actions to your pipeline that are in an AWS Region different from your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "you must have an artifact bucket in the pipeline Region and then you must have one artifact bucket per Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-create-cross-region.html#actions-create-cross-region",
+          "quote": "CodePipeline handles the copying of artifacts from one AWS Region to the other Regions when performing cross-region actions."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-3.2-0012",
+      "task": "3.2",
+      "domain": 3,
+      "services": [
+        "Amazon Route 53",
+        "Elastic Load Balancing"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs the same web application behind Application Load Balancers in us-west-2 and ap-southeast-1. Users around the world reach it through a domain in an Amazon Route 53 hosted zone. The company wants each user to be served from the Region that gives that user the lowest latency, while keeping DNS in Route 53 and without adding another service. Which solution BEST meets these requirements?",
+      "stem_ja": "ある会社は、同じ Web アプリケーションを us-west-2 と ap-southeast-1 の Application Load Balancer の後ろで動かしています。世界中の利用者は、Amazon Route 53 のホストゾーンのドメインでアクセスします。会社は、DNS を Route 53 のままにし、別のサービスを足さずに、各利用者をその利用者にとってレイテンシーが最も低いリージョンから応答させたいと考えています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create latency records for the load balancer in each Region in the Route 53 hosted zone.",
+          "text_ja": "Route 53 のホストゾーンに、各リージョンのロードバランサーのレイテンシーのレコードを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create weighted records that send 50 percent of queries to each Region's load balancer.",
+          "text_ja": "各リージョンのロードバランサーへ問い合わせの 50% ずつを送る加重のレコードを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create an AWS Global Accelerator standard accelerator with the two load balancers as endpoints.",
+          "text_ja": "2 つのロードバランサーをエンドポイントにした AWS Global Accelerator の標準のアクセラレーターを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Create a simple record that points to the us-west-2 load balancer, and use ap-southeast-1 only for disaster recovery.",
+          "text_ja": "us-west-2 のロードバランサーを指すシンプルなレコードを作り、ap-southeast-1 は災害対策にだけ使う。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "アプリケーションを複数のリージョンで動かす時、レイテンシーベースのルーティングで、利用者の要求をレイテンシーが最も低いリージョンから処理できます。各リージョンのリソースにレイテンシーのレコードを作ると、Route 53 は問い合わせごとに利用者にとって最も低いレイテンシーのリージョンのレコードを選びます。",
+        "per_choice": {
+          "A": "正しい。Route 53 のまま、利用者ごとにレイテンシーが最も低いリージョンへ向けられます。",
+          "B": "利用者のレイテンシーに関係なく半分ずつに分けるだけです。",
+          "C": "近いリージョンへ向けられますが、別のサービスを足すことになり、要件に反します。",
+          "D": "すべての利用者が us-west-2 へ向かい、遠い利用者のレイテンシーが高いままです。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+          "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+          "quote": "To use latency-based routing, you create latency records for your resources in multiple AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator",
+          "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
         }
       ],
       "low_confidence": false

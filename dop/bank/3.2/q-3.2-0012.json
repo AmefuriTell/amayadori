@@ -1,0 +1,67 @@
+{
+  "task": "3.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-3.2-0012",
+  "services": [
+    "Amazon Route 53",
+    "Elastic Load Balancing"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs the same web application behind Application Load Balancers in us-west-2 and ap-southeast-1. Users around the world reach it through a domain in an Amazon Route 53 hosted zone. The company wants each user to be served from the Region that gives that user the lowest latency, while keeping DNS in Route 53 and without adding another service. Which solution BEST meets these requirements?",
+  "stem_ja": "ある会社は、同じ Web アプリケーションを us-west-2 と ap-southeast-1 の Application Load Balancer の後ろで動かしています。世界中の利用者は、Amazon Route 53 のホストゾーンのドメインでアクセスします。会社は、DNS を Route 53 のままにし、別のサービスを足さずに、各利用者をその利用者にとってレイテンシーが最も低いリージョンから応答させたいと考えています。これらの要件を最もよく満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create latency records for the load balancer in each Region in the Route 53 hosted zone.",
+      "text_ja": "Route 53 のホストゾーンに、各リージョンのロードバランサーのレイテンシーのレコードを作る。"
+    },
+    {
+      "key": "B",
+      "text": "Create weighted records that send 50 percent of queries to each Region's load balancer.",
+      "text_ja": "各リージョンのロードバランサーへ問い合わせの 50% ずつを送る加重のレコードを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Create an AWS Global Accelerator standard accelerator with the two load balancers as endpoints.",
+      "text_ja": "2 つのロードバランサーをエンドポイントにした AWS Global Accelerator の標準のアクセラレーターを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Create a simple record that points to the us-west-2 load balancer, and use ap-southeast-1 only for disaster recovery.",
+      "text_ja": "us-west-2 のロードバランサーを指すシンプルなレコードを作り、ap-southeast-1 は災害対策にだけ使う。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "アプリケーションを複数のリージョンで動かす時、レイテンシーベースのルーティングで、利用者の要求をレイテンシーが最も低いリージョンから処理できます。各リージョンのリソースにレイテンシーのレコードを作ると、Route 53 は問い合わせごとに利用者にとって最も低いレイテンシーのリージョンのレコードを選びます。",
+    "per_choice": {
+      "A": "正しい。Route 53 のまま、利用者ごとにレイテンシーが最も低いリージョンへ向けられます。",
+      "B": "利用者のレイテンシーに関係なく半分ずつに分けるだけです。",
+      "C": "近いリージョンへ向けられますが、別のサービスを足すことになり、要件に反します。",
+      "D": "すべての利用者が us-west-2 へ向かい、遠い利用者のレイテンシーが高いままです。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+      "source_id": "S6",
+      "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency",
+      "source_id": "S6",
+      "quote": "To use latency-based routing, you create latency records for your resources in multiple AWS Regions."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator",
+      "source_id": "S8",
+      "quote": "Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
