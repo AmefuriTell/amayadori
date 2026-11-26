@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0012",
+  "source": "flowchart TB\n  R[\"構成が変わったリソース\"]\n  CFG@{ svc: \"AWS Config\", label: \"Custom Policy ルール\" }\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation で修復\" }\n  PUT[\"PutRemediationConfigurations\"]\n  R -- \"構成の変化\" --> CFG\n  CFG -- \"非準拠\" --> AUT\n  AUT == \"✔ B: 自動の修復のアクション\" ==> R\n  PUT -. \"ルールへ関連付け\" .-> CFG\n  A[\"✔ A: Custom Policy ルールを作る（Lambda 不要）\"]\n  A ==> CFG\n  C[\"⚠ C: Custom Lambda ルール（Python の保守）\"]\n  R -.-> C\n  D[\"⚠ D: サービスにリンクされたルール（修復を管理できない）\"]\n  PUT -.-> D\n  E[\"⚠ E: コンソールから手動で修復\"]\n  E -.-> R\n",
+  "alt": "Lambda を作らずに独自の AWS Config ルールで検出し、自動で直す図。Custom Policy ルールを作り（A）、PutRemediationConfigurations で Automation ドキュメントの自動修復を関連付ける（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

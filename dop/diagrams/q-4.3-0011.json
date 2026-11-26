@@ -1,0 +1,8 @@
+{
+  "id": "q-4.3-0011",
+  "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"ルール（非準拠を検出）<br/>✔ B: 自動修復の再試行<br/>（例: 300 秒で 5 回）\" }\n  AUT@{ svc: \"AWS Systems Manager\", label: \"Automation で修復<br/>短いエラーで失敗することがある\" }\n  R[\"対象のリソース\"]\n  API[\"DescribeRemediationExecutionStatus\"]\n  CFG == \"✔ B: 自動修復\" ==> AUT\n  AUT -- \"修復\" --> R\n  API == \"✔ B: 実行の詳しい状態\" ==> AUT\n  A[\"⚠ A: 手動の修復に変える\"]\n  A -.-> CFG\n  D[\"⚠ D: ルールを 1 時間ごとに作り直す\"]\n  D -.-> CFG\n  C[\"⚠ C: 失敗を探す Lambda を書く\"]\n  C -.-> AUT",
+  "alt": "AWS Config の自動修復が短いエラーで失敗する図。自動修復にやり直しの回数と期間（例: 300 秒で 5 回）を設定し、実行の状態は DescribeRemediationExecutionStatus で見る（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -12850,7 +12850,10 @@
           "quote": "DescribeRemediationExecutionStatus, provides a detailed view of a Remediation Execution for a set of resources"
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "AWS Config の自動修復が短いエラーで失敗する図。自動修復にやり直しの回数と期間（例: 300 秒で 5 回）を設定し、実行の状態は DescribeRemediationExecutionStatus で見る（B）。"
+      }
     },
     {
       "id": "q-4.3-0012",
@@ -12923,7 +12926,10 @@
           "quote": "You can only manage remediations for non-service linked AWS Config rules."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "Lambda を作らずに独自の AWS Config ルールで検出し、自動で直す図。Custom Policy ルールを作り（A）、PutRemediationConfigurations で Automation ドキュメントの自動修復を関連付ける（B）。"
+      }
     },
     {
       "id": "q-4.3-0013",
@@ -12984,7 +12990,10 @@
           "quote": "Route 53 does not support \"M out of N\" alarms."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "3 つの既存ヘルスチェックを 1 つの状態にまとめてフェイルオーバーのレコードに使う図。子のヘルスチェックを監視する計算されたヘルスチェックを作る（C）。1 つだけ見る方法や N 個中 M 個のアラームは不適切。"
+      }
     },
     {
       "id": "q-4.3-0014",
@@ -13057,7 +13066,10 @@
           "quote": "You can't reference a private endpoint health check from a calculated health check."
         }
       ],
-      "low_confidence": true
+      "low_confidence": true,
+      "diagram": {
+        "alt": "公開できない社内サービスに Route 53 のフェイルオーバーを使う図。VPC 内の送り元で確認するプライベートエンドポイントのヘルスチェック（A）と、同じアカウントの CloudWatch アラームを監視するヘルスチェック（B）が使える。"
+      }
     },
     {
       "id": "q-5.1-0001",
