@@ -1,0 +1,67 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0009",
+  "services": [
+    "AWS AppConfig",
+    "Amazon CloudWatch"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs a web application on Amazon ECS. The product team wants to turn on a new checkout feature for a small share of users first and then for everyone, without deploying new application code. If the error-rate alarm in Amazon CloudWatch fires during the rollout, the change must be reverted automatically. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は Amazon ECS でウェブアプリケーションを動かしています。プロダクトチームは、新しいチェックアウトの機能を、新しいアプリケーションのコードをデプロイせずに、まず一部の利用者に、その後すべての利用者に有効にしたいと考えています。展開中に Amazon CloudWatch のエラー率のアラームが発生した場合は、変更を自動で元に戻す必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Store the flag in AWS AppConfig and deploy it all at once. Have an operator call the StopDeployment API if the CloudWatch alarm fires.",
+      "text_ja": "フラグを AWS AppConfig に保存し、一度にすべてデプロイする。CloudWatch アラームが発生したら、運用担当者が StopDeployment API を呼ぶ。"
+    },
+    {
+      "key": "B",
+      "text": "Store the flag in AWS AppConfig. Deploy it with a gradual deployment strategy to an AppConfig environment that lists the CloudWatch alarm for automatic rollback.",
+      "text_ja": "フラグを AWS AppConfig に保存する。自動ロールバック用に CloudWatch アラームを指定した AppConfig の環境へ、段階的なデプロイ戦略でデプロイする。"
+    },
+    {
+      "key": "C",
+      "text": "Store the flag in Systems Manager Parameter Store. Change the value by hand for each user group and change it back by hand when the CloudWatch alarm fires.",
+      "text_ja": "フラグを Systems Manager Parameter Store に保存する。利用者のグループごとに値を手作業で変え、CloudWatch アラームが発生したら手作業で戻す。"
+    },
+    {
+      "key": "D",
+      "text": "Put the flag in the application's configuration file and release it with an ECS rolling deployment. Roll back the deployment when the CloudWatch alarm fires.",
+      "text_ja": "フラグをアプリケーションの設定ファイルに入れ、ECS のローリングデプロイでリリースする。CloudWatch アラームが発生したらデプロイをロールバックする。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "AWS AppConfig は、コードを再デプロイせずに機能フラグで本番の振る舞いを変えられ、デプロイ戦略で変更を段階的に展開します。環境に CloudWatch アラームを指定しておくと、デプロイ中にアラームが ALARM になった時に、設定を前のバージョンへ自動でロールバックします。",
+    "per_choice": {
+      "A": "コードの再デプロイは要りませんが、一度にすべての利用者へ届き、戻すのも人の操作が必要です。",
+      "B": "正しい。コードの再デプロイ無し、段階的な展開、アラームによる自動ロールバックがすべて組み込みでそろいます。",
+      "C": "コードの再デプロイは要りませんが、段階的な展開も戻しも手作業で、自動のロールバックになりません。",
+      "D": "設定ファイルを変えるためアプリケーションのデプロイが必要で、新しいコードをデプロイしないという要件に反します。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig",
+      "source_id": "S1",
+      "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-benefits-overview",
+      "source_id": "S3",
+      "quote": "Deployment strategies: Gradually roll out changes over a defined period of time to reduce risk."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html#monitoring-deployments",
+      "source_id": "S6",
+      "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

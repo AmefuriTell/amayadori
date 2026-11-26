@@ -1,0 +1,66 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0012",
+  "services": [
+    "AWS Config"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A security team must know whether the company's Amazon S3 buckets and security groups follow internal standards. The team needs a record of how each resource is configured, must be notified when a resource breaks a standard, and wants to deploy and monitor the full set of checks as a single unit in each account. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "セキュリティチームは、会社の Amazon S3 バケットとセキュリティグループが社内の基準に従っているかを把握する必要があります。チームには、各リソースがどう構成されているかの記録が必要で、リソースが基準に反した時に通知を受ける必要があり、確認の一式を各アカウントで 1 つの単位としてデプロイして監視したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Turn on AWS Config recording for the resource types, and deploy the AWS Config rules for the standards together as a conformance pack.",
+      "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、基準に対応する AWS Config ルールをまとめてコンフォーマンスパックとしてデプロイする。"
+    },
+    {
+      "key": "B",
+      "text": "Turn on AWS Config recording for the resource types, and create each AWS Config rule one at a time in every account.",
+      "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、各 AWS Config ルールを、すべてのアカウントで 1 つずつ作る。"
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that runs daily, reads the bucket and security group settings through the APIs, and emails the team about any problems.",
+      "text_ja": "毎日動き、API でバケットとセキュリティグループの設定を読み、問題があればチームにメールする AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "D",
+      "text": "Export the bucket and security group settings to a spreadsheet each month, and have the team compare them with the standards.",
+      "text_ja": "毎月バケットとセキュリティグループの設定を表計算シートに出力し、チームが基準と比べる。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "AWS Config はリソースの構成を詳しく記録し、ルールで構成を評価して、反するリソースを非準拠にして通知します。コンフォーマンスパックはルールの集まりで、1 つの単位としてデプロイして監視できます。",
+    "per_choice": {
+      "A": "正しい。構成の記録、ルールによる評価と通知、一式を 1 つの単位としてデプロイして監視することがそろいます。",
+      "B": "記録・評価・通知はそろいますが、ルールを 1 つずつ作るため、一式を 1 つの単位として扱えず手間が増えます。",
+      "C": "動きますが、確認のコードを書いて保守する必要があり、構成の記録も残りません。",
+      "D": "手作業で、反した時にすぐ通知されず、オーバーヘッドも大きくなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+      "source_id": "S8",
+      "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+      "source_id": "S8",
+      "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+      "source_id": "S8",
+      "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

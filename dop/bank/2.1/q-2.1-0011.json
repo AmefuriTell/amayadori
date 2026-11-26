@@ -1,0 +1,66 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0011",
+  "services": [
+    "AWS Systems Manager State Manager"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company runs 400 Amazon EC2 instances that are managed nodes in AWS Systems Manager. Engineers sometimes change agent settings on the instances by hand, and the instances drift from the approved configuration. The company wants the approved configuration to be reapplied on a schedule to every instance that has the tag Env=prod, including instances launched later, and does not want to pay for an additional service. Which solution meets these requirements with the LEAST operational effort?",
+  "stem_ja": "ある会社は、AWS Systems Manager のマネージドノードである 400 台の Amazon EC2 インスタンスを動かしています。エンジニアがときどきインスタンス上のエージェントの設定を手作業で変え、インスタンスが承認済みの構成からずれていきます。会社は、タグ Env=prod を持つすべてのインスタンス（後から起動するインスタンスも含む）に、承認済みの構成をスケジュールで適用し直したいと考えており、追加のサービスに費用を払いたくありません。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Add a cron job to the instances' user data that downloads and applies the approved configuration every night.",
+      "text_ja": "承認済みの構成を毎晩ダウンロードして適用する cron ジョブを、インスタンスのユーザーデータに追加する。"
+    },
+    {
+      "key": "B",
+      "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function to connect to each tagged instance over SSH and apply the configuration.",
+      "text_ja": "タグの付いた各インスタンスへ SSH で接続して構成を適用する AWS Lambda 関数を呼ぶ Amazon EventBridge のスケジュールを作る。"
+    },
+    {
+      "key": "C",
+      "text": "Create a Systems Manager State Manager association that applies the approved configuration on a schedule and targets managed nodes by the tag Env=prod.",
+      "text_ja": "承認済みの構成をスケジュールで適用し、タグ Env=prod でマネージドノードを対象にする Systems Manager State Manager の関連付けを作る。"
+    },
+    {
+      "key": "D",
+      "text": "Ask the operations team to compare each instance's settings with the approved configuration every week and fix any differences by hand.",
+      "text_ja": "運用チームが毎週、各インスタンスの設定を承認済みの構成と比べ、違いを手作業で直す。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "State Manager は、マネージドノードなどを定めた状態に保つ構成管理のサービスで、関連付けで適用のスケジュールと対象（タグなど）を指定します。構成のずれを減らす用途に向き、追加の料金はかかりません。",
+    "per_choice": {
+      "A": "動きますが、既に動いているインスタンスには入らず、構成を変えるたびに起動の設定を直す必要があります。",
+      "B": "動きますが、接続と適用の Lambda 関数を作って保守する必要があり、手間がかかります。",
+      "C": "正しい。タグで対象を決めるので後から起動したインスタンスも入り、スケジュールで適用し直します。追加の料金もかかりません。",
+      "D": "手作業で、400 台では手間が大きく、次の確認までずれが残ります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+      "source_id": "S7",
+      "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+      "source_id": "S7",
+      "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+      "source_id": "S7",
+      "quote": "State Manager is available at no additional charge."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

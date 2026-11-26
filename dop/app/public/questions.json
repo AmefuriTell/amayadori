@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 154,
+  "count": 158,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -3208,6 +3208,260 @@
         }
       ],
       "low_confidence": true
+    },
+    {
+      "id": "q-2.1-0009",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS AppConfig",
+        "Amazon CloudWatch"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs a web application on Amazon ECS. The product team wants to turn on a new checkout feature for a small share of users first and then for everyone, without deploying new application code. If the error-rate alarm in Amazon CloudWatch fires during the rollout, the change must be reverted automatically. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は Amazon ECS でウェブアプリケーションを動かしています。プロダクトチームは、新しいチェックアウトの機能を、新しいアプリケーションのコードをデプロイせずに、まず一部の利用者に、その後すべての利用者に有効にしたいと考えています。展開中に Amazon CloudWatch のエラー率のアラームが発生した場合は、変更を自動で元に戻す必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Store the flag in AWS AppConfig and deploy it all at once. Have an operator call the StopDeployment API if the CloudWatch alarm fires.",
+          "text_ja": "フラグを AWS AppConfig に保存し、一度にすべてデプロイする。CloudWatch アラームが発生したら、運用担当者が StopDeployment API を呼ぶ。"
+        },
+        {
+          "key": "B",
+          "text": "Store the flag in AWS AppConfig. Deploy it with a gradual deployment strategy to an AppConfig environment that lists the CloudWatch alarm for automatic rollback.",
+          "text_ja": "フラグを AWS AppConfig に保存する。自動ロールバック用に CloudWatch アラームを指定した AppConfig の環境へ、段階的なデプロイ戦略でデプロイする。"
+        },
+        {
+          "key": "C",
+          "text": "Store the flag in Systems Manager Parameter Store. Change the value by hand for each user group and change it back by hand when the CloudWatch alarm fires.",
+          "text_ja": "フラグを Systems Manager Parameter Store に保存する。利用者のグループごとに値を手作業で変え、CloudWatch アラームが発生したら手作業で戻す。"
+        },
+        {
+          "key": "D",
+          "text": "Put the flag in the application's configuration file and release it with an ECS rolling deployment. Roll back the deployment when the CloudWatch alarm fires.",
+          "text_ja": "フラグをアプリケーションの設定ファイルに入れ、ECS のローリングデプロイでリリースする。CloudWatch アラームが発生したらデプロイをロールバックする。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS AppConfig は、コードを再デプロイせずに機能フラグで本番の振る舞いを変えられ、デプロイ戦略で変更を段階的に展開します。環境に CloudWatch アラームを指定しておくと、デプロイ中にアラームが ALARM になった時に、設定を前のバージョンへ自動でロールバックします。",
+        "per_choice": {
+          "A": "コードの再デプロイは要りませんが、一度にすべての利用者へ届き、戻すのも人の操作が必要です。",
+          "B": "正しい。コードの再デプロイ無し、段階的な展開、アラームによる自動ロールバックがすべて組み込みでそろいます。",
+          "C": "コードの再デプロイは要りませんが、段階的な展開も戻しも手作業で、自動のロールバックになりません。",
+          "D": "設定ファイルを変えるためアプリケーションのデプロイが必要で、新しいコードをデプロイしないという要件に反します。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-benefits-overview",
+          "quote": "Deployment strategies: Gradually roll out changes over a defined period of time to reduce risk."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html#monitoring-deployments",
+          "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0010",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS AppConfig",
+        "AWS Lambda",
+        "Amazon S3"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "An application reads a JSON configuration file from an Amazon S3 bucket. Last month, a malformed file caused an outage. The company wants each configuration change to be checked against its JSON Schema, which is written in JSON Schema draft-07, before the change reaches the application. The file must stay in the existing S3 bucket because other tools write to it. Which actions should a DevOps engineer take to meet these requirements? (Choose TWO.)",
+      "stem_ja": "あるアプリケーションは Amazon S3 バケットから JSON の設定ファイルを読み込みます。先月、形の崩れたファイルが原因で障害が起きました。会社は、設定の変更がアプリケーションに届く前に、JSON Schema draft-07 で書かれた JSON Schema に照らして各変更を確かめたいと考えています。ほかのツールが書き込むため、ファイルは既存の S3 バケットに置いたままにする必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create an AWS AppConfig configuration profile that uses the existing S3 object as its source, and deliver the configuration to the application through AWS AppConfig.",
+          "text_ja": "既存の S3 オブジェクトをソースにする AWS AppConfig の設定プロファイルを作り、AWS AppConfig を通して設定をアプリケーションへ届ける。"
+        },
+        {
+          "key": "B",
+          "text": "Create an AWS Lambda function that validates the data against the draft-07 schema, and add it as a validator before creating the configuration profile.",
+          "text_ja": "draft-07 のスキーマに照らしてデータを確かめる AWS Lambda 関数を作り、設定プロファイルを作る前にそれをバリデーターとして追加する。"
+        },
+        {
+          "key": "C",
+          "text": "Add the draft-07 schema directly to the configuration profile as an inline JSON Schema validator.",
+          "text_ja": "draft-07 のスキーマを、インラインの JSON Schema バリデーターとして設定プロファイルに直接追加する。"
+        },
+        {
+          "key": "D",
+          "text": "Move the configuration into the AWS AppConfig hosted configuration store and remove the file from the S3 bucket.",
+          "text_ja": "設定を AWS AppConfig のホスト型設定ストアへ移し、S3 バケットからファイルを削除する。"
+        },
+        {
+          "key": "E",
+          "text": "Turn on S3 Versioning for the bucket and restore the previous object version by hand when the application fails.",
+          "text_ja": "バケットの S3 バージョニングを有効にし、アプリケーションが失敗した時に前のオブジェクトのバージョンを手作業で戻す。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "AWS AppConfig は S3 などに既にある設定データをソースにして、検証・デプロイ・管理ができ、デプロイの時にバリデーターで確かめて失敗すれば変更を戻します。インラインのスキーマは JSON Schema 4.X だけに対応するため、別のバージョンのスキーマで確かめるには Lambda のバリデーターを作る必要があります。",
+        "per_choice": {
+          "A": "正しい。ファイルを S3 に置いたまま、AppConfig のデプロイを通して届ける前に確かめられます。",
+          "B": "正しい。4.X 以外のスキーマには Lambda のバリデーターが必要で、バリデーターは設定プロファイルより先に作ります。",
+          "C": "インラインのスキーマは JSON Schema 4.X に対応するもので、draft-07 のスキーマで確かめるという要件には Lambda のバリデーターが必要です。",
+          "D": "確かめることはできますが、ファイルを既存の S3 バケットに置いたままにするという要件に反します。",
+          "E": "壊れたファイルが届いた後に戻すだけで、届く前に確かめるという要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-how-it-works",
+          "quote": "If your configuration data already exists in cloud services such as SSM Parameter Store or Amazon S3, you can use AWS AppConfig to validate, deploy, and manage that data more effectively."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "AWS AppConfig supports JSON Schema version 4.X for inline schema. If your application configuration requires a different version of JSON Schema, then you must create a Lambda validator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0011",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS Systems Manager State Manager"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company runs 400 Amazon EC2 instances that are managed nodes in AWS Systems Manager. Engineers sometimes change agent settings on the instances by hand, and the instances drift from the approved configuration. The company wants the approved configuration to be reapplied on a schedule to every instance that has the tag Env=prod, including instances launched later, and does not want to pay for an additional service. Which solution meets these requirements with the LEAST operational effort?",
+      "stem_ja": "ある会社は、AWS Systems Manager のマネージドノードである 400 台の Amazon EC2 インスタンスを動かしています。エンジニアがときどきインスタンス上のエージェントの設定を手作業で変え、インスタンスが承認済みの構成からずれていきます。会社は、タグ Env=prod を持つすべてのインスタンス（後から起動するインスタンスも含む）に、承認済みの構成をスケジュールで適用し直したいと考えており、追加のサービスに費用を払いたくありません。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Add a cron job to the instances' user data that downloads and applies the approved configuration every night.",
+          "text_ja": "承認済みの構成を毎晩ダウンロードして適用する cron ジョブを、インスタンスのユーザーデータに追加する。"
+        },
+        {
+          "key": "B",
+          "text": "Create an Amazon EventBridge schedule that invokes an AWS Lambda function to connect to each tagged instance over SSH and apply the configuration.",
+          "text_ja": "タグの付いた各インスタンスへ SSH で接続して構成を適用する AWS Lambda 関数を呼ぶ Amazon EventBridge のスケジュールを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a Systems Manager State Manager association that applies the approved configuration on a schedule and targets managed nodes by the tag Env=prod.",
+          "text_ja": "承認済みの構成をスケジュールで適用し、タグ Env=prod でマネージドノードを対象にする Systems Manager State Manager の関連付けを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Ask the operations team to compare each instance's settings with the approved configuration every week and fix any differences by hand.",
+          "text_ja": "運用チームが毎週、各インスタンスの設定を承認済みの構成と比べ、違いを手作業で直す。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "State Manager は、マネージドノードなどを定めた状態に保つ構成管理のサービスで、関連付けで適用のスケジュールと対象（タグなど）を指定します。構成のずれを減らす用途に向き、追加の料金はかかりません。",
+        "per_choice": {
+          "A": "動きますが、既に動いているインスタンスには入らず、構成を変えるたびに起動の設定を直す必要があります。",
+          "B": "動きますが、接続と適用の Lambda 関数を作って保守する必要があり、手間がかかります。",
+          "C": "正しい。タグで対象を決めるので後から起動したインスタンスも入り、スケジュールで適用し直します。追加の料金もかかりません。",
+          "D": "手作業で、400 台では手間が大きく、次の確認までずれが残ります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager is available at no additional charge."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0012",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS Config"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A security team must know whether the company's Amazon S3 buckets and security groups follow internal standards. The team needs a record of how each resource is configured, must be notified when a resource breaks a standard, and wants to deploy and monitor the full set of checks as a single unit in each account. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "セキュリティチームは、会社の Amazon S3 バケットとセキュリティグループが社内の基準に従っているかを把握する必要があります。チームには、各リソースがどう構成されているかの記録が必要で、リソースが基準に反した時に通知を受ける必要があり、確認の一式を各アカウントで 1 つの単位としてデプロイして監視したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Turn on AWS Config recording for the resource types, and deploy the AWS Config rules for the standards together as a conformance pack.",
+          "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、基準に対応する AWS Config ルールをまとめてコンフォーマンスパックとしてデプロイする。"
+        },
+        {
+          "key": "B",
+          "text": "Turn on AWS Config recording for the resource types, and create each AWS Config rule one at a time in every account.",
+          "text_ja": "対象のリソースタイプについて AWS Config の記録を有効にし、各 AWS Config ルールを、すべてのアカウントで 1 つずつ作る。"
+        },
+        {
+          "key": "C",
+          "text": "Write an AWS Lambda function that runs daily, reads the bucket and security group settings through the APIs, and emails the team about any problems.",
+          "text_ja": "毎日動き、API でバケットとセキュリティグループの設定を読み、問題があればチームにメールする AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "Export the bucket and security group settings to a spreadsheet each month, and have the team compare them with the standards.",
+          "text_ja": "毎月バケットとセキュリティグループの設定を表計算シートに出力し、チームが基準と比べる。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "AWS Config はリソースの構成を詳しく記録し、ルールで構成を評価して、反するリソースを非準拠にして通知します。コンフォーマンスパックはルールの集まりで、1 つの単位としてデプロイして監視できます。",
+        "per_choice": {
+          "A": "正しい。構成の記録、ルールによる評価と通知、一式を 1 つの単位としてデプロイして監視することがそろいます。",
+          "B": "記録・評価・通知はそろいますが、ルールを 1 つずつ作るため、一式を 1 つの単位として扱えず手間が増えます。",
+          "C": "動きますが、確認のコードを書いて保守する必要があり、構成の記録も残りません。",
+          "D": "手作業で、反した時にすぐ通知されず、オーバーヘッドも大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
+        }
+      ],
+      "low_confidence": false
     },
     {
       "id": "q-2.2-0001",
