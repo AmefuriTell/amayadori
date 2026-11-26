@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0014",
+  "source": "flowchart TB\n  APP[\"セッションを使うアプリ\"]\n  subgraph AZA[\"アベイラビリティーゾーン A\"]\n    P@{ svc: \"Amazon ElastiCache\", label: \"主ノード（故障）\" }\n  end\n  subgraph AZB[\"アベイラビリティーゾーン B\"]\n    R[\"✔ C: レプリカ（各シャードに 1 つ以上）\"]\n  end\n  X1[\"⚠ A: レプリカ無しの Multi-AZ は成り立たない\"]\n  X2[\"⚠ B: 復元は手作業でデータも失う\"]\n  X3[\"⚠ D: 大きいノードは置き換えにならない\"]\n  APP -- \"セッション\" --> P\n  P == \"✔ C: 自動で昇格\" ==> R\n  X1 -.-> P\n  X2 -.-> P\n  X3 -.-> P\n",
+  "alt": "セッション用の ElastiCache for Valkey で、各シャードに別のアベイラビリティーゾーンのレプリカを足し、自動フェイルオーバー付きの Multi-AZ を有効にする図。主ノードの故障時にレプリカが自動で昇格する C が正解。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

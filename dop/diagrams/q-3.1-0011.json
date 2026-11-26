@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0011",
+  "source": "flowchart TB\n  LB@{ svc: \"Elastic Load Balancing\", label: \"ALB（ノードは 1a・1b にある）\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"1c でもインスタンスを起動\" }\n  subgraph OKZ[\"us-east-1a・1b（有効）\"]\n    T1[\"ターゲット\"]\n  end\n  subgraph CZ[\"us-east-1c（未有効）\"]\n    T3[\"新しいインスタンス（正常・登録済み）\"]\n  end\n  X1[\"⚠ A: ALB のクロスゾーンは常に有効\"]\n  X2[\"⚠ C・D: Auto Scaling やヘルスチェックは原因でない\"]\n  LB -- \"トラフィック\" --> T1\n  ASG --> T3\n  LB -. \"⚠ 1c にノードが無く届かない\" .-> T3\n  FIX[\"✔ B: 1c をロードバランサーで有効にする\"] ==> LB\n  X1 -.-> LB\n  X2 -.-> T3\n",
+  "alt": "ALB が us-east-1a と 1b だけで有効なため、1c に登録した正常なインスタンスにトラフィックが来ない図。ロードバランサーで 1c を有効にしてノードを作る B が原因と対処。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

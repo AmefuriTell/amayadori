@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0009",
+  "source": "flowchart TB\n  subgraph ACC[\"アカウント\"]\n    POL[\"✔ B: アカウントレベルの保持ポリシー<br/>接頭辞 /app/・90 日・RETROACTIVE\"]\n    OLD@{ svc: \"Amazon CloudWatch Logs\", label: \"既存の /app/ のロググループ\" }\n    NEW@{ svc: \"Amazon CloudWatch Logs\", label: \"今後作る /app/ のロググループ\" }\n  end\n  WA[\"⚠ A: NEW_ONLY は既存が無期限のまま\"]\n  WC[\"⚠ C・D: 独自の関数や<br/>各チームの設定に頼る\"]\n  POL == \"既存にも適用\" ==> OLD\n  POL == \"今後にも適用\" ==> NEW\n  WA -.- OLD\n  WC -.- POL\n",
+  "alt": "/app/ で始まる既存と今後のロググループに 90 日の保持を使う図。アカウントレベルの保持ポリシーを RETROACTIVE で作ると、既存のものにも今後のものにも適用される（B）。NEW_ONLY では既存が無期限のまま。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0009",
+  "source": "flowchart TB\n  USER[\"利用者\"]\n  CF@{ svc: \"Amazon CloudFront\", label: \"ディストリビューション（オリジングループ）\" }\n  subgraph US[\"us-east-1\"]\n    B1@{ svc: \"Amazon S3\", label: \"プライマリのオリジン\" }\n  end\n  subgraph WE[\"us-west-2\"]\n    B2@{ svc: \"Amazon S3\", label: \"セカンダリのオリジン（写し）\" }\n  end\n  X1[\"⚠ B: 同じリージョンの写しでは足りない\"]\n  X2[\"⚠ D・E: 夜間コピーや手作業の切り替え\"]\n  USER -- \"GET\" --> CF\n  CF -- \"通常\" --> B1\n  CF == \"✔ C: 使えない時に自動で切替\" ==> B2\n  B1 == \"✔ A: クロスリージョンレプリケーション\" ==> B2\n  X1 -.-> B1\n  X2 -.-> CF\n",
+  "alt": "CloudFront のオリジングループで、us-east-1 のバケットが使えない時に us-west-2 の写しへ自動で切り替える図。S3 のクロスリージョンレプリケーション（A）とオリジングループ（C）が正解で、B・D・E は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

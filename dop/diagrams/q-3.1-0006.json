@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0006",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph AZA[\"アベイラビリティーゾーン A\"]\n    P@{ svc: \"Amazon ElastiCache\", label: \"プライマリ（障害）\" }\n  end\n  subgraph AZB[\"アベイラビリティーゾーン B\"]\n    R[\"✔ B: レプリカ\"]\n  end\n  X1[\"⚠ A: 自動フェイルオーバーだけでは別ゾーンの保証がない\"]\n  X2[\"⚠ C・D: 大きいノードやスナップショットは自動昇格でない\"]\n  APP -- \"読み書き\" --> P\n  P -. \"障害\" .-> R\n  R == \"✔ B: Multi-AZ で自動昇格\" ==> APP\n  X1 -.-> P\n  X2 -.-> P\n",
+  "alt": "ElastiCache のプライマリが落ちた時、別のアベイラビリティーゾーンのレプリカが自動で昇格する図。Multi-AZ を有効にしてレプリカを別のゾーンに置く B が正解で、自動フェイルオーバーだけ（A）では別ゾーンの保証がない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0011",
+  "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"すべてのロググループ\" }\n  FH@{ svc: \"Amazon Data Firehose\", label: \"配信ストリーム（中央の処理）\" }\n  LG2@{ svc: \"Amazon CloudWatch Logs\", label: \"配信の仕組み自身のロググループ\" }\n  OK[\"✔ A: 選択の条件で<br/>配信の仕組みのログを除外\"]\n  WB[\"⚠ B・D: バッファーや解凍を変えても<br/>ループは止まらない\"]\n  WC[\"⚠ C: ポリシーを消すと<br/>中央の処理が崩れる\"]\n  LG -- \"ログ\" --> FH\n  FH -- \"自身のログ\" --> LG2\n  LG2 -. \"⚠ 再び送られてループ\" .-> FH\n  OK == \"除外\" ==> LG2\n  WB -.- FH\n  WC -.- LG\n",
+  "alt": "アカウントレベルのサブスクリプションフィルターで再帰のループが起きる図。配信の仕組み自身のロググループが再び Firehose へ送られる。選択の条件でそのロググループを除外するのが正解（A）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

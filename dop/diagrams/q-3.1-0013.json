@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0013",
+  "source": "flowchart TB\n  APP[\"アプリケーション\"]\n  subgraph AZA[\"アベイラビリティーゾーン A\"]\n    W@{ svc: \"Amazon RDS\", label: \"ライター（主）\" }\n  end\n  subgraph AZB[\"アベイラビリティーゾーン B\"]\n    R@{ svc: \"Amazon RDS\", label: \"✔ A: リーダー\" }\n  end\n  X1[\"⚠ B: スタンバイは読み取りを処理しない\"]\n  X2[\"⚠ C・D: 復元や手作業の昇格は遅い\"]\n  APP -- \"書き込み\" --> W\n  APP -- \"読み取り\" --> R\n  W == \"✔ A: 自動のフェイルオーバーの先\" ==> R\n  X1 -.-> R\n  X2 -.-> W\n",
+  "alt": "RDS の Multi-AZ DB クラスターで、リーダーが自動のフェイルオーバーの先になり、ふだんは読み取りも処理する図。正解は A で、Multi-AZ DB インスタンスのスタンバイは読み取りを処理しない（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

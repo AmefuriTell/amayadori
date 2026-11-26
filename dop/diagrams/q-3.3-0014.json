@@ -1,0 +1,8 @@
+{
+  "id": "q-3.3-0014",
+  "source": "flowchart TB\n  U([\"利用者\"])\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"ALB のヘルスチェック\" }\n  OK[\"正常なインスタンス\"]\n  NG[\"データベースに届かないインスタンス\"]\n  U -- \"リクエスト\" --> ALB\n  ALB -. \"⚠ 今: / は壊れていても 200 → 送り続ける\" .-> NG\n  ALB == \"✔ B: /health・成功コード 200（壊れていれば 503 → unhealthy）\" ==> OK\n  X[\"⚠ A: 200-499 は余計に正常扱い・⚠ C: 間隔を短くしても / は 200\"] -.- ALB\n  Y[\"⚠ D: ALB は自分のヘルスチェックで判断\"] -.- ALB\n",
+  "alt": "ALB のヘルスチェックを / から /health に変える図。/health はデータベースに届かない時に 503 を返すので、成功コードを 200 のままにすれば壊れたインスタンスが unhealthy になり、正常なターゲットにだけ送られる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "q-3.1-0003",
+  "source": "flowchart TB\n  BIZ[\"停止してよい 1 時間 = RTO・失ってよい 5 分 = RPO（✔ A）\"]\n  POL@{ svc: \"AWS Resilience Hub\", label: \"✔ C: 耐障害性の方針（RTO 1 時間・RPO 5 分）\" }\n  APP[\"今のアーキテクチャ\"]\n  X1[\"⚠ B: RTO と RPO が逆\"]\n  X2[\"⚠ D: AZ の障害は別の AZ で解決できる\"]\n  X3[\"⚠ E: 手作業で見比べるのは手間が大きい\"]\n  BIZ -- \"目標\" --> POL\n  POL == \"AZ・リージョンの障害ごとに評価\" ==> APP\n  X1 -.-> BIZ\n  X2 -.-> APP\n  X3 -.-> APP\n",
+  "alt": "RTO 1 時間・RPO 5 分の目標を AWS Resilience Hub の耐障害性の方針に決め、今のアーキテクチャが満たすかを評価する図。正解は A（止まってよい時間が RTO）と C で、B は逆、E は手作業。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

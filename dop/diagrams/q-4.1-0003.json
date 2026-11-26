@@ -1,0 +1,8 @@
+{
+  "id": "q-4.1-0003",
+  "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"Standard のロググループ\" }\n  MF[\"メトリクスフィルター（ERROR）\"]\n  M@{ svc: \"Amazon CloudWatch\", label: \"メトリクス\" }\n  AL[\"アラーム\"]\n  NA[\"✔ A: 作った後に届いたログだけ数える<br/>⚠ D: 作り直しても過去は数えない\"]\n  NB[\"✔ B: 既定値 0 を設定すると<br/>一致なしでも 0 を報告\"]\n  NC[\"⚠ C: ディメンションを付けると<br/>既定値は決められない\"]\n  LG -- \"新しいログ\" --> MF\n  MF -- \"データポイント\" --> M\n  M --> AL\n  NA -.- MF\n  NB -.- MF\n  NC -.- M\n",
+  "alt": "ERROR を数えるメトリクスフィルターの図。フィルターは作った後のログしか数えず（A）、一致が無い時は既定値 0 を設定すると 0 を報告するので INSUFFICIENT_DATA を避けられる（B）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
