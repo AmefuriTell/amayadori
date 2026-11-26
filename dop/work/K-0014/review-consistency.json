@@ -4,49 +4,10 @@
       "id": "s07",
       "issues": [
         {
-          "kind": "fact",
-          "severity": "重",
-          "detail": "「既定では五回か、三百秒」「オンフェイリャーコンフィギュレーション」「イベンツドロップト」を、EventBridge がターゲットの呼び出しに失敗した時の一般の動きとして言っている。しかし S15 の引用の主語は subscriber（\"Set both when you create the subscriber\"）で、S15 の取得元（raw の eb-custom-bus-retry.md、Retry limits の節）は、この既定が Custom Event Bus - Classic の target の既定（24 時間・185 回）より短いと明記している。講義は subscriber を「ターゲット」と訳してこの区別を消したので、受験者は「EventBridge の target の再試行の既定は 5 回か 300 秒」と誤って覚える。notes の「s07: subscriber を『ターゲット』と訳してそろえた」は、前回の軽の指摘（呼び方の揺れ）への対応としては分かるが、意味の範囲を変えてしまうので妥当でない。",
-          "suggest": "台本・表・bullets で、この数字と OnFailureConfiguration・EventsDropped が「このページが説明する subscriber の場合」の話だと範囲を言う。Classic の target の既定（24 時間・185 回）を使うなら、raw の同じページの Retry limits の節の文を sources.md に足してから言う。範囲をうまく言えないなら、数字は外して「再試行の上限があり、使い切ったら dead-letter queue、無いと捨てられる」までにする。s14 の行「target に届かない → dead-letter queue」も同じ範囲で読めるか合わせて確かめる。"
-        },
-        {
-          "kind": "terms",
-          "severity": "軽",
-          "detail": "表の「上限に達した後 ｜ SQS のキューに記録」と台本の「記録を書きます」は根拠どおりだが、s14 の台本は「届けられなかったイベントを残したいなら」と、イベントそのものが残るように言う。",
-          "suggest": "s14 を「届けられなかった記録を残したいなら」か「失敗を記録として残したいなら」にそろえる。"
-        }
-      ]
-    },
-    {
-      "id": "s05",
-      "issues": [
-        {
           "kind": "unsupported",
           "severity": "軽",
-          "detail": "「パブリックイベントも要るなら、リージョンごとのルールを使うことになります」は S7 が直接言う事ではなく推論。notes のとおり「〜ことになります」の形で言っており、s13 の台本も「この連携では受けられないので」と理由付きなので、誤りにはならない。",
-          "suggest": "このままでよい。直接の根拠が見つかれば sources.md に足す。"
-        }
-      ]
-    },
-    {
-      "id": "s10",
-      "issues": [
-        {
-          "kind": "unsupported",
-          "severity": "軽",
-          "detail": "「シャードは、ストリームの中の区切りと考えてください」は根拠に無い言い換え。誤りに導くほどではない。",
-          "suggest": "「ストリームの記録を分けて持つ単位」程度に留めるか、根拠を足す。"
-        }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        {
-          "kind": "terms",
-          "severity": "軽",
-          "detail": "bullet「1 つのルール → simplified」は、表の行にある「アカウント固有・複数 Region」と「action-required 向け」の条件が落ちている。表と台本では言えているので食い違いは小さい。",
-          "suggest": "bullet を「固有・複数 Region を 1 つで → simplified」にそろえる。"
+          "detail": "前回の重は直っている。既定の数字（5 回か 300 秒）・OnFailureConfiguration・EventsDropped は bullets・表・台本から消え、「上限まで再試行し、尽きたら dead-letter queue に記録、無いと捨てられる」までになった。これは S15 の 1 文目（主語は target call）と 2 文目で言える範囲で、target 一般の既定の数字として誤って覚える恐れは無くなった。残る細部として、台本の「両方を、作るときに設定するよう述べています」の「作るとき」は原文では subscriber を作る時で、何を作る時かが台本では言われていない。誤りではない。",
+          "suggest": "気になるなら「設定を作るときに」程度にぼかすか、このままでよい。"
         }
       ]
     }
@@ -54,7 +15,7 @@
   "global": [
     {
       "severity": "軽",
-      "detail": "前回の中 4 件（s06 の状態の設定、s10 の queue consumer と SQS の区別、s13 の simplified の条件、s16 の冪等の範囲）はどれも直っている。s05 の制限と推奨の分け方、us-east-1 などの表記揺れ、s14 の bullet、s15 の「既定」「標準 iterator」も直っている。",
+      "detail": "前回の重 1 件（s07 の subscriber の既定を target 一般として言っていた件）は直っている。s14 の表・台本も「target 失敗を記録」「届けられなかった記録を残したいなら」と s07 の「記録」にそろった（前回の s07 terms の軽も解消）。s13 の bullet も「固有・複数 Region を 1 つ → simplified」で表の行とそろった。直したことで新しく出た重・中は無い。s01・s16 の地図の「target に届かない時」、s14 の「無いと捨てられる」は s07 の新しい範囲と食い違わない。図（s02・s03・s04・s06・s08・s09・s12）の矢印とつながりも根拠どおり。",
       "suggest": "—"
     }
   ]

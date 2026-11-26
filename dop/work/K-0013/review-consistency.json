@@ -1,37 +1,13 @@
 {
   "slides": [
     {
-      "id": "s04",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "図の枠「個々のアラームは通知しない」・bullets「個々のアラームでは通知しない」は、個々のアラームが通知できないという性質のように読める。S6 は \"taking actions only at an aggregated level\" で、そう作る使い方の話。台本「個々のアラームの所では知らせず」は使い方として読めるので食い違いは小さい。", "suggest": "枠と bullets を「個々のアラームには通知させない」と、作り方の言い方にする。" }
-      ]
-    },
-    {
-      "id": "s06",
-      "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "前回の中（EC2 以外は全て Application Auto Scaling という一般化）は直った。図は「ほかのリソースの例」、台本は「例として…が挙がっています」で S3 どおり。残るのは bullets の切れ方だけで、「例: ECS サービス → Application」「metric alarm が scaling policy を」は語が途中で切れている。", "suggest": "「例: ECS サービス → Application Auto Scaling」「metric alarm が scaling policy を動かす」と最後まで書く（入らなければ語を減らす）。" }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "台本の「ターゲットトラッキングは、目標の値に合わせて増減する種類」「プロビジョンドは、あらかじめ割り当てておく処理の量」は sources.md に定義が無い。notes のとおり「と考えてよいでしょう」「と考えてください」の弱い言い方で、試験の判断にも使っていないので、採らなかった理由は妥当。", "suggest": "対応不要（確認の記録）。" }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        { "kind": "unsupported", "severity": "軽", "detail": "表の行「オンプレミスも対象 → どちらのエージェントも → EC2 以外でも動く」の「動く」は、SSM Agent は S9（runs on … on-premises servers）で根拠があるが、CloudWatch agent は S8 で「オンプレミスのサーバーから集める」で、動く場所とは書いていない。s05 では前回の指摘どおり「集める相手」に直したので、s13 の「動く」と言い方がずれる。台本の「使えます」は問題ない。", "suggest": "確かめる所を「EC2 以外も対象」か、台本どおり「オンプレミスでも使える」にする。" }
-      ]
-    },
-    {
       "id": "s14",
       "issues": [
-        { "kind": "terms", "severity": "軽", "detail": "前回の中（「EC2 以外 → Application Auto Scaling」）は「ECS サービス・表など」と例の形に直った。ただ画面の「表」は何の表か書いておらず（台本はダイナモディービーの表）、同じ表の下の行「DynamoDB の容量 → DynamoDB auto scaling」とのつながりが画面から読めない（分かりやすさの指摘と同じ所）。確かめる所の「アラームが policy を」も語が切れている。", "suggest": "「ECS サービス・DynamoDB の表など」と書くか、2 行目の例を ECS サービスと Aurora のレプリカにする。「アラームが policy を動かす」と最後まで書く。" }
+        { "kind": "terms", "severity": "軽", "detail": "前回の指摘（画面の「表」が何の表か読めない、DynamoDB が 2 行に出る）は直った。2 行目は「ECS サービス・Aurora など」「例: Spot Fleet も」で S3 どおり、DynamoDB は 5 行目だけで「中で Application Auto Scaling」（S16）と台本も一致。残るのは、画面の「Aurora」が台本・s06 の alt の「Aurora のレプリカ」（S3: Aurora replicas）と比べて言葉が足りない事だけ。", "suggest": "入るなら「ECS サービス・Aurora のレプリカなど」と書く。" }
       ]
     }
   ],
   "global": [
-    { "severity": "軽", "detail": "前回の整合性の中 2 件（s06・s14 の一般化）は直った。前回の軽も、s01 の部 2（アイコンを外し 3 つのラベル）、s03（列を「アラームの動作 | 相手」に組み直し、「だけ」の言い切りが消えた）、s05（集める相手）、s07（スループットの容量）、s08（数秒・1 分以上を台本で言う）、s11（左にも health check、たずねる形にそろえた）、s12（独自処理の自動化で一番簡単・六つの部を四枚）、s13（Systems Manager）、s14（scaling policy の語は表から外れた）、s15（bullets に health check）、s16（composite alarm を足した）と直っている。図の矢印（s02・s04・s05・s06・s08・s09・s11）は根拠のつながりと合い、地図（s01・s16）は矢印の無い並び。notes の根拠外の扱い（EKS・ALB・metric filters・配送先・capacity provider の名・EventBridge のターゲットに SNS・Lambda を書かない）も講義の中で守られている。", "suggest": "対応不要（確認の記録）。" }
+    { "severity": "軽", "detail": "前回の軽もすべて直っている: s04 の枠と bullets は「通知しないように作る」の作り方の言い方、s06 の bullets は「metric alarm → scaling policy」「ECS サービスなど → Application Auto Scaling」と切れずに書かれ、s13 は「オンプレミスも対象」の行を外して CloudWatch agent は「オンプレミスからも集める」（S8）、SSM Agent は「オンプレミスでも動く」（S9）と根拠どおりに分け、s05 とも言い方がそろった。s07 の弱い言い方の説明は前回どおり妥当。直しで新しく食い違った所は無い（s06 の図で DynamoDB の表が Application Auto Scaling の例に出るのは S3 どおりで、s07・s14 の「中で Application Auto Scaling を使う」と矛盾しない）。図の矢印（s02・s04・s05・s06・s08・s09・s11）は根拠のつながりと合い、地図（s01・s16）は矢印の無い並び。", "suggest": "対応不要（確認の記録）。" }
   ]
 }

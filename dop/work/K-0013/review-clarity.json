@@ -1,37 +1,13 @@
 {
   "slides": [
     {
-      "id": "s04",
-      "issues": [
-        { "kind": "visual", "severity": "軽", "detail": "前回の中は直った。台本が「個々では知らせず、まとめた所でだけ知らせる。だから騒がしさを減らせる」の順になり、図にも「個々のアラームは通知しない」「ここでだけ動作」が入った。ただ図の例は 1 チーム分なので、『減る』のは個々のアラームが 3 つ別々に鳴らす通知が 1 か所にまとまるからだ、という比べる相手は絵に無く、耳で補う必要がある。", "suggest": "必要なら枠の名前を「個々のアラームからは通知させない（通知は 1 か所に）」とする程度でよい。" }
-      ]
-    },
-    {
       "id": "s06",
       "issues": [
-        { "kind": "visual", "severity": "軽", "detail": "bullets の「例: ECS サービス → Application」が途中で切れ、Application Auto Scaling の事だと読み取りにくい。図と台本は正しく例の形になっている。", "suggest": "「ECS サービスなど → Application Auto Scaling」と書き切る。" }
-      ]
-    },
-    {
-      "id": "s07",
-      "issues": [
-        { "kind": "jargon", "severity": "軽", "detail": "前回の中（ECS の 2 つの仕組みの対比、ターゲットトラッキング・プロビジョンドの説明）は直った。台本の冒頭で「前のスライドの Application Auto Scaling が増減するのは ECS のサービス、cluster auto scaling が増減するのは Auto Scaling group」と対比し、表も 2 行を並べた。残るのは、表の「provisioned の容量」が英語のままで、台本の言い換え（あらかじめ割り当てておく処理の量）が画面に無い事だけ。", "suggest": "表を「provisioned（割り当て）の容量」とする程度。" }
-      ]
-    },
-    {
-      "id": "s14",
-      "issues": [
-        { "kind": "exam", "severity": "中", "detail": "前回の直しで 2 行目が「ECS サービス・表など → Application Auto Scaling」となり、台本も「ダイナモディービーの表のような物なら、アプリケーションオートスケーリング」と言う。ところが 5 行目は「DynamoDB の容量 → DynamoDB auto scaling」。『増やす物から考える』と言った表の中で DynamoDB が 2 行に出て、答えが Application Auto Scaling と DynamoDB auto scaling の 2 つに見える。DynamoDB auto scaling が中で Application Auto Scaling を使う事は s07 の台本で一度言うだけで、この表には無いので、DynamoDB の問題でどちらを選ぶか分からなくなる。画面の「表」だけでは何の表かも読めない。", "suggest": "新しい事実を足さずに直せる。案 1: 2 行目の例から DynamoDB を外し「ECS サービス・Aurora のレプリカなど」にする（確かめる所は「例: Spot Fleet」など S3 の残りの例）。案 2: 5 行目の確かめる所を「中で Application Auto Scaling を使う」（S16）にし、台本でも「ダイナモディービーオートスケーリングは、中でアプリケーションオートスケーリングを使う仕組みです」と 2 行の関係を言う。" }
-      ]
-    },
-    {
-      "id": "s13",
-      "issues": [
-        { "kind": "exam", "severity": "軽", "detail": "4 行目「オンプレミスも対象 → どちらのエージェントも」は、条件から 1 つを選ぶ表の中で答えが 1 つに決まらない行。注として読めば分かるが、表の他の行と性質が違う。", "suggest": "s12 の INSUFFICIENT_DATA と同じく、この行を表の外（bullets か台本の「なお」）に出す。" }
+        { "kind": "exam", "severity": "軽", "detail": "図では DynamoDB の表が Application Auto Scaling の例に出るが、s14 の表では DynamoDB は DynamoDB auto scaling の行。両者の関係（DynamoDB auto scaling が中で Application Auto Scaling を使う）は s07 と s14 で言っているので迷う程ではないが、s06 の時点では気づきにくい。", "suggest": "必要なら s06 の台本の最後に「ダイナモディービーの話は、次のスライドでもう一度出ます」と一言添える程度。" }
       ]
     }
   ],
   "global": [
-    { "severity": "軽", "detail": "前回の分かりやすさの中 9 件のうち 8 件は直った: s04 composite alarm で通知が減る理由（台本の順と図の注記）、s05 SSM Agent の置き場（Systems Manager へ の別の囲みと「数値ではなく管理」、台本の「数値を集める物ではありません」）、s07 ECS の 2 つの仕組みの対比と用語の言い換え、s08「少なくとも 1 回」の意味（1 回だけとは限らない、を図・bullets・s15 の表にも）、s09 選ぶ場所の対比（「前のスライドでは…イベントブリッジでは違います。選ぶのは、イベントブリッジの側」）、s11 アラームを使う形の例（正常なホストの数・読み取りが抑えられた回数、s15 の条件にも）、s14 名前を後ろに置き「増やす物」から言う台本、s15 S3 イベント通知（決まった種類で Lambda）と EventBridge（全イベントから選ぶ）の行が重ならなくなった。残る中は s14 の DynamoDB が 2 行に出る件（直しで新しく出た物）。notes の採らなかった理由（s07 は弱い言い方で一言、s12 INSUFFICIENT_DATA を表の外へ、s05 のエッジの機器を図に入れない）はどれも妥当。", "suggest": "s14 を直せば pass。" }
+    { "severity": "軽", "detail": "前回の中（s14 で DynamoDB が 2 行に出て答えが 2 つに見える）は直った。2 行目から DynamoDB を外して「ECS サービス・Aurora など」「例: Spot Fleet も」とし、DynamoDB は 5 行目「中で Application Auto Scaling」だけ。台本も「これは中で、アプリケーションオートスケーリングを使う仕組みです」と 2 つの関係を言うので、DynamoDB の問題で選ぶ物が 1 つに決まる。前回の軽も、s06 の bullets を書き切った、s07 の表に「provisioned（割り当て）」、s13 の答えが決まらない行を外した、と直っている。直しで新しく分からなくなった所は無い。", "suggest": "対応不要（確認の記録）。" }
   ]
 }
