@@ -3551,7 +3551,10 @@
           "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "CodeDeploy エージェントが要るのは EC2/オンプレミスへのデプロイだけ。Lambda と ECS へのデプロイでは要らないので、用意する作業は無い（A）。サイドカーやレイヤー（B）や EC2 を残す案（C）は無駄。"
+      }
     },
     {
       "id": "q-1.4-0012",
@@ -3614,7 +3617,10 @@
           "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "インスタンスプロファイルのロールに S3 の権限が無いので、リビジョンとエージェントを取れない。2 つのバケットへの s3:Get* と s3:List* をロールに足すのが最も安全（D）。公開（A）などでは直らない。"
+      }
     },
     {
       "id": "q-1.4-0013",
@@ -3676,7 +3682,10 @@
           "quote": "The agent deletes log files after seven days."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "実行中のインスタンスがスケールインで終了すると CodeDeploy エージェントが止まり、デプロイが Failed になるまで最大 1 時間かかる（B）。最初のイベントの前に終了した時は 5 分でタイムアウトする（C）。"
+      }
     },
     {
       "id": "q-1.4-0014",
@@ -3737,7 +3746,10 @@
           "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ApplicationStop は前に成功したリビジョンの AppSpec のスクリプトで動くので、新しいリビジョンで直しても失敗する。失敗を無視するオプションでデプロイを作り直せば、直したスクリプトを入れられる（A）。"
+      }
     },
     {
       "id": "q-1.4-0015",
@@ -3798,7 +3810,10 @@
           "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "外で消されたデータベースに戻れず UPDATE_ROLLBACK_FAILED になったスタックは、ロールバックを続けて消えたリソースを飛ばすと UPDATE_ROLLBACK_COMPLETE に戻り、削除せずに更新できる（D）。"
+      }
     },
     {
       "id": "q-1.4-0016",
@@ -3856,7 +3871,10 @@
           "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "ログに原因が出ない AllowTraffic の失敗は、ふつうロードバランサーのヘルスチェックの設定の誤りが原因（B）。それより前のイベントが動いているので、ApplicationStop（A）やエージェント（C）は原因ではない。"
+      }
     },
     {
       "id": "q-1.4-0017",
@@ -3924,7 +3942,10 @@
           "quote": "The service role for CodeDeploy might not have required permissions."
         }
       ],
-      "low_confidence": false
+      "low_confidence": false,
+      "diagram": {
+        "alt": "すべてのライフサイクルイベントが Skipped で HEALTH_CONSTRAINTS になる時は、CodeDeploy エージェントが入っていない・動いていないこと（A）と、サービスロールの権限不足（B）を確かめる。"
+      }
     },
     {
       "id": "q-2.1-0001",

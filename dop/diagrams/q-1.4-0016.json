@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0016",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"Blue/Green デプロイ\" }\n  REPL[\"置き換え先のインスタンス（ログにエラー無し・アプリは起動）\"]\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサーのヘルスチェック\" }\n  EV[\"AllowTraffic で失敗\"]\n  BADA[\"⚠ A: ApplicationStop の失敗ならそのイベントで失敗する\"]\n  BADC[\"⚠ C: エージェントが無ければ AllowTraffic まで進まない\"]\n  BADD[\"⚠ D: タスク定義は ECS の話。EC2 には無関係\"]\n  CD -- \"デプロイ\" --> REPL\n  REPL -- \"登録\" --> ALB\n  ALB == \"✔ B: 設定の誤り\" ==> EV\n  BADA -.-> REPL\n  BADC -.-> REPL\n  BADD -.-> CD",
+  "alt": "ログに原因が出ない AllowTraffic の失敗は、ふつうロードバランサーのヘルスチェックの設定の誤りが原因（B）。それより前のイベントが動いているので、ApplicationStop（A）やエージェント（C）は原因ではない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}

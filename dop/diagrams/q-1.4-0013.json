@@ -1,0 +1,8 @@
+{
+  "id": "q-1.4-0013",
+  "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"インプレースのデプロイ\" }\n  INS[\"インスタンス（ライフサイクルのスクリプトを実行中）\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"スケールイン\" }\n  AGT[\"CodeDeploy エージェントが止まる\"]\n  ST[\"デプロイの状態が Failed になるまで最大 1 時間\"]\n  BADA[\"⚠ A: ログの削除（7 日後）は状態の報告と無関係\"]\n  BADD[\"⚠ D: エージェントは 443 番の外向き通信。受信は無関係\"]\n  BADC[\"⚠ C: 最初のイベントの前の終了なら 5 分でタイムアウト\"]\n  CD -- \"スクリプトを実行\" --> INS\n  ASG -- \"実行中に終了\" --> INS\n  INS --> AGT\n  AGT == \"✔ B: 最大 1 時間待つ\" ==> ST\n  BADA -.-> ST\n  BADC -.-> AGT\n  BADD -.-> AGT",
+  "alt": "実行中のインスタンスがスケールインで終了すると CodeDeploy エージェントが止まり、デプロイが Failed になるまで最大 1 時間かかる（B）。最初のイベントの前に終了した時は 5 分でタイムアウトする（C）。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
