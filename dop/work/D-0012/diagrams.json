@@ -28,12 +28,12 @@
     },
     {
       "id": "q-2.2-0006",
-      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph INV[\"招待で入ったメンバーアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ D: OrganizationAccountAccessRole（自分で作る）\" }\n  end\n  MGMT -. \"⚠ ロールが自動で作られない\" .-> INV\n  ROLE == \"✔ D: 管理アカウントを信頼\" ==> MGMT\n  MGMT -- \"ロールに切り替える\" --> ROLE\n  BADA[\"⚠ A: 招待し直しても同じ\"]\n  BADB[\"⚠ B: 15 日は返事の期限。待ってもロールは作られない\"]\n  BADC[\"⚠ C: 一括請求はアクセス権ではない\"]\n  BADA -.-> INV\n  BADB -.-> INV\n  BADC -.-> MGMT\n",
+      "source": "flowchart TB\n  MGMT@{ svc: \"AWS Organizations\", label: \"管理アカウント\" }\n  subgraph INV[\"招待のアカウント\"]\n    ROLE@{ svc: \"AWS IAM\", label: \"✔ D: OrganizationAccountAccessRole（自分で作る）\" }\n  end\n  MGMT -. \"⚠ ロールが自動で作られない\" .-> INV\n  ROLE == \"✔ D: 管理アカウントを信頼\" ==> MGMT\n  MGMT -- \"ロールに切り替える\" --> ROLE\n  BADA[\"⚠ A: 招待し直しても同じ\"]\n  BADB[\"⚠ B: 15 日は返事の期限。待ってもロールは作られない\"]\n  BADC[\"⚠ C: 一括請求はアクセス権ではない\"]\n  BADA -.-> INV\n  BADB -.-> INV\n  BADC -.-> MGMT\n",
       "alt": "招待で入ったメンバーアカウントには OrganizationAccountAccessRole が自動で作られないので、各アカウントで管理アカウントを信頼するロールを作る図（D）。招待し直し（A）や待つこと（B）、一括請求（C）では作られない。"
     },
     {
       "id": "q-2.2-0007",
-      "source": "flowchart TB\n  TP@{ svc: \"AWS Organizations\", label: \"タグポリシー（CostCenter・EC2 に強制）\" }\n  REQ([\"タグ付けのリクエスト\"])\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス\" }\n  NOTAG[\"CostCenter タグが無いリソース\"]\n  REQ -- \"決まりに合わない値\" --> TP\n  TP == \"✔ A: 完了させず止める\" ==> EC2\n  TP -. \"✔ B: タグの無いリソースは評価しない\" .-> NOTAG\n  BADC[\"⚠ C: タグの無いリソースは評価も報告もされない\"]\n  BADD[\"⚠ D: 全機能を有効にした組織だけで使える\"]\n  BADC -.-> NOTAG\n  BADD -.-> TP\n  TP -. \"⚠ E: 指定した種類だけ強制される\" .-> EC2\n",
+      "source": "flowchart TB\n  TP@{ svc: \"AWS Organizations\", label: \"タグポリシー（CostCenter・EC2 に強制）\" }\n  REQ([\"タグ付けのリクエスト\"])\n  EC2@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス<br/>✔ A: 合わない値は完了させず止める\" }\n  NOTAG[\"CostCenter タグが無いリソース\"]\n  REQ -- \"決まりに合わない値\" --> TP\n  TP == \"✔ A\" ==> EC2\n  TP -. \"✔ B: タグの無いリソースは評価しない\" .-> NOTAG\n  BADC[\"⚠ C: タグの無いリソースは評価も報告もされない\"]\n  BADD[\"⚠ D: 全機能を有効にした組織だけで使える\"]\n  BADC -.-> NOTAG\n  BADD -.-> TP\n  TP -. \"⚠ E: 指定した種類だけ強制される\" .-> EC2\n",
       "alt": "AWS Organizations のタグポリシーで CostCenter を EC2 に強制する図。決まりに合わないタグ付けのリクエストは止まる（A）が、タグが無いリソースは評価されない（B）。強制は指定したリソースの種類だけ（E は誤り）。"
     },
     {
