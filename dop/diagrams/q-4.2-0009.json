@@ -1,0 +1,8 @@
+{
+  "id": "q-4.2-0009",
+  "source": "flowchart TB\n  LG@{ svc: \"Amazon CloudWatch Logs\", label: \"ロググループ\" }\n  KDS@{ svc: \"Amazon Kinesis Data Streams\", label: \"ストリーム\" }\n  APP[\"検出のアプリケーション\"]\n  WB[\"⚠ B: 毎日のエクスポートでは数分以内にならない\"]\n  WC[\"⚠ C: Firehose は S3 にためてから届ける\"]\n  WD[\"⚠ D: 1 時間ごとの手作業\"]\n  LG == \"✔ A: サブスクリプション（通常 3 分以内）\" ==> KDS\n  KDS -- \"シャードを順番に読む\" --> APP\n  WB -.- LG\n  WC -.- LG\n  WD -.- LG\n",
+  "alt": "ログインの不審な動きを数分以内に順番に検出する図。サブスクリプションフィルターで Kinesis Data Streams に送り、アプリがシャードを順番に読む（A）。毎日のエクスポートや Firehose 経由の S3、手作業は要件に合わない。",
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
