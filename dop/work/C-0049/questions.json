@@ -1,0 +1,153 @@
+{
+  "item": "C-0049",
+  "questions": [
+    {
+      "task": "4.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.1-0007",
+      "services": [
+        "Amazon CloudWatch Logs",
+        "Amazon CloudWatch"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "An application writes JSON log events such as {\"path\": \"/checkout\", \"statusCode\": 503} to CloudWatch Logs in a Standard log group. The operations team wants a CloudWatch alarm when the number of server errors (status codes of 500 or higher) on the /checkout path exceeds a threshold, and the alarm must not count errors on other paths. Which solution meets this requirement with the LEAST operational overhead?",
+      "stem_ja": "あるアプリケーションは、{\"path\": \"/checkout\", \"statusCode\": 503} のような JSON のログイベントを、Standard のロググループの CloudWatch Logs に書いています。運用チームは、/checkout のパスでのサーバーエラー（ステータスコードが 500 以上）の数がしきい値を超えた時に CloudWatch アラームを鳴らしたく、ほかのパスのエラーは数えてはいけません。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Create a metric filter with the pattern { $.statusCode >= 500 && $.path = \"/checkout\" }, and create an alarm on the resulting metric.",
+          "text_ja": "{ $.statusCode >= 500 && $.path = \"/checkout\" } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "B",
+          "text": "Create a metric filter with the pattern { $.statusCode >= 500 }, and create an alarm on the resulting metric.",
+          "text_ja": "{ $.statusCode >= 500 } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "C",
+          "text": "Create a metric filter with the unstructured pattern \"checkout 500\", and create an alarm on the resulting metric.",
+          "text_ja": "構造の無い \"checkout 500\" のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。"
+        },
+        {
+          "key": "D",
+          "text": "Run a CloudWatch Logs Insights query by hand every 5 minutes and page the team when the count is too high.",
+          "text_ja": "5 分ごとに手作業で CloudWatch Logs Insights のクエリを実行し、数が多すぎたらチームを呼び出す。"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": {
+        "summary": "メトリクスフィルターは、ログデータの中で探す語やパターンを決め、ログを数値の CloudWatch メトリクスに変えて、グラフにしたりアラームを設定したりできるようにします。JSON のログでは、パターンを {} で囲み、$. でプロパティを選び、数値の比較（>= など）と && による組み合わせを使えます。",
+        "per_choice": {
+          "A": "正しい。/checkout のパスで 500 以上のものだけを数えるメトリクスになり、それにアラームを設定できます。",
+          "B": "ほかのパスのサーバーエラーも数えてしまい、要件に反します。",
+          "C": "構造の無いパターンは語が含まれるかを見るだけで、500 以上という数値の条件を表せず、503 などを取りこぼします。",
+          "D": "手作業が必要で、オーバーヘッドが大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "source_id": "S5",
+          "quote": "CloudWatch Logs uses these metric filters to turn log data into numerical CloudWatch metrics that you can graph or set an alarm on."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "source_id": "S2",
+          "quote": "Set off property selectors with a dollar sign followed by a period (\"$.\")."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "source_id": "S3",
+          "quote": "You can use the logical operators AND (\"&&\") and OR (\"||\") in filter patterns to create compound expressions that match log events where two or more conditions are true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-unstructured-log-events",
+          "source_id": "S1",
+          "quote": "Filter patterns only return the log events that contain the terms you define."
+        }
+      ]
+    },
+    {
+      "task": "4.1",
+      "difficulty": 2,
+      "status": "draft",
+      "created": "2026-11-26",
+      "id": "q-4.1-0008",
+      "services": [
+        "Amazon CloudWatch Logs"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "To reduce ingestion costs, a log group was created with the Essentials (formerly Infrequent Access) log class. A team then created a metric filter with the filter pattern \"error\" on this log group. The application writes lines such as \"ERROR payment declined\". Even after new errors occur, the metric shows no data points. Which are the MOST likely reasons? (Choose TWO.)",
+      "stem_ja": "取り込みの費用を下げるため、あるロググループは Essentials（以前の Infrequent Access）のログクラスで作られました。その後、チームがこのロググループに \"error\" というフィルターパターンのメトリクスフィルターを作りました。アプリケーションは \"ERROR payment declined\" のような行を書いています。新しいエラーが起きた後も、メトリクスにデータポイントが出ません。最も可能性の高い理由はどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Filter patterns are case sensitive, so \"error\" does not match \"ERROR\".",
+          "text_ja": "フィルターパターンは大文字と小文字を区別するため、\"error\" は \"ERROR\" に一致しない。"
+        },
+        {
+          "key": "B",
+          "text": "The log group does not use the Standard log class, and metric filters are supported only for Standard log groups.",
+          "text_ja": "ロググループが Standard のログクラスを使っておらず、メトリクスフィルターは Standard のロググループでだけ使える。"
+        },
+        {
+          "key": "C",
+          "text": "Metric filters only count events that happened before the filter was created.",
+          "text_ja": "メトリクスフィルターは、フィルターを作る前に起きたイベントだけを数える。"
+        },
+        {
+          "key": "D",
+          "text": "The metric unit was changed after the filter was created, which stops the metric from receiving data.",
+          "text_ja": "フィルターを作った後にメトリクスの単位を変えたため、メトリクスがデータを受け取らなくなった。"
+        },
+        {
+          "key": "E",
+          "text": "Metric filters can be used only with JSON log events, not with plain text lines.",
+          "text_ja": "メトリクスフィルターは JSON のログイベントにだけ使え、普通のテキストの行には使えない。"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": {
+        "summary": "フィルターパターンは大文字と小文字を区別し、決めた語を含むログイベントだけを返します。また、メトリクスフィルターは Standard のログクラスのロググループでだけ使えます。メトリクスフィルターは過去にさかのぼって数えず、作った後に起きたイベントのデータポイントだけを出します。",
+        "per_choice": {
+          "A": "正しい。小文字の \"error\" は \"ERROR\" の行に一致しません。",
+          "B": "正しい。Standard 以外のログクラスのロググループでは、メトリクスフィルターは使えません。",
+          "C": "逆で、作った後に起きたイベントだけを数えます。問題では新しいエラーでも出ていません。",
+          "D": "単位を後から変えても効果が無いだけで、データが止まる理由にはなりません。",
+          "E": "構造の無いログイベントの語にも一致させられます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-unstructured-log-events",
+          "source_id": "S1",
+          "quote": "Filter patterns are case sensitive."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "source_id": "S5",
+          "quote": "Metric filters are supported only for log groups in the Standard log class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "source_id": "S5",
+          "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "source_id": "S5",
+          "quote": "Changing the unit for the filter later will have no effect."
+        }
+      ]
+    }
+  ]
+}
