@@ -1,0 +1,62 @@
+{
+  "task": "5.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.2-0009",
+  "services": [
+    "AWS Config",
+    "AWS Systems Manager Automation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "An AWS Config rule reports Amazon S3 buckets that do not follow the company's standard. The security team wants every noncompliant bucket to be fixed automatically by a defined set of actions, and prefers to start from actions that AWS already provides instead of writing code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "AWS Config のルールが、会社の標準に従っていない Amazon S3 バケットを報告しています。セキュリティチームは、準拠していないバケットを決めた一連の操作で自動で直したく、コードを書くより AWS が用意している操作から始めたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Associate a managed Systems Manager Automation document with the AWS Config rule as an automatic remediation action.",
+      "text_ja": "AWS が用意する Systems Manager Automation のドキュメントを、自動の修復のアクションとして AWS Config のルールに関連付ける。"
+    },
+    {
+      "key": "B",
+      "text": "Create an EventBridge rule for AWS Config compliance changes that invokes an AWS Lambda function that fixes each bucket.",
+      "text_ja": "AWS Config の準拠状況の変化の EventBridge ルールを作り、各バケットを直す AWS Lambda 関数を呼び出す。"
+    },
+    {
+      "key": "C",
+      "text": "Send the AWS Config notifications to an email list and have an engineer fix each bucket in the console.",
+      "text_ja": "AWS Config の通知をメールのリストへ送り、エンジニアがコンソールで各バケットを直す。"
+    },
+    {
+      "key": "D",
+      "text": "Run a weekly script from an EC2 instance that lists all buckets and changes the settings that do not match the standard.",
+      "text_ja": "毎週 EC2 インスタンスからすべてのバケットを一覧し、標準に合わない設定を変えるスクリプトを動かす。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "AWS Config は、ルールで評価して準拠していないリソースを、Systems Manager Automation のドキュメントで修復できます。AWS Config は修復のアクションを持つマネージドの Automation ドキュメントを用意しており、独自のドキュメントを作って関連付けることもできます。",
+    "per_choice": {
+      "A": "正しい。用意されたドキュメントを関連付けるだけで、コード無しで自動の修復ができます。",
+      "B": "動きますが、修復のコードを Lambda 関数で書いて保守する必要があります。",
+      "C": "手作業で、自動の修復になりません。",
+      "D": "スクリプトを保守する必要があり、次の実行まで準拠していない状態が続きます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation",
+      "source_id": "S1",
+      "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation",
+      "source_id": "S1",
+      "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

@@ -1,0 +1,62 @@
+{
+  "task": "5.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.2-0011",
+  "services": [
+    "Amazon EventBridge",
+    "AWS Systems Manager Automation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Whenever a new EC2 instance starts in an account, a security agent must be installed on it automatically. Instances are launched from many different launch templates owned by different teams. The company has a Systems Manager Automation runbook that installs the agent and does not want to write code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "アカウントで新しい EC2 インスタンスが起動するたびに、セキュリティのエージェントを自動で入れる必要があります。インスタンスは、それぞれ別のチームが持つ多くの起動テンプレートから起動されます。会社には、エージェントを入れる Systems Manager Automation のランブックがあり、コードは書きたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Create an EventBridge rule for instance start events, and set the Automation runbook as the rule's target.",
+      "text_ja": "インスタンスの起動のイベントの EventBridge ルールを作り、Automation のランブックをルールのターゲットにする。"
+    },
+    {
+      "key": "B",
+      "text": "Create an EventBridge rule for instance start events that invokes an AWS Lambda function, which starts the runbook.",
+      "text_ja": "インスタンスの起動のイベントで AWS Lambda 関数を呼ぶ EventBridge ルールを作り、関数がランブックを開始する。"
+    },
+    {
+      "key": "C",
+      "text": "Ask every team to add the agent installation to the user data of each of its launch templates.",
+      "text_ja": "すべてのチームに、自分の各起動テンプレートのユーザーデータへエージェントのインストールを足してもらう。"
+    },
+    {
+      "key": "D",
+      "text": "Have an engineer run the runbook by hand every morning against the instances that started the day before.",
+      "text_ja": "エンジニアが毎朝、前の日に起動したインスタンスに対して手作業でランブックを実行する。"
+    }
+  ],
+  "answer": [
+    "A"
+  ],
+  "explanation": {
+    "summary": "ランブックを Amazon EventBridge のイベントのターゲットに指定すると、決まった AWS のシステムのイベントが起きた時に Automation を開始できます。例えば新しいインスタンスが起動した時に、Automation を動かしてソフトウェアを入れられます。",
+    "per_choice": {
+      "A": "正しい。コード無しで、起動のたびにランブックが自動で動きます。",
+      "B": "動きますが、ランブックを開始するだけの Lambda 関数を書いて保守することになります。",
+      "C": "多くのチームとテンプレートに頼ることになり、漏れが出やすく、手間もかかります。",
+      "D": "手作業で、起動してから最大 1 日エージェントが無い状態が続きます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge",
+      "source_id": "S5",
+      "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge",
+      "source_id": "S5",
+      "quote": "When a new instance starts, the system runs the automation and installs software."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

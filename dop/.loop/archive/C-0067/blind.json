@@ -1,0 +1,155 @@
+{
+  "item": "C-0067",
+  "questions": [
+    {
+      "id": "q-5.2-0001",
+      "task": "5.2",
+      "services": [
+        "AWS Config",
+        "AWS Systems Manager Automation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "AWS Config のルールが、会社の標準に従っていない Amazon S3 バケットを報告しています。セキュリティチームは、準拠していないバケットを決めた一連の操作で自動で直したく、コードを書くより AWS が用意している操作から始めたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "AWS が用意する Systems Manager Automation のドキュメントを、自動の修復のアクションとして AWS Config のルールに関連付ける。"
+        },
+        {
+          "key": "B",
+          "text": "AWS Config の準拠状況の変化の EventBridge ルールを作り、各バケットを直す AWS Lambda 関数を呼び出す。"
+        },
+        {
+          "key": "C",
+          "text": "AWS Config の通知をメールのリストへ送り、エンジニアがコンソールで各バケットを直す。"
+        },
+        {
+          "key": "D",
+          "text": "毎週 EC2 インスタンスからすべてのバケットを一覧し、標準に合わない設定を変えるスクリプトを動かす。"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0002",
+      "task": "5.2",
+      "services": [
+        "Amazon CloudWatch",
+        "Amazon EC2",
+        "Amazon SNS"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "古いアプリケーションが、Auto Scaling グループに入っていない 1 台の EC2 インスタンスで動いています。会社は、AWS の対応が必要な基盤のハードウェアの障害でインスタンスが損なわれた時に、自動で復旧させたいと考えており、その時には運用チームに通知する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "StatusCheckFailed_Instance に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。"
+        },
+        {
+          "key": "B",
+          "text": "StatusCheckFailed_System に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。"
+        },
+        {
+          "key": "C",
+          "text": "1 分ごとにインスタンスの状態を確かめ、失敗していたらインスタンスを停止・起動する AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "チームにメールを送る CloudWatch アラームを作り、エンジニアが手作業でインスタンスを新しいハードウェアへ移す。"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0003",
+      "task": "5.2",
+      "services": [
+        "Amazon EventBridge",
+        "AWS Systems Manager Automation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "アカウントで新しい EC2 インスタンスが起動するたびに、セキュリティのエージェントを自動で入れる必要があります。インスタンスは、それぞれ別のチームが持つ多くの起動テンプレートから起動されます。会社には、エージェントを入れる Systems Manager Automation のランブックがあり、コードは書きたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "インスタンスの起動のイベントの EventBridge ルールを作り、Automation のランブックをルールのターゲットにする。"
+        },
+        {
+          "key": "B",
+          "text": "インスタンスの起動のイベントで AWS Lambda 関数を呼ぶ EventBridge ルールを作り、関数がランブックを開始する。"
+        },
+        {
+          "key": "C",
+          "text": "すべてのチームに、自分の各起動テンプレートのユーザーデータへエージェントのインストールを足してもらう。"
+        },
+        {
+          "key": "D",
+          "text": "エンジニアが毎朝、前の日に起動したインスタンスに対して手作業でランブックを実行する。"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0004",
+      "task": "5.2",
+      "services": [
+        "AWS Systems Manager Automation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "DevOps エンジニアは、修正を当てるために、EC2 インスタンスを再起動する Systems Manager Automation の事前定義のランブックを 400 台で実行する必要があります。何か問題が起きた時の影響を抑えるため、同時に再起動するのは 20 台までにし、少ない回数の失敗で Automation を止める必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たす方法はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "400 台すべてを対象にランブックを 1 回実行し、同時実行数を 20、エラーのしきい値を低く設定する。"
+        },
+        {
+          "key": "B",
+          "text": "400 台すべてに一度にランブックを実行し、失敗が出たらエンジニアが取り消せるようコンソールを見張る。"
+        },
+        {
+          "key": "C",
+          "text": "20 台ずつランブックを開始し、失敗を数える AWS Lambda 関数を書く。"
+        },
+        {
+          "key": "D",
+          "text": "インスタンスを手作業で 20 のグループに分け、1 日に 1 グループずつランブックを実行する。"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0005",
+      "task": "5.2",
+      "services": [
+        "AWS Systems Manager OpsCenter",
+        "Amazon CloudWatch",
+        "Amazon EventBridge"
+      ],
+      "type": "multi",
+      "select_count": 2,
+      "stem": "運用チームは、多くのツールからのアラームとサービスのイベントを扱っており、問題が自動で現れ、診断して直せる 1 つのコンソールを求めています。CloudWatch アラームが ALARM の状態になった時や重要な AWS のサービスのイベントが起きた時に、手作業無しで項目が作られ、エンジニアが同じ場所から修復のランブックを実行できるようにしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices": [
+        {
+          "key": "A",
+          "text": "CloudWatch アラームと EventBridge のルールで、Systems Manager OpsCenter に OpsItem を自動で作るよう設定する。"
+        },
+        {
+          "key": "B",
+          "text": "OpsCenter で使える Systems Manager Automation のランブックで、OpsItem を解決する。"
+        },
+        {
+          "key": "C",
+          "text": "すべてのアラームをチームにメールする SNS トピックへ送り、問題は共有の表計算シートで管理する。"
+        },
+        {
+          "key": "D",
+          "text": "すべてのアラームを示す CloudWatch のダッシュボードを作り、エンジニアが手作業でチケットを作る。"
+        },
+        {
+          "key": "E",
+          "text": "各アラームを DynamoDB のテーブルへ写す AWS Lambda 関数を書き、チームが 1 時間ごとに確認する。"
+        }
+      ]
+    }
+  ]
+}

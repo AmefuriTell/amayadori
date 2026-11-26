@@ -1,0 +1,61 @@
+{
+  "task": "5.2",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-5.2-0012",
+  "services": [
+    "AWS Systems Manager Automation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A DevOps engineer must run a predefined Systems Manager Automation runbook that restarts EC2 instances on 400 instances to apply a fix. To limit the impact if something goes wrong, no more than 20 instances may be restarted at the same time, and the automation must stop after a small number of failures. Which approach meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "DevOps エンジニアは、修正を当てるために、EC2 インスタンスを再起動する Systems Manager Automation の事前定義のランブックを 400 台で実行する必要があります。何か問題が起きた時の影響を抑えるため、同時に再起動するのは 20 台までにし、少ない回数の失敗で Automation を止める必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たす方法はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Run the runbook against all 400 instances at once, and watch the console so that an engineer can cancel it if failures appear.",
+      "text_ja": "400 台すべてに一度にランブックを実行し、失敗が出たらエンジニアが取り消せるようコンソールを見張る。"
+    },
+    {
+      "key": "B",
+      "text": "Run the runbook once against all 400 instances, and set the concurrency to 20 and a low error threshold.",
+      "text_ja": "400 台すべてを対象にランブックを 1 回実行し、同時実行数を 20、エラーのしきい値を低く設定する。"
+    },
+    {
+      "key": "C",
+      "text": "Write an AWS Lambda function that starts the runbook for 20 instances at a time and counts the failures.",
+      "text_ja": "20 台ずつランブックを開始し、失敗を数える AWS Lambda 関数を書く。"
+    },
+    {
+      "key": "D",
+      "text": "Split the instances into 20 groups by hand, and run the runbook for one group each day.",
+      "text_ja": "インスタンスを手作業で 20 のグループに分け、1 日に 1 グループずつランブックを実行する。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Automation のランブックには、インスタンスの再起動のような一般的な作業の事前定義のものがあります。Automation では同時に対象にするリソースの数と、止めるまでに許すエラーの数を細かく決められます。",
+    "per_choice": {
+      "A": "同時に 400 台が再起動し、止めるのも人の判断になるため、要件を満たしません。",
+      "B": "正しい。組み込みの同時実行数とエラーのしきい値で、20 台ずつ進め、失敗が増えれば自動で止まります。",
+      "C": "動きますが、組み込みの機能で済む制御を自分で作って保守することになります。",
+      "D": "手作業が多く時間もかかり、失敗で自動で止まる仕組みもありません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#automation-benefits",
+      "source_id": "S4",
+      "quote": "This means you can specify how many resources to target concurrently, and how many errors can occur before an automation is stopped."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#what-is-an-automation",
+      "source_id": "S3",
+      "quote": "Automation includes several pre-defined runbooks that you can use to perform common tasks like restarting one or more Amazon EC2 instances"
+    }
+  ],
+  "last_checked": "2026-11-26"
+}
