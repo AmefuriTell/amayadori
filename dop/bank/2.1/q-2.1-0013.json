@@ -1,0 +1,68 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0013",
+  "services": [
+    "AWS Service Catalog",
+    "AWS CloudFormation",
+    "AWS IAM"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A platform team has approved CloudFormation templates for standard environments. Developers must be able to launch, update, and terminate only these approved environments by themselves. The security team does not want to give developers permissions for CloudFormation or for the AWS services that the templates create. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "プラットフォームチームは、標準の環境の CloudFormation のテンプレートを承認しています。開発者は、承認済みの環境だけを自分で起動・更新・終了できる必要があります。セキュリティチームは、開発者に CloudFormation や、テンプレートが作る AWS のサービスの権限を与えたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Share the templates in a Service Catalog portfolio with no constraints, and grant developers access.",
+      "text_ja": "制約の無い Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。"
+    },
+    {
+      "key": "B",
+      "text": "Give developers administrator permissions and ask them to use only the approved templates from a shared bucket.",
+      "text_ja": "開発者に管理者の権限を与え、共有のバケットの承認済みのテンプレートだけを使うよう求める。"
+    },
+    {
+      "key": "C",
+      "text": "Share the templates in a Service Catalog portfolio with a launch constraint, and grant developers access.",
+      "text_ja": "起動の制約を付けた Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。"
+    },
+    {
+      "key": "D",
+      "text": "Have the platform team launch, update, and terminate every environment that developers request through tickets.",
+      "text_ja": "開発者がチケットで求める環境を、すべてプラットフォームチームが起動・更新・終了する。"
+    }
+  ],
+  "answer": [
+    "C"
+  ],
+  "explanation": {
+    "summary": "Service Catalog では、管理者が製品のポートフォリオを作って制約を足し、IAM でポートフォリオへのアクセスを与えます。起動の制約は、利用者が製品を起動・更新・終了する時に Service Catalog が引き受ける IAM ロールを決めます。起動の制約が無いと、利用者は CloudFormation や製品が使うサービスの権限を持つ必要があります。",
+    "per_choice": {
+      "A": "承認済みの物だけに絞れますが、起動の制約が無いと、開発者自身に CloudFormation と各サービスの権限が要ります。",
+      "B": "承認済みの物に絞れず、権限も広すぎます。",
+      "C": "正しい。開発者は承認済みの製品だけを扱え、起動のロールが代わりにリソースを作るので、開発者の権限は最小で済みます。",
+      "D": "開発者が自分で起動できず、プラットフォームチームの手間が大きくなります。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction",
+      "source_id": "S1",
+      "quote": "Administrators assemble portfolios of products from their catalog, add constraints and resource tags to be used at provisioning"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+      "source_id": "S2",
+      "quote": "A launch constraint specifies the AWS Identity and Access Management (IAM) role that AWS Service Catalog assumes when an end user launches, updates, or terminates a product."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+      "source_id": "S2",
+      "quote": "Without a launch constraint, end users must launch and manage products using their own IAM credentials."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

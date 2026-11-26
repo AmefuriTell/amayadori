@@ -1,0 +1,67 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0014",
+  "services": [
+    "AWS CloudFormation",
+    "AWS Control Tower"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A company uses AWS Control Tower. Teams deploy infrastructure with CloudFormation in many accounts. The security team wants resource configurations that break AWS best practices, such as unencrypted storage, to be blocked before the resources are provisioned, and does not want to write or maintain policy code. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "ある会社は AWS Control Tower を使っています。チームは多くのアカウントで CloudFormation を使ってインフラをデプロイしています。セキュリティチームは、暗号化されていないストレージのように AWS のベストプラクティスに反するリソースの設定を、リソースが用意される前に止めたく、ポリシーのコードを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Write CloudFormation Guard rules for every resource type and register them as custom Hooks in each account.",
+      "text_ja": "すべてのリソースタイプの CloudFormation Guard のルールを書き、各アカウントで独自の Hooks として登録する。"
+    },
+    {
+      "key": "B",
+      "text": "Use AWS Config rules to find noncompliant resources after they are created, and delete them by hand.",
+      "text_ja": "AWS Config のルールで作られた後の準拠していないリソースを見つけ、手作業で削除する。"
+    },
+    {
+      "key": "C",
+      "text": "Ask a reviewer to read every CloudFormation template before it is deployed.",
+      "text_ja": "デプロイの前に、レビュー担当がすべての CloudFormation のテンプレートを読む。"
+    },
+    {
+      "key": "D",
+      "text": "Turn on AWS Control Tower proactive controls, which are implemented as CloudFormation Hooks.",
+      "text_ja": "CloudFormation Hooks として実装される AWS Control Tower のプロアクティブなコントロールを有効にする。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CloudFormation Hooks は、リソースを用意する前にその設定を調べ、準拠していなければ操作を失敗させて用意を止める（または警告する）機能です。AWS Control Tower のコントロールカタログは、Hooks として使える標準のプロアクティブなコントロールを用意しており、コードを書かずに組織全体で AWS のベストプラクティスに照らして設定を確かめられます。",
+    "per_choice": {
+      "A": "用意の前に止められますが、ポリシーのコードを書いて保守することになり、要件に反します。",
+      "B": "作られた後に見つけるので、用意の前に止める要件を満たさず、削除も手作業です。",
+      "C": "手作業で、多くのアカウントのデプロイに追いつきません。",
+      "D": "正しい。コードを書かずに、用意の前に準拠していない設定を止められます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#what-is-cloudformation-hooks",
+      "source_id": "S8",
+      "quote": "you can provide code that proactively inspects the configuration of your AWS resources before provisioning."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+      "source_id": "S10",
+      "quote": "The AWS Control Tower Control Catalog offers standardized proactive controls that you can implement as Hooks."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+      "source_id": "S10",
+      "quote": "validate resource configurations against AWS best practices across your organization without writing code."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

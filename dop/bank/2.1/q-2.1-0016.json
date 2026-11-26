@@ -1,0 +1,61 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0016",
+  "services": [
+    "AWS CloudFormation"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "Many teams write their own CloudFormation templates. The security team wants every team to include the same hardened configuration for a common set of resources, and wants to update that configuration in one place when security guidelines change. The teams must keep writing their own templates. Which solution meets these requirements with the LEAST operational overhead?",
+  "stem_ja": "多くのチームが、自分の CloudFormation のテンプレートを書いています。セキュリティチームは、よく使う一組のリソースについて、すべてのチームが同じ強化した設定を入れることと、セキュリティの指針が変わった時にその設定を 1 か所で更新することを求めています。チームは自分のテンプレートを書き続ける必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Publish a YAML snippet on a wiki and ask each team to copy it into its templates and update the copies when guidelines change.",
+      "text_ja": "YAML の断片を wiki に載せ、各チームがテンプレートへ写し、指針が変わったら写しを更新する。"
+    },
+    {
+      "key": "B",
+      "text": "Deploy the hardened resources to every account with CloudFormation StackSets, and ask teams not to define those resources themselves.",
+      "text_ja": "強化したリソースを CloudFormation StackSets ですべてのアカウントにデプロイし、チームにはそのリソースを自分で定義しないよう求める。"
+    },
+    {
+      "key": "C",
+      "text": "Review every team's template by hand before each deployment and send back changes that are needed.",
+      "text_ja": "各デプロイの前に各チームのテンプレートを手作業で見直し、必要な変更を戻す。"
+    },
+    {
+      "key": "D",
+      "text": "Package the configuration as a CloudFormation module in the registry, have teams include it in their templates, and publish new module versions when guidelines change.",
+      "text_ja": "設定を CloudFormation のモジュールとしてレジストリに入れ、チームがテンプレートに含め、指針が変わったらモジュールの新しいバージョンを出す。"
+    }
+  ],
+  "answer": [
+    "D"
+  ],
+  "explanation": {
+    "summary": "CloudFormation のモジュールは、リソースの設定を、スタックのテンプレートに含められる形でまとめる仕組みで、セキュリティやガバナンスのベストプラクティスを入れた部品として使えます。モジュールにはバージョンがあるので、指針が変わったら作成者が新しいバージョンを出せます。",
+    "per_choice": {
+      "A": "写しがチームごとに散り、指針が変わるたびにすべての写しを直す必要があります。",
+      "B": "リソースをまとめてデプロイするだけで、チームのテンプレートの中で同じ設定を使う仕組みになりません。",
+      "C": "手作業の見直しが毎回必要で、オーバーヘッドが大きくなります。",
+      "D": "正しい。チームは自分のテンプレートに同じ部品を含め、設定はモジュールの 1 か所で更新できます。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+      "source_id": "S6",
+      "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+      "source_id": "S6",
+      "quote": "because modules are versioned, if security guidelines change over time, the module author can create a new version of the module that incorporates those changes."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

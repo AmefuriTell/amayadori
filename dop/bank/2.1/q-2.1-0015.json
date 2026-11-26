@@ -1,0 +1,66 @@
+{
+  "task": "2.1",
+  "difficulty": 2,
+  "status": "verified",
+  "created": "2026-11-26",
+  "id": "q-2.1-0015",
+  "services": [
+    "AWS CDK"
+  ],
+  "type": "single",
+  "select_count": 1,
+  "stem": "A team builds infrastructure with an AWS CDK app that has many stacks and uses both L2 constructs and higher-level patterns from other teams. The security team wants one rule that checks every construct in the app and reports any Amazon S3 bucket that is not encrypted, without editing each bucket definition. Which approach BEST meets this requirement?",
+  "stem_ja": "あるチームは、多くのスタックを持ち、L2 のコンストラクトとほかのチームの高いレベルのパターンを両方使う AWS CDK のアプリでインフラを作っています。セキュリティチームは、各バケットの定義を直さずに、アプリのすべてのコンストラクトを調べて、暗号化されていない Amazon S3 バケットを報告する 1 つの決まりを求めています。この要件を最もよく満たす方法はどれですか。",
+  "choices": [
+    {
+      "key": "A",
+      "text": "Apply a Mixin with the .with() method to each bucket construct to add encryption.",
+      "text_ja": "各バケットのコンストラクトに .with() で Mixin を付けて、暗号化を足す。"
+    },
+    {
+      "key": "B",
+      "text": "Write an Aspect that visits all constructs in the app scope and validates that every bucket is encrypted.",
+      "text_ja": "アプリのスコープのすべてのコンストラクトを訪れ、すべてのバケットが暗号化されているかを確かめる Aspect を書く。"
+    },
+    {
+      "key": "C",
+      "text": "Replace every L2 bucket construct with an L1 construct so that each bucket maps directly to a CloudFormation resource.",
+      "text_ja": "各バケットが CloudFormation のリソースに直接対応するよう、すべての L2 のバケットのコンストラクトを L1 に置き換える。"
+    },
+    {
+      "key": "D",
+      "text": "Ask each team to review its own bucket definitions before every deployment.",
+      "text_ja": "各チームが、デプロイのたびに自分のバケットの定義を確かめる。"
+    }
+  ],
+  "answer": [
+    "B"
+  ],
+  "explanation": {
+    "summary": "Aspect は、あるスコープのすべてのコンストラクトに操作を当てる仕組みで、すべてのバケットが暗号化されているかを確かめることもできます。アプリ全体に決まりを当てたり確かめたりする時は Aspect、特定のコンストラクトに機能を足す時は Mixin を使います。",
+    "per_choice": {
+      "A": "Mixin は特定のコンストラクトに機能を足すもので、各バケットに付ける必要があり、アプリ全体を調べる決まりになりません。",
+      "B": "正しい。1 つの Aspect で、ほかのチームのパターンの中も含めてすべてのバケットを調べられます。",
+      "C": "各バケットの定義を直すことになり、確かめる決まりにもなりません。",
+      "D": "手作業で漏れが出やすく、1 つの決まりで調べる要件を満たしません。"
+    }
+  },
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+      "source_id": "S14",
+      "quote": "Aspects are a way to apply an operation to all constructs in a given scope."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+      "source_id": "S14",
+      "quote": "Or it could verify something about the state of the constructs, such as making sure that all buckets are encrypted."
+    },
+    {
+      "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects-vs-mixins",
+      "source_id": "S15",
+      "quote": "Use Aspects when you want to enforce rules across your entire application or validate that constructs meet certain criteria. Use Mixins when you want to add a specific feature to a specific construct."
+    }
+  ],
+  "last_checked": "2026-11-26"
+}

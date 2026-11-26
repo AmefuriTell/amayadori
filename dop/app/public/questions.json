@@ -26,7 +26,7 @@
       "weight": 0.17
     }
   },
-  "count": 231,
+  "count": 235,
   "questions": [
     {
       "id": "q-1.1-0001",
@@ -4290,6 +4290,249 @@
         {
           "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
           "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0013",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS Service Catalog",
+        "AWS CloudFormation",
+        "AWS IAM"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A platform team has approved CloudFormation templates for standard environments. Developers must be able to launch, update, and terminate only these approved environments by themselves. The security team does not want to give developers permissions for CloudFormation or for the AWS services that the templates create. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "プラットフォームチームは、標準の環境の CloudFormation のテンプレートを承認しています。開発者は、承認済みの環境だけを自分で起動・更新・終了できる必要があります。セキュリティチームは、開発者に CloudFormation や、テンプレートが作る AWS のサービスの権限を与えたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Share the templates in a Service Catalog portfolio with no constraints, and grant developers access.",
+          "text_ja": "制約の無い Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。"
+        },
+        {
+          "key": "B",
+          "text": "Give developers administrator permissions and ask them to use only the approved templates from a shared bucket.",
+          "text_ja": "開発者に管理者の権限を与え、共有のバケットの承認済みのテンプレートだけを使うよう求める。"
+        },
+        {
+          "key": "C",
+          "text": "Share the templates in a Service Catalog portfolio with a launch constraint, and grant developers access.",
+          "text_ja": "起動の制約を付けた Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。"
+        },
+        {
+          "key": "D",
+          "text": "Have the platform team launch, update, and terminate every environment that developers request through tickets.",
+          "text_ja": "開発者がチケットで求める環境を、すべてプラットフォームチームが起動・更新・終了する。"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": {
+        "summary": "Service Catalog では、管理者が製品のポートフォリオを作って制約を足し、IAM でポートフォリオへのアクセスを与えます。起動の制約は、利用者が製品を起動・更新・終了する時に Service Catalog が引き受ける IAM ロールを決めます。起動の制約が無いと、利用者は CloudFormation や製品が使うサービスの権限を持つ必要があります。",
+        "per_choice": {
+          "A": "承認済みの物だけに絞れますが、起動の制約が無いと、開発者自身に CloudFormation と各サービスの権限が要ります。",
+          "B": "承認済みの物に絞れず、権限も広すぎます。",
+          "C": "正しい。開発者は承認済みの製品だけを扱え、起動のロールが代わりにリソースを作るので、開発者の権限は最小で済みます。",
+          "D": "開発者が自分で起動できず、プラットフォームチームの手間が大きくなります。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction",
+          "quote": "Administrators assemble portfolios of products from their catalog, add constraints and resource tags to be used at provisioning"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+          "quote": "A launch constraint specifies the AWS Identity and Access Management (IAM) role that AWS Service Catalog assumes when an end user launches, updates, or terminates a product."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+          "quote": "Without a launch constraint, end users must launch and manage products using their own IAM credentials."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0014",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation",
+        "AWS Control Tower"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A company uses AWS Control Tower. Teams deploy infrastructure with CloudFormation in many accounts. The security team wants resource configurations that break AWS best practices, such as unencrypted storage, to be blocked before the resources are provisioned, and does not want to write or maintain policy code. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "ある会社は AWS Control Tower を使っています。チームは多くのアカウントで CloudFormation を使ってインフラをデプロイしています。セキュリティチームは、暗号化されていないストレージのように AWS のベストプラクティスに反するリソースの設定を、リソースが用意される前に止めたく、ポリシーのコードを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Write CloudFormation Guard rules for every resource type and register them as custom Hooks in each account.",
+          "text_ja": "すべてのリソースタイプの CloudFormation Guard のルールを書き、各アカウントで独自の Hooks として登録する。"
+        },
+        {
+          "key": "B",
+          "text": "Use AWS Config rules to find noncompliant resources after they are created, and delete them by hand.",
+          "text_ja": "AWS Config のルールで作られた後の準拠していないリソースを見つけ、手作業で削除する。"
+        },
+        {
+          "key": "C",
+          "text": "Ask a reviewer to read every CloudFormation template before it is deployed.",
+          "text_ja": "デプロイの前に、レビュー担当がすべての CloudFormation のテンプレートを読む。"
+        },
+        {
+          "key": "D",
+          "text": "Turn on AWS Control Tower proactive controls, which are implemented as CloudFormation Hooks.",
+          "text_ja": "CloudFormation Hooks として実装される AWS Control Tower のプロアクティブなコントロールを有効にする。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CloudFormation Hooks は、リソースを用意する前にその設定を調べ、準拠していなければ操作を失敗させて用意を止める（または警告する）機能です。AWS Control Tower のコントロールカタログは、Hooks として使える標準のプロアクティブなコントロールを用意しており、コードを書かずに組織全体で AWS のベストプラクティスに照らして設定を確かめられます。",
+        "per_choice": {
+          "A": "用意の前に止められますが、ポリシーのコードを書いて保守することになり、要件に反します。",
+          "B": "作られた後に見つけるので、用意の前に止める要件を満たさず、削除も手作業です。",
+          "C": "手作業で、多くのアカウントのデプロイに追いつきません。",
+          "D": "正しい。コードを書かずに、用意の前に準拠していない設定を止められます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#what-is-cloudformation-hooks",
+          "quote": "you can provide code that proactively inspects the configuration of your AWS resources before provisioning."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+          "quote": "The AWS Control Tower Control Catalog offers standardized proactive controls that you can implement as Hooks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+          "quote": "validate resource configurations against AWS best practices across your organization without writing code."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0015",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CDK"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "A team builds infrastructure with an AWS CDK app that has many stacks and uses both L2 constructs and higher-level patterns from other teams. The security team wants one rule that checks every construct in the app and reports any Amazon S3 bucket that is not encrypted, without editing each bucket definition. Which approach BEST meets this requirement?",
+      "stem_ja": "あるチームは、多くのスタックを持ち、L2 のコンストラクトとほかのチームの高いレベルのパターンを両方使う AWS CDK のアプリでインフラを作っています。セキュリティチームは、各バケットの定義を直さずに、アプリのすべてのコンストラクトを調べて、暗号化されていない Amazon S3 バケットを報告する 1 つの決まりを求めています。この要件を最もよく満たす方法はどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Apply a Mixin with the .with() method to each bucket construct to add encryption.",
+          "text_ja": "各バケットのコンストラクトに .with() で Mixin を付けて、暗号化を足す。"
+        },
+        {
+          "key": "B",
+          "text": "Write an Aspect that visits all constructs in the app scope and validates that every bucket is encrypted.",
+          "text_ja": "アプリのスコープのすべてのコンストラクトを訪れ、すべてのバケットが暗号化されているかを確かめる Aspect を書く。"
+        },
+        {
+          "key": "C",
+          "text": "Replace every L2 bucket construct with an L1 construct so that each bucket maps directly to a CloudFormation resource.",
+          "text_ja": "各バケットが CloudFormation のリソースに直接対応するよう、すべての L2 のバケットのコンストラクトを L1 に置き換える。"
+        },
+        {
+          "key": "D",
+          "text": "Ask each team to review its own bucket definitions before every deployment.",
+          "text_ja": "各チームが、デプロイのたびに自分のバケットの定義を確かめる。"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": {
+        "summary": "Aspect は、あるスコープのすべてのコンストラクトに操作を当てる仕組みで、すべてのバケットが暗号化されているかを確かめることもできます。アプリ全体に決まりを当てたり確かめたりする時は Aspect、特定のコンストラクトに機能を足す時は Mixin を使います。",
+        "per_choice": {
+          "A": "Mixin は特定のコンストラクトに機能を足すもので、各バケットに付ける必要があり、アプリ全体を調べる決まりになりません。",
+          "B": "正しい。1 つの Aspect で、ほかのチームのパターンの中も含めてすべてのバケットを調べられます。",
+          "C": "各バケットの定義を直すことになり、確かめる決まりにもなりません。",
+          "D": "手作業で漏れが出やすく、1 つの決まりで調べる要件を満たしません。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+          "quote": "Aspects are a way to apply an operation to all constructs in a given scope."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+          "quote": "Or it could verify something about the state of the constructs, such as making sure that all buckets are encrypted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects-vs-mixins",
+          "quote": "Use Aspects when you want to enforce rules across your entire application or validate that constructs meet certain criteria. Use Mixins when you want to add a specific feature to a specific construct."
+        }
+      ],
+      "low_confidence": false
+    },
+    {
+      "id": "q-2.1-0016",
+      "task": "2.1",
+      "domain": 2,
+      "services": [
+        "AWS CloudFormation"
+      ],
+      "type": "single",
+      "select_count": 1,
+      "stem": "Many teams write their own CloudFormation templates. The security team wants every team to include the same hardened configuration for a common set of resources, and wants to update that configuration in one place when security guidelines change. The teams must keep writing their own templates. Which solution meets these requirements with the LEAST operational overhead?",
+      "stem_ja": "多くのチームが、自分の CloudFormation のテンプレートを書いています。セキュリティチームは、よく使う一組のリソースについて、すべてのチームが同じ強化した設定を入れることと、セキュリティの指針が変わった時にその設定を 1 か所で更新することを求めています。チームは自分のテンプレートを書き続ける必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Publish a YAML snippet on a wiki and ask each team to copy it into its templates and update the copies when guidelines change.",
+          "text_ja": "YAML の断片を wiki に載せ、各チームがテンプレートへ写し、指針が変わったら写しを更新する。"
+        },
+        {
+          "key": "B",
+          "text": "Deploy the hardened resources to every account with CloudFormation StackSets, and ask teams not to define those resources themselves.",
+          "text_ja": "強化したリソースを CloudFormation StackSets ですべてのアカウントにデプロイし、チームにはそのリソースを自分で定義しないよう求める。"
+        },
+        {
+          "key": "C",
+          "text": "Review every team's template by hand before each deployment and send back changes that are needed.",
+          "text_ja": "各デプロイの前に各チームのテンプレートを手作業で見直し、必要な変更を戻す。"
+        },
+        {
+          "key": "D",
+          "text": "Package the configuration as a CloudFormation module in the registry, have teams include it in their templates, and publish new module versions when guidelines change.",
+          "text_ja": "設定を CloudFormation のモジュールとしてレジストリに入れ、チームがテンプレートに含め、指針が変わったらモジュールの新しいバージョンを出す。"
+        }
+      ],
+      "answer": [
+        "D"
+      ],
+      "explanation": {
+        "summary": "CloudFormation のモジュールは、リソースの設定を、スタックのテンプレートに含められる形でまとめる仕組みで、セキュリティやガバナンスのベストプラクティスを入れた部品として使えます。モジュールにはバージョンがあるので、指針が変わったら作成者が新しいバージョンを出せます。",
+        "per_choice": {
+          "A": "写しがチームごとに散り、指針が変わるたびにすべての写しを直す必要があります。",
+          "B": "リソースをまとめてデプロイするだけで、チームのテンプレートの中で同じ設定を使う仕組みになりません。",
+          "C": "手作業の見直しが毎回必要で、オーバーヘッドが大きくなります。",
+          "D": "正しい。チームは自分のテンプレートに同じ部品を含め、設定はモジュールの 1 か所で更新できます。"
+        }
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+          "quote": "because modules are versioned, if security guidelines change over time, the module author can create a new version of the module that incorporates those changes."
         }
       ],
       "low_confidence": false
