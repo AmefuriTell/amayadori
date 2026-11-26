@@ -11,6 +11,7 @@ import { el } from './ui/el.js';
 import { showVersion, checkVersion } from './ui/version.js';
 import { openGlossary, serviceLabel as glossaryLabel, renderGlossaryList as glossaryList } from './ui/glossary.js';
 import { createSpeech } from './ui/speech.js';
+import { createMock } from './ui/mock.js';
 
 const app = document.getElementById('app');
 const progress = document.querySelector('[data-testid=progress]');
@@ -37,6 +38,15 @@ function renderGlossaryList() {
   progress.textContent = '';
   glossaryList(app, state.glossary);
 }
+
+// 模試（A-0003）: 答えは終えた時に記録へ足す
+const mockUi = createMock({
+  app, progress, state: () => state, render: () => render(),
+  record(entries) {
+    for (const e of entries) state.answers = addAnswer(state.answers, e);
+    if (!saveAnswers(state.answers)) state.storageOk = false;
+  },
+});
 
 for (const tab of document.querySelectorAll('.tab')) {
   tab.addEventListener('click', () => { state.view = tab.dataset.view; render(); });
@@ -79,6 +89,8 @@ function render() {
   for (const tab of document.querySelectorAll('.tab')) {
     if (tab.dataset.view === state.view) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
   }
+  if (state.view === 'mock') { app.replaceChildren(mockUi.render()); return; }
+  mockUi.leave();
   if (state.view === 'stats') return renderStats();
   if (state.view === 'glossary') return renderGlossaryList();
   if (state.index >= state.questions.length) return renderResult();
