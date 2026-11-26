@@ -18,6 +18,9 @@
     "AWS Config": "config",
     "AWS Control Tower": "control-tower",
     "Amazon Data Firehose": "data-firehose",
+    "Amazon Detective": "detective",
+    "Amazon DynamoDB": "dynamodb",
+    "Amazon EBS": "ebs",
     "Amazon EC2 Auto Scaling": "ec2-auto-scaling",
     "Amazon EC2": "ec2",
     "Amazon ECR": "ecr",
@@ -32,6 +35,8 @@
     "AWS IAM Identity Center": "iam-identity-center",
     "AWS IAM": "iam",
     "AWS Identity and Access Management (IAM)": "iam",
+    "Amazon Inspector": "inspector",
+    "Amazon Kinesis Data Streams": "kinesis-data-streams",
     "AWS KMS": "kms",
     "AWS Key Management Service (AWS KMS)": "kms",
     "AWS Lambda": "lambda",
@@ -754,6 +759,123 @@
         }
       ]
     },
+    "detective": {
+      "id": "detective",
+      "name": "Amazon Detective",
+      "reading": "ディテクティブ",
+      "summary": "セキュリティの検出結果や怪しい動きを分析・調査し、根本の原因を早く見つけるのを助けるサービス。AWS のリソースのログを自動で集め、機械学習・統計・グラフの理論で、調べやすい図にする。",
+      "features": [
+        {
+          "title": "ログと検出結果を取り込む",
+          "text": "CloudTrail と VPC フローログから、ログインの試み・API の呼び出し・ネットワークの通信などの時間つきのイベントを取り出す。GuardDuty の検出結果も取り込む。"
+        },
+        {
+          "title": "1 年までの履歴",
+          "text": "1 年までの過去のイベントのデータを見られ、その変化を GuardDuty の検出結果と結び付ける。"
+        },
+        {
+          "title": "検出結果のグループ",
+          "text": "1 つのセキュリティの出来事に関係する複数の動きをまとめて調べられる。重大な GuardDuty の検出結果の根本の原因を分析するのに使う。"
+        }
+      ],
+      "exam_points": [
+        "GuardDuty の検出結果の根本の原因を調べたい場面では、Detective を考える。"
+      ],
+      "compare": [
+        {
+          "with": "Amazon GuardDuty",
+          "text": "GuardDuty が見つけた検出結果を、Detective が取り込んで、原因の調査に使う。"
+        }
+      ],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Amazon Detective helps you analyze, investigate, and quickly identify the root cause of security findings or suspicious activities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#detective-how-works",
+          "quote": "It also ingests findings detected by GuardDuty."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#detective-features",
+          "quote": "You can analyze the root cause for high severity GuardDuty findings using finding groups."
+        }
+      ]
+    },
+    "dynamodb": {
+      "id": "dynamodb",
+      "name": "Amazon DynamoDB",
+      "reading": "ダイナモディービー",
+      "summary": "サーバーレスでフルマネージドの、分散型の NoSQL データベース（表の形にこだわらないデータベース）。どんな規模でも、1 桁ミリ秒の速さで応答する。キーと値の形と、ドキュメントの形のデータを扱える。",
+      "features": [
+        {
+          "title": "グローバルテーブル",
+          "text": "選んだ複数のリージョンに、どこでも書き込めるデータの複製を置く。複製の仕組みを自分で作らずに、複数のリージョンで動くデータベースにできる。"
+        },
+        {
+          "title": "継続的なバックアップと特定の時点への復元",
+          "text": "直近 35 日の間の、どの時点（秒の単位）にもテーブルを戻せる。プロビジョニングした容量は使わない。"
+        }
+      ],
+      "exam_points": [
+        "複数のリージョンでどこからでも書き込めるデータベースにしたい場面では、グローバルテーブルを考える。",
+        "誤ってデータを消した時に直前の時点へ戻したい場面では、特定の時点への復元を考える（35 日まで）。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html#Introduction",
+          "quote": "Amazon DynamoDB is a serverless, fully managed, distributed NoSQL database with single-digit millisecond performance at any scale."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html#ddb-capabilities-gt",
+          "quote": "Global tables provide multi-active replication of your data across your chosen AWS Regions with 99.999% availability."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html#ddb-resilience-backups-pitr",
+          "quote": "With point-in-time recovery, you can restore a table to any point in time up to the second during the last 35 days."
+        }
+      ]
+    },
+    "ebs": {
+      "id": "ebs",
+      "name": "Amazon EBS",
+      "reading": "イービーエス",
+      "summary": "EC2 インスタンスで使う、規模を広げやすく性能の高いブロックストレージ（ディスク）のサービス。ボリュームを EC2 インスタンスに付けると、パソコンのハードディスクのように使える。",
+      "features": [
+        {
+          "title": "ボリュームとスナップショット",
+          "text": "ボリュームは EC2 インスタンスに付けるディスク。スナップショットは、ある時点のボリュームのバックアップで、ボリュームとは別に残る。スナップショットからいつでも新しいボリュームを作れる。"
+        },
+        {
+          "title": "移す・残す",
+          "text": "スナップショットで、アカウント・リージョン・アベイラビリティーゾーンをまたいでデータを移せる。安く残すための EBS Snapshots Archive もある。"
+        },
+        {
+          "title": "Data Lifecycle Manager とごみ箱",
+          "text": "Amazon Data Lifecycle Manager で、スナップショットの作成・保持・削除を自動にできる。ごみ箱（Recycle Bin）で、誤って消したスナップショットを戻せる。"
+        }
+      ],
+      "exam_points": [
+        "EBS のスナップショットの作成と古い物の削除を自動にしたい場面では、Amazon Data Lifecycle Manager を考える。",
+        "データを別のリージョンやアカウントに移したい場面では、スナップショットを使う形を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html#what-is-ebs",
+          "quote": "Amazon EBS snapshots — These are point-in-time backups of Amazon EBS volumes that persist independently from the volume itself."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html#ebs-overview",
+          "quote": "You can then use those snapshots to instantly restore volumes or to migrate data across AWS accounts, AWS Regions, or Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html#related-services",
+          "quote": "A managed service that automates the creation, retention, and deletion of EBS snapshots and EBS-backed AMIs."
+        }
+      ]
+    },
     "ec2-auto-scaling": {
       "id": "ec2-auto-scaling",
       "name": "Amazon EC2 Auto Scaling",
@@ -1252,6 +1374,74 @@
         {
           "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html#introduction",
           "quote": "We recommend that you do not include such IAM changes in the critical, high-availability code paths of your application."
+        }
+      ]
+    },
+    "inspector": {
+      "id": "inspector",
+      "name": "Amazon Inspector",
+      "reading": "インスペクター",
+      "summary": "ワークロード（動かしている物）を自動で見つけ、ソフトウェアの脆弱性（弱点）と、意図しないネットワークへのさらされ方を検査し続ける脆弱性の管理のサービス。",
+      "features": [
+        {
+          "title": "検査する物",
+          "text": "EC2 インスタンス・Amazon ECR のコンテナイメージ・Lambda 関数を見つけて検査する。問題を見つけると、詳しい報告（検出結果）を作る。"
+        },
+        {
+          "title": "自動で始まり、自動で閉じる",
+          "text": "検査の予定や設定を手で決めなくてよく、対象を自動で見つけて検査を始める。問題が直されたことも自動で見つけ、検出結果を閉じる。"
+        }
+      ],
+      "exam_points": [
+        "ECR のイメージや EC2 インスタンスの脆弱性を、人が始めなくても検査し続けたい場面では、Inspector を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html#what-is-inspector",
+          "quote": "Amazon Inspector discovers and scans Amazon EC2 instances, container images in Amazon ECR, and Lambda functions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html#features",
+          "quote": "With Amazon Inspector, you don't need to manually schedule or configure assessment scans."
+        }
+      ]
+    },
+    "kinesis-data-streams": {
+      "id": "kinesis-data-streams",
+      "name": "Amazon Kinesis Data Streams",
+      "reading": "キネシス データストリームズ",
+      "summary": "大量に流れてくるデータのレコード（1 件 1 件の記録）を、リアルタイムに集めて処理するためのサービス。送る側が書いたレコードを確かにしまい、すぐ読めるようにする。",
+      "features": [
+        {
+          "title": "シャードと順序",
+          "text": "ストリームのコンシューマー（読む側）は、シャード（ストリームを分けた単位）のレコードを順番に読む。1 つのシャードは一度に 1 つの読む側が処理するので、そのシャードの中の順序が保たれる。"
+        },
+        {
+          "title": "複数の読む側",
+          "text": "複数の読む側が同じレコードを読めるので、いくつもの処理を同時に別々に行える。"
+        },
+        {
+          "title": "キューとして読む",
+          "text": "キューの読む側はレコードを 1 件ずつ受け取る。少なくとも 1 回届け、順番は保証しないので、同じレコードを 2 回以上処理しても困らないように作る。"
+        }
+      ],
+      "exam_points": [
+        "前のレコードに頼る処理で順番を守りたい場面では、シャードのレコードを順に読むストリームの読む側を考える。"
+      ],
+      "compare": [],
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+          "quote": "Each shard is processed by one stream consumer instance at a time, which preserves the order of the records in that shard"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#using-the-service",
+          "quote": "Multiple consumers can consume the same records, so that multiple actions can take place concurrently and independently"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+          "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream"
         }
       ]
     },

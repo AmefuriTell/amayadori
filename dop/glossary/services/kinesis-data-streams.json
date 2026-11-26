@@ -1,0 +1,52 @@
+{
+  "id": "kinesis-data-streams",
+  "name": "Amazon Kinesis Data Streams",
+  "aliases": [
+    "Amazon Kinesis Data Streams"
+  ],
+  "reading": "キネシス データストリームズ",
+  "summary": "大量に流れてくるデータのレコード（1 件 1 件の記録）を、リアルタイムに集めて処理するためのサービス。送る側が書いたレコードを確かにしまい、すぐ読めるようにする。",
+  "features": [
+    {
+      "title": "シャードと順序",
+      "text": "ストリームのコンシューマー（読む側）は、シャード（ストリームを分けた単位）のレコードを順番に読む。1 つのシャードは一度に 1 つの読む側が処理するので、そのシャードの中の順序が保たれる。",
+      "source_id": "S12"
+    },
+    {
+      "title": "複数の読む側",
+      "text": "複数の読む側が同じレコードを読めるので、いくつもの処理を同時に別々に行える。",
+      "source_id": "S13"
+    },
+    {
+      "title": "キューとして読む",
+      "text": "キューの読む側はレコードを 1 件ずつ受け取る。少なくとも 1 回届け、順番は保証しないので、同じレコードを 2 回以上処理しても困らないように作る。",
+      "source_id": "S14"
+    }
+  ],
+  "exam_points": [
+    {
+      "text": "前のレコードに頼る処理で順番を守りたい場面では、シャードのレコードを順に読むストリームの読む側を考える。",
+      "source_id": "S12"
+    }
+  ],
+  "references": [
+    {
+      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+      "source_id": "S12",
+      "quote": "Each shard is processed by one stream consumer instance at a time, which preserves the order of the records in that shard"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#using-the-service",
+      "source_id": "S13",
+      "quote": "Multiple consumers can consume the same records, so that multiple actions can take place concurrently and independently"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html#introduction",
+      "source_id": "S14",
+      "quote": "A queue delivers each record at least once and does not necessarily deliver records in the order that producers wrote them to the stream"
+    }
+  ],
+  "status": "verified",
+  "created": "2026-11-26",
+  "last_checked": "2026-11-26"
+}
