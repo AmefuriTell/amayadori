@@ -21,10 +21,10 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>パッケージ\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>コンテナイメージ\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドで npm を取る\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>作る・RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    LC[\"revision<br/>lifecycle の rule\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ LC\n  IB ~~~ LC\n",
-        "alt": "講義の三部構成を上から順に並べた図。第一部は置き場所と守りで、パッケージの CodeArtifact とコンテナイメージの ECR。第二部は作り方と共有で、ビルドで npm のパッケージを取る CodeBuild と、イメージを作って RAM で共有する EC2 Image Builder。第三部は版と寿命で、revision と lifecycle の rule。"
+        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>パッケージ\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>コンテナイメージ\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドで npm を取る\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>作る・resource を<br/>RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    LC[\"revision<br/>lifecycle の rule\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ LC\n  IB ~~~ LC\n",
+        "alt": "講義の三部構成を上から順に並べた図。第一部は置き場所と守りで、パッケージの CodeArtifact とコンテナイメージの ECR。第二部は作り方と共有で、ビルドで npm のパッケージを取る CodeBuild と、イメージを作り、Image Builder の resource を RAM で共有する EC2 Image Builder。第三部は版と寿命で、revision と lifecycle の rule。"
       },
-      "narration": "この講義では、ソフトウェアのパッケージや、コンテナイメージのような物を、アーティファクトと呼びます。それをどこに置き、どう作り、いつ片付けるかを学びます。講義は三つの部に分かれます。第一部は、置き場所と、その守り方です。パッケージを置くコードアーティファクトと、コンテナイメージを置くイーシーアールを見ます。第二部は、作り方と共有です。コードビルドがビルドの中でパッケージを取ってくる形と、イーシーツーイメージビルダーでイメージを作り、ほかのアカウントと共有する形を見ます。第三部は、版と寿命です。版の中身の見分け方と、古い物を片付ける規則を見ます。細かい名前や数字は、画面の表に置きます。",
+      "narration": "この講義では、ソフトウェアのパッケージや、コンテナイメージのような物を、アーティファクトと呼びます。それをどこに置き、どう作り、いつ片付けるかを学びます。講義は三つの部に分かれます。第一部は、置き場所と、その守り方です。パッケージを置くコードアーティファクトと、コンテナイメージを置くイーシーアールを見ます。第二部は、作り方と共有です。コードビルドがビルドの中でパッケージを取ってくる形と、イーシーツーイメージビルダーでイメージを作る形と、イメージビルダーのリソースを、ほかのアカウントと共有する形を見ます。第三部は、版と寿命です。版の中身の見分け方と、古い物を片付ける規則を見ます。細かい名前や数字は、画面の表に置きます。",
       "refs": [
         {
           "source_id": "S1",
@@ -93,7 +93,7 @@
         "source": "flowchart TB\n  PUB[\"公開リポジトリ<br/>例: npmjs・PyPI\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>repository<br/>public にはできない\" }\n  CRED[\"AWS の認証情報\"]\n  U[\"利用者<br/>authorization token\"]\n  PUB -- \"external connection\" --> CA\n  CRED -- \"token を作る\" --> U\n  U -- \"publish・取得\" --> CA\n",
         "alt": "公開リポジトリ（例: npmjs、PyPI）から external connection で CodeArtifact の repository に取り込む。利用者は AWS の認証情報で authorization token を作り、それで publish や取得をする。repository のパッケージは public にはできない。"
       },
-      "narration": "リポジトリに入る道と、使う人の決まりを、順に見ます。まず入る道です。外の公開リポジトリにある、オープンソースのパッケージも取り込めます。リポジトリに、エクスターナルコネクション、つまり外部接続を設定します。接続先は、例えば、エヌピーエムジェイエスやパイピーアイのような公開リポジトリです。次に、使う人の決まりです。パッケージの版をパブリッシュするときも、取ってきて使うときも、利用者はサービスへの認証が要ります。認証には、エーダブリューエスの認証情報を使って、認可トークンを作ります。そのうえで、リポジトリのパッケージを、誰でも取れる形で公開することはできません。公開リポジトリから取り込みたい、と問題文にあれば、外部接続です。",
+      "narration": "リポジトリに入る道と、使う人の決まりを、順に見ます。まず入る道です。外の公開リポジトリにある、オープンソースのパッケージも取り込めます。リポジトリに、エクスターナルコネクション、つまり外部接続を設定します。接続先は、例えば、エヌピーエムジェイエスやパイピーアイのような公開リポジトリです。次に、使う人の決まりです。パッケージの版をパブリッシュするときも、取ってきて使うときも、利用者はサービスへの認証が要ります。認証には、エーダブリューエスの認証情報を使って、認可トークンを作ります。また、リポジトリのパッケージを、誰でも取れる形で公開することはできません。公開リポジトリから取り込みたい、と問題文にあれば、外部接続です。",
       "refs": [
         {
           "source_id": "S2",
@@ -190,7 +190,7 @@
           ]
         ]
       },
-      "narration": "次は、コンテナイメージの置き場所、イーシーアールです。イーシーアールの機能から、この講義では三つを見ます。まず、ライフサイクルポリシーです。決めた規則で、使われていないイメージを片付けます。くわしくは、片付けの部で見ます。次に、イメージスキャンです。コンテナイメージの中にある、ソフトウェアの脆弱性を見つけるのを助けます。最後に、リポジトリクリエーションテンプレートです。これは次のスライドで見ます。",
+      "narration": "次は、コンテナイメージの置き場所、イーシーアールです。イーシーアールの機能から、この講義では三つを見ます。まず、ライフサイクルポリシーです。決めた規則で、使われていないイメージを片付けます。くわしくは、第三部の、版と寿命の所で見ます。次に、イメージスキャンです。コンテナイメージの中にある、ソフトウェアの脆弱性を見つけるのを助けます。最後に、リポジトリクリエーションテンプレートです。これは次のスライドで見ます。",
       "refs": [
         {
           "source_id": "S7",
@@ -302,7 +302,7 @@
       "id": "s10",
       "title": "2-3 recipe と components",
       "bullets": [
-        "段: build・validation・test",
+        "recipe が段を決める",
         "build component: 作る前に整える",
         "test component: 作った後に試す"
       ],
@@ -410,7 +410,7 @@
       "bullets": [
         "rule で expire させる image",
         "expire は 24 時間内が目安",
-        "priority は小さい番号が上"
+        "priority は番号が小さいほど高い"
       ],
       "visual": {
         "type": "compare",
@@ -433,11 +433,11 @@
           ],
           [
             "rule の priority",
-            "数が小さいほど高い"
+            "番号が小さいほど高い"
           ]
         ]
       },
-      "narration": "次に、イーシーアールのライフサイクルポリシーです。ポリシーは、一つ以上のルールでできています。ルールが、リポジトリの中のどのイメージを、期限切れ、つまりエクスパイアにするかを決めます。ポリシーをリポジトリに当てると、イメージは、条件を満たしてから二十四時間以内に、期限切れになると見込みます。ルールには優先度、プライオリティがあり、番号が小さいほど、優先が高くなります。使わなくなったコンテナイメージをイーシーアールで片付けたい、と問題文にあれば、この仕組みです。",
+      "narration": "次に、イーシーアールのライフサイクルポリシーです。ポリシーは、一つ以上のルールでできています。ルールが、リポジトリの中のどのイメージを、期限切れ、つまりエクスパイアにするかを決めます。ポリシーをリポジトリに当てると、イメージは、条件を満たしてから二十四時間以内に、期限切れになると見込みます。ルールには優先度、プライオリティがあり、番号が小さいほど高くなります。使わなくなったコンテナイメージをイーシーアールで片付けたい、と問題文にあれば、この仕組みです。",
       "refs": [
         {
           "source_id": "S8",
@@ -541,7 +541,7 @@
             "ECR lifecycle policy"
           ],
           [
-            "古い Image Builder image",
+            "古い・多い image resource",
             "Image Builder の rule"
           ],
           [
@@ -550,7 +550,7 @@
           ]
         ]
       },
-      "narration": "ここまでを、問題文の条件から選ぶ形にまとめます。社内で作った部品を、複数のチームで共有したいなら、コードアーティファクトにパブリッシュします。依存関係の置き換えの攻撃を防ぎたいなら、パッケージオリジンコントロールです。使わなくなったコンテナイメージを片付けたいなら、イーシーアールのライフサイクルポリシーです。イメージビルダーのイメージを古さや数で片付けたいなら、イメージビルダーのライフサイクルのルールです。二つのライフサイクルを取り違えないようにします。暗号化したイメージビルダーのリソースを、ほかのアカウントと共有するなら、エーダブリューエスラムで共有し、ケーエムエスキーも共有したかを確かめます。",
+      "narration": "ここまでを、問題文の条件から選ぶ形にまとめます。社内で作った部品を、複数のチームで共有したいなら、コードアーティファクトにパブリッシュします。依存関係の置き換えの攻撃を防ぎたいなら、パッケージオリジンコントロールです。使わなくなったコンテナイメージを片付けたいなら、イーシーアールのライフサイクルポリシーです。イメージビルダーのイメージリソースを、古さや数で片付けたいなら、イメージビルダーのライフサイクルのルールです。二つのライフサイクルを取り違えないようにします。暗号化したイメージビルダーのリソースを、ほかのアカウントと共有するなら、エーダブリューエスラムで共有し、ケーエムエスキーも共有したかを確かめます。",
       "refs": [
         {
           "source_id": "S1",
@@ -589,7 +589,7 @@
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>domain・origin controls\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>scanning・template\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>pre-build で login\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>recipe・RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    RV[\"CodeArtifact<br/>revision\"]\n    EL[\"ECR lifecycle policy<br/>priority・24 時間内\"]\n    IL[\"Image Builder の rule<br/>順・image resource\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ RV\n  CB ~~~ EL\n  IB ~~~ IL\n",
+        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>domain・origin controls\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>scanning・template\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>pre-build で login\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>recipe・resource を<br/>RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    RV[\"CodeArtifact<br/>revision\"]\n    EL[\"ECR lifecycle policy<br/>priority・24 時間内\"]\n    IL[\"Image Builder の rule<br/>順・image resource\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ RV\n  CB ~~~ EL\n  IB ~~~ IL\n",
         "alt": "最初の地図に押さえる所を書き足した図。第一部は CodeArtifact の domain と package origin controls、ECR の image scanning と repository creation templates。第二部は CodeBuild の pre-build での login、EC2 Image Builder の recipe と RAM での共有。第三部は CodeArtifact の revision、ECR lifecycle policy の priority と 24 時間内、Image Builder の lifecycle rule の順と image resource での数え方。"
       },
       "narration": "まとめです。最初の地図に戻ります。第一部、置き場所と守りでは、コードアーティファクトのドメインが鍵とポリシーをまとめること、外部接続で取り込むこと、パッケージオリジンコントロールが入口を守ることを見ました。イーシーアールでは、イメージスキャンと、自動で作るリポジトリのテンプレートを見ました。第二部、作り方と共有では、コードビルドのプレビルドの段でログインすること、イメージビルダーのレシピとコンポーネント、そしてエーダブリューエスラムでのリソースの共有を見ました。第三部、版と寿命では、リビジョンを見ました。イーシーアールでは、ルールの優先度と、二十四時間以内という目安を見ました。イメージビルダーでは、ルールの順番と、イメージリソースで数えることを見ました。",

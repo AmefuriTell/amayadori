@@ -5,11 +5,6 @@ url: https://docs.aws.amazon.com/cloudhsm/latest/userguide/clusters.html#cluster
 fetched: 2026-11-27
 > The hsm1.medium HSM type is reaching end of support so new clusters cannot be created with this type.
 
-## S0 レガシー機能の告知 — Understanding central configuration in Security Hub CSPM
-url: https://docs.aws.amazon.com/securityhub/latest/userguide/central-configuration-intro.html#central-configuration-intro
-fetched: 2026-11-27
-> Central configuration is a legacy feature. Security Hub CSPM declarative policies are replacing it as the way to manage Security Hub CSPM across an organization.
-
 ## S1 Control subnet traffic with network access control lists — Control subnet traffic with network access control lists
 url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#vpc-network-acls
 fetched: 2026-11-27
@@ -104,6 +99,7 @@ fetched: 2026-11-27
 url: https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies
 fetched: 2026-11-27
 > With an AWS Security Hub CSPM declarative policy, you can centrally enable and configure Security Hub CSPM across the accounts in your organization.
+> Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization.
 > You use an AWS Organizations declarative policy to specify where Security Hub CSPM is enabled or disabled in each AWS Region.
 > You can target the organization root, organizational units (OUs), or individual accounts.
 
