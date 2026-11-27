@@ -1,0 +1,582 @@
+{
+  "task": "2.3",
+  "questions": [
+    {
+      "id": "q-2.3-0001",
+      "stem_ja": "ある企業は、AWS Organizations に属する 20 個の AWS アカウントの 3 つのリージョンで、Amazon EC2 のマネージドノードを動かしています。ノードは毎日、不足しているパッチをスキャンし、毎週日曜日にパッチを適用する必要があります。運用チームは、これを 1 つの設定から管理したく、アカウントとリージョンごとにリソースを作成したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "アカウントとリージョンごとに、毎週日曜日にパッチのタスクを実行するメンテナンスウィンドウと、毎日のスキャン用の 2 つ目のウィンドウを作成する。",
+        "B": "毎週日曜日にコンソールから [今すぐパッチ適用] を使い、毎朝コンプライアンスのレポートを確認する。",
+        "C": "組織を対象とし、毎日のスキャンと毎週のインストールのスケジュールを持つ Patch Manager のパッチポリシーを作成する。",
+        "D": "アカウントとリージョンごとに、パッチ適用のドキュメントを毎週実行する State Manager の関連付けを作成する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "パッチポリシーは AWS Organizations と連携し、1 つのポリシーで複数のアカウントとリージョンのパッチを構成できる。スキャンとインストールに別々のスケジュールを設定できる。",
+      "per_choice": {
+        "A": "スケジュールは満たすが、アカウントとリージョンごとに作ることになり、1 つの設定で管理する要件に反する。",
+        "B": "Patch now はその場で行う操作で、毎週人が押すことになり、毎日のスキャンも自動にならない。",
+        "C": "正しい。組織全体に 1 つのポリシーで、毎日のスキャンと毎週のインストールを分けて設定できる。",
+        "D": "アカウントとリージョンごとに作ることになり、毎日のスキャンも別に要る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Patch policies – Configure patching operations across multiple AWS accounts and Regions using a single policy through integration with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Scheduling flexibility – Set different schedules for scanning and installing patches using custom CRON or Rate expressions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Multiple patching methods – Choose from patch policies, maintenance windows, or on-demand \"Patch now\" operations to meet your specific needs."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0002",
+      "stem_ja": "ある企業は、Patch Manager で Linux のマネージドノードにパッチを適用しています。カスタムのパッチベースラインは、セキュリティパッチをリリースの 7 日後に自動承認し、毎週 Scan and install の操作が動きます。重大なセキュリティパッチが昨日リリースされました。すべてのノードは準拠と表示されていますが、そのパッチはインストールされていません。セキュリティチームは、ほかのパッチの承認の仕方を変えずに、次の毎週の実行でそのパッチをインストールする必要があります。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "そのパッチを、カスタムのパッチベースラインの承認済みパッチの一覧に追加する。",
+        "B": "パッチベースラインに準拠しているノードはすでに安全なので、何もしない。",
+        "C": "不足しているパッチが報告されるように、毎週の操作を Scan and install から Scan に変える。",
+        "D": "不足しているパッチが収集されノードにインストールされるように、Systems Manager Inventory を有効にする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "準拠（compliant）とは、パッチベースラインで承認され、使えるパッチが入っていること。まだ自動承認の日数に達していないパッチは承認されていないので、入っていなくても準拠と出る。カスタムのパッチベースラインの承認するパッチの一覧に足せば、他の承認の決まりを変えずに次の Scan and install で入る。",
+      "per_choice": {
+        "A": "正しい。承認の一覧に足すと、次のインストールの対象になる。",
+        "B": "準拠していることは安全であることを意味しない。このパッチは承認されていないので入っていない。",
+        "C": "Scan は足りないパッチを報告するだけで入れない。そもそも承認されていないパッチは足りない物として扱われない。",
+        "D": "Inventory はメタデータを集めるだけで、パッチを入れない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Note that being compliant with a patch baseline doesn't mean that a managed node is necessarily secure."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Compliant means that the patches defined by the patch baseline that are both available and approved have been installed on the node."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html",
+          "quote": "Custom patch baselines – Define rules for auto-approving patches within days of their release, along with approved and rejected patch lists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "quote": "Systems Manager Inventory collects only metadata from your managed nodes."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0003",
+      "stem_ja": "ある企業は、Env=Prod のタグが付いたすべてのマネージドノードに監視エージェントを入れることを求めています。エージェントが削除された場合は、1 日以内に再びインストールする必要があります。コンプライアンスチームは、どのノードが必要なソフトウェアのバージョンを動かしているかを、1 か所から照会する必要もあります。企業は、独自のスクリプトではなく AWS のマネージドの機能を使いたいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "Env=Prod のタグを対象とし、毎日のスケジュールでエージェントをインストールする State Manager の関連付けを作成する。",
+        "B": "ノードからメタデータを収集し、中央の S3 バケットに保存するように Systems Manager Inventory を設定する。",
+        "C": "エージェントが無いノードにエージェントをインストールするように Systems Manager Inventory を設定する。",
+        "D": "毎日 AWS Lambda 関数を実行し、SSH で各ノードに接続してエージェントを入れ直す。",
+        "E": "毎日 Env=Prod のノードで Patch Manager の [今すぐパッチ適用] を使い、エージェントを入れ直してソフトウェアのバージョンを報告させる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "State Manager の関連付けは、保ちたい状態とスケジュールと対象を決め、タグでも対象を選べる。ソフトが入っていなければ入れるよう指示できる。Inventory は管理ノードからメタデータを集め、中央の S3 バケットに置いて問い合わせできる。",
+      "per_choice": {
+        "A": "正しい。Env=Prod のタグで選び、毎日望む状態に戻す。",
+        "B": "正しい。メタデータを中央の S3 に集め、必要なソフトや設定のノードを調べられる。",
+        "C": "Inventory はメタデータを集めるだけで、ソフトを入れない。",
+        "D": "動くかもしれないが、自分のコードを持つことになり、要件に反する。",
+        "E": "Patch now はその場で行うパッチの操作で、毎日人が行うことになる。ソフトの入っている状態を保つ仕組みでも、メタデータを中央に集めて問い合わせる仕組みでもない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "quote": "If the software isn't installed on a node, then the association could instruct State Manager to install it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "quote": "You can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data"
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0004",
+      "stem_ja": "ある企業は、設定が企業のアクセスのルールに違反する Amazon S3 バケットを、バケットの作成や変更の直後に検出する必要があります。準拠していないバケットは、決められた繰り返し可能なアクションで修正する必要があり、企業はコードを書くより AWS がすでに提供しているアクションを好みます。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "バケットを評価する AWS Config ルールを作成し、マネージドの Systems Manager Automation のドキュメントを使う修復アクションを付ける。",
+        "B": "バケットを評価し、手作業での修正のためにセキュリティチームへ通知を送る AWS Config ルールを作成する。",
+        "C": "バケットの変更で、バケットの設定を変える独自の AWS Lambda 関数を呼び出す Amazon EventBridge ルールを作成する。",
+        "D": "Systems Manager Inventory で毎日バケットの設定を収集し、レポートに出たバケットを修正する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "AWS Config のルールは、リソースが作られた・変わった・消された時に設定を評価し続け、決まりに反するリソースを noncompliant にする。修復は Systems Manager Automation のドキュメントで行い、AWS Config は修復の操作を持つマネージドの Automation ドキュメントも用意している。",
+      "per_choice": {
+        "A": "正しい。作成や変更の時に評価し、マネージドの Automation ドキュメントで直す。",
+        "B": "検出はできるが、直すのが人の手で、決まった繰り返せる操作にならない。",
+        "C": "動くが、自分で Lambda のコードを書いて保守することになり、要件に反する。",
+        "D": "Inventory は管理ノードのメタデータを集める機能で、S3 バケットの設定を評価して直すものではない。毎日では作成や変更の直後にも気づけない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html",
+          "quote": "AWS Config continuously evaluates your resources as they are created, changed, or deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html",
+          "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0005",
+      "stem_ja": "ある企業は、AWS Step Functions でアカウントの利用終了の手続きを自動化しています。ある手順は外部の承認システムに依頼を送り、ワークフローはマネージャーが応答するまで一時停止する必要があり、応答には最大 3 日かかります。各手順は必ず 1 回だけ実行する必要があり、チームはポーリングのコードを避けたいと考えています。最も少ない運用の手間でこれらの要件を満たす設計はどれですか。",
+      "choices_ja": {
+        "A": ".waitForTaskToken で承認システムを呼び出し、SendTaskSuccess で再開する Express ワークフロー。",
+        "B": "承認があるかを確かめる Lambda 関数を毎分呼び出すループを持つ Standard ワークフロー。",
+        "C": ".waitForTaskToken で承認システムを呼び出し、SendTaskSuccess で再開する Standard ワークフロー。",
+        "D": "承認があるかを確かめる Lambda 関数を毎分呼び出すループを持つ Express ワークフロー。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Standard のワークフローは実行が正確に 1 回で、最長 1 年動ける。コールバックのタスク（task token）は、SendTaskSuccess か SendTaskFailure でトークンが返るまでワークフローを止める。Express は最長 5 分で、少なくとも 1 回の実行、使える統合のパターンは Request Response だけ。",
+      "per_choice": {
+        "A": "Express は Request Response の統合だけで、最長 5 分なので 3 日待てない。",
+        "B": "動くが、待つ間ずっと問い合わせる仕組みを持つことになり、要件に反する。",
+        "C": "正しい。正確に 1 回の実行で、トークンが返るまで止まる。",
+        "D": "Express は最長 5 分で、少なくとも 1 回の実行なので、要件に合わない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Standard workflows have exactly-once workflow execution and can run for up to one year."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express workflows have at-least-once workflow execution and can run for up to five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express Workflows only support Request Response integrations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html",
+          "quote": "The task will pause until it receives that task token back with a SendTaskSuccess or SendTaskFailure call."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0006",
+      "stem_ja": "Step Functions のワークフローの Task ステートが呼び出す API は、ときどきスロットリングします。スロットリングのエラーは、エラーの 2 秒後から始めて毎回待ち時間を倍にしながら、最大 5 回再試行する必要があります。それでも失敗した場合や、タイムアウトを含むほかのエラーで失敗した場合は、ワークフローを NotifyOps ステートに移す必要があります。これらの要件を満たす設定はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "スロットリングのエラーに対する Retry のエントリで、IntervalSeconds 2、MaxAttempts 5、BackoffRate 2 にする。",
+        "B": "ErrorEquals が States.ALL の Catch のエントリを最後のキャッチャーとして単独で置き、Next を NotifyOps にする。",
+        "C": "スロットリングのエラーに対する Retry のエントリで、IntervalSeconds 2、MaxAttempts 0、BackoffRate 2 にする。",
+        "D": "ErrorEquals が States.TaskFailed の Catch のエントリを唯一のキャッチャーとし、Next を NotifyOps にする。",
+        "E": "ErrorEquals が States.ALL の Catch のエントリを最初に置き、その後にスロットリングのエラーのキャッチャーを置く。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Retry は IntervalSeconds（最初のやり直しまでの秒）・MaxAttempts（やり直しの最大の回数。0 はやり直さない）・BackoffRate（間隔を何倍にするか）で決める。やり直しが尽きるか、Retry に合わない時は Catch を順に調べる。States.ALL は全てのエラーに合い、配列にそれだけで、最後の catcher に置く。States.TaskFailed は States.Timeout 以外に合う。",
+      "per_choice": {
+        "A": "正しい。2 秒から倍にしながら 5 回までやり直す。",
+        "B": "正しい。タイムアウトも含め、全てのエラーで NotifyOps へ進む。",
+        "C": "MaxAttempts 0 はやり直さない。",
+        "D": "States.TaskFailed はタイムアウト（States.Timeout）に合わない。",
+        "E": "States.ALL は最後の catcher に置く必要がある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "A value of 0 specifies that the error is never retried."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "The multiplier by which the retry interval denoted by IntervalSeconds increases after each retry attempt."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "It must appear alone in the ErrorEquals array and must appear in the last catcher in the Catch array."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html",
+          "quote": "The name States.TaskFailed also acts a wildcard and matches any error except for States.Timeout."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0007",
+      "stem_ja": "注文を処理する AWS Lambda 関数は非同期で呼び出されます。関数が失敗し続けると、再試行を使い切った後に一部のイベントが消えます。チームは、すべての再試行の後に失敗したすべての呼び出しの記録と、成功した呼び出しの別の記録を残す必要があり、関数にエラー処理のコードを足したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "ハンドラーを try/catch ブロックで囲み、失敗したイベントと成功したイベントを Amazon S3 に書く。",
+        "B": "関数に失敗時の送信先と成功時の送信先を設定し、実行ロールに必要なアクセス許可を与える。",
+        "C": "Lambda は成功するまで失敗したイベントをキューに残すので、既定の設定のままにする。",
+        "D": "代わりに関数を同期で呼び出し、呼び出し元ごとに失敗したリクエストを保存させる。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "非同期の呼び出しが失敗すると、Lambda は既定であと 2 回やり直し、期限切れか全てのやり直しに失敗したイベントは捨てる。失敗した呼び出しの記録を残すには on-failure の宛先を作る。成功と失敗で別々の宛先を設定でき、送るには関数の実行ロールに権限が要る。",
+      "per_choice": {
+        "A": "関数にエラー処理のコードを足すことになり、要件に反する。",
+        "B": "正しい。コードを変えずに、失敗と成功の記録を別々に残せる。",
+        "C": "全てのやり直しに失敗したイベントは捨てられる。",
+        "D": "呼び出し側にエラー処理を持つことになり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "quote": "When an event expires or fails all processing attempts, Lambda discards it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html",
+          "quote": "To capture records of failed invocations (such as timeouts or runtime errors), create an on-failure destination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "quote": "Each function can have multiple destinations, so you can configure separate destinations for successful and failed events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+          "quote": "For Lambda to successfully send records to your chosen destination, ensure that your Event Function's execution role also contains the relevant permissions."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0008",
+      "stem_ja": "AWS Step Functions の大量の IoT データの取り込みのワークフローは、各実行が数秒で終わります。各手順は、呼び出したサービスからの HTTP の応答さえあれば次に進めます。チームは、手順が 2 回以上実行されることがあると受け入れており、手順を冪等にしています。チームは、高いイベントレート向けに設計されたワークフローの種類を使いたいと考えています。これらの要件を最もよく満たす選択はどれですか。",
+      "choices_ja": {
+        "A": "すべての統合パターンに対応し、各手順を必ず 1 回だけ実行する Standard ワークフロー。",
+        "B": "各手順がコールバックを待つように .waitForTaskToken の統合を使う Express ワークフロー。",
+        "C": "重複した実行を抑えるために .waitForTaskToken の統合を使う Standard ワークフロー。",
+        "D": "リクエスト・レスポンスのサービス統合を使う Express ワークフロー。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Express のワークフローは、ストリームの処理や IoT のデータの取り込みのような、イベントの多い処理に向く。実行は少なくとも 1 回で、手順が 2 回以上動くことがある。最長 5 分で、使える統合のパターンは Request Response だけ。",
+      "per_choice": {
+        "A": "Standard は長く動く、監査の要る処理に向く。今回の要件は高い頻度の処理。",
+        "B": "Express は Request Response の統合しか使えない。",
+        "C": "コールバックを待つ必要は無く、高い頻度の処理に向く型でもない。",
+        "D": "正しい。高い頻度に向き、HTTP の応答を受けて次へ進む統合で足りる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express workflows are ideal for high-event-rate workloads, such as streaming data processing and IoT data ingestion."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Standard workflows are ideal for long-running, auditable workflows, as they show execution history and visual debugging."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html",
+          "quote": "Express Workflows only support Request Response integrations."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0009",
+      "stem_ja": "ある会社は、メインのプレイブック、複数のロール、テンプレートファイルを含む Ansible のプレイブックの一式で、Amazon Linux のマネージドノードを構成しています。会社は、タグ Role=web を持つすべてのノードに、最初に対象になった時と、その後は毎日、構成を適用して、手作業の変更が直されるようにしたいと考えています。会社は、AWS が今勧めているドキュメントを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "AWS-ApplyAnsiblePlaybooks ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。",
+        "B": "AWS-RunAnsiblePlaybook ドキュメントを使い、タグ Role=web を対象にして、毎日のスケジュールで動く State Manager の関連付けを作る。",
+        "C": "Run Command でタグ Role=web に対して AWS-ApplyAnsiblePlaybooks ドキュメントを実行し、運用担当者が毎日そのコマンドを繰り返す。",
+        "D": "各ウェブのノードのユーザーデータに、一式をダウンロードして毎日ローカルで ansible-playbook を実行する cron ジョブを追加する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "State Manager の関連付けは、作った時に実行され、その後はスケジュールどおりに実行されるので、決めた状態を保てます。Ansible のプレイブックには AWS-ApplyAnsiblePlaybooks が勧められており、ファイルの構造ごとローカルに写してから実行するため、まとめた複雑なプレイブックにも対応します。",
+      "per_choice": {
+        "A": "正しい。勧められているドキュメントで一式を実行し、作った時とその後の毎日の適用を関連付けが自動で行います。",
+        "B": "関連付けとスケジュールは合っていますが、AWS-RunAnsiblePlaybook は非推奨で、今勧められているドキュメントを使うという要件に反します。",
+        "C": "勧められているドキュメントですが、Run Command は 1 回きりの実行で、毎日の繰り返しが手作業になります。",
+        "D": "動きますが、既に動いているノードには入らず、ノードごとの設定の保守が要ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "quote": "We recommend that you use the AWS-ApplyAnsiblePlaybooks document because of the enhancements described here."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-ansible.html#systems-manager-state-manager-ansible",
+          "quote": "The AWS-ApplyAnsiblePlaybooks document supports bundled, complex playbooks because it copies the entire file structure to a local directory before executing the specified main playbook."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about-scheduling",
+          "quote": "By default, State Manager runs the association when you create it and then according to your schedule."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0010",
+      "stem_ja": "ある会社は社内の監視エージェントを作っており、その特定のバージョンを Systems Manager のすべてのマネージドノードにインストールしたいと考えています。ノードは毎週起動され、入れ替わり、エージェントが誤って削除されることもあります。会社は、エンジニアが手作業でコマンドを実行せずに、すべてのノードに承認済みのバージョンがインストールされた状態を保ちたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "エージェントを Systems Manager Distributor でパッケージにし、Run Command で今あるノードに承認済みのバージョンを 1 回インストールする。",
+        "B": "インストーラーを Amazon S3 に置き、エンジニアが毎週、新しいノードとエージェントが消えたノードでインストールのスクリプトを実行する。",
+        "C": "エージェントを Systems Manager Distributor でパッケージにし、各チームがそれぞれ好きなパッケージのバージョンを自分のノードにインストールする。",
+        "D": "エージェントを Systems Manager Distributor でパッケージにし、すべてのマネージドノードに承認済みのバージョンをスケジュールでインストールする State Manager の関連付けを作る。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Distributor はソフトウェアをパッケージにしてマネージドノードへ公開し、パッケージを作ると SSM ドキュメントができます。State Manager を使えばスケジュールでインストールでき、どのノードにどのバージョンを入れるかも決められるので、入れ替わったノードや消えたエージェントにも自動で対応できます。",
+      "per_choice": {
+        "A": "今あるノードには入りますが、Run Command は 1 回きりで、後から起動したノードや消えたエージェントには対応できません。",
+        "B": "毎週の手作業が必要で、次の作業までエージェントの無いノードが残ります。",
+        "C": "チームごとにバージョンがばらつき、承認済みのバージョンを保つという要件に反します。",
+        "D": "正しい。スケジュールで承認済みのバージョンを入れ直すので、新しいノードにも誤って消えたノードにも手作業無しで対応します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "Distributor helps you package and publish software to AWS Systems Manager managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "On a schedule by using AWS Systems Manager State Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/distributor.html#distributor",
+          "quote": "You can use Run Command or State Manager to control which of your managed nodes get a package and which version of that package."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0011",
+      "stem_ja": "DevOps エンジニアは、AWS Systems Manager Run Command を使って、200 台のマネージドノードで 1 回きりの構成の変更を行う必要があります。誤った変更の影響を抑えるため、同時にコマンドを実行するノードは全体の 10 分の 1 以下にし、どれかのノードがエラーを返したらすぐに、ほかのノードへのコマンドの送信を止める必要があります。エンジニアが使うべき設定はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "max-concurrency を 10% にする。",
+        "B": "max-concurrency を既定の値のままにする。",
+        "C": "max-errors を 0 にする。",
+        "D": "max-errors を 10% にする。",
+        "E": "Run Command を使う代わりに、毎日のスケジュールの State Manager の関連付けを作る。"
+      },
+      "answer": [
+        "A",
+        "C"
+      ],
+      "summary": "max-concurrency は同時にコマンドを実行するノードの数を、10 のような数か 10% のような割合で決めます。max-errors を 0 にすると、最初のエラーが返った後、ほかのノードへのコマンドの送信を止めます。",
+      "per_choice": {
+        "A": "正しい。対象の 10% を上限にすると、200 台のうち同時に動くのは 10 分の 1 以下になります。",
+        "B": "既定の値は 50 で、200 台の 4 分の 1 が同時に動き、10 分の 1 以下という要件を満たしません。",
+        "C": "正しい。0 にすると最初のエラーで、ほかのノードへの送信を止めます。",
+        "D": "エラーを全体の 10% まで許すため、最初のエラーで止めるという要件を満たしません。",
+        "E": "1 回きりの変更なのに毎日繰り返し適用され、同時実行とエラーの要件にも答えていません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "quote": "You can specify either an absolute number of managed nodes, for example 10, or a percentage of the target set, for example 10%."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-velocity",
+          "quote": "The default for value max-concurrency is 50."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-maxerrors",
+          "quote": "If you specify 0, then the system stops sending the command to additional managed nodes after the first error result is returned."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0012",
+      "stem_ja": "ある会社は、State Manager の関連付けでマネージドノードの構成を保ち、Patch Manager でパッチを当てています。セキュリティチームは、関連付けやパッチに準拠していないノードを 1 か所で確認し、準拠していないノードを自動で修復したいと考えています。チームは独自のレポートのツールを作りたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、準拠していないノードの修復を Amazon EventBridge のルールで開始する。",
+        "B": "毎日各ノードに接続し、設定とパッチを基準と比べ、結果を Amazon S3 のレポートに保存する AWS Lambda 関数を書く。",
+        "C": "Systems Manager Compliance で関連付けとパッチの準拠を確認し、エンジニアが毎週、準拠していない各ノードを手作業で直す。",
+        "D": "各ノードの設定を表計算シートに集める Run Command のスクリプトを毎週実行し、セキュリティチームに確認してもらう。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Systems Manager Compliance は、既定で Patch Manager のパッチと State Manager の関連付けの準拠のデータを表示します。問題は Run Command、State Manager、Amazon EventBridge を使って修復できます。",
+      "per_choice": {
+        "A": "正しい。組み込みの表示で 1 か所から確認でき、EventBridge で修復を自動で始められます。",
+        "B": "動きますが、確認とレポートの独自のツールを作って保守することになり、要件に反します。",
+        "C": "確認はできますが、修復が手作業で、自動で修復するという要件に合いません。",
+        "D": "独自の集計と人の確認が必要で、自動の修復もありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "By default, Compliance displays current compliance data about patching in Patch Manager and associations in State Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-compliance.html#systems-manager-compliance",
+          "quote": "Remediate issues by using Run Command, another tool in AWS Systems Manager, State Manager, or Amazon EventBridge."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0013",
+      "stem_ja": "AWS Organizations に 40 のアカウントを持つ会社が、4 つのリージョンでマネージドノードを動かしています。会社は、すべてに対する 1 つの中央のパッチ適用の設定を求めており、足りないパッチの毎日のスキャンと、パッチのインストールの別の毎週のスケジュールを使いたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "組織に対して Quick Setup で Patch Manager のパッチポリシーを 1 つ作り、スキャンとインストールのスケジュールを別々に決める。",
+        "B": "各アカウントとリージョンでメンテナンスウィンドウを作り、スキャンとインストールのスケジュールでパッチ適用のタスクを登録する。",
+        "C": "すべてのノードに、毎日更新を確かめ、毎週インストールする cron ジョブを足す。",
+        "D": "各アカウントの所有者が自分のノードを手作業でスキャンしてパッチを当て、毎週結果を報告する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "AWS はパッチ適用の設定にパッチポリシーを使うことを勧めています。パッチポリシーは Quick Setup で作る設定で、AWS Organizations を使えば、すべてのアカウントのすべてのリージョンのマネージドノードに 1 つのパッチポリシーを当てられ、スキャンとインストールで別のスケジュールを決められます。",
+      "per_choice": {
+        "A": "正しい。1 つの設定で組織全体に当てられ、スキャンとインストールのスケジュールも分けられます。",
+        "B": "動きますが、40 のアカウントと 4 つのリージョンのそれぞれで設定を作って保守する必要があります。",
+        "C": "各ノードの設定を保守する必要があり、中央の設定になりません。",
+        "D": "手作業が多く、中央の設定になりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+          "quote": "However, if you use AWS Organizations, you can set up one patch policy that applies to all your managed nodes in all AWS Regions in all your AWS accounts."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-policies.html#patch-manager-policies",
+          "quote": "Using a patch policy, you can specify different schedules for scanning and installing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager",
+          "quote": "Using patch policies is the recommended method for configuring your patching operations."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0014",
+      "stem_ja": "ある会社のセキュリティのポリシーでは、OS の重要な更新を適用する必要がありますが、ほかの人が報告する問題を見られるよう、公開されてから 1 週間たった後にだけ適用することになっています。新しい重要な更新は毎月何度も公開されます。運用の手間が最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "事前定義のパッチベースラインを編集し、重要な更新を承認する前に 7 日待つようにする。",
+        "B": "重要な更新の承認ルールで 7 日の自動承認の遅延を使う、独自のパッチベースラインを作る。",
+        "C": "決まったパッチ承認の締め切り日を使う承認ルールの独自のパッチベースラインを作り、その日付を毎週手作業で更新する。",
+        "D": "エンジニアが毎週新しい重要な更新を確かめ、1 つずつ手作業で承認する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "独自のパッチベースラインでは、どのパッチを承認するかをより細かく決められ、承認ルールごとに自動承認の遅延か承認の締め切り日を指定できます。自動承認の遅延は、パッチが公開されてから自動で承認されるまで待つ日数です。事前定義のベースラインはそのまま使うもので、変えられません。",
+      "per_choice": {
+        "A": "事前定義のパッチベースラインは変えられません。",
+        "B": "正しい。公開から 7 日たった重要な更新が、手作業無しで自動で承認されます。",
+        "C": "締め切り日を毎週手作業で動かす必要があり、手間がかかります。",
+        "D": "毎週の手作業が必要です。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+          "quote": "An auto-approval delay is the number of days to wait after the patch was released or last updated, before the patch is automatically approved for patching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#patch-manager-predefined-and-custom-patch-baselines",
+          "quote": "You can use these baselines as they are currently configured (you can't customize them) or you can create your own custom patch baselines."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-predefined-and-custom-patch-baselines.html#baselines-auto-approvals",
+          "quote": "For each approval rule that you create, you can choose to specify an auto-approval delay or specify a patch approval cutoff date."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0015",
+      "stem_ja": "業務時間中のパッチのインストールが障害を起こしています。会社は、一群のマネージドノードへの止まる可能性のある更新を、日曜の 02:00 から 05:00 の間にだけ行いたいと考えています。パッチ適用の前に Lambda 関数がノードをロードバランサーから外し、その後 Run Command のタスクがパッチを入れる必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "毎週日曜にノードでパッチのドキュメントを動かす、State Manager の関連付けを作る。",
+        "B": "各ノードに、日曜に自分をロードバランサーから外してパッチを入れる cron ジョブを足す。",
+        "C": "当番のエンジニアが毎週日曜の朝に、Lambda 関数と Run Command のタスクを手作業で実行する。",
+        "D": "日曜のメンテナンスウィンドウに最大の長さ、ターゲットのノード、Lambda と Run Command のタスクを登録する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "メンテナンスウィンドウは、OS のパッチ適用のような止まる可能性のある操作をいつ行うかのスケジュールを決めるもので、スケジュール・最大の長さ・登録したターゲット・登録したタスクを持ちます。タスクには Run Command のコマンド、Automation のワークフロー、Lambda の関数などを使えます。State Manager は構成の準拠を自動にするのに向き、決めた時間帯の優先度の高い作業にはメンテナンスウィンドウを選びます。",
+      "per_choice": {
+        "A": "構成の準拠を保つための仕組みで、最大の長さを持つ時間帯の中で複数の種類のタスクを動かす要件に合いません。",
+        "B": "各ノードの設定を保守する必要があり、手間がかかります。",
+        "C": "毎週の手作業が必要です。",
+        "D": "正しい。決めた時間帯の中だけで、Lambda と Run Command のタスクを順に動かせます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Maintenance Windows helps you define a schedule for when to perform potentially disruptive actions on your nodes such as patching an operating system"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Each maintenance window has a schedule, a maximum duration, a set of registered targets (the managed nodes or other AWS resources that are acted upon), and a set of registered tasks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows.html#maintenance-windows",
+          "quote": "Which one you choose depends on whether you need to automate system compliance or perform high-priority, time-sensitive tasks during periods you specify."
+        }
+      ]
+    },
+    {
+      "id": "q-2.3-0016",
+      "stem_ja": "セキュリティの勧告が、サードパーティのエージェントの脆弱なバージョンを挙げています。会社は 2,000 台のマネージドノードを動かしており、どのノードにそのバージョンが入っているかを素早く見つけ、今後の勧告でも同じ確認を続ける必要があります。会社は、ノードにログインしたり収集のスクリプトを書いたりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Patch Manager の準拠のレポートで、脆弱なエージェントのバージョンが入ったノードを探す。",
+        "B": "各ノードの入っているソフトウェアを一覧して出力をバケットに書くスクリプトを Run Command で作り、分析担当が探す。",
+        "C": "Systems Manager Inventory でノードのメタデータを中央の Amazon S3 バケットに集め、組み込みのツールでクエリする。",
+        "D": "エンジニアが各ノードにサインインし、エージェントのバージョンを手作業で確かめる。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Systems Manager Inventory は、マネージドノードからメタデータを集めて、AWS の環境を見えるようにします。集めたメタデータを中央の S3 バケットに保存し、組み込みのツールでクエリすれば、どのノードが決まったソフトウェアや構成を動かしているか、どのノードを更新する必要があるかを素早く見分けられます。",
+      "per_choice": {
+        "A": "Patch Manager の準拠は、パッチベースラインで承認したパッチが入っているかを示すもので、サードパーティのエージェントのバージョンを探す仕組みではありません。",
+        "B": "動きますが、収集のスクリプトを書いて保守することになり、要件に反します。",
+        "C": "正しい。スクリプト無しでメタデータを集め、今後の勧告でも同じクエリで確かめられます。",
+        "D": "2,000 台への手作業は時間がかかり、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "You can use Inventory to collect metadata from your managed nodes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-inventory.html#systems-manager-inventory",
+          "quote": "use built-in tools to query the data and quickly determine which nodes are running the software and configurations required by your software policy, and which nodes need to be updated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html#patch-manager-definition-of-compliance",
+          "quote": "A managed node is patch compliant when it is up to date with all the patches that meet the approval criteria that you specify in the patch baseline."
+        }
+      ]
+    }
+  ]
+}

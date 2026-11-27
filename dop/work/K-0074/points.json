@@ -1,0 +1,550 @@
+{
+  "task": "6.1",
+  "questions": [
+    {
+      "id": "q-6.1-0001",
+      "stem_ja": "ある企業は、共有のアカウントで、開発者が自分の AWS Lambda 関数用の IAM ロールを作れるようにしています。開発者が作るロールは、1 つの Amazon S3 バケットと 1 つの Amazon DynamoDB テーブルの読み書きより多くのことが決してできてはなりません。同じアカウントのほかのチームには、より広いアクセス許可が必要です。セキュリティチームは、各ロールを手で確認したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "S3 と DynamoDB へのアクセスを許可するアクセス許可の境界を各開発者に付け、Lambda のロールにはほかのポリシーを付けない。",
+        "B": "S3 と DynamoDB へのアクセス以外のすべてのアクションを拒否する SCP をアカウントに適用する。",
+        "C": "S3 と DynamoDB へのアクセスだけを許可する管理ポリシーを作り、それを境界として付けた時だけ開発者がロールを作れるようにする。",
+        "D": "開発者に IAM の完全なアクセス許可を与え、セキュリティチームが毎週新しいロールから余分なアクセス許可を外す。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "アクセス許可の境界（permissions boundary）は、マネージドポリシーで ID ベースのポリシーが与えられる権限の上限を決める。開発者にロールの作成を任せる時は、境界で任せる権限の上限を決める。境界はそれだけでは権限を与えない。",
+      "per_choice": {
+        "A": "境界は権限を与えないので、他にポリシーの無いロールは何もできない。また開発者自身の境界では、開発者が作るロールの上限にならない。",
+        "B": "アカウント全体の上限になり、広い権限が要る他のチームも止まる。",
+        "C": "正しい。開発者が作るロールに必ず境界が付くので、どんなポリシーを付けても S3 と DynamoDB の範囲を超えない。",
+        "D": "人が毎週見直すことになり、要件に反する。見直すまでの間は上限を超えられる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "quote": "When you delegate permissions to others, use permissions boundaries to set the maximum permissions that you delegate. A permissions boundary does not grant permissions on its own."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0002",
+      "stem_ja": "あるアプリケーションの IAM ロールには AdministratorAccess のポリシーが付いています。AWS CloudTrail は、直近の 90 日間のこのロールの活動を記録しています。セキュリティチームは、このポリシーを、アプリケーションが実際に使うアクションだけを許可するきめ細かいポリシーに置き換える必要があります。新しいポリシーは本番の前にステージング環境でテストする必要があり、チームはポリシーを手で書くことを避けたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "本番で、アプリケーションが失敗するまで AdministratorAccess からサービスを 1 つずつ外し、最後に動いた版を残す。",
+        "B": "IAM Access Analyzer でロールの CloudTrail の活動からポリシーを生成し、ステージングでテストしてから本番にデプロイする。",
+        "C": "チームが想定するサービスだけを許可するアクセス許可の境界を付け、ロールの AdministratorAccess はそのままにする。",
+        "D": "アプリケーションのソースコードを読んで API の呼び出しを一覧にし、それらのアクションの新しいポリシーを手で書く。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "IAM Access Analyzer は、CloudTrail に残ったアクセスの記録から、ロールが使ったサービスと操作を分析して細かいポリシーを作る。作ったポリシーを試してから本番に出せば、必要な権限だけを与えられる。",
+      "per_choice": {
+        "A": "本番で止まるまで外す方法で、試してから出す要件にも反する。",
+        "B": "正しい。記録からポリシーを作り、試してから本番に出す。",
+        "C": "境界は上限を決めるだけで、使った操作だけの細かいポリシーにはならない。予想で決めた上限では、要る操作が抜けたり余分が残ったりする。",
+        "D": "手で書くことになり、要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "quote": "IAM Access Analyzer analyzes the services and actions that your IAM roles use, and then generates a fine-grained policy that you can use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "quote": "After you test each generated policy, you can deploy the policy to your production environment."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0003",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。セキュリティチームは、どのアカウントであれ、リソースベースのポリシーが組織の外のプリンシパルからのアクセスを許可している Amazon S3 バケットと IAM ロールを見つける必要があります。チームは、そうしたリソースごとに検出結果を得たく、ポリシーを解析するスクリプトを保守したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "各アカウントで IAM の最終アクセス情報を使い、外部のプリンシパルが使ったリソースを見つける。",
+        "B": "外部のプリンシパルがロールを使えないように、すべての IAM ロールにアクセス許可の境界を付ける。",
+        "C": "すべてのバケットポリシーとロールの信頼ポリシーを読み、外部のプリンシパルを報告する、スケジュールされたスクリプトを動かす。",
+        "D": "組織を信頼ゾーンにして IAM Access Analyzer を使い、その検出結果を確認する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "IAM Access Analyzer は、組織やアカウントのリソース（S3 バケットや IAM ロールなど）のうち、外部と共有されているものを見つける。リソースベースのポリシーを論理的に分析し、外部と共有されたリソースごとに検出結果（finding）を作る。",
+      "per_choice": {
+        "A": "最終アクセスの情報は、使っていないユーザー・ロール・権限を見つけて外すためのもので、外部との共有を見つけるものではない。",
+        "B": "境界は ID ベースのポリシーの上限を決めるもので、外部と共有されているリソースを見つけない。",
+        "C": "動くが、スクリプトを保守することになり、要件に反する。",
+        "D": "正しい。リソースベースのポリシーを分析し、外部と共有されたリソースごとに検出結果を作る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+          "quote": "IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, shared with an external entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+          "quote": "For each instance of a resource shared outside of your account, IAM Access Analyzer generates a finding."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+          "quote": "IAM provides last accessed information to help you identify the users, roles, permissions, policies, and credentials that you no longer need so that you can remove them."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0004",
+      "stem_ja": "ある IAM ロールには、バケットに対する s3:* を許可し、同じバケットに対する s3:DeleteObject を明示的に拒否するアイデンティティベースのポリシーがあります。ロールには、そのバケットに対する s3:GetObject と s3:PutObject だけを許可するアクセス許可の境界もあります。ほかに適用されるポリシーはありません。このロールがバケットに対して行うリクエストのうち、許可されるものはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "s3:GetObject のリクエスト",
+        "B": "s3:ListBucket のリクエスト",
+        "C": "s3:PutObject のリクエスト",
+        "D": "s3:DeleteObject のリクエスト",
+        "E": "s3:PutBucketPolicy のリクエスト"
+      },
+      "answer": [
+        "A",
+        "C"
+      ],
+      "summary": "実際の権限は、ID ベースのポリシーと境界の両方が許す操作（重なり）だけ。どちらかに明示的な拒否があれば、その操作は拒否される。",
+      "per_choice": {
+        "A": "正しい。ID ベースのポリシー（s3:*）と境界の両方が許す。",
+        "B": "ID ベースのポリシーは許すが、境界が許していない。",
+        "C": "正しい。ID ベースのポリシーと境界の両方が許す。",
+        "D": "ID ベースのポリシーの明示的な拒否が勝つ。境界も許していない。",
+        "E": "ID ベースのポリシーは許すが、境界が許していない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "quote": "An entity's permissions boundary allows it to perform only the actions that are allowed by both its identity-based policies and its permissions boundaries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+          "quote": "An explicit deny in either of these policies overrides the allow."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0005",
+      "stem_ja": "ある企業には 40 のプロジェクトチームがあり、各チームが IAM ロールを使っています。チームは毎週新しい Amazon S3 バケットと DynamoDB テーブルを作ります。今は、セキュリティチームがチームごとにそのチームのリソースの ARN を並べた別々のポリシーを書いており、リソースが増えるたびにポリシーを更新する必要があります。企業は、少ないポリシーで最小権限を保ち、リソースが増えてもポリシーを更新しないようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "チームごとのポリシーを残し、毎晩新しいリソースの ARN をチームのポリシーに書き足すスクリプトを追加する。",
+        "B": "新しいリソースが自動で含まれるように、各チームに AWS 管理の職務機能のポリシーを使う。",
+        "C": "すべてのチームのロールに S3 と DynamoDB への完全なアクセスを与え、毎月アクセスログを確認する。",
+        "D": "各ロールと各リソースにプロジェクトのタグを付け、プリンシパルのタグとリソースのタグが一致する時にアクセスを許可する 1 つのポリシーを使う。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "属性ベースのアクセス制御（ABAC）は、タグという属性で権限を決める。主体のタグとリソースのタグが一致する時に操作を許す 1 つのポリシーで済み、新しいリソースを足してもポリシーを変えなくてよい。従来の役割ベース（RBAC）は職務ごとにポリシーを作り、リソースが増えるたびにポリシーの更新が要る。",
+      "per_choice": {
+        "A": "ポリシーの数は減らず、更新をスクリプトで続けることになる。",
+        "B": "職務別のマネージドポリシーは RBAC の考え方で、プロジェクトごとのリソースに絞れない。",
+        "C": "最小権限に反する。",
+        "D": "正しい。1 つのポリシーで、タグが一致するリソースだけに許す。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "You can design ABAC policies that allow operations when the principal's tag matches the resource tag."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "The disadvantage to using the traditional RBAC model is that when you or your users add new resources to your environment, you have to update the policies to allow access to those resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html",
+          "quote": "ABAC requires fewer policies."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0006",
+      "stem_ja": "従業員は IAM Identity Center を通じて AWS にサインインし、アイデンティティソースには各ユーザーの部署が保存されています。各部署の Amazon S3 バケットには部署のタグが付いています。従業員は自分の部署のバケットだけにアクセスできる必要があり、企業は部署ごとのアクセス許可セットや IAM ユーザーを作りたくありません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "IAM Identity Center の [アクセス制御の属性] のページで、Department のユーザー属性を選ぶ。",
+        "B": "1 つのアクセス許可セットに、aws:PrincipalTag/Department とバケットの部署タグが一致する時だけ S3 を許可するポリシーを入れる。",
+        "C": "部署ごとに、その部署のバケットの ARN を並べた別々のアクセス許可セットを作る。",
+        "D": "従業員ごとに IAM ユーザーを作り、ユーザーに部署のタグを付ける。",
+        "E": "各バケットポリシーに、許可する IAM Identity Center のグループ名として部署を書く。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "IAM Identity Center の Attributes for access control で、ポリシーで使うユーザーの属性（例 Department）を選ぶ。IAM Identity Center はその属性を、入る先のアカウントへセッションタグとして渡し、ポリシーでは aws:PrincipalTag/タグのキー の条件で参照できる。属性がバケットのタグと一致する時だけ許すポリシーを権限セットに書く。",
+      "per_choice": {
+        "A": "正しい。Department の属性をセッションタグとして渡すようにする。",
+        "B": "正しい。1 つの権限セットで、部署が一致するバケットだけに許す。",
+        "C": "部署ごとの権限セットを作ることになり、要件に反する。",
+        "D": "IAM ユーザーを作らない要件に反する。",
+        "E": "バケットごとに書き足すことになり、属性で決める仕組みにならない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "While on the Attributes for access control page, you select the Department user attribute for use with attribute-based access control (ABAC)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "they are sent as session tags that you can reference using the aws:PrincipalTag/tag-key condition key in all relevant AWS IAM policy types."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html",
+          "quote": "you then write a policy that grants users access only when the Department attribute matches the department tag that you assigned to your S3 buckets."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0007",
+      "stem_ja": "ある企業は、AWS Organizations と一緒に IAM Identity Center を使用しています。15 人のデータベース管理者は、25 個のアカウントで同じ RDS、DynamoDB、Aurora の管理のアクセス許可を必要としています。DBA チームには毎月人が加わったり抜けたりし、セキュリティチームはポリシーの変更がすべてのアカウントに自動で届くようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "Database Admin のアクセス許可セットを 1 つ作り、25 個すべてのアカウントで 15 人の管理者それぞれに個別に割り当てる。",
+        "B": "Database Admin のアクセス許可セットを 1 つ作り、25 個すべてのアカウントで DBA のグループに割り当てる。割り当ては最大 10 アカウントずつ繰り返す。",
+        "C": "25 個の各アカウントに同じポリシーの IAM ロールを作り、ポリシーが変わるたびに 25 個のロールを更新する。",
+        "D": "アカウントごとに 1 つずつ、25 個のアクセス許可セットを作り、それぞれを DBA のグループに割り当てる。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "権限セットは 1 つ以上の IAM ポリシーをまとめたテンプレートで、1 つの権限セットで複数のアカウントへのアクセスを与えられる。割り当てると IAM Identity Center が各アカウントにロールを作り、権限セットを変えるとロールとポリシーも更新される。割り当ては個人よりグループにするのが勧められ、1 回に選べるアカウントは 10 まで。",
+      "per_choice": {
+        "A": "人が入れ替わるたびに割り当てを直すことになる。グループに割り当てるのが勧められている。",
+        "B": "正しい。グループに割り当てれば人の出入りはグループの変更だけで済み、権限セットを変えれば全アカウントに反映される。",
+        "C": "25 個のロールを自分で保つことになり、手間が大きい。",
+        "D": "同じ権限を 25 個の権限セットで保つことになり、変更の手間が増える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetsconcept.html",
+          "quote": "As you modify the permission set, IAM Identity Center ensures that the corresponding IAM policies and roles are updated accordingly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "quote": "we recommended that you assign access directly to groups rather than to individual users."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/assignusers.html",
+          "quote": "You can select up to 10 AWS accounts at a time per permission set when you assign single sign-on access to users and groups."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0008",
+      "stem_ja": "ある企業は、外部の監視ベンダーが引き受ける IAM ロールを通じて、ベンダーに AWS アカウントへのアクセスを与えています。ベンダーは 1 つの AWS アカウントから多くの顧客にサービスを提供しています。企業は、ベンダーの別の顧客が企業のロールの ARN を渡すことで、ベンダーをだまして企業のリソースにアクセスさせることを防ぐ必要があります。この要件を最もよく満たす設定はどれですか。",
+      "choices_ja": {
+        "A": "ロールの信頼ポリシーでベンダーのアカウントだけを許可し、企業が作って秘密にしておく ExternalId の値を必須にする。",
+        "B": "ロールを引き受けられるのはベンダーだけなので、ロールの信頼ポリシーで条件なしにベンダーのアカウントだけを許可する。",
+        "C": "ロールの代わりにアクセスキー付きの IAM ユーザーをベンダー用に作り、90 日ごとにキーをローテーションする。",
+        "D": "ロールの信頼ポリシーでベンダーのアカウントだけを許可し、ベンダーが企業のために発行する一意の値の ExternalId の条件を必須にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "混乱した代理（confused deputy）は、権限の無い者がより権限のある者に操作をさせる問題。外部 ID をロールの信頼ポリシーの条件で求めると防げる。外部 ID は業者が顧客ごとに一意に作って管理する値で、顧客が自分で決めるものではない。別の顧客が ARN を渡しても、業者が要求に入れる外部 ID は操れない。",
+      "per_choice": {
+        "A": "外部 ID は業者が作って管理する値で、顧客が自分で決めるものではない。",
+        "B": "業者のアカウントは他の顧客のためにも動くので、別の顧客が ARN を渡すと業者が代わりに入れてしまう。",
+        "C": "長く使う認証情報を外部に渡すことになり、混乱した代理の問題も解決しない。",
+        "D": "正しい。業者が顧客ごとに決めた外部 ID を条件にする。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "The primary function of the external ID is to address and prevent the confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "The ExternalId value must be unique among Example Corp's customers and controlled by Example Corp, not its customers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html",
+          "quote": "Even if another customer supplies Example Corp with your ARN, it cannot control the external ID that Example Corp includes in its request to AWS."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0009",
+      "stem_ja": "ある会社は、Amazon Aurora の DB クラスターのマスターユーザーの認証情報を AWS Secrets Manager に保存しています。セキュリティチームは、認証情報を自動でローテーションすることを求めています。DevOps チームは、ローテーションの関数をデプロイしたり、パッチを当てたり、トラブルシューティングしたりしたくなく、サービスにローテーションの設定と管理を任せたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "シングルユーザーの戦略で Lambda 関数によるローテーションを有効にし、ローテーションの関数を保守する。",
+        "B": "30 日ごとにマスターパスワードを変えてシークレットを更新する AWS Lambda 関数を書き、スケジュールで実行する。",
+        "C": "Aurora がマスターユーザーの認証情報に提供する、Secrets Manager のマネージドローテーションを使う。",
+        "D": "認証情報を SecureString パラメータへ移し、データベースの管理者が四半期ごとに変える。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Aurora と RDS はマスターユーザーの認証情報のマネージドローテーションを提供しており、サービスがローテーションの設定と管理を行います。マネージドローテーションは Lambda 関数を使わないので、関数の保守も要りません。",
+      "per_choice": {
+        "A": "自動でローテーションできますが、ローテーションの関数を保守する必要があり、要件に反します。",
+        "B": "動きますが、独自の関数を書いて保守する必要があります。",
+        "C": "正しい。サービスがローテーションを設定・管理し、Lambda 関数を使わないので、関数の保守が要りません。",
+        "D": "手作業で、自動のローテーションになりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "Amazon Aurora offers managed rotation for master user credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "With managed rotation, you don't use an AWS Lambda function to update the secret and the credentials in the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "Managed rotation – For most managed secrets, you use managed rotation, where the service configures and manages rotation for you."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0010",
+      "stem_ja": "あるアプリケーションは、アプリケーションに必要な権限だけを持つデータベースユーザーで、Amazon RDS のデータベースに直接接続しています。ユーザーのパスワードは AWS Secrets Manager に保存されており、自動でローテーションする必要があります。ローテーションの最中もアプリケーションは最も高い可用性で動き続ける必要があり、アプリケーションはマスターユーザーを使ってはいけません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "アプリケーションのユーザーのシークレットに、交代ユーザー（alternating users）の戦略でローテーションを設定する。",
+        "B": "ローテーションが使う、データベースのスーパーユーザーの認証情報を保存した別のシークレットを作る。",
+        "C": "アプリケーションのユーザーのシークレットに、シングルユーザーの戦略でローテーションを設定する。",
+        "D": "アプリケーションがマスターユーザーで接続するように変え、マスターユーザーのシークレットにマネージドローテーションを使う。",
+        "E": "アプリケーションとデータベースの間に Amazon RDS Proxy を置き、プロキシを通して交代ユーザーの戦略を使う。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "アプリケーションのユーザーで最も高い可用性を求める時は、交代ユーザー（alternating users）の戦略を使えます。この戦略では最初のユーザーを複製するので、スーパーユーザーの認証情報を保存したシークレットが別に必要です。",
+      "per_choice": {
+        "A": "正しい。アプリケーションのユーザーで最も高い可用性を得られる戦略です。",
+        "B": "正しい。交代ユーザーの戦略はユーザーを複製するため、多くのユーザーには無い権限を持つスーパーユーザーの認証情報が要ります。",
+        "C": "自動でローテーションできますが、最も高い可用性のための戦略ではありません。",
+        "D": "アプリケーションでマスターユーザーを使わないという要件と、最小の権限のユーザーを使う推奨に反します。",
+        "E": "Amazon RDS Proxy は交代ユーザーの戦略に対応していません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed",
+          "quote": "For application users, for highest availability, you can use the Alternating users rotation strategy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "You need a secret with superuser credentials because rotation clones the first user, and most users do not have that permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "Note that Amazon RDS Proxy does not support the alternating users strategy."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0011",
+      "stem_ja": "DevOps エンジニアは、プライベートサブネットで動く Amazon RDS のデータベースのシークレットに、Lambda 関数によるローテーションを有効にしました。ローテーションは失敗し続け、Secrets Manager が何度か再試行しています。関数の権限は正しいものの、関数がデータベースに接続できません。ローテーションを直せる可能性が最も高い変更はどれですか。",
+      "choices_ja": {
+        "A": "ローテーションの関数をデータベースと同じ VPC とセキュリティグループで動かし、Secrets Manager にも届くようにする。",
+        "B": "接続により多くの時間をかけられるよう、ローテーションの関数のタイムアウトとメモリーを増やす。",
+        "C": "関数が動く回数が減るよう、ローテーションのスケジュールの間隔を長くする。",
+        "D": "関数がすべての AWS の API を呼べるよう、関数の実行ロールに管理者のポリシーをアタッチする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Lambda 関数によるローテーションでは、ローテーションの関数がネットワークを通して Secrets Manager とデータベースの両方に届く必要があります。勧められている VPC の構成では、関数をデータベースと同じ VPC とセキュリティグループに置きます。",
+      "per_choice": {
+        "A": "正しい。データベースと同じ VPC とセキュリティグループに置き、Secrets Manager にも届くようにすれば、関数が両方に接続できます。",
+        "B": "ネットワークで届かないので、時間を延ばしても接続できません。",
+        "C": "頻度を下げても、接続できないことは変わりません。",
+        "D": "権限は正しく、原因はネットワークです。権限を広げるだけで、最小の権限にも反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The last step is to make sure that the Lambda rotation function can access both Secrets Manager and your database through the network."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "The rotation functions listed under Recommended VPC configurations have the same VPC and security group as the database, which helps the function access the database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_turn-on-for-db.html#rotate-secrets_turn-on-for-db",
+          "quote": "If rotation fails, for example because Steps 3 and 4 are not yet completed, Secrets Manager retries the rotation process multiple times."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0012",
+      "stem_ja": "日本（UTC+9）にある会社は、トラフィックが最も少ない日本時間の 02:00 から 03:00 の間にだけ、毎日シークレットをローテーションしたいと考えています。DevOps エンジニアは、cron 式とローテーションウィンドウでローテーションのスケジュールを設定します。トラフィックの少ない 1 時間の外でローテーションするおそれが最も小さい設定はどれですか。",
+      "choices_ja": {
+        "A": "cron(0 2 * * ? *) と、1 時間のローテーションウィンドウ。",
+        "B": "cron(30 17 * * ? *) と、1 時間のローテーションウィンドウ。",
+        "C": "cron(0 17 * * ? *) と、1 時間のローテーションウィンドウ。",
+        "D": "cron(0 17 * * ? *) と、日の終わりに閉じる既定のローテーションウィンドウ。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Secrets Manager のローテーションのスケジュールは UTC で、cron 式の分は 0 にする必要があります（ウィンドウは毎時ちょうどに始まる）。日本時間の 02:00 は UTC の 17:00 で、ウィンドウの中のどの時刻にもローテーションしうるので、ウィンドウを 1 時間にします。",
+      "per_choice": {
+        "A": "スケジュールは UTC なので、日本時間の 11:00 から 12:00 にローテーションしてしまいます。",
+        "B": "分が 0 でない cron 式は、Secrets Manager では使えません。",
+        "C": "正しい。UTC の 17:00 は日本時間の 02:00 で、1 時間のウィンドウの中でだけローテーションします。",
+        "D": "ウィンドウが長く、その中のどの時刻にもローテーションしうるため、トラフィックの少ない 1 時間の外で動くおそれがあります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotation schedules use UTC time zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "A cron expression for Secrets Manager must have 0 in the minutes field because Secrets Manager rotation windows start on the hour."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html#rotate-secrets_schedule",
+          "quote": "Secrets Manager rotates your secret at any time during the rotation window."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0013",
+      "stem_ja": "管理者は、IAM ユーザーのアクセスキーで AWS CLI を使っています。セキュリティチームが、aws:MultiFactorAuthPresent の条件キーが true の時だけ ec2:TerminateInstances を許すポリシーを足しました。その後、管理者は MFA デバイスを持っているのに、終了のリクエストが拒否されます。MFA の要件を残したまま、管理者のリクエストを通す最もよい方法はどれですか。",
+      "choices_ja": {
+        "A": "アクセスキーのまま使い、各 ec2:TerminateInstances のリクエストのパラメータに MFA のコードを足す。",
+        "B": "終了のリクエストには、MFA 付きの AWS アカウントのルートユーザーの認証情報を使う。",
+        "C": "アクセスキーでも効くよう、条件を aws:MultiFactorAuthAge を確かめるものに変える。",
+        "D": "MFA デバイスのシリアル番号とコードを付けて GetSessionToken を呼び、返された一時的な認証情報でリクエストする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "MFA の保護は、AssumeRole か GetSessionToken で得た一時的な認証情報でだけ使えます。aws:MultiFactorAuthPresent のキーは短期の認証情報で認証した時だけあり、アクセスキーのような長期の認証情報には含まれません。そのため、MFA のコードとデバイスのシリアル番号を付けて一時的な認証情報を取り直す必要があります。",
+      "per_choice": {
+        "A": "アクセスキーは長期の認証情報で、条件キーを含まないため、要件を満たせません。",
+        "B": "ルートユーザーの認証情報では、MFA で保護された API アクセスは使えません。",
+        "C": "aws:MultiFactorAuthAge は MFA を使っていない時には無く、アクセスキーのリクエストは通りません。",
+        "D": "正しい。MFA で得た一時的な認証情報には条件キーが入り、ポリシーの条件を満たします。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "quote": "MFA protection is available only with temporary security credentials, which must be obtained with AssumeRole or GetSessionToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "quote": "The key is only present when the user authenticates with short-term credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-policies",
+          "quote": "Long-term credentials, such as access keys, do not include this key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#MFAProtectedAPI-important-points",
+          "quote": "You cannot use MFA-protected API access with AWS account root user credentials."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0014",
+      "stem_ja": "会社の自前のデータセンターのサーバーが、Amazon S3 へファイルをアップロードするバックアップのジョブを動かしています。今は各サーバーに保存した IAM ユーザーのアクセスキーを使っています。会社は既に、これらのサーバーに X.509 の証明書を発行する自前の認証局（CA）を動かしています。セキュリティチームは、これらのワークロードの長期の AWS の認証情報の管理をやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "IAM ユーザーのアクセスキーのまま、すべてのサーバーで 30 日ごとにローテーションする。",
+        "B": "サーバーごとに 1 人の IAM ユーザーを作り、各サーバーが自分の長期のアクセスキーを持つようにする。",
+        "C": "会社の CA を参照するトラストアンカーで IAM Roles Anywhere を使い、サーバーが証明書と引き換えに一時的な認証情報を得るようにする。",
+        "D": "各サーバーの暗号化したファイルにアクセスキーを保存し、ファイルの権限を絞る。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "IAM Roles Anywhere を使うと、AWS の外で動くサーバー・コンテナ・アプリケーションが IAM の一時的な認証情報を得られ、長期の AWS の認証情報を管理しなくて済みます。ワークロードは自分の CA が発行した X.509 の証明書を使い、トラストアンカー（AWS Private CA か外部の CA の証明書への参照）で認証して、一時的な認証情報と引き換えます。",
+      "per_choice": {
+        "A": "ローテーションしても長期の認証情報の管理は続き、要件を満たしません。",
+        "B": "長期の認証情報が増え、管理の手間も増えます。",
+        "C": "正しい。既存の CA の証明書を使い、長期の認証情報無しで一時的な認証情報を得られます。",
+        "D": "守り方を変えるだけで、長期の認証情報の管理は続きます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "quote": "Using IAM Roles Anywhere means you don't need to manage long-term AWS credentials for workloads running outside of AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction",
+          "quote": "To use IAM Roles Anywhere, your workloads must use X.509 certificates issued by your certificate authority (CA)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#first-time-user",
+          "quote": "Your workloads outside of AWS authenticate with the trust anchor using certificates issued by the trusted CA in exchange for temporary AWS credentials."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0015",
+      "stem_ja": "ある会社は、ジョブが OpenID Connect（OIDC）に対応した ID プロバイダーからトークンを得られる、外部の CI サービスを使っています。デプロイのジョブは、今は CI のシークレットとして保存した IAM ユーザーのアクセスキーを使っています。会社は、ジョブが一時的な AWS の認証情報を得るようにし、長期のキーを配るのをやめたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "IAM ユーザーのアクセスキーを CI のシークレットのままにし、スクリプトで毎週ローテーションする。",
+        "B": "CI サービスの IdP の IAM OIDC ID プロバイダーを作り、フェデレーションした CI のジョブが一時的な認証情報のために引き受けるロールを作る。",
+        "C": "新しいプライベート CA から CI のランナーに X.509 の証明書を発行し、IAM Roles Anywhere を設定する。",
+        "D": "漏れた時の影響を抑えるため、CI のプロジェクトごとにアクセスキーを持つ別の IAM ユーザーを作る。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "IAM OIDC ID プロバイダーは、OIDC に対応した外部の IdP と AWS アカウントの間に信頼を作るために使います。ロールは IdP で認証された OIDC のフェデレーションのプリンシパルに割り当てられ、一時的な認証情報を求められるようにします。OIDC フェデレーションを使えば、アクセスキーのような長期の認証情報を配る必要がありません。",
+      "per_choice": {
+        "A": "長期のキーを配り続けることになり、要件に反します。",
+        "B": "正しい。CI がすでに使える OIDC のトークンで、長期のキー無しに一時的な認証情報を得られます。",
+        "C": "一時的な認証情報は得られますが、新しい CA と証明書の発行を用意して運用することになり、OIDC をそのまま使うより手間がかかります。",
+        "D": "長期のキーが増え、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "quote": "You use an IAM OIDC identity provider when you want to establish trust between an OIDC-compatible IdP and your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html#id_roles_providers_create_oidc",
+          "quote": "The role permits your organization's IdP to request temporary security credentials for access to AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id-federation",
+          "quote": "you don't have to distribute long-term security credentials, such as IAM user access keys, with your application."
+        }
+      ]
+    },
+    {
+      "id": "q-6.1-0016",
+      "stem_ja": "ある EC2 インスタンスは、Amazon S3 からアプリケーションのデータを読むロールを含むインスタンスプロファイルを使っています。新しい機能には、Amazon SQS のキューへ書き込む権限も必要です。エンジニアが同じインスタンスプロファイルに 2 つ目の IAM ロールを足そうとしましたが、リクエストが失敗しました。運用上のオーバーヘッドが最も少なく、インスタンスに両方の権限を与えるソリューションはどれですか。",
+      "choices_ja": {
+        "A": "2 つ目のロールを足せるよう、インスタンスプロファイルあたりのロールの数の上限を上げてもらう。",
+        "B": "インスタンスプロファイルから既存のロールを外し、SQS の権限だけを持つ新しいロールを足す。",
+        "C": "インスタンスプロファイルに既にあるロールのポリシーに、SQS の権限を足す。",
+        "D": "SQS の権限を持つ IAM ユーザーを作り、そのアクセスキーをインスタンスに置く。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "インスタンスプロファイルに入れられる IAM ロールは 1 つだけで、この上限は上げられません。ロールは外して別のロールに入れ替えられますが、今の権限を残したまま SQS の権限も持たせるには、既にあるロールに権限を足します。",
+      "per_choice": {
+        "A": "インスタンスプロファイルあたり 1 つのロールという上限は、上げられません。",
+        "B": "SQS には書けるようになりますが、S3 を読む権限が失われます。",
+        "C": "正しい。1 つのロールに両方の権限を持たせれば、インスタンスプロファイルを変えずに済みます。",
+        "D": "長期の認証情報をインスタンスに置くことになり、管理の手間とリスクが増えます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "An instance profile can contain only one IAM role, although a role can be included in multiple instance profiles."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "This limit of one role per instance profile cannot be increased."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#instance-profiles-manage-cli-api",
+          "quote": "You can remove the existing role and then add a different role to an instance profile."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,493 @@
+{
+  "task": "1.1",
+  "questions": [
+    {
+      "id": "q-1.1-0001",
+      "stem_ja": "ある企業は、コンテナイメージを Amazon ECR のプライベートリポジトリに保存しています。セキュリティチームは、数か月前にプッシュされたイメージが、新しい脆弱性が公開された後に再評価されていないことに気付きました。チームは、人やパイプラインがチェックを開始しなくても、すべてのリポジトリが継続的に自動でチェックされるようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "レジストリのすべてのリポジトリで、プッシュ時のスキャンを有効にした基本スキャンを設定する。",
+        "B": "各イメージの手動の基本スキャンを毎日開始する、スケジュールされた AWS Lambda 関数を作成する。",
+        "C": "レジストリで拡張スキャンを有効にし、Amazon Inspector にイメージを評価させる。",
+        "D": "各イメージのプッシュ前にオープンソースのイメージスキャナーを実行する AWS CodeBuild のステージを追加する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "拡張スキャン（enhanced scanning）は Amazon Inspector と連携し、リポジトリを自動で継続してスキャンする。人やパイプラインが始めなくても、古いイメージも評価され続ける。",
+      "per_choice": {
+        "A": "基本スキャンの scan on push は push の時だけ。何か月も前に push したイメージは、新しい脆弱性が出ても評価し直されない。",
+        "B": "毎日スキャンを始めることはできるが、Lambda を作って保守する手間がかかり、基本スキャンは OS の脆弱性だけを見る。",
+        "C": "正しい。Inspector との連携で、自動で継続してスキャンする。",
+        "D": "ビルドの時にしか調べないので、既にあるイメージは評価し直されない。仕組みを作る手間も大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+          "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0002",
+      "stem_ja": "ある企業は AWS CodeArtifact を使用しています。開発チームごとに専用のリポジトリがあり、すべてのリポジトリは 1 つのドメインにあります。ビルドでは、社内の npm パッケージとオープンソースの npm パッケージの両方を、チーム自身のリポジトリを通じて解決する必要があります。中央のチームは、各チームが個別に設定するのではなく、オープンソースのパッケージの取り込み方を一元的に管理したいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "公開の npmjs レジストリへの外部接続を持つ共有リポジトリを作成する。",
+        "B": "共有リポジトリを、各チームのリポジトリのアップストリームリポジトリとして設定する。",
+        "C": "各チームのリポジトリを専用のドメインに移し、共有リポジトリを参照させる。",
+        "D": "ビルドが認証情報なしでパッケージをダウンロードできるように、共有リポジトリを公開する。",
+        "E": "すべてのチームのリポジトリに npmjs への外部接続を追加し、共有リポジトリを削除する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "外部接続（external connection）を持つ共有のリポジトリを中央のチームが持ち、それを各チームのリポジトリの upstream にする。upstream は同じドメインの中で設定でき、各チームのリポジトリから社内のパッケージと公開のパッケージの両方を取れる。",
+      "per_choice": {
+        "A": "正しい。公開の npmjs から取り込む入口を 1 か所にまとめられる。",
+        "B": "正しい。同じドメインの中なら、あるリポジトリのパッケージを別のリポジトリで使えるようにできる。",
+        "C": "あるリポジトリのパッケージを別のリポジトリで使えるようにできるのは、同じドメインの中だけ。ドメインを分ける構成はこの要件に合わない。",
+        "D": "CodeArtifact のリポジトリのパッケージは公開できない。",
+        "E": "各チームが別々に外部接続を持つことになり、中央のチームがまとめて管理する要件に合わない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "quote": "You can make packages in one repository available to another repository in the same domain."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0003",
+      "stem_ja": "DevOps エンジニアが AWS CloudFormation を使用して、GitHub への接続と、それをソースとして使う AWS CodePipeline のパイプラインを作成しました。スタックのデプロイは成功しましたが、パイプラインはリポジトリにアクセスできず、接続のステータスは PENDING です。エンジニアは、スタックが作成した接続をそのまま使い、個人用のトークンを保存しないようにしたいと考えています。エンジニアは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "最初のパイプラインの実行後に、接続が自動的に AVAILABLE に変わるのを待つ。",
+        "B": "接続を削除し、AVAILABLE になるように AWS CLI で作成し直す。",
+        "C": "GitHub の個人用アクセストークンを AWS Secrets Manager に保存し、ソースアクションから参照させる。",
+        "D": "コンソールで接続を編集してセットアップを完了し、ステータスを AVAILABLE にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "AWS CLI や CloudFormation で作った接続は、既定で PENDING になる。作った後にコンソールで接続を編集し、AVAILABLE にする必要がある。",
+      "per_choice": {
+        "A": "CLI や CloudFormation で作った接続は、コンソールで編集するまで PENDING のまま。",
+        "B": "CLI で作り直しても PENDING になる。スタックが作った接続を残す要件にも反する。",
+        "C": "個人のトークンを持たない要件に反する。",
+        "D": "正しい。コンソールで編集すれば AVAILABLE になる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html",
+          "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0004",
+      "stem_ja": "AWS CodePipeline のパイプラインは、接続を通じた GitHub のソースアクションと、それに続く AWS CodeBuild のアクションを使用しています。ビルドスクリプトはコミット履歴を読んでバージョン番号を計算する git コマンドを実行しますが、Git のメタデータが無いためコマンドが失敗します。後続の AWS CodeDeploy のアクションは、引き続きビルドの出力を受け取る必要があります。チームはビルドに Git の認証情報を保存したくありません。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "ソースアクションの出力を完全なクローンに設定し、ソースアーティファクトを CodeDeploy のアクションに直接渡す。",
+        "B": "ソースアクションの出力を完全なクローンに設定し、ソースアーティファクトを使うアクションは CodeBuild のままにする。",
+        "C": "既定の ZIP の出力のまま、個人用アクセストークンを使う git clone コマンドを buildspec に追加する。",
+        "D": "既定の ZIP の出力のまま、バージョンのスクリプトの前にビルドで git init を実行する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "既定の出力は、コミットの浅いコピーの ZIP で、git のメタデータを含まない。full clone にすると、リポジトリへの URL の参照を出力し、後の CodeBuild のアクションがリポジトリと git のメタデータを clone できる。full clone の出力を使えるのは CodeBuild のアクションだけ。",
+      "per_choice": {
+        "A": "full clone の参照は CodeBuild のアクションしか使えない。",
+        "B": "正しい。CodeBuild が git のメタデータを含めて clone できる。CodeDeploy には今までどおりビルドの出力を渡す。",
+        "C": "git の認証情報をビルドに持つことになり、要件に反する。",
+        "D": "既定の ZIP にはコミットの履歴が無いので、git init しても履歴は読めない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html",
+          "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0005",
+      "stem_ja": "ある企業の AWS CodePipeline のパイプラインは、接続を通じた GitHub のソースを使用しており、現在はプッシュのたびに開始されます。企業は、名前が \"release\" で始まる Git タグが作成された時だけパイプラインを開始したいと考えています。そのようなタグの無いプッシュでパイプラインを開始してはならず、企業は独自のコードを書きたくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "プッシュのトリガーを残し、リリースのタグを作成する main ブランチのブランチフィルターを追加する。",
+        "B": "GitHub のタグのイベントで Lambda 関数を呼び出してパイプラインを開始する Amazon EventBridge ルールを作成する。",
+        "C": "パイプラインのトリガーに、フィルターの種類 Tags とパターン release* を設定する。",
+        "D": "自動の開始を無効にし、リリースのタグを作成するたびにコンソールで [変更をリリースする] を選ぶ。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Git タグで始めるトリガーは、タグの名前の形で絞り込める。Tags の絞り込みに release* を入れると、その形のタグが作られた時だけ始まり、全ての push で始まる動き（Webhook のイベント）は使わない。",
+      "per_choice": {
+        "A": "main への push のたびに始まり、タグが無い push でも動いてしまう。",
+        "B": "自分でコードを書くことになり、要件に反する。",
+        "C": "正しい。release で始まるタグが作られた時だけ始まる。",
+        "D": "毎回人が始めることになり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "quote": "This example shows you how to create a pipeline that allows filtering for tags based on the syntax of the tag name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html",
+          "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0006",
+      "stem_ja": "ある CodeBuild プロジェクトは、起動を速くするために AWS Lambda のコンピューティングを使用しています。build フェーズでは、最初のコマンドでユニットテストを実行し、次のコマンドでテストのログをアップロードします。テストが失敗すると CodeBuild はアップロードのコマンドを飛ばすため、ログが失われます。テストが失敗してもログをアップロードし、かつテストが失敗した時はフェーズも失敗にする必要があります。最も少ない運用の手間でこれらの要件を満たす buildspec の変更はどれですか。",
+      "choices_ja": {
+        "A": "アップロードのコマンドを build フェーズの finally ブロックに移す。",
+        "B": "build フェーズに on-failure: CONTINUE を設定し、アップロードのコマンドを post_build フェーズに移す。",
+        "C": "commands ブロックの中で、アップロードのコマンドをテストのコマンドより前に移す。",
+        "D": "毎回のビルドの後に動いてログをアップロードする 2 つ目の CodeBuild プロジェクトを作成する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "finally のブロックのコマンドは、commands のブロックのコマンドの後に動き、commands のコマンドが失敗しても動く。phase が成功するのは commands と finally の全てのコマンドが成功した時だけなので、試験が失敗すれば phase は失敗する。on-failure は Lambda の計算や予約された容量では使えない。",
+      "per_choice": {
+        "A": "正しい。試験が失敗しても動き、phase は失敗のまま。",
+        "B": "on-failure は Lambda の計算では使えない。",
+        "C": "試験の前に上げると、試験のログがまだ無い。",
+        "D": "プロジェクトを足すことになり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The commands in a finally block are run even if a command in the commands block fails."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The phase is successful when all commands in the commands and the finally blocks run successfully."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0007",
+      "stem_ja": "あるチームは、起動時間を短くするために CodeBuild プロジェクトを AWS Lambda のコンピューティングに移しました。このプロジェクトは Docker イメージをビルドして Amazon ECR にプッシュしますが、移してからは docker build を実行する時に毎回ビルドが失敗します。チームは、buildspec の変更をできるだけ少なくして、Docker のビルドが再び動くようにする必要があります。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "プロジェクトを EC2 のコンピューティングに戻す。",
+        "B": "プロジェクトの環境で privilegedMode を true にする。",
+        "C": "Lambda のコンピューティングのまま、privilegedMode を true にする。",
+        "D": "Lambda のコンピューティングのまま、ビルドのタイムアウトを 60 分に上げる。",
+        "E": "Lambda のコンピューティングのまま、Docker 用のリザーブドキャパシティのフリートに切り替える。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Lambda の計算は Docker のビルドや実行、privileged モード、独自のビルドのタイムアウト、15 分を超える実行に対応しない。Docker のイメージを作るなら EC2 の計算に戻し、privilegedMode を true にする。privilegedMode が無いと、Docker のデーモンを使うビルドは失敗する。",
+      "per_choice": {
+        "A": "正しい。Lambda の計算は Docker のビルドに対応しない。",
+        "B": "正しい。Docker のイメージを作るプロジェクトでは privilegedMode を true にする。",
+        "C": "Lambda の計算は privileged モードに対応しない。",
+        "D": "Lambda の計算は独自のタイムアウトに対応せず、Docker のビルドもできない。",
+        "E": "予約された容量の fleet は EC2 の計算の選び方で、Lambda の計算のままでは使えない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support Docker builds or runs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "quote": "Set to true only if you plan to use this build project to build Docker images. Otherwise, all associated builds that attempt to interact with the Docker daemon fail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html",
+          "quote": "With the EC2 compute mode, you can run your builds with on-demand or reserved capacity fleets."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0008",
+      "stem_ja": "EC2 のコンピューティングを使う CodeBuild プロジェクトで、約 3 時間かかる統合テスト一式を実行しています。テストはまだ実行中なのに、毎回のビルドが 60 分で止まり、失敗として記録されます。プロジェクトのタイムアウトの設定は一度も変更されていません。チームは、最も少ない運用の手間で、テスト一式を 1 回のビルドで完了させたいと考えています。チームは何をすべきですか。",
+      "choices_ja": {
+        "A": "速く動くように、プロジェクトを AWS Lambda のコンピューティングに移す。",
+        "B": "プロジェクトの timeoutInMinutes を 4320 に設定する。",
+        "C": "プロジェクトの timeoutInMinutes を 240 に設定する。",
+        "D": "テスト一式を、それぞれ 60 分未満で動く 3 つのプロジェクトに分ける。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "timeoutInMinutes は、終わらないビルドを止めるまでの分数で、5 から 2160（36 時間）まで決められる。指定しないと既定の 60 分になる。Lambda の計算は 15 分を超える実行に対応しない。",
+      "per_choice": {
+        "A": "Lambda の計算は 15 分を超える実行に対応しない。",
+        "B": "決められるのは 2160 分（36 時間）まで。",
+        "C": "正しい。既定の 60 分を、3 時間の試験が終わる長さに延ばす。",
+        "D": "プロジェクトを分けることになり、1 つのビルドで終える要件にも反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html",
+          "quote": "The number of minutes, between 5 to 2160 (36 hours), after which CodeBuild stops the build if it is not complete. If not specified, the default of 60 is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0009",
+      "stem_ja": "ある会社は AWS CodeBuild でアプリケーションをビルドしています。ソースリポジトリにある buildspec ファイルでは、データベースのパスワードと社内サービスのエンドポイントを平文の環境変数として定義しており、パスワードがビルドログに表示されています。セキュリティチームは、ソースコードに認証情報を置かないこと、データベースのパスワードを定期的にローテーションすること、シークレットの値を CodeBuild のログで隠すことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "両方の値を Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。データベースのパスワードを変更してパラメータを更新する AWS Lambda 関数を書き、スケジュールで実行する。",
+        "B": "パスワードを AWS KMS キーで暗号化し、暗号文を buildspec ファイルにコミットして、ビルドのコマンドで復号する。パスワードと暗号文を四半期ごとに手作業で変更する。",
+        "C": "パスワードを自動ローテーションを設定した AWS Secrets Manager に保存し、buildspec の env の secrets-manager セクションで参照する。エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照する。CodeBuild のサービスロールに読み取り権限を与える。",
+        "D": "両方の値を buildspec ファイルから CodeBuild プロジェクトの設定にある平文の環境変数へ移す。プロジェクトへのコンソールアクセスを制限し、パスワードはスケジュールに沿って手作業で変更する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Secrets Manager はシークレットの自動ローテーションを設定でき、buildspec の env の secrets-manager や parameter-store で指定した値は CodeBuild のログで隠されます。認証情報は Secrets Manager、暗号化が要る設定値は Parameter Store の SecureString という AWS の勧める分け方にも合い、自前のコードも要りません。",
+      "per_choice": {
+        "A": "ソースから消えログでも隠れますが、ローテーションの Lambda 関数を自分で書いて保守する必要があり、オーバーヘッドが大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+        "B": "暗号文とはいえ認証情報をソースコードに置いており要件に反します。手作業の変更も手間がかかります。",
+        "C": "正しい。ソースから認証情報が消え、Secrets Manager の自動ローテーションで定期変更を自前のコード無しで満たし、env の secrets-manager・parameter-store で指定した値はログで隠されます。",
+        "D": "ソースからは消えますが平文のままで、ログでも隠されず、ローテーションも手作業です。AWS は機密の値を Parameter Store などに置くことを勧めています。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets",
+          "quote": "In Secrets Manager, you can set up automatic rotation for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "To protect sensitive information, the following are hidden in CodeBuild logs:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "For secrets such as database credentials, API keys, or tokens, we recommend AWS Secrets Manager"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0010",
+      "stem_ja": "DevOps エンジニアが CodeBuild の buildspec ファイルからハードコードされた値を取り除いています。ビルドには、ほかの複数のキーと一緒に 1 つの JSON シークレットに保存されているサードパーティの API キーが必要で、ビルドにはそのキー 1 つだけを渡す必要があります。ビルドには、認証情報ではないものの暗号化して保存する必要があるサービスのエンドポイントも必要です。エンジニアは AWS の保存先の推奨に従い、ビルドに独自の解析スクリプトを追加してはいけません。エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "API キーを AWS Secrets Manager のシークレットに置いたまま、buildspec の env の secrets-manager セクションで、シークレット ID と API キーの json-key を指定して参照する。",
+        "B": "エンドポイントを Parameter Store の SecureString パラメータとして保存し、env の parameter-store セクションで参照して、CodeBuild のサービスロールに ssm:GetParameters アクションを追加する。",
+        "C": "API キーを Parameter Store の SecureString パラメータにコピーし、buildspec ファイルの env の parameter-store セクションでそのパラメータを参照する。",
+        "D": "env の secrets-manager セクションで json-key を付けずに Secrets Manager のシークレット全体を参照し、build フェーズで jq コマンドを使って API キーを取り出す。",
+        "E": "エンドポイントは認証情報ではないため、buildspec ファイルの env の variables セクションに平文の変数として定義する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "secrets-manager の参照では json-key を指定すると、その キーの値だけを取り出せます（指定しなければシークレットの全文）。認証情報ではないが暗号化が要る値は Parameter Store の SecureString に置き、CodeBuild のサービスロールに ssm:GetParameters を与えて parameter-store で参照します。",
+      "per_choice": {
+        "A": "正しい。json-key を指定すれば、その キーの値だけがビルドに渡り、解析のスクリプトも要りません。",
+        "B": "正しい。暗号化が要る設定値には SecureString が勧められており、parameter-store で取るにはサービスロールに ssm:GetParameters が必要です。",
+        "C": "動きますが、AWS は API キーなどのシークレットには Secrets Manager を勧めており、推奨に従うという要件に合いません。",
+        "D": "json-key を付けないとシークレットの全文が渡り、1 つのキーだけ渡す要件に反し、jq による独自の解析も加わります。",
+        "E": "暗号化して保存するという要件に反します。平文の値はソースに残ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store",
+          "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0011",
+      "stem_ja": "ある会社は AWS CodePipeline でアプリケーションをデプロイしています。ビルドステージで AWS CodeBuild がデータベースの認証情報を設定ファイルに書き込み、そのファイルはアプリケーションと一緒にパッケージされます。そのため、認証情報を変えるたびにパイプライン全体の実行と再デプロイが必要です。会社は、アプリケーションを再デプロイせずに、認証情報を定期的に変更したいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "認証情報を AWS Secrets Manager に置き、CodeBuild の env の secrets-manager セクションで注入する。自動ローテーションを設定し、ローテーションのたびにパイプラインを開始する。",
+        "B": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存する。アプリケーションを実行時に Secrets Manager から認証情報を取得するように変更し、ビルドからは取り除く。",
+        "C": "認証情報を Parameter Store の SecureString パラメータとして保存する。データベースのパスワードとパラメータを変更する AWS Lambda 関数を書いてスケジュールで実行し、実行時にパラメータを読む。",
+        "D": "認証情報を自動ローテーションを設定した AWS Secrets Manager に保存し、アプリケーションをデプロイするたびに現在のシークレットを設定ファイルへコピーするデプロイのフックを追加する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Secrets Manager では、ハードコードした認証情報を実行時の呼び出しに置き換えるため、認証情報をローテーションしてもアプリケーションの更新やデプロイが要りません。自動ローテーションのスケジュールも Secrets Manager で設定できます。",
+      "per_choice": {
+        "A": "ローテーションは自動ですが、ビルド時に注入するので、変更のたびにパイプラインの実行と再デプロイが必要なままです。",
+        "B": "正しい。実行時に取得するので再デプロイが要らず、定期的な変更は Secrets Manager の自動ローテーションで行えます。",
+        "C": "再デプロイは要りませんが、ローテーションの Lambda 関数とスケジュールを自分で作って保守する必要があり、手間が大きくなります。AWS は認証情報には Secrets Manager を勧めています。",
+        "D": "シークレットは自動で変わりますが、設定ファイルに反映するにはデプロイが必要で、再デプロイ無しという要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "Since the credentials are no longer stored with the application, rotating credentials no longer requires updating your applications and deploying changes to application clients."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro",
+          "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0012",
+      "stem_ja": "Amazon ECS のサービスが、Network Load Balancer の後ろで AWS CodeDeploy の Blue/Green デプロイでデプロイされており、今はすべてのトラフィックが一度に新しいタスクセットへ移ります。チームは、問題が起きても影響を受ける利用者が少なくなるよう、新しい版にまず一部のトラフィックを送り、残りを数分後に送りたいと考えています。デプロイの手順の変更を最も少なくしてこの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSCanary10Percent5Minutes に変える。",
+        "B": "Network Load Balancer と CodeDeployDefault.ECSAllAtOnce の設定のままにし、各デプロイの前に手動の承認を足す。",
+        "C": "Network Load Balancer のままにし、デプロイ設定を CodeDeployDefault.ECSLinear10PercentEvery1Minutes に変える。",
+        "D": "サービスを Application Load Balancer の後ろへ移し、CodeDeployDefault.ECSCanary10Percent5Minutes のデプロイ設定を使う。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "ECS のデプロイでは、カナリア・リニア・一括のデプロイ設定でトラフィックを移せますが、Network Load Balancer を使う場合は事前定義の CodeDeployDefault.ECSAllAtOnce しか使えません。一部を先に送るカナリアを使うには、Application Load Balancer に移す必要があります。",
+      "per_choice": {
+        "A": "Network Load Balancer では ECSAllAtOnce しか使えず、このカナリアの設定は使えません。",
+        "B": "承認を足しても、トラフィックは一度にすべて移り、一部を先に送る要件を満たしません。",
+        "C": "Network Load Balancer では ECSAllAtOnce しか使えず、リニアの設定も使えません。",
+        "D": "正しい。ロードバランサーを変えれば、10% を先に送り残りを 5 分後に送るカナリアを使えます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs",
+          "quote": "You can shift traffic using a canary, linear, or all-at-once deployment configuration."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0013",
+      "stem_ja": "ある会社は、12 台の EC2 インスタンスに CodeDeploy のインプレースデプロイを行っています。デプロイ中も、少なくとも 4 分の 3 のインスタンスがトラフィックを処理できる状態で残る必要がありますが、その範囲でデプロイをできるだけ早く終える必要があります。最も適切なデプロイ設定はどれですか。",
+      "choices_ja": {
+        "A": "1 度に 1 台のインスタンスにだけデプロイする CodeDeployDefault.OneAtATime。",
+        "B": "1 度に最大で半分のインスタンスにデプロイする CodeDeployDefault.HalfAtATime。",
+        "C": "最小正常ホスト数を 75% にした独自のデプロイ設定。",
+        "D": "できるだけ多くのインスタンスに一度にデプロイする CodeDeployDefault.AllAtOnce。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "EC2/オンプレミスのデプロイ設定は、最小正常ホスト数で、デプロイ中にいつも残す必要があるインスタンスの数か割合を決めます。既定の設定が合わない時は、最小正常ホスト数を決めた独自のデプロイ設定を作れます。75% にすれば 12 台のうち 9 台を残しつつ、3 台ずつデプロイできます。",
+      "per_choice": {
+        "A": "残る台数の要件は満たしますが、1 台ずつなので最も時間がかかり、早く終える要件に合いません。",
+        "B": "最大で 6 台に同時にデプロイするため、残るのが半分になり、4 分の 3 を残す要件を満たしません。",
+        "C": "正しい。9 台を残す範囲で、できるだけ多くのインスタンスに同時にデプロイできます。",
+        "D": "すべてのインスタンスに一度にデプロイするため、残る台数の要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "quote": "the number or percentage of instances that must remain available at any time during a deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations-create.html#deployment-configurations-create-console",
+          "quote": "If you don't want to use one of the default deployment configurations provided with CodeDeploy, you can create your own using the following instructions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server",
+          "quote": "Deploys to up to half of the instances at a time (with fractions rounded down)."
+        }
+      ]
+    },
+    {
+      "id": "q-1.1-0014",
+      "stem_ja": "あるチームは、カナリアのデプロイ設定を使い、CodeDeploy で AWS Lambda 関数をデプロイしています。チームは、デプロイ中に関数のエラー率がしきい値を超えたら、デプロイを止めて、最後に正常だった版へ自動で戻したいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "関数のエラー率の CloudWatch アラームを作り、そのアラームをデプロイグループに足す。",
+        "B": "アラームのしきい値に達した時の自動ロールバックを、デプロイグループで有効にする。",
+        "C": "アラームが発生している間もデプロイが続くよう、アラームの設定を無視する（Ignore alarm configuration）を選ぶ。",
+        "D": "先にアラームをデプロイグループに足し、CloudWatch アラームは最初にデプロイが失敗した後に作る。",
+        "E": "ロールバックは無効のままにし、エラー率が高い時は前のリビジョンの新しいデプロイを手作業で作る。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "CloudWatch アラームをデプロイグループに足すと、メトリクスがしきい値を超えた時にデプロイを止められます。アラームは先に CloudWatch で作っておく必要があります。アラームのしきい値に達した時のロールバックを有効にすると、CodeDeploy は最後に正常だったリビジョンを再デプロイします。",
+      "per_choice": {
+        "A": "正しい。エラー率を見るアラームで、しきい値を超えた時にデプロイを止められます。",
+        "B": "正しい。アラームが発生した時に、最後に正常だったリビジョンが自動で再デプロイされます。",
+        "C": "アラームを無視するとデプロイが続き、要件と逆になります。",
+        "D": "アラームは、デプロイグループに足す前に CloudWatch で作っておく必要があります。",
+        "E": "戻すのが手作業で、自動で戻すという要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "You can configure a deployment to stop when an Amazon CloudWatch alarm detects that a metric has fallen below or exceeded a defined threshold."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "You must have already created the alarm in CloudWatch before you can add it to a deployment group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html",
+          "quote": "CodeDeploy will redeploy the last known good revision when one or more of the specified alarms is activated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-manual-rollbacks",
+          "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision"
+        }
+      ]
+    }
+  ]
+}

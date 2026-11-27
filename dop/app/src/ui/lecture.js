@@ -37,9 +37,9 @@ function renderList({ index, saved, error }, onOpen) {
     body);
 }
 
-function renderMermaid(v, url) {
+function renderMermaid(v, url, onLoad) {
   return el('div', { class: 'lec-visual diagram-box', 'data-testid': 'lecture-visual', 'data-type': 'mermaid' },
-    el('img', { src: url(v.svg), alt: v.alt ?? '' }));
+    el('img', { src: url(v.svg), alt: v.alt ?? '', onload: onLoad }));
 }
 
 function renderCompare(v) {
@@ -56,10 +56,10 @@ function renderSteps(v) {
       el('span', {}, el('b', { text: it.label ?? String(it) }), it.note ? el('span', { class: 'muted small', text: it.note }) : null))));
 }
 
-/** スライドの図。url(path) は講義のフォルダーからの URL */
-function renderVisual(v, url) {
+/** スライドの図。url(path) は講義のフォルダーからの URL、onLoad は絵を読み終えた時 */
+function renderVisual(v, url, onLoad) {
   if (!v) return null;
-  if (v.type === 'mermaid' && v.svg) return renderMermaid(v, url);
+  if (v.type === 'mermaid' && v.svg) return renderMermaid(v, url, onLoad);
   if (v.type === 'compare' && Array.isArray(v.columns) && Array.isArray(v.rows)) return renderCompare(v);
   if (v.type === 'steps' && Array.isArray(v.items)) return renderSteps(v);
   return null;
@@ -85,20 +85,27 @@ function renderScript(s) {
       el('dd', { text: l.text }))));
 }
 
-/** スライドの中身（番号・題・図・要点・台本・根拠） */
-function renderCard(s, i, n, url) {
-  return el('section', { class: 'card lec-slide', 'data-testid': 'lecture-slide', 'aria-live': 'polite' },
-    el('span', { class: 'lec-num muted small', 'data-testid': 'lecture-num', text: `${i + 1} / ${n}` }),
-    el('h3', { class: 'lec-title', 'data-testid': 'lecture-title', text: s.title }),
-    renderVisual(s.visual, url),
-    el('ul', { class: 'lec-bullets', 'data-testid': 'lecture-bullets' }, (s.bullets ?? []).map((b) => el('li', { text: b }))),
+/** スライドの舞台（A-0018）: 決まった大きさの枠に番号・題・図・要点。入りきらない時は fitStage が字を縮める */
+function renderStage(s, i, n, url, onLoad) {
+  return el('section', { class: 'card lec-slide lec-stage', 'data-testid': 'lecture-slide', 'aria-live': 'polite' },
+    el('div', { class: 'lec-stage-in', 'data-testid': 'lecture-stage' },
+      el('div', { class: 'lec-stage-head' },
+        el('h3', { class: 'lec-title', 'data-testid': 'lecture-title', text: s.title }),
+        el('span', { class: 'lec-num muted small', 'data-testid': 'lecture-num', text: `${i + 1} / ${n}` })),
+      el('div', { class: 'lec-stage-visual' }, renderVisual(s.visual, url, onLoad)),
+      el('ul', { class: 'lec-bullets', 'data-testid': 'lecture-bullets' }, (s.bullets ?? []).map((b) => el('li', { text: b })))));
+}
+
+/** 舞台の下に出す物（台本・根拠） */
+function renderBelow(s) {
+  return el('div', { class: 'lec-below' },
     el('details', { class: 'lec-more', 'data-testid': 'lecture-script' },
       el('summary', { text: '台本を読む' }), renderScript(s)),
     renderRefs(s.refs ?? []));
 }
 
-/** 再生の操作。on: { show(n), toggle(), setAuto(checked) } */
-function renderControls({ i, last, hasAudio, playing, auto }, on) {
+/** 再生の操作。on: { show(n), toggle(), setAuto(checked), full() } */
+function renderControls({ i, last, hasAudio, playing, auto, full }, on) {
   return el('div', { class: 'lec-controls' },
     el('button', { type: 'button', class: 'secondary', 'data-testid': 'lecture-prev', disabled: i === 0, onclick: () => on.show(i - 1), text: '前へ' }),
     hasAudio ? el('button', {
@@ -108,7 +115,8 @@ function renderControls({ i, last, hasAudio, playing, auto }, on) {
     }) : null,
     el('button', { type: 'button', class: 'secondary', 'data-testid': 'lecture-next', disabled: last, onclick: () => on.show(i + 1), text: '次へ' }),
     hasAudio ? el('label', { class: 'lec-auto' },
-      el('input', { type: 'checkbox', 'data-testid': 'lecture-auto', checked: auto, onchange: (e) => on.setAuto(e.target.checked) }), '自動で次へ') : null);
+      el('input', { type: 'checkbox', 'data-testid': 'lecture-auto', checked: auto, onchange: (e) => on.setAuto(e.target.checked) }), '自動で次へ') : null,
+    el('button', { type: 'button', class: 'secondary lec-full-btn', 'data-testid': 'lecture-full', 'aria-pressed': full ? 'true' : 'false', onclick: on.full, text: full ? '全画面を終える' : '全画面' }));
 }
 
 function renderDots(slides, i, onShow) {
@@ -129,8 +137,8 @@ function renderSolve(canSolve, onSolve) {
     }));
 }
 
-/** スライドの画面。view: { lec, i, playing, auto, canSolve, url }、on: { back(), show(n), toggle(), setAuto(c), solve() } */
-function renderSlide({ lec, i, playing, auto, canSolve, url }, on) {
+/** スライドの画面。view: { lec, i, playing, auto, full, canSolve, url }、on: { back(), show(n), toggle(), setAuto(c), full(), solve(), fit() } */
+function renderSlide({ lec, i, playing, auto, full, canSolve, url }, on) {
   const s = lec.slides[i];
   const n = lec.slides.length;
   const last = i === n - 1;
@@ -140,10 +148,12 @@ function renderSlide({ lec, i, playing, auto, canSolve, url }, on) {
       el('button', { type: 'button', class: 'secondary', 'data-testid': 'lecture-back', onclick: on.back, text: '一覧へ' }),
       el('span', { class: 'muted small', text: `タスク ${lec.task}・約 ${lec.minutes ?? '?'} 分` })),
     el('h2', { class: 'lec-name', text: lec.title }),
-    renderCard(s, i, n, url),
-    hasAudio ? el('div', { class: 'lec-bar', 'aria-hidden': 'true' }, el('i')) : null,
-    renderControls({ i, last, hasAudio, playing, auto }, on),
+    el('div', { class: 'lec-player', 'data-testid': 'lecture-player' },
+      renderStage(s, i, n, url, on.fit),
+      hasAudio ? el('div', { class: 'lec-bar', 'aria-hidden': 'true' }, el('i')) : null,
+      renderControls({ i, last, hasAudio, playing, auto, full }, on)),
     renderDots(lec.slides, i, on.show),
+    renderBelow(s),
     last ? renderSolve(canSolve, on.solve) : null,
     lec.credit ? el('p', { class: 'lec-credit muted small', 'data-testid': 'lecture-credit', text: `音声: ${lec.credit}` }) : null,
   );
@@ -158,12 +168,14 @@ function bindAudio(audio, app, onEnded) {
   });
 }
 
-/** ← → でスライドを移る。current() は { lec, i } か null */
-function bindKeys(current, isActive, show) {
+/** ← → でスライドを移る。F で全画面、Esc で全画面を終える。current() は { lec, i } か null */
+function bindKeys(current, isActive, show, keys = {}) {
   document.addEventListener('keydown', (e) => {
     const c = current();
     if (!c || !isActive() || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     if (e.target.closest?.('input, textarea, select, dialog')) return;
+    if ((e.key === 'f' || e.key === 'F') && keys.full) { e.preventDefault(); keys.full(); return; }
+    if (e.key === 'Escape' && keys.esc) keys.esc();
     if (e.key === 'ArrowRight' && c.i < c.lec.slides.length - 1) { e.preventDefault(); show(c.i + 1); }
     if (e.key === 'ArrowLeft' && c.i > 0) { e.preventDefault(); show(c.i - 1); }
   });
@@ -200,6 +212,28 @@ async function fetchLecture(task) {
 // c: { app, progress, hasTask, openTask, isActive, audio, saved, index, lec, i, playing, auto, error }
 
 const store = (c, next) => { c.saved = next; saveLecture(c.saved); };
+
+// 全画面（A-0018）。描き直しで要素が入れ替わっても続くよう、ブラウザの全画面は文書全体に掛け、
+// 再生の枠を画面いっぱいに出すのは body の印（lec-full）で行う。全画面の API が無い端末でも印だけで広がる
+function setFull(c, on) {
+  c.full = on;
+  document.body.classList.toggle('lec-full', on);
+  const doc = document;
+  try {
+    if (on && !doc.fullscreenElement) doc.documentElement.requestFullscreen?.()?.catch?.(() => {});
+    if (!on && doc.fullscreenElement) { c.selfExit = true; doc.exitFullscreen?.()?.catch?.(() => {}); }
+  } catch { /* 全画面にできない端末は印だけ */ }
+}
+
+/** 舞台に入りきるまで字を縮める（--lec-k を 1 から 0.4 まで） */
+function fitStage(app) {
+  const stage = app.querySelector('.lec-stage-in');
+  if (!stage) return;
+  const over = () => stage.scrollHeight > stage.clientHeight + 1 || [...stage.querySelectorAll('.lec-stage-visual, .lec-table')].some((x) => x.scrollHeight > x.clientHeight + 1 || x.scrollWidth > x.clientWidth + 1);
+  let k = 1;
+  stage.style.setProperty('--lec-k', String(k));
+  while (over() && k > 0.4) { k = Math.round((k - 0.05) * 100) / 100; stage.style.setProperty('--lec-k', String(k)); }
+}
 const slideUrl = (c) => (path) => `${ROOT}${c.lec.task}/${path}`;
 
 function play(c) {
@@ -255,6 +289,7 @@ async function open(c, task) {
 
 function toList(c) {
   pause(c);
+  if (c.full) setFull(c, false);
   c.lec = null;
   store(c, closeLecture(c.saved));
   draw(c);
@@ -267,6 +302,8 @@ function slideHandlers(c) {
     show: (n) => show(c, n),
     toggle: () => { if (c.playing) pause(c); else play(c); draw(c); },
     setAuto: (checked) => { c.auto = checked; },
+    full: () => { setFull(c, !c.full); draw(c); },
+    fit: () => fitStage(c.app),
     solve: () => { const t = c.lec.task; store(c, markSeen(c.saved, t)); c.openTask(t); },
   };
 }
@@ -279,8 +316,9 @@ function draw(c) {
     return;
   }
   c.progress.textContent = `${c.i + 1} / ${c.lec.slides.length}`;
-  const view = { lec: c.lec, i: c.i, playing: c.playing, auto: c.auto, canSolve: c.hasTask(c.lec.task), url: slideUrl(c) };
+  const view = { lec: c.lec, i: c.i, playing: c.playing, auto: c.auto, full: c.full, canSolve: c.hasTask(c.lec.task), url: slideUrl(c) };
   redraw(c.app, renderSlide(view, slideHandlers(c)));
+  fitStage(c.app);
 }
 
 /**
@@ -297,11 +335,26 @@ export function createLecture({ app, progress, hasTask, openTask, isActive }) {
     i: 0,
     playing: false,
     auto: true,
+    full: false,
+    selfExit: false,
     error: '',
   };
   document.body.append(c.audio);
   bindAudio(c.audio, app, () => ended(c));
-  bindKeys(() => (c.lec ? { lec: c.lec, i: c.i } : null), isActive, (n) => show(c, n));
+  bindKeys(() => (c.lec ? { lec: c.lec, i: c.i } : null), isActive, (n) => show(c, n), {
+    full: () => { setFull(c, !c.full); draw(c); },
+    esc: () => { if (c.full) { setFull(c, false); draw(c); } },
+  });
+  // ブラウザの全画面が Esc などで終わった時は印も外す。大きさが変わったら字を合わせ直す
+  // こちらから終えた時の知らせ（selfExit）は、その後に押し直した全画面を消さないよう読み捨てる
+  document.addEventListener('fullscreenchange', () => {
+    // 全画面に入り終える前に終えた時は、入ったところで出直す
+    if (document.fullscreenElement && !c.full) { c.selfExit = true; document.exitFullscreen?.()?.catch?.(() => {}); return; }
+    if (!document.fullscreenElement && c.selfExit) c.selfExit = false;
+    else if (!document.fullscreenElement && c.full) { setFull(c, false); draw(c); return; }
+    fitStage(app);
+  });
+  window.addEventListener('resize', () => { if (c.lec) fitStage(app); });
 
   return {
     /** 開いていた講義（読み込み直した時に続ける）。無ければ null */
@@ -316,6 +369,7 @@ export function createLecture({ app, progress, hasTask, openTask, isActive }) {
     /** ほかの画面へ移った: 音声を止め、開いていた講義を閉じる（スライドの位置は残る） */
     leave() {
       if (c.playing) pause(c);
+      if (c.full) setFull(c, false);
       if (c.lec || c.saved.open) { c.lec = null; store(c, closeLecture(c.saved)); }
     },
   };

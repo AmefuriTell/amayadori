@@ -1,0 +1,490 @@
+{
+  "task": "6.2",
+  "questions": [
+    {
+      "id": "q-6.2-0001",
+      "stem_ja": "ある企業は、us-east-1 と eu-west-1 で AWS Security Hub CSPM を使用しています。企業は us-east-1 をクロスリージョン集約のホームリージョンにし、ほかのすべてのリージョンをリンクしています。最近 ap-south-1 にワークロードをデプロイしましたが、ap-south-1 の検出結果が us-east-1 に表示されません。企業は、これらの検出結果をホームリージョンに集め、確認する場所を 1 か所のままにしたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "クロスリージョン集約が各アカウントの ap-south-1 で Security Hub CSPM を有効にするのを待つ。",
+        "B": "ap-south-1 にワークロードがあるアカウントで、ap-south-1 の Security Hub CSPM を有効にする。",
+        "C": "そのリージョンの検出結果が集まるように、ホームリージョンを ap-south-1 に変える。",
+        "D": "毎日 ap-south-1 の検出結果を Amazon S3 にエクスポートし、us-east-1 にインポートする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "リージョンをまたぐ集約は、Security Hub CSPM を有効にしているリージョンのデータだけを集める。集約の設定で Security Hub CSPM が有効になることは無いので、ap-south-1 で有効にする必要がある。",
+      "per_choice": {
+        "A": "集約の設定によって Security Hub CSPM が自動で有効になることは無い。",
+        "B": "正しい。有効にすれば、リンクしたリージョンとしてホームリージョンに集まる。",
+        "C": "ホームリージョンを変えても、ap-south-1 で有効になっていなければデータは集まらない。見る場所も変わってしまう。",
+        "D": "毎日の書き出しと取り込みの仕組みを作ることになり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "quote": "Security Hub CSPM only aggregates data from Regions where an account has Security Hub CSPM enabled."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html",
+          "quote": "Security Hub CSPM is not automatically enabled for an account based on the cross-Region aggregation configuration."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0002",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。セキュリティチームは専用のセキュリティアカウントで作業し、組織のすべてのアカウントの AWS Security Hub CSPM を管理する必要があります。後から組織に加わるアカウントも、追加の作業なしで有効化と設定が行われる必要があります。企業は、組織全体で Security Hub CSPM を管理する、現在推奨されている方法に従いたいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "Organizations の管理アカウントから、セキュリティアカウントを Security Hub CSPM の委任管理者に指定する。",
+        "B": "Security Hub CSPM の宣言型ポリシーを組織のルートにアタッチする。",
+        "C": "各メンバーアカウントにサインインし、すべてのリージョンで Security Hub CSPM を有効にする。",
+        "D": "新しいアカウントが組織に加わるたびに、セキュリティアカウントから招待を送る。",
+        "E": "すべてのアカウントを管理できるように、セキュリティアカウントを Organizations の管理アカウントにする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Organizations と連携すると、管理アカウントが Security Hub CSPM の委任管理者を決める。宣言型ポリシー（declarative policy）は組織のアカウントで Security Hub CSPM をまとめて有効にして設定でき、組織に入ったアカウントや OU に移ったアカウントも引き継ぐ。宣言型ポリシーは、組織全体で管理する推奨の方法として、レガシーになった central configuration に置き換わっている。",
+      "per_choice": {
+        "A": "正しい。委任管理者を決めると、そのアカウントで Security Hub CSPM が自動で有効になり、組織を管理できる。",
+        "B": "正しい。ルートに付けると、後から入るアカウントも引き継ぐ。",
+        "C": "アカウントごとの作業になり、後から入るアカウントにも同じ作業が要る。",
+        "D": "アカウントが入るたびに作業が要り、要件に反する。",
+        "E": "管理アカウントを入れ替えることになり、要件に関係無い大きな変更になる。委任管理者を決めれば足りる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-accounts.html",
+          "quote": "When you integrate Security Hub CSPM and AWS Organizations, the Organizations management account designates a Security Hub CSPM delegated administrator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "quote": "Accounts that join the organization, or move into an OU that has an attached declarative policy, inherit the declarative policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html",
+          "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0003",
+      "stem_ja": "ある企業は AWS Control Tower を使用しています。Workloads OU では検出コントロールが有効です。Workloads OU のあるアカウントでは、まだそのコントロールを満たせない古いシステムが動いています。企業は、OU のほかのすべてのアカウントでコントロールを保ち、このアカウントを非準拠と報告させず、独自のルールを書くことは避けたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "古いシステムのアカウントだけでコントロールを無効にし、Workloads OU のほかでは有効のままにする。",
+        "B": "Workloads OU でコントロールを無効にし、ほかのアカウント向けに独自の AWS Config ルールを作る。",
+        "C": "古いシステムのアカウントを、コントロールが有効でない別の OU に移す。",
+        "D": "アカウントを Workloads OU に残し、毎週非準拠の結果を抑制する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Control Tower のコントロールは OU 全体に当たり、OU の中の全てのアカウントが影響を受ける。1 つのアカウントだけを外すには、そのコントロールを有効にしていない別の OU へ移す。",
+      "per_choice": {
+        "A": "コントロールは OU の単位で当たり、OU の中の 1 つのアカウントだけを外すことはできない。",
+        "B": "自分でルールを作ることになり、要件に反する。",
+        "C": "正しい。別の OU に移せば、そのコントロールは当たらない。",
+        "D": "毎週の手作業になり、noncompliant と出さない要件にも合わない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0004",
+      "stem_ja": "パブリックサブネットの Web サーバーは、セキュリティグループを通じてインターネットからの HTTPS を受け付けています。セキュリティチームは、ほかのすべての HTTPS のトラフィックは引き続き許可しつつ、1 つの悪意のある IP アドレスの範囲がサブネットのどのインスタンスにも届かないようにする必要があります。チームはネットワークのレベルのコントロールを使いたく、各インスタンスを変えたくありません。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "Web サーバーのセキュリティグループに、その IP アドレスの範囲を拒否するルールを追加する。",
+        "B": "サブネットのネットワーク ACL に、HTTPS を許可するルールより小さいルール番号で、その IP アドレスの範囲を拒否するルールを追加する。",
+        "C": "サブネットのネットワーク ACL に、HTTPS を許可するルールより大きいルール番号で、その IP アドレスの範囲を拒否するルールを追加する。",
+        "D": "セキュリティグループから HTTPS のルールを外し、悪意のある範囲以外のすべての IP アドレスの範囲の許可ルールを追加する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "セキュリティグループは許可のルールだけで、拒否は書けない。ネットワーク ACL は許可と拒否の両方を書け、番号の小さい順に評価し、合ったルールを当てて残りは見ない。拒否のルールは、HTTPS を許すルールより小さい番号にする。",
+      "per_choice": {
+        "A": "セキュリティグループには許可のルールしか書けない。",
+        "B": "正しい。小さい番号の拒否が先に合うので、その範囲だけを止められる。",
+        "C": "番号の小さい HTTPS の許可が先に合い、拒否のルールは評価されない。",
+        "D": "許可のルールをたくさん持つことになり、手間が大きく、範囲の管理も難しい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "quote": "Allow rules only"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "quote": "We evaluate the rules in order, starting with the lowest numbered rule, when deciding whether allow or deny traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "quote": "If the traffic matches a rule, the rule is applied and we do not evaluate any additional rules."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0005",
+      "stem_ja": "あるチームは、サブネットのデフォルトのネットワーク ACL をカスタムのネットワーク ACL に置き換えました。カスタムの ACL には、インターネットからの HTTPS を許可するインバウンドのルールがあり、アウトバウンドには既定の拒否以外のルールがありません。インスタンスのセキュリティグループはインバウンドの HTTPS を許可しています。クライアントはサーバーに届きますが、応答を一度も受け取りません。最も少ない運用の手間で問題を解決する変更はどれですか。",
+      "choices_ja": {
+        "A": "カスタムのネットワーク ACL に、クライアントへの戻りのトラフィックを許可するアウトバウンドのルールを追加する。",
+        "B": "セキュリティグループに、クライアントへの応答を許可するアウトバウンドのルールを追加する。",
+        "C": "カスタムのネットワーク ACL に、より小さいルール番号で 2 つ目のインバウンドの HTTPS のルールを追加する。",
+        "D": "セキュリティグループを、ほかのすべてのトラフィックの拒否ルールを持つものに置き換える。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "ネットワーク ACL はステートレスで、前に送受信した通信を覚えていない。入ってくる通信を許すルールを作っても、その応答は自動では許されないので、戻りの通信を出ていく方向のルールで許す必要がある。セキュリティグループはステートフルで、戻りの通信は自動で許される。",
+      "per_choice": {
+        "A": "正しい。ネットワーク ACL は戻りの通信を明示して許す必要がある。",
+        "B": "セキュリティグループはステートフルなので、許した通信の応答は既に通る。止めているのはネットワーク ACL。",
+        "C": "入ってくる通信は既に許されている。応答が出ていけないのが問題。",
+        "D": "セキュリティグループには拒否のルールは書けず、問題もネットワーク ACL の側にある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html",
+          "quote": "If, for example, you create a NACL rule to allow specific inbound traffic to a subnet, responses to that traffic are not automatically allowed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "quote": "Automatically allowed (stateful)"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "quote": "Must be explicitly allowed (stateless)"
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0006",
+      "stem_ja": "ログインの API は Application Load Balancer の背後で動いています。攻撃者は、変化し続ける IP アドレスの集合から大量のログインのリクエストを送ってきます。企業は、通常のユーザーをブロックせず、コードを書いたり IP の一覧を手で更新したりせずに、リクエストを速く送りすぎる送信元を自動で制限する必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "攻撃に気付くたびに、サブネットのネットワーク ACL に攻撃元の IP アドレスの拒否ルールを追加する。",
+        "B": "ロードバランサーのセキュリティグループに、攻撃元の IP アドレスの拒否ルールを追加する。",
+        "C": "毎分アクセスログを読んで IP のブロックリストを更新する AWS Lambda 関数を書く。",
+        "D": "レートベースのルールを持つ AWS WAF のウェブ ACL を Application Load Balancer に関連付ける。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "AWS WAF は Application Load Balancer・CloudFront・API Gateway の REST API を守れる。rate-based rule は入ってくるリクエストを数え、速すぎる時に制限する。決めた条件でまとめて数えるので、送り元の IP が変わっても手でリストを直す必要が無い。",
+      "per_choice": {
+        "A": "見つけるたびに人が足すことになり、IP が変わると追い付かない。",
+        "B": "セキュリティグループには拒否のルールは書けない。",
+        "C": "自分でコードを書くことになり、要件に反する。",
+        "D": "正しい。速すぎる送り元を自動で制限する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html",
+          "quote": "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html",
+          "quote": "Application Load Balancer"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html",
+          "quote": "Allow rules only"
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0007",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。セキュリティチームは専用のセキュリティアカウントで作業し、すべてのメンバーアカウントで、既知の悪意のある IP アドレスとの通信と、通常と違う API の活動を検出する必要があります。チームは各アカウントで VPC フローログを作りたくありません。脅威の検出結果が出た時、アナリストは根本原因を調べられる必要があります。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "管理アカウントから、セキュリティアカウントを GuardDuty の委任管理者に指定し、メンバーアカウントで GuardDuty を有効にする。",
+        "B": "Amazon Detective を使って GuardDuty の検出結果を調べ、根本原因を特定する。",
+        "C": "GuardDuty はフローログが無いとネットワークのトラフィックを分析できないので、先にすべてのアカウントで VPC フローログを作る。",
+        "D": "GuardDuty の代わりに、Amazon Detective で各アカウントの脅威を検出する。",
+        "E": "GuardDuty は組織のすべてのアカウントを自動で監視するので、セキュリティアカウントだけで GuardDuty を有効にする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "GuardDuty は既知の悪いドメインや IP との通信、怪しい動きを検出し、CloudTrail の管理イベントや EC2 の VPC フローログのデータを分析する。フローログを自分で作る必要は無い。管理アカウントが委任管理者を決めると、そのアカウントがリージョンの全メンバーの GuardDuty を有効にして管理できる。Detective は、検出結果などから根本の原因を調べるのに使う。",
+      "per_choice": {
+        "A": "正しい。委任管理者がメンバーの GuardDuty を有効にして管理する。",
+        "B": "正しい。GuardDuty の検出結果から調査を始められる。",
+        "C": "フローログを自分で作らなくても、GuardDuty はデータを分析できる。",
+        "D": "Detective は調べるための物で、検出は GuardDuty などの結果から始まる。",
+        "E": "委任管理者を決めて、メンバーのアカウントで有効にする必要がある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_data-sources.html",
+          "quote": "You don't need to create or configure VPC flow logs in your account for GuardDuty to access this data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+          "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html",
+          "quote": "For example, you are assigned to look into findings or alerts uncovered by services such as Amazon GuardDuty and Amazon Inspector."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0008",
+      "stem_ja": "ある企業には数千の Amazon S3 バケットがあります。セキュリティチームは、分析を 1 つずつ設定せずに、すべてのバケットのどこに機密データがありそうかを継続的に広く把握したいと考えています。また、規制の対象の 3 つのバケットについて、オブジェクトのプロパティに独自の条件を付けた、より深く的を絞った分析を毎月行う必要があります。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "アカウントで Macie の自動化された機密データ検出を有効にする。",
+        "B": "規制の対象の 3 つのバケットを独自の条件で対象にする、定期的な Macie の機密データ検出ジョブを作る。",
+        "C": "一度だけのジョブでも後から新しいオブジェクトを監視し続けるので、すべてのバケットに 1 回限りの機密データ検出ジョブを作る。",
+        "D": "自動化された機密データ検出に、規制の対象の 3 つのバケットのすべてのオブジェクトを深く分析させる。",
+        "E": "Macie がバケットを継続的に監視するように、バケットごとにカスタムデータ識別子を作る。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Macie は 2 つの方法で機密データを見つける。自動の機密データの発見は、S3 のバケットの一覧を続けて評価し、サンプリングで代表のオブジェクトを選んで、広く見える化する。機密データの発見ジョブは、対象のバケット・サンプリングの深さ・オブジェクトの性質の条件を決める、より深く絞った分析で、一度だけか定期で動かせる。",
+      "per_choice": {
+        "A": "正しい。設定を作り込まずに、全てのバケットを続けて広く見る。",
+        "B": "正しい。3 つのバケットを、条件を決めて毎月深く調べる。",
+        "C": "一度だけのジョブはその時の分析で、その後の監視はしない。",
+        "D": "自動の発見はサンプリングで代表のオブジェクトを選ぶ物で、全てを深く調べる物ではない。",
+        "E": "カスタムデータ識別子は見つける条件の定義で、バケットを監視する仕組みではない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "quote": "With this option, Macie continually evaluates your S3 bucket inventory and uses sampling techniques to identify and select representative S3 objects from your buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html",
+          "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html",
+          "quote": "You can configure a job to run only once for on-demand analysis and assessment, or on a recurring basis for periodic analysis, assessment, and monitoring."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0009",
+      "stem_ja": "ある企業の社内の従業員 ID は、EMP- の後に 6 桁の数字が続く形式で、Amazon Macie に機密データとして報告させる必要があります。同じバケットのテスト用のファイルには、よく知られたサンプルのクレジットカード番号が含まれており、チームはそれを報告させたくありませんが、本物のクレジットカード番号は引き続き報告させる必要があります。最も少ない運用の手間でこれらの要件を満たす設定はどれですか。",
+      "choices_ja": {
+        "A": "マネージドデータ識別子はすでに従業員 ID を検出し、サンプルのカード番号を無視するので、それだけを使う。",
+        "B": "従業員 ID のパターンの許可リストと、サンプルのカード番号のカスタムデータ識別子を作る。",
+        "C": "従業員 ID の正規表現を持つカスタムデータ識別子と、サンプルのカード番号を含む許可リストを作る。",
+        "D": "クレジットカード番号のマネージドデータ識別子を無効にし、従業員 ID のカスタムデータ識別子を作る。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "カスタムデータ識別子は、正規表現などで会社独自の機密データを見つける条件を決め、マネージドデータ識別子を補う。許可リスト（allow list）に入れた文字や形は、マネージドやカスタムの識別子の条件に合っても報告されない。",
+      "per_choice": {
+        "A": "マネージドデータ識別子は決まった種類の機密データを見つける物で、会社独自の社員 ID の形は知らない。",
+        "B": "逆になっている。許可リストに入れた物は報告されなくなる。",
+        "C": "正しい。社員 ID は独自の条件で見つけ、サンプルの番号だけを許可リストで外す。",
+        "D": "本物のカード番号も報告されなくなる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/custom-data-identifiers.html",
+          "quote": "The criteria consist of a regular expression (regex) that defines a text pattern to match and, optionally, character sequences and a proximity rule that refine the results."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "quote": "If data matches text or a text pattern in an allow list, Macie doesn’t report the data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/allow-lists.html",
+          "quote": "This is the case even if the data matches the criteria of a managed data identifier or a custom data identifier."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0010",
+      "stem_ja": "ある企業は、50 個のメンバーアカウントで AWS Organizations を使用しています。セキュリティチームは、セキュリティアカウントから Amazon Macie を一元的に管理し、メンバーアカウントの S3 バケットの情報を確認し、各アカウントにサインインせずにメンバーアカウントで Macie を有効にする必要があります。これらの要件を最もよく満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "セキュリティアカウントから 50 個すべてのアカウントに Macie のメンバーの招待を送り、各アカウントの所有者に承諾してもらう。",
+        "B": "各メンバーアカウントにサインインして Macie を有効にし、検出結果をメールでセキュリティチームに共有する。",
+        "C": "Macie はすべてのメンバーアカウントのバケットを自動でスキャンするので、セキュリティアカウントだけで Macie を有効にする。",
+        "D": "Macie を AWS Organizations と統合し、セキュリティアカウントを Macie の管理者に指定して、そこからメンバーアカウントで Macie を有効にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Macie の組織は、指定した Macie の管理者アカウントとメンバーアカウントでできる。つなぎ方は AWS Organizations との連携か、Macie の招待で、Organizations との連携が勧められている。Organizations でつないだ場合、Macie の管理者はメンバーアカウントで Macie を有効にでき、メンバーの S3 バケットの情報も見られる。",
+      "per_choice": {
+        "A": "動くが、各アカウントで受け入れる作業が要り、勧められている方法でもない。",
+        "B": "各アカウントに入る必要があり、要件に反する。",
+        "C": "管理者とメンバーの関係を作らないと、他のアカウントのバケットは見られない。",
+        "D": "正しい。勧められている Organizations との連携で、管理者が各メンバーで有効にできる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "quote": "We recommend that you integrate Macie with AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "quote": "If the accounts are associated through AWS Organizations, the Macie administrator can also enable Macie for member accounts in the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/macie/latest/user/macie-accounts.html",
+          "quote": "Tasks include reviewing information about S3 buckets that are owned by member accounts, reviewing policy findings for those buckets, and inspecting the buckets for sensitive data."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0011",
+      "stem_ja": "ある会社は、Amazon S3 の機密のオブジェクトを AWS KMS で暗号化しています。監査人は、誰がキーを使えるかを会社自身のキーポリシーで決めること、キーを無効にしたり削除を予定したりできること、キーの操作を監査できることを求めています。会社は、自前のハードウェアを動かすことは避けたいと考えています。運用上のオーバーヘッドが最も少なく使えるキーの種類はどれですか。",
+      "choices_ja": {
+        "A": "S3 のサービスが複数のアカウントで使うために所有・管理する、AWS 所有のキー。",
+        "B": "会社が管理する AWS CloudHSM のクラスターのキーと、IAM の外で管理する利用者。",
+        "C": "S3 が会社のアカウントで会社の代わりに作って使う、AWS マネージドキー。",
+        "D": "会社が自分のアカウントで作り、自分のキーポリシーで管理するカスタマーマネージドキー。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "カスタマーマネージドキーは自分のアカウントで作り、所有し、管理するキーで、キーポリシー・IAM ポリシー・グラント、有効と無効、削除の予定などを完全に管理できます。キーの寿命と使い方を完全に管理したい場合に勧められています。",
+      "per_choice": {
+        "A": "AWS 所有のキーは、ポリシーを変えることも、操作を監査することも、削除することもできません。",
+        "B": "要件は満たせますが、HSM のクラスターと利用者を自分で管理することになり、オーバーヘッドが大きくなります。",
+        "C": "AWS マネージドキーは AWS のサービスが会社の代わりに作り、管理し、使うキーで、新しいサービス向けには作られていない古い種類です。",
+        "D": "正しい。自分のキーポリシーで使える人を決め、無効化や削除の予定もでき、自前のハードウェアも要りません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#customer-mgn-key",
+          "quote": "You have full control over these KMS keys, including establishing and maintaining their key policies, IAM policies, and grants, enabling and disabling them"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-owned-key",
+          "quote": "you cannot change their policies, you cannot audit activities on these keys, and you cannot delete them."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "quote": "AWS managed keys are KMS keys in your account that are created, managed, and used on your behalf by an AWS service integrated with AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts",
+          "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#aws-managed-key",
+          "quote": "AWS managed keys are a legacy key type that is no longer being created for new AWS services as of 2021."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0012",
+      "stem_ja": "Application Load Balancer が、AWS Certificate Manager（ACM）の Amazon が発行した公開の証明書を使っています。証明書はメールで検証されており、昨年は更新のメールに誰も対応しなかったため期限が切れました。会社は、今後の更新を人の操作無しに自動で行い、ロードバランサーが参照する証明書を変えずに済ませたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "DNS 検証を使う新しい ACM の証明書を申請してロードバランサーに 1 回付け、ACM が自動で更新するようにする。",
+        "B": "メールの検証のままにし、チームが毎年更新のメールを承認するようカレンダーの予定を作る。",
+        "C": "ACM のマネージド更新で更新されるよう、ACME の証明書の自動化で証明書を発行する。",
+        "D": "有効期限までの日数に Amazon CloudWatch アラームを作り、アラームが鳴ったらロードバランサーの証明書を手作業で付け替える。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "ACM は Amazon が発行した SSL/TLS の証明書をマネージド更新します。DNS 検証を使っていれば自動で更新し、そうでなければ期限が近いことをメールで知らせます。更新しても証明書の ARN は変わらないので、ロードバランサーの参照を変えずに済みます。",
+      "per_choice": {
+        "A": "正しい。DNS 検証の証明書は ACM が自動で更新し、ARN も変わらないため、付け替えは最初の 1 回だけです。",
+        "B": "人の操作が毎年要り、要件に反します。",
+        "C": "ACME の証明書の自動化で発行した証明書は、ACM のマネージド更新の対象外です。",
+        "D": "気づけるだけで、付け替えは手作業のままで、参照する証明書も変わります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "When ACM renews a certificate, the certificate's Amazon Resource Name (ARN) remains the same."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal",
+          "quote": "Certificates issued through ACME certificate automation are not eligible for ACM managed renewal."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0013",
+      "stem_ja": "あるアプリケーションは、1 つのカスタマーマネージドキーで SSE-KMS を使う Amazon S3 バケットに、毎日数百万個の新しいオブジェクトを書き込んでいます。AWS KMS のリクエストの料金が、毎月の請求の大きな部分を占めるようになりました。会社は、同じカスタマーマネージドキーを使い続ける必要があります。KMS のリクエストの費用を最も減らせる変更はどれですか。",
+      "choices_ja": {
+        "A": "毎年新しいキーの素材が使われるよう、カスタマーマネージドキーの自動ローテーションを有効にする。",
+        "B": "新しいオブジェクトについて S3 から AWS KMS へのリクエストが減るよう、バケットに S3 バケットキーを設定する。",
+        "C": "リクエストが複数のキーに分かれるよう、バケットのプレフィックスごとに別のカスタマーマネージドキーを作る。",
+        "D": "山の時にアプリケーションがスロットリングされないよう、AWS KMS のリクエストのクォータを上げてもらう。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "SSE-KMS でバケットレベルのキー（S3 バケットキー）を使うと、S3 から AWS KMS へのリクエストが減り、KMS のリクエストの費用を最大 99% 減らせます。設定した時点でバケットにあるオブジェクトはバケットキーを使いませんが、この会社の費用の多くは新しいオブジェクトの書き込みから来ています。",
+      "per_choice": {
+        "A": "ローテーションは今のキーの素材を変えるだけで、リクエストの数は減りません。",
+        "B": "正しい。同じカスタマーマネージドキーのまま、KMS へのリクエストを大きく減らせます。",
+        "C": "キーを分けてもリクエストの総数は変わらず、バケットキーは同じ KMS キーで暗号化したオブジェクトの間でだけ共有されるので、かえって効果が下がります。",
+        "D": "クォータを上げてもリクエストの数と費用は減りません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "Using a bucket-level key for SSE-KMS can reduce AWS KMS request costs by up to 99 percent by decreasing the request traffic from Amazon S3 to AWS KMS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "When you configure an S3 Bucket Key, objects that are already in the bucket do not use the S3 Bucket Key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview",
+          "quote": "Amazon S3 will only share an S3 Bucket Key for objects encrypted by the same AWS KMS key."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys",
+          "quote": "Key rotation changes only the current key material, which is the cryptographic secret that is used in encryption operations."
+        }
+      ]
+    },
+    {
+      "id": "q-6.2-0014",
+      "stem_ja": "ある決済の会社は、暗号化のキーを、FIPS 140-3 レベル 3 の検証を受けたシングルテナントのハードウェアセキュリティモジュール（HSM）に保存する必要があります。規制当局は、暗号のデータプレーンが AWS から見えないことと、会社が IAM の外で HSM の利用者を自分で管理することも求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "自動のキーローテーションを有効にした AWS KMS のカスタマーマネージドキーを使う。",
+        "B": "FIPS モードの AWS CloudHSM のクラスターを使い、クラスターの中で HSM の利用者を管理する。",
+        "C": "AWS がキーを管理するよう、AWS 所有のキーを使う。",
+        "D": "AWS KMS のカスタマーマネージドキーを使い、IAM ポリシーだけでアクセスを管理する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "AWS CloudHSM は、汎用・シングルテナントで、FIPS モードのクラスターでは FIPS 140-2 または FIPS 140-3 のレベル 3 の検証を受けた HSM を提供します。データプレーンはエンドツーエンドで暗号化されて AWS から見えず、利用者の管理は IAM のロールの外で自分で行います。",
+      "per_choice": {
+        "A": "キーのローテーションは良い運用ですが、シングルテナントの HSM や、IAM の外での利用者の管理という要件は満たしません。",
+        "B": "正しい。シングルテナントの検証済みの HSM で、データプレーンは AWS から見えず、利用者を自分で管理します。",
+        "C": "AWS 所有のキーは AWS が所有・管理し、ポリシーの変更も監査もできず、要件に合いません。",
+        "D": "利用者の管理が IAM になり、IAM の外で管理するという要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "quote": "HSMs are general purpose, single tenant, and either FIPS 140-2 level-3 or FIPS 140-3 level-3 validated for clusters in FIPS mode"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction",
+          "quote": "Because your data plane is end-to-end (E2E) encrypted and not visible to AWS, you control your own user management (outside of IAM roles)."
+        }
+      ]
+    }
+  ]
+}

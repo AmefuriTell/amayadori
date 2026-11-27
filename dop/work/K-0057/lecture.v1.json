@@ -1,0 +1,1179 @@
+{
+  "task": "6.3",
+  "title": "セキュリティの監視と監査の仕組み",
+  "notes": [
+    "試験ガイドの knowledge にある「漏れた AWS のアクセスキー」は、根拠（sources.md）に資料が無いので扱わず、s01 でそう断った。Amazon Inspector と Amazon Macie は S7 で Security Hub CSPM に検出結果を送るサービスの例としてだけ出し、それぞれの使い方は書いていない。",
+    "CloudTrail が API の呼び出しを記録する、という一般の説明は S1 の引用に無いので書いていない。CloudTrail が捉えるのは「イベント」（S13）、残るのは「ログファイル」（S2）と、根拠の言い方にとどめた。",
+    "S10 の暗号化のルールは、説明（既定の暗号化か、バケットポリシーでの拒否のどちらか）と、違反の説明（既定で暗号化されていない）を、根拠どおり別々に書いた。両者をつなぐ解釈は足していない。",
+    "GuardDuty の検出結果を EventBridge で受けた後の送り先（通知のサービスなど）は、S6 に無いので書いていない。「自動の監視と処理ができる」までにした。",
+    "CloudTrail Lake は S0 の告知（2026 年 5 月 31 日から新規の客には開かれない）を s12 と条件の表に必ず添えた。",
+    "C3 への返事（1 回目。採らなかった提案と、一部だけ採った提案）",
+    "global・clarity s04: 本当のルール名は s04 の図に講義の呼び方と並べて結び付けた。s13・s14 の条件の表の「選ぶ方法」に名前を添える案は、名前が長く表のセルの幅（15）を超えるので採らず、呼び方だけにした。",
+    "clarity s08 軽: リージョン B を無効にして NON_COMPLIANT へ線を引く案は、S8 に NON_COMPLIANT の条件の文が無いので採らなかった。図は「外部アクセス用」をラベルに足し、リージョンごとに有効かを見る形のままにした。",
+    "clarity s04 軽: ALB の言い換えは、s04 が名前の図になって ALB の字が出なくなったので、s07 の台本でアプリケーションロードバランサーと言う所を初出とした。",
+    "s06: 暗号化のルールの説明（どちらか）と違反の説明（既定で暗号化されていない）は、つなぐ解釈を足さず、台本で「書き方が違うが、そのまま示す」と断り、覚える対応だけを言った。",
+    "s12: 告知が選ぶ判断にどう効くかは、「新しく使い始める話なら告知に当たる」までにした。代わりの方法は根拠に無いので書いていない。",
+    "s11: Insights events の知らせ方は根拠に無いので、表の行を消し、台本で「扱わない」と断った。",
+    "掛け合いにした時の注意: 事実は先生の行だけに置いた。生徒の誤り（例を全部と思う＝発行先はクラウドウォッチログズだけ、条件付きを一般と思う＝公開なら全部違反・アカウントで一つ有効なら済む、似た物を混ぜる＝インサイツイベントもメトリクスを見る）は次の先生の行で正し、生徒の言い直しと先生の受けを置いた。根拠に無い事（クラウドトレイルが通信を記録しないか、イベントブリッジの形式、完全性の検証が改ざんを止めるか、レイクの代わり）は「違います」と言わず「そうとは言えません」と言える範囲にとどめた。",
+    "掛け合いの検証への返事: 中は全部直した（s05 の問いを「全部ずれないとドリフトにならない」にした。s08・s11・s14 は「違います」を「そうとは言えません」にし、言える範囲だけを言った。s02 は検証が気付くための物だと先に言った。s06 は生徒の確かめと「どっちを覚えるか」の問いを挟んだ。s10 は長い行を分けた）。軽は s01・s11・s12・s16・s08・s10 の言い方を直した。採らなかった軽: s13 の問いとまとめの追加、s16 の促しを言い直しに変える案、s06 の除外の条件を文に分ける案、全体の「大まかに言うと」を減らす案とエーピーアイ・ロードバランサーの言い換え。台本が上限の六千字に近く、行を足すと超えるため。「根拠」は s01・s11・s12 で「この講義の資料」と言い換えた。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "5 つのまとまりを番号の順に",
+        "記録・ルール・脅威・異常・調査",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G5[\"5 記録を調べる\"]\n    LK@{ svc: \"AWS CloudTrail\", label: \"CloudTrail Lake<br/>SQL で調べる\" }\n  end\n  subgraph G4[\"4 いつもと違う動き\"]\n    AN[\"CloudTrail の<br/>Insights events<br/>CloudWatch の<br/>異常検出\"]\n  end\n  subgraph G3[\"3 脅威を見つける\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"GuardDuty<br/>脅威の検出\" }\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>検出結果を受ける\" }\n  end\n  subgraph G2[\"2 ルールで確かめる\"]\n    CFG@{ svc: \"AWS Config\", label: \"AWS Config ルール<br/>ずれと危ない設定\" }\n  end\n  subgraph G1[\"1 記録を残す\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>監査とログの完全性\" }\n    FL@{ svc: \"Amazon VPC\", label: \"VPC Flow Logs<br/>通信の記録\" }\n  end\n",
+        "alt": "講義の地図。5 つのまとまりを番号を付けて並べる。1 記録を残すは CloudTrail の監査とログの完全性、VPC Flow Logs の通信の記録。2 ルールで確かめるは AWS Config ルールで、ずれと危ない設定を見る。3 脅威を見つけるは GuardDuty と Security Hub CSPM。4 いつもと違う動きは CloudTrail の Insights events と CloudWatch の異常検出。5 記録を調べるは CloudTrail Lake。並びは講義で扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "セキュリティの監視と監査の仕組みを、画面の五つのまとまりの順に学びます。図の並びは扱う順番で、処理の流れではありません。"
+        },
+        {
+          "who": "student",
+          "text": "五つって、どんなまとまりなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目は記録を残す話で、クラウドトレイルとブイピーシーフローログです。二つ目は、エーダブリューエスコンフィグのルールで、ずれや危ない設定を確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "残りの三つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目は脅威の話で、ガードデューティーとセキュリティハブシーエスピーエムです。四つ目は、いつもと違う動きに気付く仕組みで、クラウドトレイルのインサイツイベントと、クラウドウォッチの異常検出です。五つ目は、記録を調べるクラウドトレイルレイクです。"
+        },
+        {
+          "who": "student",
+          "text": "記録、ルール、脅威、異常、調査、の五つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。なお、試験ガイドの例にある、漏れたアクセスキーの話は、この講義の資料に含まれないので扱いません。最後に、条件から選ぶ表を見て、この地図に戻ります。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS CloudTrail is an AWS service that helps you enable operational and risk auditing, governance, and compliance of your AWS account.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+        },
+        {
+          "source_id": "S5",
+          "quote": "Amazon GuardDuty is a threat detection service that continuously monitors, analyzes, and processes AWS data sources and logs in your AWS environment.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "CloudTrail: 監査とログの完全性",
+      "bullets": [
+        "アカウントの監査を助ける",
+        "運用とリスクの監査・コンプライアンス",
+        "検証で改ざんに気付ける"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CT@{ svc: \"AWS CloudTrail\", label: \"AWS CloudTrail<br/>イベントを捉える\" }\n  LOG[\"CloudTrail の<br/>ログファイル\"]\n  VAL[\"ログファイルの<br/>完全性の検証\"]\n  X[\"改ざんに気付ける<br/>気付かれずに行うのは<br/>計算の上で事実上無理\"]\n  CT -- \"残す\" --> LOG\n  VAL -- \"確かめる\" --> LOG\n  VAL -- \"その効果\" --> X\n",
+        "alt": "AWS CloudTrail が捉えたイベントは CloudTrail のログファイルに残る。ログファイルの完全性の検証がそのログファイルを確かめる。その効果として、ログファイルの変更・削除・偽造に気付ける。気付かれずにそれを行うことは、計算の上で事実上できない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "一つ目は、記録を残す話です。エーダブリューエスクラウドトレイルは、アカウントの監査を助けるサービスです。ドキュメントは、運用とリスクの監査や、コンプライアンスなどを挙げています。"
+        },
+        {
+          "who": "student",
+          "text": "クラウドトレイルは、何を残すのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドトレイルが捉えたイベントが、ログファイルに残ります。イベントは、捉えた記録の一件一件のことです。"
+        },
+        {
+          "who": "teacher",
+          "text": "大事なのが、ログファイルの完全性の検証です。この検証を使うと、ログファイルが変更、削除、偽造された時に、それに気付けます。"
+        },
+        {
+          "who": "student",
+          "text": "検証を使えば、書き換えそのものを止められるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。この検証は、書き換えに気付くための物です。変更や削除や偽造を、気付かれずに行うのは、計算の上で事実上できない、とドキュメントは書いています。"
+        },
+        {
+          "who": "student",
+          "text": "止めるんじゃなくて、気付ける、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。改ざんに気付くための検証です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS CloudTrail is an AWS service that helps you enable operational and risk auditing, governance, and compliance of your AWS account.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+        },
+        {
+          "source_id": "S2",
+          "quote": "This makes it computationally infeasible to modify, delete or forge CloudTrail log files without detection.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "VPC Flow Logs: 通信の記録",
+      "bullets": [
+        "作れる対象: VPC・サブネットなど",
+        "例: サブネットの全ての通信",
+        "例: CloudWatch Logs へ発行"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph U[\"作れる対象に挙がる物\"]\n    V[\"VPC\"]\n    S[\"サブネット\"]\n    N[\"ネットワーク<br/>インターフェイス\"]\n  end\n  FL@{ svc: \"Amazon VPC\", label: \"VPC Flow Logs<br/>例: サブネットの<br/>全ての通信\" }\n  CWL@{ svc: \"Amazon CloudWatch Logs\", label: \"CloudWatch Logs<br/>発行先の例\" }\n  S -- \"例として\" --> FL\n  FL -- \"記録を発行\" --> CWL\n",
+        "alt": "ドキュメントは、VPC Flow Logs を作れる対象として、VPC、サブネット、ネットワークインターフェイスを挙げている。ドキュメントの例では、サブネットの全ての通信を記録し、その記録を Amazon CloudWatch Logs に発行する。CloudWatch Logs は発行先の一つの例。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、ブイピーシーフローログです。試験ガイドは、フローログを、セキュリティの監査のサービスと機能の例に挙げています。フローログは、大まかに言うと、ネットワークの通信の記録です。"
+        },
+        {
+          "who": "student",
+          "text": "何に対して作れるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ドキュメントは、作れる対象として、ブイピーシー、サブネット、ネットワークインターフェイスを挙げています。ネットワークインターフェイスは、大まかに言うと、サーバーなどがネットワークにつながる口です。"
+        },
+        {
+          "who": "student",
+          "text": "記録は、どこに行くの？"
+        },
+        {
+          "who": "teacher",
+          "text": "ドキュメントの例では、あるサブネットの全ての通信を記録し、その記録をアマゾンクラウドウォッチログズに発行しています。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、発行先はクラウドウォッチログズだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。これは一つの例で、発行先がクラウドウォッチログズだけ、という意味ではありません。"
+        },
+        {
+          "who": "student",
+          "text": "クラウドウォッチログズは、発行先の例の一つ、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "You can create a flow log for a VPC, a subnet, or a network interface.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html"
+        },
+        {
+          "source_id": "S15",
+          "quote": "In the following example, a flow log captures all traffic for a subnet and publishes the flow log records to Amazon CloudWatch Logs.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "AWS Config ルール: 扱う 5 つ",
+      "bullets": [
+        "名前と講義の呼び方を結ぶ",
+        "合わないと NON_COMPLIANT",
+        "脅威の例に当たるのは 3 つ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G2[\"そのほかの 2 つ\"]\n    D[\"ドリフトのルール<br/>cloudformation-stack-<br/>drift-detection-check\"]\n    A[\"Access Analyzer の<br/>ルール<br/>iam-external-access-<br/>analyzer-enabled\"]\n  end\n  subgraph G1[\"試験ガイドの脅威の例\"]\n    R[\"HTTPS リダイレクトの<br/>ルール<br/>alb-http-to-https-<br/>redirection-check\"]\n    P[\"S3 公開のルール<br/>s3-bucket-level-<br/>public-access-prohibited\"]\n    E[\"S3 暗号化のルール<br/>s3-bucket-server-side-<br/>encryption-enabled\"]\n  end\n",
+        "alt": "この講義で扱う 5 つの AWS Config ルールの、講義での呼び方と本当の名前を並べた表の代わりの図。試験ガイドの脅威の例に当たるのは、HTTPS リダイレクトのルール（alb-http-to-https-redirection-check）、S3 公開のルール（s3-bucket-level-public-access-prohibited）、S3 暗号化のルール（s3-bucket-server-side-encryption-enabled）。そのほかの 2 つは、ドリフトのルール（cloudformation-stack-drift-detection-check）と Access Analyzer のルール（iam-external-access-analyzer-enabled）。並べただけで、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目は、エーダブリューエスコンフィグのルールです。以下、コンフィグと呼びます。扱う五つのルールは、どれも、ある設定を確かめる物です。"
+        },
+        {
+          "who": "student",
+          "text": "確かめて、合わなかったらどうなるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エススリーなどのルールの説明では、条件に合わない時、画面の英語でノンコンプライアント、つまり準拠していない、と判定されます。画面に、本当の名前と講義の呼び方を並べました。"
+        },
+        {
+          "who": "student",
+          "text": "五つとも、試験ガイドにある脅威の例に当たるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。試験ガイドの、よくあるクラウドの脅威の例に当たるのは三つです。安全でないウェブの通信はエイチティーティーピーエスリダイレクトのルール、公開アクセスが有効なバケットはエススリー公開のルールが確かめます。"
+        },
+        {
+          "who": "teacher",
+          "text": "暗号化が無効なバケットは、エススリー暗号化のルールが確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "脅威の例に当たるのは、その三つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。残りの二つは、クラウドフォーメーションのずれを見るドリフトのルールと、アクセスアナライザーのルールです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "The rule is NON_COMPLIANT if an S3 bucket is not listed in the excludedPublicBuckets parameter and bucket level settings are public.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-level-public-access-prohibited.html"
+        },
+        {
+          "source_id": "S4",
+          "quote": "Checks if the actual configuration of a AWS CloudFormation (CloudFormation) stack differs, or has drifted, from the expected configuration.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "ドリフトのルール",
+      "bullets": [
+        "スタックの実際と期待を比べる",
+        "1 つでも違えば drift",
+        "Config からずれを確かめる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"AWS Config<br/>cloudformation-stack-<br/>drift-detection-check\" }\n  ST@{ svc: \"AWS CloudFormation\", label: \"AWS CloudFormation<br/>スタック\" }\n  R[\"スタックの<br/>リソース\"]\n  EX[\"期待した構成\"]\n  D[\"スタックは<br/>drift した\"]\n  CFG -- \"確かめる\" --> ST\n  ST -- \"持つ\" --> R\n  R -- \"期待と比べる\" --> EX\n  R -- \"1 つ以上違う\" --> D\n",
+        "alt": "AWS Config のルール cloudformation-stack-drift-detection-check が CloudFormation のスタックを確かめる。スタックが持つリソースを、期待した構成と比べる。1 つ以上のリソースが期待した構成と違えば、スタックは drift した、とみなされる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ドリフトのルールです。ドリフトは、ずれを表す言葉です。スタックは、大まかに言うと、エーダブリューエスクラウドフォーメーションでまとめて作ったリソースの集まりです。"
+        },
+        {
+          "who": "student",
+          "text": "何と何のずれを見るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "スタックの実際の構成が、期待した構成と違っていないか、つまりドリフトしていないかを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "リソースが全部ずれないと、ドリフトにはならないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。スタックの中のリソースが、一つでも期待した構成と違えば、そのスタックはドリフトしたとみなされます。"
+        },
+        {
+          "who": "student",
+          "text": "一つでも違えば、ドリフトなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。試験ガイドは、クラウドフォーメーションのドリフトの検出を、監査の機能の例に挙げています。このルールは、そのずれをコンフィグから確かめる物です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "A stack is considered to have drifted if one or more of its resources differ from their expected configuration.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "S3 公開と S3 暗号化のルール",
+      "bullets": [
+        "公開: 除外の外で公開なら違反",
+        "暗号化: 既定の暗号化か拒否",
+        "違反の説明: 既定で暗号化なし"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "S3 公開のルール",
+          "S3 暗号化のルール"
+        ],
+        "rows": [
+          [
+            "確かめる事",
+            "公開でアクセスできるか",
+            "どちらか: 暗号化か拒否"
+          ],
+          [
+            "拒否する put",
+            "",
+            "サーバー側の暗号化なし"
+          ],
+          [
+            "その暗号化",
+            "",
+            "AES-256 か AWS KMS"
+          ],
+          [
+            "違反の説明",
+            "除外の外でバケット単位が公開",
+            "既定で暗号化されていない"
+          ],
+          [
+            "除外の設定",
+            "excludedPublicBuckets",
+            ""
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "エススリーの二つのルールです。エススリー公開のルールは、バケットが公開でアクセスできる状態かを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "公開のバケットなら、どれでも違反になるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。除外の一覧、画面の英語でエクスクルーデッドパブリックバケッツに載っておらず、バケットの単位の設定が公開なら、ノンコンプライアントです。"
+        },
+        {
+          "who": "student",
+          "text": "除外の一覧に載っていなくて、バケットの単位で公開なら違反、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。エススリー暗号化のルールは、どちらかがあるかを確かめます。一つは、既定の暗号化が有効なこと。もう一つは、バケットポリシーが、サーバー側の暗号化の無い書き込み、画面のプットを、はっきり拒否していることです。"
+        },
+        {
+          "who": "student",
+          "text": "既定の暗号化か、拒否のバケットポリシーの、どちらかがあるかを見るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。その暗号化は、エーイーエス二百五十六か、エーダブリューエスキーマネジメントサービスを使う物です。一方、違反の説明は、既定で暗号化されていない時、と書いています。二つの書き方は違いますが、この講義ではそのまま示します。"
+        },
+        {
+          "who": "student",
+          "text": "書き方が違うなら、どっちを覚えればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "覚えるのは、暗号化されていないバケットを見つけたいならこのルール、という対応です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "The rule is NON_COMPLIANT if an S3 bucket is not listed in the excludedPublicBuckets parameter and bucket level settings are public.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-level-public-access-prohibited.html"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled or that the Amazon S3 bucket policy explicitly denies put-object requests without server side encryption that uses AES-256 or AWS Key Management Service.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html"
+        },
+        {
+          "source_id": "S10",
+          "quote": "The rule is NON_COMPLIANT if your Amazon S3 bucket is not encrypted by default.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "HTTPS リダイレクトのルール",
+      "bullets": [
+        "ALB の全ての HTTP リスナー",
+        "HTTPS へのリダイレクトがあるか",
+        "1 つでも無ければ違反"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"AWS Config<br/>alb-http-to-https-<br/>redirection-check\" }\n  ALB@{ svc: \"Elastic Load Balancing\", label: \"Application<br/>Load Balancer\" }\n  L1[\"HTTP リスナー<br/>リダイレクトあり\"]\n  L2[\"HTTP リスナー<br/>リダイレクトなし\"]\n  NC[\"NON_COMPLIANT\"]\n  CFG -- \"全部を確かめる\" --> ALB\n  ALB --- L1\n  ALB --- L2\n  L2 -- \"1 つでもあれば\" --> NC\n",
+        "alt": "AWS Config のルール alb-http-to-https-redirection-check が、Application Load Balancer の全ての HTTP リスナーを確かめる。HTTPS へのリダイレクトがあるリスナーと、リダイレクトが無いリスナーを並べる。リダイレクトが無いリスナーが 1 つでもあれば NON_COMPLIANT。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "エイチティーティーピーエスリダイレクトのルールです。試験ガイドの、安全でないウェブの通信という脅威に当たります。"
+        },
+        {
+          "who": "student",
+          "text": "リダイレクトって何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "大まかに言うと、エイチティーティーピーで来た要求を、エイチティーティーピーエスへ向け直すことです。リスナーは、大まかに言うと、ロードバランサーが要求を受け付ける設定です。"
+        },
+        {
+          "who": "teacher",
+          "text": "アプリケーションロードバランサーの、全てのエイチティーティーピーのリスナーに、エイチティーティーピーエスへのリダイレクトが設定されているかを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "ほとんどのリスナーに設定してあれば、大丈夫なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。リダイレクトの無いリスナーが一つでもあれば、ノンコンプライアントです。"
+        },
+        {
+          "who": "student",
+          "text": "一つでも無ければ違反、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。全てのリスナーを見る、が要点です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "Checks if HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html"
+        },
+        {
+          "source_id": "S11",
+          "quote": "The rule is NON_COMPLIANT if one or more HTTP listeners of Application Load Balancer do not have HTTP to HTTPS redirection configured.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "Access Analyzer のルール",
+      "bullets": [
+        "外部アクセス用の Analyzer",
+        "有効になっているか",
+        "アカウントのリージョンごと"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CFG@{ svc: \"AWS Config\", label: \"AWS Config<br/>iam-external-access-<br/>analyzer-enabled\" }\n  subgraph ACC[\"1 つのアカウント\"]\n    R1@{ svc: \"IAM Access Analyzer\", label: \"IAM Access Analyzer<br/>外部アクセス用<br/>リージョン A\" }\n    R2@{ svc: \"IAM Access Analyzer\", label: \"IAM Access Analyzer<br/>外部アクセス用<br/>リージョン B\" }\n  end\n  CFG -- \"有効か\" --> R1\n  CFG -- \"有効か\" --> R2\n",
+        "alt": "AWS Config のルール iam-external-access-analyzer-enabled が、1 つのアカウントの中で、リージョン A とリージョン B のそれぞれについて、外部アクセス用の IAM Access Analyzer が有効かを確かめる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "アクセスアナライザーのルールです。試験ガイドは、アイエーエムアクセスアナライザーを、弱点やセキュリティのできごとを見つけるサービスの例に挙げています。"
+        },
+        {
+          "who": "student",
+          "text": "このルールは、何を確かめるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "外部アクセス用のアクセスアナライザーが、アカウントの中で、リージョンごとに有効になっているかを確かめます。画面のルール名の、エクスターナルアクセスが、外部アクセスのことです。"
+        },
+        {
+          "who": "student",
+          "text": "アカウントのどこか一つで有効なら、それで済むのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ルールは、アカウントの中のリージョン一つ一つについて、有効かを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "リージョンごとに有効かを見る、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。この講義では、有効かどうかまでを扱い、何を分析するかの中身は扱いません。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "Checks if an IAM Access Analyzer for external access is activated in your account per region.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/iam-external-access-analyzer-enabled.html"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "GuardDuty と EventBridge",
+      "bullets": [
+        "脅威の検出を続けて行う",
+        "findings を EventBridge へ自動で",
+        "EventBridge で自動の処理"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SRC[\"AWS のデータソース<br/>とログ\"]\n  GD@{ svc: \"Amazon GuardDuty\", label: \"Amazon GuardDuty<br/>監視・分析・処理\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"Amazon EventBridge<br/>イベントを受ける\" }\n  AUTO[\"findings の<br/>自動の監視と処理\"]\n  GD -- \"続けて見る\" --> SRC\n  GD -- \"findings を自動で\" --> EB\n  EB -- \"できるようにする\" --> AUTO\n",
+        "alt": "Amazon GuardDuty は、環境の中の AWS のデータソースとログを続けて監視・分析・処理する。GuardDuty は findings（検出結果）をイベントとして自動で Amazon EventBridge に送る。EventBridge がイベントを受けることで、findings の自動の監視と処理ができる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目は、脅威を見つける話です。ここからは、見つけた結果を検出結果として出すサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "最初はどのサービスなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "アマゾンガードデューティーです。脅威を検出するサービスで、エーダブリューエスのデータソースとログを、続けて監視し、分析し、処理します。"
+        },
+        {
+          "who": "teacher",
+          "text": "見つけた結果を、画面の英語でファインディングス、日本語では検出結果と呼びます。"
+        },
+        {
+          "who": "student",
+          "text": "検出結果は、その後どうなるの？"
+        },
+        {
+          "who": "teacher",
+          "text": "ガードデューティーは、検出結果を、イベントとしてアマゾンイベントブリッジに自動で送ります。イベントブリッジはイベントバス、大まかに言うとイベントを受け取って届ける通り道のサービスです。イベントブリッジがイベントを受けることで、検出結果を自動で監視し、処理できます。"
+        },
+        {
+          "who": "student",
+          "text": "ガードデューティーが見つけて、イベントブリッジに送って自動で処理、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "Amazon GuardDuty is a threat detection service that continuously monitors, analyzes, and processes AWS data sources and logs in your AWS environment.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+        },
+        {
+          "source_id": "S6",
+          "quote": "GuardDuty automatically publishes (sends) findings as events to Amazon EventBridge (formerly Amazon CloudWatch Events), a serverless event bus service.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html"
+        },
+        {
+          "source_id": "S6",
+          "quote": "EventBridge enables automated monitoring and processing of GuardDuty findings by receiving events.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "Security Hub CSPM: 検出結果を受ける",
+      "bullets": [
+        "自分でも control findings を作る",
+        "ほかのサービスの findings も受ける",
+        "形式は ASFF"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph SRC[\"findings を送る側の例\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"Amazon GuardDuty\" }\n    IN@{ svc: \"Amazon Inspector\", label: \"Amazon Inspector\" }\n    MA@{ svc: \"Amazon Macie\", label: \"Amazon Macie\" }\n    TP[\"対応する<br/>他社の製品\"]\n  end\n  SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>control findings も作る<br/>ASFF で処理\" }\n  GD --> SH\n  IN --> SH\n  MA --> SH\n  TP --> SH\n",
+        "alt": "AWS Security Hub CSPM は、自分で control findings を作るほか、Amazon GuardDuty、Amazon Inspector、Amazon Macie、対応する他社の製品から findings を受け取る。送る側は例として挙がっている物。受けた findings のデータは ASFF という標準の形式で処理する。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、エーダブリューエスセキュリティハブシーエスピーエムです。ガードデューティーの検出結果の行き先は、二つ出てきます。自動で処理するならイベントブリッジ、ほかのサービスの検出結果とまとめて受けるなら、セキュリティハブシーエスピーエムです。"
+        },
+        {
+          "who": "student",
+          "text": "セキュリティハブシーエスピーエムは、受け取るだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。自分でもコントロールの検出結果、画面の英語でコントロールファインディングスを作ります。コントロールは、大まかに言うと、セキュリティの確認の項目です。"
+        },
+        {
+          "who": "student",
+          "text": "受け取るだけじゃなくて、自分でも作る、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。検出結果を送ってくる側の例は、ガードデューティー、アマゾンインスペクター、アマゾンメイシー、対応する他社の製品です。"
+        },
+        {
+          "who": "student",
+          "text": "データの形式は決まっているのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。検出結果のデータは、エーダブリューエスセキュリティファインディングフォーマット、略してエーエスエフエフという、標準の形式で処理されます。"
+        },
+        {
+          "who": "student",
+          "text": "自分でも作って、ほかからも受けて、形式はエーエスエフエフ、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "In addition to generating control findings, Security Hub CSPM also receives findings from other AWS services—such as Amazon GuardDuty, Amazon Inspector, and Amazon Macie— and supported third-party products.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Security Hub CSPM processes finding data using the AWS Security Finding Format (ASFF), a standard finding format.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "いつもと違う動きに気付く",
+      "bullets": [
+        "Insights events: API の使い方",
+        "異常検出: メトリクスの期待値",
+        "異常検出はアラームを作れる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "CloudTrail Insights events",
+          "CloudWatch 異常検出"
+        ],
+        "rows": [
+          [
+            "見る物",
+            "API の使い方",
+            "メトリクス"
+          ],
+          [
+            "比べる相手",
+            "いつもの使い方の型",
+            "メトリクスの期待値"
+          ],
+          [
+            "記録・検出のしかた",
+            "大きく違う時だけ記録",
+            "統計と機械学習"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目は、いつもと違う動きに気付く仕組みです。一つ目は、クラウドトレイルのインサイツイベントです。"
+        },
+        {
+          "who": "student",
+          "text": "ふつうのイベントと、何が違うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "インサイツイベントは、アカウントのエーピーアイの使い方が、いつもの使い方の型から大きく外れた時にだけ記録されます。知らせ方は扱いません。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目は、クラウドウォッチの異常検出で、画面の英語ではアノマリーディテクションです。メトリクスは、大まかに言うと、時間とともに変わる数値の記録です。"
+        },
+        {
+          "who": "student",
+          "text": "有効にすると、どうなるの？"
+        },
+        {
+          "who": "teacher",
+          "text": "あるメトリクスで有効にすると、クラウドウォッチが統計と機械学習の手法を当てはめます。そして、メトリクスの期待値をもとにした、異常検出のアラームを作れます。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、インサイツイベントも、メトリクスを見るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。この講義の資料では、インサイツイベントが見るのはエーピーアイの使い方で、メトリクスについて書いているのは異常検出です。"
+        },
+        {
+          "who": "student",
+          "text": "エーピーアイの使い方はインサイツイベント、メトリクスは異常検出、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。見る物で選びます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S13",
+          "quote": "Unlike other types of events that CloudTrail captures, Insights events are logged only when CloudTrail detects changes in your account's API usage that differ significantly from the account's typical usage patterns.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html"
+        },
+        {
+          "source_id": "S14",
+          "quote": "When you enable anomaly detection for a metric, CloudWatch applies statistical and machine learning algorithms.",
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Create anomaly detection alarms based on a metric's expected value.",
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "CloudTrail Lake: 記録を調べる",
+      "bullets": [
+        "複数の項目に複雑な SQL",
+        "ほぼ即時の問題の調査",
+        "2026 年 5 月 31 日から新規受付なし"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "CloudTrail Lake"
+        ],
+        "rows": [
+          [
+            "調べ方",
+            "複数の項目に複雑な SQL"
+          ],
+          [
+            "助ける事",
+            "ほぼ即時の問題の調査"
+          ],
+          [
+            "位置づけ",
+            "監査のための解決策"
+          ],
+          [
+            "補う物",
+            "コンプライアンスの仕組み"
+          ],
+          [
+            "告知",
+            "新しい客は 2026/5/31 から不可"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "五つ目は、記録を調べる話です。クラウドトレイルレイクでは、イベントの複数の項目にまたがって、複雑なエスキューエルの問い合わせを実行できます。エスキューエルは、データを問い合わせるための言葉です。"
+        },
+        {
+          "who": "student",
+          "text": "それは、何の役に立つのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ほぼ即時の問題の調査を助け、監査のための解決策として、コンプライアンスの仕組みを補います。"
+        },
+        {
+          "who": "student",
+          "text": "便利そうなのだ。じゃあ、これから使い始めればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。大事な告知があります。クラウドトレイルレイクは、二千二十六年五月三十一日から、新しい客には開かれていません。"
+        },
+        {
+          "who": "student",
+          "text": "新しい客には、もう開かれていない、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、代わりは何を使うの？"
+        },
+        {
+          "who": "teacher",
+          "text": "代わりの方法は、この講義の資料からは言えません。問題文が、これから新しく使い始める話なら、この告知に当たる事を思い出してください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "CloudTrail Lake is an auditing solution that can complement your compliance stack, and assist you with near real-time troubleshooting.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html"
+        },
+        {
+          "source_id": "S17",
+          "quote": "In contrast, CloudTrail Lake users can run complex SQL queries across multiple event fields.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html"
+        },
+        {
+          "source_id": "S0",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 1: 記録とずれ",
+      "bullets": [
+        "改ざんに気付く → 完全性の検証",
+        "通信の記録 → VPC Flow Logs",
+        "期待とのずれ → ドリフトのルール"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "覚える点"
+        ],
+        "rows": [
+          [
+            "ログの改ざんに気付く",
+            "ログファイルの完全性の検証",
+            "変更・削除・偽造に気付ける"
+          ],
+          [
+            "ネットワークの通信を記録",
+            "VPC Flow Logs",
+            "作る対象と発行先の例"
+          ],
+          [
+            "スタックが期待とずれた",
+            "ドリフトのルール",
+            "1 つでも違えば drift"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここからは、条件から方法を選ぶ表です。一枚目は記録とずれです。"
+        },
+        {
+          "who": "student",
+          "text": "ログが書き換えられていないか、気付きたい時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "監査のログの変更や削除、偽造に気付きたいなら、クラウドトレイルのログファイルの完全性の検証です。"
+        },
+        {
+          "who": "student",
+          "text": "ネットワークの通信を記録したい時も、クラウドトレイルなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。この講義で通信の記録として扱ったのは、ブイピーシーフローログです。作る対象と、発行先を確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "通信の記録は、フローログなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。クラウドフォーメーションのスタックが、期待した構成からずれていないかを確かめたいなら、ドリフトのルールです。リソースが一つでも違えば、ドリフトとみなされます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "This makes it computationally infeasible to modify, delete or forge CloudTrail log files without detection.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+        },
+        {
+          "source_id": "S15",
+          "quote": "In the following example, a flow log captures all traffic for a subnet and publishes the flow log records to Amazon CloudWatch Logs.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-basics.html"
+        },
+        {
+          "source_id": "S4",
+          "quote": "A stack is considered to have drifted if one or more of its resources differ from their expected configuration.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/cloudformation-stack-drift-detection-check.html"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 2: 危ない設定",
+      "bullets": [
+        "公開・暗号化 → S3 のルール",
+        "向け直さない → リダイレクトのルール",
+        "外部アクセス用 → リージョンごと"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "覚える点"
+        ],
+        "rows": [
+          [
+            "公開のバケットを見つける",
+            "S3 公開のルール",
+            "外すなら除外の一覧"
+          ],
+          [
+            "暗号化の無いバケット",
+            "S3 暗号化のルール",
+            "既定の暗号化か拒否"
+          ],
+          [
+            "HTTPS へ向け直さないリスナー",
+            "HTTPS リダイレクトのルール",
+            "全ての HTTP リスナー"
+          ],
+          [
+            "外部アクセス用の分析が有効か",
+            "Access Analyzer のルール",
+            "リージョンごと"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二枚目は、危ない設定を見つけるコンフィグのルールです。公開されているバケットを見つけたいなら、エススリー公開のルールです。判定から外したいバケットは、除外の一覧に載せます。"
+        },
+        {
+          "who": "student",
+          "text": "暗号化されていないバケットは？"
+        },
+        {
+          "who": "teacher",
+          "text": "エススリー暗号化のルールです。既定の暗号化か、拒否のバケットポリシーの、どちらかを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "ロードバランサーの方は？"
+        },
+        {
+          "who": "teacher",
+          "text": "アプリケーションロードバランサーで、エイチティーティーピーエスへ向け直していないリスナーを見つけたいなら、エイチティーティーピーエスリダイレクトのルールです。"
+        },
+        {
+          "who": "student",
+          "text": "外部アクセス用の分析が有効かは、アカウントで一回確かめればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。有効かを確かめたいなら、アクセスアナライザーのルールで、リージョンごとに見ます。"
+        },
+        {
+          "who": "student",
+          "text": "アクセスアナライザーのルールは、リージョンごと、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "The rule is NON_COMPLIANT if an S3 bucket is not listed in the excludedPublicBuckets parameter and bucket level settings are public.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-level-public-access-prohibited.html"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled or that the Amazon S3 bucket policy explicitly denies put-object requests without server side encryption that uses AES-256 or AWS Key Management Service.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html"
+        },
+        {
+          "source_id": "S11",
+          "quote": "Checks if HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Checks if an IAM Access Analyzer for external access is activated in your account per region.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/iam-external-access-analyzer-enabled.html"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 3: 脅威・異常・調査",
+      "bullets": [
+        "脅威 → GuardDuty と EventBridge",
+        "いつもと違う → 見る物で選ぶ",
+        "CloudTrail Lake は告知に注意"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "覚える点"
+        ],
+        "rows": [
+          [
+            "脅威を見つけ自動で処理",
+            "GuardDuty と EventBridge",
+            "処理は EventBridge"
+          ],
+          [
+            "検出結果を一つの形式で",
+            "Security Hub CSPM",
+            "ASFF で処理"
+          ],
+          [
+            "API の使い方がいつもと違う",
+            "Insights events",
+            "大きく違う時だけ"
+          ],
+          [
+            "メトリクスがいつもと違う",
+            "CloudWatch 異常検出",
+            "期待値のアラーム"
+          ],
+          [
+            "複数の項目を SQL で",
+            "CloudTrail Lake",
+            "新規受付の停止"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三枚目です。脅威を見つけて自動で処理したいなら、見つけるのはガードデューティー、自動の処理はイベントブリッジで行います。"
+        },
+        {
+          "who": "student",
+          "text": "検出結果を一つの形式で扱いたい時も、イベントブリッジなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。この講義で、標準の形式で処理するとしたのは、セキュリティハブシーエスピーエムです。形式はエーエスエフエフです。"
+        },
+        {
+          "who": "student",
+          "text": "一つの形式なら、セキュリティハブシーエスピーエムなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。エーピーアイの使い方がいつもと大きく違うならインサイツイベント、メトリクスがいつもと違う事に気付いて知らせたいなら、クラウドウォッチの異常検出で、期待値をもとにしたアラームを作ります。"
+        },
+        {
+          "who": "student",
+          "text": "複数の項目を、エスキューエルで調べたい時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "それはクラウドトレイルレイクです。ただし、新しく使い始める話なら、新規受付の停止の告知に当たります。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "GuardDuty automatically publishes (sends) findings as events to Amazon EventBridge (formerly Amazon CloudWatch Events), a serverless event bus service.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_eventbridge.html"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Security Hub CSPM processes finding data using the AWS Security Finding Format (ASFF), a standard finding format.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Unlike other types of events that CloudTrail captures, Insights events are logged only when CloudTrail detects changes in your account's API usage that differ significantly from the account's typical usage patterns.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/insights-events-understanding.html"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Create anomaly detection alarms based on a metric's expected value.",
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html"
+        },
+        {
+          "source_id": "S0",
+          "quote": "AWS CloudTrail Lake will no longer be open to new customers starting May 31, 2026.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake.html"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "5 つのまとまりに戻る",
+        "ルールは違反の条件まで読む",
+        "迷ったら条件の表に戻る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G5[\"5 記録を調べる\"]\n    LK@{ svc: \"AWS CloudTrail\", label: \"CloudTrail Lake<br/>新規受付の停止\" }\n  end\n  subgraph G4[\"4 いつもと違う動き\"]\n    AN[\"API の使い方は<br/>Insights events<br/>メトリクスは<br/>異常検出\"]\n  end\n  subgraph G3[\"3 脅威を見つける\"]\n    GD@{ svc: \"Amazon GuardDuty\", label: \"GuardDuty<br/>EventBridge へ\" }\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>ASFF で処理\" }\n  end\n  subgraph G2[\"2 ルールで確かめる\"]\n    CFG@{ svc: \"AWS Config\", label: \"AWS Config ルール<br/>違反の条件を読む\" }\n  end\n  subgraph G1[\"1 記録を残す\"]\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail<br/>改ざんに気付ける\" }\n    FL@{ svc: \"Amazon VPC\", label: \"VPC Flow Logs<br/>VPC やサブネットなど\" }\n  end\n",
+        "alt": "講義の地図に戻ったまとめ。1 記録を残すでは、CloudTrail のログファイルの完全性の検証で改ざんに気付けることと、VPC Flow Logs を VPC やサブネットなどに作れること。2 ルールで確かめるでは、AWS Config ルールの違反の条件を読む。3 脅威を見つけるでは、GuardDuty が findings を EventBridge へ送り、Security Hub CSPM が ASFF で処理する。4 いつもと違う動きでは、API の使い方は Insights events、メトリクスは異常検出。5 記録を調べるでは、CloudTrail Lake の新規受付の停止。並びは講義で扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。最初の地図に戻ります。並びは扱った順番です。"
+        },
+        {
+          "who": "student",
+          "text": "一つ目から順に確かめたいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目では、完全性の検証で改ざんに気付ける事と、フローログをブイピーシーやサブネットなどに作れる事を学びました。二つ目のコンフィグのルールは、何を確かめ、どんな時にノンコンプライアントになるかまで読む事が大切です。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目と四つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目では、ガードデューティーが検出結果をイベントブリッジに送り、セキュリティハブシーエスピーエムがほかのサービスの検出結果も受けます。四つ目は、エーピーアイの使い方ならインサイツイベント、メトリクスなら異常検出です。"
+        },
+        {
+          "who": "student",
+          "text": "五つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドトレイルレイクでは、新規受付の停止の告知を忘れないでください。迷ったら、条件の表に戻りましょう。"
+        },
+        {
+          "who": "student",
+          "text": "記録、ルール、脅威、異常、調査、の五つに戻るのだ。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "This makes it computationally infeasible to modify, delete or forge CloudTrail log files without detection.",
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html"
+        },
+        {
+          "source_id": "S7",
+          "quote": "In addition to generating control findings, Security Hub CSPM also receives findings from other AWS services—such as Amazon GuardDuty, Amazon Inspector, and Amazon Macie— and supported third-party products.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+        }
+      ]
+    }
+  ]
+}

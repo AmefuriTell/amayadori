@@ -1,0 +1,548 @@
+{
+  "task": "1.4",
+  "questions": [
+    {
+      "id": "q-1.4-0001",
+      "stem_ja": "ある企業は、AWS CodeDeploy を使用して AWS Lambda 関数の新しいバージョンをデプロイしています。運用チームは、各リリースでまず本番のトラフィックのごく一部を新しいバージョンに送りたいと考えています。問題が見つからなければ、5 分後に残りのすべてのトラフィックを新しいバージョンに移す必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "デプロイグループで CodeDeployDefault.LambdaCanary10Percent5Minutes のデプロイ設定を使う。",
+        "B": "デプロイグループで CodeDeployDefault.LambdaLinear10PercentEvery1Minute のデプロイ設定を使う。",
+        "C": "デプロイグループで CodeDeployDefault.LambdaAllAtOnce の設定を使い、リリース後にエラーを監視する。",
+        "D": "5 分ごとに update-alias を呼び出してエイリアスのルーティングの重みを変える、スケジュールされたスクリプトを実行する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "LambdaCanary10Percent5Minutes は、最初に 10% の通信を新しい版へ移し、残りの 90% を 5 分後に移す決まった設定。要件の「少しだけ先に流し、5 分後に残り全部」にそのまま合い、作る物も無い。",
+      "per_choice": {
+        "A": "正しい。最初に 10%、5 分後に残りの 90% を移す canary の設定。",
+        "B": "linear は 1 分ごとに 10% ずつ移すので、全部移るまで約 10 分かかり、「5 分後に残り全部」と合わない。",
+        "C": "全部を一度に移すので、先に一部だけ流す要件に合わない。",
+        "D": "エイリアスの重みを自分で変えれば動くが、スクリプトを作って保守する手間がかかる。CodeDeploy の決まった設定で足りる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html",
+          "quote": "CodeDeployDefault.LambdaCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0002",
+      "stem_ja": "ある企業は、Network Load Balancer の背後で Amazon ECS サービスを実行し、AWS CodeDeploy の Blue/Green デプロイでデプロイしています。企業は、残りを移す前に、新しいバージョンごとに本番のトラフィックの 10% を 5 分間送るようにしたいと考えています。最も少ない運用の手間でこの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "CodeDeploy でカスタムの Canary のデプロイ設定を作成し、Network Load Balancer はそのまま使う。",
+        "B": "デプロイグループを CodeDeployDefault.ECSLinear10PercentEvery1Minutes に切り替え、Network Load Balancer はそのまま使う。",
+        "C": "CodeDeployDefault.ECSAllAtOnce のまま、本番の各デプロイの前に手動の承認を追加する。",
+        "D": "サービスを Application Load Balancer に移し、CodeDeployDefault.ECSCanary10Percent5Minutes を使う。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "ECS の CodeDeploy blue/green で Network Load Balancer を使うと、使える設定は ECSAllAtOnce だけ。canary で一部だけ流すには Application Load Balancer に替え、ECSCanary10Percent5Minutes を使う。",
+      "per_choice": {
+        "A": "Network Load Balancer では ECSAllAtOnce しか使えないので、独自の canary 設定も使えない。",
+        "B": "linear の設定も Network Load Balancer では使えない。また 1 分ごとに 10% ずつで、要件の形とも違う。",
+        "C": "承認を挟んでも一度に全部を移すことは変わらず、一部だけ先に流す要件に合わない。",
+        "D": "正しい。Application Load Balancer なら canary の決まった設定が使え、10% を 5 分流してから残りを移せる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "quote": "When a Network Load Balancer is used, only the CodeDeployDefault.ECSAllAtOnce deployment configuration is supported."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html",
+          "quote": "CodeDeployDefault.ECSCanary10Percent5Minutes: Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0003",
+      "stem_ja": "ある企業は、Application Load Balancer の背後の Amazon EC2 インスタンスで動くアプリケーションに、AWS CodeDeploy の Blue/Green デプロイを使用しています。QA チームは、置き換え先のインスタンスが本番のトラフィックを受け取る前にテストする必要があり、切り替えの時期はチームが決めます。切り替えの後、運用チームが削除を決めるまで、元のインスタンスは動かし続ける必要があります。これらの要件を満たすデプロイグループの設定はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "トラフィックの再ルーティングのオプションで「すぐにトラフィックを再ルーティングする」を選ぶ。",
+        "B": "トラフィックの再ルーティングのオプションで「トラフィックを再ルーティングするかどうかを選択する」を選ぶ。",
+        "C": "待機時間を 1 時間にして「デプロイグループの元のインスタンスを終了する」を選ぶ。",
+        "D": "「デプロイグループの元のインスタンスを実行したままにする」を選ぶ。",
+        "E": "CodeDeployDefault.OneAtATime の設定で、インプレースデプロイを使う。"
+      },
+      "answer": [
+        "B",
+        "D"
+      ],
+      "summary": "「I will choose whether to reroute traffic」にすると、置き換え先のインスタンスは手で切り替えるまでロードバランサーに登録されないので、本番の通信を受けずに試験できる。「Keep the original instances … running」にすると、切り替えた後も元のインスタンスが動き続ける。",
+      "per_choice": {
+        "A": "用意ができしだい自動で登録されて本番の通信が流れるので、先に試験する要件に合わない。",
+        "B": "正しい。手で切り替えるまで置き換え先は登録されない。",
+        "C": "待つ時間の後に元のインスタンスが自動で終了する。運用チームが決めるまで残す要件に合わない。",
+        "D": "正しい。切り替えた後も元のインスタンスを動かしたままにする。",
+        "E": "in-place は同じインスタンスを更新するので、置き換え先を先に試験できず、元の環境も残らない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "quote": "Instances in the replacement environment are not registered with the specified load balancers and target groups unless you manually reroute traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-create-blue-green.html",
+          "quote": "the instances that were deregistered from the load balancers and target groups are kept running."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0004",
+      "stem_ja": "ある企業は、AWS Elastic Beanstalk の環境で Web アプリケーションを実行しています。企業は、リリースのたびに、受信トラフィックの 10% を 30 分間新しいバージョンに送りたいと考えています。新しいインスタンスが正常なままであれば、すべてのトラフィックを新しいバージョンに移し、古いインスタンスを自動で削除する必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "デプロイポリシーを Immutable にし、ヘルスチェックの待機時間を 30 分にする。",
+        "B": "デプロイポリシーを TrafficSplitting にし、トラフィックの分割を 10%、評価時間を 30 分にする。",
+        "C": "デプロイポリシーを追加バッチによるローリングにし、バッチサイズを 10% にする。",
+        "D": "2 つ目の環境を作成し、Amazon Route 53 の加重レコードでトラフィックを手作業で移す。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Traffic splitting は、新しいインスタンス一式を立ち上げ、決めた割合の通信を決めた時間だけ新しい版へ流し、問題が無ければ全部を移して古いインスタンスを終了する。割合（Traffic split）と時間（evaluation time）を設定するだけでよい。",
+      "per_choice": {
+        "A": "Immutable は新しいインスタンス一式を別の Auto Scaling グループで立ち上げるが、一部の通信だけを一定時間流す仕組みではない。",
+        "B": "正しい。割合と評価の時間を決めるだけで canary の形になり、古いインスタンスも自動で終了する。",
+        "C": "バッチごとに順にインスタンスを入れ替える方式で、通信の 10% を 30 分流してから判断する形にはならない。",
+        "D": "動くが、環境を 2 つ持ち、重みを手で変える手間がかかる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "quote": "It then forwards a specified percentage of incoming client traffic to the new application version for a specified evaluation period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html",
+          "quote": "If the new instances stay healthy, Elastic Beanstalk forwards all traffic to them and terminates the old ones."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0005",
+      "stem_ja": "ある企業は、AWS Elastic Beanstalk の環境のアプリケーションをインプレースの更新で更新しており、リリースのたびにユーザーが短い停止を経験しています。企業は、新しいバージョンをリリース前に専用の URL でテストし、ユーザーを即座に切り替え、すぐに元に戻せるようにしたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "デプロイポリシーを Rolling に変更し、バッチサイズを 1 インスタンスに減らす。",
+        "B": "今後のすべてのアプリケーションのリリースで、デプロイポリシーを Immutable に変更する。",
+        "C": "新しいバージョンを別の環境にデプロイし、環境 URL のスワップを使う。",
+        "D": "別の環境にデプロイし、DNS を切り替えた直後に古い環境を終了する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Elastic Beanstalk の blue/green は、新しい版を別の環境に置き、2 つの環境の CNAME を入れ替える（Swap environment URLs）。入れ替える前に新しい環境の URL で試験でき、入れ替えはすぐ効き、もう一度入れ替えれば戻せる。",
+      "per_choice": {
+        "A": "同じ環境の中でインスタンスを順に更新するので、新しい版を別の URL で先に試験できない。",
+        "B": "Immutable は止まらずに更新できるが、同じ環境の中の更新なので、別の URL で先に試験して入れ替える形にはならない。",
+        "C": "正しい。別の環境で試験してから CNAME を入れ替え、戻すときも入れ替えるだけ。",
+        "D": "DNS の変更が行き渡り古い記録が切れるまで、古い環境は終了してはいけない。すぐ終了すると戻せない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "quote": "deploy the new version to a separate environment, and then swap the CNAMEs of the two environments to redirect traffic to the new version instantly."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html",
+          "quote": "do not terminate your old environment until the DNS changes are propagated and your old DNS records expire."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0006",
+      "stem_ja": "ある CodeBuild プロジェクトのサービスロールには、企業のドメインとリポジトリに対する codeartifact:GetAuthorizationToken と codeartifact:ReadFromRepository を許可する IAM ポリシーがあります。ビルドの CodeArtifact へのログインの手順がアクセス拒否のエラーで失敗し、npm がパッケージをインストールできません。最小権限で問題を解決する変更はどれですか。",
+      "choices_ja": {
+        "A": "サービスロールのポリシーに sts:GetServiceBearerToken を追加する。",
+        "B": "サービスロールに AWSCodeArtifactAdminAccess マネージドポリシーをアタッチする。",
+        "C": "Secrets Manager に保存したアカウントのルートユーザーの認証情報で、ログインの手順を実行する。",
+        "D": "ビルド中に期限が切れないように、認可トークンの有効期間を 24 時間にする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "CodeArtifact の GetAuthorizationToken を呼ぶには、sts:GetServiceBearerToken と codeartifact:GetAuthorizationToken の両方の権限が要る。パッケージマネージャーで CodeArtifact のリポジトリを使うには、ユーザーかロールが sts:GetServiceBearerToken を許している必要がある。",
+      "per_choice": {
+        "A": "正しい。足りないのは sts:GetServiceBearerToken だけ。",
+        "B": "管理の権限まで与えることになり、最小権限に反する。",
+        "C": "ルートユーザーは GetAuthorizationToken を呼べない。",
+        "D": "トークンの寿命は 15 分から 12 時間まで。そもそもトークンを取れないのが問題。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Both the sts:GetServiceBearerToken and the codeartifact:GetAuthorizationToken permissions are required to call the CodeArtifact GetAuthorizationToken API."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Root users cannot call GetAuthorizationToken."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "Tokens can be configured with a lifetime between 15 minutes and 12 hours."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0007",
+      "stem_ja": "毎晩のデータのジョブは約 14 時間かかり、実行中の何か所かで AWS CodeArtifact から Python のパッケージをダウンロードします。ジョブは開始時に既定の設定で CodeArtifact の認可トークンを 1 回だけ取得しています。ジョブは、いつも実行の終盤に認証のエラーで失敗します。問題を解決するための最適な変更はどれですか。",
+      "choices_ja": {
+        "A": "ジョブの開始時に、有効期間 24 時間のトークンを要求する。",
+        "B": "トークンが期限切れにならないように、AWSCodeArtifactReadOnlyAccess マネージドポリシーをアタッチする。",
+        "C": "使用中は CodeArtifact がトークンを自動で更新するので、実行全体で 1 つのトークンを使い続ける。",
+        "D": "今のトークンの期限が切れる前に、たとえば各ダウンロードの手順の前に、新しい認可トークンを取得する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "CodeArtifact の認可トークンの寿命は既定で 12 時間で、15 分から 12 時間の間で決められる。寿命が切れたら、新しいトークンを取る必要がある。14 時間の処理では、途中で取り直す。",
+      "per_choice": {
+        "A": "寿命は 12 時間までしか決められない。",
+        "B": "権限を足してもトークンの寿命は変わらない。",
+        "C": "寿命が切れたら新しいトークンを取る必要がある。自動では延びない。",
+        "D": "正しい。切れる前に取り直せば、最後まで認証できる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "CodeArtifact authorization tokens are valid for a default period of 12 hours."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/tokens-authentication.html",
+          "quote": "When the lifetime expires, you must fetch another token."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0008",
+      "stem_ja": "AWS Fargate 上の新しい Amazon ECS サービスが、同じアカウントのプライベートの Amazon ECR リポジトリからイメージを取得できず、起動に失敗します。起動した後は、コンテナ内のアプリケーションのコードが Amazon S3 バケットにオブジェクトを書き込む必要があります。セキュリティチームは、それぞれの権限を正しいロールに付与することを求めています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "タスク実行ロールに管理ポリシー AmazonECSTaskExecutionRolePolicy を付ける。",
+        "B": "S3 への書き込みの権限をタスクの IAM ロールに付与する。",
+        "C": "ECR からの取得の権限を、タスク実行ロールではなくタスクの IAM ロールに付与する。",
+        "D": "コンテナが使えるように、S3 への書き込みの権限をタスク実行ロールに付与する。",
+        "E": "どのロールにも取得の権限が要らないように、ECR リポジトリを公開する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "タスク実行ロールは、ECS のコンテナや Fargate のエージェントが代わりに AWS の API を呼ぶための物で、ECR からイメージを取る権限はここに付ける（マネージドポリシー AmazonECSTaskExecutionRolePolicy に含まれる）。その権限はタスクのコンテナからは直接使えないので、コンテナの中のアプリが使う権限はタスクロールに付ける。",
+      "per_choice": {
+        "A": "正しい。イメージを取る権限はタスク実行ロールに付ける。",
+        "B": "正しい。アプリのコードが使う権限はタスクロールに付ける。",
+        "C": "イメージを取るのはエージェントで、権限はタスク実行ロールに付ける。",
+        "D": "タスク実行ロールの権限はコンテナから直接使えない。",
+        "E": "非公開のリポジトリを公開することになり、権限の問題の答えにならない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "For basic ECS implementations, these permissions should be added to the task execution role rather than the task IAM role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "The Amazon ECS task execution role managed policy (AmazonECSTaskExecutionRolePolicy) includes the necessary permissions for pulling images from Amazon ECR."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html",
+          "quote": "but they aren't directly accessible by the containers in the task."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0009",
+      "stem_ja": "Amazon EC2 インスタンスへの AWS CodeDeploy のデプロイが、CodeDeploy エージェントが S3 バケット deploy-artifacts からアプリケーションのリビジョンをダウンロードできないために失敗します。インスタンスにはインスタンスプロファイルがありません。セキュリティチームは最小権限を求めており、公開のバケットを認めていません。最小権限でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "すべてのバケットですべての S3 のアクションを許可するロールのインスタンスプロファイルをアタッチする。",
+        "B": "deploy-artifacts バケットからのオブジェクトの読み取りだけを許可するロールのインスタンスプロファイルをアタッチする。",
+        "C": "CodeDeploy のサービスロールに S3 の読み取りの権限を追加し、インスタンスはインスタンスプロファイルなしのままにする。",
+        "D": "エージェントが認証情報なしでリビジョンをダウンロードできるように、deploy-artifacts バケットを公開する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "EC2 のインスタンスには、アプリが置かれた S3 のバケットや GitHub に入る権限が要り、その権限はインスタンスプロファイルのロールで CodeDeploy のエージェントに与える。ポリシーは、インスタンスが入る必要のあるバケットだけに絞るのが勧められている。",
+      "per_choice": {
+        "A": "全てのバケットへの全ての操作を許すことになり、最小権限に反する。",
+        "B": "正しい。エージェントが使うインスタンスプロファイルで、必要なバケットだけを読ませる。",
+        "C": "S3 からリビジョンを取るのはインスタンスの上のエージェントで、インスタンスプロファイルの権限を使う。",
+        "D": "公開のバケットは許されていない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "quote": "This role gives the CodeDeploy agent permission to access the Amazon S3 buckets or GitHub repositories where your applications are stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html",
+          "quote": "We recommend that you restrict this policy to only those Amazon S3 buckets your Amazon EC2 instances must access."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0010",
+      "stem_ja": "ある会社は、AWS CodeDeploy で 200 台の Amazon EC2 インスタンスと 50 台のオンプレミスのサーバーにアプリケーションをデプロイしています。すべて AWS Systems Manager で管理されています。会社は、エンジニアがサーバーにログインせずに、すべてのサーバーに CodeDeploy エージェントを入れ、新しいバージョンへ自動で更新したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "EC2 のユーザーデータにエージェントのインストールのスクリプトを足し、オンプレミスのサーバーには手作業でエージェントを入れる。",
+        "B": "Systems Manager ですべてのサーバーに AWSCodeDeployAgentV2 のパッケージを 1 回入れ、新しいバージョンが出たら手作業で更新する。",
+        "C": "Systems Manager で、すべてのサーバーに AWSCodeDeployAgentV2 のパッケージをスケジュールで入れ、新しいバージョンが入るようにする。",
+        "D": "各サーバーに、最新のエージェントのインストーラーを毎週ダウンロードして実行する cron ジョブを足す。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Systems Manager を使うと、EC2 とオンプレミスのインスタンスに CodeDeploy エージェントを入れられ、1 回だけ入れることも、新しいバージョンを入れるスケジュールを組むこともできます。バージョン 2.0.x 以降は AWSCodeDeployAgentV2 のパッケージを選びます。",
+      "per_choice": {
+        "A": "EC2 では入りますが更新されず、オンプレミスのサーバーは手作業になります。",
+        "B": "ログインは要りませんが、新しいバージョンへの更新が手作業のままです。",
+        "C": "正しい。すべてのサーバーにログイン無しで入れ、スケジュールで新しいバージョンも入ります。",
+        "D": "動きますが、各サーバーの cron ジョブを作って保守する必要があり、手間がかかります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "You can use the AWS Management Console or the AWS CLI to install the CodeDeploy agent to your Amazon EC2 or on-premises instances by using AWS Systems Manager."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "With SSM, you can install the CodeDeploy once or set up a schedule to install new versions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-ssm.html",
+          "quote": "For version 2.0.x and later, choose the AWSCodeDeployAgentV2 package."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0011",
+      "stem_ja": "ある会社は、アプリケーションを EC2 インスタンスから AWS Lambda 関数と Amazon ECS のサービスへ移しており、新しいコンピューティングプラットフォームでも AWS CodeDeploy でデプロイし続けます。プラットフォームチームは、新しいプラットフォームで CodeDeploy エージェントをどう用意すべきかを尋ねています。デプロイを動かし続けつつ、運用の手間が最も少ない方法はどれですか。",
+      "choices_ja": {
+        "A": "CodeDeploy エージェントは EC2/オンプレミスのコンピューティングプラットフォームでだけ必要なので、Lambda と ECS のデプロイでは入れない。",
+        "B": "すべての ECS のタスク定義に CodeDeploy エージェントをサイドカーのコンテナとして足し、すべての関数で Lambda レイヤーにまとめる。",
+        "C": "エージェントが Lambda と ECS へデプロイできるよう、CodeDeploy エージェントを入れた EC2 インスタンスを少し残しておく。",
+        "D": "ECS のコンテナインスタンスにだけ CodeDeploy エージェントを入れ、Lambda 関数には EC2 のコンピューティングプラットフォームを使う。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "CodeDeploy エージェントは、EC2/オンプレミスのコンピューティングプラットフォームにデプロイする時だけ必要です。Amazon ECS や AWS Lambda のコンピューティングプラットフォームを使うデプロイでは要りません。",
+      "per_choice": {
+        "A": "正しい。ECS と Lambda のデプロイにはエージェントが要らないので、用意する作業がありません。",
+        "B": "エージェントは ECS と Lambda のデプロイでは要らないので、作業が増えるだけです。",
+        "C": "ECS と Lambda のデプロイにエージェントは要らず、EC2 を残す費用と手間が増えるだけです。",
+        "D": "ECS のデプロイにエージェントは要らず、Lambda 関数を EC2 のプラットフォームでデプロイすることもできません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html",
+          "quote": "The CodeDeploy agent is required only if you deploy to an EC2/On-Premises compute platform. The agent is not required for deployments that use the Amazon ECS or AWS Lambda compute platform."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0012",
+      "stem_ja": "アプリケーションのリビジョンは Amazon S3 バケットに保存されています。新しい EC2 インスタンスのグループへの CodeDeploy のデプロイが、インスタンスがリビジョンをダウンロードできずに失敗し、一部のインスタンスでは CodeDeploy エージェントのインストールも失敗しました。インスタンスには、ec2.amazonaws.com を信頼するロールの IAM インスタンスプロファイルがありますが、そのロールは Amazon S3 のアクションを何も許していません。問題を直す最も安全な変更はどれですか。",
+      "choices_ja": {
+        "A": "どのインスタンスでも読めるように、リビジョンのバケットと CodeDeploy エージェントのあるバケットを公開する。",
+        "B": "CodeDeploy がリビジョンをインスタンスへ送れるよう、インスタンスのセキュリティグループに 443 番ポートの受信のルールを足す。",
+        "C": "各インスタンスで systemctl を使って CodeDeploy エージェントを再起動してから、リビジョンを再デプロイする。",
+        "D": "インスタンスプロファイルのロールに、リビジョンのバケットと CodeDeploy エージェントのバケットへの s3:Get* と s3:List* を足す。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "アプリケーションを S3 バケットに置く時は、インスタンスプロファイルのロールに s3:Get* と s3:List* が要ります。CodeDeploy エージェントのある S3 バケットへのアクセスも与えないと、エージェントのインストールや更新でエラーが起きることがあります。",
+      "per_choice": {
+        "A": "取得はできるようになりますが、誰でも読めるようになり、安全ではありません。",
+        "B": "エージェントは 443 番ポートの HTTPS で外向きに通信するので、受信のルールを足しても直りません。",
+        "C": "原因は権限で、再起動しても S3 から取得できないままです。",
+        "D": "正しい。必要なバケットへの読み取りだけを、インスタンスのロールに足します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "quote": "If \"s3:Get*\" and \"s3:List*\" are not in the list of specified actions, choose Edit to add them, and then choose Save."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-ec2-configure.html#instances-ec2-configure-2-verify-instance-profile-permissions",
+          "quote": "Make sure to give access to the Amazon S3 buckets that contain the CodeDeploy agent. Otherwise, an error might occur when the CodeDeploy agent is installed or updated on the instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-outbound-port",
+          "quote": "The CodeDeploy agent communicates outbound using HTTPS over port 443."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0013",
+      "stem_ja": "CodeDeploy のインプレースデプロイの最中に、Auto Scaling のスケールインが、ライフサイクルイベントのスクリプトを実行中の 2 台のインスタンスを終了させました。それらのインスタンスのデプロイの状態は約 1 時間後まで Failed にならず、チームのロールバックの判断が遅れました。最も可能性の高い説明はどれですか。",
+      "choices_ja": {
+        "A": "CodeDeploy エージェントは 7 日後にログファイルを消すため、ログがローテーションされるまで失敗を報告できなかった。",
+        "B": "インスタンスの終了で CodeDeploy エージェントが止まったため、CodeDeploy はスクリプトを失敗とするまで最大 1 時間待った。",
+        "C": "インスタンスが最初のライフサイクルイベントの前に終了したため、デプロイは 1 時間のタイムアウトまで待った。",
+        "D": "CodeDeploy エージェントは 443 番ポートの受信の接続でだけ状態を報告し、それがセキュリティグループで閉じられていた。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "ライフサイクルイベントの最中にインスタンスが終了すると、CodeDeploy エージェントが止まってスクリプトを処理できなくなり、デプロイの状態が Failed になるまで最大 1 時間かかることがあります。ライフサイクルイベントの間や最初のイベントの前に終了した時は、5 分でタイムアウトします。",
+      "per_choice": {
+        "A": "ログの削除は 7 日後の話で、デプロイの状態の報告とは関係ありません。",
+        "B": "正しい。スクリプトの実行中にエージェントが止まり、失敗と表示されるまで最大 1 時間かかります。",
+        "C": "最初のライフサイクルイベントの前に終了した場合は、5 分でタイムアウトします。",
+        "D": "エージェントは 443 番ポートの HTTPS で外向きに通信します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "quote": "it might take up to an hour for the status of the deployment to be displayed as Failed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-ec2-instances.html#troubleshooting-one-hour-timeout",
+          "quote": "If an instance is terminated between lifecycle events or before the first lifecycle event step starts, the timeout occurs after just five minutes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent.html#codedeploy-agent-install-files",
+          "quote": "The agent deletes log files after seven days."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0014",
+      "stem_ja": "CodeDeploy のインプレースのデプロイグループが、ApplicationStop のライフサイクルイベントで失敗し続けています。チームは、最後に成功したリビジョンの ApplicationStop のスクリプトに不具合があると分かり、新しいリビジョンでスクリプトを直しましたが、新しいリビジョンのデプロイも ApplicationStop で失敗します。最も少ない手間で新しいリビジョンをデプロイできるようにする操作はどれですか。",
+      "choices_ja": {
+        "A": "--ignore-application-stop-failures のような、ApplicationStop の失敗を無視するオプションを付けてデプロイを作り直す。",
+        "B": "もう 1 つ新しいリビジョンで ApplicationStop のスクリプトをまた直し、オプションを変えずにデプロイする。",
+        "C": "新しいリビジョンの AppSpec ファイルで、ApplicationStop のフックのタイムアウトを延ばす。",
+        "D": "CodeDeploy のアプリケーションとデプロイグループを消して、作り直す。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "ApplicationStop・BeforeBlockTraffic・AfterBlockTraffic のスクリプトは、今のデプロイではなく、前に成功したデプロイの AppSpec ファイルから実行されます。前のリビジョンのスクリプトが失敗し続ける時は、これらの失敗を無視するよう指定してデプロイを作れば、デプロイが続き、直したスクリプトで次から成功します。",
+      "per_choice": {
+        "A": "正しい。前のリビジョンの壊れたスクリプトの失敗を無視して、直したリビジョンを入れられます。",
+        "B": "ApplicationStop は前に成功したデプロイのスクリプトで動くので、新しいリビジョンで直しても失敗は続きます。",
+        "C": "新しいリビジョンの AppSpec の設定は、前のデプロイの ApplicationStop のスクリプトの不具合を直しません。",
+        "D": "手間が大きく、作り直しは不要です。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "create a deployment and specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-lifecycle-event-failures",
+          "quote": "If the new revision includes fixed scripts for those lifecycle events, future deployments can succeed without applying this fix."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0015",
+      "stem_ja": "CloudFormation のスタックの更新が失敗し、その後のロールバックも失敗しました。ロールバックが、誰かが CloudFormation の外で削除したデータベースインスタンスへ戻ろうとするため、スタックは UPDATE_ROLLBACK_FAILED の状態です。チームは、スタックを削除せずに動く状態へ戻し、また更新できるようにしたいと考えています。この要件を最もよく満たす操作はどれですか。",
+      "choices_ja": {
+        "A": "signal-resource コマンドでデータベースのリソースに成功のシグナルを送り、その後に更新をやり直す。",
+        "B": "RetainResources パラメータを付けてスタックを削除し、テンプレートから新しいスタックを作る。",
+        "C": "CloudFormation のサービスにより多くの IAM の権限を与え、ロールバックが自分で終わるのを待つ。",
+        "D": "更新のロールバックを続け、削除されたデータベースのリソースを飛ばして、スタックを UPDATE_ROLLBACK_COMPLETE にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "依存するリソースが元の状態に戻れない時、ロールバックは失敗して UPDATE_ROLLBACK_FAILED になります。原因によっては、ロールバックを続けて動く状態（UPDATE_ROLLBACK_COMPLETE）に戻し、また更新できます。CloudFormation の外で消したリソースのように戻せない物は、ロールバックを続ける時に飛ばせます。",
+      "per_choice": {
+        "A": "シグナルを送る方法は、必要な数のシグナルを受け取れなかった時の対処で、消えたデータベースには効きません。",
+        "B": "スタックを削除しないという要件に反します。",
+        "C": "原因は権限ではなく、待ってもロールバックは終わりません。",
+        "D": "正しい。消えたリソースを飛ばしてロールバックを終え、スタックを削除せずに更新できる状態に戻せます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "A dependent resource can't return to its original state, causing the rollback to fail (UPDATE_ROLLBACK_FAILED state)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "By continuing the rollback, you can return your stack to a working state (the UPDATE_ROLLBACK_COMPLETE state), and then try to update the stack again."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed",
+          "quote": "If none of these solutions work, you can skip the resources that CloudFormation can't successfully roll back."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0016",
+      "stem_ja": "Application Load Balancer の後ろの EC2 インスタンスへの CodeDeploy の Blue/Green デプロイが、AllowTraffic のライフサイクルイベントで失敗します。置き換え先のインスタンスのデプロイのログにはエラーが無く、アプリケーションも正しく起動します。チームが直すべき、最も可能性の高い原因はどれですか。",
+      "choices_ja": {
+        "A": "前に成功したデプロイの ApplicationStop のスクリプトに誤りがある。",
+        "B": "ロードバランサーのヘルスチェックの設定が誤っている。",
+        "C": "置き換え先のインスタンスに CodeDeploy エージェントが入っていない。",
+        "D": "タスク定義のアーティファクトが 3 MB より大きい。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Blue/Green デプロイが AllowTraffic で失敗し、デプロイのログに原因が出ない時は、たいていデプロイグループのトラフィックを扱うロードバランサーのヘルスチェックの設定の誤りが原因です。ヘルスチェックの設定を見直して直します。",
+      "per_choice": {
+        "A": "ApplicationStop の失敗なら、そのイベントで失敗し、ログにも原因が出ます。",
+        "B": "正しい。ログに原因が無い AllowTraffic の失敗は、ふつうヘルスチェックの設定の誤りです。",
+        "C": "エージェントが無ければ、それより前のライフサイクルイベントが動かず、AllowTraffic まで進みません。",
+        "D": "タスク定義のアーティファクトは ECS へのデプロイの話で、EC2 の Blue/Green には関係ありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "quote": "This failure is typically due to incorrectly configured health checks in Elastic Load Balancing"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments-allowtraffic-no-logs",
+          "quote": "To resolve the issue, review and correct any errors in the health check configuration for the load balancer."
+        }
+      ]
+    },
+    {
+      "id": "q-1.4-0017",
+      "stem_ja": "EC2 インスタンスへの CodeDeploy のデプロイが、エラーコード HEALTH_CONSTRAINTS で失敗し、すべてのインスタンスのすべてのライフサイクルイベントが Skipped と表示されています。DevOps エンジニアが確かめるべき、最も可能性の高い原因はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "インスタンスで CodeDeploy エージェントが入っていないか、動いていない。",
+        "B": "CodeDeploy のサービスロールに必要な権限が無い。",
+        "C": "新しいリビジョンの ApplicationStop のスクリプトに誤りがある。",
+        "D": "ロードバランサーのヘルスチェックのパスが誤っている。",
+        "E": "インスタンスのスタックで終了保護が有効になっている。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "EC2 やオンプレミスのデプロイですべてのライフサイクルイベントが飛ばされ、HEALTH_CONSTRAINTS で失敗する時の主な原因には、CodeDeploy エージェントが入っていないか動いていないこと（メモリーやディスクの不足で止まることもある）と、CodeDeploy のサービスロールに必要な権限が無いことがあります。",
+      "per_choice": {
+        "A": "正しい。エージェントが動いていなければ、どのライフサイクルイベントも実行されません。",
+        "B": "正しい。サービスロールの権限が足りないことも、すべてのイベントが飛ばされる原因になります。",
+        "C": "スクリプトの誤りなら、そのイベントは実行されて失敗し、すべてが Skipped にはなりません。",
+        "D": "AllowTraffic で失敗するなら、それより前のイベントは実行されています。",
+        "E": "スタックの終了保護はスタックの削除を止めるもので、デプロイのライフサイクルイベントには関係ありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The CodeDeploy agent might not be installed or running on the instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The CodeDeploy agent might stop running because an instance is running low on memory or hard disk space."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-skipped-lifecycle-events",
+          "quote": "The service role for CodeDeploy might not have required permissions."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,479 @@
+{
+  "task": "1.3",
+  "questions": [
+    {
+      "id": "q-1.3-0001",
+      "stem_ja": "ある企業は、アプリケーションのイメージを Amazon ECR のリポジトリに保存しています。\"release\" で始まるタグが付いたイメージは、決して削除してはなりません。ほかのすべてのイメージは、プッシュされてから 90 日後に自動で削除する必要があります。独自のコードを実行せずに、ストレージの費用を抑える必要があります。最も少ない運用の手間でこれらの要件を満たすライフサイクルポリシーはどれですか。",
+      "choices_ja": {
+        "A": "ルールの優先度 1: tagStatus tagged、tagPrefixList [\"release\"]、countType imageCountMoreThan 10000。ルールの優先度 2: tagStatus any、countType sinceImagePushed 90 日。",
+        "B": "ルールの優先度 1: tagStatus any、countType sinceImagePushed 90 日。ルールの優先度 2: tagStatus tagged、tagPrefixList [\"release\"]、countType imageCountMoreThan 10000。",
+        "C": "ルールの優先度 1: tagStatus untagged、tagPrefixList [\"release\"]、countType imageCountMoreThan 10000。ルールの優先度 2: tagStatus any、countType sinceImagePushed 90 日。",
+        "D": "ルールの優先度 1: tagStatus tagged、tagPrefixList [\"release\"] と tagPatternList [\"*\"]、countType sinceImagePushed 90 日。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "ある規則の条件に合ったイメージは、それより優先度の低い規則では消されない。優先度 1 の規則で release のタグのイメージを選び、数の上限を大きくして実際には消さないようにすると、優先度 2 の「90 日より古いものを消す」規則から守れる。",
+      "per_choice": {
+        "A": "正しい。release のイメージは優先度 1 の規則に合うので、優先度 2 の規則では消されない。imageCountMoreThan は上限を超えた分だけを消すので、上限を大きくすれば残る。",
+        "B": "優先度の高い規則が全てのイメージを 90 日で消すので、release のイメージも消える。",
+        "C": "tagPrefixList は tagStatus が tagged の時しか使えない。",
+        "D": "1 つの規則に tagPrefixList と tagPatternList は両方は書けない。また release のイメージも 90 日で消える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "quote": "An image that matches the tagging requirements of a rule cannot be expired or archived by a rule with a lower priority."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "quote": "With countType = imageCountMoreThan, images are sorted from youngest to oldest based on pushed_at_time and then all images greater than the specified count are expired or archived."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "quote": "The tagPatternList or tagPrefixList parameters may only used if the tagStatus is tagged."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+          "quote": "A lifecycle policy rule may specify either tagPatternList or tagPrefixList, but not both."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0002",
+      "stem_ja": "ある企業は、us-east-1 の AWS CodePipeline のパイプラインを AWS CLI で管理しています。企業が ap-northeast-1 に AWS CloudFormation のスタックをデプロイするアクションを追加したところ、更新が失敗しました。企業は、1 つのパイプラインのまま、引き続き AWS CLI で管理し、リージョン間のコピーの仕組みを追加しないことを望んでいます。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "us-east-1 にある既存の S3 のソースバケットを、ap-northeast-1 のアクションのアーティファクトストアに設定する。",
+        "B": "us-east-1 のアーティファクトバケットから ap-northeast-1 のバケットへの S3 クロスリージョンレプリケーションを有効にする。",
+        "C": "ap-northeast-1 に S3 バケットを作成し、そのリージョンのアーティファクトストアとしてパイプラインに追加する。",
+        "D": "スタックをデプロイする 2 つ目のパイプラインを ap-northeast-1 に作成し、1 つ目のパイプラインの最後で開始する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "アクションを動かすリージョンごとに 1 つのアーティファクトバケットが要る。コンソールなら自動で作られるが、AWS CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを自分で指定する。",
+      "per_choice": {
+        "A": "アーティファクトバケットは、S3 のソースアクションで使うソースのバケットとは別の物。また別リージョンのアクションにはそのリージョンのバケットが要る。",
+        "B": "リージョンの間でコピーする仕組みを足すことになり、要件に反する。リージョンごとのアーティファクトバケットの指定も無いまま。",
+        "C": "正しい。CLI で別リージョンのアクションを足す時は、そのリージョンのアーティファクトバケットを指定する。",
+        "D": "パイプラインを 1 つにする要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "quote": "you must have one artifact bucket per Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "quote": "you must provide an artifact bucket for each additional Region where you plan to execute an action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome-introducing-artifacts.html",
+          "quote": "The artifact bucket is not the same bucket as the bucket used as the source file location for a pipeline where the chosen source action is S3."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0003",
+      "stem_ja": "多数の AWS アカウントを持つ企業が AWS CodeArtifact を導入しようとしています。開発チームごとに専用のリポジトリを持つ必要があります。中央のチームは、どの AWS アカウントがリポジトリを使えるか、どの公開リポジトリをパッケージの取得元として使えるかを、1 か所で管理する必要があります。保存するすべてのパッケージは、1 つのカスタマーマネージドの AWS KMS キーで暗号化する必要があります。最も少ない運用上のオーバーヘッドでこれらの要件を満たす設計はどれですか。",
+      "choices_ja": {
+        "A": "チームごとに同じ KMS キーで暗号化したドメインを 1 つずつ作成し、すべてのドメインに同じポリシーを適用する。",
+        "B": "KMS キーで 1 つのドメインを作成し、全チーム共有のリポジトリを 1 つ置いて、リポジトリポリシーを追加する。",
+        "C": "各チームのアカウントにチームのリポジトリを作成し、AWS Organizations の SCP でアクセスを制限する。",
+        "D": "KMS キーで 1 つのドメインを作成し、その中にチームごとのリポジトリを作り、ドメインポリシーでアクセスを管理する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "ドメインは複数のリポジトリをまとめる単位で、中の全ての資産は同じ KMS キーで暗号化される。ドメインを使うと、どのアカウントがリポジトリに入れるか、どの公開リポジトリをパッケージの元にするかを、複数のリポジトリにまとめて決められる。AWS も本番用には 1 つのドメインを勧めている。",
+      "per_choice": {
+        "A": "暗号化はそろうが、ドメインごとにポリシーを持つことになり、1 か所で管理する要件に合わない。",
+        "B": "1 か所で管理でき暗号化もそろうが、チームごとのリポジトリを持つ要件に合わない。",
+        "C": "チームごとのリポジトリは持てるが、ドメインを使わないので、どのアカウントが入れるかやどの公開リポジトリを使うかを 1 か所でまとめて決められない。",
+        "D": "正しい。1 つのドメインの中にチームごとのリポジトリを置き、ドメインでまとめて管理する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "quote": "All of the assets and metadata in a domain are encrypted with the same AWS KMS key (KMS key) stored in AWS Key Management Service (AWS KMS)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain, and which public repositories can be used as the sources of packages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "quote": "we recommend a single production domain that contains all published artifacts."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0004",
+      "stem_ja": "ある企業は、アカウント B で AWS CodeBuild のプロジェクトを実行しています。ビルドは、アカウント A の Amazon ECR リポジトリからコンテナイメージを、アカウント A の AWS CodeArtifact のドメインから npm パッケージを取得する必要があります。セキュリティチームは最小権限を求めており、どちらのサービスについても、長期の認証情報や公開のアクセスを認めていません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "アカウント A の ECR リポジトリに、アカウント B の CodeBuild のサービスロールにイメージの取得を許可するリポジトリポリシーを追加する。",
+        "B": "アカウント A にアカウント B 向けの CodeArtifact のドメインポリシーを追加し、ビルドではロールの認証情報で認可トークンを取得させる。",
+        "C": "サインインせずに npm パッケージをダウンロードできるように、アカウント A の CodeArtifact リポジトリを公開する。",
+        "D": "アカウント A の IAM ユーザーのアクセスキーを、CodeBuild プロジェクトの環境変数に保存する。",
+        "E": "CodeArtifact リポジトリを、アカウント A のドメインからアカウント B の新しいドメインに移す。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "ECR のプライベートリポジトリは、IAM を使ったリソースベースの権限（リポジトリポリシー）で別アカウントに pull を許せる。CodeArtifact は、ドメインでどのアカウントが入れるかを決め、使う側は自分の AWS の認証情報で認可トークンを作って認証する。",
+      "per_choice": {
+        "A": "正しい。リポジトリポリシーで、必要なロールにだけ pull を許す。",
+        "B": "正しい。ドメインでアカウント B を許し、ビルドはロールの認証情報からトークンを作るので、長く使う認証情報が要らない。",
+        "C": "CodeArtifact のリポジトリのパッケージは公開できない。公開も禁止されている。",
+        "D": "IAM ユーザーのアクセスキーは長く使う認証情報で、要件に反する。",
+        "E": "リポジトリは 1 つのドメインに属し、別のドメインへ移せない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html",
+          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html",
+          "quote": "You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "quote": "With this approach, you determine which accounts can access repositories in the domain"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html",
+          "quote": "Each repository is a member of a single domain and can't be moved to a different domain."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0005",
+      "stem_ja": "ある CodeBuild プロジェクトは、ビルドの出力を dist ディレクトリに書き出し、その下には dist/assets や dist/views などのサブディレクトリがあります。デプロイの手順では、出力のアーティファクトの最上位に dist フォルダを含めずに dist の中身を置き、かつサブディレクトリの構造を保つ必要があります。最も少ない運用の手間でこれらの要件を満たす buildspec の artifacts の設定はどれですか。",
+      "choices_ja": {
+        "A": "files: '**/*' と base-directory: dist",
+        "B": "files: 'dist/**/*' で base-directory は無し",
+        "C": "files: 'dist/**/*' と discard-paths: yes",
+        "D": "files: '**/*' と base-directory: dist と discard-paths: yes"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "base-directory に合う最上位のディレクトリ自体は成果物に入らず、その中のファイルとサブディレクトリだけが入る。files の '**/*' は全てのファイルを再帰的に表す。discard-paths を yes にすると、全てのファイルが同じディレクトリに置かれ、構造が平らになる。",
+      "per_choice": {
+        "A": "正しい。dist の中身が最上位に入り、サブディレクトリの構造は残る。",
+        "B": "dist のフォルダーごと成果物に入り、最上位に中身が来ない。",
+        "C": "discard-paths で構造が平らになり、assets や views のサブディレクトリが無くなる。",
+        "D": "dist は外れるが、discard-paths で構造が平らになる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "Matching top-level directories are not included in the build output artifact, only their files and subdirectories."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "If this contains yes, all of the build artifacts are placed in the same output directory."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "'**/*' represents all files recursively."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0006",
+      "stem_ja": "あるビルドには、AWS Secrets Manager のシークレット prod/db の JSON キー password に保存されたデータベースのパスワードと、Systems Manager Parameter Store に保存された API のエンドポイントが必要です。パスワードは CodeBuild のコンソールや AWS CLI で平文で見えてはならず、シークレットからはパスワードの値だけを読む必要があります。DevOps エンジニアはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "buildspec の env セクションで、DB_PASSWORD: prod/db:password のような secrets-manager の対応付けを使う。",
+        "B": "env で、エンドポイントに parameter-store の対応付けを使い、CodeBuild のサービスロールに ssm:GetParameters を追加する。",
+        "C": "CodeBuild のプロジェクトの設定で、パスワードを平文の環境変数として保存する。",
+        "D": "json-key を付けずに prod/db の secrets-manager の対応付けを使う。そうすると CodeBuild はパスワードだけを返すため。",
+        "E": "すべてのビルドが読めるように、リポジトリの buildspec ファイルにパスワードを書く。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "環境変数は CodeBuild のコンソールや AWS CLI で平文として見えるので、機微な値は parameter-store か secrets-manager のマッピングで渡す。secrets-manager は <secret-id>:<json-key> の形で、json-key を書けばその値だけを取り、書かなければ秘密の全文を取る。Parameter Store から取るには、サービスロールに ssm:GetParameters が要る。",
+      "per_choice": {
+        "A": "正しい。json-key の password で、パスワードの値だけを取る。",
+        "B": "正しい。Parameter Store のマッピングと、サービスロールの ssm:GetParameters の両方が要る。",
+        "C": "環境変数はコンソールや CLI で平文として見える。",
+        "D": "json-key を書かないと、秘密の全文を取る。",
+        "E": "リポジトリに平文で置くことになり、要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "Environment variables can be displayed in plain text using tools such as the CodeBuild console and the AWS CLI."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "you must add the ssm:GetParameters action to your CodeBuild service role."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0007",
+      "stem_ja": "ある CodeBuild プロジェクトは、VPC のプライベートサブネットにある Amazon RDS のデータベースに対して統合テストを実行する必要があります。同じビルドで、インターネット上の公開リポジトリからパッケージをダウンロードする必要もあります。データベースをインターネットに公開してはなりません。最も少ない運用の手間でこれらの要件を満たす構成はどれですか。",
+      "choices_ja": {
+        "A": "RDS のデータベースをパブリックアクセス可能にし、VPC の設定なしでビルドを実行する。",
+        "B": "プロジェクトに VPC ID、プライベートサブネット、セキュリティグループを追加し、プライベートサブネットのルートを NAT ゲートウェイ経由にする。",
+        "C": "プロジェクトに VPC ID、プライベートサブネット、セキュリティグループを追加し、インターネットへのルートは追加しない。",
+        "D": "VPC の設定なしでビルドを実行し、データベースのセキュリティグループに CodeBuild のサービスを名前で追加する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "CodeBuild はふつう VPC の中のリソースに届かない。VPC の ID・サブネット・セキュリティグループをプロジェクトに設定すると、VPC の中のリソースに届く。VPC の中で公開のエンドポイントにも届くには、NAT ゲートウェイか NAT インスタンスが要る。",
+      "per_choice": {
+        "A": "データベースをインターネットに出すことになり、要件に反する。",
+        "B": "正しい。VPC の中の RDS に届き、NAT ゲートウェイでインターネットにも出られる。",
+        "C": "RDS には届くが、公開のリポジトリからパッケージを取れない。",
+        "D": "VPC の設定が無いと、CodeBuild は VPC の中のリソースに届かない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "quote": "Typically, AWS CodeBuild cannot access resources in a VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "quote": "This includes the VPC ID, the VPC subnet IDs, and the VPC security group IDs. VPC-enabled builds can then access resources inside your VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/vpc-support.html",
+          "quote": "You need a NAT gateway or NAT instance to use CodeBuild with your VPC so that CodeBuild can reach public endpoints"
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0008",
+      "stem_ja": "ある企業には、.zip ファイルアーカイブとしてデプロイされた 5 つの AWS Lambda 関数があり、どれも同じライブラリ一式を同梱しています。企業は、すべてのパッケージでライブラリが重複するのをやめたいと考えています。また、関数の 1 つである payments を、パイプラインでビルドしたコンテナイメージから実行したいと考えています。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "共有ライブラリを .zip ファイルアーカイブにまとめ、.zip の関数向けの Lambda レイヤーとして公開する。",
+        "B": "既存の .zip の関数は変換できないため、payments 用にコンテナイメージから新しい Lambda 関数を作成する。",
+        "C": "既存の payments 関数のパッケージタイプを、設定で .zip からコンテナイメージに変更する。",
+        "D": "共有ライブラリをコンテナイメージのレイヤーとして公開し、.zip の関数に付ける。",
+        "E": "すべての関数が読めるように、共有ライブラリを Lambda が管理するストレージに 1 回アップロードする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Lambda のデプロイパッケージはコンテナイメージと .zip の 2 種類で、今ある関数の種類は変えられない。コンテナイメージで動かすには新しい関数を作る。レイヤーは追加のコードやデータを入れた .zip で、ライブラリの依存などを入れて共有できる。",
+      "per_choice": {
+        "A": "正しい。共有のライブラリをレイヤーにまとめる。",
+        "B": "正しい。.zip の関数をコンテナイメージに変えることはできないので、新しく作る。",
+        "C": "今ある関数のパッケージの種類は変えられない。",
+        "D": "レイヤーは .zip のファイルで作る。",
+        "E": "Lambda が管理する保存先に置かれるのは、各関数のソースコードの写し。関数どうしで共有する仕組みはレイヤー。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html",
+          "quote": "You cannot change the deployment package type (.zip or container image) for an existing function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html",
+          "quote": "You must create a new function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html",
+          "quote": "A Lambda layer is a .zip file archive that contains supplementary code or data."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html",
+          "quote": "Layers usually contain library dependencies, a custom runtime, or configuration files."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0009",
+      "stem_ja": "ある会社は、強化した Amazon Linux の AMI を毎月手作業で作っています。エンジニアが EC2 インスタンスを起動し、パッチ適用と強化のスクリプトを実行して AMI を作り、さらに別のインスタンスを起動して確認を行います。会社は、パッチを当てた AMI を毎週作り、各 AMI が確認に合格してからチームが使えるようにしたいと考えており、独自のオーケストレーションのコードは保守したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "毎週 AWS Lambda 関数を呼び出す Amazon EventBridge のスケジュールを作る。関数は、ユーザーデータにスクリプトを入れたインスタンスを起動し、CreateImage を呼び、確認を行う 2 台目のインスタンスを起動する。",
+        "B": "手動ビルドを使う EC2 Image Builder のパイプラインを作る。ビルドとテストのコンポーネントを入れたイメージレシピを使い、エンジニアが毎週パイプラインを開始する。",
+        "C": "毎週のスケジュールを設定した EC2 Image Builder のパイプラインを作る。パッチ適用と強化の手順にはビルドコンポーネント、確認にはテストコンポーネントを入れたイメージレシピを使い、配布設定を追加する。",
+        "D": "毎週のスケジュールと、ビルドコンポーネントだけのイメージレシピを持つ EC2 Image Builder のパイプラインを作る。配布された後に各チームが AMI をテストする。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Image Builder のパイプラインはスケジュールで自動ビルドでき、レシピのビルドコンポーネントでカスタマイズし、テストコンポーネントでイメージを確かめます。設定したテストがすべて成功した時だけイメージを配布するので、確認に合格した AMI だけがチームに渡ります。",
+      "per_choice": {
+        "A": "動きますが、インスタンスの起動・AMI の作成・確認を Lambda 関数で組み立てる独自のコードを保守する必要があります。",
+        "B": "テストで止まる仕組みはありますが、毎週の開始が手作業で、自動化の要件に合いません。",
+        "C": "正しい。毎週のスケジュール、コンポーネントによる手順、テストに合格した時だけの配布が、独自のコード無しでそろいます。",
+        "D": "自動ではありますが、配布の前にテストしないため、確認に合格する前の AMI がチームに渡ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "You can automate your builds by providing your build execution schedule preference."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts",
+          "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance"
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0010",
+      "stem_ja": "ある会社は、us-east-1 の EC2 Image Builder のパイプラインでカスタム AMI を作っています。us-east-1、eu-west-1、ap-southeast-2 のアプリケーションチームは、各リージョンの EC2 起動テンプレートからインスタンスを起動しており、常にテンプレートのデフォルトバージョンを使います。ビルドのたびに、エンジニアが AMI をほかのリージョンへコピーし、起動テンプレートの新しいバージョンを手作業で作っています。会社は、新しい AMI を 3 つのリージョンすべてで使えるようにし、手作業無しで新しい起動に使われるようにしたいと考えています。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "配布設定に、3 つのリージョンそれぞれの配布を追加する。各配布の launchTemplateConfigurations にそのリージョンの起動テンプレートを指定し、setDefaultVersion を false にする。",
+        "B": "同じレシピとスケジュールで、リージョンごとに別の Image Builder パイプラインを作り、ビルドのたびに各リージョンのチームが起動テンプレートを更新する。",
+        "C": "配布は us-east-1 だけのままにする。各ビルドの後に動く AWS Lambda 関数で、AMI をほかのリージョンへコピーし、各リージョンで起動テンプレートの新しいデフォルトバージョンを作る。",
+        "D": "パイプラインの配布設定に、3 つのリージョンそれぞれの配布を追加する。各配布の launchTemplateConfigurations にそのリージョンの起動テンプレートを指定し、setDefaultVersion は true のままにする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "配布設定は 1 つの配布が 1 つのリージョンに対応し、ビルドがテストに合格した後にイメージを各リージョンへ配布します。launchTemplateConfigurations を指定すると新しい AMI ID を入れた起動テンプレートの新しいバージョンが作られ、setDefaultVersion（既定は true）でそれがデフォルトバージョンになります。",
+      "per_choice": {
+        "A": "新しいバージョンは作られますが、デフォルトバージョンは変わらないため、デフォルトを使うチームの起動は古い AMI のままです。",
+        "B": "各リージョンでビルドはできますが、同じビルドを 3 回行い、起動テンプレートの更新も手作業のままです。",
+        "C": "動きますが、コピーとテンプレートの更新を Lambda 関数で作って保守する必要があり、組み込みの配布設定より手間がかかります。",
+        "D": "正しい。3 つのリージョンへの配布と、新しい AMI を入れたデフォルトバージョンの作成が、Image Builder の設定だけで行われます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "Each distribution applies to exactly one target Region and defines the outputs for that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "quote": "Image Builder creates a new version of the launch template that includes all of the original settings from the template, and the new AMI ID from the build."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/dist-using-launch-template.html#dist-using-launch-template",
+          "quote": "setDefaultVersion controls whether Image Builder makes the new launch template version the default version. This optional field defaults to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "quote": "The pipeline automatically distributes your image to the Region where it runs the build, and you can add image distribution for other Regions."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0011",
+      "stem_ja": "セキュリティチームは、EC2 Image Builder のパイプラインで作る AMI に、許容する重大度を超えるソフトウェアの脆弱性がある場合、その AMI を作らないことを求めています。チームは、すべての脆弱性の検出結果について自動で通知を受けたいとも考えています。DevOps エンジニアは独自の脆弱性スキャナーを作ったり保守したりしてはいけません。これらの要件を満たすためにエンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "Image Builder のイメージに対して Amazon Inspector のスキャンを有効にし、許容より重大な検出結果がある時にイメージを失敗させるスキャン結果の条件を設定する。",
+        "B": "Amazon Inspector の検出結果のイベントに一致する Amazon EventBridge のルールを作り、セキュリティチームがサブスクライブする Amazon SNS トピックへ送る。",
+        "C": "エンジニアがインストールしたオープンソースのスキャナーを実行し、重大な脆弱性を見つけた時に失敗の終了コードを返すテストコンポーネントを追加する。",
+        "D": "すべての AMI を配布し、毎週動く AWS Lambda 関数で新しい各 AMI を起動してスキャンし、重大な脆弱性のある AMI の登録を解除する。",
+        "E": "セキュリティチームに毎週 Amazon Inspector のコンソールを確認してもらい、重大な検出結果のある AMI を削除してもらう。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Image Builder は Amazon Inspector と連携してイメージの脆弱性をスキャンし、許容より重大な検出結果がある時にイメージを失敗させるスキャン結果の条件を設定できます。Inspector は検出結果ごとに Amazon EventBridge へイベントを送るので、ルールで通知先へ流せば自動で通知できます。",
+      "per_choice": {
+        "A": "正しい。組み込みのスキャンと、重大度の条件でイメージを失敗させる設定で、基準を超える AMI を作りません。",
+        "B": "正しい。Inspector は検出結果ごとに EventBridge へイベントを送るので、ルールで SNS に流せば自動で通知できます。",
+        "C": "テストで止めることはできますが、独自のスキャナーを入れて保守することになり、要件に反します。",
+        "D": "基準を超える AMI もいったん配布されてしまい、スキャンの仕組みも自分で作る必要があります。",
+        "E": "手作業で、確認するまで基準を超える AMI が残り、自動の通知にもなりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "Image Builder integrates with Amazon Inspector to scan the images that you build for software vulnerabilities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "You can set a scan result condition that fails the image if the AMI has findings that are more severe than you allow."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-security-findings.html#image-security-findings",
+          "quote": "Sends an event to Amazon EventBridge for each finding."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0012",
+      "stem_ja": "EC2 Image Builder のパイプラインが 2 年間、毎週新しい AMI を作ってきました。古い出力 AMI のスナップショットのストレージ費用が増え続けています。会社は、イメージを 90 日後に非推奨にし、180 日後に削除したいと考えており、その決まりは既にあるイメージにも適用する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "パイプラインの配布設定を更新し、各リージョンで直近 180 日の AMI だけを残すようにする。",
+        "B": "90 日後にイメージを非推奨にするルールと、180 日後にイメージを削除するルールを持つ Image Builder のライフサイクルポリシーを作る。",
+        "C": "AMI を一覧し、90 日を超えた AMI を非推奨にし、180 日を超えた AMI の登録解除とスナップショットの削除を行う AWS Lambda 関数をスケジュールで実行する。",
+        "D": "エンジニアが毎月 AMI を確認し、古いものをコンソールで非推奨にし、180 日を超えたものを削除する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Image Builder のライフサイクルポリシーは、イメージを非推奨にするルールや、年数・数でイメージのリソースを削除するルールを持ち、AMI のスナップショットなどの費用を減らします。配布設定の変更はその後に作るイメージにだけ効き、既に配布したイメージは手作業かライフサイクルポリシーで消すまで残ります。",
+      "per_choice": {
+        "A": "配布設定の変更は更新後に作るイメージにだけ適用され、既にあるイメージは残るため要件に合いません。",
+        "B": "正しい。非推奨と削除をルールで決められ、既にあるイメージにも適用されます。",
+        "C": "動きますが、一覧・非推奨・削除の独自のコードを保守する必要があり、組み込みのライフサイクルポリシーより手間がかかります。",
+        "D": "毎月の手作業が必要で、オーバーヘッドが大きくなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "quote": "Lifecycle rules keep your images fresh and reduce infrastructure costs, such as snapshot storage for output AMIs and Amazon ECR repository storage for containers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules",
+          "quote": "For example, you can configure a policy to deprecate images after 90 days, disable them after 120 days, and delete them after 180 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "When you update a distribution configuration, the changes apply only to images that Image Builder creates after the update."
+        }
+      ]
+    },
+    {
+      "id": "q-1.3-0013",
+      "stem_ja": "開発者は、サービスのコンテナイメージをノートパソコン上で Dockerfile からビルドし、us-east-1 の Amazon ECR リポジトリへプッシュしています。会社は、更新を取り込むためにイメージをスケジュールで作り直し、公開する前にイメージをテストし、eu-central-1 にもコピーを置きたいと考えています。会社はビルドのスクリプトを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Dockerfile を使い ECR リポジトリを出力先にするコンテナレシピと、テストコンポーネントとスケジュールを持つ EC2 Image Builder のパイプラインを作り、eu-central-1 へのコンテナの配布を追加する。",
+        "B": "Docker とサービスをインストールするイメージレシピを持つ EC2 Image Builder のパイプラインを作り、出力の AMI をスケジュールで両方のリージョンへ配布する。",
+        "C": "コンテナレシピ、テストコンポーネント、スケジュールを持つ EC2 Image Builder のパイプラインを作る。イメージは us-east-1 の ECR リポジトリにだけ配布し、開発者が eu-central-1 へコピーをプッシュする。",
+        "D": "イメージをビルドし、テストのコマンドを実行し、両方のリージョンのリポジトリへイメージをプッシュする buildspec を持つ AWS CodeBuild プロジェクトを作る。Amazon EventBridge のスケジュールで開始する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Image Builder のコンテナレシピは Dockerfile と出力先の Amazon ECR リポジトリを定め、パイプラインはスケジュールで自動ビルドし、テストに合格した時だけ配布します。配布設定にはリージョンごとのコンテナの配布を入れられるので、別のリージョンへのコピーも組み込みで行えます。",
+      "per_choice": {
+        "A": "正しい。スケジュールでの作り直し、公開前のテスト、別リージョンへの配布が、スクリプト無しの設定でそろいます。",
+        "B": "出力が AMI になり、コンテナイメージを ECR に公開するという目的に合いません。",
+        "C": "スケジュールとテストは満たしますが、eu-central-1 へのコピーが手作業のままです。",
+        "D": "動きますが、ビルド・テスト・プッシュの buildspec を書いて保守する必要があり、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#how-image-builder-works",
+          "quote": "Container recipes additionally define Dockerfiles, and the target Amazon ECR repository for your output Docker container image."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/how-image-builder-works.html#image-builder-distribution",
+          "quote": "EC2 Image Builder can distribute AMIs or container images to any AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/distribution-settings-concepts.html#distribution-settings-concepts",
+          "quote": "The available outputs are AMI distribution, container distribution,"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-features",
+          "quote": "Image Builder distributes your image only if all of the configured tests have succeeded."
+        }
+      ]
+    }
+  ]
+}

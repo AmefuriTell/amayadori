@@ -1,0 +1,1263 @@
+{
+  "task": "6.1",
+  "title": "大きな規模での ID とアクセスの管理",
+  "notes": [
+    "根拠（sources.md）にセッションポリシーの資料が無いため、試験ガイドの例にあるセッションポリシーは扱わず、s01 でそう断った。",
+    "ロールに基づくアクセス制御（RBAC）の説明は根拠に無いので、s12 で試験ガイドが並べている事だけを言い、中身は属性（ABAC）の側だけにした。",
+    "permissions boundary による権限の管理の委任の手順は根拠に無いので、s09 で「上限を決める所まで」と断った。SCP と境界の関係（重なりの計算）も根拠に無いので書いていない。",
+    "C3 への返事（1 回目。採らなかった提案と、一部だけ採った提案）",
+    "clarity s09・s15: 権限の管理の委任の手順（誰に何を任せるか）は根拠に無い。試験ガイドの knowledge が委任に boundary を挙げている事を手がかりとして言い、表の行も「上限を決める所まで」と書いた。",
+    "consistency・clarity s10: root user の行は表から外し、SCP の bullets と台本で「メンバーアカウントの root user も」とだけ言った。boundary と root user の関係は根拠に無いので書かない。",
+    "clarity s10・global: SCP で権限を与えるのが何かは根拠（S8 は与えない所まで）に無いので、s15 では「identity-based policy などの別の物」と弱めた。",
+    "clarity s08: managed rotation を提供するサービスの一覧は根拠に無いので、「一部だけ・一覧は根拠に無い」と言うにとどめた。",
+    "clarity s01・s16: 箱の上限（7）のため federation と MFA は 1 つの文字だけの箱にまとめ、Identity Center のアイコンは Identity Center の箱だけに付けた。",
+    "掛け合いにした時の注意: 生徒の取り違え（図を処理の流れと思う・例を全部と思う・推奨を禁止と思う・境界や SCP が権限を与えると思う）は先生がすぐ正し、生徒の言い直しと先生の受けを置いた。根拠で言い切れない所（MFA を全部の操作に求めるか、図のアカウントの数、最小権限を操作だけで足りるか、Identity Center をいつも選ぶか）は「そうとは言えません」にした。中身は一人読みの版から足していない。",
+    "C3 への返事（掛け合いの 1 回目）: 重と中は全部直した。軽の s13（条件の行を 2 行に分ける）と s16（1 行目を分けて生徒の確かめにする）は、上限 6,000 字に近いので採らなかった。global の「大まかに言うと」は、字数を減らせる所（s02・s06・s10・s12）だけ言い換えた。s09 の生徒の取り違えは、先に「与えるのはポリシー、境界は上限」と言ったので、「ポリシーで与えた権限が全部使える」（S6 で正せる）に替えた。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "4 つのまとまりを番号の順に",
+        "人と機械、上限、最小権限",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 最小権限と属性\"]\n    L[\"最小権限<br/>ABAC\"]\n  end\n  subgraph G3[\"3 権限の上限\"]\n    B[\"permissions boundary\"]\n    S@{ svc: \"AWS Organizations\", label: \"SCP\" }\n  end\n  subgraph G2[\"2 機械の認証情報\"]\n    T@{ svc: \"AWS STS\", label: \"一時的な認証情報\" }\n    K@{ svc: \"AWS Secrets Manager\", label: \"ローテーション\" }\n  end\n  subgraph G1[\"1 ポリシーと人\"]\n    P[\"ポリシーの付け先<br/>federation と MFA\"]\n    H@{ svc: \"AWS IAM Identity Center\", label: \"IAM Identity Center\" }\n  end\n",
+        "alt": "講義の地図。4 つのまとまりを番号を付けて左から並べる。1 ポリシーと人は、ポリシーの付け先、federation と MFA、そして IAM Identity Center。2 機械の認証情報は、STS の一時的な認証情報と、Secrets Manager のローテーション。3 権限の上限は、permissions boundary と SCP。4 最小権限と属性は、最小権限と ABAC。並びは扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、大きな規模で、人と機械のアクセスを管理する方法を学びます。画面の四つのまとまりを、番号の順に進みます。"
+        },
+        {
+          "who": "student",
+          "text": "図の左から右へ、処理が流れていく順番なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。図の並びは扱う順番で、処理の流れではありません。"
+        },
+        {
+          "who": "student",
+          "text": "左から右は、話す順番なのですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。一つ目は、ポリシーを付ける先と、人がエーダブリューエスに入る方法で、多要素認証もここで扱います。二つ目は、サーバーなどの機械が使う認証情報です。"
+        },
+        {
+          "who": "student",
+          "text": "残りの二つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目は、権限の上限を決める二つの仕組み、四つ目は、最小権限と、属性に基づくアクセス制御です。締めに、問題文の条件から方法を選ぶ表を置きます。"
+        },
+        {
+          "who": "teacher",
+          "text": "なお、試験ガイドの例にあるセッションポリシーは、この講義の根拠に含まれていないので扱いません。"
+        },
+        {
+          "who": "student",
+          "text": "人と機械、上限、最小権限、最後に表、なのだ。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "Identity-based policies are attached to an IAM user, group, or role. Resource-based policies are attached to a resource.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+        },
+        {
+          "source_id": "S3",
+          "quote": "As a best practice, we recommend that you require human users to use federation with an identity provider to access AWS resources instead of creating individual IAM users in your AWS account.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers"
+        },
+        {
+          "source_id": "S4",
+          "quote": "For centralized access management of human users, we recommend that you use IAM Identity Center to manage access to your accounts and permissions within those accounts.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers_identity-center"
+        },
+        {
+          "source_id": "S19",
+          "quote": "You can use the AWS Security Token Service (AWS STS) to create and provide trusted users with temporary security credentials that can control access to your AWS resources.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id_credentials_temp"
+        },
+        {
+          "source_id": "S15",
+          "quote": "Rotation is the process of periodically updating a secret.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+        },
+        {
+          "source_id": "S5",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Service control policies (SCPs) are a type of organization policy that you can use to manage permissions in your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps"
+        },
+        {
+          "source_id": "S12",
+          "quote": "Attribute-based access control (ABAC) is an authorization strategy that defines permissions based on attributes.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html#introduction_attribute-based-access-control"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "ポリシーを付ける先: identity-based と resource-based",
+      "bullets": [
+        "identity-based: ユーザー・グループ・ロール",
+        "resource-based: リソース",
+        "まず付ける先で見分ける"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "identity-based policy",
+          "resource-based policy"
+        ],
+        "rows": [
+          [
+            "日本語の呼び方",
+            "アイデンティティベース",
+            "リソースベース"
+          ],
+          [
+            "付ける先",
+            "ユーザー・グループ・ロール",
+            "リソース"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "一つ目のまとまりです。アイアムは、大まかに言うと、エーダブリューエスでアクセスを管理する仕組みです。まず、ポリシーを付ける先で、二つの種類を見分けます。"
+        },
+        {
+          "who": "student",
+          "text": "ポリシーって、何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "何を許すかを書いた文書の事です。画面の表の左、アイデンティティベースのポリシーは、アイアムのユーザー、グループ、ロールに付けます。"
+        },
+        {
+          "who": "student",
+          "text": "グループとロールは、どう違うのですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "グループはユーザーのまとまり、ロールは引き受けて使う権限のまとまりです。"
+        },
+        {
+          "who": "student",
+          "text": "表の右は？"
+        },
+        {
+          "who": "teacher",
+          "text": "リソースベースのポリシーで、リソースそのものに付けます。問題文に、ポリシーをどこに付けるかが書いてあれば、まずこの二つを見分けます。"
+        },
+        {
+          "who": "student",
+          "text": "ユーザー、グループ、ロールに付けるか、リソースに付けるか、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。まず付ける先で見分けます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "Identity-based policies are attached to an IAM user, group, or role. Resource-based policies are attached to a resource.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "人の入り方: identity provider との federation",
+      "bullets": [
+        "人のユーザーは federation",
+        "identity provider を通す",
+        "個別の IAM ユーザーの代わりに"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  U[\"人のユーザー\"]\n  IDP[\"identity provider<br/>ID の提供元\"]\n  A[\"AWS のリソース\"]\n  X[\"勧めない形<br/>アカウントごとの<br/>個別の IAM ユーザー\"]\n  U -- \"federation（推奨）\" --> IDP\n  IDP -- \"アクセス\" --> A\n  U -. \"この代わりに\" .- X\n  style X fill:#e5e5e5,stroke:#888888,stroke-dasharray: 5 5,color:#555555\n",
+        "alt": "人のユーザーは、推奨の形として、identity provider とのフェデレーションを通して AWS のリソースにアクセスする。灰色の点線の枠は勧めない形で、アカウントの中に個別の IAM ユーザーを作る形。ドキュメントは、この代わりにフェデレーションを使うよう勧めている。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "人がエーダブリューエスに入る方法です。ドキュメントは、ベストプラクティスとして、人のユーザーには、アイデンティティプロバイダーとのフェデレーションを使わせるよう勧めています。"
+        },
+        {
+          "who": "student",
+          "text": "二つとも、初めて聞く言葉なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "アイデンティティプロバイダーは、利用者が誰かを確かめて伝える仕組みです。"
+        },
+        {
+          "who": "student",
+          "text": "誰かを確かめる係なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。フェデレーションは、外の仕組みで確かめた人を、エーダブリューエスに入れる方法です。勧めているのは、アカウントの中に一人ずつアイアムユーザーを作る代わりに、この方法を使う事です。"
+        },
+        {
+          "who": "student",
+          "text": "それなら、アイアムユーザーを作るのは、決まりで禁止されているのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ドキュメントが述べているのは、ベストプラクティスとしての推奨です。"
+        },
+        {
+          "who": "student",
+          "text": "決まりではなく、推奨としてフェデレーション、ということですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、人のユーザーがリソースを使う場面なら、まずフェデレーションを考えます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "As a best practice, we recommend that you require human users to use federation with an identity provider to access AWS resources instead of creating individual IAM users in your AWS account.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "IAM Identity Center: 人のアクセスを一か所で",
+      "bullets": [
+        "人のアクセスを一か所で管理",
+        "どのアカウントに入れるか",
+        "アカウントの中の権限"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  U[\"人のユーザー\"]\n  IC@{ svc: \"AWS IAM Identity Center\", label: \"IAM Identity Center<br/>一か所で管理\" }\n  A1[\"アカウント A<br/>中の権限\"]\n  A2[\"アカウント B<br/>中の権限\"]\n  U -- \"アクセス\" --> IC\n  IC -- \"アクセスと権限\" --> A1\n  IC -- \"アクセスと権限\" --> A2\n",
+        "alt": "人のユーザーのアクセスを IAM Identity Center で一か所にまとめて管理する。Identity Center は、どのアカウントに入れるかと、そのアカウントの中の権限を管理する。アカウント A と B は説明のための例。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "フェデレーションの形の一つが、アイアムアイデンティティセンターです。この後は、アイデンティティセンターと呼びます。ドキュメントは、人のユーザーのアクセスを一か所で管理するなら、アイデンティティセンターを使うよう勧めています。"
+        },
+        {
+          "who": "student",
+          "text": "一か所で、何を管理するのですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "二つです。一つは、どのアカウントに入れるか。もう一つは、そのアカウントの中で何ができるか、つまり権限です。"
+        },
+        {
+          "who": "student",
+          "text": "図にアカウントが二つあるから、二つまでなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。図の二つのアカウントは説明のための例で、数に決まりがあるわけではありません。"
+        },
+        {
+          "who": "student",
+          "text": "図の数は、ただの例なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、複数のアカウントへの人のアクセスを、まとめて管理したい、とあれば、アイデンティティセンターを思い出します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "For centralized access management of human users, we recommend that you use IAM Identity Center to manage access to your accounts and permissions within those accounts.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers_identity-center"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "MFA: 慎重にすべき操作の前に",
+      "bullets": [
+        "MFA（多要素認証）を求める",
+        "特に慎重にすべき操作の前",
+        "守りを一段足す"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  U[\"ユーザー\"]\n  M[\"MFA<br/>多要素認証\"]\n  S[\"特に慎重にすべき<br/>操作\"]\n  U -- \"先に認証\" --> M\n  M -- \"その後に許す\" --> S\n",
+        "alt": "ユーザーが特に慎重にすべき操作をする前に、MFA（多要素認証）で認証することを求め、その後で操作を許す。全ての操作の話ではなく、慎重にすべき操作の前の話。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "一つ目のまとまりの最後は、多要素認証です。画面ではエムエフエーと書いてあります。"
+        },
+        {
+          "who": "student",
+          "text": "多要素って、どういう意味なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "大まかに言うと、パスワードの他にもう一つの要素で本人を確かめる方法です。ドキュメントによると、特に慎重にすべき操作を許す前に、ユーザーに多要素認証を求める事で、守りを一段足せます。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、全部の操作で必ず多要素認証を求める、という決まりなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。根拠にあるのは、慎重にすべき操作の前に求められる、という話です。"
+        },
+        {
+          "who": "student",
+          "text": "慎重にすべき操作の前に求める、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、大事な操作のときだけ本人の確認を強めたい、とあれば、多要素認証を求める形を考えます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S18",
+          "quote": "You can apply additional security by requiring users to authenticate with multi-factor authentication (MFA) before you allow them to perform particularly sensitive actions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#id_credentials_mfa_configure-api-require"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "機械の認証情報: 長期より一時的",
+      "bullets": [
+        "長期の例: access key",
+        "一時的の例: IAM ロール",
+        "AWS STS が一時的な認証情報を作る"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "長期の認証情報",
+          "一時的な認証情報"
+        ],
+        "rows": [
+          [
+            "ドキュメントの例",
+            "access key",
+            "IAM ロールなど"
+          ],
+          [
+            "ドキュメントの勧め",
+            "作る代わりに右を",
+            "こちらを使う"
+          ],
+          [
+            "作るサービス",
+            "—",
+            "AWS STS"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目のまとまり、機械の認証情報です。認証情報は、自分が誰かを示す鍵の事です。"
+        },
+        {
+          "who": "student",
+          "text": "機械は、どんな鍵を使えばいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ドキュメントは、ベストプラクティスとして、アクセスキーのような長期の認証情報を作る代わりに、一時的な認証情報を使うよう勧めています。例として挙がっているのが、アイアムロールです。"
+        },
+        {
+          "who": "student",
+          "text": "ロールって、さっきの、引き受けて使う権限のまとまりですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。ロールを引き受けて使う形なら、長期の鍵を作らずに済む、というつながりです。"
+        },
+        {
+          "who": "student",
+          "text": "一時的な認証情報は、誰が作るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エーダブリューエスエスティーエスです。この後は、エスティーエスと呼びます。エスティーエスは、信頼されたユーザーに、一時的な認証情報を作って渡せます。"
+        },
+        {
+          "who": "student",
+          "text": "長期の鍵より、ロールなどの一時的な認証情報、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "As a best practice, use temporary security credentials (such as IAM roles) instead of creating long-term credentials like access keys.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#id_credentials_access-keys"
+        },
+        {
+          "source_id": "S19",
+          "quote": "You can use the AWS Security Token Service (AWS STS) to create and provide trusted users with temporary security credentials that can control access to your AWS resources.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html#id_credentials_temp"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "機械に渡す: instance profile と Roles Anywhere",
+      "bullets": [
+        "EC2: instance profile でロールを渡す",
+        "AWS の外: Roles Anywhere で一時的な認証情報",
+        "サーバー・コンテナなどは例"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph OUT[\"AWS の外\"]\n    RA[\"IAM Roles Anywhere\"]\n    W[\"サーバー、コンテナ<br/>アプリケーションなど\"]\n    RA -- \"一時的な認証情報\" --> W\n  end\n  subgraph IN[\"AWS の中の EC2\"]\n    R[\"IAM ロール\"]\n    E@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス\" }\n    R -- \"instance profile で\" --> E\n  end\n",
+        "alt": "左は AWS の中の EC2 の場合で、instance profile を使って IAM ロールを EC2 インスタンスに渡す。右は AWS の外で動くワークロードの場合で、IAM Roles Anywhere でサーバー、コンテナ、アプリケーションなどが IAM の一時的な認証情報を得る。サーバーなどは例。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "機械に認証情報を渡す方法を、二つの場面で見ます。図の左は、エーダブリューエスの中のイーシーツーインスタンスです。インスタンスプロファイルを使って、アイアムロールを渡します。"
+        },
+        {
+          "who": "student",
+          "text": "図の右は何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エーダブリューエスの外で動くワークロードです。ワークロードは、大まかに言うと、動いている仕事の単位です。アイアムロールズエニウェアを使うと、こうしたワークロードが、アイアムの一時的な認証情報を得られます。この後は、ロールズエニウェアと呼びます。"
+        },
+        {
+          "who": "student",
+          "text": "使えるのは、サーバーとコンテナとアプリケーションの三つだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。サーバー、コンテナ、アプリケーションは、例として挙がっている物です。"
+        },
+        {
+          "who": "student",
+          "text": "三つは例で、エーダブリューエスの外のワークロード、ということですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。エーダブリューエスの中でも、イーシーツー以外の場合は、この講義では扱いません。イーシーツーはインスタンスプロファイル、外はロールズエニウェアです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S20",
+          "quote": "Use an instance profile to pass an IAM role to an EC2 instance.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#id_roles_use_switch-role-ec2_instance-profiles"
+        },
+        {
+          "source_id": "S2",
+          "quote": "You can use AWS Identity and Access Management Roles Anywhere to obtain temporary security credentials in IAM for workloads such as servers, containers, and applications that run outside of AWS.",
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "Secrets Manager: シークレットのローテーション",
+      "bullets": [
+        "ローテーション: 定期的に更新",
+        "managed rotation は一部のサービス",
+        "そのサービスが設定と管理"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  MR[\"managed rotation を<br/>提供するサービス<br/>一部だけ\"]\n  RO[\"ローテーション<br/>定期的に更新\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>シークレット\" }\n  MR -- \"設定と管理を担う\" --> RO\n  RO -- \"更新する\" --> SM\n",
+        "alt": "ローテーションは、Secrets Manager のシークレットを定期的に更新すること。managed rotation を提供しているサービスは一部だけで、そのサービスがローテーションの設定と管理を担う。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目のまとまりの最後は、認証情報のローテーションです。試験ガイドは、機械の認証情報のローテーションを自動にする例として、エーダブリューエスシークレッツマネージャーを挙げています。"
+        },
+        {
+          "who": "student",
+          "text": "さっきの一時的な認証情報と、同じ話なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "別の話です。こちらは、秘密の値そのものを替えていく話です。シークレッツマネージャーでは、守るべき秘密の値をシークレットと呼び、シークレットを定期的に更新する事をローテーションと言います。"
+        },
+        {
+          "who": "student",
+          "text": "一時的な鍵とは別で、秘密の値そのものを替える話なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。サービスによっては、そのサービスがローテーションの設定と管理を代わりに行う、マネージドローテーションがあります。"
+        },
+        {
+          "who": "student",
+          "text": "マネージドローテーションなら、どのサービスでも任せられるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。提供しているのは、一部のサービスだけです。どのサービスかの一覧は、この講義の根拠にはありません。"
+        },
+        {
+          "who": "student",
+          "text": "任せられるのは、提供している一部のサービスだけなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。ローテーションは定期的な更新、任せるのは一部のサービスで、と覚えます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S15",
+          "quote": "Rotation is the process of periodically updating a secret.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Some services offer managed rotation, where the service configures and manages rotation for you.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "permissions boundary: 権限の上限",
+      "bullets": [
+        "permissions boundary（権限の境界）",
+        "managed policy で上限を決める",
+        "実際の権限は両方が許す所"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ID[\"identity-based policy<br/>権限を与える\"]\n  PB[\"permissions boundary<br/>上限を決める\"]\n  E[\"実際の権限<br/>両方が許す所だけ\"]\n  ID -- \"与える\" --> E\n  PB -- \"制限する\" --> E\n",
+        "alt": "identity-based policy が IAM エンティティに権限を与え、permissions boundary がその上限を決めて制限する。実際の権限は、両方のポリシーが許す所、つまり重なる所だけになる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目のまとまり、権限の上限です。まず、パーミッションズバウンダリーで、画面では権限の境界と添えています。権限を与えるのはアイデンティティベースのポリシーで、境界はその上限を決める側です。"
+        },
+        {
+          "who": "student",
+          "text": "与えるのはポリシーで、境界は上限なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。境界は上級の機能で、マネージドポリシー、つまり別に作って付けるポリシーを使って、上限を決めます。上限がかかるのは、アイアムのエンティティ、つまり権限を受け取る側です。"
+        },
+        {
+          "who": "student",
+          "text": "境界を付けても、ポリシーで与えた権限は全部そのまま使えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。実際に使える権限は、ポリシーと境界の両方が許す所だけです。"
+        },
+        {
+          "who": "student",
+          "text": "使えるのは、両方が許す所だけなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。試験ガイドは、権限の管理を任せる、つまり委任する場面で、この境界を挙げています。任せ方の手順はこの講義の根拠に無く、言えるのは上限を決める所までです。問題文に委任の場面があれば、境界を思い出します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries"
+        },
+        {
+          "source_id": "S6",
+          "quote": "Identity-based policies grant permission to the entity, and permissions boundaries limit those permissions. The effective permissions are the intersection of both policy types.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-eval-logic"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "SCP: 組織のガードレール",
+      "bullets": [
+        "SCP は組織のポリシーの一種",
+        "boundary も SCP も上限を決める側",
+        "メンバーアカウントの root user も"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "permissions boundary",
+          "SCP"
+        ],
+        "rows": [
+          [
+            "種類",
+            "managed policy",
+            "組織のポリシー"
+          ],
+          [
+            "効く範囲",
+            "IAM エンティティごと",
+            "組織のユーザーとロール"
+          ],
+          [
+            "役目",
+            "上限を決める",
+            "上限を決める"
+          ],
+          [
+            "上限の相手",
+            "identity-based が与える権限",
+            "行える操作"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、サービスコントロールポリシー、画面ではエスシーピーです。組織のポリシーの一種で、組織の中の権限を管理するのに使います。"
+        },
+        {
+          "who": "student",
+          "text": "組織って、何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エーダブリューエスオーガニゼーションズでまとめた、アカウントの集まりです。"
+        },
+        {
+          "who": "student",
+          "text": "組織の中のユーザーやロールには、エスシーピーで許可を与えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。エスシーピーは、組織の中のアイアムのユーザーやロールに、許可を与えません。ガードレール、つまり、行える操作の上限を決めます。"
+        },
+        {
+          "who": "student",
+          "text": "エスシーピーは、許可ではなく上限を決める側なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。メンバーアカウント、つまり組織に入っているアカウントでは、そのアカウントのルートユーザーの権限も制限します。ルートユーザーは、大まかに言うと、アカウントそのものの利用者です。"
+        },
+        {
+          "who": "student",
+          "text": "境界とは、どこが違うのですか？"
+        },
+        {
+          "who": "teacher",
+          "text": "表で比べます。境界もエスシーピーも、上限を決める側です。違うのは効く範囲で、境界はエンティティごと、エスシーピーは組織のユーザーとロールです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "Service control policies (SCPs) are a type of organization policy that you can use to manage permissions in your organization.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps"
+        },
+        {
+          "source_id": "S8",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization. An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps"
+        },
+        {
+          "source_id": "S9",
+          "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        },
+        {
+          "source_id": "S5",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries"
+        },
+        {
+          "source_id": "S6",
+          "quote": "Identity-based policies grant permission to the entity, and permissions boundaries limit those permissions. The effective permissions are the intersection of both policy types.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-eval-logic"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "最小権限: 操作・リソース・条件を絞る",
+      "bullets": [
+        "最小権限はベストプラクティス",
+        "操作・リソース・条件を決める",
+        "広すぎる許可を避ける"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "決める物",
+          "意味"
+        ],
+        "rows": [
+          [
+            "actions",
+            "行える操作"
+          ],
+          [
+            "resources",
+            "特定のリソース"
+          ],
+          [
+            "conditions",
+            "特定の条件"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目のまとまり、最小権限と属性です。ドキュメントは、ポリシーを作る時は、最小権限を与えるのがベストプラクティスだと述べています。"
+        },
+        {
+          "who": "student",
+          "text": "最小権限って、何を小さくするのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "どの操作を、どの特定のリソースに対して、どの特定の条件のもとで行えるかを決めて、与える事です。画面の表の、アクションズが操作、リソーシズがリソース、コンディションズが条件です。"
+        },
+        {
+          "who": "student",
+          "text": "操作だけ絞れば、最小権限になるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。根拠にある最小権限は、操作、リソース、条件の三つを決める事です。"
+        },
+        {
+          "who": "student",
+          "text": "操作、リソース、条件の三つを決める、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、必要な事だけを許したい、とあれば、この三つを絞る形を選びます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "When you create policies, it's a best practice to grant least privilege.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html#introduction_attribute-based-access-control"
+        },
+        {
+          "source_id": "S10",
+          "quote": "You do this by defining the actions that can be taken on specific resources under specific conditions, also known as least-privilege permissions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-use-aws-defined-policies"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "ABAC: 属性で権限を決める",
+      "bullets": [
+        "ABAC: 属性で権限を決める",
+        "session tags: STS で渡す属性",
+        "Identity Center: ID の元の属性"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  AB[\"ABAC<br/>属性で権限を決める\"]\n  ST@{ svc: \"AWS STS\", label: \"session tags<br/>キーと値の属性\" }\n  IC@{ svc: \"AWS IAM Identity Center\", label: \"Identity Center<br/>ID の元の属性\" }\n  RL[\"ロールを引き受ける<br/>または federation\"]\n  RL -- \"渡す\" --> ST\n  ST --- AB\n  IC --- AB\n",
+        "alt": "ABAC は属性をもとに権限を決める考え方。属性が出てくる所は 2 つ。1 つは session tags で、STS でロールを引き受ける時やユーザーをフェデレーションする時に渡すキーと値の属性。もう 1 つは IAM Identity Center で、利用者の ID の元にある属性をもとに、利用者を AWS のワークロードに割り当てる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "エーバック、つまり属性に基づくアクセス制御は、属性をもとに権限を決める、認可の考え方です。属性は、利用者などに付いた情報の事です。"
+        },
+        {
+          "who": "teacher",
+          "text": "試験ガイドは、ロールに基づく型と、属性に基づく型を並べています。"
+        },
+        {
+          "who": "student",
+          "text": "ロールに基づく型は、説明しないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "この講義の根拠で説明できるのは、属性の側です。属性が出てくる所を二つ見ます。一つは、セッションタグです。"
+        },
+        {
+          "who": "student",
+          "text": "セッションタグって、何なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "キーと値の組の属性で、エスティーエスでロールを引き受ける時や、ユーザーをフェデレーションする時に渡します。"
+        },
+        {
+          "who": "student",
+          "text": "もう一つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "アイデンティティセンターです。利用者の情報を持っている所を、画面ではアイディーの元と書いています。そこにある属性で、利用者をエーダブリューエスのワークロードに割り当てられます。"
+        },
+        {
+          "who": "student",
+          "text": "エーバックは、属性で権限を決める考え方なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、属性をもとに権限を決めたい、とあれば、エーバックです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "Attribute-based access control (ABAC) is an authorization strategy that defines permissions based on attributes.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html#introduction_attribute-based-access-control"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Session tags are key-value pair attributes that you pass when you assume an IAM role or federate a user in AWS STS.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_session-tags.html#id_session-tags"
+        },
+        {
+          "source_id": "S14",
+          "quote": "You can assign users to workloads in AWS based on existing attributes in the users' identity source.",
+          "url": "https://docs.aws.amazon.com/singlesignon/latest/userguide/attributesforaccesscontrol.html#attributesforaccesscontrol"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 1: ポリシーと人",
+      "bullets": [
+        "付ける先で 2 種類",
+        "人は federation",
+        "慎重な操作には MFA"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "ユーザー・グループ・ロールに",
+            "identity-based",
+            "上限は boundary"
+          ],
+          [
+            "リソースに付ける",
+            "resource-based",
+            "付ける先"
+          ],
+          [
+            "人のアクセス一般",
+            "IdP と federation",
+            "個別 IAM ユーザーにしない"
+          ],
+          [
+            "複数アカウントの人を一括",
+            "IAM Identity Center",
+            "アカウントと中の権限"
+          ],
+          [
+            "慎重にすべき操作の前",
+            "MFA を求める",
+            "全操作の話ではない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、ポリシーと人です。ポリシーをアイアムのユーザー、グループ、ロールに付けるなら、アイデンティティベースです。その上限は、パーミッションズバウンダリーで決められます。"
+        },
+        {
+          "who": "student",
+          "text": "リソースに付けるなら？"
+        },
+        {
+          "who": "teacher",
+          "text": "リソースベースです。"
+        },
+        {
+          "who": "student",
+          "text": "人のアクセスなら、いつもアイデンティティセンターを選べばいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。複数のアカウントへの人のアクセスを、一か所でまとめて管理したい、と書いてあれば、アイデンティティセンターを選びます。まとめて管理、とまで書いていなければ、アイデンティティプロバイダーとのフェデレーションを考え、一人ずつアイアムユーザーを作る形は避けます。"
+        },
+        {
+          "who": "student",
+          "text": "まとめて管理とあればアイデンティティセンター、無ければフェデレーション、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。特に慎重にすべき操作の前なら、多要素認証を求めます。付ける先、入り方、慎重な操作、の三つで選びます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "Identity-based policies are attached to an IAM user, group, or role. Resource-based policies are attached to a resource.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_identity-vs-resource.html"
+        },
+        {
+          "source_id": "S3",
+          "quote": "As a best practice, we recommend that you require human users to use federation with an identity provider to access AWS resources instead of creating individual IAM users in your AWS account.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers"
+        },
+        {
+          "source_id": "S4",
+          "quote": "For centralized access management of human users, we recommend that you use IAM Identity Center to manage access to your accounts and permissions within those accounts.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers_identity-center"
+        },
+        {
+          "source_id": "S18",
+          "quote": "You can apply additional security by requiring users to authenticate with multi-factor authentication (MFA) before you allow them to perform particularly sensitive actions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html#id_credentials_mfa_configure-api-require"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 2: 機械の認証情報",
+      "bullets": [
+        "長期の鍵より一時的",
+        "EC2 と AWS の外で分ける",
+        "ローテーションは定期的に更新"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "access key を作るか",
+            "一時的な認証情報",
+            "IAM ロールなど"
+          ],
+          [
+            "EC2 にロールを渡す",
+            "instance profile",
+            "EC2 インスタンス"
+          ],
+          [
+            "AWS の外のワークロード",
+            "IAM Roles Anywhere",
+            "一時的な認証情報"
+          ],
+          [
+            "秘密を定期的に更新",
+            "ローテーション",
+            "Secrets Manager"
+          ],
+          [
+            "設定と管理を任せる",
+            "managed rotation",
+            "一部のサービスだけ"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二枚目は、機械の認証情報です。アクセスキーのような長期の認証情報を作るかで迷ったら、アイアムロールなどの一時的な認証情報を選びます。"
+        },
+        {
+          "who": "student",
+          "text": "ロールの渡し方は、場面でどう分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イーシーツーインスタンスにロールを渡すなら、インスタンスプロファイルです。エーダブリューエスの外で動くサーバーやコンテナなどなら、ロールズエニウェアで一時的な認証情報を得ます。"
+        },
+        {
+          "who": "student",
+          "text": "シークレットの方は？"
+        },
+        {
+          "who": "teacher",
+          "text": "シークレットを定期的に更新したいなら、シークレッツマネージャーのローテーションです。ローテーションの設定と管理を、サービスに任せたいなら、マネージドローテーションです。ただし、これがあるのは一部のサービスだけです。"
+        },
+        {
+          "who": "student",
+          "text": "まとめると、どうなるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "鍵は一時的な認証情報、イーシーツーならインスタンスプロファイル、エーダブリューエスの外ならロールズエニウェア、シークレットは定期的にローテーションです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "As a best practice, use temporary security credentials (such as IAM roles) instead of creating long-term credentials like access keys.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#id_credentials_access-keys"
+        },
+        {
+          "source_id": "S20",
+          "quote": "Use an instance profile to pass an IAM role to an EC2 instance.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html#id_roles_use_switch-role-ec2_instance-profiles"
+        },
+        {
+          "source_id": "S2",
+          "quote": "You can use AWS Identity and Access Management Roles Anywhere to obtain temporary security credentials in IAM for workloads such as servers, containers, and applications that run outside of AWS.",
+          "url": "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html#introduction"
+        },
+        {
+          "source_id": "S15",
+          "quote": "Rotation is the process of periodically updating a secret.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Some services offer managed rotation, where the service configures and manages rotation for you.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html#rotate-secrets_managed"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 3: 上限と最小権限",
+      "bullets": [
+        "どちらも上限を決める側",
+        "範囲で分ける: エンティティか組織か",
+        "最小権限と ABAC"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "エンティティごとに上限",
+            "permissions boundary",
+            "identity-based と両方が許す所"
+          ],
+          [
+            "権限の管理を委任",
+            "permissions boundary",
+            "上限を決める所まで"
+          ],
+          [
+            "組織のユーザーとロールに",
+            "SCP",
+            "メンバーの root user も"
+          ],
+          [
+            "必要な事だけ許す",
+            "最小権限",
+            "操作・リソース・条件"
+          ],
+          [
+            "属性で権限を決める",
+            "ABAC",
+            "session tags など"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三枚目は、上限と最小権限です。境界もエスシーピーも上限を決める側で、権限を与えるのは、アイデンティティベースのポリシーなどの別の物です。"
+        },
+        {
+          "who": "student",
+          "text": "二つは、どうやって選び分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "手がかりは範囲です。アイアムのエンティティごとに上限をかけたいなら、パーミッションズバウンダリーです。実際の権限は、アイデンティティベースのポリシーと境界の両方が許す所だけになります。"
+        },
+        {
+          "who": "teacher",
+          "text": "試験ガイドが挙げる、権限の管理を委任する場面でも、境界を思い出します。"
+        },
+        {
+          "who": "student",
+          "text": "組織全体なら？"
+        },
+        {
+          "who": "teacher",
+          "text": "組織のアカウントのユーザーとロールに、まとめて上限をかけたいなら、エスシーピーです。メンバーアカウントのルートユーザーも制限されます。"
+        },
+        {
+          "who": "student",
+          "text": "残りの二つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "必要な事だけを許したいなら、操作、リソース、条件を絞る最小権限です。属性をもとに権限を決めたいなら、エーバックで、セッションタグなどの属性を確かめます。"
+        },
+        {
+          "who": "teacher",
+          "text": "まとめると、上限はエンティティごとか組織かで選び、必要な事だけなら最小権限、属性ならエーバックです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries"
+        },
+        {
+          "source_id": "S6",
+          "quote": "Identity-based policies grant permission to the entity, and permissions boundaries limit those permissions. The effective permissions are the intersection of both policy types.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries-eval-logic"
+        },
+        {
+          "source_id": "S8",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization. An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps"
+        },
+        {
+          "source_id": "S9",
+          "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions"
+        },
+        {
+          "source_id": "S10",
+          "quote": "You do this by defining the actions that can be taken on specific resources under specific conditions, also known as least-privilege permissions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-use-aws-defined-policies"
+        },
+        {
+          "source_id": "S12",
+          "quote": "Attribute-based access control (ABAC) is an authorization strategy that defines permissions based on attributes.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html#introduction_attribute-based-access-control"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Session tags are key-value pair attributes that you pass when you assume an IAM role or federate a user in AWS STS.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_session-tags.html#id_session-tags"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "4 つのまとまりに戻る",
+        "推奨と上限の仕組みを分ける",
+        "迷ったら 3 つの表へ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 最小権限と属性\"]\n    L[\"操作・リソース・条件<br/>ABAC と属性\"]\n  end\n  subgraph G3[\"3 権限の上限\"]\n    B[\"permissions boundary<br/>エンティティごと\"]\n    S@{ svc: \"AWS Organizations\", label: \"SCP<br/>組織のユーザーとロール\" }\n  end\n  subgraph G2[\"2 機械の認証情報\"]\n    T@{ svc: \"AWS STS\", label: \"一時的な認証情報\" }\n    K@{ svc: \"AWS Secrets Manager\", label: \"ローテーション\" }\n  end\n  subgraph G1[\"1 ポリシーと人\"]\n    P[\"付け先で 2 種類<br/>federation と MFA\"]\n    H@{ svc: \"AWS IAM Identity Center\", label: \"IAM Identity Center<br/>一か所で管理\" }\n  end\n",
+        "alt": "講義の地図に戻ったまとめ。1 ポリシーと人は、付け先で 2 種類のポリシー、federation と MFA、一か所で管理する IAM Identity Center。2 機械の認証情報は、STS の一時的な認証情報と Secrets Manager のローテーション。3 権限の上限は、どちらも上限を決める側で、permissions boundary は IAM エンティティごと、SCP は組織のユーザーとロールに効く。4 最小権限と属性は、操作・リソース・条件と ABAC。並びは扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。最初の地図に戻ります。図の並びは扱う順番で、処理の流れではありません。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目、ポリシーは付ける先で二種類を見分け、人のユーザーはフェデレーションで入れ、複数のアカウントをまとめて管理するならアイデンティティセンターです。慎重にすべき操作の前には、多要素認証を求めます。"
+        },
+        {
+          "who": "student",
+          "text": "二つ目の機械は？"
+        },
+        {
+          "who": "teacher",
+          "text": "長期の鍵より一時的な認証情報を使い、シークレットはローテーションで定期的に更新します。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目の上限の二つは、どう分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "どちらも上限を決める側で、境界はエンティティごと、エスシーピーは組織のユーザーとロールに効きます。四つ目、最小権限は操作、リソース、条件を絞り、エーバックは属性で権限を決めます。"
+        },
+        {
+          "who": "student",
+          "text": "推奨と上限の仕組みを分けるって、どういう事なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "フェデレーションや一時的な認証情報は、ドキュメントの勧めです。境界とエスシーピーは、上限をかける仕組みです。この二つを分けて読み、迷ったら三つの表に戻ってください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "As a best practice, we recommend that you require human users to use federation with an identity provider to access AWS resources instead of creating individual IAM users in your AWS account.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers"
+        },
+        {
+          "source_id": "S4",
+          "quote": "For centralized access management of human users, we recommend that you use IAM Identity Center to manage access to your accounts and permissions within those accounts.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers.html#id_roles_providers_identity-center"
+        },
+        {
+          "source_id": "S17",
+          "quote": "As a best practice, use temporary security credentials (such as IAM roles) instead of creating long-term credentials like access keys.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#id_credentials_access-keys"
+        },
+        {
+          "source_id": "S15",
+          "quote": "Rotation is the process of periodically updating a secret.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+        },
+        {
+          "source_id": "S5",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries"
+        },
+        {
+          "source_id": "S8",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization. An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform.",
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps"
+        },
+        {
+          "source_id": "S10",
+          "quote": "You do this by defining the actions that can be taken on specific resources under specific conditions, also known as least-privilege permissions.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-use-aws-defined-policies"
+        },
+        {
+          "source_id": "S12",
+          "quote": "Attribute-based access control (ABAC) is an authorization strategy that defines permissions based on attributes.",
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction_attribute-based-access-control.html#introduction_attribute-based-access-control"
+        }
+      ]
+    }
+  ]
+}

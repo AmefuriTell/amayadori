@@ -2,6 +2,7 @@
 // 講義の束（work/<ID>/lecture.json）の形・台本の字・図の決まり・出典を見る checkLecture と、
 // mermaid の図を描く renderVisuals、よみ台本が今の台本に合うかを見る yomiErrors。
 import { paths, readJSON, ToolError } from './io.mjs';
+import { pointsOf, coverErrors } from './points.mjs';
 import { referenceErrors } from './step.mjs';
 import { iconMap, renderAll } from './diagram.mjs';
 import { parseSources } from './text.mjs';
@@ -10,7 +11,7 @@ import { yomiHash, sayErrors } from './yomi.mjs';
 import { readability } from '../dg.mjs';
 import fs from 'node:fs';
 
-export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, dialogueMax: 6000, lineMax: 160, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
+export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, dialogueMax: 6000, pointsSlidesMax: 24, pointsDialogueMax: 9000, lineMax: 160, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
 // 読み上げで崩れる字: 英字・数字・記号（半角は全部、全角は英数字と括弧・かぎ括弧・斜線・中黒・矢印・コロンなど）
 export const UNSPEAKABLE = /[\x21-\x7e０-９Ａ-Ｚａ-ｚ（）「」『』【】［］〔〕〈〉《》＜＞／・→←↑↓⇒：；＃＄％＆＊＋＝＠＼＾｜～〜]/g;
 // 台本 1 分あたりの字数（試作: 4,477 字で約 15 分。速さ 1.1）。音声を作らない時の見積もりに使う
@@ -87,11 +88,15 @@ export function checkLecture(id, lec = loadLecture(id)) {
   if (!isText(lec.task) || !examTasks().has(lec.task)) top(`task（${lec.task}）が試験ガイドの task に無い`);
   else if (item.task && item.task !== lec.task) top(`task が項目の task（${item.task}）と違う`);
   if (!isText(lec.title)) top('講義の title が要る');
+  // 判断の要点の講義（points.json がある）は、問題の決め手を全部扱うので長い
+  const points = pointsOf(id);
+  const slidesMax = points ? LIMITS.pointsSlidesMax : LIMITS.slidesMax;
   const n = lec.slides.length;
-  if (n < LIMITS.slidesMin || n > LIMITS.slidesMax) top(`スライドが ${n} 枚。${LIMITS.slidesMin}〜${LIMITS.slidesMax} 枚にする`);
+  if (n < LIMITS.slidesMin || n > slidesMax) top(`スライドが ${n} 枚。${LIMITS.slidesMin}〜${slidesMax} 枚にする`);
   const total = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
   const isDialogue = lec.slides.some((s) => Array.isArray(s?.dialogue));
-  const max = isDialogue ? LIMITS.dialogueMax : LIMITS.narrationMax;
+  const max = isDialogue ? (points ? LIMITS.pointsDialogueMax : LIMITS.dialogueMax) : LIMITS.narrationMax;
+  if (points) coverErrors(lec, points, (sid, message) => errors.push({ id: sid, message }));
   if (total < LIMITS.narrationMin || total > max) top(`台本の合計が ${total} 字。${LIMITS.narrationMin}〜${max} 字にする`);
   if (isDialogue && lec.slides.some((s) => s && !Array.isArray(s.dialogue))) top('掛け合いにするなら、全部のスライドを dialogue にする');
   const srcFile = paths.work(id, 'sources.md');

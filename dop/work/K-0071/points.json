@@ -1,0 +1,279 @@
+{
+  "task": "5.1",
+  "questions": [
+    {
+      "id": "q-5.1-0001",
+      "stem_ja": "セキュリティチームは、誰かが機密のリソースに対して Describe* などの読み取り専用の管理 API を呼び出すたびに調査のワークフローを開始する Amazon EventBridge ルールを、デフォルトのイベントバスに置きたいと考えています。アカウントでは CloudTrail が有効です。ルールは有効になっており、書き込みの呼び出しには一致しますが、これらの読み取り専用の呼び出しには一度も一致しません。チームはコードを書かずにこれを直したいと考えています。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "ルールの状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にする。",
+        "B": "すべての AWS の管理イベントを受け取れるように、ルールをパートナーのイベントバスに移す。",
+        "C": "EventBridge がイベントパターンを作り直すように、ルールを無効にしてから再び有効にする。",
+        "D": "Amazon S3 の CloudTrail のログファイルを読んでワークフローを開始する AWS Lambda 関数を作成する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "既定のイベントバスのルールで、CloudTrail を通した読み取り専用の管理イベントを受けられる。ただしルールを有効（ENABLED）にしただけでは、読み取り専用の管理イベントは照合されない。状態を ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS にすると、読み取り専用の管理イベントも含めて照合する。",
+      "per_choice": {
+        "A": "正しい。読み取り専用の管理イベントも照合するようになる。",
+        "B": "パートナーのイベントバスは AWS のイベントを受けない。",
+        "C": "ただの有効の状態は、読み取り専用の管理イベントを照合しない。",
+        "D": "自分でコードを書くことになり、要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "quote": "You can set up rules on your default event bus to receive read-only management events from AWS services via CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "quote": "Enable the rule so that EventBridge matches events against the rule, except for read-only AWS management events delivered through CloudTrail."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-service-event-cloudtrail-management.html",
+          "quote": "Partner event buses do not receive AWS events."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0002",
+      "stem_ja": "ある企業は、標準のパーティションの多数の AWS リージョンでワークロードを動かしています。運用チームは、すべてのリージョンのアカウント固有の AWS Health のイベントと、リージョンに依存しない AWS Identity and Access Management (IAM) の AWS Health のイベントの通知を受ける必要があります。チームは Amazon EventBridge ルールをできるだけ少なくしたいと考えています。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "米国西部 (オレゴン) に、標準パーティションの全リージョンからアカウント固有の AWS Health のイベントを受ける中央のルールを 1 つ作る。",
+        "B": "IAM のイベントなど、グローバルな AWS Health のイベントを受け取るルールを、米国東部 (バージニア北部) に作成する。",
+        "C": "ワークロードが動く各リージョンにルールを作成し、それらのルールで IAM のイベントを受け取る。",
+        "D": "AWS Health Dashboard に表示される公開のイベントも受け取るために、簡素化された統合を使う。",
+        "E": "企業の主なワークロードが動くリージョンだけにルールを作成する。そのルールはすべてのリージョンのイベントを受け取る。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "標準のパーティションの全てのリージョンのアカウント別の Health のイベントは、米国西部（オレゴン）に置いた 1 つの中央のルールで集められる。IAM のようにリージョンに属さないグローバルなイベントを受けるには、米国東部（バージニア北部）にルールを作る必要がある。",
+      "per_choice": {
+        "A": "正しい。1 つのルールで全てのリージョンのアカウント別のイベントを集める。",
+        "B": "正しい。グローバルなイベントはバージニア北部のルールで受ける。",
+        "C": "ルールの数が増え、グローバルなイベントはバージニア北部のルールが無いと受けられない。",
+        "D": "簡単な統合（simplified integration）では、Health Dashboard に出る公開のイベントは受けられない。",
+        "E": "ふつうのリージョンのルールはそのリージョンの分だけ。全てのリージョンをまとめるのはオレゴンの中央のルール。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "quote": "To receive account-specific AWS Health events from all Regions in the standard AWS partition, you can set up a central rule in the US West (Oregon) Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "quote": "To receive global events, you must create a rule for the US East (N. Virginia) Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "quote": "Simplified integration doesn't allow you to receive public events that are shown in the AWS Health Dashboard."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/choosing-a-region.html",
+          "quote": "You can create an EventBridge rule for each Region that you want to receive AWS Health events for."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0003",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。中央の運用チームは、運用アカウントに AWS Health のイベントの Amazon EventBridge ルールを作成しましたが、ルールは運用アカウントのイベントしか受け取りません。チームは、すべてのアカウントにルールをデプロイせずに、組織のすべてのアカウントの AWS Health のイベントを 1 か所で受け取る必要があります。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "AWS Health の EventBridge ルールは組織のすべてのアカウントのイベントを受け取るので、今のルールのままにする。",
+        "B": "StackSets で同じ EventBridge ルールをすべてのメンバーアカウントにデプロイし、各ルールからチームにメールを送る。",
+        "C": "各アカウントの所有者に、毎日 AWS Health Dashboard を確認して重要なイベントを転送してもらう。",
+        "D": "運用アカウントを委任管理者にして AWS Health の組織ビューを使い、すべてのアカウントのイベントを集約する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Health のイベントの EventBridge のルールは、自分のアカウントの通知しか受けない。組織の他のアカウントのイベントを受けるには、組織のビュー（organizational view）と委任管理者のアクセスで Health のイベントを集約する。",
+      "per_choice": {
+        "A": "ルールが受けるのは自分のアカウントの通知だけ。",
+        "B": "全アカウントにルールを置くことになり、要件に反する。",
+        "C": "人の作業に頼ることになり、手間が大きく漏れも出る。",
+        "D": "正しい。組織のビューと委任管理者で、全アカウントのイベントを 1 か所に集められる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+          "quote": "Any EventBridge rules that you create can only receive notifications for your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html",
+          "quote": "To receive organizational events for other accounts within your AWS Organizations, see Aggregating AWS Health events using organizational view and delegated administrator access."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0004",
+      "stem_ja": "Web ストアのアカウント（111122223333）は、ソースが com.exampleCorp.webStore の newOrderCreated のイベントを、別のアカウント（123456789012）にある central-event-bus という名前の中央のイベントバスに送る必要があります。中央のアカウントは、最小権限に従い、Web ストアのアカウントからのこれらのイベントだけを受け入れる必要があります。最小権限でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Web ストアのアカウントのイベントバスに、アカウント 123456789012 がイベントを読めるようにするリソースベースのポリシーをアタッチする。",
+        "B": "central-event-bus に、組織のすべてのアカウントが任意のイベントを発行できるようにするリソースベースのポリシーをアタッチする。",
+        "C": "アカウント 123456789012 の central-event-bus に、アカウント 111122223333 がそのソースと detail-type のイベントだけを発行できるリソースベースのポリシーをアタッチする。",
+        "D": "アカウント 123456789012 に IAM ユーザーを作成し、PutEvents を呼ぶためにそのアクセスキーを Web ストアのアプリケーションに保存する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "別アカウントのイベントバスへ送るには、受け取る側（バスの持ち主）のアカウントのイベントバスにリソースベースのポリシーを付け、送る側のアカウントに発行を許す。条件で source と detail-type を絞れば、決めたイベントだけを受け付けられる。",
+      "per_choice": {
+        "A": "ポリシーは受け取る側のバスに付ける。送る側のバスに付けても、中央のバスへの発行は許されない。",
+        "B": "全てのアカウントの全てのイベントを許すことになり、最小権限に反する。",
+        "C": "正しい。受け取る側のバスで、送る側のアカウントに、決めたイベントだけの発行を許す。",
+        "D": "長く使う認証情報をアプリに持たせることになり、最小権限の考え方にも合わない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+          "quote": "but only for events with a source value set to com.exampleCorp.webStore and a detail-type set to newOrderCreated."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-example-policy-cross-account-custom-bus-source.html",
+          "quote": "You attach this resource-based policy to the central-event-bus in the bus-owner account (123456789012), which is the account that receives the events."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0005",
+      "stem_ja": "ある Lambda 関数は、イベントソースマッピングを通じて Amazon SQS の標準キューのメッセージを処理しています。チームは関数のタイムアウトを 3 分に上げようとしています。失敗し続けるメッセージはデッドレターキューに送る必要がありますが、それは Lambda が何回か再試行した後に限ります。チームは AWS の推奨に従いたいと考えています。チームはどの設定を使うべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "ソースのキューの可視性タイムアウトを 18 分にする。",
+        "B": "ソースのキューの再処理ポリシーの maxReceiveCount を 5 にする。",
+        "C": "Lambda が可視性を自分で管理するので、ソースのキューの可視性タイムアウトは 30 秒のままにする。",
+        "D": "失敗がすぐにデッドレターキューに届くように、ソースのキューの再処理ポリシーの maxReceiveCount を 1 にする。",
+        "E": "関数のタイムアウトを、キューの可視性タイムアウトより長い 20 分にする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "キューの可視性タイムアウトは、関数のタイムアウトの少なくとも 6 倍にするのが勧められている（3 分なら 18 分）。関数のタイムアウトは可視性タイムアウト以下でなければならず、超えるとイベントソースマッピングの作成や更新でエラーになる。デッドレターキューへ送る前に数回やり直せるよう、maxReceiveCount は少なくとも 5 にするのが勧められている。",
+      "per_choice": {
+        "A": "正しい。3 分の 6 倍で 18 分。",
+        "B": "正しい。数回やり直してからデッドレターキューへ送る。",
+        "C": "関数のタイムアウトは可視性タイムアウト以下である必要があり、3 分の関数では設定できない。",
+        "D": "やり直さずにすぐデッドレターキューへ送られ、数回やり直す要件に反する。",
+        "E": "関数のタイムアウトは可視性タイムアウト以下である必要がある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "quote": "set the source queue's visibility timeout to at least six times the configuration timeout on your function."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "quote": "Your function's timeout must be less than or equal to the queue's visibility timeout."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html",
+          "quote": "We recommend setting the maxReceiveCount on your source queue's redrive policy to at least 5."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0006",
+      "stem_ja": "ある Lambda 関数は、Amazon SQS の標準キューから 10 個ずつのメッセージのバッチを受け取ります。バッチの中の 1 つのメッセージが失敗すると、10 個すべてのメッセージが再び見えるようになって再処理され、下流に重複したレコードができます。チームは、スループットのためにバッチサイズ 10 を保ち、すでに成功したメッセージの再処理を避ける必要があります。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "バッチの中のどれかのメッセージが失敗するたびに、関数から例外を投げる。",
+        "B": "失敗したバッチが再試行の前に長く待つように、キューの可視性タイムアウトを長くする。",
+        "C": "イベントソースマッピングで ReportBatchItemFailures を有効にし、失敗したメッセージの ID を batchItemFailures で返す。",
+        "D": "失敗が 1 つのメッセージだけに影響するように、バッチサイズを 1 にする。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "既定では、関数がバッチの処理で誤ると、うまく処理したメッセージも含めてバッチの全てのメッセージがキューに見えるようになる。イベントソースマッピングで ReportBatchItemFailures を指定し、応答の batchItemFailures に失敗したメッセージの ID を返すと、失敗した物だけがやり直される。関数が例外を投げると、バッチ全体が失敗とみなされる。",
+      "per_choice": {
+        "A": "例外を投げるとバッチ全体が失敗とみなされ、今と同じになる。",
+        "B": "やり直すまでの時間が延びるだけで、成功したメッセージもやり直される。",
+        "C": "正しい。失敗したメッセージだけがやり直される。",
+        "D": "バッチの大きさ 10 を保つ要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "quote": "To turn on partial batch responses, specify ReportBatchItemFailures for the FunctionResponseTypes action when configuring your event source mapping."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "quote": "If your function throws an exception, the entire batch is considered a complete failure."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html",
+          "quote": "all messages in that batch become visible in the queue again by default, including messages that Lambda processed successfully."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0007",
+      "stem_ja": "ある Lambda 関数は 4 つのシャードを持つ Kinesis のデータストリームを処理していますが、処理が遅れています。同じパーティションキーのレコードは、引き続き順番に処理する必要があります。チームはストリームを変えたくなく、関数が各シャードからより多くのバッチを同時に処理するようにしたいと考えています。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "イベントソースマッピングの ParallelizationFactor を 10 にする。",
+        "B": "イベントソースマッピングの ParallelizationFactor を 20 にする。",
+        "C": "Lambda が一度に多くのレコードを処理できるように、データストリームにシャードを追加する。",
+        "D": "代わりにレコードを Amazon SQS の標準キューに送り、キューから処理する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Lambda は各シャードのレコードを順に処理する。ParallelizationFactor（1〜10、既定 1）を上げると、1 つのシャードから同時に処理するバッチを増やせ、その場合も同じパーティションキーの中では順序が保たれる。シャードを足しても速くできるが、ストリームを変えることになる。",
+      "per_choice": {
+        "A": "正しい。各シャードから同時に 10 バッチまで処理し、キーごとの順序は保たれる。",
+        "B": "ParallelizationFactor は 10 まで。",
+        "C": "ストリームを変えない要件に反する。",
+        "D": "仕組みを作り直すことになり、キーごとの順序も保てない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "quote": "You can specify the number of concurrent batches that Lambda polls from a shard by using a parallelization factor from 1 (default) to 10."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "quote": "When you increase the number of concurrent batches per shard, Lambda still ensures in-order processing at the partition-key level."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html",
+          "quote": "To increase the speed at which your function processes records, add shards to your data stream."
+        }
+      ]
+    },
+    {
+      "id": "q-5.1-0008",
+      "stem_ja": "Amazon SNS の注文のトピックは、3 つの Amazon SQS キューにファンアウトしています。配送チームのキューは、メッセージ本文に \"region\": \"EU\" を含む注文だけを受け取る必要があります。発行者はメッセージ属性を設定しておらず、発行者を変えることはできません。ほかの 2 つのキューは、引き続きすべての注文を受け取る必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "配送のキューのサブスクリプションに、region が EU に一致する MessageAttributes の範囲のフィルターポリシーを割り当てる。",
+        "B": "配送のキューのサブスクリプションに、region が EU に一致する MessageBody の範囲のフィルターポリシーを割り当てる。",
+        "C": "配送の利用者がすべてのメッセージを読み、region が EU でないものを削除する。",
+        "D": "EU の注文用に別の SNS トピックを作成し、発行者に EU の注文をそこへ送ってもらう。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "SNS のトピックの購読者は、既定では全てのメッセージを受け取る。一部だけを受けるには購読にフィルターポリシーを付ける。範囲（scope）が MessageBody なら、ポリシーの名前はメッセージの本文のプロパティに合わせ、MessageAttributes ならメッセージ属性の名前に合わせる。",
+      "per_choice": {
+        "A": "発行する側はメッセージ属性を付けていないので、合うメッセージが無い。",
+        "B": "正しい。本文の region で絞り、他の 2 つの購読はそのまま全て受け取る。",
+        "C": "全てのメッセージを受けて捨てることになり、手間とむだがある。",
+        "D": "発行する側を変えられない要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html",
+          "quote": "To receive only a subset of the messages, a subscriber must assign a filter policy to the topic subscription."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+          "quote": "When the filter policy scope is set to MessageBody, each property name in the filter policy matches a message body property name."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html",
+          "quote": "When the filter policy scope is set to MessageAttributes, each property name in the filter policy matches a message attribute name."
+        }
+      ]
+    }
+  ]
+}

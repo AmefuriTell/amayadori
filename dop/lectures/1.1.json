@@ -1,89 +1,83 @@
 {
   "task": "1.1",
-  "title": "CI/CD パイプラインの実装",
+  "title": "CI/CD パイプラインの実装: 判断の要点",
   "notes": [
-    "採らなかった指摘（全体・軽）: 箱の少ない図を横向き（LR）にする提案。lec validate が mermaid を flowchart TB で始めることを求めるため、縦のまま。s01・s15 の地図は矢印を外して横に並ぶ形にした。",
-    "採らなかった指摘（s01・軽）: シーアイシーディーを言い換える提案。CI/CD の意味を説明する根拠が sources.md に無いため、タスク名として読むだけにした。パイプラインは「大まかに捉えておく」と弱い言い方にした。",
-    "採らなかった指摘（s09・軽）: オーオースのトークンを説明する提案。根拠に説明が無いため、台本と図から外し、alt にだけ根拠の例として残した。",
-    "採らなかった指摘（s13・中の一部）: 自動 rollback のきっかけ。S13 の引用が「roll back when a」で切れているため書かない。「失敗したら」の言い方も外した。",
-    "一部だけ採った指摘（s04・s05・s06・s08）: イメージ・マネージド・ビルドなどの一言の説明は根拠に無いので、「大まかに言うと」と一般の言い換えだと分かる言い方にした。イメージの置き場を ECR とするのは、S2 の image repositories と S5（コンテナの分類）・S15（container registry）からの読み取りであることを台本で示した。",
-    "一部だけ採った指摘（全体・中）: knowledge の 2 行は、あることだけを s02 の画面と台本で示し、中身には触れない（sources.md の覆えなかった行）。",
-    "掛け合いにした時の注意: 事実は先生の行だけに置いた。生徒の誤り（例を全部と思う、タスクセットの場合を一般と思う、コードとコードアーティファクト・デプロイメントコンフィギュレーションとデプロイメントグループなど似た名前を混ぜる）は、次の先生の行で必ず「違います」と正した。シーアイシーディーの意味やロールバックのきっかけは生徒に聞かせず、根拠に無い答えを出さない形にした。",
-    "C3 の中の指摘は全部直した（s05 のアイアムの言い換え、s07 のソースアクションの一言と「そこまでは言えません」、s10 の言い直し、s11 のタスクセットの一言と呼び方、s13 の問いとデプロイメントグループ）。デプロイメントグループは根拠に中身が無いので、設定できる先の一つと捉えるだけにした。",
-    "軽で直したのは s06・s11 の言い切りを弱めた所と s15 の問いと受け。ほかの軽（s01・s02・s03・s09・s12・s16 の分け方や言い足し、生徒の語尾、訂正の出だしの散らし）は、台本が字数の上限の五千五百字に近く、行を足すと超えるため採らなかった。",
-    "二回目の検証の指摘: s12 は、別の項目として見るのは講義の並べ方の話で、二つの関わりは資料で扱っていないと言う形にした。s13 の「違います」は、資料が挙げる設定先を言う形に弱めた。s10・s15 は十行以内にし、s05・s09 に生徒の言い直しを足した。生徒の語尾は一部だけくだけた形にした。"
+    "判断の要点の講義として作り直した（2026-11-27、利用者の指摘: 今の講義では問題が解けない）。問題の場面や選択肢の文は写さず、条件の言葉と機能・設定・数字の対応で教える形にした。",
+    "決め手の一覧（問題 ID → 決め手 → スライド）:",
+    "q-1.1-0001 → 継続して自動のスキャンは拡張スキャン（Amazon Inspector）。基本は push 時か手動 → s03・s20",
+    "q-1.1-0002 → 外部接続を持つ共有リポジトリを upstream に。upstream は同じドメインの中で設定する、パッケージは公開できない → s04・s20",
+    "q-1.1-0003 → CLI・CloudFormation で作った接続は既定で PENDING、コンソールで編集して AVAILABLE → s05・s20",
+    "q-1.1-0004 → 既定の出力は浅いコピーの ZIP。full clone の URL 参照を使えるのは後の CodeBuild だけ → s06・s20",
+    "q-1.1-0005 → Git タグのトリガーで Filter type Tags と release*。全 push の検出は使わない → s07・s20",
+    "q-1.1-0006 → finally は commands が失敗しても動き、phase は全部成功で成功。on-failure は Lambda の計算で使えない → s08・s09・s21",
+    "q-1.1-0007 → Lambda の計算は Docker・特権モードに対応しない。EC2 の計算に戻し privilegedMode を true。予約容量の fleet は EC2 の選び方 → s09・s10・s21",
+    "q-1.1-0008 → timeoutInMinutes は 5〜2160 分、既定 60 分。Lambda は 15 分を超えない → s09・s11・s21",
+    "q-1.1-0009 → 認証情報は自動ローテーションの Secrets Manager、暗号化が要る設定値は SecureString、env の二つの欄の値はログで隠れる → s12・s13・s14・s22",
+    "q-1.1-0010 → json-key で 1 つのキーだけ（付けないと全文）。parameter-store にはサービスロールの ssm:GetParameters → s12・s13・s22",
+    "q-1.1-0011 → 実行時の呼び出しに置き換えるとローテーションで再デプロイが要らない。自前の関数とスケジュールは手間 → s12・s14・s22",
+    "q-1.1-0012 → NLB では事前定義の ECSAllAtOnce だけ。一部を先に送りたいなら NLB のまま設定だけ変える選択肢は外れ、ロードバランサーごと変える選択肢を見る（ALB で canary が使えるという記述は資料に無い） → s15・s16・s22",
+    "q-1.1-0013 → 最小正常ホスト数。既定は OneAtATime、HalfAtATime は半分まで（切り捨て）、事前定義で残す数を守れなければ、最小正常ホスト数に残す数か割合を入れた独自の設定 → s15・s17・s22",
+    "q-1.1-0014 → アラームは先に CloudWatch で作ってデプロイグループに足す。しきい値のロールバックで最後に正常なリビジョンを再デプロイ。Ignore alarm configuration と手動は外れ → s18・s19・s22",
+    "扱えなかった物: q-1.1-0012 の正解は Application Load Balancer へ移す形だが、sources.md には「NLB の時は ECSAllAtOnce だけ」としか無く、ALB でカナリアが使えるとは書かれていない。台本では「NLB のまま設定だけ変える選択肢はこの制限に当たる」「制限が書かれているのは NLB の場合だけなので、ロードバランサーごと変える選択肢と見分ける」と言い、ALB の名前は出さなかった。",
+    "扱えなかった物: ECS・Lambda の事前定義のカナリア・リニアの設定名（ECSCanary10Percent5Minutes など）は sources.md に無いので、名前は出さず動き（10% → 5 分後など）だけを表にした。q-1.1-0001 の「レジストリで有効にする」も、スキャンがレジストリの設定だという文が無いので言っていない。",
+    "扱えなかった物: 試験ガイドの knowledge の 2 行（SDLC の概念、単一・複数アカウントのパイプラインのパターン）は sources.md の「覆えなかった行」のとおり資料が無く、問題も無いので扱わない。ECR の lifecycle policy と replication（S20〜S22）は資料にあるが、この task の問題の決め手ではないので字数の都合で外した。",
+    "検証（重 2・中 4）への直し: s16 は ECS の数字を「例」として言い、Lambda の数字と列を削った。LB を変えれば canary が使えるとは言わず「制限が書かれているのは NLB の場合だけ。設定だけ変える選択肢はこの制限に当たる」とした（s22 の表は 3 回目の直しで「LB ごと変える」）。s05 は生徒が名前の変更を言う 2 行を削った。s04 は「同じドメインの中だけ」を「資料にあるのは同じドメインの中の形」に、s09 は「切り替えできない」を「資料では EC2 のモードで選ぶ物」に弱めた。s17 は問題の割合を使わず「残す割合が半分より多ければ」の一般の形にし、表の独自の設定の行を直した（3 回目の直しで、推論の例をやめ「残す数か割合を指定」に）。s14 はマネージドローテーションの 1 文を削り、S40 の自動ローテーションのスケジュールだけにした。",
+    "軽の直し: s03（生徒の問いの形・表の見る物の行）、s07（点線を「始まらない」・release* は例）、s08・s02（頻度の言い方）、s12（KMS の 2 行と表の行）、s13（版の話）、s22（止めて自動で戻す行を足す）。外れの選択肢をなぞる生徒の問い（s03・s04・s05・s06・s07・s10・s14・s18）は「手で始める・自分で作って保守する」などの一般の形にした。",
+    "2 回目の検証（軽）への直し: s17 は「半分より多ければ半分ずつでは足りない」（奇数の台数で成り立たない）をやめ、「半分ずつのデプロイで残す数を守れない時は独自の設定」と根拠の範囲にし、表の推論の例も外した。s16 は生徒の問いに「はい」で答え、設定だけ変える選択肢とロードバランサーごと変える選択肢を見分ける形にした。s06 は根拠に無い 2 文（作れない履歴・デプロイに渡す物）を外した。s09 は予約された容量の文を EC2 の説明の所へ移した。s11 は問題の選択肢の値（三日分）をやめた。s22 の表は秘密と暗号化する設定値の行を足し、選ぶ物の列を選ぶ物にそろえた（json-key は s13 の図と台本に任せて表から外した）。決め手の一覧を今の台本に合わせた。",
+    "使った今の講義の部分: 五つの部の地図（s01・s23）と、条件から選ぶ表の形。前の講義の notes にある採らなかった指摘の理由は、前の版の lecture.v1.json に残っている。"
   ],
   "slides": [
     {
       "id": "s01",
       "title": "この講義の地図",
       "bullets": [
-        "1 置き場 2 つなぐ 3 作る",
-        "4 守る 5 届ける",
-        "最後に条件の表とまとめ"
+        "問題の決め手を 5 つの部で",
+        "置き場・つなぐ・作る",
+        "守る・届ける → 表 → まとめ"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  R[\"1 置き場<br/>コード・イメージ<br/>アーティファクト\"]\n  P@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>2 つなぐ<br/>source action\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>3 作る<br/>buildspec\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>4 守る<br/>Parameter Store も\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>5 届ける<br/>デプロイ戦略\" }\n",
-        "alt": "講義の五つの部を番号順に並べた地図（矢印は無い）。1 置き場（コード・イメージ・アーティファクトのリポジトリ）、2 つなぐ（CodePipeline の source action）、3 作る（CodeBuild と buildspec）、4 守る（Secrets Manager と Parameter Store）、5 届ける（CodeDeploy のデプロイ戦略）。"
+        "source": "flowchart TB\n  R@{ svc: \"Amazon ECR\", label: \"Amazon ECR<br/>1 置き場<br/>スキャン・CodeArtifact\" }\n  P@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>2 つなぐ<br/>接続・出力・トリガー\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>3 作る<br/>finally・計算・時間\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>4 守る<br/>Parameter Store も\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>5 届ける<br/>設定・戻し方\" }\n",
+        "alt": "講義の五つの部を番号順に並べた地図（矢印は無い）。1 置き場（ECR のスキャンと CodeArtifact）、2 つなぐ（CodePipeline の接続・ソースの出力・トリガー）、3 作る（CodeBuild の finally・計算の種類・タイムアウト）、4 守る（Secrets Manager と Parameter Store）、5 届ける（CodeDeploy のデプロイ設定と戻し方）。"
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "この講義では、試験ガイドのドメイン一にある最初のタスク、シーアイシーディーパイプラインの実装を学びます。"
+          "text": "この講義の目的は、このタスクの問題を、講義だけで解けるようになることです。問題の決め手を、五つの部に分けて見ていきます。"
         },
         {
           "who": "student",
-          "text": "パイプラインって、そもそも何なのだ？"
+          "text": "五つの部って、試験ガイドのスキルの行に合わせた分け方？"
         },
         {
           "who": "teacher",
-          "text": "ここでは、コードの変更を届けるまでの流れ、と大まかに捉えておきます。"
+          "text": "そうです。置き場、つなぐ、作る、守る、届ける、です。画面の地図の箱が、それぞれの部です。"
         },
         {
           "who": "teacher",
-          "text": "画面の地図は、講義で扱う五つの部です。一つ目は置き場で、コード、イメージ、アーティファクトの三種類のリポジトリを見ます。"
-        },
-        {
-          "who": "teacher",
-          "text": "二つ目はバージョン管理とパイプラインのつなぎ方、三つ目はビルドで、コードビルドを例にします。"
+          "text": "置き場ではイーシーアールのスキャンとコードアーティファクト、つなぐではコードパイプラインの接続と、ソースの出力と、トリガーを扱います。"
         },
         {
           "who": "student",
-          "text": "残りの二つは？"
+          "text": "作るはコードビルドで、守るはシークレッツマネージャーとパラメーターストアだね。"
         },
         {
           "who": "teacher",
-          "text": "四つ目は、ビルドとデプロイの秘密情報の管理です。例として挙がる二つのサービスを見ます。五つ目は届け方、つまりデプロイ戦略で、コードデプロイを例にします。"
+          "text": "はい。作るでは、ビルドスペックのファイナリーと、計算の種類と、タイムアウトです。届けるでは、コードデプロイのデプロイ設定と、戻し方です。"
         },
         {
           "who": "student",
-          "text": "置き場、つなぐ、作る、守る、届ける、の五つなのだ。"
+          "text": "最後に、問題文の条件から選ぶ表もあるのだ？"
         },
         {
           "who": "teacher",
-          "text": "そうです。最後に、問題文の条件から方法を選ぶ表を見て、この地図に戻ります。"
+          "text": "あります。表の後で、この地図に戻ってまとめます。要点は、部ごとに、条件の言葉と決め手を結ぶことです。"
         }
       ],
       "refs": [
         {
           "source_id": "S2",
           "quote": "Configuring code, image, and artifact repositories",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S2",
-          "quote": "Using version control to integrate pipelines with application environments",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S3",
-          "quote": "Setting up build processes (for example, AWS CodeBuild)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S3",
-          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
           "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
         },
         {
@@ -95,460 +89,1820 @@
     },
     {
       "id": "s02",
-      "title": "試験ガイドのスキル 5 行を 5 つの部に",
+      "title": "要点の読み方",
       "bullets": [
-        "スキル 5 行 → 講義の 5 つの部",
-        "挙がるサービス名は例の 1 つ",
-        "knowledge の 2 行はこの講義の外"
+        "条件の言葉を拾う",
+        "決め手: 機能・設定・数字・既定",
+        "外れる選択肢の理由も持つ"
       ],
       "visual": {
-        "type": "compare",
-        "columns": [
-          "試験ガイドのスキルの行",
-          "この講義の部"
-        ],
-        "rows": [
-          [
-            "リポジトリの設定",
-            "1 置き場"
-          ],
-          [
-            "バージョン管理でつなぐ",
-            "2 つなぐ"
-          ],
-          [
-            "ビルド（例 CodeBuild）",
-            "3 作る"
-          ],
-          [
-            "秘密情報の管理",
-            "4 守る"
-          ],
-          [
-            "デプロイ戦略の決定",
-            "5 届ける"
-          ]
+        "type": "steps",
+        "items": [
+          {
+            "label": "問題文の条件の言葉を拾う",
+            "note": "継続して・再デプロイ無し・一部を先に など"
+          },
+          {
+            "label": "決め手を当てる",
+            "note": "機能・設定・数字・既定の動き"
+          },
+          {
+            "label": "外れる選択肢を消す",
+            "note": "使えない組み合わせ・範囲の外・手間が多い"
+          }
         ]
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "まず範囲を確かめます。試験ガイドのこのタスクには、スキルとして五つの行があります。画面の表の左の列です。"
+          "text": "各スライドは、同じ順で進めます。問題文の条件の言葉、選ぶ機能や設定、そして外れる選択肢とその理由です。"
         },
         {
           "who": "student",
-          "text": "どんな行があるのだ？"
+          "text": "場面を覚えるんじゃなくて、言葉と機能の組を覚える、ってこと？"
         },
         {
           "who": "teacher",
-          "text": "リポジトリの設定、バージョン管理でパイプラインとアプリケーションの環境をつなぐこと、ビルドの手順です。"
+          "text": "そうです。同じ決め手が、別の会社や別の聞き方で出ても解けるようにします。"
         },
         {
           "who": "teacher",
-          "text": "残りは、ビルドとデプロイの秘密情報の管理と、ふさわしいデプロイ戦略の決定です。この五つを講義の五つの部に当てはめます。"
+          "text": "決め手になるのは、機能の名前、設定の名前、数字の範囲、それに何も指定しない時の既定の動きです。"
         },
         {
           "who": "student",
-          "text": "秘密情報なら、行に名前のあるシークレッツマネージャーとパラメーターストアだけ覚えればいいのだ？"
+          "text": "外れる方の理由まで覚えるのは、ちょっと大変なのだ。"
         },
         {
           "who": "teacher",
-          "text": "違います。名前は、例えば、として挙がっている例です。これだけという意味ではありません。"
+          "text": "外れ方の型として、次の三つを見ます。組み合わせて使えない、数字が範囲の外、手で始めるか自分で作って保守する手間が多い、です。"
         },
         {
           "who": "student",
-          "text": "ビルドのコードビルドや、デプロイのコードデプロイも例、ということですね。"
+          "text": "条件の言葉、決め手、外れる型、の順で見ればいいんだね。"
         },
         {
           "who": "teacher",
-          "text": "そうです。なお、このタスクには知識の行も二つありますが、この講義の資料では扱えていないので、中身には入りません。"
-        },
-        {
-          "who": "teacher",
-          "text": "技術と概念の一覧にもロールバックの手順などが並びますが、これも全部ではありません。要点は、スキルの五つの行が講義の五つの部、挙がる名前は例、です。"
+          "text": "はい。それでは置き場の部から始めます。"
         }
       ],
       "refs": [
         {
-          "source_id": "S2",
-          "quote": "Configuring code, image, and artifact repositories",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S2",
-          "quote": "Using version control to integrate pipelines with application environments",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S3",
-          "quote": "Setting up build processes (for example, AWS CodeBuild)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+          "source_id": "S9",
+          "quote": "Rollback procedures",
+          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-technologies-concepts.html#dop-technologies-concepts"
         },
         {
           "source_id": "S3",
           "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
           "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S3",
-          "quote": "Determining appropriate deployment strategies (for example, AWS CodeDeploy)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S9",
-          "quote": "The following list contains technologies and concepts that might appear on the exam. This list is non-exhaustive and is subject to change.",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-technologies-concepts.html#dop-technologies-concepts"
         }
       ]
     },
     {
       "id": "s03",
-      "title": "範囲の一覧から関わる物",
+      "title": "置き場: ECR のスキャンは基本か拡張か",
       "bullets": [
-        "範囲のサービス一覧から抜き出し",
-        "開発者ツールの Code の付く物",
-        "コンテナの分類に Amazon ECR"
+        "継続して自動で → 拡張スキャン",
+        "拡張は Amazon Inspector と連携",
+        "基本は push 時か手動"
       ],
       "visual": {
         "type": "compare",
         "columns": [
-          "範囲の一覧の分類",
-          "このタスクに関わる物"
+          "項目",
+          "基本スキャン",
+          "拡張スキャン"
         ],
         "rows": [
           [
-            "開発者ツール",
-            "CodeArtifact・CodeBuild"
+            "いつ調べる",
+            "push 時か手動",
+            "自動で継続"
           ],
           [
-            "開発者ツール",
-            "CodeDeploy・CodePipeline"
-          ],
-          [
-            "コンテナ",
-            "Amazon ECR"
-          ],
-          [
-            "管理とガバナンス",
-            "AWS Systems Manager"
-          ],
-          [
-            "セキュリティ",
-            "AWS Secrets Manager"
+            "使う物",
+            "CVE のデータベース",
+            "Amazon Inspector"
           ]
         ]
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "次に、試験の範囲に入るサービスの一覧から、このタスクに関わる物を抜き出します。"
+          "text": "最初はイーシーアールのイメージのスキャンです。種類は二つ、基本スキャンと拡張スキャンです。"
         },
         {
           "who": "student",
-          "text": "どの分類から出てくるのだ？"
+          "text": "プッシュの時にスキャンすれば、それで足りるのだ？"
         },
         {
           "who": "teacher",
-          "text": "開発者ツールの分類からは、コードアーティファクト、コードビルド、コードデプロイ、コードパイプラインです。"
+          "text": "条件しだいです。基本スキャンは、プッシュの時に調べるか、手動で始めるかです。シーブイイーのデータベースで、オペレーティングシステムの脆弱性を調べます。"
         },
         {
           "who": "teacher",
-          "text": "コンテナの分類からはイーシーアール、管理とガバナンスからはシステムズマネージャー、セキュリティからはシークレッツマネージャーです。"
+          "text": "拡張スキャンは、アマゾンインスペクターと連携して、リポジトリを自動で継続してスキャンします。"
         },
         {
           "who": "student",
-          "text": "パラメーターストアが見当たらないです。独立したサービスとして別の分類にあるのだ？"
+          "text": "じゃあ、だいぶ前にプッシュしたイメージも、誰も始めずに見続けてほしい時は？"
         },
         {
           "who": "teacher",
-          "text": "違います。パラメーターストアは、システムズマネージャーの中の機能です。"
+          "text": "継続して、自動で、という言葉が決め手で、拡張スキャンを選びます。プッシュの時のスキャンは、プッシュの時の検査です。"
         },
         {
           "who": "student",
-          "text": "じゃあ、一覧にあるコードスターやイーシーツーイメージビルダーも、ここで覚える物ですか？"
+          "text": "自動のスキャンが無いなら、スキャンを始める仕組みを自分で用意すればいい？"
         },
         {
           "who": "teacher",
-          "text": "一覧にはありますが、この講義では扱いません。"
+          "text": "手で始めるか、作って保守する手間がかかり、調べるのも基本スキャンの範囲のままです。人が始めずに、最も少ない手間で、という条件なら外れます。"
+        },
+        {
+          "who": "student",
+          "text": "継続して自動なら拡張スキャン、プッシュの時か手動なら基本スキャン、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そのとおりです。"
         }
       ],
       "refs": [
         {
-          "source_id": "S4",
-          "quote": "AWS CodeArtifact",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
+          "source_id": "S19",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html#image-scanning"
         },
         {
-          "source_id": "S4",
-          "quote": "AWS CodePipeline",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
-        },
-        {
-          "source_id": "S5",
-          "quote": "Amazon ECR",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-containers"
-        },
-        {
-          "source_id": "S7",
-          "quote": "AWS Systems Manager",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-management-governance"
-        },
-        {
-          "source_id": "S8",
-          "quote": "AWS Secrets Manager",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-security-identity-compliance"
-        },
-        {
-          "source_id": "S18",
-          "quote": "Parameter Store is a centralized configuration data store for named values called parameters.",
-          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
-        },
-        {
-          "source_id": "S4",
-          "quote": "AWS CodeStar",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-developer-tools"
-        },
-        {
-          "source_id": "S6",
-          "quote": "EC2 Image Builder",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-compute"
+          "source_id": "S19",
+          "quote": "With basic scanning, you configure your repositories to scan on push or you can perform manual scans and Amazon ECR provides a list of scan findings.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html#image-scanning"
         }
+      ],
+      "covers": [
+        "q-1.1-0001"
       ]
     },
     {
       "id": "s04",
-      "title": "1 置き場: 三種類のリポジトリ",
+      "title": "置き場: CodeArtifact の外部接続と upstream",
       "bullets": [
-        "コード: 例として GitHub",
-        "イメージ: Amazon ECR",
-        "アーティファクト: CodeArtifact"
+        "公開の取り込みは外部接続",
+        "共有リポジトリを upstream に",
+        "upstream は同じドメインの中で"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  GH[\"コードの置き場<br/>例: GitHub\"]\n  ECR@{ svc: \"Amazon ECR\", label: \"Amazon ECR<br/>イメージの置き場\" }\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>アーティファクトの<br/>置き場\" }\n",
-        "alt": "三種類のリポジトリを横に並べた図。コードの置き場は例として GitHub、イメージの置き場は Amazon ECR、アーティファクトの置き場は CodeArtifact。"
+        "source": "flowchart TB\n  NPM[\"公開のリポジトリ<br/>例: npmjs\"]\n  subgraph D[\"1 つのドメイン\"]\n  SH@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>共有リポジトリ<br/>外部接続を持つ\" }\n  TA[\"チーム A の<br/>リポジトリ\"]\n  TBB[\"チーム B の<br/>リポジトリ\"]\n  end\n  NPM -- \"外部接続で取り込む\" --> SH\n  SH -- \"upstream として使う\" --> TA\n  SH -- \"upstream として使う\" --> TBB\n",
+        "alt": "公開のリポジトリ（例 npmjs）から、外部接続を持つ共有リポジトリへパッケージを取り込む。共有リポジトリは同じドメインの中で、各チームのリポジトリの upstream になる。"
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "ここから一つ目の部、置き場です。リポジトリとは、置き場のことです。このタスクでは三種類を扱います。"
-        },
-        {
-          "who": "student",
-          "text": "名前にコードと付くから、コードの置き場はコードアーティファクトなのだ？"
+          "text": "次はコードアーティファクトです。パッケージを置くリポジトリは、どれも一つのドメインに属します。"
         },
         {
           "who": "teacher",
-          "text": "違います。コードの置き場は、この講義では例としてギットハブを使い、二つ目の部でパイプラインにつなぎます。コードアーティファクトはアーティファクトの置き場です。"
+          "text": "公開のパッケージを取り込むには、リポジトリに外部接続を設定します。エヌピーエムジェイエスのような公開のリポジトリにつなぐ設定です。"
         },
         {
           "who": "student",
-          "text": "イメージの置き場は？"
+          "text": "各チームのリポジトリが、それぞれ外部接続を持つ形でもいい？"
         },
         {
           "who": "teacher",
-          "text": "イメージは、大まかに言うと、コンテナを動かすもとになる物です。その置き場として範囲の一覧にあるのは、コンテナの分類のイーシーアール、つまりコンテナの登録先です。"
+          "text": "中央でまとめたい、という条件なら外れます。各チームが別々に外部接続を持つ形になるからです。"
+        },
+        {
+          "who": "teacher",
+          "text": "まとめるには、外部接続を持つ共有のリポジトリを一つ作り、それを各チームのリポジトリのアップストリームにします。そうすると、共有のリポジトリのパッケージを各チームのリポジトリで使えます。"
         },
         {
           "who": "student",
-          "text": "アーティファクトの置き場のコードアーティファクトは、何を置くのだ？"
+          "text": "チームごとにドメインを分けても、アップストリームでつなげるのだ？"
         },
         {
           "who": "teacher",
-          "text": "ソフトウェアのパッケージを保存し、共有するアーティファクトリポジトリです。コードは例としてギットハブ、イメージはイーシーアール、アーティファクトはコードアーティファクトです。"
+          "text": "そうとは言えません。資料にあるのは、同じドメインの中で、あるリポジトリを別のリポジトリのアップストリームにする形です。それから、コードアーティファクトのパッケージは公開にできません。"
+        },
+        {
+          "who": "student",
+          "text": "外部接続は共有のリポジトリに一つ、それを同じドメインの中でアップストリームにする、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。公開にする形は、資料ではできないと書かれています。"
         }
       ],
       "refs": [
         {
-          "source_id": "S2",
-          "quote": "Configuring code, image, and artifact repositories",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
+          "source_id": "S23",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs, NuGet Gallery, Maven Central, or PyPI.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
         },
         {
-          "source_id": "S14",
-          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
-          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
+          "source_id": "S23",
+          "quote": "You can make packages in one repository available to another repository in the same domain.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
         },
         {
-          "source_id": "S15",
-          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
-          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
-        },
-        {
-          "source_id": "S16",
-          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
-          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
-        },
-        {
-          "source_id": "S5",
-          "quote": "Amazon ECR",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-02-in-scope-services.html#dop-02-containers"
+          "source_id": "S23",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
         }
+      ],
+      "covers": [
+        "q-1.1-0002"
       ]
     },
     {
       "id": "s05",
-      "title": "1 置き場: Amazon ECR",
+      "title": "つなぐ: 接続が PENDING のまま",
       "bullets": [
-        "private repository",
-        "権限は resource-based",
-        "仕組みに AWS IAM を使う"
+        "CLI・CloudFormation で作ると PENDING",
+        "コンソールで編集して AVAILABLE",
+        "作り直し・トークンは外れ"
       ],
       "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  ECR@{ svc: \"Amazon ECR\", label: \"Amazon ECR<br/>private repository<br/>resource-based<br/>permissions\" }\n  IAM@{ svc: \"AWS IAM\", label: \"AWS IAM<br/>権限の仕組み\" }\n  ECR -. \"権限に使う\" .-> IAM\n",
-        "alt": "Amazon ECR は private repository を扱え、その権限は repository の側の resource-based permissions で、仕組みには AWS IAM を使う。"
+        "type": "steps",
+        "items": [
+          {
+            "label": "CLI か CloudFormation で接続を作る",
+            "note": "既定で PENDING"
+          },
+          {
+            "label": "コンソールで接続を編集する",
+            "note": "作った接続をそのまま使う"
+          },
+          {
+            "label": "状態が AVAILABLE になる",
+            "note": "作り直しても PENDING から"
+          }
+        ]
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "イーシーアールの公式の説明には、プライベートリポジトリを扱える、と書かれています。プライベートとは、公開しない、という意味です。"
+          "text": "コードパイプラインを外のリポジトリにつなぐ時は、接続という資源を使います。ギットハブなどのリポジトリを、エーダブリューエスのサービスにつなぐ物です。"
+        },
+        {
+          "who": "teacher",
+          "text": "問題で効くのは状態です。シーエルアイやクラウドフォーメーションで作った接続は、既定でペンディングになります。"
         },
         {
           "who": "student",
-          "text": "使える人はどうやって決めるのだ？"
+          "text": "ペンディングは途中の状態で、待てば先に進むのだ？"
         },
         {
           "who": "teacher",
-          "text": "リポジトリの権限は、リソースベースのパーミッションです。リソース、ここではリポジトリを基にした権限です。画面の図でも、リポジトリの側に書いてあります。"
+          "text": "そうとは言えません。資料にある手順は、作った後にコンソールで接続を編集して、アベイラブルにする、です。"
         },
         {
           "who": "student",
-          "text": "リポジトリの側の権限なら、アイアムとは関係ないってこと？"
+          "text": "作った後にコンソールで編集する、だね。作り直したらどう？"
         },
         {
           "who": "teacher",
-          "text": "違います。この権限には、アイアム、つまり権限の仕組みを使います。"
+          "text": "シーエルアイやクラウドフォーメーションで作れば、また既定でペンディングです。個人のトークンを保存する手は、トークンを置かない条件で外れます。"
         },
         {
           "who": "student",
-          "text": "リポジトリの側の権限でも、仕組みはアイアム、なのだ。問題文ではどう見分けるの？"
+          "text": "ペンディングと出たら、コンソールで編集、と覚えるよ。"
         },
         {
           "who": "teacher",
-          "text": "イメージを公開せずに置きたい、使える人を絞りたい、という条件が出たら思い出してください。"
-        },
-        {
-          "who": "teacher",
-          "text": "要点は、イーシーアールのプライベートリポジトリと、アイアムを使ったリソースベースのパーミッションの組み合わせです。"
+          "text": "はい、それが決め手です。"
         }
       ],
       "refs": [
         {
-          "source_id": "S15",
-          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
-          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
+          "source_id": "S26",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html#connections-github-cli"
+        },
+        {
+          "source_id": "S26",
+          "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html#connections-github-cli"
         }
+      ],
+      "covers": [
+        "q-1.1-0003"
       ]
     },
     {
       "id": "s06",
-      "title": "1 置き場: CodeArtifact",
+      "title": "つなぐ: ソースの出力は ZIP か full clone か",
       "bullets": [
-        "マネージドのリポジトリ",
-        "パッケージを保存・共有",
-        "安全で大きく伸ばせる"
+        "既定: コミットの浅いコピーの ZIP",
+        "Git の履歴が要る → full clone",
+        "full clone を使えるのは CodeBuild"
       ],
       "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  O[\"組織\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>マネージドの<br/>アーティファクト<br/>リポジトリ\" }\n  D[\"アプリケーション開発\"]\n  O -- \"パッケージを保存\" --> CA\n  CA -- \"パッケージを共有\" --> D\n",
-        "alt": "CodeArtifact はマネージドのアーティファクトリポジトリ。組織がソフトウェアパッケージを保存し、アプリケーション開発のために共有するのを助ける。"
+        "type": "compare",
+        "columns": [
+          "項目",
+          "既定",
+          "full clone"
+        ],
+        "rows": [
+          [
+            "出力の中身",
+            "浅いコピーの ZIP",
+            "リポジトリの URL"
+          ],
+          [
+            "Git の履歴",
+            "浅いコピーだけ",
+            "clone して読める"
+          ],
+          [
+            "使えるアクション",
+            "後のアクション",
+            "CodeBuild だけ"
+          ]
+        ]
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "コードアーティファクトは、マネージドのアーティファクトリポジトリです。"
+          "text": "接続を使うソースアクションには、出力の形が二つあります。"
+        },
+        {
+          "who": "teacher",
+          "text": "既定は、ほかのソースアクションと同じで、コミットの浅いコピーをジップにした物です。もう一つはフルクローンで、リポジトリへのユーアールエルの参照を出力します。"
         },
         {
           "who": "student",
-          "text": "マネージドって、どういう意味なのだ？"
+          "text": "ビルドで履歴を読むギットのコマンドが失敗するなら、ビルドの中でギットの準備をし直せば読めるのだ？"
         },
         {
           "who": "teacher",
-          "text": "大まかに言うと、仕組みの運用をサービスに任せられる、という意味です。公式の説明では、安全で、大きく伸ばせるサービスとされています。"
-        },
-        {
-          "who": "teacher",
-          "text": "役目は、組織が、アプリケーション開発のためのソフトウェアパッケージを、保存し、共有するのを助けます。"
+          "text": "そうとは言えません。既定のジップは、コミットの浅いコピーです。履歴が要るならフルクローンにします。後のコードビルドのアクションが、リポジトリとギットのメタデータをクローンできます。"
         },
         {
           "who": "student",
-          "text": "じゃあ、コンテナのイメージもコードアーティファクトに置くのだ？"
+          "text": "フルクローンの出力を、デプロイのアクションにもそのまま渡せる？"
         },
         {
           "who": "teacher",
-          "text": "この講義でイメージの置き場として見たのは、イーシーアールです。問題文に、パッケージを組織の中で保存して共有したい、と出たら、コードアーティファクトを候補にします。"
+          "text": "いいえ。フルクローンの参照を使えるのは、後に続くコードビルドのアクションだけです。"
         },
         {
           "who": "student",
-          "text": "イメージならイーシーアール、パッケージならコードアーティファクト、ですね。"
+          "text": "履歴が要るならフルクローン、受け取るのはコードビルドだけ、だね。"
         },
         {
           "who": "teacher",
-          "text": "そうです。その二つを並べて覚えてください。"
+          "text": "そうです。ビルドスペックに個人のトークンでクローンを書く手は、認証情報を置かない条件で外れます。"
         }
       ],
       "refs": [
         {
-          "source_id": "S16",
-          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
-          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+          "source_id": "S27",
+          "quote": "Default: Like other existing CodePipeline source actions, CodeStarSourceConnection can output a ZIP file with a shallow copy of your commit.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-output"
+        },
+        {
+          "source_id": "S27",
+          "quote": "Currently, the Git URL reference can only be used by downstream CodeBuild actions to clone the repo and associated Git metadata.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-output"
         }
+      ],
+      "covers": [
+        "q-1.1-0004"
       ]
     },
     {
       "id": "s07",
-      "title": "2 つなぐ: GitHub と source action",
+      "title": "つなぐ: Git タグで始めるトリガー",
       "bullets": [
-        "試験ガイド: バージョン管理でつなぐ",
-        "GitHub を source action に",
-        "GitHub Enterprise Cloud も"
+        "既定: push で変更を検出",
+        "トリガーを Git タグにする",
+        "Filter type Tags で名前の形"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  GH[\"GitHub か<br/>GitHub Enterprise Cloud<br/>のリポジトリ\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>source action\" }\n  GH -- \"source action で加える\" --> CP\n",
-        "alt": "GitHub か GitHub Enterprise Cloud のリポジトリを、CodePipeline に source action として加える。"
+        "source": "flowchart TB\n  TAG[\"Git タグを作る<br/>名前の形が合う<br/>例: release*\"]\n  PUSH[\"タグの無い push\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>トリガー: Git タグ<br/>Filter type: Tags\" }\n  TAG -- \"パイプラインが始まる\" --> CP\n  PUSH -. \"始まらない\" .-> CP\n",
+        "alt": "トリガーを Git タグにし、Filter type に Tags、パターンに release* を入れたパイプライン。その形のタグが作られた時に始まり、全部の push で変更を検出するイベントは使わない。"
       },
       "dialogue": [
         {
           "who": "teacher",
-          "text": "二つ目の部、バージョン管理とパイプラインのつなぎ方です。バージョン管理とは、コードの変更を、版として記録していく仕組みのことです。"
+          "text": "接続のソースを持つパイプラインは、既定では、リポジトリへのコードのプッシュで変更を検出して始まります。"
         },
         {
           "who": "student",
-          "text": "試験ガイドでは、何をつなぐと書いてあったのだ？"
+          "text": "特定のタグの時だけ動かしたいなら、プッシュの条件を絞れば足りる？"
         },
         {
           "who": "teacher",
-          "text": "バージョン管理を使って、パイプラインをアプリケーションの環境とつなぐ、という行です。この講義の資料にあるのは、その入口の所です。"
+          "text": "プッシュの条件を絞っても、プッシュで始まる形のままです。タグで始めたいなら、トリガーの種類をギットタグにします。"
         },
         {
           "who": "teacher",
-          "text": "コードパイプラインでは、ギットハブ、またはギットハブエンタープライズクラウドのリポジトリを、ソースアクションとして加えます。"
+          "text": "ウェブフックのイベントで、フィルターの種類にタグズを選び、タグの名前の形で絞れます。資料の例は、リリースにアスタリスクを付けた形です。"
         },
         {
           "who": "student",
-          "text": "ソースアクションって何なのだ？"
+          "text": "そのとき、普通のプッシュの検出はどうなるのだ？"
         },
         {
           "who": "teacher",
-          "text": "ここでは、パイプラインの入口にリポジトリをつなぐ物、と捉えます。"
+          "text": "ギットタグのトリガーで始まるパイプラインは、ウェブフックブイツーのイベントに設定され、全部のプッシュで変更を検出するイベントは使いません。"
         },
         {
           "who": "student",
-          "text": "じゃあ、環境とつなぐ所まで、全部ソースアクションで済むのだ？"
+          "text": "自分でコードを書かずにタグで絞るなら、トリガーのフィルター、だね。"
         },
         {
           "who": "teacher",
-          "text": "そこまでは言えません。資料で見られるのは、リポジトリをパイプラインにつなぐ入口の所だけです。"
+          "text": "はい。タグのイベントで関数を呼んで始める手は、独自のコードを書かない条件で外れます。毎回手で始めるのも手間で外れます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S28",
+          "quote": "Under Webhook events, in Filter type, choose Tags.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html#tutorials-github-tags-pipeline"
+        },
+        {
+          "source_id": "S28",
+          "quote": "Pipelines that start with a trigger type of Git tags will be configured for WebhookV2 events and will not use the Webhook event (change detection on all push events) to start the pipeline.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html#tutorials-github-tags-pipeline"
+        },
+        {
+          "source_id": "S26",
+          "quote": "The pipeline defaults to detect changes on code push to the connection source repository.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html#connections-github-cli"
+        }
+      ],
+      "covers": [
+        "q-1.1-0005"
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "作る: 失敗しても動かすなら finally",
+      "bullets": [
+        "finally は commands の後に動く",
+        "commands が失敗しても動く",
+        "phase は全部成功で成功"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  C1[\"commands<br/>1 つ目のコマンド\"]\n  C2[\"commands<br/>残りのコマンド\"]\n  F[\"finally ブロック<br/>のコマンド\"]\n  P[\"phase の結果<br/>どれか失敗なら失敗\"]\n  C1 -. \"失敗すると飛ばす\" .-> C2\n  C1 -- \"失敗しても動く\" --> F\n  F -- \"全部成功で成功\" --> P\n",
+        "alt": "commands の 1 つ目のコマンドが失敗すると、残りのコマンドは飛ばされるが、finally ブロックのコマンドは動く。phase は commands と finally の全部のコマンドが成功した時だけ成功する。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ビルドスペックのフェーズには、コマンズのブロックのほかに、ファイナリーのブロックを書けます。"
+        },
+        {
+          "who": "teacher",
+          "text": "ファイナリーのコマンドは、コマンズのコマンドの後に動きます。そしてコマンズのどれかが失敗しても動きます。"
         },
         {
           "who": "student",
-          "text": "問題文でギットハブのリポジトリをパイプラインにつなぎたい、と出たら？"
+          "text": "一つ目のコマンドが失敗したら、残りのコマンドはどうなる？"
         },
         {
           "who": "teacher",
-          "text": "ソースアクションです。"
+          "text": "コードビルドは残りを飛ばして、ファイナリーのコマンドを動かします。フェーズが成功するのは、コマンズとファイナリーの全部のコマンドが成功した時だけです。"
+        },
+        {
+          "who": "student",
+          "text": "失敗しても後の処理は動かしたい、でもフェーズは失敗にしたい、という条件に合うね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。似た働きの設定に、オンフェイリャーがあります。値はアボートかコンティニューで、コンティニューは次のフェーズへ進みます。"
+        },
+        {
+          "who": "student",
+          "text": "オンフェイリャーをコンティニューにして、次のフェーズで動かす方が分かりやすいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "計算の種類を見てください。オンフェイリャーは、ラムダの計算や予約された容量では使えず、コードビルドが用意するイーシーツーの計算のイメージだけで動きます。"
+        },
+        {
+          "who": "student",
+          "text": "ラムダの計算なら、失敗しても動かすのはファイナリー、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S29",
+          "quote": "are run even if a command in the commands block fails.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+        },
+        {
+          "source_id": "S30",
+          "quote": "The on-failure attribute is not supported when using Lambda compute or reserved capacity.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+        }
+      ],
+      "covers": [
+        "q-1.1-0006"
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "作る: EC2 の計算と Lambda の計算",
+      "bullets": [
+        "EC2: 柔軟・on-demand か予約容量",
+        "Lambda: 起動が速い",
+        "Lambda の計算は制限が多い"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "EC2 の計算",
+          "Lambda の計算"
+        ],
+        "rows": [
+          [
+            "得意",
+            "柔軟さ",
+            "起動の速さ"
+          ],
+          [
+            "Docker のビルド",
+            "privilegedMode で",
+            "使えない"
+          ],
+          [
+            "独自のタイムアウト",
+            "使える",
+            "使えない"
+          ],
+          [
+            "15 分を超える実行",
+            "使える",
+            "使えない"
+          ],
+          [
+            "on-failure",
+            "EC2 のイメージで",
+            "使えない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コードビルドの計算には、イーシーツーとラムダの二つのモードがあります。イーシーツーはビルド中の柔軟さ、ラムダは起動の速さが得意です。"
+        },
+        {
+          "who": "teacher",
+          "text": "イーシーツーでは、オンデマンドか、予約された容量のフリートで動かせます。予約された容量は、イーシーツーのモードの選び方として書かれています。"
+        },
+        {
+          "who": "student",
+          "text": "起動が速いなら、全部ラムダにした方が得じゃない？"
+        },
+        {
+          "who": "teacher",
+          "text": "制限を見て決めます。ラムダの計算は、キャッシュ、独自のビルドのタイムアウト、キューのタイムアウト、特権モード、独自の実行環境、十五分を超える実行に対応しません。"
+        },
+        {
+          "who": "teacher",
+          "text": "それに、ドッカーのビルドや実行にも対応しません。"
+        },
+        {
+          "who": "student",
+          "text": "長いビルドやドッカーのイメージ作りが出たら、まずラムダの計算を疑うのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そのとおりです。"
+        },
+        {
+          "who": "student",
+          "text": "ラムダは速いけど制限が多い、制限に当たったらイーシーツーへ、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S31",
+          "quote": "CodeBuild offers EC2 and AWS Lambda compute modes. EC2 offers optimized flexibility during your build and AWS Lambda",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-compute-types.html#compute.types"
+        },
+        {
+          "source_id": "S32",
+          "quote": "AWS Lambda doesn't support caching, custom build timeouts, queue timeout, build badges, privileged mode, custom runtime environments, or runtimes longer than 15 minutes.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html#lambda.limitations"
+        },
+        {
+          "source_id": "S32",
+          "quote": "AWS Lambda doesn't support Docker builds or runs.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html#lambda.limitations"
+        }
+      ],
+      "covers": [
+        "q-1.1-0007",
+        "q-1.1-0008",
+        "q-1.1-0006"
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "作る: Docker のイメージを作るなら",
+      "bullets": [
+        "EC2 の計算に戻す",
+        "privilegedMode を true",
+        "Lambda のままでは直らない"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  L@{ svc: \"AWS Lambda\", label: \"AWS Lambda の計算<br/>Docker も特権も不可\" }\n  E@{ svc: \"Amazon EC2\", label: \"Amazon EC2 の計算<br/>privilegedMode: true\" }\n  D[\"Docker デーモン<br/>ビルドで起動する\"]\n  L -- \"EC2 の計算に戻す\" --> E\n  E -- \"デーモンを使える\" --> D\n",
+        "alt": "Lambda の計算は Docker のビルドにも特権モードにも対応しない。EC2 の計算に戻し、privilegedMode を true にすると、ビルドで起動した Docker デーモンを使える。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ドッカーのイメージを作るビルドでは、二つの所を見ます。計算の種類と、特権モードです。"
+        },
+        {
+          "who": "teacher",
+          "text": "プロジェクトの環境のプリビレッジドモードは、ドッカーのイメージを作る時だけトゥルーにします。そうしないと、ドッカーのデーモンを使うビルドは全部失敗します。"
+        },
+        {
+          "who": "student",
+          "text": "計算の種類はそのままで、特権モードだけ入れれば動く？"
+        },
+        {
+          "who": "teacher",
+          "text": "ラムダの計算なら、動きません。ラムダの計算は特権モードに対応せず、ドッカーのビルドもできません。タイムアウトを延ばしても同じです。"
+        },
+        {
+          "who": "student",
+          "text": "イーシーツーの計算に戻すことと、プリビレッジドモードをトゥルーにすること、の二つが組なんだね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。加えて、ビルドの中でドッカーのデーモンを起動しておく必要もあります。"
+        },
+        {
+          "who": "student",
+          "text": "ドッカーが出たら、計算と特権モードの両方を見るのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。ドッカーなら、イーシーツーの計算と特権モード、です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S34",
+          "quote": "Set to true only if you plan to use this build project to",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html#cli.environment"
+        },
+        {
+          "source_id": "S34",
+          "quote": "interact with the Docker daemon fail. You must also start the Docker",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html#cli.environment"
+        },
+        {
+          "source_id": "S32",
+          "quote": "AWS Lambda doesn't support Docker builds or runs.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html#lambda.limitations"
+        }
+      ],
+      "covers": [
+        "q-1.1-0007"
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "作る: ビルドのタイムアウト",
+      "bullets": [
+        "timeoutInMinutes: 5〜2160 分",
+        "指定しないと既定の 60 分",
+        "2160 分は 36 時間"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "値"
+        ],
+        "rows": [
+          [
+            "最小",
+            "5 分"
+          ],
+          [
+            "最大",
+            "2160 分（36 時間）"
+          ],
+          [
+            "指定しない時",
+            "60 分"
+          ],
+          [
+            "Lambda の計算",
+            "独自の値は不可"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コードビルドのタイムアウトインミニッツは、終わらないビルドを止めるまでの分数です。"
+        },
+        {
+          "who": "teacher",
+          "text": "決められるのは五分から二千百六十分まで、つまり三十六時間までです。指定しないと、既定の六十分が使われます。"
+        },
+        {
+          "who": "student",
+          "text": "設定を変えてないのに、ちょうど一時間で毎回止まるのは、その既定の値のせい？"
+        },
+        {
+          "who": "teacher",
+          "text": "そう読めます。ビルドが長いなら、その長さが収まる分数に延ばします。"
+        },
+        {
+          "who": "student",
+          "text": "念のため、上限よりずっと長い分数にしておけばいいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "上限を超える値は決められません。上限は二千百六十分です。数字の選択肢は、範囲の中に入っているかを見てください。"
+        },
+        {
+          "who": "student",
+          "text": "範囲の中で、ビルドが収まる長さにする、だね。速くするためにラムダの計算に移すのは？"
+        },
+        {
+          "who": "teacher",
+          "text": "ラムダの計算は、十五分を超える実行と独自のタイムアウトに対応しないので、長いビルドには使えません。"
+        },
+        {
+          "who": "student",
+          "text": "長いビルドは、イーシーツーの計算のまま、範囲の中で延ばす。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S33",
+          "quote": "Optional. The number of minutes, between 5 to 2160 (36 hours), after which CodeBuild",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html#cli.timeoutinminutes"
+        },
+        {
+          "source_id": "S33",
+          "quote": "stops the build if it is not complete. If not specified, the default of 60 is used.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html#cli.timeoutinminutes"
+        }
+      ],
+      "covers": [
+        "q-1.1-0008"
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "守る: 値の置き場の分け方",
+      "bullets": [
+        "認証情報・API キー → Secrets Manager",
+        "暗号化が要る設定値 → SecureString",
+        "平文の変数は外れ"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "置く物",
+          "置き場",
+          "資料の言葉"
+        ],
+        "rows": [
+          [
+            "DB の認証情報",
+            "Secrets Manager",
+            "推奨"
+          ],
+          [
+            "API キー・トークン",
+            "Secrets Manager",
+            "推奨"
+          ],
+          [
+            "エンドポイント等",
+            "SecureString",
+            "暗号化が要る値"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "守るの部です。まず値をどこに置くかで、資料にはっきりした推奨があります。"
+        },
+        {
+          "who": "teacher",
+          "text": "データベースの認証情報、エーピーアイキー、トークンのような秘密には、シークレッツマネージャーを勧めています。自動ローテーションなど、秘密のための仕組みがあるからです。"
+        },
+        {
+          "who": "student",
+          "text": "パラメーターストアにもセキュアストリングがあるし、秘密もそっちで十分なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "動きはしますが、推奨に従う、という条件なら外れます。セキュアストリングは、サービスのエンドポイントやアカウントの識別子のような、暗号化が要る設定値に使うと書かれています。"
+        },
+        {
+          "who": "student",
+          "text": "認証情報じゃないエンドポイントなら、平文の変数でもいいよね。"
+        },
+        {
+          "who": "teacher",
+          "text": "暗号化して置く、という条件があれば外れます。平文の変数では暗号化されません。"
+        },
+        {
+          "who": "student",
+          "text": "秘密はシークレッツマネージャー、暗号化が要る設定値はセキュアストリング、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい、それがこの部の軸です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S41",
+          "quote": "Use SecureString for configuration values that require encryption, such as service endpoints and account identifiers.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
+        },
+        {
+          "source_id": "S41",
+          "quote": "For secrets such as database credentials, API keys, or tokens, we recommend AWS Secrets Manager, which provides purpose built security controls including automatic rotation and cross-region replication.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
+        }
+      ],
+      "covers": [
+        "q-1.1-0009",
+        "q-1.1-0010",
+        "q-1.1-0011"
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "守る: buildspec の env で参照する",
+      "bullets": [
+        "env の secrets-manager・parameter-store",
+        "json-key で 1 つのキーだけ",
+        "ロールに ssm:GetParameters"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  BS[\"buildspec の env<br/>secrets-manager<br/>parameter-store\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>json-key でキーを選ぶ\" }\n  PS@{ svc: \"AWS Systems Manager\", label: \"AWS Systems Manager<br/>Parameter Store\" }\n  ROLE@{ svc: \"AWS IAM\", label: \"AWS IAM<br/>サービスロール<br/>ssm:GetParameters\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ログで値を隠す\" }\n  CB -- \"env を読む\" --> BS\n  BS -- \"シークレットを取る\" --> SM\n  BS -- \"パラメータを取る\" --> PS\n  ROLE -. \"取る権限\" .-> PS\n",
+        "alt": "CodeBuild は buildspec の env を読み、secrets-manager の欄で Secrets Manager のシークレット（json-key でキーを選べる）を、parameter-store の欄で Parameter Store のパラメータを取る。Parameter Store から取るには、サービスロールに ssm:GetParameters が要る。取った値はログで隠される。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ビルドで値を使う時は、ビルドスペックのエンブで参照します。シークレッツマネージャーの値はシークレッツマネージャーの欄、パラメーターストアの値はパラメーターストアの欄です。"
+        },
+        {
+          "who": "teacher",
+          "text": "シークレッツマネージャーの欄では、シークレットの名前かエーアールエヌを指定します。ジェイソンキーを付けると、キーと値の組のうち、一つのキーの値だけを取り出せます。"
+        },
+        {
+          "who": "student",
+          "text": "ジェイソンキーを付けないと、エラーになるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エラーではなく、シークレットの全文を取ります。全文を取って自分で解析する手は、一つだけ渡す条件にも、独自の解析を足さない条件にも反します。"
+        },
+        {
+          "who": "student",
+          "text": "パラメーターストアの欄の方は、何か準備が要る？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードビルドのサービスロールに、エスエスエムのゲットパラメーターズのアクションを足す必要があります。"
+        },
+        {
+          "who": "student",
+          "text": "二つの欄で取った値が、ビルドのログに出ちゃわない？"
+        },
+        {
+          "who": "teacher",
+          "text": "二つの欄で指定した文字列は、ログで隠されます。隠すのは保存した値と全く同じ文字列なので、ビルドで使う形のまま保存します。"
+        },
+        {
+          "who": "student",
+          "text": "一つのキーならジェイソンキー、パラメーターストアならロールの権限、ログはどちらも隠れる、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S36",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env"
+        },
+        {
+          "source_id": "S35",
+          "quote": "To allow CodeBuild to retrieve custom environment variables stored in Amazon EC2 Systems Manager Parameter Store, you must add the ssm:GetParameters action to your CodeBuild service role.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env"
+        },
+        {
+          "source_id": "S37",
+          "quote": "Masking matches the exact value stored in Amazon EC2 Systems Manager Parameter Store or AWS Secrets Manager.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env"
+        }
+      ],
+      "covers": [
+        "q-1.1-0009",
+        "q-1.1-0010"
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "守る: ローテーションと再デプロイ",
+      "bullets": [
+        "自動ローテーションは Secrets Manager",
+        "実行時に取得 → 再デプロイ不要",
+        "ビルドで埋め込むと再デプロイ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>自動ローテーション\" }\n  APP[\"アプリケーション<br/>実行時に取得\"]\n  DB[\"データベース<br/>認証情報も更新\"]\n  SM -- \"認証情報を更新\" --> DB\n  APP -- \"必要な時に呼ぶ\" --> SM\n",
+        "alt": "Secrets Manager の自動ローテーションは、シークレットとデータベースの両方の認証情報を更新する。アプリケーションは必要な時に Secrets Manager を呼んで認証情報を取るので、ローテーションしても再デプロイが要らない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ローテーションは、シークレットを定期的に更新することです。シークレットと、データベースやサービスの側の、両方の認証情報を更新します。"
+        },
+        {
+          "who": "teacher",
+          "text": "シークレッツマネージャーでは、シークレットの自動ローテーションのスケジュールを設定できます。"
+        },
+        {
+          "who": "student",
+          "text": "ローテーションの仕組みを自分で作って、定期的に動かすのでも同じでしょ？"
+        },
+        {
+          "who": "teacher",
+          "text": "結果は近くても、関数とスケジュールを自分で作って保守する手間がかかります。最も少ない手間、の条件で外れます。"
+        },
+        {
+          "who": "student",
+          "text": "それと、ローテーションのたびに再デプロイが要るのはつらいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そこが二つ目の決め手です。ハードコードした認証情報を、必要な時にシークレッツマネージャーを呼んで取る、実行時の呼び出しに置き換えます。"
+        },
+        {
+          "who": "teacher",
+          "text": "認証情報がアプリケーションと一緒に保存されないので、ローテーションしても、アプリケーションの更新やデプロイが要りません。"
+        },
+        {
+          "who": "student",
+          "text": "ビルドで値を埋め込んだり、デプロイの時に設定ファイルへ写したりすると、変えるたびにデプロイが要る、ってこと？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。再デプロイ無しで変えたいなら、実行時に取得です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S39",
+          "quote": "When you rotate a secret, you update the credentials in both the secret and the database or service.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+        },
+        {
+          "source_id": "S40",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        },
+        {
+          "source_id": "S40",
+          "quote": "Since the credentials are no longer stored with the application, rotating credentials no longer requires updating your applications and deploying changes to application clients.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        }
+      ],
+      "covers": [
+        "q-1.1-0011",
+        "q-1.1-0009"
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "届ける: in-place と blue/green",
+      "bullets": [
+        "in-place は EC2/オンプレミスだけ",
+        "Lambda・ECS は blue/green",
+        "トラフィックを段階で移す"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "計算の基盤",
+          "in-place",
+          "blue/green"
+        ],
+        "rows": [
+          [
+            "EC2/オンプレミス",
+            "使える",
+            "EC2 インスタンスのみ"
+          ],
+          [
+            "AWS Lambda",
+            "使えない",
+            "トラフィックを移す"
+          ],
+          [
+            "Amazon ECS",
+            "使えない",
+            "トラフィックを移す"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "届けるの部です。コードデプロイのデプロイの型は、インプレースとブルーグリーンです。"
+        },
+        {
+          "who": "teacher",
+          "text": "インプレースは、各インスタンスでアプリケーションを止め、新しいリビジョンを入れ、起動して確かめます。使えるのは、イーシーツーとオンプレミスの計算の基盤だけです。"
+        },
+        {
+          "who": "student",
+          "text": "ブルーグリーンの良さは、止まる時間が短いこと？"
+        },
+        {
+          "who": "teacher",
+          "text": "新しい版による中断を小さくして更新するための型です。新しい版を古い版と並べて用意してから、本番のトラフィックを移します。"
+        },
+        {
+          "who": "student",
+          "text": "イーシーツーとオンプレミスの基盤なら、ブルーグリーンはどのサーバーでもできるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。その基盤では、ブルーグリーンはイーシーツーのインスタンスだけで動きます。"
+        },
+        {
+          "who": "student",
+          "text": "イーシーツーのインスタンスだけ、だね。ラムダとイーシーエスは？"
+        },
+        {
+          "who": "teacher",
+          "text": "ラムダとイーシーエスのブルーグリーンでは、カナリア、リニア、一括のどれかのデプロイ設定で、トラフィックを段階的に移します。"
+        },
+        {
+          "who": "student",
+          "text": "基盤を見て、使える型と移し方を先に絞る、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S50",
+          "quote": "Only deployments that use the EC2/On-Premises compute platform can use in-place deployments.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview"
+        },
+        {
+          "source_id": "S50",
+          "quote": "If you use an EC2/On-Premises compute platform, be aware that blue/green deployments work with Amazon EC2 instances only.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview"
+        },
+        {
+          "source_id": "S50",
+          "quote": "Blue/green on an AWS Lambda or Amazon ECS compute platform: Traffic is shifted in increments according to a canary, linear, or all-at-once deployment configuration.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html#welcome-deployment-overview"
+        }
+      ],
+      "covers": [
+        "q-1.1-0012",
+        "q-1.1-0013"
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "届ける: ECS の移し方と NLB の制限",
+      "bullets": [
+        "canary・linear・all-at-once",
+        "NLB なら ECSAllAtOnce だけ",
+        "NLB のまま設定だけ変えても不可"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "設定の種類",
+          "ECS での動きの例"
+        ],
+        "rows": [
+          [
+            "canary",
+            "10% → 5 分後に残り"
+          ],
+          [
+            "linear",
+            "毎分 10% ずつ"
+          ],
+          [
+            "all-at-once",
+            "一度に全部"
+          ],
+          [
+            "NLB を使う時",
+            "ECSAllAtOnce だけ"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "イーシーエスとラムダでは、デプロイ設定が、トラフィックの移し方を決めます。種類はカナリア、リニア、一括です。"
+        },
+        {
+          "who": "student",
+          "text": "移す割合や待つ時間は、設定ごとに決まってるの？"
+        },
+        {
+          "who": "teacher",
+          "text": "例えばイーシーエスには、最初に十パーセントを移し、残りを五分後に移すカナリアの設定があります。毎分十パーセントずつ移すリニアの設定もあります。数字は設定ごとに違います。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、ネットワークロードバランサーの後ろのイーシーエスでも、カナリアに変えれば一部だけ先に送れるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そこが引っかけです。ネットワークロードバランサーを使う場合、使える事前定義の設定は、イーシーエスオールアットワンスだけです。カナリアもリニアも使えません。"
+        },
+        {
+          "who": "student",
+          "text": "ネットワークロードバランサーなら一括だけ。一部を先に送りたいなら、ロードバランサーの方を変えるってこと？"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。ネットワークロードバランサーのまま設定だけ変える選択肢は、この制限に当たります。制限が書かれているのはネットワークロードバランサーの場合だけなので、ロードバランサーごと変える選択肢と見分けます。承認を足しても、移し方は一括のままです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S45",
+          "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs"
+        },
+        {
+          "source_id": "S45",
+          "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs"
+        }
+      ],
+      "covers": [
+        "q-1.1-0012"
+      ]
+    },
+    {
+      "id": "s17",
+      "title": "届ける: EC2 の最小正常ホスト数",
+      "bullets": [
+        "残す数か割合 = 最小正常ホスト数",
+        "指定しないと OneAtATime",
+        "既定が合わなければ独自の設定"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "設定",
+          "1 度に入れる数",
+          "9 台の例"
+        ],
+        "rows": [
+          [
+            "OneAtATime",
+            "1 台ずつ",
+            "1 台ずつ"
+          ],
+          [
+            "HalfAtATime",
+            "半分まで（切り捨て）",
+            "4 台まで"
+          ],
+          [
+            "AllAtOnce",
+            "できるだけ多く",
+            "9 台に一度に"
+          ],
+          [
+            "独自の設定",
+            "最小正常ホスト数",
+            "残す数か割合を指定"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "イーシーツーとオンプレミスのデプロイ設定は、最小正常ホスト数で決まります。デプロイ中にいつも使える状態で残す、インスタンスの数か割合です。"
+        },
+        {
+          "who": "student",
+          "text": "デプロイ設定を何も指定しないと、全部に一度に入れるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。指定しないと、コードデプロイは、一度に一台ずつ入れるワンアットアタイムを使います。"
+        },
+        {
+          "who": "student",
+          "text": "既定は一台ずつ、だね。ほかの事前定義の設定は？"
+        },
+        {
+          "who": "teacher",
+          "text": "ハーフアットアタイムは、一度に半分までで、端数は切り捨てです。九台なら四台までです。オールアットワンスは、できるだけ多くに一度に入れます。"
+        },
+        {
+          "who": "student",
+          "text": "残す割合が決まってる時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "事前定義の設定が合わない時、例えば半分ずつのデプロイでは残す数を守れない時は、独自のデプロイ設定を作れます。その最小正常ホスト数に、いつも使える状態で残す数か割合を入れます。"
+        },
+        {
+          "who": "student",
+          "text": "残したい数か割合を、そのまま最小正常ホスト数に入れる、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。事前定義の設定で残す数が合わないなら、独自の設定です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S44",
+          "quote": "If you don't specify a deployment configuration, CodeDeploy uses the CodeDeployDefault.OneAtATime deployment configuration.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server"
+        },
+        {
+          "source_id": "S44",
+          "quote": "Deploys to up to half of the instances at a time (with fractions rounded down). In the example of nine instances, it deploys to up to four instances at a time.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-server"
+        },
+        {
+          "source_id": "S47",
+          "quote": "Under Minimum healthy hosts, specify the number or percentage of instances that must remain available at any time during a deployment.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations-create.html#deployment-configurations-create-console"
+        }
+      ],
+      "covers": [
+        "q-1.1-0013"
+      ]
+    },
+    {
+      "id": "s18",
+      "title": "届ける: アラームで止めて自動で戻す",
+      "bullets": [
+        "先に CloudWatch アラームを作る",
+        "デプロイグループにアラームを足す",
+        "しきい値で自動ロールバック"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "CloudWatch でアラームを作る",
+            "note": "1 つのメトリクスをしきい値と比べる"
+          },
+          {
+            "label": "デプロイグループにアラームを足す",
+            "note": "しきい値を超えたらデプロイを止める"
+          },
+          {
+            "label": "アラームで戻すロールバックを有効にする",
+            "note": "最後に正常だったリビジョンを再デプロイ"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "デプロイ中に指標が悪くなったら止めて戻したい、という問題の決め手です。画面の三つの手順で考えます。"
+        },
+        {
+          "who": "teacher",
+          "text": "まず、クラウドウォッチのアラームです。一つのメトリクスを決めた期間で見て、しきい値と比べて動く物です。"
+        },
+        {
+          "who": "student",
+          "text": "それをコードデプロイにどうつなぐの？"
+        },
+        {
+          "who": "teacher",
+          "text": "アラームをデプロイグループに足します。メトリクスがしきい値を超えたり下回ったりした時に、デプロイを止められます。"
+        },
+        {
+          "who": "student",
+          "text": "アラームを作るのとデプロイグループに足すのは、どっちが先でもいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "いいえ。デプロイグループに足す前に、クラウドウォッチでアラームを作っておく必要があります。"
+        },
+        {
+          "who": "student",
+          "text": "先にアラームを作って、それからデプロイグループに足す、だね。止めた後は？"
+        },
+        {
+          "who": "teacher",
+          "text": "アラームのしきい値に達した時のロールバックを有効にします。指定したアラームが一つでも動くと、コードデプロイは最後に正常だったリビジョンを再デプロイします。"
+        },
+        {
+          "who": "student",
+          "text": "止めるのはアラーム、戻すのはロールバックの設定、二つそろえるんだね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S53",
+          "quote": "You must have already created the alarm in CloudWatch before you can add it to a deployment group.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html"
+        },
+        {
+          "source_id": "S53",
+          "quote": "Roll back when alarm thresholds are met. If you added an alarm to this application in the previous step, CodeDeploy will redeploy the last known good revision when one or more of the specified alarms is activated.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html"
+        }
+      ],
+      "covers": [
+        "q-1.1-0014"
+      ]
+    },
+    {
+      "id": "s19",
+      "title": "届ける: 戻し方とアラームを無視する設定",
+      "bullets": [
+        "ロールバック = 前の版で新しいデプロイ",
+        "自動: 失敗時か、しきい値で",
+        "Ignore alarm configuration は逆"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "設定・操作",
+          "動き",
+          "止めて自動で戻す"
+        ],
+        "rows": [
+          [
+            "自動ロールバック",
+            "前の正常な版を再デプロイ",
+            "合う"
+          ],
+          [
+            "手動ロールバック",
+            "前の版で新しくデプロイ",
+            "合わない"
+          ],
+          [
+            "Ignore alarm configuration",
+            "アラームを見ずに進む",
+            "合わない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コードデプロイのロールバックは、前にデプロイしたリビジョンを、新しいデプロイとして入れ直す仕組みです。自動でも手動でもできます。"
+        },
+        {
+          "who": "student",
+          "text": "自動で戻すきっかけは、アラームだけ？"
+        },
+        {
+          "who": "teacher",
+          "text": "アラームだけではありません。デプロイグループかデプロイに、デプロイが失敗した時か、決めた監視のしきい値に達した時に、自動で戻すよう設定できます。"
+        },
+        {
+          "who": "student",
+          "text": "自動を設定してない時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "前にデプロイしたリビジョンを使う新しいデプロイを作って、手で戻します。ただ、自動で戻す、という条件には合いません。"
+        },
+        {
+          "who": "student",
+          "text": "アラームの設定を無視する、っていうのは、誤検知が多い時に便利そうなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "これを選ぶと、足したアラームを考えずにデプロイが進みます。止めたい、という条件とは逆なので外れます。"
+        },
+        {
+          "who": "student",
+          "text": "自動で戻すなら、ロールバックを有効にして、アラームは無視しない、だね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S48",
+          "quote": "You can configure a deployment group or deployment to automatically roll back when a deployment fails or when a monitoring threshold you specify is met. In this case, the last known good version of an application revision is deployed.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-automatic-rollbacks"
+        },
+        {
+          "source_id": "S49",
+          "quote": "If you have not set up automatic rollbacks, you can manually roll back a deployment by creating a new deployment that uses any previously deployed application revision",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy-manual-rollbacks"
+        },
+        {
+          "source_id": "S53",
+          "quote": "If you want deployments to proceed without taking into account alarms you have added, choose Ignore alarm configuration.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-groups-configure-advanced-options.html"
+        }
+      ],
+      "covers": [
+        "q-1.1-0014"
+      ]
+    },
+    {
+      "id": "s20",
+      "title": "条件から選ぶ 1: 置き場・つなぐ",
+      "bullets": [
+        "問題文の条件 → 選ぶ物 → 外れやすい物"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ物",
+          "外れやすい物"
+        ],
+        "rows": [
+          [
+            "継続して自動でスキャン",
+            "拡張スキャン",
+            "push 時のスキャン"
+          ],
+          [
+            "公開パッケージを一元管理",
+            "外部接続と upstream",
+            "各リポジトリに接続"
+          ],
+          [
+            "接続が PENDING",
+            "コンソールで編集",
+            "作り直し・トークン"
+          ],
+          [
+            "Git の履歴が要る",
+            "full clone",
+            "ZIP のまま・トークン"
+          ],
+          [
+            "タグの時だけ開始",
+            "Git タグのトリガー",
+            "push の条件で絞る"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここから、問題文の条件から選ぶ表です。まず置き場とつなぐの部です。"
+        },
+        {
+          "who": "teacher",
+          "text": "継続して自動でスキャン、なら拡張スキャンです。公開のパッケージを中央でまとめる、なら外部接続を持つ共有のリポジトリを、同じドメインでアップストリームにします。"
+        },
+        {
+          "who": "student",
+          "text": "接続がペンディングの時は、コンソールで編集だったね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。ギットの履歴が要るなら、ソースの出力をフルクローンにして、受け取るのはコードビルドです。"
+        },
+        {
+          "who": "student",
+          "text": "タグの時だけ始めたいなら、プッシュの条件じゃなくて、ギットタグのトリガー、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。右の列の外れやすい物も、なぜ外れるかを言えるようにしてください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S19",
+          "quote": "Enhanced scanning – Amazon ECR integrates with Amazon Inspector to provide automated, continuous scanning of your repositories.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html#image-scanning"
+        },
+        {
+          "source_id": "S23",
+          "quote": "To do this, configure one repository as an upstream of the other.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
+        },
+        {
+          "source_id": "S26",
+          "quote": "A connection created through the AWS CLI or AWS CloudFormation is in PENDING status by default.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html#connections-github-cli"
+        },
+        {
+          "source_id": "S27",
+          "quote": "This option can only be used by CodeBuild downstream actions.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html#action-reference-CodestarConnectionSource-output"
+        },
+        {
+          "source_id": "S28",
+          "quote": "In the Tags or patterns field, enter release*.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-github-tags.html#tutorials-github-tags-pipeline"
+        }
+      ],
+      "covers": [
+        "q-1.1-0001",
+        "q-1.1-0002",
+        "q-1.1-0003",
+        "q-1.1-0004",
+        "q-1.1-0005"
+      ]
+    },
+    {
+      "id": "s21",
+      "title": "条件から選ぶ 2: 作る",
+      "bullets": [
+        "問題文の条件 → 選ぶ物 → 外れやすい物"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ物",
+          "外れやすい物"
+        ],
+        "rows": [
+          [
+            "失敗しても後で動かす",
+            "finally",
+            "Lambda で on-failure"
+          ],
+          [
+            "Docker のイメージを作る",
+            "EC2 と privilegedMode",
+            "Lambda のまま"
+          ],
+          [
+            "毎回 60 分で止まる",
+            "timeoutInMinutes",
+            "2160 分を超える値"
+          ],
+          [
+            "長いビルド",
+            "EC2 の計算",
+            "Lambda の計算"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は作るの部です。失敗しても後の処理を動かし、フェーズは失敗にしたい、ならファイナリーです。"
+        },
+        {
+          "who": "student",
+          "text": "ラムダの計算だと、オンフェイリャーは使えないんだったね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。ドッカーのイメージを作るなら、イーシーツーの計算と、プリビレッジドモードのトゥルーです。"
+        },
+        {
+          "who": "student",
+          "text": "毎回六十分で止まるなら、既定のタイムアウトを範囲の中で延ばす。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。上限は二千百六十分です。十五分を超える長いビルドは、ラムダの計算では動きません。"
+        },
+        {
+          "who": "student",
+          "text": "作るの部は、まず計算の種類を確かめるのが近道なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい、その読み方で合っています。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S29",
+          "quote": "are run even if a command in the commands block fails.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.phases"
+        },
+        {
+          "source_id": "S32",
+          "quote": "AWS Lambda doesn't support Docker builds or runs.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/lambda.html#lambda.limitations"
+        },
+        {
+          "source_id": "S33",
+          "quote": "stops the build if it is not complete. If not specified, the default of 60 is used.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/create-project.html#cli.timeoutinminutes"
+        }
+      ],
+      "covers": [
+        "q-1.1-0006",
+        "q-1.1-0007",
+        "q-1.1-0008"
+      ]
+    },
+    {
+      "id": "s22",
+      "title": "条件から選ぶ 3: 守る・届ける",
+      "bullets": [
+        "問題文の条件 → 選ぶ物 → 外れやすい物"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ物",
+          "外れやすい物"
+        ],
+        "rows": [
+          [
+            "秘密・暗号化する設定値",
+            "Secrets Manager・SecureString",
+            "平文の変数"
+          ],
+          [
+            "再デプロイ無しで変える",
+            "実行時に取得",
+            "ビルドで埋め込む"
+          ],
+          [
+            "NLB で一部を先に",
+            "LB ごと変える",
+            "設定だけ変える"
+          ],
+          [
+            "止めて自動で戻す",
+            "アラームと戻す設定",
+            "Ignore・手動"
+          ],
+          [
+            "残す数が既定で合わない",
+            "独自の設定",
+            "HalfAtATime 等"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "最後は守ると届けるの部です。秘密を推奨どおりに置くならシークレッツマネージャー、暗号化が要る設定値ならセキュアストリングです。"
+        },
+        {
+          "who": "student",
+          "text": "暗号化が要る設定値を、平文の変数に置く選択肢は外れるんだね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。再デプロイ無しで認証情報を変えたいなら、実行時に取得して、自動ローテーションを使います。"
+        },
+        {
+          "who": "student",
+          "text": "ネットワークロードバランサーのままカナリアに変える選択肢は、外れるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。事前定義の設定で残す数が合わないなら、最小正常ホスト数の独自の設定です。"
+        },
+        {
+          "who": "student",
+          "text": "止めて自動で戻すなら、先に作ったアラームをデプロイグループに足して、しきい値のロールバックを有効にする。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。アラームを無視する設定と、手で戻す操作は外れます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S42",
+          "quote": "If you manage credentials such as usernames, passwords, or any other secrets, we recommend using AWS Secrets Manager.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#parameter-store-use-cases"
+        },
+        {
+          "source_id": "S36",
+          "quote": "If you do not specify a json-key, CodeBuild retrieves the entire secret text.",
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env"
+        },
+        {
+          "source_id": "S40",
+          "quote": "You replace hard-coded credentials with a runtime call to the Secrets Manager service to retrieve credentials dynamically when you need them.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
+        },
+        {
+          "source_id": "S45",
+          "quote": "If you're using a Network Load Balancer, only the CodeDeployDefault.ECSAllAtOnce predefined deployment configuration is supported.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs"
+        },
+        {
+          "source_id": "S52",
+          "quote": "You can create custom deployment configurations in CodeDeploy to define your own minimum healthy host values.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/instances-health.html#minimum-healthy-hosts"
+        }
+      ],
+      "covers": [
+        "q-1.1-0009",
+        "q-1.1-0010",
+        "q-1.1-0011",
+        "q-1.1-0012",
+        "q-1.1-0013",
+        "q-1.1-0014"
+      ]
+    },
+    {
+      "id": "s23",
+      "title": "まとめ",
+      "bullets": [
+        "5 つの部ごとに条件と決め手",
+        "外れる型: 組めない・範囲外・手間",
+        "迷ったら条件から選ぶ表へ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  R@{ svc: \"Amazon ECR\", label: \"Amazon ECR<br/>1 置き場<br/>スキャン・CodeArtifact\" }\n  P@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>2 つなぐ<br/>接続・出力・トリガー\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>3 作る<br/>finally・計算・時間\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>4 守る<br/>Parameter Store も\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>5 届ける<br/>設定・戻し方\" }\n",
+        "alt": "最初の地図に戻る（矢印は無い）。1 置き場（ECR のスキャンと CodeArtifact）、2 つなぐ（接続・出力・トリガー）、3 作る（finally・計算の種類・タイムアウト）、4 守る（Secrets Manager と Parameter Store）、5 届ける（デプロイ設定と戻し方）。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "最初の地図に戻ります。置き場では、継続して自動のスキャンと、共有のリポジトリのアップストリームでした。"
+        },
+        {
+          "who": "teacher",
+          "text": "つなぐでは、ペンディングの接続はコンソールで編集、履歴が要るならフルクローン、タグで始めるならギットタグのトリガーです。"
+        },
+        {
+          "who": "student",
+          "text": "作るは、ファイナリーと、計算の種類と、タイムアウトの範囲だったね。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。守るでは、秘密はシークレッツマネージャー、暗号化が要る設定値はセキュアストリング、再デプロイ無しなら実行時に取得です。"
+        },
+        {
+          "who": "student",
+          "text": "届けるは、ネットワークロードバランサーなら一括だけ、割合を残すなら独自の設定、戻すならアラームとロールバック、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そのとおりです。外れる選択肢は、組み合わせて使えない、範囲の外、手間が多い、の型で見分けてください。"
+        },
+        {
+          "who": "student",
+          "text": "迷ったら、条件から選ぶ表に戻って、条件の言葉から探すよ。"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。それがこの講義の使い方です。"
         }
       ],
       "refs": [
@@ -558,724 +1912,16 @@
           "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
         },
         {
-          "source_id": "S14",
-          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
-          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
-        }
-      ]
-    },
-    {
-      "id": "s08",
-      "title": "3 作る: CodeBuild と buildspec",
-      "bullets": [
-        "buildspec: YAML 形式",
-        "ビルドのコマンドと設定",
-        "CodeBuild が使ってビルド"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  BS[\"buildspec<br/>YAML 形式<br/>ビルドのコマンドと設定\"]\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドを実行\" }\n  BS -- \"ビルドで使う\" --> CB\n",
-        "alt": "buildspec は YAML 形式で書く、ビルドのコマンドと関連の設定の集まり。CodeBuild は buildspec を使ってビルドを実行する。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "三つ目の部、ビルドです。ビルドは、大まかに言うと、コードから動かせる物を作る作業です。"
-        },
-        {
-          "who": "student",
-          "text": "試験ガイドでは、どのサービスが出てくるのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "ビルドの手順を作る例として、コードビルドが挙がっています。コードビルドでは、ビルドスペックという物を使います。"
-        },
-        {
-          "who": "student",
-          "text": "ビルドスペックって、コードビルドの別の呼び方ですか？"
-        },
-        {
-          "who": "teacher",
-          "text": "違います。ビルドスペックは、ビルドのコマンドと、それに関係する設定をまとめた物です。コードビルドは、それを使ってビルドを実行します。"
-        },
-        {
-          "who": "student",
-          "text": "どんな形で書くのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "ヤムルという形式です。"
-        },
-        {
-          "who": "student",
-          "text": "試験ではどう出ますか？"
-        },
-        {
-          "who": "teacher",
-          "text": "ビルドの手順をどこに書くか、が出たら、ビルドスペックです。"
-        }
-      ],
-      "refs": [
-        {
           "source_id": "S3",
           "quote": "Setting up build processes (for example, AWS CodeBuild)",
           "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S10",
-          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
-          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
-        }
-      ]
-    },
-    {
-      "id": "s09",
-      "title": "4 守る: Secrets Manager",
-      "bullets": [
-        "管理・取得・ローテーション",
-        "DB・アプリの認証情報など",
-        "ハードコードが要らない"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  APP[\"アプリケーション<br/>ソースコードに<br/>認証情報を書き込まない\"]\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>管理・取得<br/>ローテーション\" }\n  K[\"DB・アプリの認証情報<br/>API キー<br/>などの秘密情報\"]\n  APP -- \"取得する\" --> SM\n  SM -- \"扱う秘密情報\" --> K\n",
-        "alt": "Secrets Manager は、データベースやアプリケーションの認証情報、OAuth トークン、API キーなどの秘密情報を管理・取得・ローテーションする。アプリケーションのソースコードに認証情報をハードコードしなくてよくなる。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "四つ目の部、秘密情報です。試験ガイドの行は、ビルドとデプロイの秘密情報を管理すること、でした。"
-        },
-        {
-          "who": "student",
-          "text": "秘密情報って、具体的にはどんな物なのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "パスワードやキーのように、ほかの人に知られてはいけない値のことです。例として挙がる一つ目が、シークレッツマネージャーです。"
-        },
-        {
-          "who": "teacher",
-          "text": "シークレッツマネージャーは、秘密情報を、作ってから使い終えるまで通して、管理し、取り出し、ローテーションするのを助けます。ローテーションとは、値を新しい物に取り替えることです。"
-        },
-        {
-          "who": "student",
-          "text": "名前からすると、データベースのパスワード専用なのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "違います。扱う秘密情報の例は、データベースやアプリケーションの認証情報、エーピーアイキーなどです。"
-        },
-        {
-          "who": "student",
-          "text": "データベース専用じゃないんだね。じゃあ、わざわざこれを使う理由は？"
-        },
-        {
-          "who": "teacher",
-          "text": "公式の説明は利点として、アプリケーションのソースコードに認証情報を直接書き込まなくてよくなる、と述べています。直接書き込むことを、ハードコードと呼びます。"
-        },
-        {
-          "who": "teacher",
-          "text": "問題文に、認証情報をソースコードに書き込みたくない、と出たら、まずシークレッツマネージャーです。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S3",
-          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S17",
-          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
-          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
-        },
-        {
-          "source_id": "S17",
-          "quote": "Secrets Manager helps you improve your security posture, because you no longer need hard-coded credentials in application source code.",
-          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
-        }
-      ]
-    },
-    {
-      "id": "s10",
-      "title": "4 守る: Parameter Store と比べる",
-      "bullets": [
-        "Parameter Store: 設定の置き場",
-        "置く物は名前付きの値",
-        "どちらも秘密情報を管理する例"
-      ],
-      "visual": {
-        "type": "compare",
-        "columns": [
-          "項目",
-          "Secrets Manager",
-          "Parameter Store"
-        ],
-        "rows": [
-          [
-            "公式の説明",
-            "秘密情報の管理",
-            "設定データの置き場"
-          ],
-          [
-            "置く物",
-            "秘密情報",
-            "名前付きの値"
-          ],
-          [
-            "説明にある言葉",
-            "ローテーション",
-            "パラメーター"
-          ],
-          [
-            "試験ガイド",
-            "秘密情報管理の例",
-            "秘密情報管理の例"
-          ]
-        ]
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "例として挙がる二つ目が、パラメーターストアです。システムズマネージャーの中の機能で、公式の説明では、設定データを一か所に集めて置く場所です。置く物は名前の付いた値で、これをパラメーターと呼びます。"
-        },
-        {
-          "who": "student",
-          "text": "設定の置き場なら、秘密情報の管理には使わないってこと？"
-        },
-        {
-          "who": "teacher",
-          "text": "違います。試験ガイドでは、パラメーターストアもシークレッツマネージャーも、どちらもビルドとデプロイの秘密情報を管理する例です。"
-        },
-        {
-          "who": "student",
-          "text": "じゃあ、パラメーターストアはローテーションができない、ということなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "そうは言えません。言えるのは、公式の説明にローテーションという言葉が出てくるのは、シークレッツマネージャーの方だ、という事だけです。"
-        },
-        {
-          "who": "student",
-          "text": "できないとは言っていない。でも、説明に言葉があるのはシークレッツマネージャーの方、なのだ。"
-        },
-        {
-          "who": "teacher",
-          "text": "そうです。"
-        },
-        {
-          "who": "student",
-          "text": "問題文ではどう見分けるの？"
-        },
-        {
-          "who": "teacher",
-          "text": "ローテーションの言葉が出たら、説明が合うシークレッツマネージャーを先に確かめます。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S3",
-          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S18",
-          "quote": "Parameter Store is a centralized configuration data store for named values called parameters.",
-          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
-        },
-        {
-          "source_id": "S17",
-          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
-          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
-        }
-      ]
-    },
-    {
-      "id": "s11",
-      "title": "5 届ける: blue/green（task set の場合）",
-      "bullets": [
-        "新しい版を replacement task set に",
-        "本番トラフィックを移す",
-        "task set を使う場合の説明"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  T[\"本番トラフィック\"]\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>blue/green\" }\n  O[\"original task set<br/>元の版\"]\n  R[\"replacement task set<br/>新しい版\"]\n  CD -- \"新しい版を入れる\" --> R\n  T -. \"移す前\" .-> O\n  T -- \"移した後\" --> R\n",
-        "alt": "task set を使う場合の CodeDeploy の blue/green。新しい版を replacement task set として入れ、本番トラフィックを original task set から replacement task set へ移す。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "五つ目の部、デプロイ戦略です。デプロイとは、新しい版を届けることです。"
-        },
-        {
-          "who": "student",
-          "text": "試験ガイドの例は何なのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "ふさわしいデプロイ戦略を決める例として、コードデプロイが挙がっています。戦略の一つに、ブルーグリーンデプロイメントがあります。"
-        },
-        {
-          "who": "teacher",
-          "text": "公式の説明の一つでは、タスクセットを使う場合が書かれています。タスクセットは、ここでは、アプリケーションの版を入れておく単位、と捉えます。"
-        },
-        {
-          "who": "student",
-          "text": "その場合、どういう流れなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "まず、新しい版を、置き換え用の新しいタスクセットとして入れます。そして、元のタスクセットから新しいタスクセットへ、本番のトラフィックを移します。"
-        },
-        {
-          "who": "student",
-          "text": "ブルーグリーンなら、いつもタスクセットを使うのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "そうとは言えません。いま話したのは、タスクセットを使う場合の説明です。いつもそうだ、という意味ではありません。"
-        },
-        {
-          "who": "student",
-          "text": "問題文に、新しいタスクセットへ本番のトラフィックを移す、と出たら？"
-        },
-        {
-          "who": "teacher",
-          "text": "ブルーグリーンです。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S3",
-          "quote": "Determining appropriate deployment strategies (for example, AWS CodeDeploy)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S11",
-          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
-        }
-      ]
-    },
-    {
-      "id": "s12",
-      "title": "5 届ける: deployment configuration",
-      "bullets": [
-        "deployment configuration",
-        "規則と成功・失敗の条件",
-        "デプロイ中に CodeDeploy が使う"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy\" }\n  DC[\"deployment configuration<br/>規則<br/>成功と失敗の条件\"]\n  CD -- \"デプロイ中に使う\" --> DC\n",
-        "alt": "deployment configuration は、規則と、成功の条件・失敗の条件の集まりで、CodeDeploy がデプロイの間に使う。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "次は、デプロイメントコンフィギュレーションを見ます。"
-        },
-        {
-          "who": "student",
-          "text": "ブルーグリーンの話の続きなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "この講義では、別の項目として見ます。二つがどう関わるかは、ここの資料では扱っていません。"
-        },
-        {
-          "who": "student",
-          "text": "じゃあ、どういう物なの？"
-        },
-        {
-          "who": "teacher",
-          "text": "公式の説明では、規則と、成功の条件、失敗の条件の集まりです。コードデプロイが、デプロイの間に使います。"
-        },
-        {
-          "who": "student",
-          "text": "問題文ではどう出るのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "デプロイの成功や失敗の条件を、規則としてまとめておきたい、と出たら、デプロイメントコンフィギュレーションです。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S12",
-          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
-        }
-      ]
-    },
-    {
-      "id": "s13",
-      "title": "5 届ける: rollback",
-      "bullets": [
-        "rollback: 自動か手動",
-        "自動で戻す設定ができる",
-        "設定先: deployment group か deployment"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  D[\"デプロイ\"]\n  G[\"deployment group<br/>か deployment\"]\n  A[\"自動の rollback\"]\n  M[\"手動の rollback\"]\n  D -- \"自動で戻す\" --> A\n  D -- \"手動で戻す\" --> M\n  G -- \"自動で戻す設定\" --> A\n",
-        "alt": "CodeDeploy のデプロイは自動でも手動でも rollback できる。deployment group か deployment に、自動で rollback するよう設定できる。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "ロールバックとは、デプロイを戻すことです。コードデプロイのデプロイは、自動でも、手動でもロールバックできます。"
-        },
-        {
-          "who": "student",
-          "text": "じゃあ、いつも自動で戻ってくれるのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "いつもではありません。自動でロールバックするように、設定することもできる、という事です。"
-        },
-        {
-          "who": "student",
-          "text": "設定するのは、さっきのデプロイメントコンフィギュレーションなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "名前は似ていますが、資料が挙げる設定先は、デプロイメントグループか、一回ごとのデプロイメントの二つです。"
-        },
-        {
-          "who": "student",
-          "text": "設定先は、デプロイメントグループかデプロイメント、なのだ。"
-        },
-        {
-          "who": "teacher",
-          "text": "そうです。デプロイメントグループは資料に中身の説明が無いので、設定できる先の一つ、とだけ捉えます。"
-        },
-        {
-          "who": "teacher",
-          "text": "問題文に、自動で戻せるようにしたい、と出たら、デプロイメントグループか、デプロイメントの設定です。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S13",
-          "quote": "Deployments can be rolled back automatically or manually.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
-        },
-        {
-          "source_id": "S13",
-          "quote": "You can configure a deployment group or deployment to automatically roll back when a",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
-        },
-        {
-          "source_id": "S9",
-          "quote": "Rollback procedures",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/dop-technologies-concepts.html#dop-technologies-concepts"
-        }
-      ]
-    },
-    {
-      "id": "s14",
-      "title": "条件から方法を選ぶ 1: 置き場・つなぐ・作る",
-      "bullets": [
-        "問題文の条件 → 方法・確かめる所"
-      ],
-      "visual": {
-        "type": "compare",
-        "columns": [
-          "問題文の条件",
-          "選ぶ方法",
-          "確かめる所"
-        ],
-        "rows": [
-          [
-            "イメージを公開せず置く",
-            "Amazon ECR",
-            "private・resource-based"
-          ],
-          [
-            "パッケージを組織で共有",
-            "CodeArtifact",
-            "保存と共有"
-          ],
-          [
-            "GitHub をパイプラインへ",
-            "CodePipeline",
-            "source action"
-          ],
-          [
-            "ビルドの手順を書く",
-            "CodeBuild",
-            "buildspec（YAML）"
-          ]
-        ]
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "ここから二枚で、問題文の条件から選ぶ方法を引けるように、表にまとめます。一枚目は、置き場、つなぐ、作るの三つの部です。"
-        },
-        {
-          "who": "student",
-          "text": "イメージを公開せずに置きたい、なら、イーシーアールなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "そうです。確かめる所は、プライベートリポジトリと、リソースベースのパーミッションです。"
-        },
-        {
-          "who": "student",
-          "text": "パッケージを組織で共有したい、なら？"
-        },
-        {
-          "who": "teacher",
-          "text": "コードアーティファクトです。"
-        },
-        {
-          "who": "student",
-          "text": "ギットハブのリポジトリをパイプラインにつなぎたい、は、コードビルドでしたっけ？"
-        },
-        {
-          "who": "teacher",
-          "text": "違います。コードパイプラインのソースアクションです。コードビルドは、ビルドの手順を書く場所、のほうで、確かめる所はビルドスペックです。"
-        },
-        {
-          "who": "student",
-          "text": "つなぐのがコードパイプライン、作るのがコードビルド、なのだ。"
-        },
-        {
-          "who": "teacher",
-          "text": "そうです。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S15",
-          "quote": "Amazon ECR supports private repositories with resource-based permissions using AWS IAM.",
-          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#what-is-ecr"
-        },
-        {
-          "source_id": "S16",
-          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
-          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
-        },
-        {
-          "source_id": "S14",
-          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
-          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
-        },
-        {
-          "source_id": "S10",
-          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
-          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
-        }
-      ]
-    },
-    {
-      "id": "s15",
-      "title": "条件から方法を選ぶ 2: 守る・届ける",
-      "bullets": [
-        "問題文の条件 → 方法・確かめる所"
-      ],
-      "visual": {
-        "type": "compare",
-        "columns": [
-          "問題文の条件",
-          "選ぶ方法",
-          "確かめる所"
-        ],
-        "rows": [
-          [
-            "認証情報を書き込まない",
-            "Secrets Manager",
-            "Parameter Store も例"
-          ],
-          [
-            "ローテーションも要る",
-            "Secrets Manager",
-            "説明にローテーション"
-          ],
-          [
-            "新しい task set へ移す",
-            "blue/green",
-            "task set の場合"
-          ],
-          [
-            "成功・失敗の条件",
-            "deployment configuration",
-            "規則と条件の集まり"
-          ],
-          [
-            "自動で戻したい",
-            "rollback",
-            "deployment group 等"
-          ]
-        ]
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "二枚目は、守る、届けるの二つの部です。"
-        },
-        {
-          "who": "student",
-          "text": "認証情報をソースコードに書き込みたくない、なら、シークレッツマネージャーだけなのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "違います。シークレッツマネージャーですが、パラメーターストアも、試験ガイドで秘密情報を管理する例に挙がっています。"
-        },
-        {
-          "who": "student",
-          "text": "じゃあ、二つを見分ける手がかりは？"
-        },
-        {
-          "who": "teacher",
-          "text": "ローテーションも要るなら、説明にローテーションがあるシークレッツマネージャーです。"
-        },
-        {
-          "who": "student",
-          "text": "届けるの方は？"
-        },
-        {
-          "who": "teacher",
-          "text": "新しいタスクセットへ本番のトラフィックを移すなら、ブルーグリーンです。成功と失敗の条件をまとめるなら、デプロイメントコンフィギュレーションです。"
-        },
-        {
-          "who": "student",
-          "text": "自動で戻したい、は？"
-        },
-        {
-          "who": "teacher",
-          "text": "デプロイメントグループかデプロイメントに、ロールバックの設定をします。"
-        },
-        {
-          "who": "teacher",
-          "text": "条件の言葉を見つけて、表で方法を引いてください。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S3",
-          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S17",
-          "quote": "AWS Secrets Manager helps you manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, API keys, and other secrets throughout their lifecycles.",
-          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
-        },
-        {
-          "source_id": "S11",
-          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
-        },
-        {
-          "source_id": "S12",
-          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
-        },
-        {
-          "source_id": "S13",
-          "quote": "You can configure a deployment group or deployment to automatically roll back when a",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
-        }
-      ]
-    },
-    {
-      "id": "s16",
-      "title": "まとめ",
-      "bullets": [
-        "1 置き場 2 つなぐ 3 作る",
-        "4 守る 5 届ける",
-        "迷ったら条件から方法を選ぶ表へ"
-      ],
-      "visual": {
-        "type": "mermaid",
-        "source": "flowchart TB\n  R[\"1 置き場<br/>コード・イメージ<br/>アーティファクト\"]\n  P@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>2 つなぐ<br/>source action\" }\n  CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>3 作る<br/>buildspec\" }\n  SM@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager<br/>4 守る<br/>Parameter Store も\" }\n  CD@{ svc: \"AWS CodeDeploy\", label: \"CodeDeploy<br/>5 届ける<br/>blue/green<br/>deployment configuration<br/>rollback\" }\n",
-        "alt": "最初の地図に戻る（矢印は無い）。1 置き場、2 つなぐ（source action）、3 作る（buildspec）、4 守る（Secrets Manager と Parameter Store）、5 届ける（blue/green・deployment configuration・rollback）。"
-      },
-      "dialogue": [
-        {
-          "who": "teacher",
-          "text": "まとめです。最初の地図に戻ります。"
-        },
-        {
-          "who": "student",
-          "text": "五つの部、もう一度お願いしたいのだ。"
-        },
-        {
-          "who": "teacher",
-          "text": "一つ目の置き場では、コードは例としてギットハブ、イメージはイーシーアール、アーティファクトはコードアーティファクトを見ました。"
-        },
-        {
-          "who": "teacher",
-          "text": "二つ目のつなぎ方では、コードパイプラインのソースアクション、三つ目のビルドでは、コードビルドとビルドスペックを見ました。"
-        },
-        {
-          "who": "student",
-          "text": "守ると届けるは？"
-        },
-        {
-          "who": "teacher",
-          "text": "四つ目の秘密情報では、シークレッツマネージャーとパラメーターストアを見ました。"
-        },
-        {
-          "who": "teacher",
-          "text": "五つ目のデプロイでは、ブルーグリーン、デプロイメントコンフィギュレーション、ロールバックを見ました。"
-        },
-        {
-          "who": "student",
-          "text": "問題で迷ったら、どうすればいいのだ？"
-        },
-        {
-          "who": "teacher",
-          "text": "条件から方法を選ぶ、の二枚の表に戻ってください。"
-        }
-      ],
-      "refs": [
-        {
-          "source_id": "S2",
-          "quote": "Configuring code, image, and artifact repositories",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S14",
-          "quote": "To add a source action for your GitHub or GitHub Enterprise Cloud repository in CodePipeline, you",
-          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html"
-        },
-        {
-          "source_id": "S10",
-          "quote": "A buildspec is a collection of build commands and related settings, in YAML format, that CodeBuild uses to run a build.",
-          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref"
-        },
-        {
-          "source_id": "S3",
-          "quote": "Managing build and deployment secrets (for example, AWS Secrets Manager, AWS Systems Manager Parameter Store)",
-          "url": "https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02-domain1.html#dop-02-task-1-1-skills"
-        },
-        {
-          "source_id": "S12",
-          "quote": "A deployment configuration is a set of rules and success and failure conditions used by CodeDeploy during a deployment.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configurations"
-        },
-        {
-          "source_id": "S11",
-          "quote": "CodeDeploy performs a blue/green deployment by installing an updated version of the application as a new replacement task set. CodeDeploy reroutes production traffic from the original application task set to the",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html"
-        },
-        {
-          "source_id": "S13",
-          "quote": "Deployments can be rolled back automatically or manually.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
         }
       ]
     }
   ],
   "credit": "VOICEVOX:四国めたん、VOICEVOX:ずんだもん",
   "audio": true,
-  "minutes": 13.5,
+  "minutes": 21.6,
   "status": "verified",
   "created": "2026-11-27",
   "last_checked": "2026-11-27"

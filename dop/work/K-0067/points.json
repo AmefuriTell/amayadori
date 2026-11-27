@@ -1,0 +1,470 @@
+{
+  "task": "3.3",
+  "questions": [
+    {
+      "id": "q-3.3-0001",
+      "stem_ja": "ある企業は、Amazon RDS のマルチ AZ の DB インスタンスで本番のデータベースを動かしています。大きなリリースの前に、DevOps チームは、データベースが別のアベイラビリティーゾーンのスタンバイにフェイルオーバーした時に、アプリケーションが正しく再接続することを確かめる必要があります。テストは既存の DB インスタンスを使い、データを失わず、バックアップの復元を必要としてはなりません。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "最新の自動スナップショットを別のアベイラビリティーゾーンの新しい DB インスタンスに復元し、アプリケーションの接続先をそこにする。",
+        "B": "別のアベイラビリティーゾーンにリードレプリカを作成し、テスト中にスタンドアロンの DB インスタンスに昇格させる。",
+        "C": "計画したテストの時間帯に、[フェイルオーバーで再起動] のオプションを選んで DB インスタンスを再起動する。",
+        "D": "別のアベイラビリティーゾーンに新しいスタンバイが作成されるように、マルチ AZ を無効にしてから再び有効にする。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Multi-AZ の DB インスタンスは、障害の時に別のアベイラビリティーゾーンのスタンバイへ自動で切り替わる（多くは 60〜120 秒）。再起動の時に Reboot with failover を選ぶと、利用者の求めでこの切り替えを起こせるので、今のインスタンスのまま試せる。",
+      "per_choice": {
+        "A": "別のインスタンスを作ることになり、今のインスタンスで試す要件にも、バックアップを戻さない要件にも反する。",
+        "B": "別のインスタンスに切り替える試験になり、Multi-AZ のスタンバイへの切り替えを試すことにならない。",
+        "C": "正しい。今のインスタンスで、スタンバイへの切り替えを起こせる。",
+        "D": "スタンバイを作り直すだけで、切り替えそのものは起きない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "quote": "Amazon RDS automatically switches to a standby replica in another Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+          "quote": "The user requested a failover of the DB instance. You rebooted the DB instance and chose Reboot with failover."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0002",
+      "stem_ja": "ある企業は、プライマリクラスターが us-east-1、セカンダリクラスターが us-west-2 にある Amazon Aurora のグローバルデータベースを使用しています。すべてのクラスターは正常です。企業は us-east-1 で計画メンテナンスを予定しており、その前にプライマリの役割を us-west-2 に移す必要があります。コミット済みのデータを失ってはならず、企業はクラスターを作り直すのではなく組み込みの機能を使いたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "グローバルデータベースを、us-west-2 のセカンダリクラスターへスイッチオーバーする。",
+        "B": "グローバルデータベースを、us-west-2 のセカンダリクラスターへフェイルオーバーする。",
+        "C": "最新のスナップショットを us-west-2 にコピーし、新しいプライマリクラスターとして復元する。",
+        "D": "今すぐ us-west-2 へフェイルオーバーし、メンテナンスの後にもう一度フェイルオーバーして戻す。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "switchover（以前の managed planned failover）は、全てのクラスターが健全な時の計画した切り替えに使う。切り替えの前に副のクラスターを主と同期するので、RPO は 0（データの損失なし）。failover は計画外の障害から戻るための方法で、RPO は秒単位の 0 でない値になる。",
+      "per_choice": {
+        "A": "正しい。同期してから切り替えるので、データを失わない。",
+        "B": "failover の RPO は秒単位で 0 にならず、データを失う可能性がある。",
+        "C": "クラスターを作り直すことになり、スナップショットの後のデータも失う。",
+        "D": "failover を 2 回行うことになり、どちらでもデータを失う可能性がある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "quote": "Because this feature synchronizes secondary DB clusters with the primary before making any other changes, RPO is 0 (no data loss)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "quote": "The RPO for this approach is typically a non-zero value measured in seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0003",
+      "stem_ja": "ある企業は、プライマリクラスターが eu-west-1、セカンダリクラスターが eu-central-1 にある Amazon Aurora のグローバルデータベースを使用しています。計画外の障害で、eu-west-1 のプライマリクラスターが使えなくなりました。ビジネス側は、データベースができるだけ早く再び書き込みを受け付けることを求めており、直近の数秒ぶんのデータを失うことは受け入れます。最も少ない運用の手間でこれらの要件を満たすアクションはどれですか。",
+      "choices_ja": {
+        "A": "データを失わないように、eu-central-1 のセカンダリクラスターへスイッチオーバーする。",
+        "B": "eu-central-1 のセカンダリクラスターへ、クロスリージョンのフェイルオーバーを行う。",
+        "C": "グローバルデータベースは障害の間にプライマリのリージョンを変えられないので、eu-west-1 の回復を待つ。",
+        "D": "eu-central-1 で最新のスナップショットを新しいクラスターとして復元し、アプリケーションの接続先をそこにする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "計画外の障害から戻るには、副のクラスターへのリージョンをまたぐ failover を使う。RPO は秒単位の 0 でない値になるので、数秒のデータの損失を許すという要件に合う。switchover は全てのクラスターが健全な時の計画した操作。",
+      "per_choice": {
+        "A": "switchover は、全てのクラスターと関わるサービスが健全な時の計画した操作に使う。主のクラスターが使えない今は合わない。",
+        "B": "正しい。計画外の障害から戻る方法で、失うのは秒単位。",
+        "C": "failover で副のクラスターに切り替えられる。待つと書き込みが戻るのが遅れる。",
+        "D": "クラスターを作り直すので時間がかかり、スナップショットの後のデータも失う。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "quote": "Failover – Use this approach to recover from an unplanned outage. With this approach, you perform a cross-Region failover to one of the secondary DB clusters in your Aurora global database."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-disaster-recovery.html",
+          "quote": "Use this approach for controlled scenarios, such as operational maintenance and other planned operational procedures"
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0004",
+      "stem_ja": "ある企業は、プライマリとセカンダリのオリジンを持つオリジングループを設定した Amazon CloudFront で、Web アプリケーションを配信しています。テスト中、プライマリのオリジンが HTTP 503 のエラーを返しました。ページの読み込みはセカンダリのオリジンから成功しましたが、POST を使うフォームの送信は失敗したままです。この動作を説明するものはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "CloudFront がセカンダリのオリジンにフェイルオーバーするのは、GET、HEAD、OPTIONS を使うビューワーのリクエストだけである。",
+        "B": "CloudFront は、プライマリのオリジンがフェイルオーバーの条件に選んだステータスコード（503 など）を返した時にフェイルオーバーする。",
+        "C": "CloudFront は、プライマリのオリジンが 5xx ではなく 4xx のステータスコードを返した時にだけフェイルオーバーする。",
+        "D": "CloudFront はすべての HTTP メソッドでフェイルオーバーするので、POST の失敗はセカンダリのオリジンから来ているはずである。",
+        "E": "オリジングループは、Route 53 のヘルスチェックがプライマリのオリジンを異常と判断した後にだけフェイルオーバーする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "オリジンフェイルオーバーは、選んだ HTTP のステータスコード（400・403・404・416・429・500・502・503・504 の組み合わせ）の応答を受けた時に副のオリジンへ切り替える。ただし切り替えるのは、利用者のリクエストが GET・HEAD・OPTIONS の時だけで、POST や PUT などでは切り替えない。",
+      "per_choice": {
+        "A": "正しい。POST は切り替えないので、主のオリジンの 503 がそのまま返る。",
+        "B": "正しい。503 を条件に選んでいれば、GET のページの読み込みは副のオリジンへ切り替わる。",
+        "C": "条件には 500・502・503・504 なども選べる。",
+        "D": "GET・HEAD・OPTIONS 以外では切り替えない。",
+        "E": "オリジングループは、選んだステータスコードの応答で切り替える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "quote": "When CloudFront receives a response with one of the status codes that you specify, it fails over to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html",
+          "quote": "You can choose any combination of the following status codes: 400, 403, 404, 416, 429, 500, 502, 503, or 504."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0005",
+      "stem_ja": "ある企業は、2 台の Web サーバーの間で Amazon Route 53 の DNS フェイルオーバーを使用しています。DevOps チームは、AWS Fault Injection Service (AWS FIS) で本当の障害を注入し、一方のサーバーが障害を起こした時にトラフィックが正常なサーバーに移ることを確かめたいと考えています。本番へのリスクはできるだけ低く抑え、テストは繰り返せるようにする必要があります。これらの要件を最もよく満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "結果が実際のトラフィックを反映するように、ピークの時間帯に本番で直接 AWS FIS の実験を実行する。",
+        "B": "AWS FIS は使わず、DNS レコードを手で編集して 2 台目のサーバーを指すようにしてテストする。",
+        "C": "AWS FIS はリソースに影響を与えずに障害をシミュレートするので、ドキュメントのレビューの中でだけ AWS FIS の実験を実行する。",
+        "D": "実験を計画し、まず本番前の環境で実行し、その結果を使ってから本番で実行する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "AWS FIS は本物のリソースに本物の操作を行う。本番で試す前に、計画の段階を終え、本番前の環境で実験を行うことが強く勧められている。DNS failover は、同じ役割の資源のうち健全でない物から健全な物へ Route 53 が通信を向ける仕組み。",
+      "per_choice": {
+        "A": "本番で、しかも混む時間に試すのは、本番への危険を最も小さくする要件に反する。",
+        "B": "手で DNS を書き換えるのは、障害を検知して自動で切り替わることの試験にならない。",
+        "C": "AWS FIS は本物のリソースに本物の操作を行う。",
+        "D": "正しい。計画してから本番前の環境で試す。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "quote": "AWS FIS carries out real actions on real AWS resources in your system."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+          "quote": "we strongly recommend that you complete a planning phase and run the experiments in a pre-production environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+          "quote": "you can configure DNS failover so that Route 53 routes your traffic from an unhealthy resource to a healthy resource."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0006",
+      "stem_ja": "ある企業は、backup=daily のタグが付いたすべての Amazon EBS ボリュームと Amazon RDS のデータベースを 1 日 1 回バックアップし、各バックアップのコピーを 2 つ目の AWS リージョンに保管する必要があります。チームは毎週タグ付きの新しいリソースを作成しており、運用チームはリソースが増えるたびに設定を更新したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "2 つ目のリージョンにコピーする毎日のルールを持つ AWS Backup のプランを作成し、リソースを作るたびにその ARN をプランに追加する。",
+        "B": "2 つ目のリージョンにコピーする毎日のルールを持つ AWS Backup のプランを作成し、backup=daily のタグでリソースを割り当てる。",
+        "C": "タグ付きのリソースのスナップショットを取り、2 つ目のリージョンにコピーする、スケジュールされた AWS Lambda 関数を実行する。",
+        "D": "各リージョンに毎日のルールを持つ AWS Backup のプランを作成し、両方で backup=daily のタグでリソースを割り当てる。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "バックアッププランのルールでは、頻度や期間を決め、Copy to destination で別のリージョンへのコピーを決められる。リソースの割り当てはタグで含める・外すことができるので、タグの付いた新しいリソースも設定を変えずに対象になる。",
+      "per_choice": {
+        "A": "リソースが増えるたびに設定を変えることになり、要件に反する。",
+        "B": "正しい。毎日のルールで別リージョンへ写し、タグで対象を決める。",
+        "C": "自分でコードを持つことになり、手間が大きい。",
+        "D": "各リージョンで別々にバックアップを取るだけで、同じバックアップの写しを別リージョンに置くことにならない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "quote": "You can use a scheduled backup plan to copy backups across AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "quote": "For Copy to destination, Choose the destination AWS Region for your backup copy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/assigning-resources.html",
+          "quote": "Use tags to include or exclude resources"
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0007",
+      "stem_ja": "ある AWS Backup のルールは、バックアップを別のリージョンにコピーしています。費用を抑えるため、コピーはコールドストレージに移す必要があり、企業はコールドストレージの決まりが許す範囲でできるだけ早くコピーを削除したいと考えています。コピーの設定の組み合わせとして有効で、かつコピーを最も早く削除する、つまり最も費用対効果の高い有効な選択はどれですか。",
+      "choices_ja": {
+        "A": "30 日後にコールドストレージへ移行し、保持期間は 180 日。",
+        "B": "30 日後にコールドストレージへ移行し、保持期間は 100 日。",
+        "C": "60 日後にコールドストレージへ移行し、保持期間は 120 日。",
+        "D": "90 日後にコールドストレージへ移行し、保持期間は 150 日。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "コールドストレージに移したバックアップは、そこに少なくとも 90 日置く必要がある。保持期間（作ってから消すまでの日数）は、コールドストレージへ移す日数より 90 日を超えて長くする。30 日で移すなら保持期間は 120 日より長くする必要があり、選択肢の中で条件を満たすのは 180 日だけ。",
+      "per_choice": {
+        "A": "正しい。30 + 90 = 120 日より長い。",
+        "B": "30 + 90 = 120 日より短い。",
+        "C": "60 + 90 = 150 日より短い。",
+        "D": "90 + 90 = 180 日より短い。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "quote": "Backups transitioned to cold storage must be stored there for a minimum of 90 days."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html",
+          "quote": "This value must be greater than 90 days beyond the Transition to cold storage value."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0008",
+      "stem_ja": "ランサムウェアと内部の脅威から守るため、ある企業の AWS Backup のボールトにあるバックアップは、保持期間が終わるまで、管理者を含むどのユーザーにも削除や変更をされてはなりません。セキュリティチームは、設定が恒久的になる前に、それをテストする期間を設けたいと考えています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "ガバナンスモードの AWS Backup Vault Lock でボールトをロックし、管理できる IAM のアクセス許可を持つ人を限る。",
+        "B": "すべてのロールにバックアップの削除を拒否する IAM ポリシーを追加し、毎月ポリシーを見直す。",
+        "C": "すぐに変更できなくなるように、猶予期間なしのコンプライアンスモードの AWS Backup Vault Lock でボールトをロックする。",
+        "D": "ロックが変更できなくなる前に猶予期間を設けた、コンプライアンスモードの AWS Backup Vault Lock でボールトをロックする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "compliance モードの Vault Lock は、保持期間が終わるまで保管庫と中身が消されたり変えられたりしないための物で、ロックされると誰も（AWS も）変えたり消したりできない。ロックされて変えられなくなる前に、決めた猶予の時間がある。governance モードは、十分な IAM の権限を持つ人なら管理や削除ができる。",
+      "per_choice": {
+        "A": "governance モードは、権限のある人なら消せる。",
+        "B": "管理者が IAM のポリシーを変えれば消せる。",
+        "C": "試す時間が無く、要件に反する。",
+        "D": "正しい。誰も消せず、変えられなくなる前に試す時間がある。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "quote": "A vault lock in Compliance mode cannot be altered or deleted by any user or by AWS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "quote": "A vault lock in compliance mode has a grace time period you set before it locks and the contents and vault lock become immutable."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html",
+          "quote": "A vault locked in Governance mode can be managed or deleted by users who have the appropriate IAM permissions."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0009",
+      "stem_ja": "ある企業は、すでに数百万個のオブジェクトがあるバケットに、S3 クロスリージョンレプリケーションの設定を追加します。コンプライアンス上、既存のすべてのオブジェクトも送信先のリージョンにあり、新しいオブジェクトの大部分は数秒以内に、99.9 パーセントは 15 分以内にレプリケートされ、レプリケーションの時間を確認できる必要があります。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "レプリケーションの設定の前からあったオブジェクトをレプリケートする S3 バッチレプリケーションのジョブを実行する。",
+        "B": "レプリケーションのルールで S3 Replication Time Control を有効にする。",
+        "C": "設定を追加すると通常のレプリケーションが自動でコピーするので、既存のオブジェクトには何もしない。",
+        "D": "同一リージョンレプリケーションは既存のオブジェクトを 15 分以内にレプリケートするので、それに切り替える。",
+        "E": "すべてのオブジェクトを 1 分以内にレプリケートする S3 Replication Time Control を有効にする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "ライブのレプリケーションは新しいオブジェクトを続けて複製する。設定の前からあるオブジェクトは、S3 Batch Replication で必要な時に Batch Operations のジョブで複製する。S3 Replication Time Control は、ほとんどのオブジェクトを数秒で、99.9% を 15 分以内に複製し、複製の時間も見えるようにする。",
+      "per_choice": {
+        "A": "正しい。設定の前からあるオブジェクトを複製する。",
+        "B": "正しい。99.9% を 15 分以内に複製し、時間も見える。",
+        "C": "ライブのレプリケーションは新しいオブジェクトだけ。",
+        "D": "別のリージョンに置く要件に反する。",
+        "E": "15 分以内に 99.9% で、全てを 1 分以内ではない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+          "quote": "S3 Batch Replication differs from live replication, which continuously and automatically replicates new objects across Amazon S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html",
+          "quote": "Objects that existed before a replication configuration was in place"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-time-control.html",
+          "quote": "S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.9 percent of those objects within 15 minutes."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0010",
+      "stem_ja": "Auto Scaling グループの EC2 インスタンスは、Auto Scaling グループではなく起動のスクリプトによって、Application Load Balancer のターゲットグループに登録されています。ときどきアプリケーションのプロセスが固まり、ロードバランサーはそのインスタンスを unhealthy としますが、EC2 のステータスチェックは通るため、インスタンスは入れ替えられません。会社は、そのようなインスタンスを自動で入れ替えたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "スクリプトでインスタンスを登録する代わりに、ターゲットグループを Auto Scaling グループにアタッチする。",
+        "B": "Auto Scaling グループで、Elastic Load Balancing のヘルスチェックを有効にする。",
+        "C": "正常なインスタンスがより多く残るよう、Auto Scaling グループの最小の容量を増やす。",
+        "D": "ロードバランサーが unhealthy とするインスタンスを再起動するよう、エンジニアに通知する CloudWatch アラームを作る。",
+        "E": "EC2 のステータスチェックが早く始まるよう、ヘルスチェックの猶予期間を短くする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "既定では、Amazon EC2 Auto Scaling は EC2 のヘルスチェックで異常か届かないインスタンスだけを入れ替えます。ロードバランサー（ALB の場合はターゲットグループ）を Auto Scaling グループにアタッチし、Elastic Load Balancing のヘルスチェックを有効にすると、ロードバランサーが unhealthy と報告したインスタンスも入れ替えられます。",
+      "per_choice": {
+        "A": "正しい。ALB はロードバランサーではなくターゲットグループをアタッチし、ロードバランサーの判定を Auto Scaling で使えるようにします。",
+        "B": "正しい。ロードバランサーが unhealthy と報告したインスタンスを、Auto Scaling が入れ替えるようになります。",
+        "C": "固まったインスタンスは入れ替えられないまま残ります。",
+        "D": "再起動が手作業で、自動で入れ替える要件を満たしません。",
+        "E": "EC2 のステータスチェックは通っているので、早く始めても入れ替えは起きません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "quote": "By default, Amazon EC2 Auto Scaling only replaces instances that are unhealthy or unreachable based on Amazon EC2 health checks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "quote": "Amazon EC2 Auto Scaling can replace a running instance if any of the Elastic Load Balancing load balancers you attach to the Auto Scaling group report it as unhealthy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html#attach-load-balancer-asg",
+          "quote": "When you attach an Application Load Balancer, Network Load Balancer, or Gateway Load Balancer, you attach a target group rather than the load balancer itself."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0011",
+      "stem_ja": "スケールインの時に、一部の利用者が 500 番台のエラーを受け取ります。調べると、Application Load Balancer の後ろのインスタンスが、最大 90 秒かかるリクエストの実行中に終了していました。ターゲットグループの登録解除の遅延は 10 秒に設定されていました。これらのエラーを最も効果的に防ぐ変更はどれですか。",
+      "choices_ja": {
+        "A": "新しいターゲットが最初は少ないリクエストを受けるよう、ターゲットグループのスロースタートのモードを有効にする。",
+        "B": "unhealthy とされるターゲットが減るよう、ヘルスチェックの成功コードを 200-499 にする。",
+        "C": "インスタンスがすぐにターゲットグループから外れるよう、登録解除の遅延を 0 秒にする。",
+        "D": "登録解除の遅延を、最も長いリクエストより長い値（例えば既定の 300 秒）に増やす。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Elastic Load Balancing は登録解除中のターゲットへ新しいリクエストを送らず、既定では 300 秒待ってから登録解除を終えるので、処理中のリクエストが終わるのを助けます。遅延が過ぎる前に登録解除中のターゲットが接続を切ると、クライアントは 500 番台のエラーを受け取ります。Auto Scaling のターゲットは、登録解除が終わった後に終了・入れ替えされます。",
+      "per_choice": {
+        "A": "スロースタートは新しいターゲットへの送り方で、終了するターゲットのリクエストは守れません。",
+        "B": "ヘルスチェックの判定は、スケールインで終了するインスタンスのリクエストとは関係ありません。",
+        "C": "待ち時間が無くなり、実行中のリクエストがさらに切られやすくなります。",
+        "D": "正しい。最も長いリクエストが終わるまで待ってから登録解除を終えるので、実行中のリクエストが切られません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "quote": "By default, Elastic Load Balancing waits 300 seconds before completing the deregistration process, which can help in-flight requests to the target to complete."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "quote": "If a deregistering target terminates the connection before the deregistration delay elapses, the client receives a 500-level error response."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#deregistration-delay",
+          "quote": "If the target is part of an Auto Scaling group, it can be terminated and replaced."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0012",
+      "stem_ja": "ある会社は、Route 53 のレイテンシーのエイリアスのレコードを通して、2 つのリージョンの Application Load Balancer から利用者に応答しています。障害の時、us-east-1 のロードバランサーの後ろのターゲットがすべて unhealthy でしたが、Route 53 はその地域の利用者を、正常なリージョンではなく us-east-1 へ送り続けました。この状況で Route 53 がもう一方のリージョンへ送るようにするために、最も少ない手間で行える変更はどれですか。",
+      "choices_ja": {
+        "A": "レイテンシーのレコードを、各リージョンへ 50% ずつ送る加重のレコードに置き換える。",
+        "B": "us-east-1 のターゲットグループのヘルスチェックを無効にし、ターゲットが unhealthy とされないようにする。",
+        "C": "リージョンが異常になるたびに、当番のエンジニアが DNS のレコードを手作業で変える。",
+        "D": "両方のレイテンシーのエイリアスのレコードで、Evaluate Target Health を Yes にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "エイリアスのレコードで Evaluate Target Health を Yes にすると、Route 53 はトラフィックを送る前にそのリージョンに正常なリソースがあるかを確かめ、無ければもう一方のリージョンの正常なリソースを選びます。No にすると、ヘルスチェックが失敗していても、そのレコードへ送り続けます。",
+      "per_choice": {
+        "A": "レイテンシーで選ばなくなるうえ、異常なリージョンにも半分のトラフィックが送られ続けます。",
+        "B": "異常を隠すだけで、壊れたターゲットにトラフィックが送られ続けます。",
+        "C": "手作業で、切り替えが遅れます。",
+        "D": "正しい。正常なリソースが無いリージョンを避け、もう一方のリージョンへ送ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs",
+          "quote": "This causes Route 53 to determine whether there are any healthy resources in a Region before trying to route traffic there."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-complex-configs.html#dns-failover-complex-configs-eth-no",
+          "quote": "If you set Evaluate Target Health to No, Route 53 continues to route traffic to the records that an alias record refers to even if health checks for those records are failing."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0013",
+      "stem_ja": "デプロイでヘルスチェックのパスが変わった後、Application Load Balancer のターゲットグループのすべてのターゲットが、有効なすべてのアベイラビリティーゾーンで同時にヘルスチェックに失敗しました。チームはロードバランサーがリクエストを送るのをやめると思っていましたが、利用者はまだターゲットに届き、アプリケーションのエラーを受け取りました。最も可能性の高い説明はどれですか。",
+      "choices_ja": {
+        "A": "登録解除の遅延によって、失敗した後 300 秒間は unhealthy のターゲットが使われ続けた。",
+        "B": "スロースタートのモードが、unhealthy のターゲットへ少しのリクエストを送り続けた。",
+        "C": "すべてのターゲットが同時にヘルスチェックに失敗すると、ロードバランサーはフェイルオープンになり、すべてのターゲットへリクエストを送る。",
+        "D": "Application Load Balancer は、Auto Scaling グループが入れ替えない限り、ヘルスチェックでターゲットへの送信を止めない。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "各ロードバランサーのノードは、通常は正常なターゲットにだけリクエストを送ります。ただし、ターゲットグループに unhealthy なターゲットしか無い時は、状態に関係なくすべてのターゲットへ送ります。有効なすべてのアベイラビリティーゾーンで全ターゲットが同時に失敗すると、ロードバランサーはフェイルオープンになります。",
+      "per_choice": {
+        "A": "登録解除の遅延は登録解除中のターゲットの話で、ヘルスチェックに失敗したターゲットを使い続ける仕組みではありません。",
+        "B": "スロースタートのターゲットは、unhealthy になるとスロースタートを抜けます。",
+        "C": "正しい。全ターゲットが同時に失敗したため、フェイルオープンですべてのターゲットへ送られました。",
+        "D": "ロードバランサーは通常、正常なターゲットにだけリクエストを送ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "quote": "If a target group contains only unhealthy registered targets, the load balancer routes requests to all those targets, regardless of their health status."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "quote": "if all targets fail health checks at the same time in all enabled Availability Zones, the load balancer fails open."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#slow-start-mode",
+          "quote": "If a target in slow start mode becomes unhealthy, the target exits slow start mode."
+        }
+      ]
+    },
+    {
+      "id": "q-3.3-0014",
+      "stem_ja": "Application Load Balancer のヘルスチェックは / のパスを使い、200 の応答を期待しています。トップページはインスタンスがデータベースへの接続を失っていても 200 を返すため、利用者が壊れたインスタンスへ送られます。アプリケーションには既に /health があり、データベースに届かない時は 503、それ以外は 200 を返します。リクエストが処理できるインスタンスにだけ送られるようにする最もよい変更はどれですか。",
+      "choices_ja": {
+        "A": "より多くの応答を正常とみなすよう、ヘルスチェックの成功コードを 200-499 にする。",
+        "B": "ヘルスチェックのパスを /health にし、成功コードは 200 のままにする。",
+        "C": "/ のパスのままにし、失敗を早く見つけるようヘルスチェックの間隔を短くする。",
+        "D": "ロードバランサーのヘルスチェックは / のままにし、/health を要求する Route 53 のヘルスチェックを作る。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "ヘルスチェックのパスは、ターゲットのヘルスチェックの送り先で、成功コードはターゲットからの成功の応答として扱うコードです。データベースに届かない時に 503 を返す /health を使い、成功を 200 にすれば、壊れたインスタンスは unhealthy になり、ロードバランサーは正常なターゲットにだけリクエストを送ります。",
+      "per_choice": {
+        "A": "/ のままでは壊れていても 200 が返り、問題は変わりません。",
+        "B": "正しい。データベースに届かないインスタンスが 503 で unhealthy になり、外されます。",
+        "C": "/ は壊れていても 200 を返すので、間隔を短くしても失敗として見つかりません。",
+        "D": "ロードバランサーは自分のヘルスチェック（/ の 200）で判断するため、データベースに届かないインスタンスにもリクエストを送り続けます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "quote": "If the protocol version is HTTP/1.1 or HTTP/2, the possible values are from 200 to 499."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "quote": "The codes to use when checking for a successful response from a target."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#target-group-health-checks",
+          "quote": "Each load balancer node routes requests only to the healthy targets in the enabled Availability Zones for the load balancer."
+        }
+      ]
+    }
+  ]
+}
