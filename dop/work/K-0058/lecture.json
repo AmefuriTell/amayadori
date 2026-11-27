@@ -21,6 +21,8 @@
     "扱えなかった物: q-1.1-0012 の正解は Application Load Balancer へ移す形だが、sources.md には「NLB の時は ECSAllAtOnce だけ」としか無く、ALB でカナリアが使えるとは書かれていない。台本では「制限が書かれているのは NLB の場合」「ロードバランサーを変える選択肢と設定だけ変える選択肢を見分ける」と言い、ALB の名前は出さなかった。",
     "扱えなかった物: ECS・Lambda の事前定義のカナリア・リニアの設定名（ECSCanary10Percent5Minutes など）は sources.md に無いので、名前は出さず動き（10% → 5 分後など）だけを表にした。q-1.1-0001 の「レジストリで有効にする」も、スキャンがレジストリの設定だという文が無いので言っていない。",
     "扱えなかった物: 試験ガイドの knowledge の 2 行（SDLC の概念、単一・複数アカウントのパイプラインのパターン）は sources.md の「覆えなかった行」のとおり資料が無く、問題も無いので扱わない。ECR の lifecycle policy と replication（S20〜S22）は資料にあるが、この task の問題の決め手ではないので字数の都合で外した。",
+    "検証（重 2・中 4）への直し: s16 は ECS の数字を「例」として言い、Lambda の数字と列を削った。LB を変えれば canary が使えるとは言わず「制限が書かれているのは NLB の場合だけ。設定だけ変える選択肢はこの制限に当たる」とした（s22 の表も「NLB の制限に注意」）。s05 は生徒が名前の変更を言う 2 行を削った。s04 は「同じドメインの中だけ」を「資料にあるのは同じドメインの中の形」に、s09 は「切り替えできない」を「資料では EC2 のモードで選ぶ物」に弱めた。s17 は問題の割合を使わず「残す割合が半分より多ければ」の一般の形にし、表の独自の設定の行を 9 台の例（6 台残す → 3 台ずつ）にそろえた。s14 はマネージドローテーションの 1 文を削り、S40 の自動ローテーションのスケジュールだけにした。",
+    "軽の直し: s03（生徒の問いの形・表の見る物の行）、s07（点線を「始まらない」・release* は例）、s08・s02（頻度の言い方）、s12（KMS の 2 行と表の行）、s13（版の話）、s22（止めて自動で戻す行を足す）。外れの選択肢をなぞる生徒の問い（s03・s04・s05・s06・s07・s10・s14・s18）は「手で始める・自分で作って保守する」などの一般の形にした。",
     "使った今の講義の部分: 五つの部の地図（s01・s23）と、条件から選ぶ表の形。前の講義の notes にある採らなかった指摘の理由は、前の版の lecture.v1.json に残っている。"
   ],
   "slides": [
@@ -132,7 +134,7 @@
         },
         {
           "who": "teacher",
-          "text": "外れ方には型があります。組み合わせて使えない、数字が範囲の外、自分で作る仕組みで手間が多い、の三つが多いです。"
+          "text": "外れ方の型として、次の三つを見ます。組み合わせて使えない、数字が範囲の外、手で始めるか自分で作って保守する手間が多い、です。"
         },
         {
           "who": "student",
@@ -181,11 +183,6 @@
             "使う物",
             "CVE のデータベース",
             "Amazon Inspector"
-          ],
-          [
-            "見る物",
-            "OS の脆弱性",
-            "リポジトリを継続"
           ]
         ]
       },
@@ -196,7 +193,7 @@
         },
         {
           "who": "student",
-          "text": "プッシュの時にスキャンする設定なら、うちでも普段から入れてるのだ。それで足りない？"
+          "text": "プッシュの時にスキャンすれば、それで足りるのだ？"
         },
         {
           "who": "teacher",
@@ -216,11 +213,11 @@
         },
         {
           "who": "student",
-          "text": "毎日手動のスキャンを始める関数を作るのはどう？"
+          "text": "自動のスキャンが無いなら、スキャンを始める仕組みを自分で用意すればいい？"
         },
         {
           "who": "teacher",
-          "text": "動きはしますが、関数を作って保守する手間がかかり、調べるのも基本スキャンの範囲のままです。最も少ない手間、の条件で外れます。"
+          "text": "手で始めるか、作って保守する手間がかかり、調べるのも基本スキャンの範囲のままです。人が始めずに、最も少ない手間で、という条件なら外れます。"
         },
         {
           "who": "student",
@@ -253,7 +250,7 @@
       "bullets": [
         "公開の取り込みは外部接続",
         "共有リポジトリを upstream に",
-        "upstream は同じドメインの中だけ"
+        "upstream は同じドメインの中で"
       ],
       "visual": {
         "type": "mermaid",
@@ -271,7 +268,7 @@
         },
         {
           "who": "student",
-          "text": "チームが多いなら、全部のリポジトリに外部接続を付けて回るのが普通？"
+          "text": "各チームのリポジトリが、それぞれ外部接続を持つ形でもいい？"
         },
         {
           "who": "teacher",
@@ -287,7 +284,7 @@
         },
         {
           "who": "teacher",
-          "text": "いいえ。別のリポジトリのパッケージを使えるのは、同じドメインの中だけです。それから、コードアーティファクトのパッケージは公開にできません。"
+          "text": "そうとは言えません。資料にあるのは、同じドメインの中で、あるリポジトリを別のリポジトリのアップストリームにする形です。それから、コードアーティファクトのパッケージは公開にできません。"
         },
         {
           "who": "student",
@@ -295,7 +292,7 @@
         },
         {
           "who": "teacher",
-          "text": "はい。ドメインを分ける、公開にする、という選択肢は外れます。"
+          "text": "はい。公開にする形は、資料ではできないと書かれています。"
         }
       ],
       "refs": [
@@ -350,20 +347,12 @@
           "text": "コードパイプラインを外のリポジトリにつなぐ時は、接続という資源を使います。ギットハブなどのリポジトリを、エーダブリューエスのサービスにつなぐ物です。"
         },
         {
-          "who": "student",
-          "text": "前はコードスターコネクションズって名前だったよね。古い名前で作った物は使えなくなる？"
-        },
-        {
-          "who": "teacher",
-          "text": "名前は変わりましたが、前の名前空間で作った資源も引き続き使えます。"
-        },
-        {
           "who": "teacher",
           "text": "問題で効くのは状態です。シーエルアイやクラウドフォーメーションで作った接続は、既定でペンディングになります。"
         },
         {
           "who": "student",
-          "text": "パイプラインを一回動かせば、そのうちアベイラブルになるのだ？"
+          "text": "ペンディングは途中の状態で、待てば先に進むのだ？"
         },
         {
           "who": "teacher",
@@ -371,11 +360,11 @@
         },
         {
           "who": "student",
-          "text": "作った後にコンソールで編集する、だね。シーエルアイで作り直すのは？"
+          "text": "作った後にコンソールで編集する、だね。作り直したらどう？"
         },
         {
           "who": "teacher",
-          "text": "シーエルアイで作ってもペンディングから始まります。個人のトークンを保存する手は、トークンを置かない条件で外れます。"
+          "text": "シーエルアイやクラウドフォーメーションで作れば、また既定でペンディングです。個人のトークンを保存する手は、トークンを置かない条件で外れます。"
         },
         {
           "who": "student",
@@ -396,11 +385,6 @@
           "source_id": "S26",
           "quote": "After you create a connection with the CLI or CloudFormation, use the console to edit the connection to make its status AVAILABLE.",
           "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html#connections-github-cli"
-        },
-        {
-          "source_id": "S24",
-          "quote": "The service name AWS CodeStar Connections has been renamed.",
-          "url": "https://docs.aws.amazon.com/dtconsole/latest/userguide/welcome-connections.html#welcome-connections"
         }
       ],
       "covers": [
@@ -451,7 +435,7 @@
         },
         {
           "who": "student",
-          "text": "ビルドで履歴を読むギットのコマンドが失敗するなら、ビルドの中でギットイニットすれば直るのだ？"
+          "text": "ビルドで履歴を読むギットのコマンドが失敗するなら、ビルドの中でギットの準備をし直せば読めるのだ？"
         },
         {
           "who": "teacher",
@@ -496,11 +480,11 @@
       "bullets": [
         "既定: push で変更を検出",
         "トリガーを Git タグにする",
-        "Filter type Tags と release*"
+        "Filter type Tags で名前の形"
       ],
       "visual": {
         "type": "mermaid",
-        "source": "flowchart TB\n  TAG[\"Git タグを作る<br/>名前が release* の形\"]\n  PUSH[\"タグの無い push\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>トリガー: Git タグ<br/>Filter type: Tags\" }\n  TAG -- \"パイプラインが始まる\" --> CP\n  PUSH -. \"全 push の検出は使わない\" .-> CP\n",
+        "source": "flowchart TB\n  TAG[\"Git タグを作る<br/>名前の形が合う<br/>例: release*\"]\n  PUSH[\"タグの無い push\"]\n  CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>トリガー: Git タグ<br/>Filter type: Tags\" }\n  TAG -- \"パイプラインが始まる\" --> CP\n  PUSH -. \"始まらない\" .-> CP\n",
         "alt": "トリガーを Git タグにし、Filter type に Tags、パターンに release* を入れたパイプライン。その形のタグが作られた時に始まり、全部の push で変更を検出するイベントは使わない。"
       },
       "dialogue": [
@@ -510,15 +494,15 @@
         },
         {
           "who": "student",
-          "text": "リリースのタグの時だけ動かしたいなら、ブランチのフィルターを足せばいい？"
+          "text": "特定のタグの時だけ動かしたいなら、プッシュの条件を絞れば足りる？"
         },
         {
           "who": "teacher",
-          "text": "ブランチで絞っても、そのブランチへのプッシュのたびに始まり、タグの無いプッシュでも動きます。決め手は、トリガーの種類をギットタグにすることです。"
+          "text": "プッシュの条件を絞っても、プッシュで始まる形のままです。タグで始めたいなら、トリガーの種類をギットタグにします。"
         },
         {
           "who": "teacher",
-          "text": "ウェブフックのイベントで、フィルターの種類にタグズを選び、タグの形の欄に、リリースにアスタリスクを付けた形を入れます。その形のタグが作られた時に始まります。"
+          "text": "ウェブフックのイベントで、フィルターの種類にタグズを選び、タグの名前の形で絞れます。資料の例は、リリースにアスタリスクを付けた形です。"
         },
         {
           "who": "student",
@@ -594,7 +578,7 @@
         },
         {
           "who": "teacher",
-          "text": "そうです。そこでよく並ぶのがオンフェイリャーです。値はアボートかコンティニューで、コンティニューは次のフェーズへ進みます。"
+          "text": "そうです。似た働きの設定に、オンフェイリャーがあります。値はアボートかコンティニューで、コンティニューは次のフェーズへ進みます。"
         },
         {
           "who": "student",
@@ -699,7 +683,7 @@
         },
         {
           "who": "teacher",
-          "text": "そのとおりです。予約された容量のフリートは、イーシーツーのモードの選び方です。ラムダのままフリートだけ切り替えることはできません。"
+          "text": "そのとおりです。資料では、予約された容量のフリートは、イーシーツーのモードで選ぶ物として書かれています。"
         },
         {
           "who": "student",
@@ -757,11 +741,11 @@
         },
         {
           "who": "student",
-          "text": "ラムダの計算のまま、プリビレッジドモードをトゥルーにするのじゃだめ？"
+          "text": "計算の種類はそのままで、特権モードだけ入れれば動く？"
         },
         {
           "who": "teacher",
-          "text": "だめです。ラムダの計算は特権モードに対応せず、ドッカーのビルドもできません。タイムアウトを延ばしても同じです。"
+          "text": "ラムダの計算なら、動きません。ラムダの計算は特権モードに対応せず、ドッカーのビルドもできません。タイムアウトを延ばしても同じです。"
         },
         {
           "who": "student",
@@ -922,11 +906,6 @@
             "エンドポイント等",
             "SecureString",
             "暗号化が要る値"
-          ],
-          [
-            "SecureString の鍵",
-            "AWS KMS",
-            "値を暗号化"
           ]
         ]
       },
@@ -946,14 +925,6 @@
         {
           "who": "teacher",
           "text": "動きはしますが、推奨に従う、という条件なら外れます。セキュアストリングは、サービスのエンドポイントやアカウントの識別子のような、暗号化が要る設定値に使うと書かれています。"
-        },
-        {
-          "who": "student",
-          "text": "セキュアストリングの暗号化は、何でしてるの？"
-        },
-        {
-          "who": "teacher",
-          "text": "パラメーターストアは、キーマネジメントサービスで値を暗号化します。"
         },
         {
           "who": "student",
@@ -981,11 +952,6 @@
         {
           "source_id": "S41",
           "quote": "For secrets such as database credentials, API keys, or tokens, we recommend AWS Secrets Manager, which provides purpose built security controls including automatic rotation and cross-region replication.",
-          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
-        },
-        {
-          "source_id": "S41",
-          "quote": "Parameter Store encrypts the values using AWS Key Management Service.",
           "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html#systems-manager-parameter-store"
         }
       ],
@@ -1023,7 +989,7 @@
         },
         {
           "who": "teacher",
-          "text": "エラーではなく、シークレットの全文を取ります。全文を取って自分で解析する手は、一つだけ渡す条件にも、独自の解析を足さない条件にも反します。版を指定しなければ、今の版が取られます。"
+          "text": "エラーではなく、シークレットの全文を取ります。全文を取って自分で解析する手は、一つだけ渡す条件にも、独自の解析を足さない条件にも反します。"
         },
         {
           "who": "student",
@@ -1092,11 +1058,11 @@
         },
         {
           "who": "teacher",
-          "text": "シークレッツマネージャーでは、自動ローテーションを設定できます。多くのマネージドのシークレットは、サービスが設定と管理をするマネージドローテーションで、これはラムダの関数を使いません。"
+          "text": "シークレッツマネージャーでは、シークレットの自動ローテーションのスケジュールを設定できます。"
         },
         {
           "who": "student",
-          "text": "パラメーターストアに置いて、関数とスケジュールを自分で作って回すのでも同じでしょ？"
+          "text": "ローテーションの仕組みを自分で作って、定期的に動かすのでも同じでしょ？"
         },
         {
           "who": "teacher",
@@ -1130,9 +1096,9 @@
           "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
         },
         {
-          "source_id": "S39",
-          "quote": "Managed rotation doesn't use a Lambda function.",
-          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html#rotating-secrets"
+          "source_id": "S40",
+          "quote": "With Secrets Manager, you can configure an automatic rotation schedule for your secrets.",
+          "url": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html#intro"
         },
         {
           "source_id": "S40",
@@ -1248,35 +1214,30 @@
       "bullets": [
         "canary・linear・all-at-once",
         "NLB なら ECSAllAtOnce だけ",
-        "一部を先に → NLB のままでは不可"
+        "NLB のまま設定だけ変えても不可"
       ],
       "visual": {
         "type": "compare",
         "columns": [
           "設定の種類",
-          "ECS での動き",
-          "Lambda での動き"
+          "ECS での動きの例"
         ],
         "rows": [
           [
             "canary",
-            "10% → 5 分後に残り",
-            "10% → 30 分後に残り"
+            "10% → 5 分後に残り"
           ],
           [
             "linear",
-            "毎分 10% ずつ",
-            "10 分ごとに 10%"
+            "毎分 10% ずつ"
           ],
           [
             "all-at-once",
-            "一度に全部",
             "一度に全部"
           ],
           [
             "NLB を使う時",
-            "ECSAllAtOnce だけ",
-            "記述なし"
+            "ECSAllAtOnce だけ"
           ]
         ]
       },
@@ -1286,16 +1247,12 @@
           "text": "イーシーエスとラムダでは、デプロイ設定が、トラフィックの移し方を決めます。種類はカナリア、リニア、一括です。"
         },
         {
-          "who": "teacher",
-          "text": "イーシーエスのカナリアは、最初に十パーセントを移し、残りの九十パーセントを五分後に移します。リニアは毎分十パーセントずつ、一括は一度に全部です。"
-        },
-        {
           "who": "student",
-          "text": "ラムダのカナリアも、同じ五分？"
+          "text": "移す割合や待つ時間は、設定ごとに決まってるの？"
         },
         {
           "who": "teacher",
-          "text": "違います。ラムダの事前定義の設定では、カナリアは三十分後に残りを移し、リニアは十分ごとに十パーセントです。数字は画面の表で見比べてください。"
+          "text": "例えばイーシーエスには、最初に十パーセントを移し、残りを五分後に移すカナリアの設定があります。毎分十パーセントずつ移すリニアの設定もあります。数字は設定ごとに違います。"
         },
         {
           "who": "student",
@@ -1311,7 +1268,7 @@
         },
         {
           "who": "teacher",
-          "text": "はい。制限が書かれているのは、ネットワークロードバランサーの場合です。設定だけ変える選択肢と、ロードバランサーを変える選択肢を見分けてください。承認を足しても、移し方は一括のままです。"
+          "text": "制限が書かれているのは、ネットワークロードバランサーの場合だけです。設定だけ変える選択肢は、この制限に当たります。承認を足しても、移し方は一括のままです。"
         }
       ],
       "refs": [
@@ -1324,11 +1281,6 @@
           "source_id": "S45",
           "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.",
           "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-ecs"
-        },
-        {
-          "source_id": "S46",
-          "quote": "Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 30 minutes later.",
-          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployment-configurations.html#deployment-configuration-lambda"
         }
       ],
       "covers": [
@@ -1368,8 +1320,8 @@
           ],
           [
             "独自の設定",
-            "最小正常ホスト数",
-            "残す数を決める"
+            "残す数から決まる",
+            "6 台残す → 3 台ずつ"
           ]
         ]
       },
@@ -1396,15 +1348,15 @@
         },
         {
           "who": "student",
-          "text": "四分の三は残したい、みたいに割合が決まってる時は？"
+          "text": "残す割合が決まってる時は？"
         },
         {
           "who": "teacher",
-          "text": "事前定義の設定が合わない時は、最小正常ホスト数を決めた独自のデプロイ設定を作れます。残す割合をそこに入れます。"
+          "text": "残す割合が半分より多ければ、半分ずつでは足りず、一台ずつは満たしても遅いです。事前定義の設定が合わない時は、最小正常ホスト数にその割合を入れた独自のデプロイ設定を作れます。残す数を守った上で、残りに一度に入れられます。"
         },
         {
           "who": "student",
-          "text": "一台ずつは残る数を満たしても遅い、半分ずつは残りが足りない、だから独自の設定か。"
+          "text": "残す割合をそのまま最小正常ホスト数にする、だね。"
         },
         {
           "who": "teacher",
@@ -1476,7 +1428,7 @@
         },
         {
           "who": "student",
-          "text": "デプロイグループに先にアラームを登録して、アラーム本体は後で作るのでもいいのだ？"
+          "text": "アラームを作るのとデプロイグループに足すのは、どっちが先でもいいのだ？"
         },
         {
           "who": "teacher",
@@ -1639,12 +1591,12 @@
           [
             "Git の履歴が要る",
             "full clone",
-            "git init・トークン"
+            "ZIP のまま・トークン"
           ],
           [
             "タグの時だけ開始",
             "Git タグのトリガー",
-            "ブランチのフィルター"
+            "push の条件で絞る"
           ]
         ]
       },
@@ -1667,7 +1619,7 @@
         },
         {
           "who": "student",
-          "text": "タグの時だけ始めたいなら、ブランチのフィルターじゃなくて、ギットタグのトリガー、なのだ。"
+          "text": "タグの時だけ始めたいなら、プッシュの条件じゃなくて、ギットタグのトリガー、なのだ。"
         },
         {
           "who": "teacher",
@@ -1813,12 +1765,7 @@
         ],
         "rows": [
           [
-            "秘密を推奨どおりに",
-            "Secrets Manager",
-            "SecureString"
-          ],
-          [
-            "キー 1 つだけ渡す",
+            "秘密のキー 1 つだけ",
             "json-key",
             "全文を取って解析"
           ],
@@ -1829,13 +1776,18 @@
           ],
           [
             "NLB で一部を先に",
-            "LB を変えて canary",
+            "NLB の制限に注意",
             "設定だけ変える"
+          ],
+          [
+            "止めて自動で戻す",
+            "アラームと戻す設定",
+            "Ignore・手動"
           ],
           [
             "割合を残して速く",
             "独自の設定",
-            "HalfAtATime 等"
+            "OneAtATime 等"
           ]
         ]
       },
