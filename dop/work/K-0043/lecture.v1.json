@@ -1,0 +1,1200 @@
+{
+  "task": "2.1",
+  "title": "インフラをコードで定義し、使い回せる部品で管理する",
+  "notes": [
+    "1 回目の検証への返事（採らなかった指摘とその理由）:",
+    "global・s02・s05・s11: 「根拠に定義の一文を足す」案は採らなかった。C2 では sources.md を増やせないため。代わりに、テンプレート・スタック・bootstrap・assets・ノードの説明を語の紹介にとどめ、仕組みを言い切らない形に弱めた。",
+    "s15（両方の検証）: 指摘された行を全部表に足す案は、表が 5 行までなので採らなかった。似た組（change set と Hooks、AWS Config・State Manager・AWS AppConfig）を表に並べ、StackSets・bootstrap・modules と Service Catalog は bullets に置いた。台本は表と bullets の順に合わせ、concurrency mode は s10 で扱うので s15 の台本からは外した。",
+    "s04（clarity・軽）: CDK のスタックが s02 のスタックと同じ物だと言う案は、根拠に無いので言わなかった。合成したテンプレートの話を s04 の最後で予告するだけにした。",
+    "s11（旧 s11。clarity・軽）: s10 と重なる State Manager と AWS Config のスライドは、s10 に合わせて一つにまとめた（16 枚の上限の中で、三つの道具を見分ける表を足すため）。",
+    "global: AWS OpsWorks は sources.md の「覆えなかった行」のとおり扱わない。s11 で「例をいくつか挙げています。ここでは三つを見ます」とだけ言う。",
+    "掛け合いにした時の注意: 事実は先生の行だけに置いた。生徒の誤り（設定管理やテンプレートの道具のれいを全部と思う、ブートストラップの二つの条件をどちらか一つと思う、AWS Config と AWS AppConfig・change set と Hooks・modules と CDK・modules と Service Catalog など似た物を混ぜる）は、次の先生の行で正した。根拠に無い点（SAM のテンプレートと CloudFormation のテンプレートの関係、CDK のスタックと CloudFormation のスタックの関係、change set を作った時に変更が当たるか）は「そうとは言えません」と正し、言える範囲だけを言った。訂正の後は、生徒が正しい形を言い直し、先生が「そうです」と受ける形にそろえた。",
+    "掛け合いの検証への返事: 重・中は全部直した。s11 のステートマネージャーは、根拠に「システムズマネージャーの機能」という言い方が無いため、S6 の見出しの正式な名前（AWS Systems Manager State Manager）を言う形で、システムズマネージャーの一部だと分かるようにした。軽の s05 のアセットの説明は、根拠に中身が無いので「中身はここでは扱いません」と範囲を言うだけにした。軽の s11 の順は、bullets と表の順（AWS Config・State Manager・AWS AppConfig）に台本を合わせた。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "四つの部分と最後の表",
+        "道具・変更・設定・部品",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "1 IaC の道具",
+            "note": "CloudFormation・AWS SAM・AWS CDK と bootstrap"
+          },
+          {
+            "label": "2 変更の管理",
+            "note": "change set・CloudFormation Hooks・StackSets"
+          },
+          {
+            "label": "3 設定の管理",
+            "note": "AWS Config・State Manager・AWS AppConfig"
+          },
+          {
+            "label": "4 使い回せる部品",
+            "note": "CloudFormation modules・AWS Service Catalog"
+          },
+          {
+            "label": "最後: 条件から選ぶ表",
+            "note": "問題文の条件から方法を選ぶ"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、クラウドの基盤をコードで定義し、作ってから片付けるまで管理する方法を学びます。試験ガイドのタスク二の一です。"
+        },
+        {
+          "who": "teacher",
+          "text": "基盤をコードとして書く考え方を、インフラストラクチャーアズコード、略してアイエーシーと呼びます。"
+        },
+        {
+          "who": "student",
+          "text": "講義はどんな順番で進むのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "四つの部分と、最後の条件から選ぶ表でできています。一つ目はアイエーシーの道具で、クラウドフォーメーション、エーダブリューエスサム、シーディーケーの三つと、その見分け方を見ます。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目は変更の管理です。影響を先に見る、組織のベストプラクティスに合うかを確かめる、たくさんのアカウントとリージョンに広げる、の三つの方法を扱います。"
+        },
+        {
+          "who": "student",
+          "text": "残りの二つは？"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目は設定の管理で、三つのサービスを比べます。四つ目は使い回せる部品です。最後に、条件から選ぶ表で締めます。"
+        },
+        {
+          "who": "student",
+          "text": "道具、変更、設定、部品、そして最後に表、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "CloudFormation is a service that helps you model and set up your AWS resources",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome"
+        },
+        {
+          "source_id": "S3",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources, including the impact on resource properties and attributes.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets"
+        },
+        {
+          "source_id": "S10",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "1-1 CloudFormation",
+      "bullets": [
+        "AWS のリソースを形にして用意",
+        "管理の時間を減らす",
+        "アプリに時間を回す"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CF@{ svc: \"AWS CloudFormation\", label: \"CloudFormation\" }\n  R[\"AWS のリソース\"]\n  E[\"効果<br/>管理の時間を減らし<br/>アプリに時間を回す\"]\n  CF -- \"形にして用意する\" --> R\n  CF -- \"ねらい\" --> E\n",
+        "alt": "CloudFormation は AWS のリソースを形にして用意するのを助ける。ねらいは、リソースの管理にかける時間を減らし、AWS で動くアプリケーションに時間を回すこと。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "一つ目の部分、アイエーシーの道具です。まず、クラウドフォーメーションです。"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドフォーメーションは、エーダブリューエスのリソースを形にして、用意するのを助けるサービスです。リソースとは、エーダブリューエスの上で使う一つ一つの部品のことです。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、クラウドフォーメーションはアプリを動かすためのサービスなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。助けるのはリソースを用意することです。ねらいは、リソースを管理する時間を減らし、エーダブリューエスで動くアプリケーションに集中する時間を増やすことです。"
+        },
+        {
+          "who": "student",
+          "text": "アプリを動かすんじゃなくて、リソースを用意する道具なのだ。その分アプリに時間を回せるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。この先、作りたいリソースを書いたファイルをテンプレート、まとめて扱うリソースをスタックと呼びます。"
+        },
+        {
+          "who": "student",
+          "text": "テンプレートは書いたファイル、スタックはまとめたリソース、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。どちらも、この後よく出てきます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "CloudFormation is a service that helps you model and set up your AWS resources",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome"
+        },
+        {
+          "source_id": "S1",
+          "quote": "so that you can spend less time managing those resources and more time focusing on your applications that run in AWS.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "1-2 AWS SAM",
+      "bullets": [
+        "AWS SAM テンプレートに書く",
+        "アプリのリソースとプロパティ",
+        "ファイルは template.yaml"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  P[\"AWS SAM プロジェクト\"]\n  T[\"template.yaml<br/>AWS SAM テンプレート\"]\n  R[\"アプリケーションの<br/>リソースとプロパティ\"]\n  P -- \"中にある\" --> T\n  T -- \"定義する\" --> R\n",
+        "alt": "AWS SAM プロジェクトの中にある template.yaml が AWS SAM テンプレート。このテンプレートで、アプリケーションのリソースとプロパティを定義する。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目の道具は、エーダブリューエスサムです。サムでは、サムのテンプレートを設定して、アプリケーションのリソースと、そのプロパティを定義します。"
+        },
+        {
+          "who": "student",
+          "text": "プロパティって、どういう物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "リソースごとの設定の中身です。このテンプレートは、サムのプロジェクトの中にある、テンプレートドットヤムルというファイルです。"
+        },
+        {
+          "who": "student",
+          "text": "そのファイルって、クラウドフォーメーションのテンプレートと同じ物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ここで言えるのは、サムのプロジェクトの中にある、サムのテンプレートだ、ということまでです。"
+        },
+        {
+          "who": "student",
+          "text": "サムのプロジェクトの中の、サムのテンプレート、とだけ覚えるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、サムのプロジェクトやテンプレートドットヤムルが出てきたら、サムの話で、リソースの定義はそこにある、と読みます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "Do this by configuring your AWS SAM template to define your application's resources and properties, which is the template.yaml file in your AWS SAM project.",
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-authoring.html#serverless-authoring"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "1-3 AWS CDK",
+      "bullets": [
+        "オープンソースのライブラリ",
+        "コマンドラインの道具",
+        "cdk deploy でデプロイ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CDK@{ svc: \"AWS CDK\", label: \"AWS CDK<br/>ライブラリと<br/>コマンドラインの道具\" }\n  ST[\"CDK のスタック<br/>1 つ以上\"]\n  ENV[\"AWS の環境\"]\n  CDK -- \"作る\" --> ST\n  ST -- \"cdk deploy\" --> ENV\n",
+        "alt": "AWS CDK はオープンソースのライブラリとコマンドラインの道具の集まり。CDK で作った 1 つ以上のスタックを、cdk deploy で AWS の環境にデプロイする。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目の道具は、エーダブリューエスシーディーケーです。シーディーケーは、オープンソースのライブラリと、コマンドラインの道具を集めた物です。"
+        },
+        {
+          "who": "student",
+          "text": "ライブラリって？"
+        },
+        {
+          "who": "teacher",
+          "text": "プログラムから呼んで使う部品の集まりです。シーディーケーは、エーダブリューエスの上のアプリケーションを作り、デプロイするために使います。"
+        },
+        {
+          "who": "teacher",
+          "text": "デプロイとは、作った物を実際の環境に置いて動かすことです。そのためのコマンドが、シーディーケーデプロイです。"
+        },
+        {
+          "who": "student",
+          "text": "そのコマンドで、どこに置くのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ以上のシーディーケーのスタックを、エーダブリューエスの環境にデプロイします。"
+        },
+        {
+          "who": "student",
+          "text": "シーディーケーのスタックは、さっきのクラウドフォーメーションのスタックと同じなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ここで言えるのは、シーディーケーデプロイが一つ以上のスタックを環境に置く、ということまでです。"
+        },
+        {
+          "who": "student",
+          "text": "言えるのは、スタックを環境に置く、までなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。次のスライドで見るとおり、シーディーケーはテンプレートを合成、つまり作り出します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "The AWS Cloud Development Kit (AWS CDK) is an open-source set of libraries and command-line tools for building and deploying applications on AWS.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/home.html#home"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Deploy one or more AWS CDK stacks into your AWS environment.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html#ref-cli-cmd-deploy"
+        },
+        {
+          "source_id": "S9",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html#ref-cli-cmd-deploy"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "1-4 bootstrap していない環境",
+      "bullets": [
+        "環境が bootstrap 済みか",
+        "未済なら通るスタックが限られる",
+        "2 つの条件を両方満たす物だけ"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "bootstrap 無しで成功",
+          "中身"
+        ],
+        "rows": [
+          [
+            "1 assets",
+            "持たない"
+          ],
+          [
+            "2 合成したテンプレート",
+            "51,200 バイト未満"
+          ],
+          [
+            "結果",
+            "両方を満たす物だけ成功"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "シーディーケーデプロイには、気をつけたい条件があります。エーダブリューエスの環境が、ブートストラップされていない場合です。"
+        },
+        {
+          "who": "student",
+          "text": "ブートストラップって？"
+        },
+        {
+          "who": "teacher",
+          "text": "環境の準備を指す言葉です。準備がされていない環境では、デプロイに成功するスタックが限られます。条件は二つです。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つは、アセットを持たないことです。アセットは、テンプレートのほかにスタックが持つ物です。中身はここでは扱いません。"
+        },
+        {
+          "who": "student",
+          "text": "一つ目は、アセットを持たないこと、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。もう一つは、シーディーケーが作り出した、合成したテンプレートが、五万千二百バイトより小さいことです。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、どっちか一つを満たせば成功するのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。両方を満たす物だけが成功します。"
+        },
+        {
+          "who": "student",
+          "text": "アセットが無くて、しかもテンプレートが小さい、の両方なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、準備をしていない環境へのデプロイが失敗する、とあれば、この二つの条件を思い出してください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html#ref-cli-cmd-deploy"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "1-5 三つの道具を見分ける",
+      "bullets": [
+        "SAM は template.yaml",
+        "CDK はライブラリとコマンド",
+        "CDK は bootstrap も確かめる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "道具",
+          "問題文の手掛かり"
+        ],
+        "rows": [
+          [
+            "CloudFormation",
+            "AWS のリソースを用意"
+          ],
+          [
+            "AWS SAM",
+            "template.yaml に定義"
+          ],
+          [
+            "AWS CDK",
+            "ライブラリとコマンド"
+          ],
+          [
+            "CDK の手掛かり",
+            "cdk deploy・bootstrap"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここで、三つの道具を並べて見分けます。クラウドフォーメーションはリソースを形にして用意し、サムはテンプレートドットヤムルにリソースとプロパティを定義します。"
+        },
+        {
+          "who": "teacher",
+          "text": "シーディーケーは、ライブラリとコマンドラインの道具です。手掛かりは、シーディーケーデプロイのコマンドと、ブートストラップです。"
+        },
+        {
+          "who": "student",
+          "text": "テンプレートを書いてデプロイする道具は、この三つで全部なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "全部とは言えません。試験ガイドは、テンプレートを書いてデプロイする技能のれいとして、この三つを挙げています。"
+        },
+        {
+          "who": "student",
+          "text": "三つはれい、なのだ。問題文でどう見分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。ファイルやコマンドの名前が手掛かりになります。"
+        },
+        {
+          "who": "student",
+          "text": "テンプレートドットヤムルならサム、シーディーケーデプロイやブートストラップならシーディーケー、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。そして、リソースを形にして用意する、と言うのがクラウドフォーメーションです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "CloudFormation is a service that helps you model and set up your AWS resources",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Do this by configuring your AWS SAM template to define your application's resources and properties, which is the template.yaml file in your AWS SAM project.",
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-authoring.html#serverless-authoring"
+        },
+        {
+          "source_id": "S2",
+          "quote": "The AWS Cloud Development Kit (AWS CDK) is an open-source set of libraries and command-line tools for building and deploying applications on AWS.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/home.html#home"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Deploy one or more AWS CDK stacks into your AWS environment.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html#ref-cli-cmd-deploy"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "2-1 change set",
+      "bullets": [
+        "変更の影響を先に見る",
+        "動いているリソースへの影響",
+        "プロパティと属性まで"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  CH[\"スタックへの<br/>変更の案\"]\n  CS@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>change set\" }\n  R[\"動いているリソース<br/>プロパティと属性\"]\n  CH -- \"まとめる\" --> CS\n  CS -- \"影響を先に見る\" --> R\n",
+        "alt": "スタックへの変更の案を CloudFormation の change set にまとめると、動いているリソースへの影響を、プロパティと属性への影響も含めて先に見られる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目の部分、変更の管理です。動いている基盤を変えるときに使うのが、チェンジセットです。"
+        },
+        {
+          "who": "teacher",
+          "text": "チェンジセットを使うと、スタックへの変更の案が、動いているリソースにどう響くかを、前もって見られます。"
+        },
+        {
+          "who": "student",
+          "text": "どこまで細かく見られるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "プロパティと属性、つまりリソースの中身への影響までです。"
+        },
+        {
+          "who": "student",
+          "text": "チェンジセットを作ったら、その変更はすぐに当たるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ここで言えるのは、影響を前もって見られる、ということです。いきなり当てるのではなく、まず影響を確かめてから進める流れです。"
+        },
+        {
+          "who": "student",
+          "text": "作ってすぐ当てる物じゃなくて、まず影響を見る物なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、動いているリソースに起きることを、変更の前に知りたい、とあれば、チェンジセットです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources, including the impact on resource properties and attributes.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "2-2 CloudFormation Hooks",
+      "bullets": [
+        "リソース・スタック・change set",
+        "組織のベストプラクティス",
+        "セキュリティ・運用・費用"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  IN[\"リソース・スタック<br/>change set\"]\n  HK@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>Hooks\" }\n  BP[\"組織の<br/>ベストプラクティス<br/>セキュリティ・運用<br/>費用の最適化\"]\n  IN -- \"確かめる対象\" --> HK\n  HK -- \"合っているか\" --> BP\n",
+        "alt": "CloudFormation Hooks は、CloudFormation のリソース・スタック・change set が、組織のセキュリティ・運用・費用の最適化のベストプラクティスに合っているかを確かめるのを助ける。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、クラウドフォーメーションフックスです。フックスは、クラウドフォーメーションのリソース、スタック、チェンジセットが、組織のベストプラクティスに従っているかを確かめるのを助けます。"
+        },
+        {
+          "who": "student",
+          "text": "ベストプラクティスって？"
+        },
+        {
+          "who": "teacher",
+          "text": "良いとされるやり方のことです。種類は、セキュリティ、運用、費用の最適化の三つが挙がっています。"
+        },
+        {
+          "who": "student",
+          "text": "確かめる対象にチェンジセットが入るなら、フックスもチェンジセットと同じ働きなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。チェンジセットは影響を見るための物、フックスはベストプラクティスに合っているかを見るための物です。フックスは、チェンジセットを確かめる側です。"
+        },
+        {
+          "who": "student",
+          "text": "チェンジセットは影響を見る、フックスはベストプラクティスに合うかを見る、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、組織のベストプラクティスに合っていることを確かめたい、とあれば、フックスです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "CloudFormation Hooks is a feature that helps ensure that your CloudFormation resources, stacks, and change sets comply with your organization",
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#what-is-cloudformation-hooks"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "2-3 StackSets",
+      "bullets": [
+        "複数のアカウントとリージョン",
+        "スタックを作成・更新・削除",
+        "1 回の操作で"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SS@{ svc: \"AWS CloudFormation StackSets\", label: \"StackSets<br/>1 回の操作で<br/>作成・更新・削除\" }\n  subgraph A1[\"アカウント A\"]\n    X1[\"スタック<br/>リージョン 1\"]\n    X2[\"スタック<br/>リージョン 2\"]\n  end\n  subgraph A2[\"アカウント B\"]\n    X3[\"スタック<br/>リージョン 1\"]\n    X4[\"スタック<br/>リージョン 2\"]\n  end\n  SS --> A1\n  SS --> A2\n",
+        "alt": "CloudFormation StackSets は、1 回の操作で、複数のアカウントと複数のリージョンにまたがって、スタックを作成・更新・削除する。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "変更を広げる先が一つではないときに使うのが、クラウドフォーメーションスタックセッツです。スタックセッツは、スタックの働きを広げた物です。"
+        },
+        {
+          "who": "student",
+          "text": "スタックセッツは、一つのアカウントの中でスタックを増やす物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。一回の操作で、複数のアカウントと、複数のリージョンにまたがって、スタックを作成、更新、削除できます。"
+        },
+        {
+          "who": "student",
+          "text": "一回で、いくつものアカウントとリージョンに、なのだ。リージョンって？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。リージョンとは、エーダブリューエスが世界の地域ごとに分けている場所です。試験ガイドにも、スタックセッツを複数のアカウントとリージョンに当てる、という技能が挙がっています。"
+        },
+        {
+          "who": "student",
+          "text": "問題文ではどんな言い方になるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "多くのアカウントとリージョンに、一回の操作でスタックを広げたい、とあれば、スタックセッツです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S10",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "2-4 失敗が起きた時の速さ",
+      "bullets": [
+        "concurrency mode を選ぶ",
+        "Strict Failure Tolerance",
+        "失敗ごとに並行の数が減る"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "StackSets の操作を始める",
+            "note": "アカウントとリージョンへ"
+          },
+          {
+            "label": "操作の失敗が起きる",
+            "note": "Strict Failure Tolerance の場合"
+          },
+          {
+            "label": "並行の数が減る",
+            "note": "失敗のたびに減る"
+          },
+          {
+            "label": "デプロイの速さが下がる",
+            "note": "失敗が重なるほど遅い"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "スタックセッツには、コンカレンシーモードを選ぶ所があります。コンカレンシーとは並行の度合い、つまり同時に進める作業の数のことです。"
+        },
+        {
+          "who": "teacher",
+          "text": "そのモードの一つが、ストリクト、フェイリャー、トレランスです。名前は、失敗の許し方が厳しい、という意味です。"
+        },
+        {
+          "who": "student",
+          "text": "失敗に厳しいって、速さとは関係ないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "関係があります。このモードでは、スタックセッツの操作に失敗が起きると、デプロイの速さが下がります。"
+        },
+        {
+          "who": "student",
+          "text": "どうして遅くなるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "失敗が一つ起きるたびに、並行の数が減るからです。失敗が重なるほど、ゆっくり進みます。"
+        },
+        {
+          "who": "student",
+          "text": "失敗のたびに同時に進む数が減って、遅くなる、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、失敗が出た後にデプロイが遅くなった、とあれば、このモードの動きを思い出します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "Strict Failure Tolerance lowers the deployment speed as StackSet operation failures occur because concurrency decreases for each failure.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html#concurrency-mode"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "3-1 設定管理の三つ",
+      "bullets": [
+        "AWS Config: リソースの設定を見る",
+        "State Manager: 状態に保つ",
+        "AWS AppConfig: アプリの動き"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "サービス",
+          "何に対して・役目"
+        ],
+        "rows": [
+          [
+            "AWS Config",
+            "AWS リソースの設定を見る"
+          ],
+          [
+            "State Manager",
+            "ノードを決めた状態に保つ"
+          ],
+          [
+            "State Manager の特徴",
+            "安全で規模を広げられる"
+          ],
+          [
+            "AWS AppConfig",
+            "アプリの動きを変える"
+          ],
+          [
+            "AppConfig の特徴",
+            "コードを再デプロイしない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目の部分、設定の管理です。試験ガイドが挙げる設定管理のサービスのれいから、三つを見ます。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目のエーダブリューエスコンフィグは、アカウントの中のエーダブリューエスのリソースについて、その設定を詳しく見せるサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "二つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "システムズマネージャーのステートマネージャーです。正式な名前は、エーダブリューエスシステムズマネージャーステートマネージャーです。"
+        },
+        {
+          "who": "teacher",
+          "text": "管理されたノードや、ほかのリソースを、利用者が決めた状態に保つ作業を自動にします。安全で、規模を広げられる設定管理のサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目のアップコンフィグも、名前が似てるから設定を見るサービスなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。見る物と変える物で分けます。アップコンフィグは、アプリケーションの動きを、コードをデプロイし直さずに、本番で安全に変えるのを助けます。"
+        },
+        {
+          "who": "student",
+          "text": "コンフィグは見る、アップコンフィグは変える、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。設定を見る、状態に保つ、動きを変える、の三つです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "source_id": "S6",
+          "quote": "State Manager is a secure and scalable configuration management service that automates the process of keeping your managed nodes and other AWS resources in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "3-2 AWS AppConfig",
+      "bullets": [
+        "再デプロイせず動きを変える",
+        "設定のデータをまとめて管理",
+        "置き場から設定をデプロイ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G[\"設定の置き場の例\"]\n    HS[\"AppConfig の<br/>hosted configuration<br/>store\"]\n    SEC@{ svc: \"AWS Secrets Manager\", label: \"Secrets Manager\" }\n    PS@{ svc: \"AWS Systems Manager\", label: \"Systems Manager<br/>Parameter Store\" }\n    S3@{ svc: \"Amazon S3\", label: \"Amazon S3\" }\n  end\n  AC@{ svc: \"AWS AppConfig\", label: \"AWS AppConfig<br/>設定をデプロイ\" }\n  APP[\"本番の<br/>アプリケーション\"]\n  G -- \"設定\" --> AC\n  AC -- \"動きを変える\" --> APP\n",
+        "alt": "AWS AppConfig は、AppConfig の hosted configuration store、Secrets Manager、Systems Manager Parameter Store、Amazon S3 などの置き場から設定をデプロイし、コードを再デプロイせずに本番のアプリケーションの動きを変える。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "アップコンフィグの目的は、コードをデプロイし直さずに、本番のアプリケーションの動きを安全に変えることです。"
+        },
+        {
+          "who": "teacher",
+          "text": "使い方の一つが、設定をまとめて保存することです。いくつものワークロードにまたがって、設定のデータをそろえて管理できます。"
+        },
+        {
+          "who": "student",
+          "text": "設定はどこから届けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "置き場からデプロイします。挙がっている置き場の一つは、ホステッドコンフィギュレーションストアという、アップコンフィグ自身の置き場です。"
+        },
+        {
+          "who": "student",
+          "text": "置き場は、そのアップコンフィグ自身の置き場だけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ほかに、シークレッツマネージャー、システムズマネージャーのパラメーターストア、そしてエススリーも挙がっています。"
+        },
+        {
+          "who": "student",
+          "text": "挙がっている置き場は四つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文で、コードを出し直さずにアプリの動きを変えたい、とあれば、アップコンフィグです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Centralized configuration storage – Manage configuration data consistently across workloads.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-when-to-use"
+        },
+        {
+          "source_id": "S13",
+          "quote": "AWS AppConfig can deploy configuration from the AWS AppConfig hosted configuration store, AWS Secrets Manager, Systems Manager Parameter Store, or Amazon S3.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-when-to-use"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "4-1 CloudFormation modules",
+      "bullets": [
+        "リソースの設定を包む",
+        "複数のテンプレートに組み込む",
+        "中身が分かり・管理でき・繰り返せる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  MOD@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>modules\" }\n  T1[\"スタックの<br/>テンプレート A\"]\n  T2[\"スタックの<br/>テンプレート B\"]\n  T3[\"スタックの<br/>テンプレート C\"]\n  MOD -- \"組み込む\" --> T1\n  MOD -- \"組み込む\" --> T2\n  MOD -- \"組み込む\" --> T3\n",
+        "alt": "CloudFormation modules は、リソースの設定を包み、複数のスタックのテンプレートに組み込めるようにする。中身が分かり、管理でき、繰り返し使える形で包む。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目の部分、使い回せる部品です。試験ガイドは、基盤の型、組織の決まり、セキュリティの基準を、使い回せるテンプレートに組み込む、という技能を挙げています。"
+        },
+        {
+          "who": "student",
+          "text": "その技能のれいは、どれなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "サービスカタログ、クラウドフォーメーションのモジュール、シーディーケーの三つです。"
+        },
+        {
+          "who": "student",
+          "text": "モジュールって、シーディーケーのことなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。どちらも挙がっているれいですが、別の物です。シーディーケーは一つ目の部分で見ました。"
+        },
+        {
+          "who": "student",
+          "text": "モジュールとシーディーケーは別の物、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。モジュールは、リソースの設定を包んで、いくつものスタックのテンプレートに組み込めるようにする方法です。包み方は、中身が分かり、管理しやすく、繰り返し使える形です。"
+        },
+        {
+          "who": "student",
+          "text": "問題文でモジュールだと分かるのは？"
+        },
+        {
+          "who": "teacher",
+          "text": "同じリソースの設定を、いくつものテンプレートに組み込みたい、とあれば、モジュールです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules"
+        },
+        {
+          "source_id": "S2",
+          "quote": "The AWS Cloud Development Kit (AWS CDK) is an open-source set of libraries and command-line tools for building and deploying applications on AWS.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/home.html#home"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "4-2 AWS Service Catalog",
+      "bullets": [
+        "portfolio に product を集める",
+        "制約とリソースのタグを付ける",
+        "IAM でアクセスを許す"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  AD[\"管理者\"]\n  PF@{ svc: \"AWS Service Catalog\", label: \"Service Catalog<br/>portfolio<br/>product・制約・タグ\" }\n  U[\"IAM の<br/>ユーザーとグループ\"]\n  AD -- \"組み立てる\" --> PF\n  PF -- \"アクセスを許す\" --> U\n",
+        "alt": "AWS Service Catalog では、管理者がカタログの product を集めて portfolio を組み立て、リソースを用意する時に使う制約とリソースのタグを付け、IAM のユーザーとグループに portfolio へのアクセスを許す。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、サービスカタログです。段階は三つです。一つ目に、管理者は、カタログに載っているプロダクトを集めて、ポートフォリオを組み立てます。"
+        },
+        {
+          "who": "student",
+          "text": "ポートフォリオって？"
+        },
+        {
+          "who": "teacher",
+          "text": "ここでは、プロダクトを集めて組み立てた物、と捉えておきます。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目に、制約とリソースのタグを付けます。どちらも、リソースを用意するときに使われます。制約はそのときの条件、タグはリソースに付ける名札のような情報です。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "アイアムのユーザーとグループに、ポートフォリオへのアクセスを許します。アイアムは、エーダブリューエスの利用者と権限を管理する仕組みです。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、サービスカタログもモジュールと同じで、テンプレートに組み込む部品なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。ここで見たサービスカタログの働きは、管理者がポートフォリオを組み立ててアクセスを許すことです。テンプレートに組み込む部品として見たのは、モジュールです。"
+        },
+        {
+          "who": "student",
+          "text": "組み込むならモジュール、アクセスを許して使わせるならサービスカタログ、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S15",
+          "quote": "Administrators assemble portfolios of products from their catalog, add constraints and resource tags to be used at provisioning",
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction"
+        },
+        {
+          "source_id": "S15",
+          "quote": "and then grant access to the portfolio through AWS Identity and Access Management (IAM) users and groups.",
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ表",
+      "bullets": [
+        "多くのアカウントとリージョン: StackSets",
+        "bootstrap 無し: assets と大きさ",
+        "使い回す: modules・Service Catalog"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法"
+        ],
+        "rows": [
+          [
+            "動くリソースへの影響を見る",
+            "change set"
+          ],
+          [
+            "ベストプラクティスに合うか",
+            "CloudFormation Hooks"
+          ],
+          [
+            "リソースの設定を詳しく見る",
+            "AWS Config"
+          ],
+          [
+            "決めた状態に自動で保つ",
+            "State Manager"
+          ],
+          [
+            "再デプロイせず動きを変える",
+            "AWS AppConfig"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "条件から方法を選ぶ表を、上から読みます。動いているリソースへの影響を先に見たいならチェンジセット、組織のベストプラクティスに合うかを確かめたいならフックスです。"
+        },
+        {
+          "who": "student",
+          "text": "どっちもチェンジセットが出てくるから、混ざりそうなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "影響を見るのがチェンジセット、ベストプラクティスに合うかを見るのがフックスです。設定を詳しく見たいならエーダブリューエスコンフィグです。"
+        },
+        {
+          "who": "teacher",
+          "text": "決めた状態に自動で保ちたいならステートマネージャー、コードを出し直さずにアプリの動きを変えたいならアップコンフィグです。"
+        },
+        {
+          "who": "student",
+          "text": "表に入らなかった物はどうするのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "画面の上の要点に置きました。多くのアカウントとリージョンに一回で広げたいならスタックセッツ、準備、つまりブートストラップをしていない環境で失敗するなら、アセットとテンプレートの大きさを確かめます。"
+        },
+        {
+          "who": "teacher",
+          "text": "使い回したいなら、テンプレートに組み込むモジュールか、管理者がアクセスを許して使わせるサービスカタログです。"
+        },
+        {
+          "who": "student",
+          "text": "影響ならチェンジセット、ベストプラクティスならフックス、組み込むならモジュール、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。条件の言葉から方法を選びます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources, including the impact on resource properties and attributes.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets"
+        },
+        {
+          "source_id": "S4",
+          "quote": "CloudFormation Hooks is a feature that helps ensure that your CloudFormation resources, stacks, and change sets comply with your organization",
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#what-is-cloudformation-hooks"
+        },
+        {
+          "source_id": "S12",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "source_id": "S6",
+          "quote": "State Manager is a secure and scalable configuration management service that automates the process of keeping your managed nodes and other AWS resources in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        },
+        {
+          "source_id": "S10",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets"
+        },
+        {
+          "source_id": "S9",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy.",
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html#ref-cli-cmd-deploy"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules"
+        },
+        {
+          "source_id": "S15",
+          "quote": "and then grant access to the portfolio through AWS Identity and Access Management (IAM) users and groups.",
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "道具: CloudFormation・SAM・CDK",
+        "変更: 先に見る・確かめる・広げる",
+        "設定の管理と使い回せる部品"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "1 IaC の道具",
+            "note": "CloudFormation・AWS SAM・AWS CDK と bootstrap"
+          },
+          {
+            "label": "2 変更の管理",
+            "note": "change set で先に見る・Hooks で確かめる・StackSets で広げる"
+          },
+          {
+            "label": "3 設定の管理",
+            "note": "AWS Config で見る・State Manager で保つ・AWS AppConfig でアプリの動きを変える"
+          },
+          {
+            "label": "4 使い回せる部品",
+            "note": "CloudFormation modules・AWS Service Catalog"
+          },
+          {
+            "label": "最後: 条件から選ぶ表",
+            "note": "迷ったら条件から選ぶ表に戻る"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。一つ目はアイエーシーの道具でした。クラウドフォーメーションはリソースを用意し、サムはテンプレートドットヤムルに定義し、シーディーケーはライブラリとコマンドで作ってデプロイします。"
+        },
+        {
+          "who": "student",
+          "text": "準備、つまりブートストラップをしていない環境の条件は、両方だったのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。アセットが無く、テンプレートが決まった大きさより小さいスタックだけが成功します。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目は変更の管理で、チェンジセットで先に見る、フックスで確かめる、スタックセッツで広げる、でした。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目と四つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目は設定の管理で、見るエーダブリューエスコンフィグ、保つステートマネージャー、変えるアップコンフィグです。"
+        },
+        {
+          "who": "teacher",
+          "text": "四つ目は使い回せる部品で、モジュールとサービスカタログでした。迷ったら、条件から選ぶ表に戻ってください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "CloudFormation is a service that helps you model and set up your AWS resources",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html#Welcome"
+        },
+        {
+          "source_id": "S3",
+          "quote": "Change sets allow you to preview how proposed changes to a stack might impact your running resources, including the impact on resource properties and attributes.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html#using-cfn-updating-stacks-changesets"
+        },
+        {
+          "source_id": "S10",
+          "quote": "CloudFormation StackSets extends the capability of stacks by allowing you to create, update, or delete stacks across multiple accounts and AWS Regions with a single operation.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html#what-is-cfnstacksets"
+        },
+        {
+          "source_id": "S6",
+          "quote": "State Manager is a secure and scalable configuration management service that automates the process of keeping your managed nodes and other AWS resources in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state"
+        },
+        {
+          "source_id": "S14",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules"
+        }
+      ]
+    }
+  ]
+}

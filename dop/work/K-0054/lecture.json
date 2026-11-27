@@ -1,0 +1,1295 @@
+{
+  "task": "5.3",
+  "title": "システムとアプリケーションの失敗のトラブルシューティング",
+  "notes": [
+    "S16（Auto Scaling の lifecycle hook）は使わなかった。sources.md の引用は仕組み（既定 1 時間待つ・スケールインで止めて EventBridge で知らせる）だけで、失敗を調べる場面との結び付きが根拠に無い。条件の表の行の上限（1 枚 5 行・4 枚まで）にも収まらないため。",
+    "S17 の service events は使わなかった。「ECS の service が作った task の場合」という条件付きの話で、条件の表の行に条件ごと載せる余地が無いため。止まった task が 1 時間だけ表示される事だけを扱った。",
+    "S15 は資料の中身（エラーメッセージの一覧）を引用していないので、「起動の失敗の資料にエラーメッセージ・原因・手順がある」までにとどめた。",
+    "C3 への返事（1 回目。採らなかった提案と、一部だけ採った提案）",
+    "clarity s03: EventBridge と CloudWatch Events の違いは根拠に無いので説明しなかった。図では OpsItem を作るきっかけ（EventBridge）と情報を集める元（CloudWatch Events）に分けて置くだけにした。",
+    "clarity s06: cloud-init と cfn のログの中身は根拠に無いので、「立ち上げのときの設定を受け持つ仕組みと考えてよさそう」「略した書き方と見てよい」と弱めて書いた。",
+    "clarity s08: CodeBuild の一文は外した（S10 は buildspec のコマンドがコンテナで動く事までで、失敗の調べ方につながる根拠が無い）。",
+    "clarity s09: 2 段の図ではなく、CodePipeline と CodeDeploy を左右に並べる表にした。比べる相手を置き、ロールバックの違いを並べて示すため。ログの行は CodeDeploy の列にだけ置いた。",
+    "clarity s11: EKS の Kubernetes は根拠に無いので「大まかに言うと」と弱めた。managed node group の説明も弱めた言い方にした。",
+    "clarity global: CloudWatch は根拠（S3・S5・S12）の範囲で「ログを集めて表示したり、アラームで見張ったりするサービス」と s03 で一言言った。メトリクスは根拠に無いので言っていない。「ヘルス」は AWS Health とヘルスチェックの名前だけに残し、ほかは「健全性」にそろえた。",
+    "掛け合いにした時の注意: 事実は先生の行だけに置いた。生徒の誤りは、条件付きを一般と思う（CloudTrail のリンクはいつでも開く・UPDATE_ROLLBACK_FAILED はいつでも手で直せる）、似た名前を混ぜる（OpsItem のきっかけと CloudWatch Events、ステージの再試行とアクションの再試行、CodePipeline と CodeDeploy のロールバック）、思い込み（Health を EventBridge で受けるには追加料金・X-Ray が直す・EKS の検査がソフトも見る）を使い、次の先生の行で正し、生徒の言い直しと先生の受けを置いた。根拠に打ち消す文が無い所（CloudWatch Events がきっかけか、X-Ray が直すか、CodeDeploy の戻し方が CodePipeline と同じか）は「違います」と言わず「そうとは言えません」「同じとは言えません」と正した。字数の上限のため、条件の表（s12〜s15）は訂正を置かず質問と答えだけにし、一人読みの「どちらもインスタンスの側に残るログ」（根拠に無い）は外した。",
+    "C3 への返事（掛け合いの 1 回目）: 中は全部直した（consistency s09、clarity s03・s04・s05・s08・s09・s11・s12・s16、指示により s14 の長い行も分けた）。軽は consistency s08・s10・s11・s16、clarity s03・s09・s10・s11 を直した。採らなかった軽: clarity s01（地図の行を分ける・カナリアを先に一言説明）、clarity s05 の冒頭に生徒の問いを足す案（イベントの区別は生徒の問いへの先生の答えの中に移すだけにした）、clarity global の条件の表の問いを一つずつに分ける案（s12 は分けたが、s13・s15 は分けると台本が上限の 6,000 字を超えるため）。",
+    "生徒の人物の書き直し（利用者の希望。一年ほど実務をしたエンジニアにする）: 基本の言葉（可用性・アラーム・スタック・ロールバック・オンプレミス・タスク・イーケーエス）を聞く問いと、それに答えるだけの先生の説明を外した。問いは手間・費用・見る順番・見分け方の目線にし、誤りは、最初から流し直すしかない・手で入れ替える、を足した。根拠に打ち消す文が無いので「そうとは言えません」と正した。事実と範囲は前の版のまま。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "4 つの部を番号の順に",
+        "健全性・原因・デプロイ・プロセス",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 失敗したプロセス\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling\" }\n    EC@{ svc: \"Amazon ECS\", label: \"Amazon ECS<br/>と Amazon EKS\" }\n  end\n  subgraph G3[\"3 失敗したデプロイ\"]\n    CF@{ svc: \"AWS CloudFormation\", label: \"CloudFormation\" }\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline<br/>と CodeDeploy\" }\n  end\n  subgraph G2[\"2 原因を探る\"]\n    XR[\"AWS X-Ray<br/>と canary\"]\n  end\n  subgraph G1[\"1 健全性を知る\"]\n    HE@{ svc: \"AWS Health\", label: \"AWS Health\" }\n    OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter\" }\n  end\n",
+        "alt": "講義の地図。4 つの部を番号を付けて左から並べる。1 健全性を知るは AWS Health と OpsCenter。2 原因を探るは AWS X-Ray と canary。3 失敗したデプロイは CloudFormation、CodePipeline と CodeDeploy。4 失敗したプロセスは EC2 Auto Scaling、Amazon ECS と Amazon EKS。並びは講義で扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、システムとアプリケーションの失敗を調べ、原因を突き止める方法を学びます。画面の四つの部を、番号の順に進みます。"
+        },
+        {
+          "who": "student",
+          "text": "四つの部は、障害時に調べる手順の順番なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "図の並びは講義で扱う順番で、処理の流れではありません。"
+        },
+        {
+          "who": "student",
+          "text": "手順じゃなく、講義の順番なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。一つ目は健全性を知るで、エーダブリューエスヘルスとオプスセンター。二つ目は原因を探るで、エックスレイとカナリアです。"
+        },
+        {
+          "who": "teacher",
+          "text": "三つ目は失敗したデプロイで、クラウドフォーメーション、コードパイプライン、コードデプロイ。四つ目は失敗したプロセスで、オートスケーリング、イーシーエス、イーケーエスです。"
+        },
+        {
+          "who": "student",
+          "text": "最後は、問題文から逆に引く表なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。最後に、問題文の条件から方法を選ぶ表を、四枚置きます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "AWS Health provides ongoing visibility into your resource performance and the availability of your AWS services and accounts.",
+          "url": "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html#what-is-aws-health"
+        },
+        {
+          "source_id": "S1",
+          "quote": "AWS X-Ray is a service that collects data about requests that your application serves",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "健全性を知る 1: AWS Health",
+      "bullets": [
+        "リソース・サービス・アカウントの状態",
+        "健全性の変化で通知",
+        "EventBridge で受ける（追加料金なし）"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  R[\"自分のリソースの性能<br/>サービスとアカウントの可用性\"]\n  HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>警告と通知\" }\n  EB@{ svc: \"Amazon EventBridge\", label: \"Amazon EventBridge<br/>追加料金なし\" }\n  R -- \"健全性の変化\" --> HE\n  HE -- \"イベントを受ける\" --> EB\n",
+        "alt": "AWS Health は、自分のリソースの性能と、AWS のサービスとアカウントの可用性を見えるようにする。健全性が変わると、それをきっかけに警告と通知を届ける。全ての顧客が、AWS Health のイベントを Amazon EventBridge で追加料金なしに受け取れる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "一つ目の部、健全性を知る、です。エーダブリューエスヘルスは、自分のリソースの性能と、サービスやアカウントの可用性を、継続して見えるようにするサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "サービスそのものが使えるかどうかも、見えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。リソースの健全性が変わると、それをきっかけに、警告と通知を届けます。"
+        },
+        {
+          "who": "student",
+          "text": "その通知は、何で受けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "受け方で覚えたいのが、イベントブリッジです。大まかに言うと、イベントを受けて送り先へ渡すサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "イベントブリッジで受けると、料金が上乗せされるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。全ての顧客が、エーダブリューエスヘルスのイベントを、イベントブリッジで追加の料金なしに受け取れます。"
+        },
+        {
+          "who": "student",
+          "text": "全ての顧客が、追加の料金なしで受けられる、ですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。健全性の変化は、イベントブリッジで受けられます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "The service delivers alerts and notifications triggered by changes in the health of AWS resources, so that you get near-instant event visibility and guidance to help accelerate troubleshooting.",
+          "url": "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html#what-is-aws-health"
+        },
+        {
+          "source_id": "S4",
+          "quote": "All AWS customers can receive AWS Health events through Amazon EventBridge at no additional cost.",
+          "url": "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html#what-is-aws-health"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "健全性を知る 2: OpsCenter",
+      "bullets": [
+        "Systems Manager の OpsCenter",
+        "きっかけ: アラームと EventBridge",
+        "Config・CloudTrail などを集める"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph K[\"OpsItem を作るきっかけ\"]\n    CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>のアラーム<br/>ALARM<br/>（アラーム状態）\" }\n    EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>サービスのイベント\" }\n  end\n  subgraph S[\"調べる情報を集める元\"]\n    CFG@{ svc: \"AWS Config\", label: \"AWS Config<br/>構成の記録\" }\n    CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail のログ<br/>操作の記録\" }\n    CE[\"CloudWatch Events\"]\n  end\n  OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter<br/>OpsItem\" }\n  CW -- \"設定すれば自動で\" --> OC\n  EB --> OC\n  CFG -- \"情報を集める\" --> OC\n  CT --> OC\n  CE --> OC\n",
+        "alt": "図は 2 つのまとまりに分かれる。OpsItem を作るきっかけは、CloudWatch のアラームが ALARM（アラーム状態）になったときと、EventBridge がサービスのイベントを処理したときで、設定すれば OpsCenter が OpsItem を自動で作る。調べる情報を集める元は、AWS Config（構成の記録）、CloudTrail のログ（操作の記録）、CloudWatch Events で、OpsCenter がそのリソースについての情報を集める。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、オプスセンターです。システムズマネージャーの機能の一つで、調べる情報を集め、画面を行き来せずに調べられるようにします。"
+        },
+        {
+          "who": "teacher",
+          "text": "イベントブリッジとクラウドウォッチと連携しています。クラウドウォッチは、大まかに言うと、ログを集めて表示したり、アラームで見張ったりするサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "調べる項目を手で起こすのは手間なのだ。自動で作れるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "できます。設定しておけば、オプスアイテムを自動で作れます。オプスアイテムは、大まかに言うと、調べて対処する事柄をまとめた項目です。"
+        },
+        {
+          "who": "student",
+          "text": "きっかけは、図の右のクラウドウォッチイベンツなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。資料で挙がるきっかけは、図の左の、きっかけのまとまりの二つです。アラームがアラーム状態になったときと、イベントブリッジがサービスのイベントを処理したときです。"
+        },
+        {
+          "who": "student",
+          "text": "きっかけは、アラーム状態と、イベントブリッジの処理の二つ、ですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。図の右は、情報を集める元のまとまりです。コンフィグは構成の記録、クラウドトレイルは操作の記録、と大まかに考えてください。クラウドウォッチイベンツの情報も含めて集めます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "This means you can configure these services to automatically create an OpsItem in OpsCenter when a CloudWatch alarm enters the ALARM state or when EventBridge processes an event from any AWS service that publishes events.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        },
+        {
+          "source_id": "S5",
+          "quote": "For the AWS resource, OpsCenter aggregates information from AWS Config, AWS CloudTrail logs, and Amazon CloudWatch Events, so you don't have to navigate across multiple console pages during your investigation.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "原因を探る: X-Ray と canary",
+      "bullets": [
+        "X-Ray: リクエストのデータを集める",
+        "trace map（トレースの地図）",
+        "canary の失敗 → X-Ray Analytics"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SY@{ svc: \"Amazon CloudWatch Synthetics\", label: \"Synthetics の canary<br/>24 時間・毎分\" }\n  AL@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>失敗のアラーム\" }\n  subgraph X[\"AWS X-Ray\"]\n    TM[\"trace map<br/>リクエストの地図\"]\n    XA[\"X-Ray Analytics<br/>トレースの統計で<br/>root cause（根本原因）\"]\n  end\n  SY -- \"失敗\" --> AL\n  AL -- \"受けたら調べる\" --> XA\n",
+        "alt": "AWS X-Ray の中に、リクエストの地図である trace map と、トレースのデータを統計で調べる X-Ray Analytics のコンソールがある。CloudWatch Synthetics の canary は 24 時間、毎分動く。canary の失敗の CloudWatch アラームを受けたら、X-Ray Analytics で、トレースのデータの統計のモデルを使って、ありそうな root cause（根本原因）を調べる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目の部、原因を探る、です。エックスレイは、アプリケーションが受けたリクエストのデータを集め、見たり絞り込んだりして、問題を見つける道具を用意するサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "集めたデータから、リクエストがどこを通ったか追えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "トレースは、大まかに言うと、リクエストが通った道の記録です。エックスレイは、トレースのデータから、詳しいトレースマップ、つまり道の地図を作ります。"
+        },
+        {
+          "who": "teacher",
+          "text": "同じエックスレイの中の、エックスレイアナリティクスのコンソールでは、トレースのデータを、統計のモデルで調べます。"
+        },
+        {
+          "who": "student",
+          "text": "統計は、どんな時に使うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "統計の使いどころの一つが、クラウドウォッチシンセティクスのカナリアです。エンドポイントやエーピーアイを見張るスクリプトで、一日中、一分に一回動きます。カナリアの失敗のアラームを受けたときが出番です。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、エックスレイが原因を直してくれるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。言えるのは、エックスレイアナリティクスで、ありそうな根本原因を調べる所までです。"
+        },
+        {
+          "who": "student",
+          "text": "直すのではなく、ありそうな根本原因を調べる、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS X-Ray is a service that collects data about requests that your application serves, and provides tools that you can use to view, filter, and gain insights into that data to identify issues and opportunities for optimization.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray"
+        },
+        {
+          "source_id": "S1",
+          "quote": "X-Ray uses trace data from the AWS resources that power your cloud applications to generate a detailed trace map.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray"
+        },
+        {
+          "source_id": "S2",
+          "quote": "CloudWatch Synthetics is a fully managed service that enables you to monitor your endpoints and APIs using scripted canaries that run 24 hours per day, once per minute.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-cloudwatch-synthetics.html#xray-services-cloudwatch-synthetics-workflows-root-cause"
+        },
+        {
+          "source_id": "S2",
+          "quote": "Once you receive a CloudWatch alarm for failures in a Synthetics canary, use the statistical modeling on trace data in X-Ray to determine the probable root cause of the issue within the X-Ray Analytics console.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-cloudwatch-synthetics.html#xray-services-cloudwatch-synthetics-workflows-root-cause"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "失敗したデプロイ 1: スタックの根本原因",
+      "bullets": [
+        "作成の失敗 → 根本原因のイベント",
+        "Status reason が不明なら CloudTrail",
+        "operation ID で関係を追う"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ST@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>スタックの作成が失敗\" }\n  RC[\"根本原因らしいイベント<br/>Status reason<br/>（状態の理由）\"]\n  CT@{ svc: \"AWS CloudTrail\", label: \"CloudTrail のコンソール<br/>詳しい根本原因\" }\n  OP[\"operation ID<br/>失敗で絞り込む\"]\n  ST -- \"見つける手助け\" --> RC\n  RC -. \"不明でリンクがあれば\" .-> CT\n  ST -. \"関係するイベント\" .-> OP\n",
+        "alt": "CloudFormation のスタックの作成が失敗すると、CloudFormation が根本原因らしいイベントを見つける手助けをする。その Status reason（状態の理由）がはっきりせず、根本原因に CloudTrail のコンソールへのリンクが出ていれば、リンクを開いて詳しい根本原因を見る。別に、デプロイのイベントには operation ID が付き、失敗での絞り込みと合わせて関係するイベントを追える。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目の部、失敗したデプロイです。まずクラウドフォーメーションです。"
+        },
+        {
+          "who": "student",
+          "text": "スタックの作成が失敗したとき、イベントのどこから読めばいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドフォーメーションが、根本原因らしいイベントを見つける手助けをします。ここで言うイベントは、スタックで起きた出来事の記録で、イベントブリッジで受けるイベントとは別の物です。まず、そのステータスリーズン、つまり状態の理由を読みます。"
+        },
+        {
+          "who": "student",
+          "text": "理由が分からなかったら、いつでもクラウドトレイルを見に行けばいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "いつでも、とは言えません。理由がはっきりせず、しかも根本原因の所にクラウドトレイルのコンソールへのリンクが出ているときに、開いて詳しい根本原因を見ます。"
+        },
+        {
+          "who": "student",
+          "text": "理由がはっきりせず、リンクが出ているときに開く、ですね。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。もう一つの手がかりが、オペレーションアイディーです。デプロイのイベントに、ほかと重ならないオペレーションアイディーが付きます。"
+        },
+        {
+          "who": "student",
+          "text": "何に効くのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "これを手がかりに、関係するイベントを追いやすくなります。失敗での絞り込みと合わせて使います。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "If your stack creation fails, CloudFormation can help you to determine the event that is likely the root cause for the stack failure.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/determine-root-cause-for-stack-failures.html#determine-root-cause-for-stack-failures"
+        },
+        {
+          "source_id": "S6",
+          "quote": "If the provided reason in Status reason isn't clear, and the root cause displays a link to the CloudTrail console, open the link to view the event to find a detailed root cause.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/determine-root-cause-for-stack-failures.html#determine-root-cause-for-stack-failures"
+        },
+        {
+          "source_id": "S7",
+          "quote": "CloudFormation assigns unique operation IDs to deployment events, making it easier to track and correlate related events.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#basic-ts-guide"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "失敗したデプロイ 2: EC2 のログ",
+      "bullets": [
+        "EC2 の問題 → cloud-init と cfn のログ",
+        "テンプレートで CloudWatch へ出す",
+        "インスタンスにつながずに見る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  TP@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>テンプレートで設定\" }\n  EC@{ svc: \"Amazon EC2\", label: \"EC2 インスタンス<br/>cloud-init と cfn のログ\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>コンソールに表示\" }\n  TP -. \"ログを出す設定\" .-> EC\n  EC -- \"ログを出す\" --> CW\n",
+        "alt": "CloudFormation で EC2 の問題が起きたら、cloud-init と cfn のログを見る。CloudFormation のテンプレートで設定すれば、これらのログを CloudWatch に出せる。CloudWatch はログをマネジメントコンソールに表示するので、EC2 インスタンスにつながずにログを見られる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "クラウドフォーメーションで、イーシーツーの問題が起きた場合は、クラウドイニットのログと、シーエフエヌのログを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "それぞれ、何のログなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドイニットは、大まかに言うと、インスタンスの立ち上げのときの設定を受け持つ仕組みと考えてよさそうです。シーエフエヌは、クラウドフォーメーションを略した書き方と見てよいでしょう。"
+        },
+        {
+          "who": "student",
+          "text": "ログを見るたびにインスタンスに入るのは手間なのだ。つながずに見る方法はあるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "テンプレートを設定して、これらのログを、クラウドウォッチに出せます。クラウドウォッチは、ログをマネジメントコンソールに表示します。"
+        },
+        {
+          "who": "teacher",
+          "text": "問題文に、インスタンスにつながずにこれらのログを見たい、とあれば、この設定です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "For Amazon EC2 issues, view the cloud-init and cfn logs.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#basic-ts-guide"
+        },
+        {
+          "source_id": "S3",
+          "quote": "You can also configure your CloudFormation template so that the logs are published to Amazon CloudWatch, which displays logs in the AWS Management Console so you don't have to connect to your Amazon EC2 instance.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#basic-ts-guide"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "失敗したデプロイ 3: UPDATE_ROLLBACK_FAILED",
+      "bullets": [
+        "rollback（ロールバック）が失敗",
+        "依存するリソースが元に戻れない",
+        "原因しだいで手で直して続ける"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "依存するリソース",
+            "note": "元の状態に戻れない"
+          },
+          {
+            "label": "ロールバックが失敗",
+            "note": "UPDATE_ROLLBACK_FAILED の状態"
+          },
+          {
+            "label": "原因しだいで手で直す",
+            "note": "エラーを直す"
+          },
+          {
+            "label": "ロールバックを続ける",
+            "note": "直せた場合"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、クラウドフォーメーションの更新を元に戻す途中の失敗です。"
+        },
+        {
+          "who": "student",
+          "text": "ロールバック自体が失敗するのは、どんな時なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "依存するリソースが、元の状態に戻れないことがあります。すると、ロールバックが失敗します。このときの状態が、アップデートロールバックフェイルドです。"
+        },
+        {
+          "who": "student",
+          "text": "その状態なら、いつでもエラーを手で直して、ロールバックを続ければいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。どう対処するかは、失敗の原因しだいです。原因によっては、エラーを手で直してから、ロールバックを続けられます。"
+        },
+        {
+          "who": "student",
+          "text": "原因によっては、手で直して続けられる、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。どんな原因でも手で直せる、とは書かれていません。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S13",
+          "quote": "A dependent resource can't return to its original state, causing the rollback to fail (UPDATE_ROLLBACK_FAILED state).",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Depending on the cause of the failure, you can manually fix the error and continue the rollback.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "失敗したデプロイ 4: CodePipeline のステージ",
+      "bullets": [
+        "最初から流し直さずに再試行",
+        "ステージ全体か、失敗したアクションか",
+        "設定すれば失敗で自動ロールバック"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "方法",
+          "やり直す・戻す範囲"
+        ],
+        "rows": [
+          [
+            "失敗したステージの再試行",
+            "最初のアクションから全部"
+          ],
+          [
+            "失敗したアクションの再試行",
+            "失敗したアクションを全部"
+          ],
+          [
+            "自動ロールバック（設定）",
+            "直近の成功した実行へ"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、コードパイプラインです。パイプラインは、ステージという段階に分かれ、ステージの中に、アクションという仕事が並びます。"
+        },
+        {
+          "who": "student",
+          "text": "ステージが失敗したら、パイプラインを最初から流し直すしかないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。パイプラインを最初から流し直さずに、失敗したステージを再試行できます。"
+        },
+        {
+          "who": "student",
+          "text": "最初からではなく、失敗したステージを再試行できる、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。ステージを再試行すると、ステージの最初のアクションから、全体をやり直します。"
+        },
+        {
+          "who": "student",
+          "text": "失敗したアクションの再試行も、ステージの最初からなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうではありません。資料では区別されていて、アクションの再試行は、失敗したアクションの方を、全てやり直します。"
+        },
+        {
+          "who": "student",
+          "text": "ステージは最初から全体、アクションは失敗した分だけ、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。もう一つは、自動のロールバックです。ステージを、失敗したら自動でロールバックするように設定できます。設定したステージが失敗すると、直近の成功した実行に戻ります。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "You can retry a stage that has failed without having to run a pipeline again from the beginning.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html#stage-retry"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Retrying a failed stage retries all actions in the stage from the first action in the stage, and retrying failed actions retries all failed actions in the stage.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html#stage-retry"
+        },
+        {
+          "source_id": "S9",
+          "quote": "When the stage fails, the stage is rolled back to the most recent successful execution.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html#stage-rollback-auto"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "失敗したデプロイ 5: CodeDeploy と 2 つのロールバック",
+      "bullets": [
+        "多くの失敗はログファイルで分かる",
+        "CloudWatch Logs で一か所に",
+        "ロールバックの違いを並べる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "点",
+          "CodePipeline",
+          "CodeDeploy"
+        ],
+        "rows": [
+          [
+            "失敗の原因を探す",
+            "—",
+            "ログ（EC2・オンプレミス）"
+          ],
+          [
+            "戻す物",
+            "ステージ",
+            "デプロイ"
+          ],
+          [
+            "戻し方",
+            "直近の成功した実行へ",
+            "前のリビジョンを再デプロイ"
+          ],
+          [
+            "自動にする設定先",
+            "ステージ",
+            "deployment group か deployment"
+          ],
+          [
+            "自動のきっかけ",
+            "失敗",
+            "失敗か監視のしきい値"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、コードデプロイです。まず、イーシーツーやオンプレミスへのデプロイの、トラブルシューティングの資料からです。"
+        },
+        {
+          "who": "student",
+          "text": "失敗の原因は、まずどこを見るのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "多くのデプロイの失敗は、デプロイの途中で作られるログファイルを見れば、原因が分かります。一台ずつ見るより、クラウドウォッチログズで、一か所で見張ることが勧められています。"
+        },
+        {
+          "who": "student",
+          "text": "ロールバックは、コードパイプラインと同じで、直近の成功した実行に戻すのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "同じとは言えません。資料の言い方では、コードデプロイは、新しいデプロイとして出し直します。以前にデプロイしたリビジョン、つまりアプリケーションの版を、デプロイし直すのです。"
+        },
+        {
+          "who": "student",
+          "text": "前のリビジョンを、新しいデプロイとして出し直す、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。デプロイメントグループか、デプロイに設定しておけば、デプロイの失敗か、指定した監視のしきい値で、自動でロールバックします。"
+        },
+        {
+          "who": "student",
+          "text": "二つの戻し方は、どこで見分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードパイプラインは、ステージが直近の成功した実行に戻ります。コードデプロイは、前のリビジョンを、新しいデプロイとして出し直します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "The causes of many deployment failures can be identified by reviewing the log files created during the deployment process.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments"
+        },
+        {
+          "source_id": "S12",
+          "quote": "For simplicity, we recommend using Amazon CloudWatch Logs to centrally monitor log files instead of viewing them instance by instance.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments"
+        },
+        {
+          "source_id": "S11",
+          "quote": "CodeDeploy rolls back deployments by redeploying a previously deployed revision of an application as a new deployment.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        },
+        {
+          "source_id": "S11",
+          "quote": "You can configure a deployment group or deployment to automatically roll back when a deployment fails or when a monitoring threshold you specify is met.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "失敗したプロセス 1: EC2 Auto Scaling",
+      "bullets": [
+        "健全性の状態を見続ける",
+        "unhealthy の InService を置き換え",
+        "起動の失敗はエラーメッセージから"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>desired capacity<br/>（希望の容量）を保つ\" }\n  IS[\"InService の<br/>インスタンス\"]\n  UH[\"unhealthy<br/>（健全でない）と判定\"]\n  NW[\"新しいインスタンス\"]\n  LF[\"起動の失敗<br/>エラーメッセージ<br/>原因と手順の資料\"]\n  AS -- \"健全性を見続ける\" --> IS\n  IS -- \"判定\" --> UH\n  UH -- \"置き換える\" --> NW\n",
+        "alt": "EC2 Auto Scaling は、desired capacity（希望の容量）を保つために、グループのインスタンスの健全性の状態を見続ける。InService のインスタンスを unhealthy（健全でない）と判定すると、新しいインスタンスに置き換える。別の話として、インスタンスが起動に失敗したときのエラーメッセージ、原因、手順をまとめた資料がある。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目の部、失敗したプロセスです。まずイーシーツーオートスケーリングです。グループのデザイアードキャパシティ、つまり希望の容量を保つために、インスタンスの健全性の状態を見続けます。"
+        },
+        {
+          "who": "student",
+          "text": "健全でないインスタンスは、手で入れ替えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。インサービス、つまりグループで使われている状態のインスタンスを、アンヘルシー、つまり健全でないと判定すると、新しいインスタンスに置き換えます。"
+        },
+        {
+          "who": "student",
+          "text": "手ではなく、オートスケーリングが置き換える、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。これも、希望の容量を保つためです。一方で、インスタンスが起動に失敗することもあります。"
+        },
+        {
+          "who": "student",
+          "text": "起動の失敗は、何を手がかりにするのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "トラブルシューティングの資料に、そのときに出るエラーメッセージと、考えられる原因、取れる手順がまとめてあります。置き換えは自動、起動の失敗は資料で調べる、です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "Amazon EC2 Auto Scaling continuously monitors the health status of instances in an Auto Scaling group to maintain the desired capacity.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+        },
+        {
+          "source_id": "S14",
+          "quote": "When Amazon EC2 Auto Scaling determines that an InService instance is unhealthy, it replaces it with a new instance to maintain the desired capacity of the group.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+        },
+        {
+          "source_id": "S15",
+          "quote": "This page provides information about your EC2 instances that fail to launch, potential causes, and the steps you can take to resolve the issues.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ts-as-instancelaunchfailure.html#ts-as-instancelaunchfailure"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "失敗したプロセス 2: ECS と EKS",
+      "bullets": [
+        "止まったタスクは 1 時間だけ表示",
+        "CannotPullContainer: イメージ",
+        "managed node group: エラーコード"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "点",
+          "Amazon ECS",
+          "Amazon EKS"
+        ],
+        "rows": [
+          [
+            "見る物",
+            "止まったタスクのエラー",
+            "エラーコード"
+          ],
+          [
+            "対象",
+            "タスク",
+            "managed node group"
+          ],
+          [
+            "例・中身",
+            "CannotPullContainer",
+            "ハードの健全性の問題"
+          ],
+          [
+            "注意",
+            "コンソールに 1 時間だけ",
+            "EC2 ヘルスチェック基準"
+          ],
+          [
+            "ソフトの問題",
+            "—",
+            "このチェックは検出しない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、コンテナのサービス、イーシーエスとイーケーエスです。イーシーエスの止まったタスクは、エラーを見て原因を探します。"
+        },
+        {
+          "who": "student",
+          "text": "止まったタスクは、いつまでコンソールで見られるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "一時間だけです。エラーの例が、キャンノットプルコンテナです。コンテナのイメージを取ってこられず、タスクが起動に失敗したことを示します。"
+        },
+        {
+          "who": "student",
+          "text": "権限が足りないときも、同じエラーになるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "中には、権限の問題で、タスク定義で指定したイメージを取れないことを示すエラーもあります。"
+        },
+        {
+          "who": "student",
+          "text": "イーケーエスのノードの不調は、どう分かるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "マネージドノードグループは、コンテナを動かすイーシーツーのインスタンスのまとまり、と大まかに考えてください。ハードウェアの健全性の問題にあうと、診断を助けるエラーコードが返ります。この検査は、イーシーツーのヘルスチェックに基づきます。"
+        },
+        {
+          "who": "student",
+          "text": "アプリが落ちたようなソフトウェアの問題も、見つけてくれるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "いいえ。この検査は、ソフトウェアの問題は検出しません。"
+        },
+        {
+          "who": "student",
+          "text": "この検査は、ソフトウェアの問題は検出しない、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "Stopped tasks only appear in the console for 1 hour.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors"
+        },
+        {
+          "source_id": "S18",
+          "quote": "The following errors indicate that the task failed to start because Amazon ECS can't retrieve the specified container image.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image"
+        },
+        {
+          "source_id": "S18",
+          "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image"
+        },
+        {
+          "source_id": "S19",
+          "quote": "If your managed node group encounters a hardware health issue, Amazon EKS returns an error code to help you to diagnose the issue.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#troubleshoot-managed-node-groups"
+        },
+        {
+          "source_id": "S19",
+          "quote": "These health checks don't detect software issues because they are based on Amazon EC2 health checks.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#troubleshoot-managed-node-groups"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "条件から選ぶ 1: 健全性を知る・原因を探る",
+      "bullets": [
+        "健全性 → Health・OpsCenter",
+        "通り道を見る → trace map",
+        "canary の失敗 → X-Ray Analytics"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "健全性の変化を受ける",
+            "AWS Health",
+            "EventBridge で受信"
+          ],
+          [
+            "ALARM で項目を自動作成",
+            "OpsCenter",
+            "設定して OpsItem"
+          ],
+          [
+            "画面を行き来せず調べる",
+            "OpsCenter",
+            "Config・CloudTrail"
+          ],
+          [
+            "リクエストの通り道を見る",
+            "X-Ray",
+            "trace map"
+          ],
+          [
+            "canary 失敗の根本原因を絞る",
+            "X-Ray Analytics",
+            "トレースの統計"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、健全性を知る、と、原因を探る、です。"
+        },
+        {
+          "who": "student",
+          "text": "問題文のどの言葉を見て、選び分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "リソースの健全性の変化を受けたい、なら、エーダブリューエスヘルスです。イベントブリッジで受け取れます。"
+        },
+        {
+          "who": "student",
+          "text": "アラーム状態になったら、調べる項目を自動で作りたい、なら？"
+        },
+        {
+          "who": "teacher",
+          "text": "オプスセンターで、設定してオプスアイテムを作ります。いくつもの画面を行き来せずに調べたい、もオプスセンターです。"
+        },
+        {
+          "who": "student",
+          "text": "リクエストの通り道を見たいなら？"
+        },
+        {
+          "who": "teacher",
+          "text": "地図で見たいなら、エックスレイのトレースマップです。"
+        },
+        {
+          "who": "student",
+          "text": "カナリアが失敗したら？"
+        },
+        {
+          "who": "teacher",
+          "text": "カナリアの失敗のアラームを受け、ありそうな根本原因を絞りたいなら、エックスレイアナリティクスで、トレースの統計を使います。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "All AWS customers can receive AWS Health events through Amazon EventBridge at no additional cost.",
+          "url": "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html#what-is-aws-health"
+        },
+        {
+          "source_id": "S5",
+          "quote": "OpsCenter is integrated with Amazon EventBridge and Amazon CloudWatch.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        },
+        {
+          "source_id": "S2",
+          "quote": "use the statistical modeling on trace data in X-Ray to determine the probable root cause of the issue within the X-Ray Analytics console.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/xray-services-cloudwatch-synthetics.html#xray-services-cloudwatch-synthetics-workflows-root-cause"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 2: CloudFormation",
+      "bullets": [
+        "まず根本原因のイベント",
+        "EC2 の問題 → ログ",
+        "ロールバックの失敗 → 原因しだいで手で直す"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "スタックの作成が失敗",
+            "根本原因のイベント",
+            "Status reason"
+          ],
+          [
+            "理由が不明でリンクあり",
+            "CloudTrail を開く",
+            "詳しい根本原因"
+          ],
+          [
+            "関係するイベントを追う",
+            "operation ID",
+            "失敗で絞り込む"
+          ],
+          [
+            "EC2 の問題",
+            "cloud-init・cfn ログ",
+            "CloudWatch に出す"
+          ],
+          [
+            "UPDATE_ROLLBACK_FAILED",
+            "原因しだいで手で直す",
+            "ロールバックを続ける"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二枚目は、クラウドフォーメーションです。スタックの作成が失敗したら、根本原因らしいイベントの、ステータスリーズンを読みます。"
+        },
+        {
+          "who": "student",
+          "text": "理由がはっきりしないときは？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドトレイルへのリンクが出ている場合は、リンクを開いて、詳しい根本原因を見ます。関係するイベントを追いたいなら、オペレーションアイディーと、失敗での絞り込みです。"
+        },
+        {
+          "who": "student",
+          "text": "イーシーツーの問題や、アップデートロールバックフェイルドなら？"
+        },
+        {
+          "who": "teacher",
+          "text": "イーシーツーの問題なら、クラウドイニットとシーエフエヌのログです。つながずに見たいなら、クラウドウォッチに出す設定です。"
+        },
+        {
+          "who": "teacher",
+          "text": "アップデートロールバックフェイルドなら、原因によっては、エラーを手で直して、ロールバックを続けます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "If the provided reason in Status reason isn't clear, and the root cause displays a link to the CloudTrail console, open the link to view the event to find a detailed root cause.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/determine-root-cause-for-stack-failures.html#determine-root-cause-for-stack-failures"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Use operation IDs and failure filtering for targeted troubleshooting.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#basic-ts-guide"
+        },
+        {
+          "source_id": "S3",
+          "quote": "For Amazon EC2 issues, view the cloud-init and cfn logs.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#basic-ts-guide"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Depending on the cause of the failure, you can manually fix the error and continue the rollback.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html#troubleshooting-errors-update-rollback-failed"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 3: CodePipeline と CodeDeploy",
+      "bullets": [
+        "CodePipeline → ステージの再試行",
+        "CodePipeline と CodeDeploy で戻し方が違う",
+        "CodeDeploy → ログと前のリビジョン"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "ステージを途中からやり直す",
+            "CodePipeline の再試行",
+            "全体か失敗分だけ"
+          ],
+          [
+            "ステージ失敗で自動で戻す",
+            "CodePipeline 自動ロールバック",
+            "直近の成功した実行"
+          ],
+          [
+            "CodeDeploy の失敗の原因",
+            "ログ（EC2・オンプレミス）",
+            "CloudWatch Logs で集中"
+          ],
+          [
+            "CodeDeploy で前の版へ",
+            "前のリビジョンを再デプロイ",
+            "新しいデプロイとして"
+          ],
+          [
+            "デプロイ失敗やしきい値で",
+            "CodeDeploy 自動ロールバック",
+            "deployment group か deployment"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三枚目は、コードパイプラインとコードデプロイです。失敗したステージを、最初から流し直さずにやり直したいなら、コードパイプラインのステージの再試行です。やり直すのは、全体か、失敗分だけか、です。"
+        },
+        {
+          "who": "student",
+          "text": "失敗したら自動で戻したい、とあったら？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードパイプラインなら、ステージに自動ロールバックを設定します。戻る先は、直近の成功した実行です。"
+        },
+        {
+          "who": "student",
+          "text": "コードデプロイの失敗の原因は？"
+        },
+        {
+          "who": "teacher",
+          "text": "イーシーツーやオンプレミスへのデプロイの失敗なら、デプロイの途中のログで探します。"
+        },
+        {
+          "who": "student",
+          "text": "コードデプロイで、前の版に戻したいときは？"
+        },
+        {
+          "who": "teacher",
+          "text": "前のリビジョンを、新しいデプロイとしてデプロイし直します。デプロイの失敗や監視のしきい値で自動で戻したいなら、デプロイメントグループかデプロイに設定します。"
+        },
+        {
+          "who": "student",
+          "text": "設定する先が、コードパイプラインとは違うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。コードパイプラインはステージに設定します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "You can retry a stage that has failed without having to run a pipeline again from the beginning.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-retry.html#stage-retry"
+        },
+        {
+          "source_id": "S9",
+          "quote": "You can configure stages in a pipeline to roll back automatically on failure.",
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/stage-rollback-auto.html#stage-rollback-auto"
+        },
+        {
+          "source_id": "S12",
+          "quote": "For simplicity, we recommend using Amazon CloudWatch Logs to centrally monitor log files instead of viewing them instance by instance.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/troubleshooting-deployments.html#troubleshooting-deployments"
+        },
+        {
+          "source_id": "S11",
+          "quote": "You can configure a deployment group or deployment to automatically roll back when a deployment fails or when a monitoring threshold you specify is met.",
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/deployments-rollback-and-redeploy.html#deployments-rollback-and-redeploy"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 4: 失敗したプロセス",
+      "bullets": [
+        "unhealthy → 自動で置き換え",
+        "止まったタスクの表示は 1 時間",
+        "検査は EC2 ヘルスチェックに基づく"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "InService が unhealthy",
+            "Auto Scaling が置き換え",
+            "desired capacity"
+          ],
+          [
+            "インスタンスが起動しない",
+            "起動の失敗の資料",
+            "エラーメッセージ"
+          ],
+          [
+            "ECS のタスクが止まった",
+            "止まったタスクのエラー",
+            "コンソールに 1 時間"
+          ],
+          [
+            "イメージを取れない",
+            "CannotPullContainer",
+            "権限の問題の例も"
+          ],
+          [
+            "managed node group の不調",
+            "エラーコード",
+            "EC2 基準・ソフトは対象外"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四枚目は、失敗したプロセスです。インサービスのインスタンスがアンヘルシーと判定されたら、オートスケーリングが置き換えて、希望の容量を保ちます。"
+        },
+        {
+          "who": "student",
+          "text": "起動しない、タスクが止まった、なら？"
+        },
+        {
+          "who": "teacher",
+          "text": "起動しないなら、エラーメッセージを手がかりに、起動の失敗の資料を調べます。イーシーエスのタスクが止まったなら、止まったタスクのエラーを見ます。コンソールに出るのは一時間だけです。"
+        },
+        {
+          "who": "student",
+          "text": "イメージを取れない、とか、イーケーエスのノードの不調なら？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージを取れないなら、キャンノットプルコンテナのエラーです。権限の問題を示す物もあります。マネージドノードグループのハードウェアの不調なら、エラーコードが手がかりです。"
+        },
+        {
+          "who": "teacher",
+          "text": "ただし、このヘルスチェックはイーシーツーのヘルスチェックに基づくので、ソフトウェアの問題は検出しません。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "When Amazon EC2 Auto Scaling determines that an InService instance is unhealthy, it replaces it with a new instance to maintain the desired capacity of the group.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html#ec2-auto-scaling-health-checks"
+        },
+        {
+          "source_id": "S15",
+          "quote": "When your EC2 instances fail to launch, you might get one or more of the following error messages:",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ts-as-instancelaunchfailure.html#ts-as-instancelaunchfailure"
+        },
+        {
+          "source_id": "S17",
+          "quote": "Stopped tasks only appear in the console for 1 hour.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/stopped-task-errors.html#stopped-task-errors"
+        },
+        {
+          "source_id": "S18",
+          "quote": "This error indicates that the task can't pull the image specified in the task definition because of permission issues.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_cannot_pull_image.html#task_cannot_pull_image"
+        },
+        {
+          "source_id": "S19",
+          "quote": "These health checks don't detect software issues because they are based on Amazon EC2 health checks.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/troubleshooting.html#troubleshoot-managed-node-groups"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "4 つの部に戻る",
+        "まず根本原因の手がかりを探す",
+        "迷ったら条件の表に戻る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 失敗したプロセス\"]\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"EC2 Auto Scaling<br/>unhealthy を置き換え\" }\n    EC@{ svc: \"Amazon ECS\", label: \"ECS のタスクのエラー<br/>EKS のエラーコード\" }\n  end\n  subgraph G3[\"3 失敗したデプロイ\"]\n    CF@{ svc: \"AWS CloudFormation\", label: \"CloudFormation<br/>根本原因のイベント\" }\n    CP@{ svc: \"AWS CodePipeline\", label: \"CodePipeline の再試行<br/>CodeDeploy のログ\" }\n  end\n  subgraph G2[\"2 原因を探る\"]\n    XR[\"AWS X-Ray<br/>trace map と<br/>X-Ray Analytics\"]\n  end\n  subgraph G1[\"1 健全性を知る\"]\n    HE@{ svc: \"AWS Health\", label: \"AWS Health<br/>EventBridge で受信\" }\n    OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter<br/>OpsItem と情報の集約\" }\n  end\n",
+        "alt": "講義の地図に戻ったまとめ。1 健全性を知るでは、AWS Health のイベントを EventBridge で受け、OpsCenter が OpsItem を作り情報を集める。2 原因を探るでは、AWS X-Ray の trace map と X-Ray Analytics。3 失敗したデプロイでは、CloudFormation の根本原因のイベント、CodePipeline の再試行と CodeDeploy のログ。4 失敗したプロセスでは、EC2 Auto Scaling が unhealthy を置き換え、ECS は止まったタスクのエラー、EKS はエラーコードを見る。並びは講義で扱う順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。最初の地図に戻ります。並びは扱った順番で、処理の流れではありません。"
+        },
+        {
+          "who": "teacher",
+          "text": "健全性を知るでは、エーダブリューエスヘルスのイベントをイベントブリッジで受け、オプスセンターで、オプスアイテムを作り、調べる情報を集めました。"
+        },
+        {
+          "who": "student",
+          "text": "原因を探る部は？"
+        },
+        {
+          "who": "teacher",
+          "text": "エックスレイのトレースマップと、エックスレイアナリティクスを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "失敗したデプロイは？"
+        },
+        {
+          "who": "teacher",
+          "text": "クラウドフォーメーションの根本原因のイベント、コードパイプラインの再試行、コードデプロイのログを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "プロセスのほうは？"
+        },
+        {
+          "who": "teacher",
+          "text": "オートスケーリングの置き換え、イーシーエスのタスクのエラー、イーケーエスのエラーコードを見ました。迷ったら、四枚の表に戻ってください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "X-Ray uses trace data from the AWS resources that power your cloud applications to generate a detailed trace map.",
+          "url": "https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html#aws-xray"
+        },
+        {
+          "source_id": "S6",
+          "quote": "If your stack creation fails, CloudFormation can help you to determine the event that is likely the root cause for the stack failure.",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/determine-root-cause-for-stack-failures.html#determine-root-cause-for-stack-failures"
+        }
+      ]
+    }
+  ]
+}

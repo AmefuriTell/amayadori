@@ -1,0 +1,739 @@
+{
+  "task": "5.2",
+  "title": "イベントに応じた構成の変更",
+  "notes": [
+    "地図の四つのまとまりは、試験ガイドの task 5.2 の skills と knowledge（Auto Scaling）を軸にした。中身の事実は sources.md だけから。",
+    "S10 は「Automation documents」、S12・S14 は「runbook」と書く。同じ物だと言い切る根拠が無いので、台本では各出典の呼び方のまま使い、呼び方を出典に合わせた事だけを断った。",
+    "C3 への返事（1 回目）",
+    "global・s06・s01・s13: まとまり 2 の名前を「グループの入れ替え」から「Auto Scaling」に変え、s06 で lifecycle hook は入れ替えとは別の話だと言った。待ち状態は名のとおり「いったん待つ状態で、その間に独自の処理を動かせる」とだけ言い、clarity の「起動や終了で移る途中」「次の段階へ進む前」は根拠（S7）に無いので採らなかった。",
+    "global・s09: 台本と表の「ドキュメント」は Automation documents の意味だけにし、AWS の説明書の意味は「資料」に言い換えた。ノードとインスタンスは s05 で「資料に合わせてインスタンスと呼ぶ」と断った（同じ物とは言っていない）。",
+    "global（条件の重なり）: 4 組（State Manager と instance refresh、association・Maintenance Windows・EventBridge の日程、AppConfig と自動の rollback、State Manager と AWS Config）を、本文（s05・s07・s08・s09）、表（s12〜s15）、まとめ（s16）で「何を変えるか」で見分けた。",
+    "s05: 「実行中だけ」は S6 が手動と自動を分けていないので、rollback 全体の時期の行にした。clarity の「望ましい容量＝決めておいた台数」の言い換えは根拠に無いので採らなかった。",
+    "s09: マネージドルールの名前は画面に出さないので、台本でも「あらかじめ用意されたルールもある」までに軽くした。",
+    "s11: 「システムの障害」を下で動くハードウェアやソフトウェアの障害と同じだと言う根拠が無いので、言い換えは採らず、その文を削った。表から停止・終了を外し、使うアクションを reboot と recover にした。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "4 つのまとまりを番号の順に",
+        "並びは講義の順で流れではない",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G1[\"1 構成を当てる\"]\n    direction LR\n    SM@{ svc: \"AWS Systems Manager\", label: \"State Manager<br/>Run Command<br/>Maintenance Windows\" }\n  end\n  subgraph G2[\"2 Auto Scaling\"]\n    direction LR\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"instance refresh<br/>lifecycle hook\" }\n  end\n  subgraph G3[\"3 イベントで変える\"]\n    direction LR\n    AU@{ svc: \"Amazon EventBridge\", label: \"EventBridge と<br/>Automation\" }\n    AC@{ svc: \"AWS AppConfig\", label: \"AWS AppConfig<br/>アプリの設定\" }\n    AU ~~~ AC\n  end\n  subgraph G4[\"4 望まない状態を直す\"]\n    direction LR\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>ルールと修復\" }\n    OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter<br/>作業項目\" }\n    EC@{ svc: \"Amazon EC2\", label: \"EC2 の<br/>自動の復旧\" }\n    CF ~~~ OC ~~~ EC\n  end\n  G1 ~~~ G2\n  G2 ~~~ G3\n  G3 ~~~ G4\n",
+        "alt": "講義の地図。4 つのまとまりを番号を付けて上から並べる。1 構成を当てるは State Manager・Run Command・Maintenance Windows。2 Auto Scaling は instance refresh と lifecycle hook。3 イベントで変えるは EventBridge と Automation、AWS AppConfig。4 望まない状態を直すは AWS Config のルールと修復、OpsCenter、EC2 の自動の復旧。並びは講義の順で、処理の流れではない。"
+      },
+      "narration": "この講義では、イベントに応じて、システムの構成を変える方法を学びます。画面の四つのまとまりを、番号の順に進みます。図の並びは講義の順番で、処理の流れではありません。一つ目は、構成を当てる方法です。構成を当てるとは、決めた構成をサーバーに反映することです。ステートマネージャーを中心に、似た機能と比べます。二つ目は、オートスケーリングです。インスタンスリフレッシュとライフサイクルフックを見ます。三つ目は、イベントで変える方法で、イベントブリッジとオートメーション、そしてアップコンフィグです。四つ目は、望まない状態を直す方法で、エーダブリューエスコンフィグ、オプスセンター、イーシーツーの自動の復旧です。締めは、条件から方法を選ぶ表です。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "State Manager is a secure and scalable service that automates the process of keeping managed nodes in a hybrid and multicloud infrastructure in a state that you define.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "source_id": "S5",
+          "quote": "To refresh instances in an Auto Scaling group, you can define a new configuration that contains the latest version of your application and any other updates you want to make.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html#instance-refresh-how-it-works"
+        },
+        {
+          "source_id": "S11",
+          "quote": "Automation also integrates with Amazon EventBridge to help you build event-driven architecture at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#systems-manager-automation"
+        },
+        {
+          "source_id": "S10",
+          "quote": "AWS Config allows you to remediate noncompliant resources that are evaluated by AWS Config Rules.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "構成を当てる 1: State Manager",
+      "bullets": [
+        "決めた状態に保つ",
+        "association: 状態・日程・対象",
+        "ハイブリッド・マルチクラウドも"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SM@{ svc: \"AWS Systems Manager\", label: \"State Manager\" }\n  AS[\"association<br/>保ちたい状態<br/>日程と対象\"]\n  N[\"管理対象のノード<br/>ハイブリッドや<br/>マルチクラウドも\"]\n  SM -- \"association を持つ\" --> AS\n  AS -- \"日程どおりに当てる\" --> N\n",
+        "alt": "State Manager の association は、保ちたい状態と、構成を当てる日程と対象を定めた設定。association が管理対象のノードに日程どおりに構成を当てる。ノードはハイブリッドやマルチクラウドの環境にあってもよい。"
+      },
+      "narration": "一つ目のまとまり、構成を当てる方法です。管理対象のノードとは、大まかに言うと、システムズマネージャーで管理するサーバーのことです。ステートマネージャーは、管理対象のノードを、自分で決めた状態に保つ作業を自動にする機能です。ノードは、ハイブリッドやマルチクラウドの環境にあっても構いません。中心になる設定が、アソシエーションです。アソシエーションは、リソースに割り当てる構成で、保ちたい状態を定めます。さらに、いつ構成を当てるかの日程と、どこに当てるかの対象も持ちます。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "A State Manager association is a configuration that you assign to your AWS resources. The configuration defines the state that you want to maintain on your resources.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "source_id": "S2",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "構成を当てる 2: 似た機能と並べる",
+      "bullets": [
+        "状態を保つ → State Manager",
+        "時刻を決める → Maintenance Windows",
+        "一度きり → Run Command"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "State Manager",
+          "Maintenance Windows",
+          "Run Command"
+        ],
+        "rows": [
+          [
+            "保つか一度か",
+            "決めた状態を保つ",
+            "—",
+            "一度きりの変更"
+          ],
+          [
+            "いつ動くか",
+            "association の日程",
+            "更新の時間を決める",
+            "—"
+          ],
+          [
+            "資料の使い所 1",
+            "増えたノードにも当てる",
+            "パッチを当てる",
+            "よくある管理作業"
+          ],
+          [
+            "資料の使い所 2",
+            "厳しい準拠の報告",
+            "更新の時間に複数の作業",
+            "多くのノードへまとめて"
+          ]
+        ]
+      },
+      "narration": "ステートマネージャーと似た機能二つを、画面の列の順に見ます。ステートマネージャーは、決めた状態を保ちます。資料は、全てのノードの状態をそろえて保ちたいとき、オートスケーリングで新しいノードを作るとき、厳しい準拠の報告が要るときに、ステートマネージャーを使う、と述べています。準拠とは、決めた決まりに合っていることです。メンテナンスウィンドウは、パッチ、更新の時間の中で複数の種類の作業を動かすこと、更新がいつ動くかを決めることが優先なら使います。ランコマンドは、管理対象のノードの構成を、離れた所から安全に管理する機能です。資料にあるのはできる事で、よくある管理の作業の自動化と、一度きりの構成の変更を、多くのノードにまとめて行う事です。状態を保ち続けるステートマネージャーに対し、ランコマンドは一度きりの変更です。",
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Use State Manager if you want to maintain a consistent state across all managed nodes, use Amazon EC2 Auto Scaling to generate new nodes, or have strict compliance reporting requirements.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-vs-maintenance-windows.html#sm-mw-use-cases"
+        },
+        {
+          "source_id": "S3",
+          "quote": "Use Maintenance Windows if your priorities include patching managed nodes, running multiple task types during an update period, or controlling when updates run.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-vs-maintenance-windows.html#sm-mw-use-cases"
+        },
+        {
+          "source_id": "S1",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "構成を当てる 3: Auto Scaling の新しいノード",
+      "bullets": [
+        "新しいノードも State Manager が見る",
+        "best practice は tag で対象",
+        "全ノード同じ tag なら 1 つ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループ<br/>ノードを起動\" }\n  N[\"新しいノード<br/>全て同じ tag<br/>key と値\"]\n  AS@{ svc: \"AWS Systems Manager\", label: \"State Manager<br/>association は 1 つ<br/>対象は tag\" }\n  ASG -- \"起動\" --> N\n  AS -- \"tag で当てる\" --> N\n",
+        "alt": "Auto Scaling グループが新しいノードを起動する。全てのノードに同じ key と値の tag が付いていれば、State Manager の association は 1 つでよく、対象を tag で決めてノードに構成を当てる。"
+      },
+      "narration": "オートスケーリンググループは、ノードの数を増やしたり減らしたりする仕組みです。増えた新しいノードにも、同じ構成を当てたい場面があります。ステートマネージャーは、アカウントの中で起動した新しいノードを、手で起動した物も、オートスケーリンググループで起動した物も見張れます。オートスケーリンググループでアソシエーションを使うときのベストプラクティスは、タグで対象を決めることです。タグとは、リソースに付けるキーと値の組です。全てのノードに、同じキーと値のタグが付いていれば、オートスケーリンググループのために要るアソシエーションは、一つだけです。",
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Auto Scaling scenarios: State Manager can monitor all new nodes launched within an account either manually or through Auto Scaling groups.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-vs-maintenance-windows.html#sm-mw-use-cases"
+        },
+        {
+          "source_id": "S4",
+          "quote": "The best practice when using associations to run Auto Scaling groups is to use tag targets.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-asg.html#systems-manager-state-manager-asg"
+        },
+        {
+          "source_id": "S4",
+          "quote": "If all nodes are tagged with the same key and value, you only need one association to run your Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-asg.html#systems-manager-state-manager-asg"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "Auto Scaling 1: instance refresh",
+      "bullets": [
+        "当て続けず、入れ替える",
+        "Rolling は何台かずつ",
+        "rollback は実行中だけ"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "資料の説明"
+        ],
+        "rows": [
+          [
+            "新しい構成",
+            "最新版のアプリなど"
+          ],
+          [
+            "Rolling（既定）",
+            "何台かずつ終了と起動"
+          ],
+          [
+            "rollback の時期",
+            "実行中だけ。後は不可"
+          ],
+          [
+            "自動の rollback",
+            "失敗か指定の ALARM"
+          ],
+          [
+            "戻す時の動き",
+            "新しくした分を置き換え"
+          ]
+        ]
+      },
+      "narration": "二つ目のまとまり、オートスケーリングです。一つ目のまとまりは、今あるノードに、決めた構成を当て続ける方法でした。インスタンスリフレッシュは、新しい構成を定めて、グループのインスタンスそのものを入れ替える方法です。ここからは資料に合わせて、グループの中のサーバーをインスタンスと呼びます。新しい構成には、最新の版のアプリケーションなどを含めます。入れ替え方の既定は、画面のローリングで、インスタンスを何台かずつ終了し、新しい物を起動します。これで入れ替えの間も、望ましい容量と可用性を保ちます。ロールバック、つまり元に戻すことは、実行中の入れ替えに対してできます。終わった後は戻せません。戻すときは、それまでに新しくしたインスタンスを置き換えます。入れ替えが失敗したとき、または指定したクラウドウォッチのアラームが、アラームの状態になったときは、自動で戻すこともできます。",
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "Rolling strategy (default) — Terminates instances and launches new ones in batches according to your preferences.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html#instance-refresh-how-it-works"
+        },
+        {
+          "source_id": "S5",
+          "quote": "This ensures that your Auto Scaling group maintains its desired capacity and availability throughout the update process.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html#instance-refresh-how-it-works"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can roll back an instance refresh that is still in progress. You can't roll it back after it's finished.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html#instance-refresh-rollback"
+        },
+        {
+          "source_id": "S6",
+          "quote": "Auto rollback: Amazon EC2 Auto Scaling automatically reverses what was deployed if the instance refresh fails for some reason or if any CloudWatch alarms you specify go into the ALARM state.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html#instance-refresh-rollback"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "Auto Scaling 2: lifecycle hook",
+      "bullets": [
+        "入れ替えとは別の話",
+        "待ち状態で独自の処理",
+        "例: スケールインで終了"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling グループ<br/>資料の例:<br/>スケールインで<br/>終了を始める\" }\n  W[\"待ち状態<br/>lifecycle hook による\"]\n  CA[\"独自の処理<br/>custom actions\"]\n  ASG -- \"インスタンスが移る\" --> W\n  W -- \"移った時に動く\" --> CA\n",
+        "alt": "資料の例では、Auto Scaling グループがスケールインのイベントに応じてインスタンスの終了を始める。lifecycle hook によってインスタンスが待ち状態に移ると、その時に独自の処理（custom actions）を動かせる。"
+      },
+      "narration": "ここからは、入れ替えとは別の話です。ライフサイクルフックは、大まかに言うと、インスタンスを待ち状態に移らせる仕組みです。待ち状態は、その名のとおりインスタンスがいったん待つ状態で、その間に動く独自の処理を作れます。画面のカスタムアクションが、この独自の処理です。資料の例は、オートスケーリンググループがスケールインのイベントに応じて、インスタンスの終了を始める場面です。スケールインとは、インスタンスの数を減らすことです。インスタンスが待ち状態に移ったときに、自分の処理を挟みたい場面の候補です。",
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "You can create custom actions for your Auto Scaling group to act when an instance transitions into a wait state due to a lifecycle hook.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html#lifecycle-hooks-overview"
+        },
+        {
+          "source_id": "S7",
+          "quote": "The Auto Scaling group responds to a scale-in event and begins terminating an instance.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html#lifecycle-hooks-overview"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "イベントで変える 1: EventBridge と Automation",
+      "bullets": [
+        "runbook を EventBridge の target に",
+        "日程か、システムのイベントで",
+        "承認が要る時は aws:approve"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  EB@{ svc: \"Amazon EventBridge\", label: \"EventBridge<br/>システムのイベント<br/>または日程\" }\n  AU@{ svc: \"AWS Systems Manager\", label: \"Automation<br/>が始まる\" }\n  AP[\"aws:approve<br/>承認か拒否まで<br/>一時停止\"]\n  RS[\"AWS リソース<br/>デプロイ・構成・管理\"]\n  EB -- \"runbook を target に\" --> AU\n  AU -- \"構成する\" --> RS\n  AU -. \"承認が要る時\" .-> AP\n",
+        "alt": "EventBridge のイベントの target に runbook を指定すると、システムのイベントが起きた時や日程に従って、Systems Manager の Automation が始まり、AWS リソースのデプロイ・構成・管理を行う。承認が要る時は aws:approve のアクションで、承認か拒否まで一時停止する。"
+      },
+      "narration": "三つ目のまとまり、イベントで変える方法です。オートメーションは、システムズマネージャーの機能で、リソースのデプロイ、構成、管理を、大きな規模で自動にできます。イベントブリッジと連携し、イベントを起点にした仕組みも作れます。オートメーションで動かす手順の定義を、イベントブリッジの資料に合わせてランブックと呼びます。ランブックを、イベントブリッジのターゲット、つまり送り先に指定すると、オートメーションが始まります。きっかけは、特定のシステムのイベントでも、日程でも構いません。この日程で動くのはランブックで、アソシエーションの日程やメンテナンスウィンドウの更新の時間とは、動かす物が違います。人の承認を挟みたいときは、画面のアプルーブ、つまり承認のアクションで、承認か拒否まで一時的に止めます。",
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "Automation helps you to build automated solutions to deploy, configure, and manage AWS resources at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#systems-manager-automation"
+        },
+        {
+          "source_id": "S12",
+          "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge"
+        },
+        {
+          "source_id": "S12",
+          "quote": "You can start automations according to a schedule, or when a specific AWS system event occurs.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge"
+        },
+        {
+          "source_id": "S13",
+          "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-require-approvals.html#running-automations-require-approvals"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "イベントで変える 2: AWS AppConfig",
+      "bullets": [
+        "AWS Config とは別のサービス",
+        "再デプロイせずに振る舞いを変更",
+        "変更がアラームを起こせば戻す"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  AC@{ svc: \"AWS AppConfig\", label: \"AWS AppConfig<br/>構成の変更\" }\n  APP[\"本番のアプリ<br/>コードは<br/>再デプロイしない\"]\n  AL[\"その変更が<br/>アラームを起こした\"]\n  RB[\"AppConfig が<br/>変更を自動で戻す\"]\n  AC -- \"振る舞いを変える\" --> APP\n  APP -. \"変更のあと\" .-> AL\n  AL -- \"その時\" --> RB\n",
+        "alt": "AWS AppConfig の構成の変更で、コードを再デプロイせずに本番のアプリの振る舞いを変える。その構成の変更がアラームを起こした時は、AppConfig が自動でその変更を戻し、影響を小さくする。"
+      },
+      "narration": "次は、アップコンフィグです。名前が似ていますが、四つ目のまとまりのエーダブリューエスコンフィグとは別のサービスです。アップコンフィグは、コードを再デプロイせずに、本番のアプリケーションの振る舞いを、安全に変えるのを助けます。構成の変更がアラームを起こしたときは、アップコンフィグがその変更を自動で戻し、影響を小さくします。ここでのイベントは、構成の変更が起こしたアラームです。インスタンスリフレッシュの自動のロールバックが戻すのは、入れ替えたインスタンスでした。アップコンフィグが戻すのは、アプリケーションの構成の変更です。",
+      "refs": [
+        {
+          "source_id": "S18",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        },
+        {
+          "source_id": "S18",
+          "quote": "If a configuration change triggers an alarm, AWS AppConfig automatically rolls back the change to minimize impact.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "望まない状態を直す 1: AWS Config",
+      "bullets": [
+        "AWS Config Rules で評価",
+        "違反 → noncompliant と通知",
+        "AWS Config が Automation で修復"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  RULE@{ svc: \"AWS Config\", label: \"AWS Config Rules<br/>理想の構成\" }\n  R[\"AWS リソース\"]\n  NC[\"noncompliant の印<br/>通知を送る\"]\n  FIX@{ svc: \"AWS Config\", label: \"AWS Config が修復<br/>Automation の<br/>ドキュメントを使う\" }\n  RULE -- \"評価\" --> R\n  R -- \"違反した時\" --> NC\n  NC -- \"修復\" --> FIX\n",
+        "alt": "AWS Config Rules は理想の構成を表し、AWS リソースの構成を評価する。ルールに違反したリソースには noncompliant の印が付き、通知が送られる。そのリソースを、AWS Config が Systems Manager の Automation のドキュメントを使って修復する。"
+      },
+      "narration": "四つ目のまとまり、望まない状態を直す方法です。エーダブリューエスコンフィグは、アカウントの中のリソースの構成を詳しく見せます。エーダブリューエスコンフィグのルールは、理想の構成を表し、リソースの構成の設定を評価します。あらかじめ用意されたルールもあります。違反したリソースには、画面のノンコンプライアント、つまり準拠していないという印を付け、通知を送ります。そのリソースは、エーダブリューエスコンフィグが修復できます。修復には、システムズマネージャーのオートメーションのドキュメントを使います。この呼び方は、その資料に合わせた物で、行う操作が書かれています。自分で作ったドキュメントを、ルールに結び付けることもできます。ノードを決めた状態に保つステートマネージャーと違い、ルールで評価して直す点を押さえます。",
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig"
+        },
+        {
+          "source_id": "S9",
+          "quote": "AWS Config provides customizable, predefined rules called managed rules to help you get started.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config.html#evaluate-config"
+        },
+        {
+          "source_id": "S10",
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        },
+        {
+          "source_id": "S10",
+          "quote": "You can also create and associate custom automation documents with AWS Config rules.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "望まない状態を直す 2: OpsCenter",
+      "bullets": [
+        "OpsItem を一か所で",
+        "見る・調べる・解決する",
+        "解決に Automation の runbook"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ENG[\"運用の担当者\"]\n  OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter<br/>一か所で扱う\" }\n  OI[\"OpsItem<br/>運用の作業項目\"]\n  RB@{ svc: \"AWS Systems Manager\", label: \"Automation の<br/>runbook\" }\n  ENG -- \"見る・調べる・解決\" --> OC\n  OC -- \"まとめる\" --> OI\n  OC -- \"解決に使う\" --> RB\n",
+        "alt": "運用の担当者が OpsCenter で、AWS リソースに関わる運用の作業項目（OpsItem）を一か所で見て、調べて、解決する。OpsCenter は、問題を素早く解決するための Automation の runbook も用意している。"
+      },
+      "narration": "オプスセンターも、システムズマネージャーの機能です。運用の担当者が、エーダブリューエスのリソースに関わる運用の作業項目を、一か所で見て、調べて、解決できます。この作業項目を、オプスアイテムと呼びます。オプスセンターには、オートメーションのランブックも用意されていて、問題を素早く解決するのに使えます。運用の作業項目をまとめて扱い、そこから直す処理を動かしたい、という場面で思い出してください。",
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "OpsCenter provides a central location where operations engineers and IT professionals can view, investigate, and resolve operational work items (OpsItems) related to AWS resources.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        },
+        {
+          "source_id": "S14",
+          "quote": "OpsCenter also provides Systems Manager Automation runbooks that you can use to quickly resolve issues.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "望まない状態を直す 3: EC2 の自動の復旧",
+      "bullets": [
+        "simplified: 対応する物は既定で有効",
+        "CloudWatch action: 手動で設定",
+        "アラームの reboot と recover"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "simplified",
+          "CloudWatch action"
+        ],
+        "rows": [
+          [
+            "設定",
+            "対応する物は既定で有効",
+            "アラームを手動で設定"
+          ],
+          [
+            "動き",
+            "AWS が管理する決まった動き",
+            "動作と条件を変えられる"
+          ],
+          [
+            "使うアクション",
+            "—",
+            "reboot と recover"
+          ]
+        ]
+      },
+      "narration": "最後は、イーシーツーの自動のインスタンスの復旧です。これは、下で動くハードウェアやソフトウェアに障害が起きたとき、インスタンスを使える状態に自動で戻す、イーシーツーの機能です。やり方は二つあります。一つ目は、画面のシンプリファイド、つまり簡単にした自動の復旧です。対応するインスタンスでは、既定で有効です。復旧の動きは決まっていて、エーダブリューエスが管理します。二つ目は、画面のクラウドウォッチアクション、つまりクラウドウォッチのアクションによる復旧です。アラームとアクションを手動で設定する必要があり、そのかわり、動作と条件を変えられます。アラームのアクションには停止や終了もありますが、復旧に使うのは、画面のリブートとリカバー、つまり再起動と復旧です。",
+      "refs": [
+        {
+          "source_id": "S16",
+          "quote": "Simplified automatic recovery: Enabled by default on supported instances.",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#ec2-automatic-instance-recovery-key-concepts"
+        },
+        {
+          "source_id": "S16",
+          "quote": "CloudWatch action based recovery: Requires manual configuration on supported instances.",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#ec2-automatic-instance-recovery-key-concepts"
+        },
+        {
+          "source_id": "S17",
+          "quote": "Fixed recovery behavior managed by AWS",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#differences"
+        },
+        {
+          "source_id": "S15",
+          "quote": "You can use the reboot and recover actions to automatically reboot those instances or recover them onto new hardware if a system impairment occurs.",
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "条件から選ぶ 1: 構成を当てる",
+      "bullets": [
+        "保つ → State Manager",
+        "一度きり → Run Command",
+        "時刻・パッチ → Maintenance Windows"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "状態を保つ・準拠の報告",
+            "State Manager",
+            "association の日程と対象"
+          ],
+          [
+            "多くのノードに一度きり",
+            "Run Command",
+            "一度きりの変更か"
+          ],
+          [
+            "パッチ・更新の時刻を決める",
+            "Maintenance Windows",
+            "更新の時間"
+          ],
+          [
+            "更新の時間に複数の作業",
+            "Maintenance Windows",
+            "作業の種類"
+          ],
+          [
+            "増えたノードにも当て続ける",
+            "association を tag で",
+            "全ノード同じ tag なら 1 つ"
+          ]
+        ]
+      },
+      "narration": "ここからは、問題文の条件から方法を選ぶ表です。一枚目は、構成を当てるまとまりです。ノードを決めた状態に保ちたい、または厳しい準拠の報告が要るなら、ステートマネージャーです。アソシエーションの日程は、決めた状態を保つための日程です。多くのノードに一度きりの変更をまとめて行うなら、ランコマンドです。パッチを当てたい、更新がいつ動くかを決めたい、更新の時間に複数の種類の作業を動かしたいなら、メンテナンスウィンドウです。オートスケーリングで増えたノードにも同じ構成を当て続けたいなら、入れ替えるのではなく、アソシエーションの対象をタグで決めます。全てのノードが同じタグなら、一つで足ります。",
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Use State Manager if you want to maintain a consistent state across all managed nodes, use Amazon EC2 Auto Scaling to generate new nodes, or have strict compliance reporting requirements.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-vs-maintenance-windows.html#sm-mw-use-cases"
+        },
+        {
+          "source_id": "S1",
+          "quote": "With Run Command, you can automate common administrative tasks and perform one-time configuration changes at scale.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/run-command.html#run-command"
+        },
+        {
+          "source_id": "S4",
+          "quote": "If all nodes are tagged with the same key and value, you only need one association to run your Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-asg.html#systems-manager-state-manager-asg"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 2: Auto Scaling",
+      "bullets": [
+        "入れ替える → instance refresh",
+        "rollback は実行中だけ",
+        "待ち状態で処理 → lifecycle hook"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "インスタンスを新しい版に",
+            "instance refresh",
+            "新しい構成を定める"
+          ],
+          [
+            "容量を保ち何台かずつ",
+            "Rolling（既定）",
+            "終了と起動を分けて"
+          ],
+          [
+            "入れ替えを途中で戻す",
+            "rollback",
+            "実行中だけ。後は不可"
+          ],
+          [
+            "入れ替えを自動で戻す",
+            "自動の rollback",
+            "失敗か指定の ALARM"
+          ],
+          [
+            "待ち状態で独自の処理",
+            "lifecycle hook",
+            "例はスケールインの終了"
+          ]
+        ]
+      },
+      "narration": "二枚目は、オートスケーリングです。今のノードに当て続けるのではなく、インスタンスを新しい版に入れ替えたいなら、インスタンスリフレッシュです。容量と可用性を保ちながら何台かずつ入れ替えるのは、既定のローリングです。途中で戻したいなら、ロールバックです。戻せるのは実行中だけで、終わった後は戻せない点を確かめます。入れ替えの失敗や、指定したアラームで、入れ替えたインスタンスを自動で戻したいなら、自動のロールバックです。インスタンスが待ち状態に移ったときに独自の処理を動かしたいなら、ライフサイクルフックです。資料の例は、スケールインで終了を始める場面でした。",
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "Rolling strategy (default) — Terminates instances and launches new ones in batches according to your preferences.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html#instance-refresh-how-it-works"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can roll back an instance refresh that is still in progress. You can't roll it back after it's finished.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html#instance-refresh-rollback"
+        },
+        {
+          "source_id": "S7",
+          "quote": "You can create custom actions for your Auto Scaling group to act when an instance transitions into a wait state due to a lifecycle hook.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html#lifecycle-hooks-overview"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 3: イベントで変える",
+      "bullets": [
+        "イベントで → runbook を target に",
+        "承認 → aws:approve",
+        "設定を戻す → AWS AppConfig"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "システムのイベントで変更",
+            "EventBridge と Automation",
+            "runbook を target に"
+          ],
+          [
+            "runbook を日程で始める",
+            "EventBridge と Automation",
+            "日程で動く物は runbook"
+          ],
+          [
+            "途中で人の承認",
+            "aws:approve",
+            "承認か拒否まで停止"
+          ],
+          [
+            "アプリの設定を変える",
+            "AWS AppConfig",
+            "コードは再デプロイしない"
+          ],
+          [
+            "設定の変更がアラームを起こす",
+            "AWS AppConfig",
+            "戻すのは設定の変更"
+          ]
+        ]
+      },
+      "narration": "三枚目は、イベントで変えるまとまりです。システムのイベントで、リソースの構成を自動で変えたいなら、イベントブリッジのターゲットにランブックを指定し、オートメーションを動かします。ランブックを日程で始めたいときも、イベントブリッジからです。途中で人の承認を挟みたいなら、アプルーブのアクションです。コードを再デプロイせずに、アプリケーションの振る舞いを変えたいなら、アップコンフィグです。その構成の変更がアラームを起こしたら自動で戻したい、という条件も、アップコンフィグです。戻すのが入れ替えたインスタンスなら、二枚目の自動のロールバックでした。",
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "You can start automations according to a schedule, or when a specific AWS system event occurs.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge"
+        },
+        {
+          "source_id": "S13",
+          "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-require-approvals.html#running-automations-require-approvals"
+        },
+        {
+          "source_id": "S18",
+          "quote": "If a configuration change triggers an alarm, AWS AppConfig automatically rolls back the change to minimize impact.",
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 4: 望まない状態を直す",
+      "bullets": [
+        "ルール違反 → AWS Config の修復",
+        "作業項目 → OpsCenter",
+        "EC2 の復旧は 2 つのやり方"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "リソースがルールに違反",
+            "AWS Config の修復",
+            "Automation のドキュメント"
+          ],
+          [
+            "独自の手順で修復",
+            "独自のドキュメント",
+            "ルールに結び付ける"
+          ],
+          [
+            "作業項目を一か所で",
+            "OpsCenter",
+            "OpsItem と runbook"
+          ],
+          [
+            "EC2 を自動で復旧",
+            "simplified",
+            "対応する物は既定で有効"
+          ],
+          [
+            "復旧の条件を自分で",
+            "CloudWatch action",
+            "アラームを手動で設定"
+          ]
+        ]
+      },
+      "narration": "四枚目は、望まない状態を直すまとまりです。リソースがルールに違反して、それを直したいなら、エーダブリューエスコンフィグの修復で、オートメーションのドキュメントを使います。自分の手順で直したいなら、自分で作ったドキュメントを、ルールに結び付けます。運用の作業項目を一か所で見て、調べて、解決したいなら、オプスセンターです。イーシーツーのインスタンスを障害から自動で戻すには、対応するインスタンスで既定で有効な、簡単にした自動の復旧があります。復旧の動作や条件を自分で決めたいなら、クラウドウォッチのアクションによる復旧で、アラームとアクションを手動で設定します。",
+      "refs": [
+        {
+          "source_id": "S10",
+          "quote": "You can also create and associate custom automation documents with AWS Config rules.",
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation"
+        },
+        {
+          "source_id": "S14",
+          "quote": "OpsCenter provides a central location where operations engineers and IT professionals can view, investigate, and resolve operational work items (OpsItems) related to AWS resources.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter"
+        },
+        {
+          "source_id": "S17",
+          "quote": "Requires manual configuration of CloudWatch alarms and actions",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#differences"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "4 つのまとまりに戻る",
+        "似た条件は何を変えるかで",
+        "迷ったら条件の表に戻る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G1[\"1 構成を当てる\"]\n    direction LR\n    SM@{ svc: \"AWS Systems Manager\", label: \"保つ State Manager<br/>時刻を決める<br/>Maintenance Windows<br/>一度きり Run Command\" }\n  end\n  subgraph G2[\"2 Auto Scaling\"]\n    direction LR\n    AS@{ svc: \"Amazon EC2 Auto Scaling\", label: \"instance refresh<br/>戻すのは実行中だけ<br/>lifecycle hook\" }\n  end\n  subgraph G3[\"3 イベントで変える\"]\n    direction LR\n    AU@{ svc: \"Amazon EventBridge\", label: \"EventBridge の<br/>target に runbook\" }\n    AC@{ svc: \"AWS AppConfig\", label: \"AWS AppConfig<br/>アラームで設定を戻す\" }\n    AU ~~~ AC\n  end\n  subgraph G4[\"4 望まない状態を直す\"]\n    direction LR\n    CF@{ svc: \"AWS Config\", label: \"AWS Config<br/>Automation で修復\" }\n    OC@{ svc: \"AWS Systems Manager\", label: \"OpsCenter<br/>OpsItem\" }\n    EC@{ svc: \"Amazon EC2\", label: \"EC2 の復旧<br/>simplified は<br/>対応する物で既定\" }\n    CF ~~~ OC ~~~ EC\n  end\n  G1 ~~~ G2\n  G2 ~~~ G3\n  G3 ~~~ G4\n",
+        "alt": "講義の地図に戻ったまとめ。1 構成を当てるでは、保つなら State Manager、時刻を決めるなら Maintenance Windows、一度きりなら Run Command。2 Auto Scaling では instance refresh で入れ替え、戻すのは実行中だけ。lifecycle hook は待ち状態で独自の処理。3 イベントで変えるでは、EventBridge の target に runbook を指定し、AWS AppConfig は構成の変更がアラームを起こすと設定を戻す。4 望まない状態を直すでは、AWS Config が Automation で修復し、OpsCenter が OpsItem を一か所で扱い、EC2 の復旧は対応するインスタンスで simplified が既定で有効。並びは講義の順で、処理の流れではない。"
+      },
+      "narration": "まとめです。最初の地図に戻ります。似た条件は、何を変えるかで見分けます。当て続けるならステートマネージャー、入れ替えるならインスタンスリフレッシュです。日程は、状態を保つならアソシエーション、更新の時間ならメンテナンスウィンドウ、ランブックを始めるならイベントブリッジです。アラームで戻すのは、設定ならアップコンフィグ、入れ替えたインスタンスなら自動のロールバックです。ノードを保つステートマネージャーに対し、エーダブリューエスコンフィグはリソースをルールで評価して直します。ロールバックは実行中だけ、簡単にした自動の復旧は対応するインスタンスだけ、という条件も忘れずに。迷ったら、四つの表に戻ってください。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "The configuration defines the state that you want to maintain on your resources.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#state-manager-about"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can roll back an instance refresh that is still in progress. You can't roll it back after it's finished.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html#instance-refresh-rollback"
+        },
+        {
+          "source_id": "S12",
+          "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event.",
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Simplified automatic recovery: Enabled by default on supported instances.",
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#ec2-automatic-instance-recovery-key-concepts"
+        }
+      ]
+    }
+  ],
+  "credit": "VOICEVOX:四国めたん",
+  "audio": true,
+  "minutes": 10.8,
+  "status": "verified",
+  "created": "2026-11-27",
+  "last_checked": "2026-11-27"
+}

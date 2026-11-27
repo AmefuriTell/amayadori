@@ -1,0 +1,1222 @@
+{
+  "task": "1.3",
+  "title": "アーティファクトを置く・作る・片付ける",
+  "notes": [
+    "C3 の指摘への返事（採らなかった物）",
+    "s04（分かりやすさ・中）アセットとメタデータの言い換え: sources.md に assets・metadata の説明が無いので、言い換えは足していない。s12 では「ドメインのスライドで出た、アセットとメタデータ」とつなぐだけにした。",
+    "s05（分かりやすさ・中）dependency substitution の攻撃の様子: sources.md に説明が無いので足していない。代わりの案どおり、二つの入口（外からの取り込みと社内の publish）のどちらも、新しい版を許すか止めるかをこの仕組みで決める、と台本で強めた。カタカナの名前は日本語の後に一度だけにした。",
+    "s07（分かりやすさ・中）pull through cache・create on push・replication の言い換え: sources.md に説明が無いので足していない。代わりの案どおり、図に「ECR が repo を作る場面」という枠を付け、台本で「自分で作らなくても repository ができる場面」とまとめた。",
+    "s09・s10（分かりやすさ・中）validation の段と component の関係: sources.md に書かれていないので結び付けていない。段（build・validation・test）は recipe が決める事として s10 にまとめ、component は build と test の二種類とだけ言う。",
+    "s11（分かりやすさ・軽）OU の説明: sources.md に説明が無いので足していない。",
+    "s15（分かりやすさ・中）判断の行の追加: 表は 5 行まで・スライドは 16 枚までなので、表には 5 行（共有・dependency substitution・ECR の片付け・Image Builder の片付け・resource の共有）を置いた。external connection、pre-build の login、creation template、24 時間内は、台本で先に言い、s16 の地図の箱に置いた。",
+    "掛け合いにした時の注意: 事実と試験の判断は先生の行に置いた。生徒の誤り（例えばの名前を全部と思う、取得だけなら認証は要らないと思う、鍵とオリジンコントロール・スキャンとライフサイクルポリシー・ECR と Image Builder の lifecycle など似た物を混ぜる、AGE と COUNT を出力で数えると思う）は次の先生の行で正し、生徒が正しい形を言い直して先生が受ける形にした。根拠に打ち消す文が無い s08 のログインの段は「そうとは言えません。資料の手順ではプレビルドの段です」とした。",
+    "掛け合いの検証への返事（採らなかった物）: s07（軽）の「自動で作られるリポジトリにも設定を入れたい、と問題文にあれば」の締めは、元の台本に無い判断で上限六千字にも当たるので足していない。s14（中）の「先に枠を言ってから取り違え」の順は、一枚十行の上限のため、取り違えの訂正の中で出力ではなくイメージリソースと言い、生徒の言い直しで締める形にした。s15 は、ECR と Image Builder をポリシーとルールで呼び分けると Image Builder にポリシーが無いと聞こえるので、サービスごとに別の仕組み、と正した。s06 のスキャンの訂正は言える範囲に弱めた。s06・s07 の根拠の無い前提の問い（スキャンが直すか、手で直すしかないか、機能は三つで全部か）は、根拠で否定できる取り違えに替えた。字数のため、s02・s04・s05 の図の説明の一言は台本から外した（図は画面にある）。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "第一部 置き場所と守り",
+        "第二部 作り方と共有",
+        "第三部 版と寿命"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>パッケージ\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>コンテナイメージ\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>ビルドで npm を取る\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>作る・resource を<br/>RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    LC[\"revision<br/>lifecycle の rule\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ LC\n  IB ~~~ LC\n",
+        "alt": "講義の三部構成を上から順に並べた図。第一部は置き場所と守りで、パッケージの CodeArtifact とコンテナイメージの ECR。第二部は作り方と共有で、ビルドで npm のパッケージを取る CodeBuild と、イメージを作り、Image Builder の resource を RAM で共有する EC2 Image Builder。第三部は版と寿命で、revision と lifecycle の rule。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、ソフトウェアのパッケージや、コンテナイメージのような物を、アーティファクトと呼びます。それをどこに置き、どう作り、いつ片付けるかを学びます。"
+        },
+        {
+          "who": "student",
+          "text": "どんな順で進むのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "講義は三つの部に分かれます。第一部は、置き場所と、その守り方です。パッケージを置くコードアーティファクトと、コンテナイメージを置くイーシーアールを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "第二部は？"
+        },
+        {
+          "who": "teacher",
+          "text": "作り方と共有です。コードビルドがビルドの中でパッケージを取ってくる形と、イーシーツーイメージビルダーでイメージを作る形を見ます。"
+        },
+        {
+          "who": "teacher",
+          "text": "そして、イメージビルダーのリソースを、ほかのアカウントと共有する形を見ます。"
+        },
+        {
+          "who": "student",
+          "text": "第三部は、片付けだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "それだけではありません。第三部は版と寿命で、版の中身の見分け方と、古い物を片付ける規則の両方を見ます。"
+        },
+        {
+          "who": "student",
+          "text": "見分け方も片付けも、第三部なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。要点は、置き場所と守り、作り方と共有、版と寿命、の三つの部です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        },
+        {
+          "source_id": "S11",
+          "quote": "Container images that you create with Image Builder are stored in Amazon ECR in your source Region (where your build runs), and in any Regions where you distribute the container image.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/integrate-products-services.html#integrate-products-services"
+        },
+        {
+          "source_id": "S6",
+          "quote": "To use npm packages from CodeBuild, run the login command from the pre-build section of your project's buildspec.yaml to configure npm to fetch packages from CodeArtifact.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/using-npm-packages-in-codebuild.html#npm-packages-in-codebuild-login"
+        },
+        {
+          "source_id": "S15",
+          "quote": "Your AWS account must own the Image Builder resource that you want to share.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-shared-resources.html#share-ib-resources-prereqs"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Lifecycle policies help with managing the lifecycle of the images in your repositories.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "1-1 CodeArtifact で共有する",
+      "bullets": [
+        "managed の artifact repository",
+        "private packages を publish",
+        "アプリやチームの間で共有"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  T[\"開発チーム<br/>社内の部品を作る\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>repository\" }\n  A1[\"アプリケーション 1\"]\n  A2[\"アプリケーション 2\"]\n  T -- \"publish\" --> CA\n  CA -- \"使う\" --> A1\n  CA -- \"使う\" --> A2\n",
+        "alt": "開発チームが社内の部品を private package として CodeArtifact の repository に publish し、複数のアプリケーションがそれを使う。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "第一部、置き場所と守りです。まず、コードアーティファクトです。安全で、大きな規模にも対応できる、マネージドのアーティファクトリポジトリのサービスです。"
+        },
+        {
+          "who": "student",
+          "text": "どんな事を助けてくれるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "組織が、アプリケーションの開発に使うソフトウェアのパッケージを、保管し、共有するのを助けます。"
+        },
+        {
+          "who": "student",
+          "text": "自分たちで作ったパッケージも置けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "はい。自分たちで作ったプライベートなパッケージを、リポジトリにパブリッシュ、つまり載せることもできます。"
+        },
+        {
+          "who": "student",
+          "text": "載せると、どうなるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "社内だけの部品を、複数のアプリケーションや開発チームの間で共有できます。"
+        },
+        {
+          "who": "student",
+          "text": "社内の部品をチームで共有したい時は、どうするのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードアーティファクトにパブリッシュします。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "AWS CodeArtifact is a secure, highly scalable, managed artifact repository service that helps organizations to store and share software packages for application development.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        },
+        {
+          "source_id": "S1",
+          "quote": "You can also publish private packages to a CodeArtifact repository. This helps you share proprietary software components between multiple applications and development teams in your organization.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "1-2 外から取り込む・認証する",
+      "bullets": [
+        "external connection で取り込む",
+        "publish も取得も認証が要る",
+        "public にはできない"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  PUB[\"公開リポジトリ<br/>例: npmjs・PyPI\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>repository<br/>public にはできない\" }\n  CRED[\"AWS の認証情報\"]\n  U[\"利用者<br/>authorization token\"]\n  PUB -- \"external connection\" --> CA\n  CRED -- \"token を作る\" --> U\n  U -- \"publish・取得\" --> CA\n",
+        "alt": "公開リポジトリ（例: npmjs、PyPI）から external connection で CodeArtifact の repository に取り込む。利用者は AWS の認証情報で authorization token を作り、それで publish や取得をする。repository のパッケージは public にはできない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まず、リポジトリに入る道です。外の公開リポジトリにある、オープンソースのパッケージも取り込めます。リポジトリに、エクスターナルコネクション、つまり外部接続を設定します。接続先は、例えば、エヌピーエムジェイエスやパイピーアイのような公開リポジトリです。"
+        },
+        {
+          "who": "student",
+          "text": "つなげるのは、その二つだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。資料には、ほかにニューゲットギャラリーやメイブンセントラルも挙がっています。公開リポジトリから取り込みたい、と問題文にあれば、外部接続です。"
+        },
+        {
+          "who": "student",
+          "text": "名前は全部ではないのだ。じゃあ、取ってくるだけなら、認証はいらないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "名前はそのとおりです。認証は違います。パッケージの版をパブリッシュするときも、取ってきて使うときも、利用者はサービスへの認証が要ります。エーダブリューエスの認証情報で、認可トークンを作ります。"
+        },
+        {
+          "who": "student",
+          "text": "載せるときも、取ってくるときも、認証がいるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。なお、外から取り込むことはできても、リポジトリのパッケージを、誰でも取れる形で公開することはできません。"
+        },
+        {
+          "who": "student",
+          "text": "取り込めても、こちらから公開はできないのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "You can also import open-source packages into a repository by configuring it with an external connection to a public repository such as npmjs, NuGet Gallery, Maven Central, or PyPI.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
+        },
+        {
+          "source_id": "S2",
+          "quote": "CodeArtifact requires users to authenticate with the service in order to publish or consume package versions. You must authenticate to the CodeArtifact service by creating an authorization token using your AWS credentials.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
+        },
+        {
+          "source_id": "S2",
+          "quote": "Packages in CodeArtifact repositories cannot be made publicly available.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#codeartifact-how-does-it-work"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "1-3 domain と KMS key",
+      "bullets": [
+        "domain の中は同じ KMS key",
+        "assets と metadata を暗号化",
+        "複数 repository に組織の policy"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  KMS@{ svc: \"AWS KMS\", label: \"KMS key<br/>一つ\" }\n  POL[\"組織の policy\"]\n  subgraph D[\"domain\"]\n    R1@{ svc: \"AWS CodeArtifact\", label: \"repository A\" }\n    R2@{ svc: \"AWS CodeArtifact\", label: \"repository B\" }\n  end\n  KMS -- \"同じ key で暗号化\" --> D\n  POL -- \"まとめて当てる\" --> D\n",
+        "alt": "CodeArtifact の domain の中の repository A と B。domain の中の assets と metadata は同じ一つの KMS key で暗号化される。組織の policy を domain の複数の repository にまとめて当てられる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コードアーティファクトには、ドメインという単位があります。ドメインの中にあるアセットとメタデータは、すべて、同じ一つのケーエムエスキーで暗号化されます。"
+        },
+        {
+          "who": "student",
+          "text": "ケーエムエスキーって、なんなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "キーマネジメントサービスに保管される、暗号の鍵です。"
+        },
+        {
+          "who": "student",
+          "text": "リポジトリごとに、別々の鍵になるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。同じドメインの中なら、リポジトリが違っても、同じ一つの鍵です。"
+        },
+        {
+          "who": "student",
+          "text": "ドメインの中は、全部同じ鍵なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。また、ドメインを使うと、組織としてのポリシーを、複数のリポジトリにまたがって当てられます。"
+        },
+        {
+          "who": "student",
+          "text": "守りの設定は、ドメインの単位でもまとめて考えられるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "All of the assets and metadata in a domain are encrypted with the same AWS KMS key (KMS key) stored in AWS Key Management Service (AWS KMS).",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-domain"
+        },
+        {
+          "source_id": "S3",
+          "quote": "Using a domain, you can apply an organizational policy across multiple repositories.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-domain"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "1-4 package origin controls",
+      "bullets": [
+        "新しい版の二つの入口",
+        "取り込みと publish を許可・拒否",
+        "dependency substitution から守る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  PUB[\"external connection<br/>公開リポジトリから\"]\n  DEV[\"社内から<br/>新しい版\"]\n  OC[\"package origin controls<br/>許可か拒否\"]\n  CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>repository\" }\n  PUB -- \"取り込み\" --> OC\n  DEV -- \"publish\" --> OC\n  OC -- \"許可した物だけ\" --> CA\n",
+        "alt": "新しいパッケージの版は、external connection からの取り込みも、社内からの publish も、package origin controls で許可か拒否かを決められてから repository に入る。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "リポジトリに新しい版が入る入口は、二つあります。外部接続からの取り込みと、社内からのパブリッシュです。"
+        },
+        {
+          "who": "student",
+          "text": "守るのは、外からの取り込みだけでいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。二つの入口のそれぞれで、新しい版を許すか止めるかを決めます。それがパッケージオリジンコントロールです。"
+        },
+        {
+          "who": "student",
+          "text": "入口は二つとも、この仕組みで許すか止めるかを決めるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。これで、依存関係の置き換えの攻撃と呼ばれる、悪意のある操作から、利用者を守ります。英語の名前は、ディペンデンシーサブスティテューションアタックです。"
+        },
+        {
+          "who": "student",
+          "text": "ドメインのケーエムエスキーで守るのと、同じ仕組みなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。鍵はドメインの中身の暗号化です。この仕組みは、新しい版を入れるのを、許すか止めるかを決めます。"
+        },
+        {
+          "who": "student",
+          "text": "鍵は暗号化、オリジンコントロールは入口、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。依存関係の置き換えの攻撃を防ぎたい、と問題文にあれば、この仕組みです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "Package origin controls are used to block or allow ingestion or publishing of new package versions, which protects users from malicious actions known as dependency substitution attacks.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-package-group"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "1-5 ECR の機能から三つ",
+      "bullets": [
+        "コンテナイメージの置き場所",
+        "片付け・脆弱性・自動の設定",
+        "片付けは第三部でくわしく"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "機能",
+          "役目"
+        ],
+        "rows": [
+          [
+            "lifecycle policies",
+            "使わない image を片付け"
+          ],
+          [
+            "image scanning",
+            "脆弱性を見つける"
+          ],
+          [
+            "repository creation templates",
+            "自動で作る repo の設定"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、コンテナイメージの置き場所、イーシーアールです。イーシーアールの機能から、この講義では三つを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "一つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "ライフサイクルポリシーです。決めた規則で、使われていないイメージを片付けます。くわしくは第三部で見ます。"
+        },
+        {
+          "who": "student",
+          "text": "二つ目のイメージスキャンも、使わないイメージを片付ける機能なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。資料で言えるのは、コンテナイメージの中のソフトウェアの脆弱性を見つけるのを助ける、という所までです。片付けの機能は、ライフサイクルポリシーです。"
+        },
+        {
+          "who": "student",
+          "text": "片付けはライフサイクルポリシー、脆弱性はイメージスキャン、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。三つ目は、リポジトリクリエーションテンプレートです。これは次のスライドで見ます。"
+        },
+        {
+          "who": "student",
+          "text": "片付け、脆弱性、自動で作るリポジトリの設定、の三つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "Lifecycle policies help with managing the lifecycle of the images in your repositories. You define rules that result in the cleaning up of unused images. Image scanning helps in identifying software vulnerabilities in your container images.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        },
+        {
+          "source_id": "S7",
+          "quote": "Repository creation templates allow you to define the settings for repositories created by Amazon ECR on your behalf",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "1-6 repository creation templates",
+      "bullets": [
+        "ECR が代わりに作る repository",
+        "template で設定を先に決める",
+        "tag immutability・暗号化など"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph W[\"ECR が repo を作る場面\"]\n    PTC[\"pull through cache\"]\n    COP[\"create on push\"]\n    REP[\"replication\"]\n  end\n  TPL[\"repository creation<br/>template<br/>tag immutability・暗号化<br/>repository policy<br/>lifecycle policy<br/>resource tag\"]\n  R@{ svc: \"Amazon ECR\", label: \"ECR<br/>自動で作られた repository\" }\n  W --> TPL\n  TPL -- \"設定を当てる\" --> R\n",
+        "alt": "pull through cache、create on push、replication という、ECR が代わりに repository を作る場面。そのとき、repository creation template で前もって決めた設定（tag immutability、暗号化、repository policy、lifecycle policy、resource tag）が、自動で作られた repository に当たる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "イーシーアールは、利用者に代わって、リポジトリを作ることがあります。その場面は、プルスルーキャッシュ、クリエイトオンプッシュ、レプリケーションの三つの動きです。"
+        },
+        {
+          "who": "student",
+          "text": "三つとも、名前が難しいのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "ここでは、自分で作らなくてもリポジトリができる場面、とまとめて押さえます。こうして作られるリポジトリの設定を、前もって決めておくのが、リポジトリクリエーションテンプレートです。"
+        },
+        {
+          "who": "student",
+          "text": "自分で作るリポジトリの設定を決める物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。イーシーアールが、利用者に代わって作るリポジトリの設定です。"
+        },
+        {
+          "who": "student",
+          "text": "代わりに作られるリポジトリの設定を、先に決めておくのだ。どんな設定なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。設定は図の真ん中の箱のとおりで、例えば、タグを変えられないようにするタグイミュータビリティや、暗号化の設定です。リポジトリポリシー、ライフサイクルポリシー、リソースタグもあります。"
+        },
+        {
+          "who": "student",
+          "text": "なぜ、前もって決めておくのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "テンプレートで決めておけば、自動で作られたリポジトリにも、守りと片付けの設定が入ります。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "Repository creation templates allow you to define the settings for repositories created by Amazon ECR on your behalf during pull through cache, create on push, or replication actions.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        },
+        {
+          "source_id": "S7",
+          "quote": "You can specify tag immutability, encryption configuration, repository policies, lifecycle policies, and resource tags for automatically created repositories.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "2-1 CodeBuild で npm を取る",
+      "bullets": [
+        "作るときに使う物を取ってくる",
+        "pre-build の段で login",
+        "build の段で npm コマンド"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "pre-build の段: login",
+            "note": "npm の取り先を CodeArtifact に"
+          },
+          {
+            "label": "build の段: npm コマンド",
+            "note": "login が成功した後に install"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "第二部、作り方と共有です。まず、ビルドのサービス、コードビルドです。ここで見るのは、ビルドで使う物を、コードアーティファクトから取ってくる形です。"
+        },
+        {
+          "who": "student",
+          "text": "どんなパッケージで考えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "エヌピーエムのパッケージです。プロジェクトのビルドスペックというファイルには、段が分かれています。"
+        },
+        {
+          "who": "student",
+          "text": "ログインは、ビルドの段でやればいいのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。資料の手順ではプレビルドの段です。そこでログインのコマンドを実行すると、エヌピーエムが、コードアーティファクトからパッケージを取ってくるように設定されます。"
+        },
+        {
+          "who": "student",
+          "text": "ビルドの段では、なにをするのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ログインがうまくいった後で、ビルドの段から、エヌピーエムのコマンドを実行して、パッケージをインストールします。ログインで取り先が決まってから、インストールする順です。"
+        },
+        {
+          "who": "student",
+          "text": "ログインはプレビルド、インストールはビルドの段なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。コードビルドでコードアーティファクトのパッケージを使うなら、ログインはプレビルドの段、と覚えます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "To use npm packages from CodeBuild, run the login command from the pre-build section of your project's buildspec.yaml to configure npm to fetch packages from CodeArtifact.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/using-npm-packages-in-codebuild.html#npm-packages-in-codebuild-login"
+        },
+        {
+          "source_id": "S6",
+          "quote": "After login has run successfully, you can run npm commands from the build section to install npm packages.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/using-npm-packages-in-codebuild.html#npm-packages-in-codebuild-login"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "2-2 Image Builder の pipeline",
+      "bullets": [
+        "image pipeline: 作る流れを自動に",
+        "recipe: 何を作るか",
+        "infrastructure: どこで作るか"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  P@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>image pipeline\" }\n  RC[\"image recipe か<br/>container recipe<br/>何を作るか\"]\n  INF[\"infrastructure configuration<br/>どこで作るか\"]\n  AMI@{ svc: \"Amazon EC2\", label: \"AMI\" }\n  ECR@{ svc: \"Amazon ECR\", label: \"container image<br/>ECR に保管<br/>ビルドの Region<br/>配布先の Region\" }\n  P -- \"結び付ける\" --> RC\n  P -- \"結び付ける\" --> INF\n  P -- \"作る\" --> AMI\n  P -- \"作る\" --> ECR\n",
+        "alt": "EC2 Image Builder の image pipeline には、何を作るかを決める image recipe か container recipe と、どこで作るかを決める infrastructure configuration を結び付ける。pipeline は AMI とコンテナイメージを作る。コンテナイメージは、ビルドの Region と配布先の Region の ECR に保管される。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、イーシーツーイメージビルダーです。イーシーツー用のイメージであるエーエムアイと、コンテナイメージを、安全に作るための仕組みです。"
+        },
+        {
+          "who": "student",
+          "text": "中心になるのは、どの仕組みなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージパイプラインです。パイプラインは、イメージを作る流れを自動にする枠組みです。パイプラインには、なにを作るかを決めるレシピを結び付けます。イメージレシピか、コンテナレシピです。"
+        },
+        {
+          "who": "student",
+          "text": "作ったコンテナイメージは、どこに置かれるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イーシーアールです。ビルドを動かしたリージョンと、配布する先のリージョンの、両方に保管されます。"
+        },
+        {
+          "who": "student",
+          "text": "どこで作るかも、レシピが決めるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。どこで作るかを決めるのは、インフラストラクチャコンフィギュレーションです。これもパイプラインに結び付けられます。"
+        },
+        {
+          "who": "student",
+          "text": "なにを作るかはレシピ、どこで作るかはインフラストラクチャコンフィギュレーション、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "An image pipeline provides an automation framework for building secure AMIs and container images on AWS. The Image Builder image pipeline is associated with an image recipe or container recipe",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder"
+        },
+        {
+          "source_id": "S9",
+          "quote": "An image pipeline can be associated with an infrastructure configuration that defines where your image is built.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder"
+        },
+        {
+          "source_id": "S11",
+          "quote": "Container images that you create with Image Builder are stored in Amazon ECR in your source Region (where your build runs), and in any Regions where you distribute the container image.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/integrate-products-services.html#integrate-products-services"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "2-3 recipe と components",
+      "bullets": [
+        "recipe が段を決める",
+        "build component: 作る前に整える",
+        "test component: 作った後に試す"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "base image を決める",
+            "note": "image recipe に書く"
+          },
+          {
+            "label": "build component",
+            "note": "作る前に instance を整える"
+          },
+          {
+            "label": "image を作る",
+            "note": "出力は AMI"
+          },
+          {
+            "label": "作った image から起動",
+            "note": "新しい instance"
+          },
+          {
+            "label": "test component",
+            "note": "起動した instance を試す"
+          }
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "レシピの中身を見ます。レシピは、イメージを作る流れの段を決めます。段は、ビルド、検証、テストの三つです。"
+        },
+        {
+          "who": "student",
+          "text": "レシピには、ほかに、どんな事が決めてあるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージレシピは、ベースイメージ、つまり元にするイメージと、そこに当てるコンポーネントを決める文書です。この組み合わせで、出力するエーエムアイの形が決まります。"
+        },
+        {
+          "who": "student",
+          "text": "段と同じで、コンポーネントも三種類あるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。コンポーネントは手順の並びを決めたもので、ビルドコンポーネントとテストコンポーネントの二つです。段の三つとは数が違います。"
+        },
+        {
+          "who": "student",
+          "text": "二つは、どう違うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ビルドコンポーネントは、イメージを作る前に、インスタンスを整えます。テストコンポーネントは、作ったイメージから起動したインスタンスを試します。コンポーネントでは、例えば、ソフトウェアを入れる、コンプライアンスを確かめる、といった事ができます。"
+        },
+        {
+          "who": "student",
+          "text": "コンポーネントは二つで、作る前に整えるのがビルド、作った後に試すのがテスト、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "image recipe or container recipe that defines the build, validation, and test phases for an image build lifecycle.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#what-is-image-builder"
+        },
+        {
+          "source_id": "S10",
+          "quote": "An Image Builder image recipe is a document that defines the base image and the components that are applied to the base image to produce the desired configuration for the output AMI image.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts"
+        },
+        {
+          "source_id": "S10",
+          "quote": "A component defines the sequence of steps required to either customize an instance prior to image creation (a build component), or to test an instance that was launched from the created image (a test component).",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html#image-builder-concepts"
+        },
+        {
+          "source_id": "S11",
+          "quote": "Components that you specify in your recipes can perform build and test actions, for example, to install software or perform compliance validation.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/integrate-products-services.html#integrate-products-services"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "2-4 Image Builder の resource を RAM で共有",
+      "bullets": [
+        "共有できるのは自分の resource",
+        "共有された物は再共有できない",
+        "KMS key も明示的に共有"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  A[\"自分のアカウント<br/>Image Builder の<br/>resource を持つ\"]\n  RAM[\"AWS RAM\"]\n  T[\"相手<br/>アカウント・組織・OU<br/>受けた物は<br/>再共有できない\"]\n  KMS@{ svc: \"AWS KMS\", label: \"KMS key<br/>暗号化した resource 用\" }\n  A -- \"resource を共有\" --> RAM\n  RAM --> T\n  KMS -- \"明示的に共有\" --> T\n",
+        "alt": "自分のアカウントが持つ Image Builder の resource を AWS RAM で相手のアカウント・組織・OU に共有する。相手は受けた物を再共有できない。暗号化した resource の KMS key は、相手に明示的に共有する。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "イメージビルダーのリソースは、エーダブリューエスラム、つまりリソースアクセスマネージャーで、ほかのアカウントや組織、オーユーに共有できます。"
+        },
+        {
+          "who": "student",
+          "text": "出力したエーエムアイを共有する話なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ここで言うのは、イメージビルダーのリソースの共有です。"
+        },
+        {
+          "who": "student",
+          "text": "共有するのは、イメージビルダーのリソースなのだ。前提はあるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。前提のうち、ここでは三つを押さえます。まず、共有するリソースは、自分のアカウントが持っている物でなければなりません。"
+        },
+        {
+          "who": "student",
+          "text": "共有してもらった物も、さらに別の相手に回せるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "いいえ。ほかから共有された物を、さらに共有することはできません。最後に、暗号化したリソースなら、それに結び付いたケーエムエスキーも、相手に、はっきり共有する必要があります。"
+        },
+        {
+          "who": "student",
+          "text": "自分の物だけ、再共有はできない、鍵もはっきり共有、の三つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S15",
+          "quote": "Your AWS account must own the Image Builder resource that you want to share. You cannot share resources that have been shared with you.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-shared-resources.html#share-ib-resources-prereqs"
+        },
+        {
+          "source_id": "S15",
+          "quote": "The AWS Key Management Service (AWS KMS) key associated with encrypted resources must be explicitly shared with the target accounts, organizations, or OUs.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-shared-resources.html#share-ib-resources-prereqs"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "3-1 版を見分ける revision",
+      "bullets": [
+        "package version revision",
+        "assets と metadata の組を示す",
+        "更新のたびに新しく作られる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph V[\"同じ package version\"]\n    R1[\"revision<br/>assets と metadata の組\"]\n    R2[\"新しい revision<br/>更新した後の組\"]\n  end\n  R1 -- \"版を更新\" --> R2\n",
+        "alt": "CodeArtifact の同じ package version の中で、assets と metadata の組を示す revision が、版を更新すると新しい revision に変わる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "第三部、版と寿命です。まず、同じ版の中身が変わった事を、どう見分けるかを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "どうやって見分けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "コードアーティファクトの、パッケージバージョンリビジョンです。パッケージの一つの版について、特定のアセットとメタデータの組を示す文字列です。"
+        },
+        {
+          "who": "student",
+          "text": "アセットとメタデータって、前にも出てきたのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "ドメインのスライドで出た、アセットとメタデータです。版が更新されるたびに、新しいリビジョンが作られます。"
+        },
+        {
+          "who": "student",
+          "text": "リビジョンが変わるのは、新しい版を出したときだけなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。同じ版のままでも、更新するとリビジョンが変わります。"
+        },
+        {
+          "who": "student",
+          "text": "同じ版でも、更新すればリビジョンが変わるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。中身が変わったかどうかは、リビジョンで見分けられます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "A package version revision is a string that identifies a specific set of assets and metadata for a package version. Each time a package version is updated, a new package version revision is created.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-package-version-revision"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "3-2 ECR の lifecycle policy",
+      "bullets": [
+        "rule で expire させる image",
+        "expire は 24 時間内が目安",
+        "priority は番号が小さいほど高い"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "中身"
+        ],
+        "rows": [
+          [
+            "policy の中身",
+            "一つ以上の rule"
+          ],
+          [
+            "rule が決める事",
+            "expire させる image"
+          ],
+          [
+            "expire まで",
+            "条件を満たして 24 時間内"
+          ],
+          [
+            "rule の priority",
+            "番号が小さいほど高い"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次に、イーシーアールのライフサイクルポリシーです。ポリシーは、一つ以上のルールでできています。"
+        },
+        {
+          "who": "student",
+          "text": "ルールは、なにを決めるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "リポジトリの中のどのイメージを、期限切れ、つまりエクスパイアにするかを決めます。"
+        },
+        {
+          "who": "student",
+          "text": "ポリシーを当てたら、いつ期限切れになるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "イメージは、条件を満たしてから二十四時間以内に、期限切れになると見込みます。"
+        },
+        {
+          "who": "student",
+          "text": "ルールが複数あったら、番号が大きいほうが優先なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ルールには優先度、プライオリティがあり、番号が小さいほど高くなります。"
+        },
+        {
+          "who": "student",
+          "text": "番号が小さいルールほど優先、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。使わなくなったコンテナイメージをイーシーアールで片付けたい、と問題文にあれば、この仕組みです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "A lifecycle policy consists of one or more rules that determine which images in a repository should be expired.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle-policy-howitworks"
+        },
+        {
+          "source_id": "S8",
+          "quote": "Once a lifecycle policy is applied to a repository, you should expect that images become expired within 24 hours after they meet the expiration criteria.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle-policy-howitworks"
+        },
+        {
+          "source_id": "S8",
+          "quote": "A lower rule priority number means higher priority.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle-policy-howitworks"
+        },
+        {
+          "source_id": "S7",
+          "quote": "You define rules that result in the cleaning up of unused images.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "3-3 Image Builder の lifecycle",
+      "bullets": [
+        "Deprecate→Disable→Delete",
+        "1 回の実行で 1 resource に 1 つ",
+        "削除の基準は AGE か COUNT"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "× ではない",
+          "○ こちら"
+        ],
+        "rows": [
+          [
+            "数える物",
+            "AMI・container",
+            "image resource"
+          ],
+          [
+            "AGE の起点",
+            "出力の作成日",
+            "ビルド完了の日"
+          ],
+          [
+            "COUNT の単位",
+            "出力の数",
+            "recipe の版ごと"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "最後に、イメージビルダーのライフサイクルのルールです。目的は、イメージを新しく保ち、インフラの費用を下げることです。"
+        },
+        {
+          "who": "student",
+          "text": "どんな費用なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "例えば、出力したエーエムアイのスナップショットの保管や、コンテナのためのイーシーアールのリポジトリの保管です。"
+        },
+        {
+          "who": "teacher",
+          "text": "ルールの種類が複数あるときの順は、非推奨のデプリケート、無効のディセーブル、削除のデリートです。"
+        },
+        {
+          "who": "student",
+          "text": "一回の実行では、どうなるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "一つのリソースに当たる処理は、一つだけです。削除の基準は、古さのエイジか、数のカウントです。ここが引っかけです。"
+        },
+        {
+          "who": "student",
+          "text": "古さは、出力したエーエムアイが作られた日から数えるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。出力したエーエムアイやコンテナではなく、イメージリソースが作られた日、つまりビルドが終わった時に決まる日です。数も、レシピの版ごとの、イメージリソースの数です。"
+        },
+        {
+          "who": "student",
+          "text": "古さも数も、出力ではなくイメージリソースで見るのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "Lifecycle rules keep your images fresh and reduce infrastructure costs, such as snapshot storage for output AMIs and Amazon ECR repository storage for containers. Deletes the image resources by age or by count.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules"
+        },
+        {
+          "source_id": "S13",
+          "quote": "When a policy has multiple rule types, Image Builder evaluates each resource in this order: Deprecate rule, Disable rule, Delete rule. Only one action applies to each resource per execution.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rule-priority"
+        },
+        {
+          "source_id": "S14",
+          "quote": "The AGE filter uses the Image Builder image resource creation date (set once the build completes), not the output AMI or container creation date. The COUNT filter counts Image Builder image resources per recipe version, not output AMIs or containers.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules-retention"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から方法を選ぶ",
+      "bullets": [
+        "問題文の条件を探す",
+        "どのサービスの話かを確かめる",
+        "前提も合わせて確かめる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法・確かめる所"
+        ],
+        "rows": [
+          [
+            "社内の部品を共有",
+            "CodeArtifact に publish"
+          ],
+          [
+            "dependency substitution",
+            "package origin controls"
+          ],
+          [
+            "不要な container image",
+            "ECR lifecycle policy"
+          ],
+          [
+            "古い・多い image resource",
+            "Image Builder の rule"
+          ],
+          [
+            "暗号化 resource を共有",
+            "RAM と KMS key 共有"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "問題文の条件から選ぶ形にまとめます。社内で作った部品を、複数のチームで共有したいなら、コードアーティファクトにパブリッシュします。"
+        },
+        {
+          "who": "student",
+          "text": "依存関係の置き換えの攻撃を防ぎたいなら？"
+        },
+        {
+          "who": "teacher",
+          "text": "パッケージオリジンコントロールです。"
+        },
+        {
+          "who": "student",
+          "text": "古いイメージを片付けるなら、イーシーアールでもイメージビルダーでも、同じ仕組みなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。サービスごとに別の仕組みです。使わなくなったコンテナイメージなら、イーシーアールのライフサイクルポリシーです。イメージビルダーのイメージリソースを、古さや数で片付けるなら、イメージビルダーのライフサイクルのルールです。どちらもライフサイクルなので、どのサービスの話かを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "コンテナイメージはイーシーアール、イメージリソースはイメージビルダーのルール、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        },
+        {
+          "who": "student",
+          "text": "暗号化したイメージビルダーのリソースを、ほかのアカウントと共有するなら？"
+        },
+        {
+          "who": "teacher",
+          "text": "エーダブリューエスラムで共有し、ケーエムエスキーも共有したかを確かめます。条件を探し、どのサービスの話かと、前提も確かめる、が要点です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "This helps you share proprietary software components between multiple applications and development teams in your organization.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/welcome.html#welcome"
+        },
+        {
+          "source_id": "S5",
+          "quote": "which protects users from malicious actions known as dependency substitution attacks.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-package-group"
+        },
+        {
+          "source_id": "S7",
+          "quote": "You define rules that result in the cleaning up of unused images.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html#ecr-features"
+        },
+        {
+          "source_id": "S12",
+          "quote": "Deletes the image resources by age or by count.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rules"
+        },
+        {
+          "source_id": "S15",
+          "quote": "The AWS Key Management Service (AWS KMS) key associated with encrypted resources must be explicitly shared with the target accounts, organizations, or OUs.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-shared-resources.html#share-ib-resources-prereqs"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "第一部 置き場所と守り",
+        "第二部 作り方と共有",
+        "第三部 版と寿命"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph P1[\"第一部 置き場所と守り\"]\n    CA@{ svc: \"AWS CodeArtifact\", label: \"CodeArtifact<br/>domain・origin controls\" }\n    ECR@{ svc: \"Amazon ECR\", label: \"ECR<br/>scanning・template\" }\n  end\n  subgraph P2[\"第二部 作り方と共有\"]\n    CB@{ svc: \"AWS CodeBuild\", label: \"CodeBuild<br/>pre-build で login\" }\n    IB@{ svc: \"EC2 Image Builder\", label: \"EC2 Image Builder<br/>recipe・resource を<br/>RAM で共有\" }\n  end\n  subgraph P3[\"第三部 版と寿命\"]\n    RV[\"CodeArtifact<br/>revision\"]\n    EL[\"ECR lifecycle policy<br/>priority・24 時間内\"]\n    IL[\"Image Builder の rule<br/>順・image resource\"]\n  end\n  CA ~~~ CB\n  ECR ~~~ IB\n  CB ~~~ RV\n  CB ~~~ EL\n  IB ~~~ IL\n",
+        "alt": "最初の地図に押さえる所を書き足した図。第一部は CodeArtifact の domain と package origin controls、ECR の image scanning と repository creation templates。第二部は CodeBuild の pre-build での login、EC2 Image Builder の recipe と RAM での共有。第三部は CodeArtifact の revision、ECR lifecycle policy の priority と 24 時間内、Image Builder の lifecycle rule の順と image resource での数え方。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。第一部、置き場所と守りでは、コードアーティファクトのドメインが、鍵とポリシーをまとめることを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "入口の守りは？"
+        },
+        {
+          "who": "teacher",
+          "text": "外部接続での取り込みと、パッケージオリジンコントロールです。イーシーアールでは、イメージスキャンと、自動で作るリポジトリのテンプレートを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "第二部は？"
+        },
+        {
+          "who": "teacher",
+          "text": "作り方と共有です。コードビルドのプレビルドの段でログインすること、イメージビルダーのレシピとコンポーネント、そしてエーダブリューエスラムでのリソースの共有を見ました。"
+        },
+        {
+          "who": "student",
+          "text": "第三部は？"
+        },
+        {
+          "who": "teacher",
+          "text": "リビジョンを見ました。イーシーアールでは、ルールの優先度と、二十四時間以内という目安を見ました。イメージビルダーでは、ルールの順番と、イメージリソースで数えることを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "イーシーアールは番号の小さいルールが優先、イメージビルダーはイメージリソースで数える、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。置き場所と守り、作り方と共有、版と寿命、の三つで振り返ります。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Using a domain, you can apply an organizational policy across multiple repositories.",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/codeartifact-concepts.html#welcome-concepts-domain"
+        },
+        {
+          "source_id": "S6",
+          "quote": "run the login command from the pre-build section of your project's buildspec.yaml",
+          "url": "https://docs.aws.amazon.com/codeartifact/latest/ug/using-npm-packages-in-codebuild.html#npm-packages-in-codebuild-login"
+        },
+        {
+          "source_id": "S8",
+          "quote": "A lower rule priority number means higher priority.",
+          "url": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html#lifecycle-policy-howitworks"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Image Builder evaluates each resource in this order: Deprecate rule, Disable rule, Delete rule.",
+          "url": "https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-lifecycle-rules.html#image-lifecycle-rule-priority"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1374 @@
+{
+  "task": "6.2",
+  "title": "セキュリティの決まりとデータ保護の自動化",
+  "notes": [
+    "根拠（sources.md）に AWS Shield・AWS Systems Manager・AWS Config の資料が無いため、試験ガイドの例にあるこの 3 つは扱わず、s01 でそう断った。",
+    "S0（hsm1.medium の新規クラスター不可）は s08 だけで触れ、hsm1.medium の型だけの話で、試験とずれるかもしれない事を台本で断った。s14 の表からは外した（C3 1 回目の指摘）。",
+    "S2 の Security Hub CSPM で意図しないネットワークの到達性を確かめる勧めは、条件の表の行の上限のため扱わなかった。",
+    "C3 への返事（1 回目。一部だけ採った提案と、採らなかった提案）",
+    "clarity s04 軽: 線のラベル「Private CA 署名ならエクスポート」は 15 字を超えるので、線は「Private CA 署名なら」のままにし、箱を「エクスポートして 社内の PKI のどこでも」にした。",
+    "clarity s11 中・consistency s11 中: GuardDuty が何を見つけるサービスかは根拠に無いので書かず、台本で「組織で広げる仕方だけを見る」と断った。Control Tower は S17 の「統制し、準拠を見張る」を足した。",
+    "clarity s03 中: stateful rule groups の行は表に残し、台本でステートフルとルールグループを一言で説明した（どちらも根拠に定義が無いので「大まかに言うと」と弱めた）。",
+    "clarity s09 中・consistency s09 中: 識別子の行は残し、自動の機密データ検出の欄を「この講義では扱わない」にした。表で当てはまらない欄は空にし、「—」は使わないことにそろえた。",
+    "consistency s10 軽: ホームリージョンは「別の機能」の枠に分け、宣言型ポリシーの流れからつながる矢印をやめた。",
+    "consistency s08 軽: CloudHSM の「HSM を自分で運用する時」は S8 の勧めの裏なので、台本で「逆に言えば」と根拠の向きを添えた。",
+    "clarity s01 中: 「根拠」という語はやめ、「この講義の資料には無いので扱わない。試験に出ないという意味ではないので別に学ぶ」と言い換えた。",
+    "掛け合いにした時の注意: 事実は先生の行だけに置いた。生徒の誤りは、例を全部と思う（どの ACM の証明書もエクスポートできる・試験ガイドのサービスを全部扱う）、条件付きを一般と思う（Amazon 発行なら常に自動更新・委任された管理者がどのリージョンでも管理・security groups と network ACLs を常に両方・鍵を強く管理したいなら CloudHSM）、似た名前を混ぜる（Control Tower の detective control と Amazon Detective・宣言型ポリシーとクロスリージョン集約・自動の検出とジョブ・Network Firewall と AWS WAF）を使い、次の先生の行で正して、生徒の言い直しと先生の受けを置いた。根拠に無い所（WAF が VPC の境界を見るか、ACM の他の証明書のエクスポート、管理者のリージョン外、detective control で根本原因を調べられるか、CloudHSM と KMS の管理の度合い）は「そうとは言えません」と正した。字数の上限のため、s05 の英語名 managed renewal と s09 の data identifier の読みは台本から外した（画面と refs は元のまま）。",
+    "掛け合いの検証への返事（1 回目）: 中は全部直した（s02 ルートテーブルを問いで分けまとめに入れた、s04 最後の生徒の行を消し先生が元の向きでまとめた、s08 告知を前に移し要点で締めた、s09 判断を先生の行に移し識別子を S15 の範囲で説明した、s10 長い行を分け中央設定を「前に勧められていた組織全体で管理するやり方」と説明した、s11 Amazon Detective を正した直後に言い生徒の言い直しを入れ三つのアカウントの役を一言ずつ言った）。s10 のコントロールは根拠に Security Hub CSPM の control の定義が無いので、説明を足さず台本から語を外した（clarity の提案どおり）。s11 のリージョンの取り違えは、行数の上限のため生徒の問いと確かめに替えた。軽は s07・s10 のオーガニゼーションズ・s08 と s14 の「管理の度合いではなく」・s04 の順番・s12・s15 の「その」・s16 を直した。s03・s06 の行の分け方、s15 の問いを二つに分ける事、s10 の図の位置を指す事、全体の受けの言い方の単調さは、上限六千字の中で余地が無いため採らなかった（s10 の図の位置は台本から確かめられないため）。",
+    "生徒の人物を変えた書き直し（利用者の希望）: ずんだもんを、AWS を使って 1 年ほど働いたエンジニアの受験者にした。基本の言葉の意味を聞く問い（ランディングゾーン、メンバーアカウント、ロールやリージョンの言い換え）は、使い分け・手間・問題文での見分け方の問いに替え、先生の行の基本の言葉の説明は外した。生徒の誤りは、アカウント自身のエスシーピーは経路と別扱い（s08）を足し、エスシーピーで境界の代わりになる（s10）は根拠に打ち消しが無いので「そうとは言えません」で正した。事実と条件は前の版の範囲から変えていない。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "4 つのまとまりを番号の順に",
+        "Shield・Systems Manager・Config は別に学ぶ",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 組織全体\"]\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>組織で有効に\" }\n    OT[\"Control Tower<br/>GuardDuty<br/>Detective\"]\n  end\n  subgraph G3[\"3 機密データ\"]\n    MC@{ svc: \"Amazon Macie\", label: \"Amazon Macie<br/>見つけ方は 2 つ\" }\n  end\n  subgraph G2[\"2 証明書と鍵\"]\n    ACM[\"ACM<br/>証明書\"]\n    KMS@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>CloudHSM と<br/>S3 Bucket Keys も\" }\n  end\n  subgraph G1[\"1 VPC の守り\"]\n    SG[\"security groups<br/>network ACLs<br/>Network Firewall\"]\n    WAF@{ svc: \"AWS WAF\", label: \"AWS WAF<br/>Web の要求\" }\n  end\n",
+        "alt": "講義の地図。4 つのまとまりを番号を付けて並べる。1 VPC の守りは security groups、network ACLs、Network Firewall と、Web の要求を見る AWS WAF。2 証明書と鍵は ACM と AWS KMS で、CloudHSM と S3 Bucket Keys も扱う。3 機密データは Amazon Macie の 2 つの見つけ方。4 組織全体は Security Hub CSPM を組織で有効にする方法と、Control Tower、GuardDuty、Detective。並びは講義の順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "この講義では、たくさんのアカウントを使う環境で、アカウントを作り、迎え入れ、守る仕組みを学びます。部は四つです。"
+        },
+        {
+          "who": "teacher",
+          "text": "一つ目は土台で、コントロールタワーと、ランディングゾーン、アカウントファクトリーを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "二つ目は？"
+        },
+        {
+          "who": "teacher",
+          "text": "アカウントを作る方法と集める方法です。サービスカタログのエーピーアイ、スタックセットの自動デプロイ、招待と組織の間の移動を扱います。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目からが、守る側なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。三つ目は権限です。サービスコントロールポリシー、ロールの引き受け、権限の境界を見ます。"
+        },
+        {
+          "who": "student",
+          "text": "四つ目は、その守りを多くのアカウントにまとめてかける道具？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。コンフィグ、コントロールタワーのコントロール、セキュリティのサービス三つを見ます。"
+        },
+        {
+          "who": "student",
+          "text": "作る、集めるの後に、権限と統制で守る流れなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。最後に、条件から方法を選ぶ表を二枚置きます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "Use security groups as the primary mechanism for controlling network access to your VPCs.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S6",
+          "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+        },
+        {
+          "source_id": "S12",
+          "quote": "Amazon Macie is a data security service that discovers sensitive data by using machine learning and pattern matching",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#what-is-macie"
+        },
+        {
+          "source_id": "S16",
+          "quote": "With an AWS Security Hub CSPM declarative policy, you can centrally enable and configure Security Hub CSPM across the accounts in your organization.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "VPC の守り 1: security groups と network ACLs",
+      "bullets": [
+        "主な仕組みは security groups",
+        "network ACLs はサブネット単位",
+        "route tables は最小限の経路"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  SG[\"security groups<br/>主な仕組み\"]\n  NACL[\"network ACLs<br/>必要な時に足す層\"]\n  RT[\"route tables<br/>最小限の経路\"]\n  subgraph VPC[\"VPC\"]\n    subgraph SUB[\"サブネット\"]\n      I@{ svc: \"Amazon EC2\", label: \"インスタンス\" }\n    end\n  end\n  SG -- \"インスタンスを守る\" --> I\n  NACL -- \"許可と拒否\" --> SUB\n  RT -- \"経路を決める\" --> SUB\n",
+        "alt": "VPC の中のサブネットにインスタンスがある。security groups は主な仕組みで、インスタンスを守る。network ACLs は必要な時に足す層で、サブネットの単位で通信を許可したり拒否したりする。route tables はサブネットの経路を決め、最小限の経路にする。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "コントロールタワーは、複数のアカウントの環境を、決まったベストプラクティスに沿って用意し、統制するサービスです。ほかのサービスを組み合わせて動きます。"
+        },
+        {
+          "who": "teacher",
+          "text": "例として、オーガニゼーションズ、サービスカタログ、アイアムアイデンティティセンターが挙がっています。"
+        },
+        {
+          "who": "student",
+          "text": "組み合わせる中で、オーガニゼーションズはどんな働きを持っているの？"
+        },
+        {
+          "who": "teacher",
+          "text": "働きには、アカウントを一か所で統制すること、プログラムから呼ぶ窓口のエーピーアイでアカウントを作ること、サービスコントロールポリシーがあります。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、組み合わせる相手は、その三つのサービスで全部？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。三つは例です。これらを組み合わせて、一時間かからずにランディングゾーンを作ります。"
+        },
+        {
+          "who": "student",
+          "text": "三つは例なのだ。ランディングゾーンは、そうして出来上がる環境の呼び名？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。セキュリティとコンプライアンスのベストプラクティスに基づいた、複数のアカウントの環境です。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "A network access control list (ACL) allows or denies specific inbound or outbound traffic at the subnet level.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#vpc-network-acls"
+        },
+        {
+          "source_id": "S2",
+          "quote": "When necessary, use network ACLs to provide stateless, coarse-grain network control.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S2",
+          "quote": "Configure subnet route tables with the minimum network routes to support your connectivity requirements.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S3",
+          "quote": "You can secure your instances using only security groups. However, you can add network ACLs as an additional layer of defense.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "VPC の守り 2: Network Firewall と AWS WAF",
+      "bullets": [
+        "Network Firewall: VPC の境界",
+        "AWS WAF: HTTP(S) の要求",
+        "組み合わせて多層防御"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "Network Firewall",
+          "AWS WAF"
+        ],
+        "rows": [
+          [
+            "見る所",
+            "VPC の境界の通信",
+            "HTTP(S) の要求"
+          ],
+          [
+            "種類",
+            "stateful・マネージド",
+            "Web アプリ向け"
+          ],
+          [
+            "できる事",
+            "侵入の検知と防御",
+            "見張りとアクセス制御"
+          ],
+          [
+            "stateful rule groups",
+            "security groups に似る",
+            ""
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ランディングゾーンは会社全体の入れ物で、組織単位、アカウント、ユーザーなど、決まりに従わせたい物をまとめて持ちます。"
+        },
+        {
+          "who": "student",
+          "text": "組織単位は、いわゆるオーユー？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。いくつかのアカウントをまとめる単位で、中にアカウントが入ります。"
+        },
+        {
+          "who": "student",
+          "text": "アカウントファクトリーは、作ったアカウントをまとめて入れておく所なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。まとめるのは組織単位です。アカウントファクトリーは、アカウントを作るための、設定を変えられる型です。前もって承認した設定で新しいアカウントを作り、作り方をそろえます。"
+        },
+        {
+          "who": "student",
+          "text": "まとめるのは組織単位、作り方をそろえる型がアカウントファクトリー、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、新しいアカウントを標準の形で作りたい、とあれば、この型を思い出してください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S4",
+          "quote": "Network Firewall is a stateful, managed, network firewall and intrusion detection and prevention service.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/network-firewall.html#network-firewall"
+        },
+        {
+          "source_id": "S4",
+          "quote": "Stateful rule groups are similar in behavior and use to Amazon VPC security groups.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/network-firewall.html#network-firewall"
+        },
+        {
+          "source_id": "S2",
+          "quote": "Use AWS Network Firewall to protect the subnets in your VPC from common network threats.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS WAF is a web application firewall that lets you monitor the HTTP(S) requests that are forwarded to your protected web application resources.",
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html#waf-chapter"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "ACM 1: 証明書を扱う",
+      "bullets": [
+        "作成・保存・更新を引き受ける",
+        "公開とプライベートの証明書",
+        "Private CA 署名は社内 PKI へ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ACM[\"ACM<br/>作成・保存・更新\"]\n  PUB[\"公開の証明書<br/>SSL/TLS\"]\n  PRI[\"プライベートの証明書<br/>SSL/TLS\"]\n  PKI[\"エクスポートして<br/>社内の PKI のどこでも\"]\n  ACM -- \"扱う\" --> PUB\n  ACM -- \"扱う\" --> PRI\n  PRI -- \"Private CA 署名なら\" --> PKI\n",
+        "alt": "ACM は証明書の作成、保存、更新を扱う。扱うのは公開とプライベートの SSL/TLS の証明書。AWS Private CA が署名した証明書なら、エクスポートして社内の PKI のどこでも使える。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二つ目の部です。まず、標準の形でのアカウントの用意を、プログラムで自動にする道です。"
+        },
+        {
+          "who": "teacher",
+          "text": "コントロールタワーはサービスカタログなどと統合されていて、サービスカタログのエーピーアイで、メンバーアカウントを作って用意できます。"
+        },
+        {
+          "who": "student",
+          "text": "手で一つずつ作る手間を、なくす道なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。同じエーピーアイで、すでに組織にいるメンバーアカウントを、コントロールタワーに登録することもできます。"
+        },
+        {
+          "who": "student",
+          "text": "登録すると、そのアカウントが組織に入るってこと？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。そのアカウントは、もう組織にいます。登録で入る先は、組織ではなくコントロールタワーです。"
+        },
+        {
+          "who": "student",
+          "text": "もう組織にいるアカウントを、コントロールタワーに登録する、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、アカウントの用意をプログラムで自動にしたい、とあれば、サービスカタログのエーピーアイを確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "新しく作るのにも、組織にいるアカウントの登録にも使える道なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S6",
+          "quote": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing public and private SSL/TLS X.509 certificates and keys that protect your AWS websites and applications.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can also export ACM certificates signed by AWS Private CA for use anywhere in your internal PKI.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "ACM 2: 管理された更新",
+      "bullets": [
+        "対象は Amazon が発行した証明書",
+        "DNS 検証なら自動で更新",
+        "インポートした証明書は対象外"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "証明書",
+          "管理された更新"
+        ],
+        "rows": [
+          [
+            "Amazon 発行・DNS 検証",
+            "自動で更新"
+          ],
+          [
+            "Amazon 発行・DNS 検証でない",
+            "期限前にメールで知らせる"
+          ],
+          [
+            "インポートした証明書",
+            "対象外"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、中身をそろえる話です。クラウドフォーメーションのスタックセットは、オーガニゼーションズの組織と組み合わせて、組織のアカウントへデプロイできます。"
+        },
+        {
+          "who": "student",
+          "text": "アカウントが増えるたびに、手でデプロイし直すのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "自動デプロイという設定を有効にすると、アカウントの出入りのたびに、デプロイが自動で動きます。加わったアカウントへのデプロイを、人が手で始める必要はありません。"
+        },
+        {
+          "who": "student",
+          "text": "動くきっかけは、新しく加わった時だけ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。きっかけは三つです。対象の組織や組織単位にアカウントが加わった時、そこから外れた時、対象の組織単位の間で移された時です。"
+        },
+        {
+          "who": "student",
+          "text": "加わる、外れる、対象の組織単位の間で移る、の三つなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        },
+        {
+          "who": "student",
+          "text": "問題文だと、どんな書き方ならこれを選ぶ？"
+        },
+        {
+          "who": "teacher",
+          "text": "組織に加わるアカウントにも自動で同じ物を入れたい、とあれば、スタックセットの自動デプロイが有効かを確かめます。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "ACM provides managed renewal for your Amazon-issued SSL/TLS certificates. This means that ACM will either renew your certificates automatically (if you are using DNS validation), or it will send you email notices when expiration is approaching.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+        },
+        {
+          "source_id": "S7",
+          "quote": "NOT ELIGIBLE if imported.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "AWS KMS: 鍵の選び方とローテーション",
+      "bullets": [
+        "管理が大事 → customer managed keys",
+        "手軽さが一番 → AWS owned keys",
+        "自動ローテーションは有効にすると既定で毎年"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "項目",
+          "ポイント"
+        ],
+        "rows": [
+          [
+            "customer managed keys",
+            "寿命と使い方を全て管理"
+          ],
+          [
+            "AWS owned keys",
+            "手軽さが一番大事な時"
+          ],
+          [
+            "自動ローテーション",
+            "有効にすると既定で毎年"
+          ],
+          [
+            "ローテーションの影響",
+            "守っているデータは変わらない"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここからは集める方法です。組織を作り、管理アカウントのメールアドレスが自分の物だと確かめると、既存のアカウントを組織に招待できます。"
+        },
+        {
+          "who": "student",
+          "text": "さっきの登録とは、相手のアカウントがどこにいるかが違うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。登録は、すでに組織にいるアカウントの話でした。招待は、組織の外や別の組織にあるアカウントを、組織に迎え入れる話です。招待を送れるのは、組織の管理アカウントからだけです。"
+        },
+        {
+          "who": "student",
+          "text": "受ける側が招待を二つ受けたら、両方の組織に入れるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "入れません。一つのアカウントが入れる組織は一つだけで、招待をいくつ受け取っても、受け入れられるのは一つです。"
+        },
+        {
+          "who": "student",
+          "text": "じゃあ、別の組織にいるアカウントを移す時や、合併で集める時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "アカウントは、いつでも移せます。移す時は、新しい組織の管理アカウントから招待を送り、そのアカウントが受け入れます。合併や買収で、いくつもの組織のアカウントを一つにまとめる場合も、同じ形です。"
+        },
+        {
+          "who": "student",
+          "text": "集める時は、新しい組織の管理アカウントから招待して、移る側が受け入れる、なのだ。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "Customer managed keys are recommended for customers who want full control over the lifecycle and usage of their keys.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+        },
+        {
+          "source_id": "S9",
+          "quote": "Use customer managed keys when control is important, but use AWS owned keys when convenience is most important.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+        },
+        {
+          "source_id": "S10",
+          "quote": "By default, when you enable automatic key rotation for a KMS key, AWS KMS generates new cryptographic material for the KMS key every year.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Key rotation has no effect on the data that the KMS key protects.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "S3 Bucket Keys: SSE-KMS の費用を減らす",
+      "bullets": [
+        "目的: SSE-KMS の費用を減らす",
+        "短い寿命のバケット単位の鍵",
+        "一時的に S3 の中に置く"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  K@{ svc: \"AWS KMS\", label: \"AWS KMS\" }\n  BK[\"バケット単位の鍵<br/>短い寿命\"]\n  B@{ svc: \"Amazon S3\", label: \"S3 のバケット<br/>S3 Bucket Key を使う<br/>SSE-KMS の費用を<br/>減らすのが目的\" }\n  K -- \"元にして作る\" --> BK\n  BK -- \"一時的に置く\" --> B\n",
+        "alt": "目的は SSE-KMS の費用を減らす事。S3 のバケットで SSE-KMS に S3 Bucket Key を使うよう設定すると、AWS は AWS KMS から短い寿命のバケット単位の鍵を作り、その鍵を一時的に S3 の中に置く。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "三つ目の部、権限です。サービスコントロールポリシー、略してエスシーピーは、決して権限を与えません。"
+        },
+        {
+          "who": "student",
+          "text": "えっ、エスシーピーに許可を書いておけば、その操作が通るようになるんじゃないのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。エスシーピーは、組織の中のアイアムユーザーとアイアムロールが使える権限の、上限を決めるアクセスの制御です。"
+        },
+        {
+          "who": "student",
+          "text": "上限を決めるだけなら、操作を通すには、別に許可が要るってこと？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。たとえるなら、エスシーピーは天井です。天井の下で、別に許可された事だけができます。天井を高くしても、それだけでなにかができるようにはなりません。"
+        },
+        {
+          "who": "student",
+          "text": "試験だと、どこで取り違えさせてくるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "問題文で、エスシーピーを付ければ操作できるようになる、と読める選択肢は、この点と合いません。"
+        },
+        {
+          "who": "student",
+          "text": "エスシーピーは天井で、それだけでは権限を与えない、と。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "When you configure your bucket to use an S3 Bucket Key for SSE-KMS, AWS generates a short-lived bucket-level key from AWS KMS, then temporarily keeps it in S3.",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "AWS CloudHSM と AWS KMS",
+      "bullets": [
+        "HSM: 暗号の処理と鍵の保管",
+        "HSM を運用しない → AWS KMS",
+        "hsm1.medium の型は新規クラスター不可"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "AWS CloudHSM",
+          "AWS KMS"
+        ],
+        "rows": [
+          [
+            "選ぶ時",
+            "HSM を自分で運用する時",
+            "HSM を運用したくない"
+          ],
+          [
+            "形",
+            "HSM のクラスター",
+            "マネージドのサービス"
+          ],
+          [
+            "注意",
+            "hsm1.medium の型だけ新規不可",
+            ""
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "エスシーピーの拒否、つまりディナイの効き方です。組織は、一番上のルートから組織単位を通って、アカウントへつながります。"
+        },
+        {
+          "who": "teacher",
+          "text": "ルートからあるアカウントまでの、まっすぐな経路の上で、どこか一つのエスシーピーが拒否していれば、そのアカウントでは拒否されます。"
+        },
+        {
+          "who": "student",
+          "text": "アカウントに直接付けたエスシーピーは、経路とは別扱いなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。経路には、対象のアカウント自身も入ります。言い換えると、拒否のポリシーをどの段に付けても、その下の全ての組織単位とメンバーアカウントで評価されます。"
+        },
+        {
+          "who": "student",
+          "text": "アカウント自身も経路に入るのだ。組織単位の全部のアカウントで止めたい時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。ある組織単位の全てのアカウントで、ある操作を禁じたい、とあれば、その組織単位に拒否のエスシーピーを付けます。"
+        },
+        {
+          "who": "student",
+          "text": "拒否は、付けた段より下の全部に届く、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S8",
+          "quote": "A hardware security module (HSM) is a computing device that processes cryptographic operations and provides secure storage for cryptographic keys.",
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+        },
+        {
+          "source_id": "S8",
+          "quote": "If you want a managed service for creating and controlling your encryption keys but you don't want or need to operate your own HSMs, consider using AWS Key Management Service.",
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+        },
+        {
+          "source_id": "S0",
+          "quote": "The hsm1.medium HSM type is reaching end of support so new clusters cannot be created with this type.",
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/clusters.html#clusters"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "Amazon Macie: 機密データを見つける",
+      "bullets": [
+        "機械学習とパターンの照合",
+        "自動の検出: 広い見通し",
+        "ジョブ: 深く絞った分析"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "観点",
+          "自動の機密データ検出",
+          "機密データ検出ジョブ"
+        ],
+        "rows": [
+          [
+            "違いの軸",
+            "広く見通す",
+            "深く絞って分析"
+          ],
+          [
+            "見る所",
+            "S3 のどこにありそうか",
+            "S3 の汎用バケット"
+          ],
+          [
+            "識別子",
+            "この講義では扱わない",
+            "マネージド・カスタム"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、ロールの引き受けです。メンバーアカウントを作ると、その中にアイアムロールが自動で作られます。作り方は、オーガニゼーションズのコンソール、コマンドラインの道具、アカウントを作るエーピーアイのどれかです。"
+        },
+        {
+          "who": "student",
+          "text": "自動で作られるロールの名前と、権限の強さは？"
+        },
+        {
+          "who": "teacher",
+          "text": "既定の名前は、オーガニゼーションアカウントアクセスロールで、そのアカウントの全ての管理者権限を持ちます。"
+        },
+        {
+          "who": "student",
+          "text": "第三者のアカウントへのアクセスでは？"
+        },
+        {
+          "who": "teacher",
+          "text": "引き受ける側は、エクスターナルアイディーで、どんな状況で操作しているかを示します。"
+        },
+        {
+          "who": "student",
+          "text": "エクスターナルアイディーは、パスワードのように隠す物なのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。秘密としては扱われません。ただし、ロールを引き受けるエーピーアイ、画面のアシュームロールでは、毎回これを指定します。"
+        },
+        {
+          "who": "student",
+          "text": "秘密ではないけど、毎回指定する、なのだ。問題文では、二つをどう見分ける？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。作ったメンバーアカウントを管理者として操作したい、とあれば、このロールです。第三者のアカウントへのアクセスでロールを引き受ける、とあれば、エクスターナルアイディーです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S12",
+          "quote": "Amazon Macie is a data security service that discovers sensitive data by using machine learning and pattern matching, provides visibility into data security risks, and enables automated protection against those risks.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#what-is-macie"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+        },
+        {
+          "source_id": "S14",
+          "quote": "You can configure a job to use managed data identifiers that Macie provides, custom data identifiers that you define, or a combination of the two.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html#discovery-jobs"
+        },
+        {
+          "source_id": "S15",
+          "quote": "Each managed data identifier is designed to detect a specific type of sensitive data—for example, AWS secret access keys, credit card numbers, or passport numbers for a particular country or region.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/managed-data-identifiers.html#managed-data-identifiers"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "Security Hub CSPM: 組織全体で有効に",
+      "bullets": [
+        "宣言型ポリシーで一か所から",
+        "対象: ルート・OU・アカウント",
+        "集約は別の機能: ホームリージョンへ"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ORG@{ svc: \"AWS Organizations\", label: \"Organizations の<br/>宣言型ポリシー\" }\n  T[\"対象<br/>ルート・OU<br/>アカウント\"]\n  SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>有効か無効か\" }\n  subgraph AGG[\"別の機能\"]\n    HOME[\"クロスリージョン集約<br/>複数のリージョンの<br/>結果を集める先は<br/>ホームリージョン\"]\n  end\n  ORG -- \"対象を選ぶ\" --> T\n  T -- \"各リージョンで決める\" --> SH\n",
+        "alt": "AWS Organizations の宣言型ポリシーで、対象としてルート、OU、アカウントを選び、各リージョンで Security Hub CSPM を有効にするか無効にするかを決める。別の機能のクロスリージョン集約で、複数のリージョンの検出結果などを一つのホームリージョンにまとめる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "権限の最後は、パーミッションバウンダリー、日本語で権限の境界です。権限を管理する作業を、自分のアカウントのアイアムユーザーに任せられます。"
+        },
+        {
+          "who": "student",
+          "text": "任された人は、どこまでできるの？"
+        },
+        {
+          "who": "teacher",
+          "text": "任された人は、決められた権限の境界の中でだけ、代わりに作業します。例は、ユーザーを作る作業です。"
+        },
+        {
+          "who": "student",
+          "text": "上限を決めるなら、エスシーピーでも代わりになりそう？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうとは言えません。エスシーピーは、組織の中の上限を決める、組織のポリシーです。権限の境界は、自分のアカウントの中で、作業を任せる時の範囲です。"
+        },
+        {
+          "who": "student",
+          "text": "組織の上限ならエスシーピー、自分のアカウントで作業を任せる範囲なら権限の境界、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、開発者に権限の作業を任せたいが、決めた範囲は超えさせたくない、とあれば、権限の境界を思い出します。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S16",
+          "quote": "Security Hub CSPM declarative policies replace central configuration as the recommended way to manage Security Hub CSPM across an organization.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+        },
+        {
+          "source_id": "S16",
+          "quote": "You use an AWS Organizations declarative policy to specify where Security Hub CSPM is enabled or disabled in each AWS Region.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+        },
+        {
+          "source_id": "S16",
+          "quote": "You can target the organization root, organizational units (OUs), or individual accounts.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+        },
+        {
+          "source_id": "S18",
+          "quote": "By using cross-Region aggregation in AWS Security Hub CSPM, you can aggregate findings, finding updates, insights, control compliance statuses, and security scores from multiple AWS Regions to a single home Region.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "Control Tower・GuardDuty・Detective",
+      "bullets": [
+        "control は OU 全体に効く",
+        "GuardDuty は委任された管理者",
+        "根本原因を調べる → Detective"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G1[\"Control Tower\"]\n    CT@{ svc: \"AWS Control Tower\", label: \"Control Tower の<br/>control\" }\n    OU[\"OU<br/>中の全アカウント\"]\n  end\n  subgraph G2[\"GuardDuty\"]\n    MG[\"管理アカウント\"]\n    GD[\"委任された管理者の<br/>アカウント\"]\n    MB[\"メンバーアカウント<br/>そのリージョンで\"]\n  end\n  subgraph G3[\"Detective\"]\n    DT@{ svc: \"Amazon Detective\", label: \"Detective<br/>根本原因を調べる\" }\n  end\n  CT -- \"OU 全体に\" --> OU\n  MG -- \"指名する\" --> GD\n  GD -- \"既定で有効にして管理\" --> MB\n  G1 ~~~ G2\n  G2 ~~~ G3\n",
+        "alt": "3 つの別々のまとまり。Control Tower の control は OU の全体に付き、中の全てのアカウントが影響を受ける。GuardDuty では、管理アカウントが委任された管理者を指名し、その管理者が既定で、そのリージョンの組織の全てのメンバーアカウントで GuardDuty を有効にし管理できる。Detective は検出結果や怪しい動きの根本原因を調べる。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "四つ目の部、統制の道具です。コンフィグのアグリゲーターは、複数のアカウントとリージョンをまたいで、コンプライアンスのデータを集めます。"
+        },
+        {
+          "who": "student",
+          "text": "集めた所から、元のアカウントの設定もまとめて直せるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。元のアカウントから集める側のアカウントへデータを写し、読むだけの一覧を作ります。元のアカウントを変える操作はできません。"
+        },
+        {
+          "who": "student",
+          "text": "アグリゲーターは読むだけ、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。問題文に、全てのアカウントのコンプライアンスを一か所で見たい、とあれば、アグリゲーターです。"
+        },
+        {
+          "who": "teacher",
+          "text": "次は配布です。コンフィグのルールを組織に配ると、新しく加わったアカウントにも配られ、外れたアカウントからは取り除かれます。"
+        },
+        {
+          "who": "student",
+          "text": "配る役を別のアカウントに任せる時の注意は？"
+        },
+        {
+          "who": "teacher",
+          "text": "管理アカウントから、委任された管理者、つまり管理を任された別のアカウントを使って配る場合、コンフィグはサービスリンクロールというロールを自動では作りません。この点だけ覚えてください。"
+        },
+        {
+          "who": "student",
+          "text": "一か所で見るならアグリゲーター、委任で配る時はロールが自動で作られない、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "AWS Control Tower implements preventive, detective, and proactive controls that help you govern your resources and monitor compliance across groups of AWS accounts.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S17",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S19",
+          "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+        },
+        {
+          "source_id": "S19",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+        },
+        {
+          "source_id": "S20",
+          "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity.",
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html#detective-investigation-about"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "条件から選ぶ 1: VPC の守り",
+      "bullets": [
+        "主な仕組み → security groups",
+        "層を足す → network ACLs",
+        "Web の要求 → AWS WAF"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "決め手"
+        ],
+        "rows": [
+          [
+            "通信を絞る主な仕組み",
+            "security groups",
+            "インスタンスを守る"
+          ],
+          [
+            "サブネット単位で層を足す",
+            "network ACLs",
+            "ステートレスで粗い"
+          ],
+          [
+            "経路を必要な分だけに",
+            "route tables",
+            "最小限の経路"
+          ],
+          [
+            "VPC の境界で脅威を防ぐ",
+            "Network Firewall",
+            "stateful・検知と防御"
+          ],
+          [
+            "Web の要求を見て制御",
+            "AWS WAF",
+            "HTTP(S) の要求"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "次は、コントロールタワーのコントロールという決まりです。このコントロールは組織単位の全体に付き、その中の全てのアカウントが影響を受けます。"
+        },
+        {
+          "who": "student",
+          "text": "一部のアカウントにだけかけたい時は、アカウントを選んで付けるのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。コントロールは、組織単位の全体に付きます。"
+        },
+        {
+          "who": "student",
+          "text": "付けるのは組織単位の全体、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。種類は三つあり、名前はプリベンティブ、ディテクティブ、プロアクティブです。名前だけ覚えれば十分です。これらで、まとまりの中のリソースを統制し、コンプライアンスを見張ります。"
+        },
+        {
+          "who": "student",
+          "text": "ある操作を禁じたいだけでも、これを使うのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "ある操作を禁じる、つまり権限の上限を決めたいだけなら、前のエスシーピーです。コントロールタワーの環境で、統制とコンプライアンスの見張りを組織単位にまとめてかけたいなら、このコントロールです。"
+        },
+        {
+          "who": "student",
+          "text": "禁じるだけならエスシーピー、組織単位にまとめて統制と見張りならコントロール、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "Use security groups as the primary mechanism for controlling network access to your VPCs.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S2",
+          "quote": "When necessary, use network ACLs to provide stateless, coarse-grain network control.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S2",
+          "quote": "Use AWS Network Firewall to protect the subnets in your VPC from common network threats.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#control-network-traffic"
+        },
+        {
+          "source_id": "S5",
+          "quote": "AWS WAF lets you control access to your content.",
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html#waf-chapter"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 2: 証明書と AWS KMS の鍵",
+      "bullets": [
+        "自動の更新 → DNS 検証",
+        "管理が大事 → customer managed keys",
+        "素材を新しく → 自動ローテーション"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "決め手"
+        ],
+        "rows": [
+          [
+            "証明書の更新を自動に",
+            "Amazon 発行で DNS 検証",
+            "インポートした物は対象外"
+          ],
+          [
+            "社内の PKI で使う",
+            "Private CA の署名",
+            "エクスポートできる"
+          ],
+          [
+            "KMS で寿命と使い方を管理",
+            "customer managed keys",
+            "管理が大事な時"
+          ],
+          [
+            "手軽さが一番大事",
+            "AWS owned keys",
+            ""
+          ],
+          [
+            "鍵の素材を定期的に新しく",
+            "自動ローテーション",
+            "有効なら既定で毎年"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "最後に、セキュリティのサービス三つです。一つ目はセキュリティハブシーエスピーエムで、シーエスピーエムまでが名前です。複数のアカウントを管理するやり方が二つあります。中央設定と、宣言型ポリシーです。"
+        },
+        {
+          "who": "student",
+          "text": "二つを一緒に使えば、いいとこ取りなのだ？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。二つは同じ組織で同時には使えません。中央設定は、このサービスを使うアカウントが複数ある環境で役に立ちますが、初めて組むなら宣言型ポリシーが勧められています。"
+        },
+        {
+          "who": "student",
+          "text": "同じ組織では片方だけ、初めて組むなら宣言型、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。二つ目はアマゾンディテクティブで、リソースのログを自動で集め、怪しい動きなどの根本の原因を素早く見つけるのを助けます。三つ目はガードデューティです。"
+        },
+        {
+          "who": "student",
+          "text": "ガードデューティは、委任された管理者を一つ決めておけば、全部のリージョンに効く？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。ガードデューティはリージョンごとのサービスで、委任された管理者アカウントもリージョンごとです。"
+        },
+        {
+          "who": "student",
+          "text": "委任された管理者も、リージョンごとなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "NOT ELIGIBLE if imported.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+        },
+        {
+          "source_id": "S6",
+          "quote": "You can also export ACM certificates signed by AWS Private CA for use anywhere in your internal PKI.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html#acm-overview"
+        },
+        {
+          "source_id": "S9",
+          "quote": "Use customer managed keys when control is important, but use AWS owned keys when convenience is most important.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#concepts"
+        },
+        {
+          "source_id": "S10",
+          "quote": "By default, when you enable automatic key rotation for a KMS key, AWS KMS generates new cryptographic material for the KMS key every year.",
+          "url": "https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html#rotate-keys"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 3: S3 の暗号化・HSM・Macie",
+      "bullets": [
+        "費用を減らす → S3 Bucket Keys",
+        "HSM の運用で KMS と CloudHSM",
+        "広く → 自動の検出、深く → ジョブ"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "決め手"
+        ],
+        "rows": [
+          [
+            "SSE-KMS の費用を減らす",
+            "S3 Bucket Keys",
+            "バケット単位の鍵"
+          ],
+          [
+            "HSM を運用せず鍵を管理",
+            "AWS KMS",
+            "マネージドのサービス"
+          ],
+          [
+            "HSM そのものを自分で運用",
+            "AWS CloudHSM",
+            "HSM の運用で分ける"
+          ],
+          [
+            "S3 の機密データを広く",
+            "Macie の自動の検出",
+            "どこにありそうか"
+          ],
+          [
+            "汎用バケットを深く調べる",
+            "Macie のジョブ",
+            "識別子を選ぶ"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "ここから二枚は、条件から方法を選ぶ表です。表は左から、条件、選ぶ方法、確かめる所です。一枚目は、作る、集める、禁じる、の判断です。"
+        },
+        {
+          "who": "teacher",
+          "text": "新しいアカウントを標準の設定で作りたい時は、アカウントファクトリーです。自動にするなら、サービスカタログのエーピーアイです。"
+        },
+        {
+          "who": "student",
+          "text": "もう組織にいるアカウントを、コントロールタワーに入れたい時は？"
+        },
+        {
+          "who": "teacher",
+          "text": "同じエーピーアイの登録です。加わるアカウントに同じ物を入れたい時は、スタックセットの自動デプロイを有効にします。"
+        },
+        {
+          "who": "student",
+          "text": "合併で集める時は、移る側のアカウントから、新しい組織へ招待を送る形？"
+        },
+        {
+          "who": "teacher",
+          "text": "違います。招待を送れるのは管理アカウントからだけで、新しい組織の管理アカウントから招待を送ります。"
+        },
+        {
+          "who": "student",
+          "text": "新しい組織の管理アカウントからの招待なのだ。禁じたい時に確かめる所は？"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。組織単位で特定の操作を禁じたい時は、拒否のエスシーピーで、権限は与えない点を確かめます。"
+        },
+        {
+          "who": "student",
+          "text": "作るのは型と自動化、集めるのは招待、禁じるのはエスシーピー、なのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "When you configure your bucket to use an S3 Bucket Key for SSE-KMS, AWS generates a short-lived bucket-level key from AWS KMS, then temporarily keeps it in S3.",
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html#bucket-key-overview"
+        },
+        {
+          "source_id": "S8",
+          "quote": "If you want a managed service for creating and controlling your encryption keys but you don't want or need to operate your own HSMs, consider using AWS Key Management Service.",
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html#introduction"
+        },
+        {
+          "source_id": "S0",
+          "quote": "The hsm1.medium HSM type is reaching end of support so new clusters cannot be created with this type.",
+          "url": "https://docs.aws.amazon.com/cloudhsm/latest/userguide/clusters.html#clusters"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Sensitive data discovery jobs provide deeper, more targeted analysis.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 4: 組織全体",
+      "bullets": [
+        "Security Hub CSPM → 宣言型ポリシー",
+        "OU 全体を統制 → control",
+        "根本原因 → Detective"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "選ぶ方法",
+          "決め手"
+        ],
+        "rows": [
+          [
+            "Security Hub CSPM を組織へ",
+            "宣言型ポリシー",
+            "ルート・OU・アカウント"
+          ],
+          [
+            "複数リージョンの結果を一つに",
+            "Security Hub CSPM の集約",
+            "ホームリージョンへ"
+          ],
+          [
+            "OU 全体を統制",
+            "Control Tower の control",
+            "中の全アカウント"
+          ],
+          [
+            "GuardDuty を組織で管理",
+            "委任された管理者",
+            "既定でそのリージョン"
+          ],
+          [
+            "根本原因を調べる",
+            "Amazon Detective",
+            "検出結果や怪しい動き"
+          ]
+        ]
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "二枚目は、入る、任せる、見張る、の判断です。作ったメンバーアカウントに管理者として入りたい時は、自動で作られるロールです。"
+        },
+        {
+          "who": "teacher",
+          "text": "第三者のアカウントへのアクセスでロールを引き受ける時は、エクスターナルアイディーを毎回指定します。権限の作業を範囲を決めて任せたい時は、権限の境界です。"
+        },
+        {
+          "who": "student",
+          "text": "見張る方は、一か所で見る話と、まとめてかける話が混ざりそうなのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "全てのアカウントのコンプライアンスを一か所で見たい時は、コンフィグのアグリゲーターで、読むだけです。組織単位に統制と見張りをまとめてかけたい時は、コントロールタワーのコントロールです。"
+        },
+        {
+          "who": "student",
+          "text": "セキュリティの三つは、どこで見分ける？"
+        },
+        {
+          "who": "teacher",
+          "text": "画面の箇条書きにあります。初めて複数アカウントの管理を組むなら、セキュリティハブの宣言型ポリシーです。根本の原因を調べるならディテクティブ、ガードデューティの委任の管理者はリージョンごとです。"
+        },
+        {
+          "who": "student",
+          "text": "条件の一言で、選ぶ道具が変わるのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S16",
+          "quote": "With an AWS Security Hub CSPM declarative policy, you can centrally enable and configure Security Hub CSPM across the accounts in your organization.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/accounts-orgs-policies.html#accounts-orgs-policies"
+        },
+        {
+          "source_id": "S18",
+          "quote": "By using cross-Region aggregation in AWS Security Hub CSPM, you can aggregate findings, finding updates, insights, control compliance statuses, and security scores from multiple AWS Regions to a single home Region.",
+          "url": "https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html#finding-aggregation"
+        },
+        {
+          "source_id": "S17",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        },
+        {
+          "source_id": "S19",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region.",
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations"
+        },
+        {
+          "source_id": "S20",
+          "quote": "Amazon Detective makes it easy to analyze, investigate, and quickly identify the root cause of security findings or suspicious activity.",
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/detective-investigation-about.html#detective-investigation-about"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "4 つのまとまりに戻る",
+        "DNS 検証・リージョンなどの条件",
+        "迷ったら条件の表に戻る"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph G4[\"4 組織全体\"]\n    SH@{ svc: \"AWS Security Hub CSPM\", label: \"Security Hub CSPM<br/>宣言型ポリシー<br/>集約\" }\n    OT[\"Control Tower の control<br/>GuardDuty の委任<br/>Detective で調べる\"]\n  end\n  subgraph G3[\"3 機密データ\"]\n    MC@{ svc: \"Amazon Macie\", label: \"Amazon Macie<br/>広く 自動の検出<br/>深く ジョブ\" }\n  end\n  subgraph G2[\"2 証明書と鍵\"]\n    ACM[\"ACM<br/>Amazon 発行で<br/>DNS 検証なら<br/>自動で更新\"]\n    KMS@{ svc: \"AWS KMS\", label: \"AWS KMS<br/>自動ローテーション<br/>HSM の運用は<br/>CloudHSM\" }\n  end\n  subgraph G1[\"1 VPC の守り\"]\n    SG[\"security groups が主<br/>network ACLs を足す<br/>Network Firewall は境界\"]\n    WAF@{ svc: \"AWS WAF\", label: \"AWS WAF<br/>HTTP(S) を制御\" }\n  end\n",
+        "alt": "講義の地図に戻ったまとめ。1 VPC の守りでは、security groups が主な仕組みで network ACLs は足す層、Network Firewall が VPC の境界で脅威を防ぎ、AWS WAF が HTTP(S) の要求を制御する。2 証明書と鍵では、ACM は Amazon 発行で DNS 検証なら自動で更新し、AWS KMS は自動ローテーション、HSM を自分で運用するなら CloudHSM。3 Amazon Macie は広く見るなら自動の検出、深く調べるならジョブ。4 組織全体は Security Hub CSPM の宣言型ポリシーと集約、Control Tower の control、GuardDuty の委任された管理者、Detective。並びは講義の順で、処理の流れではない。"
+      },
+      "dialogue": [
+        {
+          "who": "teacher",
+          "text": "まとめです。地図に戻ります。一つ目の土台では、ランディングゾーン、組織単位、アカウントの型であるアカウントファクトリーを見ました。"
+        },
+        {
+          "who": "teacher",
+          "text": "二つ目では、エーピーアイでの作成と登録、スタックセットの自動デプロイ、招待と移動を見ました。"
+        },
+        {
+          "who": "student",
+          "text": "三つ目の権限は、取り違えやすい所が多かったのだ。"
+        },
+        {
+          "who": "teacher",
+          "text": "エスシーピーは権限を与えずに上限を決めること、拒否は下の全部に届くこと、ロールの引き受け、権限の境界を見ました。四つ目では、コンフィグ、コントロール、三つのセキュリティのサービスを見ました。"
+        },
+        {
+          "who": "student",
+          "text": "最後は、どこまで効くかで道具を分ける、ってことか。"
+        },
+        {
+          "who": "teacher",
+          "text": "そうです。コントロールは組織単位の全体、ガードデューティはリージョンごとです。問題では、条件の語から、地図のどこの話かを考えてください。"
+        }
+      ],
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "You can secure your instances using only security groups. However, you can add network ACLs as an additional layer of defense.",
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison"
+        },
+        {
+          "source_id": "S7",
+          "quote": "ACM provides managed renewal for your Amazon-issued SSL/TLS certificates.",
+          "url": "https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html#managed-renewal"
+        },
+        {
+          "source_id": "S13",
+          "quote": "Automated sensitive data discovery provides broad visibility into where sensitive data might reside in your Amazon S3 data estate.",
+          "url": "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html#macie-features"
+        },
+        {
+          "source_id": "S17",
+          "quote": "A control applies to an entire organizational unit (OU), and every AWS account within the OU is affected by the control.",
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls"
+        }
+      ]
+    }
+  ]
+}

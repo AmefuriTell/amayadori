@@ -155,18 +155,54 @@ textarea { font: inherit; width: 100%; border: 1px solid var(--line); border-rad
 .lec-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; }
 .lec-head button { padding: 4px 12px; font-size: .85rem; }
 .lec-name { margin: 0; font-size: 1.1rem; }
-.lec-slide { display: grid; gap: 12px; min-width: 0; }
-.lec-num { font-variant-numeric: tabular-nums; }
-.lec-title { margin: 0; font-size: 1.15rem; }
+/* 舞台（A-0018）: スライドの大きさを決めて、移っても枠と操作の位置が変わらないようにする。
+   横長の画面は 16:9、狭い画面は 3:4。字は舞台の幅に合わせ（cqw）、入りきらない時は --lec-k で縮める */
+.wrap:has(> .lec) { max-width: 1080px; }
+.lec-player { display: grid; gap: 10px; min-width: 0; }
+.lec-stage { padding: 0; overflow: hidden; container-type: inline-size; }
+.lec-stage-in {
+  --lec-k: 1;
+  aspect-ratio: 16 / 9; width: 100%; overflow: hidden;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 1.6cqw;
+  padding: 2.4cqw 3cqw; font-size: calc(var(--lec-k) * 1.85cqw); line-height: 1.5;
+}
+.lec-stage-head { display: flex; gap: 2cqw; align-items: baseline; justify-content: space-between; min-width: 0; }
+.lec-num { font-variant-numeric: tabular-nums; flex: none; font-size: .8em; }
+.lec-title { margin: 0; font-size: 1.35em; line-height: 1.35; }
+.lec-stage-visual { min-height: 0; min-width: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .lec-visual { min-width: 0; max-width: 100%; }
-.lec-visual img { display: block; width: 100%; height: auto; max-height: 52vh; object-fit: contain; }
-.lec-table { overflow-x: auto; }
+.lec-stage-visual > .lec-visual { width: 100%; max-height: 100%; }
+.lec-stage-visual > .diagram-box { height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.lec-visual img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.lec-stage .stats { font-size: .9em; }
+.lec-stage .stats th, .lec-stage .stats td { padding: .35em .45em; }
+.lec-table { overflow: hidden; }
 .lec-table tbody th { color: var(--muted); font-weight: 400; }
+@media (max-width: 599px) {
+  .lec-stage-in { aspect-ratio: 3 / 4; gap: 3cqw; padding: 4.5cqw 4.5cqw; font-size: calc(var(--lec-k) * 4.4cqw); }
+  .lec-stage .lec-steps { display: grid; grid-template-columns: 1fr 1fr; }
+  .lec-stage .lec-steps li { padding: .35em .5em; }
+}
+.lec-below { display: grid; gap: 8px; }
+/* 全画面: 再生の枠を画面いっぱいに出す（body の印。ブラウザの全画面が使えない端末でも広がる） */
+body.lec-full { overflow: hidden; }
+body.lec-full .lec-player {
+  position: fixed; inset: 0; z-index: 50; background: var(--bg);
+  padding: 16px; align-content: center; justify-items: center;
+}
+body.lec-full .lec-stage { width: min(calc(100vw - 32px), calc((100vh - 110px) * 16 / 9)); }
+body.lec-full .lec-stage-in { aspect-ratio: 16 / 9; gap: 1.6cqw; padding: 2.4cqw 3cqw; font-size: calc(var(--lec-k) * 1.85cqw); }
+body.lec-full .lec-bar, body.lec-full .lec-controls { width: min(calc(100vw - 32px), calc((100vh - 110px) * 16 / 9)); }
+@media (orientation: portrait) {
+  body.lec-full .lec-stage, body.lec-full .lec-bar, body.lec-full .lec-controls { width: min(calc(100vw - 32px), calc((100vh - 130px) * 3 / 4)); }
+  body.lec-full .lec-stage-in { aspect-ratio: 3 / 4; gap: 3cqw; padding: 4.5cqw; font-size: calc(var(--lec-k) * 4.4cqw); }
+}
+.lec-full-btn { margin-left: auto; }
 .lec-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .lec-steps li { flex: 1 1 140px; min-width: 0; display: flex; gap: 8px; align-items: flex-start; background: var(--quote); border-radius: 8px; padding: 10px 12px; }
 .lec-steps li > span:last-child { display: grid; gap: 2px; min-width: 0; }
 .lec-steps .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
-.lec-bullets { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.lec-bullets { margin: 0; padding-left: 1.2em; display: grid; gap: .3em; }
 .lec-more { border-top: 1px solid var(--line); padding-top: 8px; font-size: .9rem; }
 .lec-more summary { cursor: pointer; color: var(--accent); }
 .lec-script { white-space: pre-wrap; margin: 8px 0 0; }
@@ -187,3 +223,6 @@ textarea { font: inherit; width: 100%; border: 1px solid var(--line); border-rad
 .lec .actions { margin-top: 0; align-items: center; }
 .lec .actions p { margin: 0; }
 .lec-credit { margin: 0; text-align: right; }
+.lec-stage .lec-steps { gap: .5em; align-content: center; }
+.lec-stage .lec-steps li { flex: 1 1 8em; gap: .5em; padding: .5em .7em; border-radius: .5em; }
+.lec-stage .lec-steps .n { width: 1.5em; height: 1.5em; font-size: .85em; }
