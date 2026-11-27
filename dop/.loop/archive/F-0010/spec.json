@@ -1,0 +1,12 @@
+{
+  "item": "F-0010",
+  "goal": "tools/lec.mjs（414 行）から、講義の形の検査と図の描画を tools/lib/lecture.mjs に分け、400 行の決まりに収める",
+  "findings": ["file:tools/lec.mjs"],
+  "plan": [
+    "tools/lib/lecture.mjs を作り、LIMITS・読み上げで崩れる字・字数の数え方・loadLecture・examTasks・boxesOf・visualErrors・checkLecture・renderVisuals を移す",
+    "tools/lec.mjs はそれを import し、コマンド（validate / verdict / yomi / gate / publish）と検証の結論・公開だけを持つ",
+    "lec.mjs から外へ出していた LIMITS・boxesOf・checkLecture・renderVisuals は lec.mjs からも export し直し、使う側を変えずに済ませる"
+  ],
+  "invariants": ["ツールの出力（JSON）と札の書き方は変えない", "試験のファイルは変えない"],
+  "allow_test_changes": []
+}

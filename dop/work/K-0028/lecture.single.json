@@ -1,0 +1,763 @@
+{
+  "task": "3.2",
+  "title": "ビジネスの要件に合わせて伸び縮みする仕組み",
+  "notes": [
+    "C3 の 1 回目への返事（採らなかった提案と、一部だけ採った提案）",
+    "consistency s15・clarity s15: Route 53 と Global Accelerator を 2 行に分けた。決め手は s12 の対比（レコードの値で答える／AWS の網を通す、待ち時間が最短／最も近い）に合わせた。clarity の「DNS の答え」は、根拠に DNS の語が無いので「レコードの値」と書いた。",
+    "clarity s15: lazy loading の行を「同じデータの読み込みでデータストアが重い」のような症状の形にする提案は、根拠に無いので採らなかった。条件は本文の言い方のままにした。",
+    "clarity s11: 負荷分散とキャッシュを「増えた負荷を一か所に集めない工夫」とまとめる提案は、根拠に無いので採らなかった。AZ は説明が根拠に無いので、bullets と台本から外した。",
+    "clarity s04: Service Auto Scaling と CloudWatch の輪は、S3 が Service Auto Scaling の考慮事項の節にある事から、線のラベルを「指標」にとどめて描いた。アラームが増減のきっかけだとは書いていない。desired count・コンテナインスタンスの説明は、根拠に定義が無いので「と考えてください」と弱めて書いた。",
+    "clarity s05: 「100% はインスタンスを使い切る目標」は、S5 の targetCapacity が使用率の目標である事と S6 の言い換えとして書いた。100% より下げた時の効果は根拠に無いので書いていない。",
+    "clarity s06: Auto Scaling group の capacity provider を「EC2 インスタンスの容量」と言うのは、根拠に定義が無いので「と考えてください」と弱めて書いた。",
+    "clarity s09: partial batch response の言い換えは、目的（成功分を再試行させない）の言い方にした。図に送る側の箱を足した（何を送る側かは根拠に無いので、名前は付けていない）。",
+    "clarity s13: s03 の向かない例（RequestCount）は、表の行の上限（5 行）のため s13 には入れず、s03 の表と bullets に置いた。",
+    "global（問題文で〜とあれば を全スライドに）: 台本の字数の上限（5,000 字）のため、s13〜s15 の表で条件の形にまとめ、各スライドへの追加は一部にとどめた。",
+    "clarity s07: deployment などの説明は、根拠に無いので名前を画面に任せ、台本では「デプロイメントなど」とだけ言った。",
+    "clarity s12: レコードの説明は、根拠に無いので値の例（IP アドレス）を言うだけにした。エンドポイントは「通信を届ける先」と一言で言い換えた。"
+  ],
+  "slides": [
+    {
+      "id": "s01",
+      "title": "この講義の地図",
+      "bullets": [
+        "5 つの部を順に",
+        "各部でつまずきも見る",
+        "最後に条件から選ぶ表"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  P1@{ svc: \"Amazon EC2 Auto Scaling\", label: \"第 1 部<br/>指標で伸ばす<br/>EC2 Auto Scaling\" }\n  P2@{ svc: \"Amazon ECS\", label: \"第 2 部<br/>コンテナ<br/>ECS・Fargate・EKS\" }\n  P3@{ svc: \"AWS Lambda\", label: \"第 3 部<br/>サーバーレス<br/>Lambda・SQS<br/>API Gateway\" }\n  P4@{ svc: \"Elastic Load Balancing\", label: \"第 4 部<br/>負荷分散とキャッシュ<br/>Elastic Load Balancing<br/>ElastiCache\" }\n  P5@{ svc: \"Amazon Route 53\", label: \"第 5 部<br/>複数リージョン<br/>Route 53<br/>Global Accelerator\" }\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n\n  T[\"条件から選ぶ表\"]\n  P5 ~~~ T\n",
+        "alt": "講義の地図。上から順に五つの部を扱う。第一部は指標で伸ばす部で EC2 Auto Scaling。第二部はコンテナの部で ECS・Fargate・EKS。第三部はサーバーレスの部で Lambda・SQS・API Gateway。第四部は負荷分散とキャッシュの部で Elastic Load Balancing と ElastiCache。第五部は複数リージョンの部で Route 53 と Global Accelerator。最後に条件から選ぶ表を見る。箱の並びは扱う順で、処理の流れではない。"
+      },
+      "narration": "この講義では、試験ガイドのタスク三の二を学びます。五つの部を、上から順に進みます。箱の並びは扱う順番で、処理の流れではありません。第一部は、指標で伸ばす部です。イーシーツーオートスケーリングの指標を見ます。第二部は、コンテナの部です。イーシーエス、ファーゲート、イーケーエスを見ます。第三部は、サーバーレスの部です。ラムダ、エスキューエス、エーピーアイゲートウェイを見ます。第四部は、負荷分散とキャッシュの部です。第五部は、複数リージョンの部です。最後に、条件から選ぶ表を三枚見て、地図に戻ります。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "A target tracking scaling policy automatically scales the capacity of your Auto Scaling group based on a target metric value.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#as-scaling-target-tracking"
+        },
+        {
+          "source_id": "S7",
+          "quote": "With Amazon ECS on AWS Fargate capacity providers, you can use both Fargate and Fargate Spot capacity with your Amazon ECS tasks.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        },
+        {
+          "source_id": "S11",
+          "quote": "You can use a Lambda Event Function to process messages in an Amazon Simple Queue Service (Amazon SQS) queue.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#with-sqs"
+        },
+        {
+          "source_id": "S14",
+          "quote": "A load balancer accepts incoming traffic from clients and routes requests to its registered targets (such as EC2 instances) in one or more Availability Zones. The load balancer also monitors the health of its registered targets and ensures that it routes traffic only to healthy targets.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#how-elastic-load-balancing-works"
+        },
+        {
+          "source_id": "S17",
+          "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency.",
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "title": "第 1 部 指標で伸ばす 1: target tracking",
+      "bullets": [
+        "目標にする指標の値を決める",
+        "Auto Scaling group を自動で増減",
+        "使われ方の癖に合わせる"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  M[\"指標の今の値\"]\n  G[\"目標の値\"]\n  TT[\"target tracking の<br/>scaling policy\"]\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling group<br/>キャパシティ\" }\n  M --> TT\n  G --> TT\n  TT -- \"自動で増減\" --> ASG\n",
+        "alt": "target tracking の scaling policy は、指標の今の値と目標の値をもとに、Auto Scaling group のキャパシティを自動で増減させる。"
+      },
+      "narration": "第一部、指標で伸ばす部の一枚目です。イーシーツーオートスケーリングには、ターゲットトラッキングという、スケーリングポリシーがあります。スケーリングポリシーは、増減の決まりと考えてください。ターゲットトラッキングでは、目標にする指標の値を決めます。するとポリシーが、その値をもとに、オートスケーリンググループのキャパシティを、自動で増減させます。オートスケーリンググループは、ここでは、台数を増減させるインスタンスのまとまり、と考えてください。キャパシティは、そのまとまりの大きさのことです。アプリケーションごとに違う使われ方にも、自動で合わせます。問題文で、ある指標を目標の値に保ちたい、とあれば、まず思い浮かべたい方法です。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "A target tracking scaling policy automatically scales the capacity of your Auto Scaling group based on a target metric value.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#as-scaling-target-tracking"
+        },
+        {
+          "source_id": "S1",
+          "quote": "It automatically adapts to the unique usage patterns of your individual applications.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#as-scaling-target-tracking"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "title": "第 1 部 指標で伸ばす 2: 指標の選び方",
+      "bullets": [
+        "使用率の指標であること",
+        "台数に比例して増減",
+        "RequestCount は向かない例"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "見る点",
+          "ドキュメントの説明"
+        ],
+        "rows": [
+          [
+            "指標の種類",
+            "使用率の指標"
+          ],
+          [
+            "表す物",
+            "インスタンスの忙しさ"
+          ],
+          [
+            "台数との関係",
+            "台数に比例して増減"
+          ],
+          [
+            "向かない例",
+            "ロードバランサーが受けた総数"
+          ],
+          [
+            "取れる間隔",
+            "1 分以下を勧める"
+          ]
+        ]
+      },
+      "narration": "次は、どの指標を目標にするかです。独自の指標なら何でも使える、わけではありません。まず、使用率の指標であることです。インスタンスがどれだけ忙しいかを表す指標でなければなりません。次に、指標の値が、オートスケーリンググループのインスタンスの数に比例して、増えたり減ったりすることです。向かない例は、グループの前に置いたロードバランサーが受けた、リクエストの総数です。指標の名前は、リクエストカウントです。この総数は、グループの使用率によっては変わりません。台数に比例して動く指標ではない、ということです。最後に、条件ではなく勧めとして、一分以下の間隔で取れる指標を使うことが挙がっています。使用率の変化に速く応じるためです。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "Not all custom metrics work for target tracking. The metric must be a valid utilization metric and describe how busy an instance is.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#target-tracking-choose-metrics"
+        },
+        {
+          "source_id": "S2",
+          "quote": "The metric value must increase or decrease proportionally to the number of instances in the Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#target-tracking-choose-metrics"
+        },
+        {
+          "source_id": "S2",
+          "quote": "The number of requests received by the load balancer doesn't change based on the utilization of the Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#target-tracking-choose-metrics"
+        },
+        {
+          "source_id": "S2",
+          "quote": "We recommend that you only use metrics that are available at one-minute or lower intervals to help you scale faster in response to utilization changes.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#target-tracking-choose-metrics"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "title": "第 2 部 コンテナ 1: ECS のサービスを増減",
+      "bullets": [
+        "指標は 1 分ごとに CloudWatch へ",
+        "無い指標にアラームは作れない",
+        "起点は desired count でなく実際の数"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ECS@{ svc: \"Amazon ECS\", label: \"ECS のサービス<br/>実際に動くタスク数\" }\n  CW@{ svc: \"Amazon CloudWatch\", label: \"CloudWatch<br/>届くまで指標も<br/>アラームも無い\" }\n  SAS[\"Service Auto Scaling<br/>実際に動く数が起点\"]\n  ECS -- \"1 分ごとの指標\" --> CW\n  CW -- \"指標\" --> SAS\n  SAS -- \"タスク数を増減\" --> ECS\n",
+        "alt": "ECS のサービスは 1 分ごとに指標を CloudWatch へ送る。届くまでその指標は無く、アラームも作れない。Service Auto Scaling は、desired count ではなく実際に動くタスク数を起点に、サービスのタスク数を増減させる。"
+      },
+      "narration": "ここから第二部、コンテナの部です。イーシーエスでは、サービスのタスクの数を、サービスオートスケーリングで増減できます。タスクは、動いているコンテナのまとまりと考えてください。気をつける点は二つです。一つ目は指標です。イーシーエスは、一分ごとに指標をクラウドウォッチへ送ります。送られるまで、その指標はありません。まだ無い指標には、アラームを作れません。二つ目は増減の起点です。望ましいタスクの数、デザイアードカウントは、ここでは、動かしたいと決めた数と考えてください。タスクを置く余裕がコンテナインスタンスに無いと、望ましい数まで実際には動かないことがあります。コンテナインスタンスは、タスクを動かすイーシーツーインスタンスです。そこでサービスオートスケーリングは、望ましい数ではなく、実際に動いている数を起点にします。これで、届かない数を積み上げる増やし過ぎを防ぎます。",
+      "refs": [
+        {
+          "source_id": "S3",
+          "quote": "Amazon ECS sends metrics in 1-minute intervals to CloudWatch. Metrics are not available until the clusters and services send the metrics to CloudWatch, and you cannot create CloudWatch alarms for metrics that do not exist.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        },
+        {
+          "source_id": "S4",
+          "quote": "During scaling activities, the actual running task count in a service is the value that Service Auto Scaling uses as its starting point, as opposed to the desired count.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        },
+        {
+          "source_id": "S4",
+          "quote": "This prevents excessive (runaway) scaling that might not be satisfied, for example, if there aren't enough container instance resources to place the additional tasks.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "title": "第 2 部 コンテナ 2: インスタンスの空き",
+      "bullets": [
+        "ECS が EC2 の台数を管理",
+        "targetCapacity は使用率の目標",
+        "既定の 100% では増やす間 PENDING"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  ECS@{ svc: \"Amazon ECS\", label: \"ECS<br/>cluster auto scaling\" }\n  ASG@{ svc: \"Amazon EC2 Auto Scaling\", label: \"Auto Scaling group<br/>targetCapacity\" }\n  I1@{ svc: \"Amazon EC2\", label: \"インスタンス\" }\n  I2@{ svc: \"Amazon EC2\", label: \"インスタンス\" }\n  N[\"既定の 100% では<br/>空きが無く<br/>増やす間 PENDING\"]\n  ECS -- \"台数を管理\" --> ASG\n  ASG --> I1\n  ASG --> I2\n  I2 -.- N\n",
+        "alt": "ECS の cluster auto scaling は、クラスターに登録した EC2 インスタンスの Auto Scaling group の台数を管理し、targetCapacity でインスタンスの使用率の目標を決める。targetCapacity が既定の 100% のとき、インスタンスに空きが無く、スケールアウトの間、新しいタスクは PENDING になる。"
+      },
+      "narration": "第二部の二枚目は、イーシーツーの上でタスクを動かすときの、インスタンスの空きです。イーシーエスは、クラスターに登録したイーシーツーインスタンスの増減を、自分で管理できます。この講義では、これをクラスターオートスケーリングと呼びます。そのとき、オートスケーリンググループのインスタンスの使用率に、目標の割合を決めます。この割合が、ターゲットキャパシティです。既定の値は百パーセントです。使用率の目標が百パーセントなので、インスタンスを使い切る目標になります。そのため、スケールアウト、つまり台数を増やす間、新しいタスクを動かす空きがインスタンスに無く、タスクはペンディングの状態で待ちます。問題文で、増やす間にタスクがペンディングで待つ、とあれば、ターゲットキャパシティの値を確かめます。",
+      "refs": [
+        {
+          "source_id": "S5",
+          "quote": "Amazon ECS can manage the scaling of Amazon EC2 instances that are registered to your cluster. Then, you set a target percentage (the targetCapacity) for the instance utilization in this Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#cluster-auto-scaling"
+        },
+        {
+          "source_id": "S6",
+          "quote": "When the targetCapacity is the default value of 100 %, the new tasks are in the PENDING state during the scale-out because there is no available capacity on the instances to run the tasks.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#cluster-auto-scaling"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "title": "第 2 部 コンテナ 3: Fargate と Fargate Spot",
+      "bullets": [
+        "Fargate Spot は割引の料金",
+        "2 分前の知らせで中断",
+        "strategy に Auto Scaling group を混ぜない"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "見る点",
+          "ドキュメントの説明"
+        ],
+        "rows": [
+          [
+            "Fargate Spot の料金",
+            "Fargate より割引"
+          ],
+          [
+            "向くタスク",
+            "中断されてよい物"
+          ],
+          [
+            "中断の前",
+            "2 分前の知らせ"
+          ],
+          [
+            "クラスターに混在可",
+            "Fargate と Auto Scaling group"
+          ],
+          [
+            "capacity provider strategy",
+            "Fargate か Auto Scaling group"
+          ]
+        ]
+      },
+      "narration": "第二部の三枚目は、ファーゲートです。ファーゲートのキャパシティプロバイダーを使うと、イーシーエスのタスクに、ファーゲートとファーゲートスポットの両方の容量を使えます。キャパシティプロバイダーは、タスクを動かす容量の出どころ、と考えてください。ファーゲートスポットでは、中断されてもよいタスクを、ファーゲートより割り引いた料金で動かせます。そのかわり、エーダブリューエスが容量を取り戻すときには、二分前の知らせのあとで、タスクが中断されます。組み合わせの決まりもあります。対象は、ファーゲートのキャパシティプロバイダーと、オートスケーリンググループのキャパシティプロバイダーです。後者は、イーシーツーインスタンスの容量と考えてください。クラスターには、二つを混ぜて置けます。けれども、キャパシティプロバイダー戦略には、どちらか一方しか入れられません。戦略は、タスクをどの出どころで動かすかの組み合わせ、と考えてください。",
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "With Amazon ECS on AWS Fargate capacity providers, you can use both Fargate and Fargate Spot capacity with your Amazon ECS tasks.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        },
+        {
+          "source_id": "S8",
+          "quote": "With Fargate Spot, you can run interruption tolerant Amazon ECS tasks at a rate that's discounted compared to the Fargate price. When AWS needs the capacity back, your tasks are interrupted with a two-minute warning.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        },
+        {
+          "source_id": "S7",
+          "quote": "A cluster can contain a mix of Fargate and Auto Scaling group capacity providers. However, a capacity provider strategy can only contain either Fargate or Auto Scaling group capacity providers, but not both.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "title": "第 2 部 コンテナ 4: EKS の Pod を増減",
+      "bullets": [
+        "Horizontal Pod Autoscaler",
+        "deployment などの Pod 数",
+        "指標の元を入れておく"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  subgraph K[\"Amazon EKS のクラスター\"]\n    direction TB\n    MS[\"指標の元<br/>例 metrics server\"]\n    HPA[\"Horizontal Pod<br/>Autoscaler\"]\n    D[\"deployment など\"]\n    P1[\"Pod\"]\n    P2[\"Pod\"]\n  end\n  MS -- \"CPU 使用率\" --> HPA\n  HPA -- \"Pod の数\" --> D\n  D --> P1\n  D --> P2\n",
+        "alt": "Amazon EKS のクラスターで、Horizontal Pod Autoscaler は、metrics server などの指標の元から得た CPU 使用率をもとに、deployment などの Pod の数を増減させる。"
+      },
+      "narration": "第二部の四枚目は、イーケーエスです。クバネティスのホリゾンタルポッドオートスケーラーは、ポッドの数を自動で増減させます。ポッドは、ここでは、クバネティスでコンテナを動かす単位、と考えてください。増減させる対象は、デプロイメントなど、画面にある物です。イーケーエスのドキュメントでは、その対象の、シーピーユーの使用率をもとに増減させる、と説明しています。ホリゾンタルポッドオートスケーラーは、クバネティスの標準の仕組みです。ただし、動かすには、イーケーエスのクラスターに、指標の元を入れておく必要があります。指標の元の例として、クバネティスのメトリクスサーバーが挙がっています。問題文で、ポッドが増えない、とあれば、指標の元が入っているかを確かめます。",
+      "refs": [
+        {
+          "source_id": "S9",
+          "quote": "The Kubernetes Horizontal Pod Autoscaler automatically scales the number of Pods in a deployment, replication controller, or replica set based on that resource’s CPU utilization.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html#horizontal-pod-autoscaler"
+        },
+        {
+          "source_id": "S9",
+          "quote": "The Horizontal Pod Autoscaler is a standard API resource in Kubernetes that simply requires that a metrics source (such as the Kubernetes metrics server) is installed on your Amazon EKS cluster to work.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html#horizontal-pod-autoscaler"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "title": "第 3 部 サーバーレス 1: Lambda の同時実行",
+      "bullets": [
+        "reserved は確保と上限",
+        "provisioned は cold start 対策",
+        "provisioned は追加の料金"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "設定",
+          "ドキュメントの説明"
+        ],
+        "rows": [
+          [
+            "reserved concurrency",
+            "その関数だけに確保"
+          ],
+          [
+            "reserved concurrency",
+            "上限を超えて増えない"
+          ],
+          [
+            "provisioned concurrency",
+            "cold start を減らす"
+          ],
+          [
+            "provisioned concurrency",
+            "追加の料金がかかる"
+          ],
+          [
+            "provisioned concurrency",
+            "非同期はふつう要らない"
+          ]
+        ]
+      },
+      "narration": "ここから第三部、サーバーレスの部です。ラムダには、同時実行の設定が二つあります。同時実行は、ここでは、関数が同時に動ける量、と考えてください。一つ目は、リザーブドコンカレンシーです。指定した量を、その関数のためだけに確保します。同時に、その量を超えて増えないようにもします。下限と上限を兼ねる、ということです。二つ目は、プロビジョンドコンカレンシーです。関数のコールドスタートの待ち時間を減らすのに役立ち、二桁ミリ秒の応答を目指した仕組みです。コールドスタートは、関数を動かし始めるときの待ち時間、と考えてください。ただし、設定すると、追加の料金がかかります。また、データ処理のパイプラインのような非同期の処理は、待ち時間に敏感でないことが多く、ふつうは要らない、とされています。",
+      "refs": [
+        {
+          "source_id": "S10",
+          "quote": "Reserved concurrency acts as both a lower and upper bound - it reserves the specified capacity exclusively for your function while also preventing it from scaling beyond that limit.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Provisioned concurrency is useful for reducing cold start latencies for functions and designed to make functions available with double-digit millisecond response times.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Configuring provisioned concurrency incurs additional charges to your AWS account.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Asynchronous workloads, such as data processing pipelines, are often less latency sensitive and so do not usually need provisioned concurrency.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "title": "第 3 部 サーバーレス 2: SQS から Lambda",
+      "bullets": [
+        "キューを間に置く形",
+        "メッセージをバッチで処理",
+        "partial batch response"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  S[\"メッセージを送る側\"]\n  Q@{ svc: \"Amazon SQS\", label: \"SQS のキュー<br/>メッセージ\" }\n  L@{ svc: \"AWS Lambda\", label: \"Lambda 関数<br/>partial batch response\" }\n  N[\"一部が失敗しても<br/>成功分は再試行させない\"]\n  S -- \"送る\" --> Q\n  Q -- \"バッチ\" --> L\n  L -.- N\n",
+        "alt": "送る側と処理する側の間に SQS のキューを置く。キューのメッセージを Lambda 関数がバッチで処理する。バッチの一部が失敗した時に、成功したメッセージを再試行させないため、partial batch response の処理を組み込む。"
+      },
+      "narration": "第三部の二枚目は、エスキューエスとラムダです。試験ガイドには、疎結合で分散した設計、という観点があります。疎結合は、ここでは、送る側と処理する側を直接つながず、間に何かを置く形と考えてください。この講義では、その一つの形として、キューを間に置く組み合わせを見ます。ラムダの関数で、エスキューエスのキューのメッセージを処理できます。メッセージは、まとめたバッチで処理されます。大事なのは、バッチの一部だけが失敗したときです。そのままでは、うまく処理できたメッセージまで、再試行されることがあります。それを防ぐため、パーシャルバッチレスポンスの処理を組み込む必要があります。問題文で、一部の失敗のたびに成功分までやり直される、とあれば、この処理を確かめます。",
+      "refs": [
+        {
+          "source_id": "S11",
+          "quote": "You can use a Lambda Event Function to process messages in an Amazon Simple Queue Service (Amazon SQS) queue.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#with-sqs"
+        },
+        {
+          "source_id": "S11",
+          "quote": "When processing Amazon SQS messages, you need to implement partial batch response logic to prevent successfully processed messages from being retried when some messages in a batch fail.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#with-sqs"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "title": "第 3 部 サーバーレス 3: API Gateway の throttling",
+      "bullets": [
+        "token bucket で数える",
+        "定常の速さと burst の上限",
+        "超えると 429 のことも"
+      ],
+      "visual": {
+        "type": "steps",
+        "items": [
+          {
+            "label": "リクエストが届く",
+            "note": "token 1 つがリクエスト 1 つ"
+          },
+          {
+            "label": "上限を超える",
+            "note": "定常の速さと burst の上限"
+          },
+          {
+            "label": "API Gateway が絞る",
+            "note": "429 Too Many Requests が返ることがある"
+          }
+        ]
+      },
+      "narration": "第三部の三枚目は、エーピーアイゲートウェイのスロットリングです。スロットリングは、リクエストを絞ることです。ここでは、レストエーピーアイの説明のページによります。エーピーアイゲートウェイは、トークンバケットという数え方で、リクエストを絞ります。トークン一つが、リクエスト一つに当たります。リクエストが、定常の速さの上限と、バーストの上限を超えると、絞り始めます。定常の速さは、ふだん続けて受ける速さ、バーストは、短い間に集まるリクエスト、と考えてください。このとき、クライアントは、四百二十九番、トゥーメニーリクエスツのエラーを受け取ることがあります。問題文で、四百二十九番のエラーが増えた、とあれば、まずこの二つの上限を確かめます。",
+      "refs": [
+        {
+          "source_id": "S13",
+          "quote": "API Gateway throttles requests to your API using the token bucket algorithm, where a token counts for a request. When request submissions exceed the steady-state request rate and burst limits, API Gateway begins to throttle requests. Clients may receive 429 Too Many Requests error responses at this point.",
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling"
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "title": "第 4 部 負荷分散とキャッシュ",
+      "bullets": [
+        "健全なターゲットにだけ流す",
+        "lazy loading",
+        "まずキャッシュに聞く"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  C[\"クライアント\"]\n  LB@{ svc: \"Elastic Load Balancing\", label: \"ロードバランサー<br/>健全なターゲット<br/>にだけ流す\" }\n  subgraph A[\" \"]\n    T1@{ svc: \"Amazon EC2\", label: \"ターゲット<br/>例 EC2\" }\n    T2@{ svc: \"Amazon EC2\", label: \"ターゲット<br/>例 EC2\" }\n  end\n  EC@{ svc: \"Amazon ElastiCache\", label: \"ElastiCache<br/>lazy loading\" }\n  DS[\"データストア\"]\n  C --> LB\n  LB --> T1\n  LB --> T2\n  A -- \"1 まず聞く\" --> EC\n  A -- \"2 無い・期限切れ\" --> DS\n",
+        "alt": "ロードバランサーはクライアントの通信を受け、EC2 インスタンスなどの登録したターゲットのうち健全な物にだけ流す。lazy loading では、アプリケーションはまず ElastiCache のキャッシュに聞き、データが無いか期限切れならデータストアに聞く。"
+      },
+      "narration": "第四部、負荷分散とキャッシュの部です。ロードバランサーは、クライアントからの通信を受け、登録したターゲットに振り分けます。ターゲットの例は、イーシーツーインスタンスです。ロードバランサーは、ターゲットの健康も見ていて、健全なターゲットにだけ、通信を流します。次はキャッシュです。エラスティキャッシュの、メムキャッシュディー向けの説明のページに、レイジーローディングという方法があります。アプリケーションは、データが要るとき、まずキャッシュに聞きます。キャッシュにデータが無いか、期限が切れていれば、そこで初めてデータストアに聞きます。図の番号は、この順番です。",
+      "refs": [
+        {
+          "source_id": "S14",
+          "quote": "A load balancer accepts incoming traffic from clients and routes requests to its registered targets (such as EC2 instances) in one or more Availability Zones. The load balancer also monitors the health of its registered targets and ensures that it routes traffic only to healthy targets.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#how-elastic-load-balancing-works"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Whenever your application requests data, it first makes the request to the ElastiCache cache. If the data doesn't exist in the cache or has expired, your application requests the data from your data store.",
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html#Strategies.LazyLoading"
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "title": "第 5 部 複数リージョン",
+      "bullets": [
+        "届け方の違いが決め手",
+        "Route 53 はレコードの値で答える",
+        "Global Accelerator は AWS の網"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "見る点",
+          "Route 53 latency",
+          "Global Accelerator"
+        ],
+        "rows": [
+          [
+            "届け方",
+            "レコードの値で答える",
+            "AWS の網を通す"
+          ],
+          [
+            "向ける先",
+            "待ち時間が最短",
+            "クライアントに最も近い"
+          ],
+          [
+            "使う設定",
+            "latency-based routing",
+            "standard accelerator"
+          ],
+          [
+            "前提",
+            "複数リージョンに配置",
+            "複数リージョンの endpoint"
+          ]
+        ]
+      },
+      "narration": "第五部、複数リージョンの部では、二つの方法を比べます。一つ目は、ルートフィフティースリーの、レイテンシーに基づくルーティングです。レイテンシーは、待ち時間のことです。アプリケーションを複数のリージョンに置いているとき、待ち時間が最も短いリージョンから応答させられます。ルートフィフティースリーは、選んだレコードの値で答えます。値の例は、ウェブサーバーのアイピーアドレスです。二つ目は、グローバルアクセラレーターです。複数のリージョンのエンドポイント、つまり通信を届ける先を扱える、グローバルなサービスです。スタンダードアクセラレーターでは、エーダブリューエスのグローバルなネットワークを通して、クライアントに最も近いリージョンのエンドポイントへ、通信を向けます。見分ける所は、レコードの値で答えるか、通信をエーダブリューエスのネットワークに通すか、です。",
+      "refs": [
+        {
+          "source_id": "S17",
+          "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency.",
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency"
+        },
+        {
+          "source_id": "S17",
+          "quote": "Route 53 responds with the value from the chosen record, such as the IP address for a web server.",
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency"
+        },
+        {
+          "source_id": "S18",
+          "quote": "Global Accelerator is a global service that supports endpoints in multiple AWS Regions. With a standard accelerator, Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client.",
+          "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator"
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "title": "条件から選ぶ 1: 第 1 部と第 2 部の前半",
+      "bullets": [
+        "指標・ECS・Fargate Spot",
+        "細部は表で確かめる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "方法・関わる仕組み",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "指標を目標の値に保つ",
+            "target tracking",
+            "使用率・比例・1 分以下"
+          ],
+          [
+            "ECS の増やし過ぎを防ぐ",
+            "実際に動く数が起点",
+            "desired count ではない"
+          ],
+          [
+            "新しい指標でアラーム",
+            "CloudWatch の指標",
+            "届くまで作れない"
+          ],
+          [
+            "増やす間に PENDING",
+            "cluster auto scaling",
+            "targetCapacity"
+          ],
+          [
+            "中断されてよいタスク",
+            "Fargate Spot",
+            "2 分前の知らせ"
+          ]
+        ]
+      },
+      "narration": "ここから、条件から選ぶ表です。一枚目は、第一部と第二部の前半です。指標を目標の値に保ちたいときは、ターゲットトラッキングで、台数に比例する使用率の指標かを見ます。イーシーエスの増やし過ぎを防ぐのは、実際に動くタスクの数を起点にする仕組みです。新しいサービスの指標でアラームを作るときは、指標が届いているかを確かめます。増やす間にタスクがペンディングで待つなら、ターゲットキャパシティの値を見ます。中断されてもよいタスクを安く動かすなら、ファーゲートスポットで、二分前に知らせがあります。",
+      "refs": [
+        {
+          "source_id": "S2",
+          "quote": "The metric value must increase or decrease proportionally to the number of instances in the Auto Scaling group.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#target-tracking-choose-metrics"
+        },
+        {
+          "source_id": "S4",
+          "quote": "During scaling activities, the actual running task count in a service is the value that Service Auto Scaling uses as its starting point, as opposed to the desired count.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        },
+        {
+          "source_id": "S3",
+          "quote": "Amazon ECS sends metrics in 1-minute intervals to CloudWatch. Metrics are not available until the clusters and services send the metrics to CloudWatch, and you cannot create CloudWatch alarms for metrics that do not exist.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        },
+        {
+          "source_id": "S6",
+          "quote": "When the targetCapacity is the default value of 100 %, the new tasks are in the PENDING state during the scale-out because there is no available capacity on the instances to run the tasks.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#cluster-auto-scaling"
+        },
+        {
+          "source_id": "S8",
+          "quote": "With Fargate Spot, you can run interruption tolerant Amazon ECS tasks at a rate that's discounted compared to the Fargate price. When AWS needs the capacity back, your tasks are interrupted with a two-minute warning.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "title": "条件から選ぶ 2: 第 2 部の後半と第 3 部の前半",
+      "bullets": [
+        "Fargate・EKS・Lambda・SQS",
+        "細部は表で確かめる"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "方法・関わる仕組み",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "Auto Scaling group と併用",
+            "capacity provider strategy",
+            "どちらか一方だけ"
+          ],
+          [
+            "Pod を CPU で増減",
+            "Horizontal Pod Autoscaler",
+            "指標の元"
+          ],
+          [
+            "cold start を短く",
+            "provisioned concurrency",
+            "料金・非同期は不要"
+          ],
+          [
+            "関数の確保と上限",
+            "reserved concurrency",
+            "超えて増えない"
+          ],
+          [
+            "SQS の一部が失敗",
+            "partial batch response",
+            "成功分を再試行しない"
+          ]
+        ]
+      },
+      "narration": "二枚目は、第二部の後半と第三部の前半です。ファーゲートとオートスケーリンググループの容量を併せて使うときは、一つのキャパシティプロバイダー戦略に、両方は入れられません。ポッドの数をシーピーユーの使用率で増減させるなら、ホリゾンタルポッドオートスケーラーで、指標の元を見ます。コールドスタートの待ち時間を減らすなら、プロビジョンドコンカレンシーです。追加の料金がかかり、非同期の処理にはふつう要りません。関数の分を確保しつつ上限も決めるなら、リザーブドコンカレンシーです。エスキューエスのバッチで一部が失敗するなら、パーシャルバッチレスポンスです。",
+      "refs": [
+        {
+          "source_id": "S7",
+          "quote": "A cluster can contain a mix of Fargate and Auto Scaling group capacity providers. However, a capacity provider strategy can only contain either Fargate or Auto Scaling group capacity providers, but not both.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html#fargate-capacity-providers"
+        },
+        {
+          "source_id": "S9",
+          "quote": "The Horizontal Pod Autoscaler is a standard API resource in Kubernetes that simply requires that a metrics source (such as the Kubernetes metrics server) is installed on your Amazon EKS cluster to work.",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html#horizontal-pod-autoscaler"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Configuring provisioned concurrency incurs additional charges to your AWS account.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Asynchronous workloads, such as data processing pipelines, are often less latency sensitive and so do not usually need provisioned concurrency.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Reserved concurrency acts as both a lower and upper bound - it reserves the specified capacity exclusively for your function while also preventing it from scaling beyond that limit.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S11",
+          "quote": "When processing Amazon SQS messages, you need to implement partial batch response logic to prevent successfully processed messages from being retried when some messages in a batch fail.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#with-sqs"
+        }
+      ]
+    },
+    {
+      "id": "s15",
+      "title": "条件から選ぶ 3: 第 3 部の後半から第 5 部",
+      "bullets": [
+        "API Gateway・負荷分散・キャッシュ",
+        "Route 53 と Global Accelerator"
+      ],
+      "visual": {
+        "type": "compare",
+        "columns": [
+          "問題文の条件",
+          "方法・関わる仕組み",
+          "確かめる所"
+        ],
+        "rows": [
+          [
+            "429 が返る",
+            "API Gateway",
+            "定常と burst の上限"
+          ],
+          [
+            "健全な先にだけ流す",
+            "Elastic Load Balancing",
+            "ターゲットの健康"
+          ],
+          [
+            "先にキャッシュを読む",
+            "lazy loading",
+            "無い・期限切れでデータストア"
+          ],
+          [
+            "待ち時間最短のリージョン",
+            "Route 53 latency",
+            "レコードの値で答える"
+          ],
+          [
+            "最も近いリージョンへ",
+            "Global Accelerator",
+            "standard で AWS の網"
+          ]
+        ]
+      },
+      "narration": "三枚目は、第三部の後半から第五部までです。四百二十九番のエラーが返るなら、エーピーアイゲートウェイの、定常の速さとバーストの上限を見ます。健全なターゲットにだけ流すのは、ロードバランサーの役目です。まずキャッシュを読み、無いか期限切れならデータストアに聞くのが、レイジーローディングです。待ち時間が最も短いリージョンから応答させるなら、ルートフィフティースリーの、レイテンシーに基づくルーティングで、レコードの値で答えます。クライアントに最も近いリージョンへ、エーダブリューエスのネットワークを通して届けるなら、グローバルアクセラレーターです。",
+      "refs": [
+        {
+          "source_id": "S13",
+          "quote": "API Gateway throttles requests to your API using the token bucket algorithm, where a token counts for a request. When request submissions exceed the steady-state request rate and burst limits, API Gateway begins to throttle requests. Clients may receive 429 Too Many Requests error responses at this point.",
+          "url": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html#api-gateway-request-throttling"
+        },
+        {
+          "source_id": "S14",
+          "quote": "A load balancer accepts incoming traffic from clients and routes requests to its registered targets (such as EC2 instances) in one or more Availability Zones. The load balancer also monitors the health of its registered targets and ensures that it routes traffic only to healthy targets.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#how-elastic-load-balancing-works"
+        },
+        {
+          "source_id": "S16",
+          "quote": "Whenever your application requests data, it first makes the request to the ElastiCache cache. If the data doesn't exist in the cache or has expired, your application requests the data from your data store.",
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html#Strategies.LazyLoading"
+        },
+        {
+          "source_id": "S17",
+          "quote": "If your application is hosted in multiple AWS Regions, you can improve performance for your users by serving their requests from the AWS Region with the lowest latency.",
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-latency.html#routing-policy-latency"
+        },
+        {
+          "source_id": "S18",
+          "quote": "Global Accelerator is a global service that supports endpoints in multiple AWS Regions. With a standard accelerator, Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client.",
+          "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator"
+        }
+      ]
+    },
+    {
+      "id": "s16",
+      "title": "まとめ",
+      "bullets": [
+        "地図に戻って 5 つの部",
+        "つまずきと確かめる所"
+      ],
+      "visual": {
+        "type": "mermaid",
+        "source": "flowchart TB\n  P1@{ svc: \"Amazon EC2 Auto Scaling\", label: \"第 1 部<br/>指標で伸ばす<br/>使用率の指標を目標に\" }\n  P2@{ svc: \"Amazon ECS\", label: \"第 2 部<br/>コンテナ<br/>起点・空き・Spot・Pod\" }\n  P3@{ svc: \"AWS Lambda\", label: \"第 3 部<br/>サーバーレス<br/>Lambda 同時実行<br/>SQS 一部の失敗<br/>API Gateway 429\" }\n  P4@{ svc: \"Elastic Load Balancing\", label: \"第 4 部<br/>負荷分散とキャッシュ<br/>健全な先<br/>先にキャッシュ\" }\n  P5@{ svc: \"Amazon Route 53\", label: \"第 5 部<br/>複数リージョン<br/>Route 53 latency<br/>Global Accelerator\" }\n  P1 ~~~ P2\n  P2 ~~~ P3\n  P3 ~~~ P4\n  P4 ~~~ P5\n",
+        "alt": "まとめの地図。第一部 指標で伸ばすは使用率の指標を目標にする。第二部 コンテナは増減の起点、インスタンスの空き、Fargate Spot、Pod の増減。第三部 サーバーレスは Lambda の同時実行、SQS の一部の失敗、API Gateway の 429。第四部 負荷分散とキャッシュは健全な先とまずキャッシュ。第五部 複数リージョンは Route 53 の latency と Global Accelerator。箱の並びは扱った順。"
+      },
+      "narration": "地図に戻ります。第一部では、ターゲットトラッキングで、使用率の指標を目標にすることを見ました。第二部では、増減の起点、インスタンスの空き、ファーゲートスポット、ポッドの増減を見ました。第三部では、ラムダの同時実行、エスキューエスの一部の失敗、四百二十九番のエラーを見ました。第四部では、健全なターゲットにだけ流すことと、まずキャッシュに聞くことを見ました。第五部では、ルートフィフティースリーとグローバルアクセラレーターの届け方の違いを見ました。",
+      "refs": [
+        {
+          "source_id": "S1",
+          "quote": "A target tracking scaling policy automatically scales the capacity of your Auto Scaling group based on a target metric value.",
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html#as-scaling-target-tracking"
+        },
+        {
+          "source_id": "S4",
+          "quote": "During scaling activities, the actual running task count in a service is the value that Service Auto Scaling uses as its starting point, as opposed to the desired count.",
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html#auto-scaling-concepts"
+        },
+        {
+          "source_id": "S10",
+          "quote": "Reserved concurrency acts as both a lower and upper bound - it reserves the specified capacity exclusively for your function while also preventing it from scaling beyond that limit.",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/provisioned-concurrency.html#provisioned-concurrency"
+        },
+        {
+          "source_id": "S14",
+          "quote": "A load balancer accepts incoming traffic from clients and routes requests to its registered targets (such as EC2 instances) in one or more Availability Zones. The load balancer also monitors the health of its registered targets and ensures that it routes traffic only to healthy targets.",
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#how-elastic-load-balancing-works"
+        },
+        {
+          "source_id": "S18",
+          "quote": "Global Accelerator is a global service that supports endpoints in multiple AWS Regions. With a standard accelerator, Global Accelerator directs traffic over the AWS global network to endpoints in the nearest Region to the client.",
+          "url": "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html#what-is-global-accelerator"
+        }
+      ]
+    }
+  ],
+  "credit": "VOICEVOX:四国めたん",
+  "audio": true,
+  "minutes": 11.5,
+  "status": "verified",
+  "created": "2026-11-27",
+  "last_checked": "2026-11-27"
+}

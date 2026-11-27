@@ -1,143 +1,28 @@
 #!/usr/bin/env node
-// 講義のツール: validate / verdict / gate / publish
+// 講義のツール: validate / verdict / yomi / gate / publish（形の検査と図の描画は lib/lecture.mjs）
 // 講義の項目（K-）の束は work/<ID>/lecture.json に
-//   { task, title, slides: [{ id, title, bullets, visual, narration, refs: [{ source_id, quote, url }] }] }。
+//   { task, title, slides: [{ id, title, bullets, visual, dialogue | narration, refs: [{ source_id, quote, url }] }] }。
+// dialogue は掛け合いの台本 [{ who: 'teacher' | 'student', text }]（先生 = 四国めたん、生徒 = ずんだもん）。
+// narration は 1 人で読む前の形（先生の 1 行として扱う）。
 // C3 の 2 人の検証役は work/<ID>/review-consistency.json と review-clarity.json を書く。
 // 出来上がりは lectures/<task>.json（講義の元）と app/public/lectures/<task>/（アプリが読む形・図・音声）。
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, today, setResult, writeReport, rel } from './lib/io.mjs';
-import { itemIdOf as idOf, requireState, referenceErrors, failToFeedback as toFeedback } from './lib/step.mjs';
-import { iconMap, renderAll } from './lib/diagram.mjs';
-import { parseSources } from './lib/text.mjs';
-import { synthesize, CREDIT } from './lib/tts.mjs';
-import { readability } from './dg.mjs';
+import { itemIdOf as idOf, requireState, failToFeedback as toFeedback } from './lib/step.mjs';
+import { synthesize, creditOf } from './lib/tts.mjs';
+import { buildYomi, sayErrors, sayMap } from './lib/yomi.mjs';
 
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
-export const LIMITS = { slidesMin: 12, slidesMax: 16, narrationMin: 3000, narrationMax: 5000, bullets: 3, bulletWidth: 22, boxes: 7, rows: 5, cellWidth: 15, steps: 6 };
-// 読み上げで崩れる字: 英字・数字・記号（半角は全部、全角は英数字と括弧・かぎ括弧・斜線・中黒・矢印・コロンなど）
-const UNSPEAKABLE = /[\x21-\x7e０-９Ａ-Ｚａ-ｚ（）「」『』【】［］〔〕〈〉《》＜＞／・→←↑↓⇒：；＃＄％＆＊＋＝＠＼＾｜～〜]/g;
-// 台本 1 分あたりの字数（試作: 4,477 字で約 15 分。速さ 1.1）。音声を作らない時の見積もりに使う
-const CHARS_PER_MINUTE = 300;
 const REVIEWS = { consistency: 'review-consistency.json', clarity: 'review-clarity.json' };
 const SEVERITY = ['重', '中', '軽'];
-
 const itemIdOf = (arg) => idOf(arg, { prefix: 'K', message: '講義の項目 ID（例 K-0001）を渡す' });
-const width = (t) => [...String(t)].reduce((n, c) => n + (c.charCodeAt(0) < 128 ? 0.5 : 1), 0);
-const len = (t) => [...String(t ?? '')].length;
-const isText = (t) => typeof t === 'string' && t.trim().length > 0;
 
-function loadLecture(id) {
-  const l = readJSON(paths.work(id, 'lecture.json'), null);
-  if (!l || typeof l !== 'object' || !Array.isArray(l.slides)) throw new ToolError(`work/${id}/lecture.json は { "task", "title", "slides": [ … ] } の形にする`);
-  return l;
-}
+import { LIMITS, CHARS_PER_MINUTE, len, spokenLen, loadLecture, boxesOf, checkLecture, renderVisuals, yomiErrors } from './lib/lecture.mjs';
 
-function examTasks() {
-  return new Set(readJSON(paths.config('exam.json'), { domains: [] }).domains.flatMap((d) => d.tasks.map((t) => t.id)));
-}
-
-/** mermaid の箱の id（subgraph の id は数えない） */
-export function boxesOf(source) {
-  const ids = new Set();
-  const skip = /^\s*(flowchart|graph|subgraph|end|classDef|class|style|linkStyle|direction|click|%%)\b/;
-  for (const raw of source.split('\n')) {
-    if (!raw.trim() || skip.test(raw)) continue;
-    const line = raw
-      .replace(/"[^"]*"/g, '')
-      .replace(/@\{[^}]*\}/g, ' ')
-      .replace(/\[[^\]]*\]|\([^)]*\)|\{[^}]*\}/g, ' ')
-      .replace(/\|[^|]*\|/g, ' ')
-      .replace(/:::\w+/g, ' ');
-    for (const part of line.split(/<?[-=.]{2,}>?|<?-\.+->?|&/)) {
-      const m = part.trim().match(/^([A-Za-z_][\w]*)$/);
-      if (m) ids.add(m[1]);
-    }
-  }
-  return [...ids];
-}
-
-/** 1 枚の図の誤り */
-function visualErrors(v, add) {
-  if (!v || typeof v !== 'object') return add('visual が無い（mermaid・compare・steps のどれかを 1 つ）');
-  if (v.type === 'mermaid') {
-    if (typeof v.source !== 'string' || !/^\s*flowchart\s+TB\b/.test(v.source)) return add('mermaid の source は "flowchart TB" で始める');
-    const boxes = boxesOf(v.source);
-    if (boxes.length > LIMITS.boxes) add(`図の箱が ${boxes.length} 個。${LIMITS.boxes} 個までにする`);
-    for (const m of readability(v.source)) add(m);
-    const map = iconMap();
-    for (const [, , svc, label] of v.source.matchAll(/(\b[A-Za-z][A-Za-z0-9_]*)@\{\s*svc:\s*"([^"]+)"\s*(?:,\s*label:\s*"([^"]*)"\s*)?\}/g)) {
-      if (!map[svc] && !(label ?? svc).startsWith(svc)) add(`svc の「${svc}」は config/icon-map.json に無い。表にある名前にするか、ラベルの頭にサービス名を書く`);
-    }
-  } else if (v.type === 'compare') {
-    if (!Array.isArray(v.columns) || !v.columns.length || !Array.isArray(v.rows) || !v.rows.length) return add('compare は columns と rows が要る');
-    if (v.rows.length > LIMITS.rows) add(`表の行が ${v.rows.length} 行。${LIMITS.rows} 行までにする`);
-    const cells = [...v.columns, ...v.rows.flatMap((r) => (Array.isArray(r) ? r : [r]))];
-    v.rows.forEach((r, i) => { if (!Array.isArray(r) || r.length !== v.columns.length) add(`表の ${i + 1} 行目のセルの数が columns（${v.columns.length}）と違う`); });
-    for (const c of cells) if (typeof c === 'string' && width(c) > LIMITS.cellWidth) add(`表のセルが長い（${c}）。幅 ${LIMITS.cellWidth} まで`);
-  } else if (v.type === 'steps') {
-    if (!Array.isArray(v.items) || !v.items.length) return add('steps は items が要る');
-    if (v.items.length > LIMITS.steps) add(`手順が ${v.items.length} 個。${LIMITS.steps} 個までにする`);
-    v.items.forEach((x, i) => { if (!isText(x?.label)) add(`手順の ${i + 1} 個目に label が無い`); });
-  } else {
-    add(`visual の type が違う（${v.type}）。mermaid・compare・steps のどれか`);
-  }
-}
-
-/** 描かずに見られる誤り。[{ id: スライドの id | null, message }] */
-export function checkLecture(id, lec = loadLecture(id)) {
-  const errors = [];
-  const top = (message) => errors.push({ id: null, message });
-  const item = readJSON(paths.work(id, 'item.json'), {});
-  if (!isText(lec.task) || !examTasks().has(lec.task)) top(`task（${lec.task}）が試験ガイドの task に無い`);
-  else if (item.task && item.task !== lec.task) top(`task が項目の task（${item.task}）と違う`);
-  if (!isText(lec.title)) top('講義の title が要る');
-  const n = lec.slides.length;
-  if (n < LIMITS.slidesMin || n > LIMITS.slidesMax) top(`スライドが ${n} 枚。${LIMITS.slidesMin}〜${LIMITS.slidesMax} 枚にする`);
-  const total = lec.slides.reduce((t, s) => t + len(s?.narration), 0);
-  if (total < LIMITS.narrationMin || total > LIMITS.narrationMax) top(`台本の合計が ${total} 字。${LIMITS.narrationMin}〜${LIMITS.narrationMax} 字にする`);
-  const srcFile = paths.work(id, 'sources.md');
-  const sources = fs.existsSync(srcFile) ? parseSources(fs.readFileSync(srcFile, 'utf8')) : null;
-
-  lec.slides.forEach((s, i) => {
-    const want = `s${String(i + 1).padStart(2, '0')}`;
-    const sid = s?.id ?? `#${i + 1}`;
-    const add = (message) => errors.push({ id: sid, message });
-    if (!s || typeof s !== 'object') return add('形が違う');
-    if (s.id !== want) add(`id は ${want} にする（s01 から連番）`);
-    if (!isText(s.title)) add('title が要る');
-    if (!Array.isArray(s.bullets)) add('bullets（要点の配列）が要る');
-    else {
-      if (s.bullets.length > LIMITS.bullets) add(`bullets が ${s.bullets.length} 個。${LIMITS.bullets} 個までにする`);
-      for (const b of s.bullets) {
-        if (!isText(b)) add('bullets に空の要点がある');
-        else if (width(b) > LIMITS.bulletWidth) add(`要点が長い（${b}）。幅 ${LIMITS.bulletWidth} まで（全角 1・半角 0.5）`);
-      }
-    }
-    if (!isText(s.narration)) add('narration（台本）が要る');
-    else {
-      const bad = [...new Set(s.narration.match(UNSPEAKABLE) ?? [])];
-      if (bad.length) add(`台本に読み上げで崩れる字がある（${bad.slice(0, 8).join(' ')}）。英字・数字・記号はかなや言葉に直す`);
-    }
-    visualErrors(s.visual, add);
-    if (!Array.isArray(s.refs) || !s.refs.length) add('refs（出典）が 1 つ以上要る');
-    else referenceErrors(s.refs, sources, (pointer, message) => add(`refs${pointer.replace(/^\/references/, '')} ${message}`), id);
-  });
-  return errors;
-}
-
-/** mermaid の図を描く（previewDir があれば PNG を置く）。{ errors, results } */
-export async function renderVisuals(lec, { previewDir } = {}) {
-  const list = lec.slides.filter((s) => s?.visual?.type === 'mermaid' && typeof s.visual.source === 'string').map((s) => ({ id: s.id, source: s.visual.source }));
-  if (!list.length) return { errors: [], results: [] };
-  // 試験と CI（ブラウザが無い）では描かない。中身の無い絵を置く（形の検査は描く前に済んでいる）
-  if (process.env.DOP_RENDER === 'skip') return { errors: [], results: list.map((d) => ({ id: d.id, svg: '<svg xmlns="http://www.w3.org/2000/svg"/>', unknown: [] })) };
-  const results = await renderAll(list, { previewDir });
-  const errors = results.filter((r) => r.error).map((r) => ({ id: r.id, message: `図が描けない: ${r.error}` }));
-  return { errors, results };
-}
+export { LIMITS, boxesOf, checkLecture, renderVisuals };
 
 async function gateLecture(id) {
   const lec = loadLecture(id);
@@ -148,6 +33,7 @@ async function gateLecture(id) {
   if (verdict && fs.statSync(paths.work(id, 'lecture.json')).mtimeMs > fs.statSync(vfile).mtimeMs + 1) {
     fails.push({ check: 'verified', id: null, message: '検証（lec verdict）の後に lecture.json を書き換えた。C3 からやり直す' });
   }
+  if (process.env.DOP_TTS !== 'skip') for (const m of yomiErrors(id, lec)) fails.push({ check: 'yomi', id: null, message: m });
   let results = [];
   if (!fails.some((f) => f.check === 'form')) {
     const r = await renderVisuals(lec, { previewDir: paths.work(id, 'preview') });
@@ -213,7 +99,7 @@ const commands = {
     const unknown = [...new Set(results.flatMap((r) => r.unknown))];
     const details = errors.length ? writeReport(`${id}/validate.txt`, errors.map((e) => `${e.id ?? '(全体)'}\t${e.message}`).join('\n') + '\n') : undefined;
     if (!errors.length) setResult(id, 'C2_author', 'ok');
-    const chars = lec.slides.reduce((t, s) => t + len(s?.narration), 0);
+    const chars = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
     emit({
       ok: !errors.length,
       summary: errors.length
@@ -222,6 +108,30 @@ const commands = {
       items: errors.map((e) => `${e.id ?? '(全体)'}: ${e.message}`),
       details_path: details,
       repeatKey: `kvalidate:${id}`,
+    });
+  },
+
+  // C3（検証の後）: よみ台本を作る。--done で、読みを確かめ終えた印を付ける
+  async yomi(args) {
+    const id = itemIdOf(args._[0]);
+    const lec = loadLecture(id);
+    const file = paths.work(id, 'yomi.json');
+    const prev = readJSON(file, null);
+    if (args.done) {
+      const errs = yomiErrors(id, lec).filter((m) => !m.startsWith('読みを確かめ終えていない'));
+      if (errs.length) return emit({ ok: false, summary: `確かめ終えた印を付けられない（${errs.length} 件）`, items: errs, repeatKey: `kyomi:${id}` });
+      writeJSON(file, { ...prev, checked: prev.hash });
+      return emit({ ok: true, summary: `読みを確かめ終えた印を付けた（say ${prev.slides.flatMap((s) => s.lines).filter((l) => l.say).length} 行）`, items: [] });
+    }
+    for (const s of prev?.slides ?? []) s.lines.forEach((l, k) => { if (l.say) { const e = sayErrors(l.text, l.say); if (e.length) throw new ToolError(`${s.id} の ${k + 1} 行目の say: ${e.join('、')}`); } });
+    const { slides, hash } = await buildYomi(lec, prev);
+    writeJSON(file, { hash, checked: prev?.checked === hash ? hash : null, slides });
+    const lines = slides.flatMap((s) => s.lines);
+    emit({
+      ok: true,
+      summary: `よみ台本を作った（${lines.length} 行、say ${lines.filter((l) => l.say).length} 行）→ 読みを台本と照らし、読み違いは say で直して lec yomi をもう一度。終えたら lec yomi --done`,
+      items: [],
+      details_path: rel(file),
     });
   },
 
@@ -296,19 +206,20 @@ const commands = {
 
     // 音声を先に作る（失敗したら何も入れない）。作業の場所で作ってから写す
     const skipTTS = process.env.DOP_TTS === 'skip';
-    const chars = lec.slides.reduce((t, s) => t + len(s.narration), 0);
+    const chars = lec.slides.reduce((t, s) => t + spokenLen(s), 0);
     let audio = null;
     if (!skipTTS) {
       const tmp = paths.work(id, 'audio');
       fs.rmSync(tmp, { recursive: true, force: true });
-      audio = { dir: tmp, ...(await synthesize(lec, tmp)) };
+      audio = { dir: tmp, ...(await synthesize(lec, tmp, { says: sayMap(readJSON(paths.work(id, 'yomi.json'), null)) })) };
     }
     const minutes = audio ? audio.minutes : Math.round((chars / CHARS_PER_MINUTE) * 10) / 10;
 
     // 講義の元
     const srcFile = path.join(paths.lectures(), `${lec.task}.json`);
     const prev = readJSON(srcFile, null);
-    const source = { ...lec, credit: CREDIT, audio: !!audio, minutes, status: 'verified', created: prev?.created ?? today(), last_checked: today() };
+    const credit = creditOf(lec);
+    const source = { ...lec, credit, audio: !!audio, minutes, status: 'verified', created: prev?.created ?? today(), last_checked: today() };
     writeJSON(srcFile, source);
 
     // アプリが読む形・図・音声
@@ -326,12 +237,13 @@ const commands = {
       const visual = type === 'mermaid' ? { type, alt, svg: `visuals/${s.id}.svg` } : { type, ...rest };
       const sec = audio?.files.find((f) => f.id === s.id)?.seconds;
       return {
-        id: s.id, title: s.title, bullets: s.bullets, visual, narration: s.narration,
+        id: s.id, title: s.title, bullets: s.bullets, visual,
+        ...(Array.isArray(s.dialogue) ? { dialogue: s.dialogue } : { narration: s.narration }),
         refs: s.refs.map((r) => ({ quote: r.quote, url: r.url })),
         ...(audio ? { audio: `audio/${s.id}.mp3`, seconds: sec } : {}),
       };
     });
-    writeJSON(path.join(dir, 'lecture.json'), { task: lec.task, title: lec.title, credit: CREDIT, audio: !!audio, minutes, last_checked: source.last_checked, slides });
+    writeJSON(path.join(dir, 'lecture.json'), { task: lec.task, title: lec.title, credit, audio: !!audio, minutes, last_checked: source.last_checked, slides });
 
     // 一覧を書き直す
     const ldir = paths.lectures();

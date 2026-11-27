@@ -11,6 +11,24 @@ export const ENGINE = process.env.VOICEVOX_URL ?? 'http://127.0.0.1:50021';
 export const IMAGE = 'mirror.gcr.io/voicevox/voicevox_engine:cpu-latest';
 export const SPEAKER = 2; // 四国めたん（ノーマル）
 export const CREDIT = 'VOICEVOX:四国めたん';
+// 掛け合い（dialogue）の役と声。先生 = 四国めたん（ノーマル）、生徒 = ずんだもん（ノーマル）
+export const VOICES = {
+  teacher: { speaker: 2, name: '四国めたん', label: 'めたん先生' },
+  student: { speaker: 3, name: 'ずんだもん', label: 'ずんだもん' },
+};
+
+/** スライドの読み上げの行。dialogue があればそれ、無ければ narration を先生の 1 行として扱う */
+export function linesOf(s) {
+  if (Array.isArray(s?.dialogue)) return s.dialogue;
+  return typeof s?.narration === 'string' ? [{ who: 'teacher', text: s.narration }] : [];
+}
+
+/** 講義で使った声のクレジット（例: VOICEVOX:四国めたん、VOICEVOX:ずんだもん） */
+export function creditOf(lecture) {
+  const used = new Set(lecture.slides.flatMap((s) => linesOf(s).map((l) => l.who)));
+  const names = Object.entries(VOICES).filter(([who]) => used.has(who)).map(([, v]) => `VOICEVOX:${v.name}`);
+  return names.length ? names.join('、') : CREDIT;
+}
 const CONTAINER = 'voicevox';
 const WAIT_ENGINE_MS = 3 * 60e3;
 const WAIT_DOCKER_MS = 60e3;
@@ -105,24 +123,35 @@ function tool(cmd, args) {
  * スライドごとに outDir/<slide id>.mp3 を作る。
  * @returns {{ files: { id: string, seconds: number }[], minutes: number }}
  */
-export async function synthesize(lecture, outDir, { speaker = SPEAKER, speed = 1.1 } = {}) {
+export async function synthesize(lecture, outDir, { speaker = SPEAKER, speed = 1.1, says = null } = {}) {
   await ensureEngine();
   await installAccents();
   fs.mkdirSync(outDir, { recursive: true });
   const files = [];
   for (const s of lecture.slides) {
-    const q = await fetch(`${ENGINE}/audio_query?speaker=${speaker}&text=${encodeURIComponent(s.narration)}`, { method: 'POST' });
-    if (!q.ok) throw new ToolError(`読み上げの準備（audio_query）に失敗: ${s.id}: ${q.status}`);
-    const query = await q.json();
-    query.speedScale = speed;
-    query.postPhonemeLength = 0.6;
-    const w = await fetch(`${ENGINE}/synthesis?speaker=${speaker}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(query) });
-    if (!w.ok) throw new ToolError(`読み上げ（synthesis）に失敗: ${s.id}: ${w.status}`);
-    const wav = path.join(outDir, `${s.id}.wav`);
-    fs.writeFileSync(wav, Buffer.from(await w.arrayBuffer()));
+    // 行ごとに声を変えて読み、つないで 1 枚 1 本の mp3 にする（行の間は 0.35 秒、最後は 0.6 秒あける）
+    const lines = linesOf(s);
+    const wavs = [];
+    for (const [k, line] of lines.entries()) {
+      const who = Array.isArray(s.dialogue) ? (VOICES[line.who]?.speaker ?? speaker) : speaker;
+      // says（よみ台本で読み違いを直した文）があればそれを読む
+      const text = says?.get(s.id)?.[k] ?? line.text;
+      const q = await fetch(`${ENGINE}/audio_query?speaker=${who}&text=${encodeURIComponent(text)}`, { method: 'POST' });
+      if (!q.ok) throw new ToolError(`読み上げの準備（audio_query）に失敗: ${s.id} の ${k + 1} 行目: ${q.status}`);
+      const query = await q.json();
+      query.speedScale = speed;
+      query.postPhonemeLength = k === lines.length - 1 ? 0.6 : 0.35;
+      const w = await fetch(`${ENGINE}/synthesis?speaker=${who}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(query) });
+      if (!w.ok) throw new ToolError(`読み上げ（synthesis）に失敗: ${s.id} の ${k + 1} 行目: ${w.status}`);
+      const wav = path.join(outDir, `${s.id}-${String(k).padStart(3, '0')}.wav`);
+      fs.writeFileSync(wav, Buffer.from(await w.arrayBuffer()));
+      wavs.push(wav);
+    }
     const mp3 = path.join(outDir, `${s.id}.mp3`);
-    tool('ffmpeg', ['-loglevel', 'error', '-y', '-i', wav, '-b:a', '64k', mp3]);
-    fs.rmSync(wav);
+    const inputs = wavs.flatMap((f) => ['-i', f]);
+    const concat = `${wavs.map((_, k) => `[${k}:a]`).join('')}concat=n=${wavs.length}:v=0:a=1[a]`;
+    tool('ffmpeg', ['-loglevel', 'error', '-y', ...inputs, '-filter_complex', concat, '-map', '[a]', '-b:a', '64k', mp3]);
+    for (const f of wavs) fs.rmSync(f);
     const sec = Number(tool('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', mp3]).trim());
     files.push({ id: s.id, seconds: Math.round(sec * 10) / 10 });
   }

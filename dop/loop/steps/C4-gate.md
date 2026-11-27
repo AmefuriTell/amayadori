@@ -21,7 +21,7 @@ AI の判断を使わず、ツールだけで確かめる。AI は結果を見�
 
 図の項目（D-、P-015）では dg gate / dg publish（形・検証が ok・描けること を見て、diagrams/ に図の元、app/public/diagrams/ に絵を入れる）。
 
-講義の項目（K-）では lec gate / lec publish（形・検証が pass・検証の後に書き換えていない、を見て、図を描き、VOICEVOX で音声を作り、lectures/ に講義の元、app/public/lectures/&lt;task&gt;/ にアプリが読む物を入れる）。VOICEVOX は lec publish が起こす（Docker。初めは公式のイメージを mirror.gcr.io から取るので数分かかる）。
+講義の項目（K-）では lec gate / lec publish（形・検証が pass・検証の後に書き換えていない・よみ台本を確かめ終えた（C3 の lec yomi --done）、を見て、図を描き、VOICEVOX で音声を作り、lectures/ に講義の元、app/public/lectures/&lt;task&gt;/ にアプリが読む物を入れる）。VOICEVOX は lec publish が起こす（Docker。初めは公式のイメージを mirror.gcr.io から取るので数分かかる）。
 
 ## q gate の検査
 
