@@ -87,7 +87,7 @@
 
 ## 講義の項目（K-）の検証
 
-判断の要点の講義（points.json がある項目）では、2 人の検証に加えて「解けるかの試し」をする。答えを見ない検証役を別の新しい文脈で起こし、lecture.json だけを読ませて solve-blind.json の問題を全部解かせる（points.json・questions.json・bank・review-*.json は見せない。自分の知識でなく、講義に書いてある事で選ぶ）。検証役は work/&lt;ID&gt;/solve.json に [{ id, answer: [記号], slide, quote, why }] を書く。quote は決め手にした講義の文（そのスライドの台本・要点・図の文をそのまま）。lec verdict は、答えが違う問題と、quote が講義に無い問題を「中」として数える（講義に決め手が足りない）。直したら解き直す。
+判断の要点の講義（points.json がある項目）では、2 人の検証に加えて「解けるかの試し」をする。`lec solve <ID>` で notes と covers を抜いた solve-lecture.json を作り、答えを見ない検証役を別の新しい文脈で起こして、solve-lecture.json だけを読ませて solve-blind.json の問題を全部解かせる（lecture.json・points.json・questions.json・bank・review-*.json は見せない。自分の知識でなく、講義に書いてある事で選ぶ）。検証役は work/&lt;ID&gt;/solve.json に [{ id, answer: [記号], slide, quote, why }] を書く。quote は決め手にした講義の文（そのスライドの台本・要点・図の文をそのまま）。lec verdict は、答えが違う問題と、quote が講義に無い問題を「中」として数える（講義に決め手が足りない）。直したら解き直す。
 
 検証役を 2 人、別々の新しい文脈で起こす（互いの結果は見せない）。どちらも work/&lt;ID&gt;/lecture.json・sources.md・preview/&lt;スライド id&gt;.png（図の絵）を見る。Web は使わない。試験ガイドの task の knowledge・skills（item.json の task_info、無ければ config/exam.json）も見る。そこにある観点（例: mutable と immutable）を講義の軸や見出しに使うのは根拠に無い分類ではない。ただし観点の中身の事実は sources.md に根拠が要る。
 

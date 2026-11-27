@@ -96,6 +96,16 @@ const commands = {
     emit({ ok: true, summary: `task ${task} の問題 ${nq} 問を points.json に書き、問題の資料から出典を ${ns} 個足した → docs check`, items: [] });
   },
 
+  // C3（判断の要点の講義）: 解けるかの試しに渡す講義を書く。notes と covers（答えの手がかり）を抜き、画面と台本だけにする
+  solve(args) {
+    const id = itemIdOf(args._[0]);
+    if (!pointsOf(id)) throw new ToolError('points.json が無い（判断の要点の講義だけ）');
+    const lec = loadLecture(id);
+    const slides = lec.slides.map((s) => ({ id: s.id, title: s.title, bullets: s.bullets, visual: s.visual, dialogue: s.dialogue }));
+    writeJSON(paths.work(id, 'solve-lecture.json'), { task: lec.task, title: lec.title, slides });
+    emit({ ok: true, summary: `解けるかの試しに渡す講義を書いた（${slides.length} 枚）→ 答えを見ない検証役に solve-lecture.json と solve-blind.json だけで解いてもらう`, items: [], details_path: rel(paths.work(id, 'solve-lecture.json')) });
+  },
+
   async validate(args) {
     const id = itemIdOf(args._[0]);
     const lec = loadLecture(id);
