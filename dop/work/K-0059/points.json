@@ -1,0 +1,528 @@
+{
+  "task": "1.2",
+  "questions": [
+    {
+      "id": "q-1.2-0001",
+      "stem_ja": "あるチームは GitHub でコードを管理し、Webhook を設定した AWS CodeBuild プロジェクトでユニットテストを実行しています。テストは、プルリクエストが作成された時と、新しいコミットが追加されるたびに実行する必要があります。テストは、main ブランチを対象とするプルリクエストに対してだけ実行する必要があります。ほかのブランチを対象とするプルリクエストでは、ビルドを開始してはなりません。最も少ない運用の手間でこれらの要件を満たす Webhook の設定はどれですか。",
+      "choices_ja": {
+        "A": "2 つのフィルターグループ: 1 つは EVENT に PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED を設定し、もう 1 つは BASE_REF に refs/heads/main を設定する。",
+        "B": "1 つのフィルターグループで、EVENT に PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED を、BASE_REF に refs/heads/main を設定する。",
+        "C": "1 つのフィルターグループで、EVENT に PUSH, PULL_REQUEST_CREATED を、BASE_REF に refs/heads/main を設定する。",
+        "D": "1 つのフィルターグループで、EVENT に PULL_REQUEST_CREATED, PULL_REQUEST_MERGED を、BASE_REF に refs/heads/main を設定する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "ビルドは、どれかのフィルターグループが真になると始まり、グループが真になるのはその中の全フィルターが真の時。1 つのグループに「作成と更新の PR イベント」と「BASE_REF が main」を入れると、main 向けの PR の作成と更新だけでビルドが始まる。",
+      "per_choice": {
+        "A": "グループどうしはどれか 1 つが真ならよいので、PR イベントだけのグループが他のブランチ向けの PR でも真になり、ビルドが始まってしまう。",
+        "B": "正しい。同じグループの中のフィルターは全部そろった時だけ真になるので、main 向けの PR の作成と更新に絞れる。",
+        "C": "BASE_REF は PR のイベントでしか使えない。また PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）が入っていない。",
+        "D": "PR に新しいコミットを足した時（PULL_REQUEST_UPDATED）に動かない。MERGED はマージの時で、要件に無い。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "quote": "A build is triggered if any filter group evaluates to true, which occurs when all the filters in the group evaluate to true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/github-webhook.html",
+          "quote": "A BASE_REF filter can be used with pull request events only."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0002",
+      "stem_ja": "ある企業は AWS CodeBuild で .NET アプリケーションをビルドしています。テストフレームワークは、結果を NUnit 3 の XML ファイルとして test-results ディレクトリに書き出します。開発者は、ビルドごとに結果を CodeBuild のテストレポートとして表示したいと考えています。企業は、ファイルを変換したりアップロードしたりする手順を追加したくありません。最も少ない運用の手間でこれらの要件を満たす変更はどれですか。",
+      "choices_ja": {
+        "A": "buildspec に reports セクションを追加して test-results のファイルを指定し、file-format を NUNIT3XML に設定する。",
+        "B": "buildspec に reports セクションを追加して test-results のファイルを指定し、file-format は設定しない。",
+        "C": "結果を JUnit XML に変換するビルドコマンドを追加し、変換後のファイルを reports セクションに指定する。",
+        "D": "ビルドのたびに Amazon S3 に保存されるように、test-results のファイルを artifacts セクションに追加する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "buildspec の reports に、試験結果のファイルの場所（files）と形式（file-format）を書くと、CodeBuild がテストレポートにする。file-format を書かないと JUNITXML として扱うので、NUnit 3 XML なら NUNIT3XML を指定する。",
+      "per_choice": {
+        "A": "正しい。形式を NUNIT3XML にすれば、変換なしでテストレポートになる。",
+        "B": "file-format を書かないと JUNITXML として扱われ、NUnit 3 XML の形式と合わない。",
+        "C": "動くが、変換の手順を足すことになり、要件に反する。CodeBuild は NUnit 3 XML をそのまま扱える。",
+        "D": "S3 にファイルが残るだけで、CodeBuild のテストレポートにはならない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html",
+          "quote": "NUNIT3XML NUnit 3 XML"
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0003",
+      "stem_ja": "ある企業は、接続を使う GitHub のソースアクションを持つ AWS CodePipeline の V2 パイプラインを使用しています。パイプラインは、main ブランチを対象とするプルリクエストが作成された時と、そのプルリクエストに新しいリビジョンが公開されるたびに開始する必要があります。また、main へのすべてのプッシュでも開始する必要があります。企業は 1 つのパイプラインを使い、独自のコードは使わないことを望んでいます。最も少ない運用上のオーバーヘッドでこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "main に対する Open と Closed のイベントの pullRequest フィルターと、main の push フィルターを持つトリガーを追加する。",
+        "B": "main の push フィルターだけを持つトリガーを追加し、プルリクエストでテストを実行する CodeBuild の Webhook を追加する。",
+        "C": "プルリクエストのイベント用に 2 つ目のパイプラインを作成し、最初のパイプラインは main へのプッシュ用に残す。",
+        "D": "main に対する Open と Update のイベントの pullRequest フィルターと、main の push フィルターを持つトリガーを追加する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "V2 パイプラインのトリガーは、git の設定で push と pull request のイベントを絞り込める。pull request の Open は PR が作られた時、Update は PR に新しいリビジョンが出た時に動くので、main への push のフィルターと合わせると 1 つのパイプラインで要件を満たす。",
+      "per_choice": {
+        "A": "Closed は PR が閉じられた時。新しいリビジョンが出た時（Update）に動かない。",
+        "B": "PR の時に動くのは CodeBuild だけで、パイプラインは始まらない。",
+        "C": "動くが、パイプラインを 1 つにする要件に反する。",
+        "D": "正しい。Open と Update の pull request のフィルターと、main の push のフィルターを 1 つのパイプラインに入れる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-triggers.html",
+          "quote": "Update - This option triggers the pipeline when a pull request revision is published for the branch/file path."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/pipeline-requirements.html",
+          "quote": "Triggers allow you to configure your pipeline to start on a particular event type or filtered event type, such as when a change on a particular branch or pull request is detected."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0004",
+      "stem_ja": "ある企業は、Web アプリケーション用の JMeter のスクリプトを持っています。企業は、リリースのたびに数千の同時ユーザーをシミュレートしてボトルネックを見つける必要があり、また性能の劣化を見つけるために、同じ負荷テストを毎週実行する必要があります。DevOps チームは、負荷を生成するサーバーを用意したり管理したりしたくなく、テストを CI/CD パイプラインに組み込みたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Amazon EC2 インスタンスの Auto Scaling グループで JMeter を実行し、リリースのたびにパイプラインからグループを開始する。",
+        "B": "テストを別のフレームワーク向けに書き直し、リリースのたびに開発者のワークステーションから実行する。",
+        "C": "Distributed Load Testing on AWS をデプロイして既存の JMeter のスクリプトを使い、毎週のテストをスケジュールし、パイプラインから呼び出す。",
+        "D": "週に 1 回、共有の 1 台のサーバーから JMeter のスクリプトを実行し、リリースの負荷テストは省く。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Distributed Load Testing on AWS は、サーバーを用意せずに何千もの利用者のリクエストを流し、リリースの前にボトルネックを見つける。JMeter などのスクリプトを使え、すぐ・決めた日時・くり返しの予定で動かせる。CI/CD のパイプラインに入れる使い方も想定されている。",
+      "per_choice": {
+        "A": "負荷を出すサーバーを持って管理することになり、要件に反する。",
+        "B": "書き直す必要は無く、手元で動かすのでは自動にならない。",
+        "C": "正しい。今の JMeter のスクリプトのまま、くり返しの予定とパイプラインの両方で使える。",
+        "D": "リリースの前の試験の要件に反し、1 台では何千もの利用者を再現しにくい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html",
+          "quote": "This solution simulates thousands of connected users generating HTTP requests at a sustained rate without the need to provision servers."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/solution-overview.html",
+          "quote": "Customize your application tests using JMeter, k6, Locust test scripts, or simple HTTP endpoint configuration."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/use-cases.html",
+          "quote": "Integrate automated performance testing into continuous integration and deployment pipelines to catch performance issues early in the development cycle."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/solutions/latest/distributed-load-testing-on-aws/features.html",
+          "quote": "Schedules tests to run immediately, at a specific future date and time, or on a recurring schedule using cron expressions for automated regression testing."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0005",
+      "stem_ja": "ある CodeBuild プロジェクトは、1 回のビルドで 2,000 件の統合テストを実行しており、60 分かかります。チームは、同じテスト一式を同じ設定のまま、同時に動く 10 個のビルドに分けたいと考えています。チームは、テストファイルを手で分けたり、複数のプロジェクトを保守したりしたくありません。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "同じ環境の 10 個の設定を並べたビルドマトリックスで、バッチビルドを構成する。",
+        "B": "CodeBuild プロジェクトを 10 個作成し、それぞれに実行するテストファイルの一覧を渡す。",
+        "C": "テストを 1 つのビルドで実行し、パイプラインからそのビルドを同時に 10 回開始する。",
+        "D": "ビルドファンアウトでバッチビルドを構成し、parallelism フィールドを 10 に設定する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "build fanout は、1 つの作業をバッチの中の複数のビルドに分け、試験を並べて動かすのに使える。parallelism の値に合わせて、試験のケースを分けた塊ごとに別のビルドを作る。build matrix は、違う設定の組み合わせごとにビルドを作る物。",
+      "per_choice": {
+        "A": "build matrix は違う設定の組み合わせごとにビルドを作る物で、同じ試験を分けて動かす物ではない。",
+        "B": "試験のファイルを手で分け、10 個のプロジェクトを持つことになり、要件に反する。",
+        "C": "同じ試験の全部を 10 回動かすだけで、試験は分かれない。",
+        "D": "正しい。試験を 10 に分け、並べて動かす。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "A build fanout defines a task that will be split into multiple builds in the batch. This can be used for running tests in parallel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "A build matrix defines tasks with different configurations that run in parallel."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0006",
+      "stem_ja": "あるライブラリは、3 つのランタイムのバージョンと 2 つのオペレーティングシステムのイメージでテストする必要があり、組み合わせは 6 通りになります。プルリクエストごとに 6 通りすべてを並列で実行する必要があり、チームは別々のプロジェクトを保守するのではなく、1 か所で定義したいと考えています。最も少ない運用の手間でこれらの要件を満たす CodeBuild の構成はどれですか。",
+      "choices_ja": {
+        "A": "ランタイムのバージョンとイメージを並べたビルドマトリックスを持つバッチビルド。",
+        "B": "ビルドファンアウトを使い、parallelism フィールドを 6 にしたバッチビルド。",
+        "C": "組み合わせごとに 1 つずつ、同じパイプラインのステージから開始する 6 個の CodeBuild プロジェクト。",
+        "D": "buildspec の中で 6 通りの組み合わせを 1 つずつ順に実行する 1 つのビルド。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "build matrix は違う設定の作業を並べて動かす物で、CodeBuild は設定の組み合わせごとに別のビルドを作り、並べて動かす。build fanout は同じ作業の試験を塊に分ける物。",
+      "per_choice": {
+        "A": "正しい。組み合わせごとにビルドが作られ、並べて動く。",
+        "B": "build fanout は同じ設定のまま試験を分ける物で、違う設定の組み合わせを作らない。",
+        "C": "動くが、6 つのプロジェクトを持つことになり、要件に反する。",
+        "D": "1 つのビルドで順に動かすので、並べて動かす要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "CodeBuild creates a separate build for each possible configuration combination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "These builds run in parallel."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/batch-build.html",
+          "quote": "CodeBuild creates a separate build for each shard of test cases based on the value set in the parallelism field."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0007",
+      "stem_ja": "ある Amazon ECS サービスで動くコンテナのヘルスチェックのコマンドは、アプリケーションの読み込みが終わるまで 0 以外の終了コードを返し、読み込みには約 90 秒かかります。ヘルスチェックは、間隔・タイムアウト・再試行の回数に既定値を使っています。新しいタスクは、起動が終わる前に異常と判断されて置き換えられます。チームは、起動中のチェックの失敗は無視し、起動後のチェックは弱めないようにしたいと考えています。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "コンテナのヘルスチェックの retries を 20 に設定する。",
+        "B": "コンテナのヘルスチェックの interval を 400 秒に設定する。",
+        "C": "コンテナのヘルスチェックの startPeriod を 120 秒に設定する。",
+        "D": "コンテナのヘルスチェックの timeout を 90 秒に設定する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "コンテナのヘルスチェックは、コマンドの終了コード 0 で成功、0 以外で失敗とする。startPeriod は、起動の間の失敗を retries の回数に数えない猶予（0〜300 秒、既定は無効）。interval は 5〜300 秒、timeout は 2〜60 秒、retries は 1〜10 回。",
+      "per_choice": {
+        "A": "retries は 10 回まで。",
+        "B": "interval は 300 秒まで。起動の後の確かめも弱くなる。",
+        "C": "正しい。起動の間の失敗を数えず、その後は今までどおり確かめる。",
+        "D": "timeout は 60 秒まで。1 回の確かめの待ち時間で、起動の遅さの問題は解決しない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "The optional grace period to provide containers time to bootstrap in before failed health checks count towards the maximum number of retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "You can specify between 1 and 10 retries."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "You can specify between 5 and 300 seconds. The default value is 30 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "You can specify between 2 and 60 seconds. The default value is 5 seconds."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0008",
+      "stem_ja": "ある Amazon ECS のタスクには、アプリケーションのコンテナと、ログを転送するサイドカーのコンテナがあります。どちらも essential パラメータを省略しています。サイドカーがクラッシュすると、タスク全体が停止します。チームは、サイドカーが失敗してもアプリケーションが動き続け、タスクのヘルスがアプリケーションの正常性だけを反映するようにしたいと考えています。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "サイドカーのコンテナの essential を false に設定する。",
+        "B": "アプリケーションのコンテナにヘルスチェックのコマンドを定義し、essential のままにする。",
+        "C": "両方のコンテナの essential を false に設定する。",
+        "D": "サイドカーのヘルスも報告されるように、サイドカーにヘルスチェックのコマンドを追加し、essential のままにする。",
+        "E": "省略すると essential でない扱いになるので、サイドカーの essential パラメータは省略したままにする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "essential が true のコンテナが止まると、タスクの他のコンテナも全て止まる。false なら他に影響しない。省くと essential とみなされ、タスクには少なくとも 1 つの essential のコンテナが要る。タスクの健全性は、essential でヘルスチェックのコマンドを持つコンテナだけで決まる。",
+      "per_choice": {
+        "A": "正しい。サイドカーが止まってもアプリは動き続ける。",
+        "B": "正しい。essential でヘルスチェックを持つアプリのコンテナだけで、タスクの健全性が決まる。",
+        "C": "タスクには少なくとも 1 つの essential のコンテナが要る。",
+        "D": "サイドカーの状態もタスクの健全性に入り、止まればタスクも止まる。",
+        "E": "省くと essential とみなされる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "If this parameter is omitted, a container is assumed to be essential."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "If the essential parameter of a container is marked as false, then its failure doesn't affect the rest of the containers in a task."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html",
+          "quote": "All tasks must have at least one essential container."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/healthcheck.html",
+          "quote": "Containers that are essential and have health check command in the task definition are the only ones considered to determine the task health."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0009",
+      "stem_ja": "Amazon EC2 インスタンスへの AWS CodeDeploy のデプロイで、ValidateService フックのスクリプトが、アプリケーションが正常な応答を返すまでポーリングしており、最大で 4 分かかることがあります。フックのタイムアウトは 60 秒に設定されており、アプリケーションが正常になってもデプロイは ValidateService で失敗します。チームは、デプロイが成功と記録される前の確認を続ける必要があります。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "ValidateService フックのタイムアウトを 7200 秒に増やす。",
+        "B": "ポーリングのスクリプトを BeforeInstall フックに移す。",
+        "C": "確認なしでデプロイが完了するように、ValidateService フックを削除する。",
+        "D": "ValidateService フックのタイムアウトを 300 秒に増やす。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "hooks の timeout は、スクリプトが失敗とみなされるまでの秒数で、既定と最大は 3600 秒（1 時間）。超えるとデプロイが止まり、そのインスタンスへのデプロイは失敗する。ValidateService は最後のライフサイクルイベントで、デプロイがうまく終わったかを確かめるのに使う。",
+      "per_choice": {
+        "A": "1 つのライフサイクルイベントのスクリプトに許されるのは最大 3600 秒。",
+        "B": "BeforeInstall はアプリを入れる前で、入れた後の確かめにならない。",
+        "C": "成功とする前に確かめる要件に反する。",
+        "D": "正しい。4 分の確かめが収まる長さにする。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "quote": "The number of seconds to allow the script to execute before it is considered to have failed. The default is 3600 seconds (1 hour)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "quote": "3600 seconds (1 hour) is the maximum amount of time allowed for script execution for each deployment lifecycle event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html",
+          "quote": "ValidateService – This is the last deployment lifecycle event. It is used to verify the deployment was completed successfully."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0010",
+      "stem_ja": "ある Java のチームは AWS CodeBuild でビルドしています。テストは既に JaCoCo XML のカバレッジのファイルを出していますが、開発者はカバレッジを見るためにビルドのアーティファクトをダウンロードする必要があります。チームは、すべてのビルドの行カバレッジと分岐カバレッジを CodeBuild で見られるようにしたく、追加のレポートのツールを動かしたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "buildspec ファイルに reports セクションを足して JaCoCo XML のファイルの場所を指定し、ファイル形式は指定しない。",
+        "B": "buildspec ファイルに reports セクションを足し、コードカバレッジのレポートグループ、JaCoCo XML のファイルの場所、JACOCOXML のファイル形式を指定する。",
+        "C": "ビルドのたびに JaCoCo XML のファイルを Amazon S3 バケットへアップロードし、それを解析する静的なダッシュボードを公開する。",
+        "D": "Amazon EC2 で自前のコード品質のサーバーを動かし、ビルドから JaCoCo XML のファイルを送る。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "CodeBuild はテストのコードカバレッジのレポートを作れ、行カバレッジと分岐カバレッジを示します。buildspec にコードカバレッジのレポートグループを設定してビルドを動かすと、ビルドごとにレポートが作られます。JaCoCo XML は対応する形式で、ファイル形式を指定しないと JUNITXML として扱われます。",
+      "per_choice": {
+        "A": "ファイル形式を指定しないと JUNITXML として扱われ、JaCoCo のカバレッジのレポートとして読まれません。",
+        "B": "正しい。対応する形式を指定したレポートグループで、ビルドごとのカバレッジのレポートが CodeBuild に出ます。",
+        "C": "動きますが、解析とダッシュボードを自分で作って保守する必要があります。",
+        "D": "動きますが、追加のツールを動かして保守することになり、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "quote": "CodeBuild allows you to generate code coverage reports for your tests."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report-create",
+          "quote": "To create a code coverage report, you run a build project that is configured with at least one code coverage report group in its buildspec file."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/code-coverage-report.html#code-coverage-report",
+          "quote": "JaCoCo XML"
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0011",
+      "stem_ja": "あるチームは、CodeBuild の buildspec ファイルの reports セクションから自動で作られたレポートグループを使っています。監査人は、すべてのビルドのテスト結果の元のファイルを 1 年間残すことを新たに求めています。チームは、テストのレポートが約 1 か月後に見られなくなることに気づきました。運用上のオーバーヘッドが最も少なく監査の要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "今のレポートグループのまま、各テストのレポートが期限切れになる前に画面を保存する。",
+        "B": "今のレポートグループのまま、監査人が結果を求めるたびに古いビルドを実行し直す。",
+        "C": "チームが保守するスクリプトで結果のファイルを Amazon S3 へコピーする post_build のコマンドを足す。",
+        "D": "元の結果を Amazon S3 へエクスポートするレポートグループを作り、buildspec でその ARN を指定する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "テストのレポートは作られてから 30 日で期限切れになり、見られなくなります。buildspec で作ったレポートグループは元のテスト結果のファイルをエクスポートしないため、コンソールか AWS CLI で作ったレポートグループを使い、buildspec ではその ARN を指定します。",
+      "per_choice": {
+        "A": "手作業で、元のテスト結果のファイルも残りません。",
+        "B": "実行し直しても当時の結果にはならず、すべてのビルドの元のファイルを残すことになりません。",
+        "C": "動きますが、コピーのスクリプトを保守する必要があり、レポートグループの機能を使うより手間がかかります。",
+        "D": "正しい。エクスポートするレポートグループをコンソールか AWS CLI で作り、buildspec から既存のレポートグループとして ARN で指定します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/test-reporting.html#test-reporting",
+          "quote": "A report expires 30 days after it was created. You cannot view an expired test report."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#test-report-group-create-buildspec",
+          "quote": "A report group created using the buildspec does not export raw test result files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Specify the ARN of an existing report group, or the name of a new report group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/report-group-create.html#report-group-create",
+          "quote": "You can use the CodeBuild console, the AWS CLI, or a buildspec file to create a report group."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0012",
+      "stem_ja": "ある Python のサービスは AWS CodePipeline でデプロイされています。チームは、デプロイの前に単体テストを実行する別のステージを置き、JUnit XML で書かれる各回の pytest の結果を、AWS CodeBuild のテストのレポートとして見たいと考えています。チームはマネージドの機能だけを使いたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "単体テストの CodeBuild プロジェクトを実行する、Test のカテゴリーの CodeBuild のアクションを持つステージを足す。",
+        "B": "プロジェクトの buildspec に、JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式は既定のものを使う。",
+        "C": "JUnit XML の結果のファイルを指す reports セクションを足し、ファイル形式を CLOVERXML にする。",
+        "D": "テストのレポートが作られるよう、CodeBuild のアクションの BatchEnabled パラメータを有効にする。",
+        "E": "テストの結果を環境変数としてエクスポートし、アクションの出力変数から読む。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "CodePipeline の CodeBuild のアクションは Build か Test のカテゴリーで、パイプラインの中でビルドやテストを実行できます。テストのレポートは buildspec の reports セクションで結果のファイルの場所を指定して作り、ファイル形式を指定しなければ JUNITXML として扱われます。",
+      "per_choice": {
+        "A": "正しい。Test のカテゴリーの CodeBuild のアクションで、デプロイの前にテストのステージを置けます。",
+        "B": "正しい。JUnit XML は既定の形式なので、reports セクションで場所を指定すればテストのレポートが作られます。",
+        "C": "CLOVERXML はコードカバレッジの形式で、JUnit XML の結果を正しく読めません。",
+        "D": "BatchEnabled は同じ実行の中で複数のビルドを動かすためのもので、レポートを作る設定ではありません。",
+        "E": "出力変数はビルドでエクスポートした環境変数を出すもので、テストのレポートにはなりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "quote": "Allows you to run builds and tests as part of your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild",
+          "quote": "Category: Build or Test"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.reports",
+          "quote": "Optional mapping. Represents the report file format. If not specified, JUNITXML is used."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodeBuild.html#action-reference-CodeBuild-config",
+          "quote": "The Boolean value of the BatchEnabled parameter allows the action to run multiple builds in the same build execution."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0013",
+      "stem_ja": "us-east-1 のパイプラインに、新しいデプロイに対してスモークテストを行う Lambda の呼び出しのアクションがあります。関数はクロスリージョンのアクションとして eu-west-1 で動きます。テストは終わりますが、パイプラインのアクションはタイムアウトするまで成功も失敗も表示しません。関数は、パイプラインのリージョンの CodePipeline のエンドポイントへ結果を報告しています。問題を直せる可能性が最も高い変更はどれですか。",
+      "choices_ja": {
+        "A": "パイプラインが結果を受け取る時間を増やすため、Lambda 関数のタイムアウトを最大にする。",
+        "B": "パイプラインが CloudWatch Logs から結果を読めるよう、関数で CodePipeline からの JSON のイベント全体をログに出す。",
+        "C": "PutJobSuccessResult と PutJobFailureResult を、Lambda 関数が動く eu-west-1 のエンドポイントへ送る。",
+        "D": "Lambda のアクションを手動の承認のアクションに置き換え、テスターが結果を確かめてから承認する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "クロスリージョンの Lambda の呼び出しのアクションでは、PutJobSuccessResult と PutJobFailureResult による結果を、CodePipeline のあるリージョンではなく、Lambda 関数のあるリージョンへ送る必要があります。",
+      "per_choice": {
+        "A": "結果が正しいリージョンへ届かない限り、時間を延ばしても表示は変わりません。",
+        "B": "CodePipeline の JSON のイベントには一時的な認証情報が入っており、ログに出すと認証情報が CloudWatch Logs に残るため、出してはいけません。",
+        "C": "正しい。関数のあるリージョンへ結果を送れば、アクションが成功か失敗になります。",
+        "D": "自動のテストが手作業になり、問題の原因も直りません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "quote": "should be sent to the AWS Region where the Lambda function is present and not to the Region where CodePipeline exists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "quote": "Do not log the JSON event that CodePipeline sends to Lambda because this can result in user credentials being logged in CloudWatch Logs."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0014",
+      "stem_ja": "パイプラインは Lambda の呼び出しのアクションで、外部のテストのシステムで結合テストを始め、結果を待っています。テストは今は約 40 分かかるため、アクションが失敗します。チームは、今の Lambda の呼び出しのアクションと同じ関数を使い続けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "関数がテストを始めて継続トークンを返し、その後の呼び出しのたびにテストの状態を確かめて、終わるまで続ける。",
+        "B": "テスト全体を待てるよう、Lambda 関数のタイムアウトを 60 分にする。",
+        "C": "Lambda の呼び出しのアクションを手動の承認のアクションに置き換え、テストが通ったらテスターが承認する。",
+        "D": "Lambda の呼び出しのアクションを、テストのシステムを待つ Step Functions の呼び出しのアクションに置き換える。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "継続トークン（continue_job_later）を使うと、時間のかかる非同期の処理を見守れます。これにより、Lambda の上限である 15 分を超えても、アクションが続き、関数を成功させられます。",
+      "per_choice": {
+        "A": "正しい。今のアクションと関数のまま、15 分を超えるテストを待てます。",
+        "B": "Lambda の実行時間の上限は 15 分で、60 分にはできません。",
+        "C": "自動のテストの待ち合わせが手作業になり、要件に合いません。",
+        "D": "動きますが、今の Lambda の呼び出しのアクションを使い続けるという要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "quote": "Using a continuation token to monitor a long-running asynchronous process (continue_job_later)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/actions-invoke-lambda-function.html#actions-invoke-lambda-function",
+          "quote": "This allows the action to continue and the function to succeed even if it exceeds a fifteen-minute runtime (a limit in Lambda)."
+        }
+      ]
+    },
+    {
+      "id": "q-1.2-0015",
+      "stem_ja": "テスト環境へデプロイした後、パイプラインは、いくつかの手順と分岐を持つ結合テストのワークフローを実行する必要があります。ワークフローが出す値（例えば確かめたテスト環境の URL）は、次のデプロイのアクションの設定へ渡す必要があります。チームはパイプラインのマネージドの機能を使い、つなぎのコードを書くのは避けたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "テストのワークフローの状態マシンを開始し、アクションの設定かアーティファクトから入力を渡す Step Functions の呼び出しのアクションを足す。",
+        "B": "次のデプロイのアクションの設定で、Step Functions のアクションの出力変数を参照する。",
+        "C": "手動の承認のアクションを足し、テスターが確かめた URL を次のアクションに入力する。",
+        "D": "ワークフローの手順と分岐がテスト用の端末で動くよう、Device Farm のテストのアクションを足す。",
+        "E": "次のアクションが読めるよう、CodePipeline のイベント全体とワークフローの結果をログに出す Lambda 関数を書く。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "Step Functions の呼び出しのアクションは、パイプラインから状態マシンの実行を始め、アクションの設定かアーティファクトのファイルから最初の状態を渡せます。このアクションは、パイプラインの後のアクションの設定から参照できる出力変数を出します。",
+      "per_choice": {
+        "A": "正しい。手順と分岐のあるテストを、つなぎのコード無しで状態マシンとして動かせます。",
+        "B": "正しい。出力変数を参照すれば、ワークフローの値を次のアクションに渡せます。",
+        "C": "値の受け渡しが手作業になり、要件に合いません。",
+        "D": "Device Farm は端末でアプリケーションを試すためのもので、手順と分岐のあるワークフローの実行や値の受け渡しには使いません。",
+        "E": "コードを書くことになり、イベントには一時的な認証情報が入っているので、ログに出してはいけません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+          "quote": "Starts an AWS Step Functions state machine execution from your pipeline."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-config",
+          "quote": "Provides an initial state to the state machine through either a property in the action configuration or a file located in a pipeline artifact to be passed as input."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-StepFunctions.html#action-reference-StepFunctions-output",
+          "quote": "This action produces output variables that can be referenced by the action configuration of a downstream action in the pipeline."
+        }
+      ]
+    }
+  ]
+}

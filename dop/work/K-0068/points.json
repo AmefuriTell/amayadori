@@ -1,0 +1,566 @@
+{
+  "task": "4.1",
+  "questions": [
+    {
+      "id": "q-4.1-0001",
+      "stem_ja": "セキュリティのポリシーでは、eu-west-1 にある既存の Amazon CloudWatch Logs のロググループを、カスタマーマネージドの AWS KMS キーで暗号化することが求められています。DevOps エンジニアは eu-west-1 に対称の KMS キーを作成し、ロググループに関連付けようとしましたが、CloudWatch Logs がキーを使えないため操作が失敗します。キーはこのロググループだけで使えるようにする必要があります。エンジニアは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "CloudWatch Logs は公開鍵でログのデータを暗号化するので、代わりに非対称の KMS キーを作成する。",
+        "B": "エンジニアの IAM ロールにキーに対する kms:Encrypt と kms:Decrypt のアクセス許可を与え、既定のキーポリシーはそのままにする。",
+        "C": "us-east-1 に KMS キーを作成し、そのリージョンの CloudWatch Logs のサービスプリンシパルにキーの使用を許可する。",
+        "D": "eu-west-1 の CloudWatch Logs のサービスプリンシパルにキーの使用を許可する文を、ロググループの ARN の条件付きでキーポリシーに追加する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "KMS キーは既定では持ち主しか使えないので、キーポリシーで CloudWatch Logs のサービスプリンシパル（キーと同じリージョンの物）に使う権限を与える。使える範囲は、条件で特定のロググループの ARN に絞るのがよいとされている。",
+      "per_choice": {
+        "A": "CloudWatch Logs は対称キーしか使えない。非対称キーを使ってはいけない。",
+        "B": "CloudWatch Logs のサービスプリンシパルに権限が無いままで、キーを使えない。",
+        "C": "サービスプリンシパルはキーと同じリージョンでなければならず、ロググループのリージョンとも合わない。",
+        "D": "正しい。サービスプリンシパルに許し、条件で 1 つのロググループに絞る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "quote": "With this step, you give the CloudWatch Logs service principal and the caller role permission to use the key. This service principal must be in the same AWS Region where the KMS key is stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "quote": "The Condition section in this example restricts the key to a single log group ARN."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "quote": "CloudWatch Logs supports only symmetric KMS keys. Do not use an asymmetric key to encrypt the data in your log groups."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0002",
+      "stem_ja": "あるアプリケーションは Amazon CloudWatch Logs のロググループにログを書き込んでおり、一部のログイベントにはクレジットカード番号が含まれています。ログを見るオペレーターにカード番号が見えてはなりません。ストレージの費用を抑えるため、ログイベントは 90 日後に自動で削除する必要があります。企業は独自のコードを書いたり動かしたりしたくありません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "クレジットカード番号のデータ識別子を使ってマスクする、ロググループのデータ保護ポリシーを作成する。",
+        "B": "ロググループの保持期間の設定を 90 日にする。",
+        "C": "オペレーターがカード番号を読めないように、カスタマーマネージドの AWS KMS キーでロググループを暗号化する。",
+        "D": "既定の保持期間の設定のままにし、90 日より古いログイベントを削除するスケジュールされた AWS Lambda 関数を実行する。",
+        "E": "CloudWatch Logs にログイベントが残らないように、毎日ロググループを Amazon S3 にエクスポートする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "データ保護のポリシーは、データ識別子で機微なデータを選び、見つけた物をログイベントの表示の時にマスクできる。ロググループの保持期間を決めると、それより古いデータは消され、消す印が付いた後は保存の費用もかからない。",
+      "per_choice": {
+        "A": "正しい。カード番号を見つけて、表示の時にマスクする。",
+        "B": "正しい。既定では無期限に残るので、90 日を設定すれば自動で消える。",
+        "C": "KMS で暗号化しても、データを求められた時に CloudWatch Logs が復号するので、表示を隠すことにはならない。",
+        "D": "自分のコードを動かすことになり、要件に反する。保持期間の設定で足りる。",
+        "E": "書き出しても CloudWatch Logs の保持はそのままで、日々の書き出しの仕組みも要る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/cloudwatch-logs-data-protection-policies.html",
+          "quote": "These operations let you log the sensitive data that is found (or not found), and to mask the sensitive data when the log events are viewed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+          "quote": "By default, log data is stored in CloudWatch Logs indefinitely. However, you can configure how long to store log data in a log group. Any data older than the current retention setting is deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+          "quote": "After they are marked for deletion, they do not add to your archival storage costs anymore, even if they are not actually deleted until later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+          "quote": "CloudWatch Logs decrypts this data whenever it is requested."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0003",
+      "stem_ja": "あるチームは今日、Standard のロググループに ERROR を含むログイベントを数えるメトリクスフィルターを作成し、そのメトリクスにアラームを作成しました。先週のログにはエラーが含まれているのに、グラフには過去 1 週間のデータがありません。エラーの無い静かな時間帯には、アラームは OK ではなく INSUFFICIENT_DATA になります。メトリクスにはディメンションがありません。正しい説明またはアクションはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "メトリクスフィルターは、フィルターを作成した後に届いたログイベントについてだけデータポイントを発行する。",
+        "B": "メトリクスフィルターに既定値 0 を設定すると、ログは届いたが 1 つも一致しない時に CloudWatch が 0 を報告する。",
+        "C": "サービス名のディメンションを既定値 0 と一緒に追加すると、静かな時間帯もアラームが OK のままになる。",
+        "D": "メトリクスフィルターを削除して作り直すと、CloudWatch Logs が過去 1 週間のログを 1 回スキャンする。",
+        "E": "ロググループを Infrequent Access のログクラスに移すと、メトリクスフィルターが 1 時間ごとに報告するようになる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "メトリクスフィルターは過去のデータには効かず、作った後に届いたイベントの値だけを出す。既定の値を決めないと、合うログが無い時は何も報告しないので、0 でも既定の値を決めるのが勧められている。ディメンションを付けたメトリクスには既定の値を決められない。メトリクスフィルターが使えるのは Standard のロググループだけ。",
+      "per_choice": {
+        "A": "正しい。過去のログはさかのぼって数えない。",
+        "B": "正しい。合うログが無い時に既定の値 0 が報告される。",
+        "C": "ディメンションを付けると既定の値を決められない。",
+        "D": "フィルターは過去のデータをさかのぼって調べない。",
+        "E": "メトリクスフィルターは Standard のロググループだけで使える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "quote": "Filters only publish the metric data points for events that happen after the filter was created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "quote": "If you don't specify a default value, CloudWatch won't report data when your metric filter doesn't find a match."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntaxForMetricFilters.html",
+          "quote": "If you assign dimensions to metrics that metric filters generate, you can't specify default values for those metrics."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html",
+          "quote": "Metric filters are supported only for log groups in the Standard log class."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0004",
+      "stem_ja": "ある Lambda 関数は、支払いの種類ごとの注文の合計など、いくつかの独自のビジネスのメトリクスを出す必要があります。チームは、関数が CloudWatch へ同期の API 呼び出しを余分に行うことも、cloudwatch:PutMetricData のアクセス許可を与えることも、新しいメトリクスごとに別のメトリクスフィルターを作成することも望んでいません。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "関数の既存の logs:PutLogEvents のアクセス許可を使い、CloudWatch の埋め込みメトリクス形式でメトリクスをログエントリとして書く。",
+        "B": "関数からメトリクスごとに PutMetricData を呼び出し、実行ロールに cloudwatch:PutMetricData を追加する。",
+        "C": "新しいビジネスのメトリクスを追加するたびに、ロググループにメトリクスフィルターを作成する。",
+        "D": "値を Amazon S3 バケットに書き、それらに対して PutMetricData を呼び出すスケジュールされたジョブを実行する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "埋め込みメトリクス形式（embedded metric format）では、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作れ、設定も要らない。必要なのは logs:PutLogEvents の権限だけで、cloudwatch:PutMetricData の権限は要らない。",
+      "per_choice": {
+        "A": "正しい。ログを書くだけで非同期にメトリクスができ、PutMetricData の権限は要らない。",
+        "B": "同期の API 呼び出しと PutMetricData の権限が要り、要件に反する。",
+        "C": "メトリクスを足すたびにフィルターを作ることになり、要件に反する。",
+        "D": "仕組みを作ることになり、PutMetricData の権限も要る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html",
+          "quote": "No setup is required to use the embedded metric format."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0005",
+      "stem_ja": "データチームは、AWS/EC2 と AWS/RDS の名前空間のすべての CloudWatch のメトリクスを、Apache Parquet 形式で Amazon S3 のデータレイクに継続的に届けたいと考えています。これらの名前空間に後から追加されるメトリクスも自動で含める必要があります。チームは CloudWatch をポーリングするコードを書きたくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Quick S3 のセットアップでメトリクスストリームを作成し、ストリームの出力形式に Parquet を選ぶ。",
+        "B": "AWS/EC2 の包含フィルターと、AWS/RDS 以外のすべての名前空間の除外フィルターを持つメトリクスストリームを作成する。",
+        "C": "毎分 GetMetricData を呼び出して Parquet ファイルを Amazon S3 に書く AWS Lambda 関数を実行する。",
+        "D": "2 つの名前空間の包含フィルターを持ち、データを Parquet に変換する Firehose の配信ストリームに送るメトリクスストリームを作成する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "メトリクスストリームは CloudWatch のメトリクスをほぼリアルタイムに送り続ける。Firehose を使う形では、JSON と OpenTelemetry の形式を直接扱い、Parquet などへは Firehose の変換で変える。名前空間で絞る filter は include か exclude のどちらかだけで、作った後に条件に合う新しいメトリクスも自動で入る。",
+      "per_choice": {
+        "A": "ストリームが直接選べる形式は JSON と OpenTelemetry だけ。",
+        "B": "1 つのストリームに include と exclude の両方の filter は置けない。",
+        "C": "自分で問い合わせるコードを持つことになり、要件に反する。",
+        "D": "正しい。2 つの名前空間を含めて送り、Firehose で Parquet に変える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "quote": "or you can configure transformations in your Firehose delivery stream to convert the data to a different format such as Parquet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "quote": "A single metric stream can have only include or exclude filters, but not both."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "quote": "the new metrics are automatically included in the stream."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Metric-Streams.html",
+          "quote": "Each stream can use either JSON format, OpenTelemetry 1.0.0, or OpenTelemetry 0.7.0 format."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0006",
+      "stem_ja": "あるチームは、ロググループの一致するログイベントをリアルタイムの処理のために AWS Lambda 関数へ送る、CloudWatch Logs のサブスクリプションフィルターを追加します。コードを書く前に、チームは関数が何を受け取り、どのような配信の保証を前提にできるかを尋ねています。正しい説明はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "関数は、gzip で圧縮され base64 でエンコードされたログのデータを awslogs.data フィールドで受け取る。",
+        "B": "イベントは少なくとも 1 回配信されるので、関数はときどき重複するイベントを処理できるようにすべきである。",
+        "C": "イベントは必ず 1 回だけ配信されるので、関数は重複を処理する必要がない。",
+        "D": "圧縮は Kinesis の送信先だけに適用されるので、関数はプレーンテキストのログイベントを受け取る。",
+        "E": "ロググループには最大 10 個のサブスクリプションフィルターを設定できるので、チームごとに自分のフィルターを追加できる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "サブスクリプションフィルターで送るログは gzip で圧縮され、Lambda は awslogs.data のフィールドに base64 で符号化されたデータを受け取る。配信は少なくとも 1 回で、まれに重複がある。ロググループに付けられるサブスクリプションフィルターは 5 つまで。",
+      "per_choice": {
+        "A": "正しい。gzip で圧縮され、base64 で awslogs.data に入る。",
+        "B": "正しい。少なくとも 1 回の配信で、重複があり得る。",
+        "C": "少なくとも 1 回で、重複は起こり得る。",
+        "D": "送り先が何でも gzip で圧縮される。",
+        "E": "ロググループごとに 5 つまで。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html",
+          "quote": "AWS Lambda receives the data base64 encoded in the awslogs.data field."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "quote": "Subscription filters ensure at least one time delivery of events, while duplicate events may occasionally occur."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "quote": "When log events are sent to the receiving service, they are compressed with the gzip format."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html",
+          "quote": "Each log group can have up to five subscription filters associated with it."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0007",
+      "stem_ja": "ある会社は、Systems Manager のマネージドノードである 300 台の Amazon Linux の EC2 インスタンスを動かしています。運用チームは、すべてのインスタンスのメモリの使用率とディスク容量の使用率を Amazon CloudWatch で見る必要があります。すべてのインスタンスは 1 か所に保存した 1 つのエージェントの設定を使う必要があり、インスタンスのロールは追加の権限無しで AWS 管理の CloudWatchAgentServerPolicy を使うことにしています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "CloudWatch エージェントの設定を /monitoring/cwagent-config というパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。",
+        "B": "すべてのインスタンスに、メモリとディスクの使用量を読み、毎分 PutMetricData API で値を送る cron ジョブを追加する。",
+        "C": "CloudWatch エージェントの設定を、名前が AmazonCloudWatch- で始まるパラメータとして Parameter Store に保存し、Systems Manager ですべてのインスタンスにエージェントを入れて、そのパラメータで起動する。",
+        "D": "すべてのインスタンスに CloudWatch エージェントを入れ、エージェントの設定ファイルが変わるたびに各インスタンスへ手作業でコピーする。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "CloudWatch エージェントは mem_used_percent や disk_used_percent などのメトリクスを集めます。設定を Parameter Store に保存すれば、ほかのサーバーにエージェントを入れる時にその設定を使えますが、CloudWatchAgentServerPolicy が読めるのは AmazonCloudWatch- で始まる名前のパラメータだけです。",
+      "per_choice": {
+        "A": "パラメータの名前が AmazonCloudWatch- で始まらないため、CloudWatchAgentServerPolicy では読めず、追加の権限が必要になります。",
+        "B": "動きますが、メトリクスを送る独自のスクリプトを 300 台で保守することになります。",
+        "C": "正しい。1 つの設定を Parameter Store に置き、Systems Manager でまとめて入れられ、管理ポリシーのままで読めます。",
+        "D": "メトリクスは集められますが、設定を 1 か所に置いておらず、変更のたびに手作業のコピーが要ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html#linux-metrics-enabled-by-CloudWatch-agent",
+          "quote": "mem_used_percent The percentage of memory currently in use."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#install-CloudWatch-Agent-on-EC2-Instance-fleet-ssm",
+          "quote": "The name must start with AmazonCloudWatch-, because the CloudWatchAgentServerPolicy managed policy can read only those parameters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/installing-cloudwatch-agent-ssm.html#installing-cloudwatch-agent-ssm",
+          "quote": "Using AWS Systems Manager makes it easier to install the CloudWatch agent on a fleet of Amazon EC2 instances."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0008",
+      "stem_ja": "AWS Lambda 関数が注文を処理しており、注文の種類（約 10 種類）ごとの注文の数をカスタムメトリクスとして公開する必要があります。関数のロールは Amazon CloudWatch Logs に書き込めますが、セキュリティチームはロールに cloudwatch:PutMetricData を与えません。会社は、思いがけず大量のカスタムメトリクスが作られることも避けたいと考えています。これらの要件を最も運用効率よく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、リクエスト ID と注文の種類をディメンションにする。",
+        "B": "関数のログの出力に CloudWatch の埋め込みメトリクス形式でメトリクスを書き、注文の種類をディメンションにする。",
+        "C": "注文ごとに関数から PutMetricData API を呼び、注文の種類をディメンションにする。",
+        "D": "各注文を Amazon S3 バケットに書き、注文を数えてメトリクスを公開するスケジュールのジョブを EC2 インスタンスで動かす。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "埋め込みメトリクス形式は、CloudWatch Logs に書くログの形でカスタムメトリクスを非同期に作り、logs:PutLogEvents の権限があれば cloudwatch:PutMetricData は要りません。ディメンションの組み合わせごとにメトリクスが作られるので、リクエスト ID のような値の種類が多いディメンションは避けます。",
+      "per_choice": {
+        "A": "リクエスト ID は値の種類が多く、組み合わせごとにメトリクスが作られて、大量のカスタムメトリクスになります。",
+        "B": "正しい。ログに書くだけでメトリクスができ、注文の種類（約 10 種類）だけをディメンションにするのでメトリクスの数も抑えられます。",
+        "C": "cloudwatch:PutMetricData の権限が必要で、セキュリティチームの決定に反します。",
+        "D": "動きますが、関数とは別の仕組みを作って動かし続ける必要があり、手間が大きくなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "quote": "The CloudWatch embedded metric format allows you to generate custom metrics asynchronously in the form of logs written to CloudWatch Logs."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "quote": "you need the logs:PutLogEvents permission but you don't need to also have the cloudwatch:PutMetricData permission."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html#CloudWatch_Embedded_Metric_Format",
+          "quote": "the embedded metric format will by design create a custom metric corresponding to each unique dimension combination."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0009",
+      "stem_ja": "多くのチームが、名前が /app/ で始まる CloudWatch Logs のロググループを作っています。これらのロググループの多くは既定の保持のまま作られており、ストレージの費用が増え続けています。会社は、/app/ で始まる既存と今後のすべてのロググループで、各チームの設定に頼らずに、ログイベントを 90 日間保持したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "/app/ の接頭辞に、90 日の保持期間と NEW_ONLY のオプションでアカウントレベルの保持ポリシーを作る。",
+        "B": "/app/ の接頭辞に、90 日の保持期間と RETROACTIVE のオプションでアカウントレベルの保持ポリシーを作る。",
+        "C": "毎日 /app/ のロググループを一覧し、それぞれに 90 日の保持を設定する AWS Lambda 関数をスケジュールで実行する。",
+        "D": "各チームに自分のロググループで 90 日の保持を設定してもらい、毎月設定を確認する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "CloudWatch Logs の既定ではログデータは無期限に保存されます。アカウントレベルの保持ポリシーはロググループの設定より優先され、RETROACTIVE を指定すると、ポリシーを作る前からあるものも含めて接頭辞に合うすべてのロググループに適用されます。",
+      "per_choice": {
+        "A": "NEW_ONLY はポリシーを作った後に作られるロググループにだけ適用され、既存のロググループは無期限のままです。",
+        "B": "正しい。既存と今後の /app/ のロググループのすべてに、チームの設定に頼らず 90 日の保持が適用されます。",
+        "C": "動きますが、独自の関数を作って保守する必要があります。",
+        "D": "各チームに頼ることになり、要件に反します。確認の手間もかかります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "By default, log data is stored in CloudWatch Logs indefinitely."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify RETROACTIVE to apply the policy to every log group that matches the prefix, including log groups that existed before you created the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#account-level-retention-policies",
+          "quote": "Specify NEW_ONLY to apply the policy only to log groups that are created after you create the policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html#SttingLogRetention",
+          "quote": "An account-level retention policy overrides the retention setting of the log group."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0010",
+      "stem_ja": "ある会社は、アプリケーションのログを、1 つ約 20 KB の数百万個の小さなファイルとして Amazon S3 バケットへエクスポートしています。チームは 30 日後にオブジェクトをより安いストレージクラスへ移す S3 ライフサイクルのルールを足しましたが、オブジェクトは元のストレージクラスのままで、ストレージの費用も下がりません。最も可能性の高い理由はどれですか。",
+      "choices_ja": {
+        "A": "ライフサイクルのルールは作った後に足されたオブジェクトにだけ適用されるため、既存のオブジェクトは移されない。",
+        "B": "バケットポリシーがすべてのプリンシパルのすべてのアクションを拒否しており、ライフサイクルのルールがオブジェクトを移せない。",
+        "C": "ライフサイクルの移行はデータの取り出しとして課金されるため、S3 は節約より費用が大きくなる移行を飛ばす。",
+        "D": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移さない。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "S3 ライフサイクルは既定で、128 KB より小さいオブジェクトをどのストレージクラスへも移しません。小さなオブジェクトはオブジェクトごとに移行のリクエストの料金がかかり、節約より費用が大きくなることがあるため、移行は勧められていません。",
+      "per_choice": {
+        "A": "ライフサイクルのルールは既存のオブジェクトにも、後から足すオブジェクトにも適用されます。",
+        "B": "バケットポリシーでライフサイクルのルールによる削除や移行を止めることはできません。",
+        "C": "ライフサイクルの移行にデータの取り出しの料金はかかりません。",
+        "D": "正しい。約 20 KB のオブジェクトは既定の動きで移されません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html#lifecycle-configuration-constraints",
+          "quote": "Amazon S3 applies a default behavior to S3 Lifecycle configurations that prevents objects smaller than 128 KB from being transitioned to any storage class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "When you add a Lifecycle configuration to a bucket, the configuration rules apply to both existing objects and objects that you add later."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "You can't use a bucket policy to prevent deletions or transitions by an S3 Lifecycle rule."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html#object-lifecycle-mgmt",
+          "quote": "There are no data retrieval charges for lifecycle transitions."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0011",
+      "stem_ja": "ある会社は、すべてのロググループを中央で処理するため Amazon Data Firehose へ送るアカウントレベルのサブスクリプションフィルターのポリシーを作りました。その後すぐ、配信の仕組み自身のリソースからログを受け取るロググループまで対象になり、再帰のループが起きて、CloudWatch Logs の取り込みの料金が急に上がりました。中央の処理を続けながら、ループを最も効果的に止める変更はどれですか。",
+      "choices_ja": {
+        "A": "アカウントレベルのポリシーに、配信の仕組みのリソースからログを取り込むロググループを除外する選択の条件を足す。",
+        "B": "配信の回数が減るよう、Firehose のバッファーのサイズと間隔を大きくする。",
+        "C": "アカウントレベルのポリシーを消し、各チームに自分のロググループのサブスクリプションフィルターを作ってもらう。",
+        "D": "配信の時にログが小さくなるよう、Firehose で解凍の機能を有効にする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "サブスクリプションフィルターでは、再帰のループが起きて取り込みの料金が大きく増えることがあります。これを防ぐには、アカウントレベルのサブスクリプションフィルターの選択の条件で、配信の仕組みに含まれるリソースからログを取り込むロググループを除外することが勧められています。",
+      "per_choice": {
+        "A": "正しい。ループのもとになるロググループだけを外し、ほかのロググループの中央の処理は続けられます。",
+        "B": "配信の回数は減っても、ループで取り込まれるログの量は減りません。",
+        "C": "ループは止まりますが、中央でまとめて処理する仕組みが崩れ、各チームの手間が増えます。",
+        "D": "解凍してもループは止まらず、取り込みの料金も減りません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "quote": "There is a risk of causing an infinite recursive loop with subscription filters that can lead to a large increase in ingestion billing if not addressed."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters-AccountLevel.html#SubscriptionFilters-AccountLevel",
+          "quote": "we recommend that you use selection criteria in your account-level subscription filters to exclude log groups that ingest log data from resources that are part of the subscription delivery workflow."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0012",
+      "stem_ja": "あるチームは、CloudWatch Logs のロググループのログを、VPC アクセスを使う Amazon OpenSearch Service のドメインへ流したいと考えています。流す仕組みはドメインへ書き込む Lambda 関数を使いますが、関数がドメインのエンドポイントに届きません。流せるようにするために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "lambda.amazonaws.com を信頼し、AWSLambdaVPCAccessExecutionRole ポリシーをアタッチした Lambda の実行ロールを使う。",
+        "B": "送り元のロググループが Standard のログクラスを使っていることを確かめる。",
+        "C": "既存の OpenSearch Service のドメインを、VPC アクセスからパブリックアクセスへ変える。",
+        "D": "データが VPC を通れるよう、サブスクリプションで gzip の圧縮を有効にする。",
+        "E": "Lambda の実行ロールの信頼関係に、lambda.amazonaws.com の代わりに logs.amazonaws.com を入れる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "OpenSearch Service へ流す時、Lambda の実行ロールは信頼関係に lambda.amazonaws.com を持つ必要があり、VPC アクセスのドメインでは AWSLambdaVPCAccessExecutionRole ポリシーが要ります。このポリシーが、Lambda が VPC の中の OpenSearch のエンドポイントへ書き込めるようにします。また、OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+      "per_choice": {
+        "A": "正しい。Lambda が VPC に入り、ドメインのエンドポイントへ書き込めるようになります。",
+        "B": "正しい。OpenSearch Service へ流せるのは Standard のログクラスのロググループだけです。",
+        "C": "ドメインを作った後に、アクセスの種類は変えられません。",
+        "D": "サブスクリプションで送るログはもともと gzip で圧縮されており、届かない問題の原因ではありません。",
+        "E": "実行ロールの信頼関係には lambda.amazonaws.com が必要です。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "quote": "It must have lambda.amazonaws.com in the trust relationship."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_LG",
+          "quote": "This Amazon-managed policy grants Lambda access to the customer's VPC, enabling Lambda to write to the OpenSearch endpoint in the VPC."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Stream",
+          "quote": "Streaming to OpenSearch Service is supported only for log groups in the Standard log class."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_OpenSearch_Stream.html#CWL_OpenSearch_Domain",
+          "quote": "The domain can have either public access or VPC access, but you can't then modify the type of access after the domain is created."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0013",
+      "stem_ja": "あるアプリケーションは、{\"path\": \"/checkout\", \"statusCode\": 503} のような JSON のログイベントを、Standard のロググループの CloudWatch Logs に書いています。運用チームは、/checkout のパスでのサーバーエラー（ステータスコードが 500 以上）の数がしきい値を超えた時に CloudWatch アラームを鳴らしたく、ほかのパスのエラーは数えてはいけません。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "{ $.statusCode >= 500 && $.path = \"/checkout\" } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。",
+        "B": "{ $.statusCode >= 500 } のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。",
+        "C": "構造の無い \"checkout 500\" のパターンのメトリクスフィルターを作り、できたメトリクスにアラームを作る。",
+        "D": "5 分ごとに手作業で CloudWatch Logs Insights のクエリを実行し、数が多すぎたらチームを呼び出す。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "メトリクスフィルターは、ログデータの中で探す語やパターンを決め、ログを数値の CloudWatch メトリクスに変えて、グラフにしたりアラームを設定したりできるようにします。JSON のログでは、パターンを {} で囲み、$. でプロパティを選び、数値の比較（>= など）と && による組み合わせを使えます。",
+      "per_choice": {
+        "A": "正しい。/checkout のパスで 500 以上のものだけを数えるメトリクスになり、それにアラームを設定できます。",
+        "B": "ほかのパスのサーバーエラーも数えてしまい、要件に反します。",
+        "C": "構造の無いパターンは語が含まれるかを見るだけで、500 以上という数値の条件を表せず、503 などを取りこぼします。",
+        "D": "手作業が必要で、オーバーヘッドが大きくなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html#search-filter-concepts",
+          "quote": "CloudWatch Logs uses these metric filters to turn log data into numerical CloudWatch metrics that you can graph or set an alarm on."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "quote": "Set off property selectors with a dollar sign followed by a period (\"$.\")."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-json-log-events",
+          "quote": "You can use the logical operators AND (\"&&\") and OR (\"||\") in filter patterns to create compound expressions that match log events where two or more conditions are true."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html#matching-terms-unstructured-log-events",
+          "quote": "Filter patterns only return the log events that contain the terms you define."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0014",
+      "stem_ja": "us-east-1 の既存の CloudWatch Logs のロググループが、既定の暗号化でアプリケーションのログを保存しています。新しいセキュリティのポリシーで、このロググループに新しく取り込むすべてのログデータを、カスタマーマネージドの AWS KMS キーで暗号化することが求められました。この要件を最もよく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "CloudWatch Logs のプリンシパルを許す非対称のキーを us-east-1 に作り、ロググループに関連付ける。",
+        "B": "us-west-2 に対称の KMS キーを作り、us-east-1 のロググループに関連付ける。",
+        "C": "キーポリシーを変えずに対称の KMS キーを作り、CloudWatch のコンソールで既存のロググループに関連付ける。",
+        "D": "CloudWatch Logs のプリンシパルを許す対称のキーを us-east-1 に作り、AWS CLI で関連付ける。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "KMS による暗号化は、作る時か作った後にロググループへ KMS キーを関連付けて有効にし、その後に取り込むデータがそのキーで暗号化されます。CloudWatch Logs は対称の KMS キーにだけ対応し、キーポリシーで、キーと同じリージョンの CloudWatch Logs のサービスプリンシパルに使う権限を与えます。既存のロググループへの関連付けはコンソールではできません。",
+      "per_choice": {
+        "A": "CloudWatch Logs は対称の KMS キーにだけ対応し、非対称のキーは使ってはいけません。",
+        "B": "サービスプリンシパルはキーと同じリージョンにある必要があり、ほかのリージョンのキーは使えません。",
+        "C": "KMS キーは既定で持ち主しか使えないので、キーポリシーで権限を与える必要があり、既存のロググループへの関連付けもコンソールではできません。",
+        "D": "正しい。対称のキー、同じリージョンのサービスプリンシパルへの権限、API か CLI での関連付けがそろっています。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+          "quote": "Encryption using AWS KMS is enabled at the log group level, by associating a KMS key with a log group, either when you create the log group or after it exists."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encrypt-log-data-kms",
+          "quote": "CloudWatch Logs supports only symmetric KMS keys."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#cmk-permissions-lg",
+          "quote": "This service principal must be in the same AWS Region where the KMS key is stored."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html#encryption-limits",
+          "quote": "You can't associate a KMS key with an existing log group using the CloudWatch console."
+        }
+      ]
+    },
+    {
+      "id": "q-4.1-0015",
+      "stem_ja": "ある会社は、CloudTrail の証跡のログファイルとダイジェストファイルを、SSE-S3 ではなくカスタマーマネージドの KMS キーで暗号化したいと考えています。セキュリティのロールの監査担当は、変更した時からすぐにファイルを読める必要があります。証跡は eu-west-1 の S3 バケットへ届けています。証跡をキーを使うように更新する前に、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "eu-west-1 に KMS キーを作り、CloudTrail が暗号化にキーを使えるようにするキーポリシーの文を足す。",
+        "B": "監査担当のセキュリティのロールに復号の権限を与える、キーポリシーの文を足す。",
+        "C": "CloudTrail がすべてのリージョンの証跡で使えるよう、us-east-1 に KMS キーを作る。",
+        "D": "監査担当が自分のキーを渡せるよう、バケットのデフォルト暗号化を SSE-C にする。",
+        "E": "キーポリシーは変えず、監査担当がアクセスのエラーを報告した後に復号の権限を与える。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "CloudTrail で SSE-KMS を使うには KMS キーを作って管理し、CloudTrail が暗号化に使い、利用者が復号できるようにするポリシーをキーに付けます。キーは、ログファイルを受け取る S3 バケットと同じリージョンに作る必要があります。復号の権限を証跡の設定より先に入れておかないと、権限の無い利用者は権限を与えるまで暗号化されたファイルを読めません。",
+      "per_choice": {
+        "A": "正しい。バケットと同じリージョンのキーで、CloudTrail が暗号化に使えるようにします。",
+        "B": "正しい。先に復号の権限を入れておけば、変更した時からすぐ読めます。",
+        "C": "キーはログファイルを受け取るバケットと同じリージョン（eu-west-1）に作る必要があります。",
+        "D": "SSE-C はデフォルト暗号化に使えません。",
+        "E": "変更から権限を与えるまでの間、監査担当がファイルを読めず、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms",
+          "quote": "The KMS key that you choose must be created in the same AWS Region as the Amazon S3 bucket that receives your log files and digest files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+          "quote": "Add policy sections to the key that enable CloudTrail to encrypt and users to decrypt log files and digest files."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/encrypting-cloudtrail-log-files-with-aws-kms.html#encrypting-cloudtrail-log-files-with-aws-kms-enabling",
+          "quote": "If you do not perform this step before adding the key to your trail configuration, users without decrypt permissions cannot read encrypted files until you grant them those permissions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-bucket-encryption.html#default-bucket-encryption",
+          "quote": "Server-side encryption with customer-provided keys (SSE-C) is not supported for default encryption."
+        }
+      ]
+    }
+  ]
+}

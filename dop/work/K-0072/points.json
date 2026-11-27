@@ -1,0 +1,440 @@
+{
+  "task": "5.2",
+  "questions": [
+    {
+      "id": "q-5.2-0001",
+      "stem_ja": "ある企業は、アプリケーションのコードを再デプロイせずに、本番で新しいチェックアウトの機能を有効にしたいと考えています。変更は段階的にユーザーに届く必要があります。変更の展開中、またはすべてのターゲットに届いた後の監視期間中に、チェックアウトのエラーの CloudWatch アラームが鳴った場合は、変更を自動で元に戻す必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "フラグを AWS Lambda の環境変数に保存し、CodeDeploy の Canary デプロイで新しい関数のバージョンを発行する。",
+        "B": "ベイク時間を持つ段階的なデプロイ戦略で AWS AppConfig の機能フラグを使い、CloudWatch のアラームをロールバックのモニターとして付ける。",
+        "C": "フラグを AWS Systems Manager Parameter Store に保存し、アラームが鳴ったらオペレーターが元に戻す。",
+        "D": "フラグを有効にした新しいコンテナイメージをビルドし、ECS のローリング更新で展開する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "AWS AppConfig は、コードを配り直さずに本番のアプリの動きを変え、機能を少しずつ広げられる。デプロイ戦略と CloudWatch のアラームによる自動ロールバックを組み合わせると、配信の間にアラームが鳴った時に前の版へ戻す。bake time は、100% に配った後もアラームを見る時間で、その間に鳴っても戻す。",
+      "per_choice": {
+        "A": "関数の新しい版を配ることになり、コードを配り直さない要件に反する。",
+        "B": "正しい。少しずつ配り、配信中と bake time の間にアラームが鳴れば自動で戻る。",
+        "C": "戻すのが人の作業になり、自動で戻す要件に合わない。少しずつ広げることもできない。",
+        "D": "コードを作り直して配ることになり、要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "quote": "If an alarm is triggered during this time, AWS AppConfig rolls back the deployment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+          "quote": "using a combination of AWS AppConfig deployment strategies and automatic rollbacks based on Amazon CloudWatch alarms."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0002",
+      "stem_ja": "DevOps エンジニアは、CloudWatch のアラームをロールバックのモニターにして AWS AppConfig のデプロイを設定しています。チームは、各デプロイを見張る代わりにこの機能に頼れるように、ロールバックがいつ起き、何が必要かを正確に理解したいと考えています。正しい説明はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "デプロイ中に監視しているアラームが ALARM か INSUFFICIENT_DATA になると、AWS AppConfig は前の設定データに戻す。",
+        "B": "AWS AppConfig が CloudWatch のアラームに基づいてデプロイをロールバックするには、先にアクセス許可を設定する必要がある。",
+        "C": "AWS AppConfig は、オペレーターがコンソールでロールバックを承認した後にだけロールバックする。",
+        "D": "ロールバックは、アプリケーションのコードの前のバージョンをコンピューティングのターゲットに再デプロイする。",
+        "E": "AWS AppConfig は、設定がターゲットの 100% に届いた時点でアラームの監視をやめる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "配信の間に見張るアラームが ALARM か INSUFFICIENT_DATA になると、AppConfig は設定のデータを前の版へ自動で戻す。CloudWatch のアラームで戻すには、AppConfig に権限を設定しておく必要がある。100% に配った後も bake time の間はアラームを見続ける。",
+      "per_choice": {
+        "A": "正しい。ALARM と INSUFFICIENT_DATA の両方で戻す。",
+        "B": "正しい。戻すための権限を設定する必要がある。",
+        "C": "自動で戻る。人の承認は要らない。",
+        "D": "戻すのは設定のデータで、アプリのコードではない。",
+        "E": "100% に配った後も、bake time の間はアラームを見る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html",
+          "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "quote": "You must configure permissions for AWS AppConfig to roll back based on CloudWatch alarms."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-deployment-strategy.html",
+          "quote": "This setting specifies the amount of time AWS AppConfig monitors for Amazon CloudWatch alarms after the configuration has been deployed to 100% of its targets"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0003",
+      "stem_ja": "Systems Manager のパラメータ /app/db-endpoint が更新されたら、企業はインスタンスのフリートでアプリケーションを再起動し、新しい値を読ませる必要があります。再起動の前に毎回シニアエンジニアの承認が必要で、企業は独自のコードを書いたりホストしたりしたくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "パラメータの更新イベントで AWS Lambda 関数を呼び出す EventBridge ルールを作成し、関数がエンジニアにメールして返信を待ってから再起動する。",
+        "B": "パラメータの更新イベントの EventBridge ルールを作成し、すぐにアプリケーションを再起動する Systems Manager Automation のランブックをターゲットにする。",
+        "C": "エンジニアが毎朝パラメータの履歴を確認し、値が変わっていたら手でアプリケーションを再起動する。",
+        "D": "パラメータの更新イベントの EventBridge ルールを作成し、再起動の前に aws:approve のステップを含む Systems Manager Automation のランブックをターゲットにする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Parameter Store のパラメータの作成・更新・削除を EventBridge で受け、ルールのターゲットに Automation のランブックを指定すれば、イベントに応じて自動化を始められる。aws:approve のアクションは、決めた人が承認か拒否をするまで自動化を一時停止する。",
+      "per_choice": {
+        "A": "自分でコードを書いて動かすことになり、要件に反する。",
+        "B": "承認の手順が無く、承認してから再起動する要件に反する。",
+        "C": "人が毎朝確かめることになり、手間が大きく、反映も遅れる。",
+        "D": "正しい。更新を受けてランブックを始め、承認を待ってから再起動する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-cwe.html",
+          "quote": "Notify you when a parameter or a parameter label version is created, updated, or deleted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html",
+          "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-require-approvals.html",
+          "quote": "The automation uses the automation action aws:approve, which temporarily pauses the automation until the designated principals either approve or deny the action."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0004",
+      "stem_ja": "DevOps エンジニアは、400 台のマネージドインスタンスの設定ファイルを変更する Systems Manager Automation のランブックを実行する必要があります。同時に変更を実行してよいのは 20 台までです。企業は 5 台までの失敗を許容し、それを超えたら Systems Manager は残りのインスタンスへの変更の送信を止める必要があります。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "Systems Manager が同時実行の数を自動で上げるように、適応型の同時実行で自動化を実行する。",
+        "B": "レート制御で自動化を実行し、同時実行数を 20、エラーのしきい値を 5 にする。",
+        "C": "20 台でランブックを開始し、待って失敗を数え、すべてのインスタンスが終わるまで繰り返すスクリプトを書く。",
+        "D": "コンソールから 1 台ずつ自動化を実行し、5 台が失敗したら止める。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "rate control の concurrency は、同時に自動化を動かしてよいリソースの数を決める。error threshold は、他のリソースへ送るのを止めるまでに失敗してよい自動化の数を決める。adaptive concurrency は、同時の数を 100 から 500 まで自動で増やす物。",
+      "per_choice": {
+        "A": "同時の数を自動で増やす物で、同時に 20 までに抑える要件に反する。",
+        "B": "正しい。concurrency で同時に動かす数を 20 にし、error threshold で止めるまでに許す失敗の数を 5 にする。",
+        "C": "自分でスクリプトを作ることになり、手間が大きい。",
+        "D": "1 台ずつの手作業になり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "quote": "The concurrency value determines how many resources are allowed to run the automation simultaneously."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "quote": "An error threshold determines how many automations are allowed to fail before Systems Manager stops sending the automation to other resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-scale.html",
+          "quote": "Adaptive concurrency automatically scales your automation quota from 100 concurrently running automations up to 500."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0005",
+      "stem_ja": "スケールインの間に Auto Scaling グループがインスタンスを終了する前に、企業はインスタンスのローカルのログを Amazon S3 にコピーする必要があります。コピーは通常 20 分かかりますが、大きいインスタンスでは最大 3 時間かかることがあります。終了は、コピーが終わるまで待つ必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "終了のライフサイクルフックを追加し、EventBridge ルールからコピーを始め、コピー中はハートビートを記録し、その後ライフサイクルアクションを完了する。",
+        "B": "既定のタイムアウトで終了のライフサイクルフックを追加し、EventBridge ルールからコピーを始める。",
+        "C": "終了のライフサイクルフックを追加し、EventBridge ルールからコピーを始め、コピーが始まったら ABANDON でアクションを完了する。",
+        "D": "各インスタンスで毎時ログをコピーする cron のジョブを動かし、スケールインでは通常どおりインスタンスを終了させる。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "終了のライフサイクルフックは、縮小の時にインスタンスを終了の前に止め、EventBridge で知らせる。既定の待ち時間は 1 時間（heartbeat timeout）で、時間が足りなければ heartbeat を記録して待ち時間をやり直せる。フックが時間切れになるか abandon にされると、すぐに終了へ進む。",
+      "per_choice": {
+        "A": "正しい。heartbeat で待ち時間を延ばし、コピーが終わってから進める。",
+        "B": "既定の 1 時間を超えると、コピーの途中でも終了へ進む。",
+        "C": "フックを abandon にすると、すぐに終了へ進むので、コピーが終わる前にインスタンスが終了する。",
+        "D": "最後の 1 時間までのログが失われうる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+          "quote": "When a scale-in event occurs, a lifecycle hook pauses the instance before it is terminated and sends you a notification using Amazon EventBridge."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks-overview.html",
+          "quote": "If you need more time, you can restart the timeout period by recording a heartbeat."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html",
+          "quote": "If a termination lifecycle hook times out, or is abandoned, Amazon EC2 Auto Scaling proceeds with terminating the instance immediately."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0006",
+      "stem_ja": "希望する容量が 20 台の Auto Scaling グループを、新しい起動テンプレートのバージョンに移す必要があります。更新の間、希望する容量の少なくとも 90 パーセントがサービスを続け、グループは希望する容量を超えて余分なインスタンスを起動してはならず、更新は一度に 2 台ずつ置き換える必要があります。これらの要件を最もよく満たすインスタンスの更新の設定はどれですか。",
+      "choices_ja": {
+        "A": "最小正常率 100、最大正常率 100。",
+        "B": "最小正常率 0、最大正常率 100。",
+        "C": "最小正常率 50、最大正常率 100。",
+        "D": "最小正常率 90、最大正常率 100。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "最小の正常率は、更新の間に動かし続ける希望の容量の割合。最小 90% と最大 100% なら、一度に容量の 10% を入れ替える（20 台なら 2 台）。最小と最大を両方 100% にすると 1 台ずつ、最小 0% にすると全部を一度に入れ替える。",
+      "per_choice": {
+        "A": "1 台ずつの入れ替えになり、2 台ずつの要件に合わない。",
+        "B": "全部を一度に入れ替え、90% を保てない。",
+        "C": "一度に 10 台を入れ替え、90% を保てない。",
+        "D": "正しい。20 台の 10% で 2 台ずつ入れ替え、90% を保つ。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "quote": "For example, if the minimum healthy percentage is 90 percent and the maximum healthy percentage is 100 percent, then 10 percent of capacity will be replaced at a time."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "quote": "To replace one instance at a time, set both the minimum and maximum healthy percentage to 100 percent."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-overview.html",
+          "quote": "To replace all instances at once, set a minimum healthy percentage of 0 percent."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0007",
+      "stem_ja": "あるチームは、Auto Scaling グループのインスタンスの更新を実行します。チームは、アプリケーションを確認できるようにインスタンスの 20 パーセントが置き換わった時に通知を受けたく、また更新中にエラーの CloudWatch アラームが ALARM になったら、置き換えたすべてのインスタンスを自動で元に戻したいと考えています。チームはどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "20 パーセントと 100 パーセントにチェックポイントを設定し、EventBridge ルールでチェックポイントのイベントを Amazon SNS に送る。",
+        "B": "インスタンスの更新で自動ロールバックを有効にし、CloudWatch のアラームを指定する。",
+        "C": "取り消すと置き換えたインスタンスが元に戻るので、アラームが鳴ったらインスタンスの更新を取り消す。",
+        "D": "インスタンスの更新が終わるまで待ち、アラームが鳴っていたらロールバックする。",
+        "E": "20 パーセントにだけチェックポイントを設定する。チームが確認すると更新も完了する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "チェックポイントは、新しいインスタンスが何 % になったら止まるかを決め、100% 以外のチェックポイントごとにイベントを出す。EventBridge のルールで SNS などへ送れる。複数のチェックポイントを使う時は、全て入れ替えるために最後を 100% にする。自動のロールバックは、更新が失敗するか指定したアラームが ALARM になった時に元へ戻す。取り消しや失敗で止まっても、入れ替えた物は戻らず、終わった後はロールバックできない。",
+      "per_choice": {
+        "A": "正しい。20% で知らせ、最後は 100% にして全て入れ替える。",
+        "B": "正しい。アラームが ALARM になれば自動で元へ戻す。",
+        "C": "取り消しても、既に入れ替えたインスタンスは元に戻らない。",
+        "D": "終わった後のインスタンスのリフレッシュはロールバックできない。",
+        "E": "複数のチェックポイントでは最後を 100% にする必要がある。20% だけでは全て入れ替わらない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+          "quote": "You can add an EventBridge rule to send the events to a target such as Amazon SNS."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html",
+          "quote": "If you cancel the operation or it fails before reaching the last checkpoint, any instances that were already replaced are not rolled back to their previous configuration."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+          "quote": "Auto rollback: Amazon EC2 Auto Scaling automatically reverses what was deployed if the instance refresh fails for some reason or if any CloudWatch alarms you specify go into the ALARM state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/instance-refresh-rollback.html",
+          "quote": "You can't roll it back after it's finished."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0008",
+      "stem_ja": "インシデントの対応中に、エンジニアがいくつかのセキュリティグループのルールをコンソールで直接変更しましたが、これらのセキュリティグループは AWS CloudFormation のスタックで管理されています。チームは、リソースを一切変更せずに、どのスタックのリソースが CloudFormation の外で変更され、どのプロパティがテンプレートと違うかを見つける必要があります。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "今のテンプレートで変更セットを作成し、変更セットが変更するリソースを確認する。",
+        "B": "スタックでドリフトの検出を実行し、ドリフトしたリソースとそのプロパティを確認する。",
+        "C": "CloudFormation が戻すリソースを一覧にするように、同じテンプレートでスタックを更新する。",
+        "D": "スタックのイベントの一覧を確認し、コンソールでルールが変更されたリソースを見つける。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "ドリフト検出は、CloudFormation の管理の外で設定が変えられたスタックのリソースを見つけ、実際の設定が期待される設定と違うかを調べる。1 つ以上のプロパティが消されたり値を変えられたりしたリソースはドリフトしたとみなされる。",
+      "per_choice": {
+        "A": "change set はテンプレートの変更で何が変わるかを見る物で、管理の外の変更を調べる物ではない。",
+        "B": "正しい。リソースを変えずに、管理の外で変わったリソースとプロパティを見つける。",
+        "C": "リソースに手を入れることになり、何も変えない要件に反する。",
+        "D": "スタックのイベントは CloudFormation の操作の記録で、コンソールでの直接の変更は出ない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+          "quote": "You can use drift detection to identify stack resources to which configuration changes have been made outside of CloudFormation management."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html",
+          "quote": "A resource is considered to have drifted if one or more of its properties have been deleted, or had their value changed."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0009",
+      "stem_ja": "AWS Config のルールが、会社の標準に従っていない Amazon S3 バケットを報告しています。セキュリティチームは、準拠していないバケットを決めた一連の操作で自動で直したく、コードを書くより AWS が用意している操作から始めたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "AWS が用意する Systems Manager Automation のドキュメントを、自動の修復のアクションとして AWS Config のルールに関連付ける。",
+        "B": "AWS Config の準拠状況の変化の EventBridge ルールを作り、各バケットを直す AWS Lambda 関数を呼び出す。",
+        "C": "AWS Config の通知をメールのリストへ送り、エンジニアがコンソールで各バケットを直す。",
+        "D": "毎週 EC2 インスタンスからすべてのバケットを一覧し、標準に合わない設定を変えるスクリプトを動かす。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "AWS Config は、ルールで評価して準拠していないリソースを、Systems Manager Automation のドキュメントで修復できます。AWS Config は修復のアクションを持つマネージドの Automation ドキュメントを用意しており、独自のドキュメントを作って関連付けることもできます。",
+      "per_choice": {
+        "A": "正しい。用意されたドキュメントを関連付けるだけで、コード無しで自動の修復ができます。",
+        "B": "動きますが、修復のコードを Lambda 関数で書いて保守する必要があります。",
+        "C": "手作業で、自動の修復になりません。",
+        "D": "スクリプトを保守する必要があり、次の実行まで準拠していない状態が続きます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation",
+          "quote": "AWS Config applies remediation using AWS Systems Manager Automation documents."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html#remediation",
+          "quote": "AWS Config provides a set of managed automation documents with remediation actions."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0010",
+      "stem_ja": "古いアプリケーションが、Auto Scaling グループに入っていない 1 台の EC2 インスタンスで動いています。会社は、AWS の対応が必要な基盤のハードウェアの障害でインスタンスが損なわれた時に、自動で復旧させたいと考えており、その時には運用チームに通知する必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "StatusCheckFailed_Instance に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。",
+        "B": "1 分ごとにインスタンスの状態を確かめ、失敗していたらインスタンスを停止・起動する AWS Lambda 関数を書く。",
+        "C": "チームにメールを送る CloudWatch アラームを作り、エンジニアが手作業でインスタンスを新しいハードウェアへ移す。",
+        "D": "StatusCheckFailed_System に、復旧のアクションと SNS の通知を持つ CloudWatch アラームを作る。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "CloudWatch アラームのアクションで、EC2 インスタンスを自動で停止・終了・再起動・復旧できます。基盤のハードウェアの障害など AWS の対応が必要な問題で損なわれた時は、StatusCheckFailed_System のアラームの復旧のアクションで自動で復旧し、選んだ SNS トピックで通知されます。",
+      "per_choice": {
+        "A": "復旧のアクションは、StatusCheckFailed_Instance を除く EC2 のインスタンスごとのメトリクスのアラームに付けられます。",
+        "B": "独自の関数を作って保守する必要があり、組み込みの復旧のアクションより手間がかかります。",
+        "C": "復旧が手作業で、自動で復旧する要件を満たしません。",
+        "D": "正しい。ハードウェアの障害を StatusCheckFailed_System で見つけ、自動で復旧して SNS で知らせます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#AddingRecoverActions",
+          "quote": "When the StatusCheckFailed_System alarm is triggered, and the recover action is initiated, you will be notified by the Amazon SNS topic"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#UsingAlarmActions",
+          "quote": "You can also add the recover action to alarms that is set on any Amazon EC2 per-instance metric except for StatusCheckFailed_Instance."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/UsingAlarmActions.html#AddingRecoverActions",
+          "quote": "automatically recovers the instance if it becomes impaired due to an underlying hardware failure or a problem that requires AWS involvement to repair."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0011",
+      "stem_ja": "アカウントで新しい EC2 インスタンスが起動するたびに、セキュリティのエージェントを自動で入れる必要があります。インスタンスは、それぞれ別のチームが持つ多くの起動テンプレートから起動されます。会社には、エージェントを入れる Systems Manager Automation のランブックがあり、コードは書きたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "インスタンスの起動のイベントの EventBridge ルールを作り、Automation のランブックをルールのターゲットにする。",
+        "B": "インスタンスの起動のイベントで AWS Lambda 関数を呼ぶ EventBridge ルールを作り、関数がランブックを開始する。",
+        "C": "すべてのチームに、自分の各起動テンプレートのユーザーデータへエージェントのインストールを足してもらう。",
+        "D": "エンジニアが毎朝、前の日に起動したインスタンスに対して手作業でランブックを実行する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "ランブックを Amazon EventBridge のイベントのターゲットに指定すると、決まった AWS のシステムのイベントが起きた時に Automation を開始できます。例えば新しいインスタンスが起動した時に、Automation を動かしてソフトウェアを入れられます。",
+      "per_choice": {
+        "A": "正しい。コード無しで、起動のたびにランブックが自動で動きます。",
+        "B": "動きますが、ランブックを開始するだけの Lambda 関数を書いて保守することになります。",
+        "C": "多くのチームとテンプレートに頼ることになり、漏れが出やすく、手間もかかります。",
+        "D": "手作業で、起動してから最大 1 日エージェントが無い状態が続きます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge",
+          "quote": "You can start an automation by specifying a runbook as the target of an Amazon EventBridge event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/running-automations-event-bridge.html#running-automations-event-bridge",
+          "quote": "When a new instance starts, the system runs the automation and installs software."
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0012",
+      "stem_ja": "DevOps エンジニアは、修正を当てるために、EC2 インスタンスを再起動する Systems Manager Automation の事前定義のランブックを 400 台で実行する必要があります。何か問題が起きた時の影響を抑えるため、同時に再起動するのは 20 台までにし、少ない回数の失敗で Automation を止める必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "400 台すべてに一度にランブックを実行し、失敗が出たらエンジニアが取り消せるようコンソールを見張る。",
+        "B": "400 台すべてを対象にランブックを 1 回実行し、同時実行数を 20、エラーのしきい値を低く設定する。",
+        "C": "20 台ずつランブックを開始し、失敗を数える AWS Lambda 関数を書く。",
+        "D": "インスタンスを手作業で 20 のグループに分け、1 日に 1 グループずつランブックを実行する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Automation のランブックには、インスタンスの再起動のような一般的な作業の事前定義のものがあります。Automation では同時に対象にするリソースの数と、止めるまでに許すエラーの数を細かく決められます。",
+      "per_choice": {
+        "A": "同時に 400 台が再起動し、止めるのも人の判断になるため、要件を満たしません。",
+        "B": "正しい。組み込みの同時実行数とエラーのしきい値で、20 台ずつ進め、失敗が増えれば自動で止まります。",
+        "C": "動きますが、組み込みの機能で済む制御を自分で作って保守することになります。",
+        "D": "手作業が多く時間もかかり、失敗で自動で止まる仕組みもありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#automation-benefits",
+          "quote": "This means you can specify how many resources to target concurrently, and how many errors can occur before an automation is stopped."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html#what-is-an-automation",
+          "quote": "Automation includes several pre-defined runbooks that you can use to perform common tasks like restarting one or more Amazon EC2 instances"
+        }
+      ]
+    },
+    {
+      "id": "q-5.2-0013",
+      "stem_ja": "運用チームは、多くのツールからのアラームとサービスのイベントを扱っており、問題が自動で現れ、診断して直せる 1 つのコンソールを求めています。CloudWatch アラームが ALARM の状態になった時や重要な AWS のサービスのイベントが起きた時に、手作業無しで項目が作られ、エンジニアが同じ場所から修復のランブックを実行できるようにしたいと考えています。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "CloudWatch アラームと EventBridge のルールで、Systems Manager OpsCenter に OpsItem を自動で作るよう設定する。",
+        "B": "OpsCenter で使える Systems Manager Automation のランブックで、OpsItem を解決する。",
+        "C": "すべてのアラームをチームにメールする SNS トピックへ送り、問題は共有の表計算シートで管理する。",
+        "D": "すべてのアラームを示す CloudWatch のダッシュボードを作り、エンジニアが手作業でチケットを作る。",
+        "E": "各アラームを DynamoDB のテーブルへ写す AWS Lambda 関数を書き、チームが 1 時間ごとに確認する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "OpsCenter は Amazon EventBridge と Amazon CloudWatch と統合されており、CloudWatch アラームが ALARM になった時や EventBridge がイベントを処理した時に、OpsItem を自動で作れます。OpsCenter には問題を素早く解決するための Automation のランブックもあり、1 つのコンソールから診断と修復ができます。",
+      "per_choice": {
+        "A": "正しい。手作業無しで、アラームとイベントから OpsItem が作られます。",
+        "B": "正しい。同じ場所から修復のランブックを実行できます。",
+        "C": "項目が自動で作られる 1 つのコンソールにならず、修復もできません。",
+        "D": "チケットの作成が手作業で、修復の手段もありません。",
+        "E": "独自の仕組みを保守することになり、修復の手段もありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter",
+          "quote": "automatically create an OpsItem in OpsCenter when a CloudWatch alarm enters the ALARM state or when EventBridge processes an event from any AWS service that publishes events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html#OpsCenter",
+          "quote": "OpsCenter also provides Systems Manager Automation runbooks that you can use to quickly resolve issues."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,539 @@
+{
+  "task": "3.1",
+  "questions": [
+    {
+      "id": "q-3.1-0001",
+      "stem_ja": "ある企業は 1 つの AWS リージョンで受注システムを動かしており、リージョンの障害に備えたディザスタリカバリの計画が必要です。通常の運用中は、プライマリリージョンだけがユーザーに応答してよいものとします。プライマリリージョンが障害を起こした場合、復旧先のリージョンは、容量を減らした状態でもすぐにトラフィックを処理でき、その後スケールアップできる必要があります。これらの要件を満たす最も費用対効果の高いディザスタリカバリの戦略はどれですか。",
+      "choices_ja": {
+        "A": "バックアップと復元。バックアップを復旧先のリージョンにコピーし、フェイルオーバーの時に IaC からインフラストラクチャを再デプロイする。",
+        "B": "パイロットライト。データを復旧先のリージョンにレプリケートし、アプリケーションサーバーはデプロイしたうえで停止しておく。",
+        "C": "マルチサイトのアクティブ/アクティブ。常に両方のリージョンからユーザーに応答する。",
+        "D": "ウォームスタンバイ。縮小したが完全に機能する本番の複製を、復旧先のリージョンで動かしておく。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "warm standby は、別のリージョンに縮小した、しかし完全に動く本番の写しを置く。縮小した量ならすぐに通信を処理でき、あとは拡張するだけ。普段は 1 つのリージョンだけで利用者に応えるなら、active/active より安く簡単。",
+      "per_choice": {
+        "A": "障害の時にインフラと設定とコードを作り直し、データも戻す必要があり、すぐには処理できない。",
+        "B": "pilot light は、先にサーバーを起こすなどの作業をしないとリクエストを処理できない。",
+        "C": "両方のリージョンで利用者に応えるので、普段は主のリージョンだけの要件に反し、最も費用がかかる。",
+        "D": "正しい。縮小した量ですぐに通信を処理でき、拡張するだけでよい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "The distinction is that pilot light cannot process requests without additional action taken first, whereas warm standby can handle traffic (at reduced capacity levels) immediately."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "Alternatively, if you do not want to use both Regions to handle user traffic, then Warm Standby offers a more economical and operationally less complex approach."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "In addition to data, you must redeploy the infrastructure, configuration, and application code in the recovery Region."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0002",
+      "stem_ja": "ある企業には、2 つ目の AWS リージョンでのディザスタリカバリの計画が必要です。ビジネス側は、サーバーの起動とスケールアウトの間、復旧にある程度の時間がかかることを受け入れています。データの損失はごく小さくする必要があるため、データベースの変更は定期的なバックアップではなく、継続的に復旧先のリージョンに届く必要があります。企業は、復旧先のリージョンの継続的な費用をできるだけ低く抑えたいと考えています。これらの要件を満たす最も費用対効果の高いディザスタリカバリの戦略はどれですか。",
+      "choices_ja": {
+        "A": "バックアップと復元。毎晩のデータベースのスナップショットを復旧先のリージョンにコピーする。",
+        "B": "パイロットライト。動いているデータベースへ継続的にレプリケートし、アプリケーションサーバーは停止しておく。",
+        "C": "ウォームスタンバイ。縮小した本番の環境を、復旧先のリージョンで常に動かしておく。",
+        "D": "マルチサイトのアクティブ/アクティブ。両方のリージョンからユーザーに応答し、データは非同期でレプリケートする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "pilot light は、データを別のリージョンへ写し、データベースなどデータを保つ物は常に動かすが、アプリのサーバーは止めておき、障害の時に起こして拡張する。動かしておく物が少ないので費用を抑えられ、データベースへの継続的な複製で RPO を小さくできる。",
+      "per_choice": {
+        "A": "達成できる復旧時点はバックアップの頻度で決まる。夜ごとの取得では、継続的に届ける要件に合わない。",
+        "B": "正しい。データは継続的に写し、サーバーは止めておくので、要件を満たすうちで最も安い。",
+        "C": "要件は満たすが、縮小した本番を常に動かすので pilot light より費用がかかる。",
+        "D": "最も複雑で費用のかかる方法。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "A pilot light approach minimizes the ongoing cost of disaster recovery by minimizing the active resources"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "For pilot light, continuous data replication to live databases and data stores in the DR region is the best approach for low RPO"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "How often you run your backup will determine your achievable recovery point (which should align to meet your RPO)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html",
+          "quote": "This approach is the most complex and costly approach to disaster recovery"
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0003",
+      "stem_ja": "ある企業のビジネスオーナーは、アプリケーションに 2 つの要件を示しています。障害の後にアプリケーションが使えない時間は最大 1 時間、失ってよいデータは最大 5 分ぶんです。DevOps チームは、アベイラビリティーゾーンとリージョンの障害についてこれらの目標を記録し、独自の評価ツールを作らずに、最も少ない手作業で今のアーキテクチャが目標を満たすかを確認する必要があります。正しい説明またはアクションはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "1 時間の上限は RTO で、5 分の上限は RPO である。",
+        "B": "1 時間の上限は RPO で、5 分の上限は RTO である。",
+        "C": "この RTO と RPO を目標とする AWS Resilience Hub のポリシーを定義し、評価に使う。",
+        "D": "アベイラビリティーゾーンの障害は、別のリージョンに切り替えることでしか解決できない事象として扱う。",
+        "E": "目標をスプレッドシートに記録し、リリースのたびに手作業でアーキテクチャと比べる。"
+      },
+      "answer": [
+        "A",
+        "C"
+      ],
+      "summary": "RTO はサービスが止まってから戻るまでに許せる最大の遅れ、RPO は最後の復旧時点から許せる最大の時間（失ってよいデータの量）。AWS Resilience Hub では、アプリ・インフラ・アベイラビリティーゾーン・リージョンの障害ごとの RTO と RPO の目標を耐障害性の方針（resilience policy）に決め、アプリがそれを満たすかを見積もる。",
+      "per_choice": {
+        "A": "正しい。止まってよい時間が RTO、失ってよいデータの時間が RPO。",
+        "B": "RTO と RPO が逆。",
+        "C": "正しい。方針に目標を決め、満たすかを評価できる。",
+        "D": "アベイラビリティーゾーンの障害は、別のアベイラビリティーゾーンへ切り替えて解決できる種類として扱われる。",
+        "E": "リリースのたびに人が見比べることになり、手作業を最も少なくする要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "quote": "The maximum acceptable delay between the interruption of service and restoration of service."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "quote": "The maximum acceptable amount of time since the last data recovery point."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/arh-mgmt.html",
+          "quote": "These policies include RTO and RPO targets for applications, infrastructure, Availability Zone, and Region disruptions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/resilience-hub/latest/userguide/concepts-terms.html",
+          "quote": "This type of outage can be resolved by switching to a different Availability Zone."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0004",
+      "stem_ja": "アプリケーションサーバーは、3 つのアベイラビリティーゾーンのプライベートサブネットで動いています。すべてのプライベートサブネットは、インターネットへの通信を AZ-a にある 1 つの NAT ゲートウェイ経由でルーティングしています。AZ-a の障害の間、ほかの 2 つのアベイラビリティーゾーンのサーバーもインターネットに接続できなくなりました。企業は、1 つの AZ の障害の間も、残りのゾーンでインターネットへの接続が使えるようにしたいと考えています。この要件を最もよく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "AZ-a に 2 つ目の NAT ゲートウェイを作成し、プライベートサブネットを 2 つの NAT ゲートウェイに分ける。",
+        "B": "NAT ゲートウェイを AZ-b に移し、すべてのプライベートサブネットをそこへルーティングする。",
+        "C": "NAT ゲートウェイを帯域幅の大きいものに置き換え、今のルーティングはそのままにする。",
+        "D": "アベイラビリティーゾーンごとに NAT ゲートウェイを作成し、各プライベートサブネットを同じゾーンの NAT ゲートウェイへルーティングする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "NAT ゲートウェイは特定のアベイラビリティーゾーンに作られ、そのゾーンの中で冗長になっている。複数のゾーンの資源が 1 つの NAT ゲートウェイを共有すると、そのゾーンが落ちた時に他のゾーンの資源もインターネットに出られなくなる。ゾーンごとに NAT ゲートウェイを作り、同じゾーンの NAT ゲートウェイを使うように経路を決める。",
+      "per_choice": {
+        "A": "2 つとも AZ-a にあるので、AZ-a が落ちると両方使えない。",
+        "B": "単一の障害点が AZ-b に移るだけ。",
+        "C": "ゾーンの障害に対する弱さは変わらない。",
+        "D": "正しい。1 つのゾーンが落ちても、他のゾーンは自分のゾーンの NAT ゲートウェイを使い続けられる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "quote": "If you have resources in multiple Availability Zones and they share one NAT gateway, and if the NAT gateway's Availability Zone is down, resources in the other Availability Zones lose internet access."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html",
+          "quote": "To improve resiliency, create a NAT gateway in each Availability Zone, and configure your routing to ensure that resources use the NAT gateway in the same Availability Zone."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0005",
+      "stem_ja": "Network Load Balancer は 2 つのアベイラビリティーゾーンで有効になっており、クロスゾーン負荷分散は無効です。ターゲットは Auto Scaling グループから来ます。何度かスケーリングが起きた後、AZ-a には 5 台、AZ-b には 1 台のインスタンスがあります。AZ-b の 1 台のインスタンスは過負荷で、AZ-a が障害を起こすと残る容量が少なすぎます。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "各ロードバランサーノードが、有効なすべてのアベイラビリティーゾーンのターゲットにトラフィックを分散するように、クロスゾーン負荷分散を有効にする。",
+        "B": "Auto Scaling グループが両方のアベイラビリティーゾーンのサブネットを使い、ゾーン間で均等に配置するように設定する。",
+        "C": "すべてのトラフィックが AZ-a のインスタンスに行くように、ロードバランサーで AZ-b を無効にする。",
+        "D": "ターゲットが 1 か所にまとまるように、すべてのインスタンスを AZ-a に移す。",
+        "E": "各ノードはすでにすべてのゾーンのターゲットにトラフィックを送っているので、クロスゾーン負荷分散は無効のままにする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "ゾーン間の負荷分散（cross-zone load balancing）を有効にすると、各ゾーンのロードバランサーのノードが、有効な全てのゾーンのターゲットに通信を配る。無効なら、各ノードは自分のゾーンのターゲットにだけ配る。Auto Scaling は、有効なゾーンに同じ数のインスタンスを保つように動く（balanced best effort）。",
+      "per_choice": {
+        "A": "正しい。AZ-b のノードも全てのターゲットに配るので、1 台に集中しない。",
+        "B": "正しい。インスタンスをゾーンに均等に置き、1 つのゾーンが落ちても容量が残る。",
+        "C": "1 つのゾーンだけに頼ることになり、単一の障害点が残る。",
+        "D": "全てのインスタンスが 1 つのゾーンに集まり、そのゾーンの障害で止まる。",
+        "E": "無効の時は、各ノードは自分のゾーンのターゲットにしか配らない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "quote": "When cross-zone load balancing is enabled, each load balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html",
+          "quote": "When cross-zone load balancing is disabled, each load balancer node distributes traffic only across the registered targets in its Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-availability-zone-balanced.html",
+          "quote": "Auto Scaling maintains an equal number of instances across enabled Availability Zones."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0006",
+      "stem_ja": "ElastiCache (Redis OSS) のレプリケーショングループには、プライマリが 1 つとレプリカが 1 つあり、マルチ AZ は無効です。プライマリノードが障害を起こした時、ElastiCache はそれをオフラインにして新しいプライマリをプロビジョニングし、アプリケーションは長く停止しました。企業は、プライマリが障害を起こした場合に、別のアベイラビリティーゾーンのレプリカが自動で昇格するようにしたいと考えています。この要件を最もよく満たす変更はどれですか。",
+      "choices_ja": {
+        "A": "自動フェイルオーバーだけを有効にし、マルチ AZ は無効のままにする。",
+        "B": "マルチ AZ を有効にし、プライマリと別のアベイラビリティーゾーンにレプリカを 1 つ以上置く。",
+        "C": "プライマリが障害を起こしにくいように、より大きいノードタイプに移す。",
+        "D": "新しいプライマリをすぐに復元できるように、1 時間ごとにスナップショットを取る。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Multi-AZ を有効にすると、ElastiCache はレプリカを別々のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にする。主ノードが落ちると、複製の遅れが最も少ないレプリカを自動で主に上げる。Multi-AZ には、主と別のゾーンに少なくとも 1 つのレプリカが要る。Multi-AZ なしで自動フェイルオーバーだけを有効にすると、レプリカが別のゾーンにある保証は無い。",
+      "per_choice": {
+        "A": "レプリカが別のゾーンにある保証が無い。",
+        "B": "正しい。別のゾーンのレプリカを自動で主に上げる。",
+        "C": "落ちにくくなるだけで、落ちた時の切り替えは変わらない。",
+        "D": "戻すのに時間がかかり、自動の昇格にもならない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html",
+          "quote": "While it is possible to have automatic failover enabled without Multi-AZ, replicas are not guaranteed to be in different Availability Zones in this configuration."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0007",
+      "stem_ja": "あるゲーム会社は、バックエンドを us-east-1 と eu-west-1 で動かしています。各リージョンのプレイヤーは、自分のリージョンで低いレイテンシーでプロフィールのデータを読み書きできる必要があります。一方のリージョンが中断した場合は、データの損失がほとんど無いか全く無い状態で、トラフィックをもう一方のリージョンへ移す必要があります。会社は、独自のレプリケーションの処理を作ったり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "プライマリクラスターを us-east-1、セカンダリクラスターを eu-west-1 に置いた Amazon Aurora グローバルデータベースにデータを保存する。",
+        "B": "各リージョンの DynamoDB テーブルにデータを保存し、DynamoDB Streams と AWS Lambda 関数で、すべての変更をもう一方のリージョンへコピーする。",
+        "C": "us-east-1 の Amazon RDS の DB インスタンスにデータを保存し、eu-west-1 にクロスリージョンのリードレプリカを作る。",
+        "D": "us-east-1 と eu-west-1 にレプリカを持つ DynamoDB グローバルテーブルにデータを保存する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "DynamoDB グローバルテーブルは、独自のレプリケーションを作らずにリージョン間でデータを自動で複製し、どのレプリカでも読み書きできるマルチアクティブの機能です。リージョンが中断した時は別のリージョンへトラフィックを移し、低いかゼロの RPO を実現できます。",
+      "per_choice": {
+        "A": "複数リージョンに置けますが、データが書き込まれるのはプライマリのリージョンだけです。eu-west-1 のプレイヤーの書き込みを自分のリージョンで処理するマルチアクティブの構成にはなりません。",
+        "B": "両方のリージョンで読み書きできますが、変更をコピーする仕組みを自分で作って保守する必要があります。",
+        "C": "リードレプリカは読み取り用で、eu-west-1 のプレイヤーは自分のリージョンで書き込めません。",
+        "D": "正しい。どちらのリージョンのレプリカでも読み書きでき、複製は自動で、中断時は別のリージョンへ移せます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables",
+          "quote": "Global tables automatically replicate your DynamoDB table data across AWS Regions and optionally across AWS accounts without requiring you to build and maintain your own replication solution."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html#GlobalTables",
+          "quote": "Any global table replica can serve reads and writes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "An Aurora global database consists of one primary AWS Region where your data is written, and up to 10 read-only secondary AWS Regions."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0008",
+      "stem_ja": "ある会社は、プライマリクラスターを us-east-1、セカンダリクラスターを us-west-2 に置いた Amazon Aurora グローバルデータベースを使っています。会社は四半期ごとに、両方のリージョンが正常な状態で、計画した作業としてプライマリのリージョンをもう一方のリージョンへ移します。移す時にデータを失ってはならず、移すたびにアプリケーションの設定を変える必要が無いようにしなければなりません。運用の手間が最も少なくこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "四半期ごとに us-west-2 へグローバルデータベースのフェイルオーバーを行い、アプリケーションが新しいプライマリクラスターのエンドポイントを使うように更新する。",
+        "B": "四半期ごとにプライマリクラスターのスナップショットを取って us-west-2 へコピーし、新しいクラスターを復元して、アプリケーションをそこへ向ける。",
+        "C": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションはグローバルデータベースのライターエンドポイントに接続する。",
+        "D": "四半期ごとに us-west-2 へグローバルデータベースのスイッチオーバーを行い、アプリケーションが新しいプライマリのリージョンのクラスターエンドポイントを使うように更新する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "リージョンの入れ替えのような計画した作業にはスイッチオーバーを使い、正常なグローバルデータベースのプライマリを、データを失わずにセカンダリのリージョンへ移せます。グローバルデータベースのライターエンドポイントは、スイッチオーバーやフェイルオーバーの後も常にプライマリのクラスターを指すので、アプリケーションの設定を変えずに済みます。",
+      "per_choice": {
+        "A": "フェイルオーバーはプライマリのリージョンの障害から復旧するための仕組みで、計画した作業にはスイッチオーバーを使います。アプリケーションの更新も要ります。",
+        "B": "復元までに書かれたデータを失うおそれがあり、移すたびにアプリケーションの向け先も変える必要があります。",
+        "C": "正しい。スイッチオーバーでデータを失わずに移し、ライターエンドポイントが新しいプライマリを指し続けます。",
+        "D": "データは失いませんが、移すたびにアプリケーションの設定を変える必要があり、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "For planned operational procedures such as Regional rotation, use the switchover mechanism"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "you can relocate the primary cluster of a healthy Aurora Global Database to one of its secondary Regions with no data loss."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html#aurora-global-database-overview",
+          "quote": "connect to the Aurora Global Database writer endpoint, which always points to the primary DB cluster, even after a switchover or failover to a different AWS Region."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0009",
+      "stem_ja": "ある会社は、オリジンを us-east-1 の Amazon S3 バケットにした Amazon CloudFront ディストリビューションで、静的なウェブサイトを配信しています。コンテンツは 1 日に何度も更新されます。us-east-1 のバケットが使えなくなった場合、CloudFront はサイトへの GET リクエストに、別のリージョンにあるコンテンツの写しから自動で応答する必要があり、その写しはスケジュールしたジョブ無しで最新に保たれる必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "us-east-1 のバケットから us-west-2 のバケットへの S3 クロスリージョンレプリケーションを設定する。",
+        "B": "us-east-1 のバケットから us-east-1 の 2 つ目のバケットへの S3 同一リージョンレプリケーションを設定する。",
+        "C": "us-east-1 のバケットをプライマリオリジン、us-west-2 のバケットをセカンダリオリジンにした CloudFront のオリジングループを作る。",
+        "D": "毎晩、us-east-1 のバケットから us-west-2 のバケットへ新しいオブジェクトをコピーする AWS Lambda 関数をスケジュールで実行する。",
+        "E": "us-west-2 のバケットを 2 つ目のオリジンとして追加し、プライマリのバケットが使えなくなった時にエンジニアがデフォルトのキャッシュ動作をそちらへ変える。"
+      },
+      "answer": [
+        "A",
+        "C"
+      ],
+      "summary": "S3 クロスリージョンレプリケーションは、別のリージョンのバケットへオブジェクトを自動・非同期でコピーします。CloudFront のオリジングループは、プライマリのオリジンが使えないか失敗を示すステータスコードを返した時に、GET・HEAD・OPTIONS のリクエストを自動でセカンダリのオリジンへ切り替えます。",
+      "per_choice": {
+        "A": "正しい。別のリージョンの写しが、ジョブ無しで自動で最新に保たれます。",
+        "B": "写しは自動で保たれますが同じリージョンにあり、別のリージョンに写しを置くという要件に合いません。",
+        "C": "正しい。プライマリが使えない時、CloudFront が GET のリクエストを自動でセカンダリへ切り替えます。",
+        "D": "スケジュールしたジョブで、要件に反します。次の実行までは写しが古いままです。",
+        "E": "切り替えが手作業で、自動で応答するという要件に合いません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#replication",
+          "quote": "You can use replication to enable automatic, asynchronous copying of objects across Amazon S3 buckets."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html#crr-scenario",
+          "quote": "S3 Cross-Region Replication (CRR) is used to copy objects across Amazon S3 buckets in different AWS Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+          "quote": "If the primary origin is unavailable, or returns specific HTTP response status codes that indicate a failure, CloudFront automatically switches to the secondary origin."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/high_availability_origin_failover.html#high_availability_origin_failover",
+          "quote": "CloudFront fails over to the secondary origin only when the HTTP method of the viewer request is GET, HEAD, or OPTIONS."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0010",
+      "stem_ja": "Network Load Balancer が 2 つのアベイラビリティーゾーンで有効になっています。一方のゾーンには 2 つ、もう一方には 6 つのターゲットが登録されています。2 つのターゲットは負荷が高すぎ、残りの 6 つはほとんど暇です。会社は、インスタンスを足したりロードバランサーの種類を変えたりせずに、8 つのターゲット全体にトラフィックを均等に分けたいと考えています。最も少ない手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Network Load Balancer のクロスゾーン負荷分散を有効にする。",
+        "B": "ターゲットが 2 つのゾーンに 4 台のインスタンスを足して登録する。",
+        "C": "Network Load Balancer を Application Load Balancer に置き換え、ターゲットグループでクロスゾーン負荷分散を無効にする。",
+        "D": "負荷が高すぎるターゲットがより早く外されるよう、ヘルスチェックの間隔を短くする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Network Load Balancer では、クロスゾーン負荷分散は既定で無効で、各ノードは自分のアベイラビリティーゾーンのターゲットにだけトラフィックを分けます。有効にすると、各ノードが有効なすべてのアベイラビリティーゾーンのターゲットに分けるので、ゾーンごとのターゲットの数が違っても全体に分かれます。設定はロードバランサーを作った後でもいつでも変えられます。",
+      "per_choice": {
+        "A": "正しい。インスタンスを足さず、種類も変えずに、すべてのターゲットにトラフィックを分けられます。",
+        "B": "偏りは減りますが、インスタンスを足さないという要件に反します。",
+        "C": "ロードバランサーの種類を変えるうえ、クロスゾーンを無効にするとゾーンごとの偏りがそのまま残ります。",
+        "D": "負荷の高いターゲットが外されるだけで、残りのターゲットの負荷がさらに高まり、均等には分かれません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "quote": "By default, each Network Load Balancer node distributes traffic across the registered targets in its Availability Zone only."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/network/network-load-balancers.html#cross-zone-load-balancing",
+          "quote": "If you turn on cross-zone load balancing, each Network Load Balancer node distributes traffic across the registered targets in all enabled Availability Zones."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#cross-zone-load-balancing",
+          "quote": "After you create the load balancer, you can enable or disable cross-zone load balancing at any time."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0011",
+      "stem_ja": "Application Load Balancer は us-east-1a と us-east-1b で有効になっています。可用性を高めるため、チームは Auto Scaling グループを us-east-1c でもインスタンスを起動するように変えました。us-east-1c の新しいインスタンスは正常で、ターゲットグループにも登録されていますが、トラフィックを一切受け取りません。最も可能性の高い原因はどれですか。",
+      "choices_ja": {
+        "A": "Application Load Balancer のロードバランサーのレベルで、クロスゾーン負荷分散が無効になっている。",
+        "B": "ロードバランサーで us-east-1c が有効になっておらず、そのゾーンにロードバランサーのノードが無い。",
+        "C": "Auto Scaling グループがゾーン間でインスタンスを均等に保つため、us-east-1c の新しいインスタンスを止める。",
+        "D": "ヘルスチェックがインスタンスを早く正常とみなしすぎるため、ロードバランサーが無視する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "ロードバランサーでアベイラビリティーゾーンを有効にすると、Elastic Load Balancing はそのゾーンにロードバランサーのノードを作ります。ターゲットを登録しても、そのゾーンを有効にしていなければ、登録したターゲットはトラフィックを受け取りません。",
+      "per_choice": {
+        "A": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は常に有効で、無効にできません。",
+        "B": "正しい。ゾーンを有効にしていないと、そのゾーンに登録したターゲットはトラフィックを受け取りません。",
+        "C": "Auto Scaling は有効なゾーン間でインスタンスの数を均等に保ちますが、それでトラフィックが来なくなるわけではありません。",
+        "D": "正常と判定されたターゲットは使われます。早く正常になっても無視されることはありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html#availability-zones",
+          "quote": "If you register targets in an Availability Zone but do not enable the Availability Zone, these registered targets do not receive traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "With Application Load Balancers, cross-zone load balancing is always turned on at the load balancer level, and cannot be turned off."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html#health-check-settings",
+          "quote": "When the health checks exceed HealthyThresholdCount consecutive successes, the load balancer puts the target back in service."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0012",
+      "stem_ja": "Application Load Balancer は 3 つのアベイラビリティーゾーンで有効になっており、2 つのターゲットグループがあります。トラフィックを各ゾーンの中に留めるため、両方のグループでターゲットグループのレベルのクロスゾーン負荷分散を無効にしています。一方のターゲットグループには 3 つのゾーンすべてにターゲットがありますが、もう一方は 2 つのゾーンにしかありません。利用者は 2 つ目のグループのパスで、ときどき HTTP 503 のエラーを受け取ります。クロスゾーン負荷分散を無効のまま、エラーを最もよく解決する変更はどれですか。",
+      "choices_ja": {
+        "A": "各利用者が動いているターゲットに留まるよう、2 つ目のターゲットグループでターゲットのスティッキネスを有効にする。",
+        "B": "ターゲットが頻繁に外されないよう、2 つ目のターゲットグループのヘルスチェックの間隔を長くする。",
+        "C": "2 つ目のターゲットグループのターゲットを、3 つ目のゾーンにも登録する。",
+        "D": "ロードバランサーのレベルでも、クロスゾーン負荷分散を無効にする。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "クロスゾーン負荷分散を無効にすると、各ノードは自分のゾーンのターゲットにだけトラフィックを分けます。複数のターゲットグループがある時は、すべてのターゲットグループが同じゾーンに参加するようにし、空のゾーンを作らないようにします。空のゾーンに入ったリクエストは 503 エラーになります。",
+      "per_choice": {
+        "A": "クロスゾーン負荷分散が無効の時、ターゲットのスティッキネスは使えません。",
+        "B": "ターゲットが無いゾーンの問題で、ヘルスチェックの間隔を変えても解決しません。",
+        "C": "正しい。3 つ目のゾーンにもターゲットがあれば空のゾーンが無くなり、クロスゾーンを無効のまま 503 を防げます。",
+        "D": "Application Load Balancer では、ロードバランサーのレベルのクロスゾーン負荷分散は無効にできません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "ensure all target groups are participating in the same Availability Zones, within the configured Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "as this triggers a 503 error for all HTTP requests that enter the empty Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html#modify-cross-zone",
+          "quote": "Target stickiness is not supported when cross-zone load balancing is off."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0013",
+      "stem_ja": "ある会社は、Amazon RDS で MySQL のデータベースを動かしています。主のインスタンスが故障した時に、できるだけ短いダウンタイムで別のアベイラビリティーゾーンへ自動でフェイルオーバーする必要があります。また、別のリードレプリカを管理せずに、待機の容量が遊ばないよう読み取りのトラフィックも処理させたいと考えています。これらの要件を最もよく満たすデプロイの選択肢はどれですか。",
+      "choices_ja": {
+        "A": "ほかのアベイラビリティーゾーンにリーダーの DB インスタンスを持つ、Multi-AZ DB クラスターのデプロイ。",
+        "B": "1 つのスタンバイの DB インスタンスを持つ、Multi-AZ DB インスタンスのデプロイ。",
+        "C": "故障の後に別のアベイラビリティーゾーンへ復元する自動バックアップを持つ、シングル AZ の DB インスタンス。",
+        "D": "故障の後にエンジニアが手作業で昇格させるリードレプリカを持つ、シングル AZ の DB インスタンス。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Multi-AZ DB インスタンスのデプロイのスタンバイはフェイルオーバーを支えますが、読み取りのトラフィックは処理しません。Multi-AZ DB クラスターのデプロイでは、リーダーの DB インスタンスが自動のフェイルオーバーの先になり、読み取りのトラフィックも処理します。ライターが止まると、RDS がリーダーへのフェイルオーバーを管理します。",
+      "per_choice": {
+        "A": "正しい。リーダーが自動のフェイルオーバーの先になり、ふだんは読み取りも処理します。",
+        "B": "自動のフェイルオーバーはできますが、スタンバイは読み取りのトラフィックを処理しません。",
+        "C": "復元に時間がかかり、自動のフェイルオーバーではありません。",
+        "D": "昇格が手作業で、別のリードレプリカの管理も要ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "quote": "A Multi-AZ DB instance deployment has one standby DB instance that provides failover support, but doesn't serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html#Concepts.MultiAZ",
+          "quote": "A Multi-AZ DB cluster deployment has standby DB instances that provide failover support and can also serve read traffic."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html#multi-az-db-clusters-concepts-overview",
+          "quote": "If an outage occurs on your writer DB instance, RDS manages failover to one of the reader DB instances."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0014",
+      "stem_ja": "あるアプリケーションは、セッションの保存先として Amazon ElastiCache for Valkey のクラスターを使っています。各シャードには主ノードしか無いため、ノードの故障で長い停止が起きます。会社は、故障した主ノードを、ダウンタイムを最小にして別のアベイラビリティーゾーンのノードで自動で置き換えたいと考えています。運用上のオーバーヘッドが最も少なくこの要件を満たす変更はどれですか。",
+      "choices_ja": {
+        "A": "シャードにレプリカを足さずに、クラスターの Multi-AZ を有効にする。",
+        "B": "1 時間ごとにスナップショットを取り、ノードが故障したら別のアベイラビリティーゾーンの新しいクラスターへ復元する。",
+        "C": "各シャードに別の AZ のレプリカを 1 つ以上足し、自動フェイルオーバー付きの Multi-AZ を有効にする。",
+        "D": "故障しにくくなるよう、各主ノードをより大きなノードタイプに変える。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Multi-AZ は ElastiCache の高い可用性のために勧められている構成で、有効にするとレプリカを別のアベイラビリティーゾーンに置き、自動フェイルオーバーを有効にします。主ノードが故障すると、レプリケーションの遅れが最も少ないレプリカが自動で主に昇格します。Multi-AZ には、主と別のアベイラビリティーゾーンにレプリカが少なくとも 1 つ要ります。",
+      "per_choice": {
+        "A": "Multi-AZ には、主と別のアベイラビリティーゾーンのレプリカが少なくとも 1 つ必要です。",
+        "B": "復元は手作業で時間もかかり、セッションのデータも失われます。",
+        "C": "正しい。故障した時にレプリカが自動で主に昇格し、ダウンタイムを最小にできます。",
+        "D": "故障の確率が下がるだけで、故障した時の自動の置き換えにはなりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "When you enable Multi-AZ, ElastiCache distributes your replicas across different Availability Zones and enables automatic failover."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "Multi-AZ requires at least one replica in a different Availability Zone from the primary."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoFailover.html#AutoFailover.Understanding",
+          "quote": "If the primary node fails, ElastiCache automatically promotes the replica with the least replication lag to primary."
+        }
+      ]
+    },
+    {
+      "id": "q-3.1-0015",
+      "stem_ja": "ロードバランサーの後ろのアプリケーションが、1 つのリージョンの 3 つのアベイラビリティーゾーンで動いています。ときどき 1 つのゾーンが、ヘルスチェックでは分からない形で損なわれ、利用者にエラーが出ます。運用チームは、アプリケーションを変えずに、一時的な対処として、損なわれたゾーンから同じリージョンの正常なゾーンへトラフィックを素早く移せるようにしたいと考えています。これに備えて DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "ロードバランサーを Amazon Application Recovery Controller（ARC）のゾーンシフトにオプトインする。",
+        "B": "1 つのゾーンからトラフィックを移した時に残りのゾーンに十分な容量があるよう、アプリケーションを事前に拡張しておく。",
+        "C": "損なわれたゾーンがずっと外れたままになるよう、期限の無いゾーンシフトを始める計画にする。",
+        "D": "別のリージョンの待機のスタックへの Route 53 のアクティブ・パッシブのフェイルオーバーの構成を作る。",
+        "E": "障害のたびに、損なわれたゾーンのインスタンスを手作業で終了する計画にする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "ARC のゾーンシフトを使うと、対応するリソースのトラフィックを、損なわれたアベイラビリティーゾーンから同じリージョンの正常なゾーンへ移せます。使うにはリソースをオプトインする必要があり、始める前にアプリケーションを事前に拡張して、1 つのゾーンから移すだけの容量を持たせておく必要があります。ゾーンシフトはすべて一時的な対処で、最初に最長 72 時間の期限を決め、必要なら延ばします。",
+      "per_choice": {
+        "A": "正しい。ゾーンシフトを使うには、リソースのオプトインが必要です。",
+        "B": "正しい。移した先のゾーンに十分な容量が無いと、トラフィックを受け止められません。",
+        "C": "ゾーンシフトはすべて一時的な対処で、期限を決めて始めます。",
+        "D": "別のリージョンへ移す構成で、同じリージョンの正常なゾーンへ素早く移す要件に合いません。",
+        "E": "手作業で時間がかかり、素早く移す要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "shift traffic for a supported resource away from an impaired Availability Zone (AZ) in an AWS Region to healthy AZs in the same Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "You must opt-in resources in order to use zonal shift."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "Before you start a zonal shift, you must prescale your application and ensure that you have sufficient capacity to shift traffic away from an Availability Zone."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/r53recovery/latest/dg/arc-zonal-shift.html#arc-zonal-shift",
+          "quote": "All zonal shifts are temporary mitigations."
+        }
+      ]
+    }
+  ]
+}

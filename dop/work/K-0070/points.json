@@ -1,0 +1,533 @@
+{
+  "task": "4.3",
+  "questions": [
+    {
+      "id": "q-4.3-0001",
+      "stem_ja": "ある Amazon RDS の DB インスタンスでは、ストレージの自動スケーリングが有効です。割り当て済みのストレージは 950 GiB で、最大ストレージのしきい値は 1,000 GiB です。空きストレージ容量は直近の 1 時間、割り当て済みのストレージの 4% のままで、直近の 24 時間にストレージの変更は行われておらず、ストレージは増えていません。企業は、データが増えるのに合わせてストレージが自動で増え続けるようにしたいと考えています。DevOps エンジニアは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "次の増分が収まるように、最大ストレージのしきい値を今の割り当て済みのストレージより十分に高くする。",
+        "B": "空きの少ない状態が数時間続いてから自動スケーリングが始まるので、さらに少なくとも 1 時間待つ。",
+        "C": "割り当て済みのストレージを変更する AWS Lambda 関数を呼び出す、FreeStorageSpace の CloudWatch アラームを作成する。",
+        "D": "自動スケーリングがインスタンスを満杯とみなしてすぐにスケールするように、最大ストレージのしきい値を 950 GiB に下げる。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "空きが割り当ての 10% 以下の状態が 5 分以上続くと自動拡張が始まり、増える量は 10 GiB・割り当ての 10%・予測の増加のうち大きい方。950 GiB の 10% は 95 GiB なので、増やすと最大のしきい値 1,000 GiB を超え、超える時は自動拡張は起きない。しきい値は今の割り当てより少なくとも 10% 多くし、26% 以上多くするのが勧められている。",
+      "per_choice": {
+        "A": "正しい。次の増加分が収まるように、最大のしきい値を上げる。",
+        "B": "低い空きが 5 分続けば始まる条件はもう満たしている。止まっている原因は最大のしきい値。",
+        "C": "自分で仕組みを作ることになり、手間が大きい。最大のしきい値を上げれば足りる。",
+        "D": "最大のしきい値は今の割り当てより少なくとも 10% 多くする必要があり、下げても拡張は起きない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "quote": "- Free available space is less than or equal to 10 percent of the allocated storage."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "quote": "- 10 percent of currently allocated storage"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "quote": "Autoscaling doesn't occur if the maximum storage threshold would be exceeded by the storage increment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html",
+          "quote": "You must set the maximum storage threshold to at least 10% more than the current allocated storage."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0002",
+      "stem_ja": "ある Amazon ECS クラスターは、マネージドスケーリングを有効にし、targetCapacity を 90% にした Auto Scaling グループのキャパシティープロバイダーを使っています。運用チームは、同じ Auto Scaling グループに独自の CPU ベースのターゲット追跡ポリシーも追加しました。グループは今、予測できない形でインスタンスを起動・終了し、タスクがときどき容量を待ちます。チームは、ECS がタスクに合わせてクラスターの大きさを自動で決めるようにしたいと考えています。チームは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "両方のポリシーを残し、タスクが待っている時にインスタンスを追加するステップスケーリングのポリシーを足す。",
+        "B": "チーム独自のスケーリングポリシーを削除し、ECS のマネージドのターゲット追跡ポリシーにグループの希望する容量を任せる。",
+        "C": "Amazon ECS だけが起動するインスタンスの数を決めるように、グループの MaximumCapacity を 0 にする。",
+        "D": "マネージドスケーリングを無効にし、リリースのたびに希望する容量を手で設定する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "managed scaling では、ECS が目標の使用率（targetCapacity）に合わせて Auto Scaling グループの target tracking のポリシーを作り、タスクの使う資源に合わせて増減する。キャパシティプロバイダーに結び付いたグループの希望の数は、ECS が管理するポリシー以外で変えたり管理したりしてはいけない。",
+      "per_choice": {
+        "A": "ECS が管理するポリシー以外のポリシーをさらに足すことになり、ぶつかり合いが増える。",
+        "B": "正しい。ECS が管理するポリシーだけにすれば、タスクに合わせて増減する。",
+        "C": "グループが増えるには MaximumCapacity が 0 より大きい必要がある。0 では増えない。",
+        "D": "自動で増減させる要件に反し、手の作業が増える。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "quote": "Amazon ECS creates two custom CloudWatch metrics and a target tracking scaling policy for your Auto Scaling group."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "quote": "Don't change or manage the desired capacity for the Auto Scaling group that's associated with a capacity provider with any scaling policies other than the one Amazon ECS manages."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html",
+          "quote": "For the group to scale out, the value for MaximumCapacity must be greater than zero."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0003",
+      "stem_ja": "あるチームは、スロットリングが起きた時だけデータポイントを報告する Amazon DynamoDB の ThrottledRequests メトリクスに CloudWatch のアラームを作成します。アラームは、直近の 5 つの 1 分間の期間のうち少なくとも 3 つでスロットリングが起きた時だけ ALARM になる必要があります。スロットリングの無い静かな期間には、アラームは INSUFFICIENT_DATA ではなく OK を示す必要があります。これらの要件を最もよく満たすアラームの設定はどれですか。",
+      "choices_ja": {
+        "A": "期間 1 分、アラームを出すデータポイント 5 個中 3 個、欠落データを notBreaching として扱う。",
+        "B": "期間 1 分、アラームを出すデータポイント 5 個中 3 個、欠落データを breaching として扱う。",
+        "C": "期間 1 分、アラームを出すデータポイント 5 個中 3 個、欠落データの扱いは既定のまま。",
+        "D": "期間 5 分、アラームを出すデータポイント 3 個中 3 個、欠落データを notBreaching として扱う。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "Evaluation Periods（N）と Datapoints to Alarm（M）を違う値にすると「N のうち M」のアラームになる。DynamoDB の ThrottledRequests のようにエラーの時だけ値が出るメトリクスでは、欠けたデータを notBreaching（良い・しきい値の内）として扱う。既定は missing で、評価の範囲のデータが全て欠けると INSUFFICIENT_DATA になる。",
+      "per_choice": {
+        "A": "正しい。5 分のうち 3 回の絞り込みで ALARM、静かな時は OK になる。",
+        "B": "欠けたデータを悪いとみなすので、絞り込みが無い時に ALARM になる。",
+        "C": "既定の missing では、データが全て欠けると INSUFFICIENT_DATA になる。",
+        "D": "評価の範囲は 15 分になり、直近の 5 つの 1 分の期間で見る要件に合わない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "quote": "When you configure Evaluation Periods and Datapoints to Alarm as different values, you're setting an \"M out of N\" alarm."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "quote": "But for a metric that generates data points only when an error occurs, such as ThrottledRequests in Amazon DynamoDB, you would want to treat missing data as notBreaching."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarms-and-missing-data.html",
+          "quote": "missing – If all data points in the alarm evaluation range are missing, the alarm transitions to INSUFFICIENT_DATA."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-evaluation.html",
+          "quote": "If you configure 3 out of 3 data points with a period of 10 minutes, the evaluation interval is 30 minutes."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0004",
+      "stem_ja": "プライマリのデータベースが障害を起こすと、アプリケーションのヘルスの CloudWatch アラーム約 20 個が同時に ALARM になり、オンコールのチームは 20 件の通知を受け取ります。チームは、データベースのアラームが ALARM で、かつアプリケーションのヘルスのアラームの少なくとも半分が ALARM の時だけ、Amazon SNS トピックへの 1 件の通知と、Systems Manager OpsCenter の OpsItem を 1 つ出したいと考えています。すべてのアラームは 1 つのアカウントとリージョンにあります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "ルール ALARM(db) OR AT_LEAST(50%, ALARM, (app1, app2, ...)) の複合アラームを作成し、SNS と OpsItem のアクションを設定する。",
+        "B": "同じ AND のルールの複合アラームを作成し、データベースのホストを再起動する EC2 の再起動のアクションを設定する。",
+        "C": "ルール ALARM(db) AND AT_LEAST(50%, ALARM, (app1, app2, ...)) の複合アラームを作成し、SNS と OpsItem のアクションを設定する。",
+        "D": "21 個すべてのアラームに Lambda 関数をサブスクライブし、状態を数えて条件を満たした時に 1 件のメッセージを発行させる。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "複合アラームはルールの式で他のアラームの状態をまとめる。AND は全ての条件が真の時、OR はどれか 1 つが真の時に真。AT_LEAST は決めた数か割合のアラームが指定の状態の時に真になる。複合アラームが取れるアクションは、SNS への通知・Lambda の呼び出し・OpsCenter の OpsItem・Incident Manager のインシデントだけ。",
+      "per_choice": {
+        "A": "OR ではどちらか片方の条件だけでも通知が出る。",
+        "B": "複合アラームは EC2 のアクションを取れない。",
+        "C": "正しい。両方の条件がそろった時だけ、1 つの通知と OpsItem を出す。",
+        "D": "自分で数える仕組みを作ることになり、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Logical AND operator. Returns TRUE when all specified conditions are TRUE."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Function that returns TRUE when a minimum number or percentage of specified alarms are in the required state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Composite alarms can take only the following actions:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/alarm-combining.html",
+          "quote": "Create OpsItems in Systems Manager Ops Center"
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0005",
+      "stem_ja": "アプリケーションサーバーは、生のログファイルをバケット app-logs のプレフィックス raw/ の下にアップロードします。すべての新しいオブジェクトに対する S3 のイベント通知が Lambda 関数を呼び出し、関数は各ファイルを解析して結果を app-logs に書き戻します。リリースの後、関数の呼び出し回数と費用が際限なく増えています。企業は、バケットを 1 つのまま、新しい生のファイルをすべて処理し続けたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "たまった処理が片付くまで関数の予約された同時実行を 0 にし、その後設定を外す。",
+        "B": "増え続けるイベントに関数が追いつけるように、アカウントの Lambda の同時実行の上限を上げる。",
+        "C": "通知をプレフィックス raw/ に限り、関数の結果は processed/ のような別のプレフィックスの下に書かせる。",
+        "D": "すべてのオブジェクトへの通知のまま .log のサフィックスのフィルターを追加し、関数も .log ファイルを書く。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "S3 は、オブジェクトが作られた時に Lambda の関数を非同期で呼べる。関数が自分を呼んだのと同じバケットに書くと、呼び出しがくり返し続く。避けるには、バケットを 2 つにするか、入ってくるオブジェクトの prefix にだけトリガーを当てる。通知は key の prefix と suffix で絞れる。",
+      "per_choice": {
+        "A": "処理そのものが止まり、全ての新しいファイルを処理する要件に反する。",
+        "B": "くり返しは止まらず、費用がさらに増える。",
+        "C": "正しい。raw/ にだけ反応し、結果は別の prefix に書くので、くり返しが止まる。",
+        "D": "結果も .log なので、書いた結果でまた関数が呼ばれる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+          "quote": "If your Lambda Event Function uses the same bucket that triggers it, it could cause the function to run in a loop."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html",
+          "quote": "To avoid this, use two buckets, or configure the trigger to only apply to a prefix used for incoming objects."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-filtering.html",
+          "quote": "You can configure notifications to be filtered by the prefix and suffix of the key name of objects."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0006",
+      "stem_ja": "ある企業は、S3 のログバケットのすべての新しいオブジェクトで、3 つの利用者を起動したいと考えています。順序どおりの処理のジョブにデータを渡す Amazon SQS の FIFO キュー、AWS Step Functions のワークフロー、セキュリティ用の Lambda 関数です。企業は、独自のファンアウトのコードより、マネージドのルーティングを好みます。正しい説明またはアクションはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "バケットで Amazon EventBridge への配信を有効にし、EventBridge のルールで 3 つのターゲットにイベントをルーティングする。",
+        "B": "S3 のイベント通知は少なくとも 1 回配信されるので、利用者は重複した通知に耐えられるように設計する。",
+        "C": "SQS の FIFO キューに直接送る S3 のイベント通知と、ほかのターゲット向けの 2 つ目の通知を設定する。",
+        "D": "S3 のイベント通知は必ず 1 回だけ配信されることを前提にし、利用者は重複を処理しなくてよい。",
+        "E": "バケットの EventBridge への配信はプレフィックスで絞れるので、ログのプレフィックスだけで有効にする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "S3 のイベント通知は少なくとも 1 回届くように作られている。SQS の FIFO キューは S3 のイベント通知の送り先にできず、FIFO キューへ送るには EventBridge を使う。EventBridge への送信はバケット単位で有効か無効かを選び、有効にすると全てのイベントが送られ、EventBridge のルールで他の送り先へ振り分けられる。",
+      "per_choice": {
+        "A": "正しい。EventBridge のルールで 3 つの送り先に振り分けられ、FIFO キューにも送れる。",
+        "B": "正しい。少なくとも 1 回の配信なので、重複に耐えるようにする。",
+        "C": "SQS の FIFO キューは S3 のイベント通知の送り先にできない。",
+        "D": "少なくとも 1 回の配信で、重複はあり得る。",
+        "E": "EventBridge への送信はバケット単位で有効にし、全てのイベントが送られる。絞るのは EventBridge のルールで行う。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "quote": "Amazon S3 event notifications are designed to be delivered at least once."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "quote": "Amazon Simple Queue Service FIFO (First-In-First-Out) queues aren't supported as an Amazon S3 event notification destination."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html",
+          "quote": "To send a notification for an Amazon S3 event to an Amazon SQS FIFO queue, you can use Amazon EventBridge."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-event-types-and-destinations.html",
+          "quote": "If you enable delivery, all events are sent to EventBridge. Moreover, you can use EventBridge rules to route events to additional targets."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0007",
+      "stem_ja": "運用チームは、アカウントのどの EC2 インスタンスが終了した時にも、既存の Amazon SNS トピックを通してメールを受け取りたいと考えています。停止や開始など、インスタンスのほかの状態の変化は通知してはならず、コードを保守したくもありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "EC2 の状態変化の通知のイベントすべてに一致する EventBridge ルールを作り、終了したインスタンスの時だけ SNS トピックへ発行する AWS Lambda 関数へ送る。",
+        "B": "Amazon EC2 からの EC2 の状態変化の通知のうち状態が terminated のイベントに一致するイベントパターンの EventBridge ルールを作り、SNS トピックをターゲットにして、EventBridge がトピックへ発行できるようにする。",
+        "C": "5 分ごとに DescribeInstances を呼び、新しく終了したインスタンスを見つけたら SNS トピックへ発行する AWS Lambda 関数をスケジュールで実行する。",
+        "D": "EC2 の状態変化の通知のイベントすべてに一致する EventBridge ルールを作って SNS トピックをターゲットにし、ほかの状態のメールはチームが無視する。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "イベントパターンは、どのイベントをターゲットへ送るかを決めるもので、イベントのソースや detail-type だけでなく、本文の state のような値でも絞り込めます。SNS トピックをターゲットにする時は、EventBridge がトピックへ発行できるようにトピックの設定を変えます。",
+      "per_choice": {
+        "A": "動きますが、絞り込みのコードを Lambda 関数で保守する必要があり、イベントパターンで済む所に手間がかかります。",
+        "B": "正しい。パターンで終了のイベントだけを選び、コード無しで SNS へ送れます。",
+        "C": "動きますが、ポーリングのコードを保守する必要があり、通知も最大 5 分遅れます。",
+        "D": "ほかの状態の変化も通知され、要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "quote": "The following event pattern selects all Amazon EC2 instance-termination events."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "quote": "the event pattern includes fields about the event--source and detail-type--as well as a field from the event body--state."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-use-resource-based.html#eb-sns-permissions",
+          "quote": "To allow EventBridge to publish to an Amazon SNS topic, use the aws sns get-topic-attributes and the aws sns set-topic-attributes commands."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0008",
+      "stem_ja": "EventBridge ルールが、EC2 インスタンスの終了のイベントを、当番のエンジニアへメールを送る Amazon SNS トピックに送っています。エンジニアにはイベントの JSON 全体が届き、読みにくいと感じています。エンジニアは、各イベントの値から作った「Instance i-0abc in us-east-1 was terminated」のような短いメッセージを受け取りたいと考えています。会社は、コンピューティングのリソースやコードを足したくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "ルールのターゲットに入力トランスフォーマーを設定し、入力パスでインスタンス ID とリージョンを変数に入れ、それを使う入力テンプレートを書く。",
+        "B": "メールにその値だけが入るよう、ルールのイベントパターンをインスタンス ID とリージョンのフィールドだけに一致するように変える。",
+        "C": "イベントを AWS Lambda 関数へ送り、関数がイベントからメッセージを作って SNS トピックへ発行する。",
+        "D": "ルールはそのままにし、エンジニアが各メールからインスタンス ID とリージョンのフィールドを探す。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "入力トランスフォーマーを使うと、ルールのターゲットへ渡す前にイベントの文を変えられます。入力パスで JSON パスを使って元のイベントの値を変数に入れ、入力テンプレートの中で <変数名> として使うと、元のイベントの代わりに変換したものがターゲットへ送られます。",
+      "per_choice": {
+        "A": "正しい。コード無しで、イベントの値から作った短いメッセージをターゲットへ送れます。",
+        "B": "イベントパターンはどのイベントを送るかを決めるもので、送る中身は変わらず、JSON 全体が届いたままです。",
+        "C": "動きますが、メッセージを作るコードと関数を足して保守することになり、要件に反します。",
+        "D": "読みにくさが変わらず、要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+          "quote": "You can customize the text from an event before EventBridge passes the information to the target of a rule."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input",
+          "quote": "The transformed event is sent to a target instead of the original event."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-transform-target-input.html#eb-transform-target-input-path",
+          "quote": "Input Path is used to define variables. Use JSON path to reference items in your event and store those values in variables."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html#eb-event-patterns",
+          "quote": "An event pattern defines the data EventBridge uses to determine whether to send the event to the target."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0009",
+      "stem_ja": "あるアカウントの 1 つのリージョンに 300 台の EC2 インスタンスがあります。すべてのインスタンスが IMDSv2 を使い、SSM Agent 3.2.582.0 以降を動かしていますが、多くに IAM インスタンスプロファイルが無いため、Systems Manager のマネージドノードとして表示されません。会社は、インスタンスプロファイルを作ったりアタッチしたりせずに、そのリージョンの今と今後のすべてのインスタンスをマネージドノードにしたいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "AmazonSSMManagedInstanceCore ポリシーを持つインスタンスプロファイルを作り、持っていない各インスタンスにアタッチする。",
+        "B": "Systems Manager が SSM Agent に接続できるよう、各インスタンスのセキュリティグループに 443 番ポートの HTTPS の受信のルールを足す。",
+        "C": "そのリージョンで Default Host Management Configuration を有効にし、それが用意する既定のロールを使う。",
+        "D": "Default Host Management Configuration を有効にし、ロールの認証情報を得られるようインスタンスを IMDSv1 に切り替える。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Default Host Management Configuration を有効にすると、インスタンスプロファイルを手作業で作らなくても、そのアカウントとリージョンで IMDSv2 を使い SSM Agent 3.2.582.0 以降を入れたすべてのインスタンスが自動でマネージドインスタンスになります。既定のロールは、Systems Manager で管理するのに必要な最小の権限を持ちます。",
+      "per_choice": {
+        "A": "マネージドノードにはなりますが、インスタンスプロファイルを作ってアタッチしないという要件に反し、今後のインスタンスにも作業が要ります。",
+        "B": "SSM Agent が Systems Manager への接続をすべて始めるので、受信のルールは要らず、権限の問題も解決しません。",
+        "C": "正しい。条件を満たす今と今後のインスタンスが、インスタンスプロファイル無しで自動で管理されます。",
+        "D": "Default Host Management Configuration は IMDSv1 に対応しておらず、IMDSv2 が必要です。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#fleet-manager-default-host-management-configuration",
+          "quote": "Using Default Host Management Configuration, you can manage EC2 instances without having to manually create an AWS Identity and Access Management (IAM) instance profile."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-permissions.html#default-host-management",
+          "quote": "all instances using Instance Metadata Service Version 2 (IMDSv2) in the AWS Region and AWS account with SSM Agent version 3.2.582.0 or later installed automatically become managed instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/managed-instances-default-host-management.html#dhmc-prerequisites",
+          "quote": "Default Host Management Configuration doesn't support Instance Metadata Service Version 1."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "you don't need to configure your firewall to allow inbound traffic to your instances for Systems Manager."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0010",
+      "stem_ja": "プライベートサブネットの EC2 インスタンスには SSM Agent と必要な IAM の権限がありますが、Systems Manager のマネージドノードとして表示されません。サブネットにはインターネットへのルートが無く、セキュリティチームは外向きのインターネットのアクセスを許しません。インスタンスを Systems Manager で管理できるようにするために、DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "VPC に、ssm、ssmmessages、ec2messages のサービスの VPC エンドポイントを作る。",
+        "B": "インスタンスから VPC エンドポイントへの、443 番ポートの外向きの HTTPS の通信を許す。",
+        "C": "インスタンスのセキュリティグループに、Systems Manager からの 443 番ポートの受信のルールを足す。",
+        "D": "SSM Agent が公開のエンドポイントに届くよう、NAT ゲートウェイとインターネットへのルートを足す。",
+        "E": "状態を Systems Manager へ報告するよう、インスタンスに CloudWatch エージェントを入れる。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "SSM Agent は Systems Manager のサービスへの接続をすべて自分から始め、ssm・ssmmessages・ec2messages のエンドポイントと HTTPS（443 番ポート）で通信します。インターネットへの外向きのアクセスを使わない時は、VPC エンドポイントを使います。",
+      "per_choice": {
+        "A": "正しい。インターネットに出ずに、SSM Agent が通信するエンドポイントへ VPC の中から届きます。",
+        "B": "正しい。SSM Agent は HTTPS の 443 番ポートで外向きに接続するので、エンドポイントへの外向きの通信を許します。",
+        "C": "SSM Agent が接続を始めるので、受信の通信を許す必要はありません。",
+        "D": "動きますが、外向きのインターネットのアクセスを許さないという要件に反します。",
+        "E": "状態を Systems Manager へ送るのは SSM Agent で、CloudWatch エージェントは関係ありません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "The alternative to using a VPC endpoint is to allow outbound internet access on your managed instances."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "the managed instances must also allow HTTPS (port 443) outbound traffic to the following endpoints: ssm.region.amazonaws.com, ssmmessages.region.amazonaws.com, ec2messages.region.amazonaws.com."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-create-vpc.html#setup-create-vpc",
+          "quote": "SSM Agent initiates all connections to the Systems Manager service in the cloud."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html#ssm-agent",
+          "quote": "SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Gateway Service (ssmmessages)."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0011",
+      "stem_ja": "AWS Config のルールが、Systems Manager Automation のドキュメントで自動修復を行っています。修復は短い間のエラーでときどき失敗し、エンジニアが気づくまで対象のリソースは準拠していないままになります。会社は、失敗した修復を数分以内に自動でやり直し、各修復の実行の詳しい状態を見たいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "ルールを手動の修復に変え、リソースが準拠していない時にエンジニアが修復を始める。",
+        "B": "自動修復にやり直しの回数と期間（例えば 300 秒で 5 回）を設定し、詳細は DescribeRemediationExecutionStatus で確かめる。",
+        "C": "毎分動いて失敗した修復を探し、Automation のドキュメントを再び始める AWS Lambda 関数を書く。",
+        "D": "すべてのリソースが評価・修復し直されるよう、AWS Config のルールを 1 時間ごとに消して作り直す。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "自動修復の後もリソースが準拠していない時は、やり直しの回数と秒数を入れて、ルールに自動修復をやり直させられます。やり直しは修復が失敗した時だけ、決めた期間の中で行われます（例: 300 秒で 5 回）。DescribeRemediationExecutionStatus は、修復の実行の状態や手順の時刻、失敗した手順のエラーを詳しく示します。",
+      "per_choice": {
+        "A": "手作業が増え、自動でやり直す要件に反します。",
+        "B": "正しい。組み込みのやり直しで短い間のエラーをしのぎ、API で実行の状態を確かめられます。",
+        "C": "動きますが、組み込みの機能で済む仕組みを自分で作って保守することになります。",
+        "D": "手間が大きく、作り直しの間は評価も修復も止まります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "If a resource is still noncompliant after auto remediation, you can set the rule to try auto remediation again. Enter the desired retries and seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "Retries only occur if remediation fails and work within the specified time period; for example, 5 retries in 300 seconds."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "DescribeRemediationExecutionStatus, provides a detailed view of a Remediation Execution for a set of resources"
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0012",
+      "stem_ja": "セキュリティチームは、リソースの構成が変わるたびに会社独自の設定を確かめる独自の AWS Config ルールを必要としており、準拠していないリソースを自動で直したいと考えています。チームは、Java や Python で Lambda 関数を開発・保守したくありません。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "確認のために、AWS Config の Custom Policy ルールを作る。",
+        "B": "PutRemediationConfigurations で、Systems Manager Automation のドキュメントを使う自動の修復のアクションをルールに関連付ける。",
+        "C": "構成を評価する Python の関数で、AWS Config の Custom Lambda ルールを作る。",
+        "D": "ほかの AWS のサービスが作ったサービスにリンクされた AWS Config ルールに、修復のアクションを関連付ける。",
+        "E": "セキュリティチームがコンソールから各修正を始めるよう、手動の修復を選ぶ。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "AWS Config の Custom Policy ルールは構成の変化で動き、Java や Python で Lambda 関数を作らずに独自のルールを作れます。PutRemediationConfigurations で、選んだアクションの修復の設定をルールに足せば、Systems Manager Automation のドキュメントで準拠していないリソースを直せます。",
+      "per_choice": {
+        "A": "正しい。Lambda 関数を作らずに、構成の変化で動く独自のルールを作れます。",
+        "B": "正しい。ルールに Automation のドキュメントを使う自動の修復を関連付けられます。",
+        "C": "動きますが、Python の Lambda 関数を開発・保守することになり、要件に反します。",
+        "D": "修復を管理できるのは、サービスにリンクされていない AWS Config ルールだけです。",
+        "E": "手作業になり、自動で直す要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules.html#evaluate-config_develop-rules-policy",
+          "quote": "AWS Config Custom Policy rules are initiated by configuration changes."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config_develop-rules.html#evaluate-config_develop-rules-policy",
+          "quote": "AWS Config Custom Policy rules allow you to create AWS Config Custom rules without needing to use Java or Python to develop Lambda functions to manage your custom rules."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "PutRemediationConfigurations, adds or updates the remediation configuration with a specific AWS Config rule with the selected target or action."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/setup-autoremediation.html#setup-autoremediation",
+          "quote": "You can only manage remediations for non-service linked AWS Config rules."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0013",
+      "stem_ja": "あるリージョンの Web アプリケーションには、Web のフロントエンド、API、画像のサービスという 3 つの公開の部品があります。各部品には既に、公開のエンドポイントに対する Route 53 のヘルスチェックがあります。会社は、既存の 3 つのヘルスチェックの状態をもとに、フェイルオーバーのレコードが使えるアプリケーション全体の 1 つのヘルス状態を求めています。運用上のオーバーヘッドが最も少なくこの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Web のフロントエンドのヘルスチェックだけをフェイルオーバーのレコードに関連付け、ほかの 2 つの部品は見ない。",
+        "B": "3 つの部品にまたがる「N 個中 M 個」の CloudWatch アラームを作り、そのアラームを監視するヘルスチェックを作る。",
+        "C": "既存の 3 つのヘルスチェックを監視する計算されたヘルスチェックを作り、フェイルオーバーのレコードに関連付ける。",
+        "D": "1 分ごとに 3 つのエンドポイントを確かめ、1 つが失敗したら DNS のレコードを更新する AWS Lambda 関数を書く。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "ほかのヘルスチェックの状態を監視するヘルスチェックを、計算されたヘルスチェックといいます。1 つの親のヘルスチェックは最大 255 の子のヘルスチェックを監視でき、Route 53 がほかのヘルスチェックを正常とみなすかどうかを見ます。",
+      "per_choice": {
+        "A": "API や画像のサービスの障害を見られず、アプリケーション全体の状態になりません。",
+        "B": "Route 53 は「N 個中 M 個」のアラームに対応していません。",
+        "C": "正しい。既存の 3 つのヘルスチェックを 1 つの状態にまとめ、レコードで使えます。",
+        "D": "独自の関数を作って保守する必要があり、組み込みの仕組みより手間がかかります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "A health check can monitor the status of other health checks; this type of health check is known as a calculated health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html#dns-failover-determining-health-of-endpoints-calculated",
+          "quote": "One parent health check can monitor the health of up to 255 child health checks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "Route 53 does not support \"M out of N\" alarms."
+        }
+      ]
+    },
+    {
+      "id": "q-4.3-0014",
+      "stem_ja": "ある会社は、VPC からしか届かず、インターネットに公開してはならない社内のサービスに、Route 53 のフェイルオーバーのルーティングを使っています。会社は、サービスが正常でなくなった時に Route 53 にフェイルオーバーさせたいと考えています。ヘルス状態を与えるために DevOps エンジニアが使える方法はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "VPC の中のヘルスチェックの送り元を使う、プライベートエンドポイントのヘルスチェックを作る。",
+        "B": "同じアカウントで、サービスのヘルスのメトリクスの CloudWatch アラームを監視するヘルスチェックを作る。",
+        "C": "サービスのプライベート IP アドレスを使う、公開のエンドポイントのヘルスチェックを作る。",
+        "D": "サービスを持つ別の AWS アカウントの CloudWatch アラームを監視するヘルスチェックを作る。",
+        "E": "サービスのプライベートエンドポイントのヘルスチェックを参照する、計算されたヘルスチェックを作る。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "プライベートエンドポイントのヘルスチェックは、VPC から届くエンドポイントを、インターネットに公開せずに監視し、VPC の中のヘルスチェックの送り元からリクエストを送ります。また、CloudWatch のメトリクスにアラームを作れば、そのアラームと同じデータを監視するヘルスチェックを作れます。アラームはヘルスチェックと同じアカウントにある必要があります。",
+      "per_choice": {
+        "A": "正しい。インターネットに公開せずに、VPC の中からサービスを直接確かめられます。",
+        "B": "正しい。同じアカウントのアラームのデータをもとに、ヘルス状態が変わります。",
+        "C": "公開のエンドポイントのヘルスチェックは、世界の各地のヘルスチェッカーから確かめるもので、VPC の中だけのサービスには届きません。",
+        "D": "ヘルスチェックが監視できるのは、同じアカウントの CloudWatch アラームだけです。",
+        "E": "計算されたヘルスチェックから、プライベートエンドポイントのヘルスチェックは参照できません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "A private endpoint health check monitors an endpoint that is reachable from your VPC, such as a specific IP address, domain name, or port."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You don't need to expose any endpoint to the internet."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html#health-checks-types",
+          "quote": "A health check can only monitor a CloudWatch alarm that exists in the same AWS account as the health check."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-private-endpoints.html#health-checks-private-endpoints-how-it-works",
+          "quote": "You can't reference a private endpoint health check from a calculated health check."
+        }
+      ]
+    }
+  ]
+}

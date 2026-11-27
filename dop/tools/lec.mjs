@@ -13,6 +13,7 @@ import { CODE, paths, readJSON, writeJSON, appendLine, emit, main, ToolError, to
 import { itemIdOf as idOf, requireState, failToFeedback as toFeedback } from './lib/step.mjs';
 import { synthesize, creditOf } from './lib/tts.mjs';
 import { buildYomi, sayErrors, sayMap } from './lib/yomi.mjs';
+import { buildPoints, pointsOf, solveResult } from './lib/points.mjs';
 
 const APP = process.env.DOP_APP ? path.resolve(process.env.DOP_APP) : path.join(CODE, 'app');
 
@@ -86,6 +87,15 @@ function parseReview(id, who, { raw }, slideIds) {
 }
 
 const commands = {
+  // C1（判断の要点の講義）: task の問題から points.json と solve-blind.json を作り、問題の資料を sources.md と raw/ に足す
+  points(args) {
+    const id = itemIdOf(args._[0]);
+    const task = readJSON(paths.work(id, 'item.json'), {}).task ?? loadLecture(id).task;
+    if (!task) throw new ToolError('task が分からない（item.json か lecture.json の task）');
+    const [nq, ns] = buildPoints(id, task);
+    emit({ ok: true, summary: `task ${task} の問題 ${nq} 問を points.json に書き、問題の資料から出典を ${ns} 個足した → docs check`, items: [] });
+  },
+
   async validate(args) {
     const id = itemIdOf(args._[0]);
     const lec = loadLecture(id);
@@ -145,7 +155,7 @@ const commands = {
     const stale = Object.entries(raws).filter(([, r]) => fs.statSync(r.file).mtimeMs + 1 < lecAt).map(([w]) => REVIEWS[w]);
     if (stale.length) throw new ToolError(`${stale.join('・')} が今の lecture.json より古い。検証役に今の版を見直してもらう`);
 
-    const again = sameLecVerdict(id, raws);
+    const again = pointsOf(id) ? null : sameLecVerdict(id, raws);
     if (again) {
       const r = readJSON(paths.work(id, 'result.json'), null);
       if (r?.state !== 'C3_verify' || r.result !== again.result) setResult(id, 'C3_verify', again.result, { count: false });
@@ -169,6 +179,16 @@ const commands = {
       for (const i of r.global) {
         counts[i.severity]++;
         if (heavy(i)) fbGlobal.push(i); else mild.push({ slide: null, ...i });
+      }
+    }
+    // 判断の要点の講義: 講義だけで解けなかった問題は、その決め手が足りない（中）
+    const points = pointsOf(id);
+    if (points) {
+      const sr = solveResult(id, points);
+      if (sr.errors.length) throw new ToolError(sr.errors.join(' / '));
+      for (const w of sr.wrong) {
+        counts.中++;
+        fbGlobal.push({ kind: 'solve', severity: '中', detail: `${w.id}: 講義だけで解くと ${w.got || '答え無し'}（正しくは ${w.want}）。${w.why ?? ''}`.trim(), suggest: 'points.json のその問題の決め手（summary・per_choice）を、問題の場面を写さずに台本と画面で扱う' });
       }
     }
     const result = counts.重 + counts.中 > 0 ? 'fix' : 'pass';

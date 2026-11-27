@@ -1,0 +1,561 @@
+{
+  "task": "2.2",
+  "questions": [
+    {
+      "id": "q-2.2-0001",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。セキュリティチームは、基本のリソースを定義した AWS CloudFormation のテンプレートを管理しています。Workloads OU に置かれるすべてのアカウントは、今あるものも今後のものも、誰も操作せずに 2 つのリージョンで基本のリソースを受け取る必要があります。チームは各アカウントに IAM ロールを作成したくありません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "Workloads OU を対象とするセルフマネージド型のアクセス許可の StackSet を作成し、新しいアカウントに実行ロールを追加する。",
+        "B": "Workloads OU を対象とするサービスマネージド型のアクセス許可の StackSet を作成し、アカウントが来たらスタックインスタンスを追加する。",
+        "C": "Workloads OU を対象とし、自動デプロイを有効にした、サービスマネージド型のアクセス許可の StackSet を作成する。",
+        "D": "新しいアカウントで AWS Lambda 関数を呼び出し、各リージョンにスタックを作成させる Amazon EventBridge ルールを作成する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "service-managed のアクセス許可なら、CloudFormation が各アカウントとリージョンの IAM ロールを作るので、自分で作らなくてよい。自動デプロイを有効にすると、対象の組織や OU にアカウントが入った時に自動でスタックを足す。",
+      "per_choice": {
+        "A": "self-managed では各アカウントに実行用のロールを用意する必要があり、要件に反する。",
+        "B": "アカウントが入るたびに人が作業することになり、「誰も作業しない」要件に反する。",
+        "C": "正しい。ロールは CloudFormation が作り、新しいアカウントにも自動で展開される。",
+        "D": "動くが、Lambda の作成と保守が要り、手間が大きい。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-associate-stackset-with-org.html",
+          "quote": "With this model, you don't need to create IAM roles in each target account and AWS Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "quote": "CloudFormation can automatically deploy additional stacks to new AWS Organizations accounts when they're added to your target organization or organizational units (OUs)."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0002",
+      "stem_ja": "ある企業は、AWS Control Tower の Account Factory でアカウントを作成し、Prod OU に置いています。サービスマネージド型のアクセス許可と自動デプロイを使う StackSet が Prod OU を対象としており、アカウント単位のフィルターでサンドボックスのアカウントを除外しています。Prod OU に置かれた新しいサンドボックスのアカウントが、それでもスタックを受け取りました。企業は、本番のアカウントの自動デプロイを続け、サンドボックスのアカウントには基本のリソースを入れないようにする必要があります。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "新しいサンドボックスのアカウント ID を、StackSet のアカウント単位の除外フィルターに追加する。",
+        "B": "サンドボックスのアカウントを、StackSet が対象としない別の OU に置く。",
+        "C": "自動デプロイを無効にし、新しい本番のアカウントごとに手でスタックインスタンスを追加する。",
+        "D": "サンドボックスのアカウントだけ自動デプロイを無効にし、ほかのアカウントでは有効のままにする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "自動デプロイは、アカウント単位の絞り込み（account level targeting filters）を考えない。また自動デプロイは StackSet の単位で有効にする。対象の OU に入ったアカウントには展開されるので、外したいアカウントは対象でない OU に置く。",
+      "per_choice": {
+        "A": "自動デプロイはアカウント単位の絞り込みを考えないので、足しても新しいアカウントには展開される。",
+        "B": "正しい。対象の OU に入らなければ展開されない。",
+        "C": "外せるが、本番のアカウントの自動デプロイを続ける要件に反し、手の作業が増える。",
+        "D": "自動デプロイは StackSet の単位で有効にするもので、アカウントごとには切り替えられない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "quote": "Automatic deployments do not consider account level targeting filters."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "quote": "The automatic deployments feature is enabled at the StackSet level."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-manage-auto-deployment.html",
+          "quote": "When automatic deployments are enabled, they're triggered when accounts are added to a target organization or OU, removed from a target organization or OU, or moved between target OUs."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0003",
+      "stem_ja": "ある企業は AWS Organizations を使用しています。メンバーアカウントの管理者は広い IAM のアクセス許可を持っています。セキュリティチームは、管理者を含め、どのメンバーアカウントのどの IAM ユーザーやロールも、組織の CloudTrail のログ記録を停止できないようにする必要があります。管理アカウントの自動化は、引き続き証跡を管理できなければなりません。開発者の既存のアクセス許可を変えてはなりません。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "各メンバーアカウントのすべてのロールに、cloudtrail:StopLogging を拒否する IAM ポリシーを追加する。",
+        "B": "cloudtrail:StopLogging と cloudtrail:DeleteTrail を拒否する SCP を、メンバーアカウントを含む OU にアタッチする。",
+        "C": "セキュリティチームのロールにだけ CloudTrail の権限を与える SCP をアタッチし、IAM ポリシーから CloudTrail の権限を外す。",
+        "D": "証跡の管理を管理アカウントに移し、メンバーアカウントの CloudTrail の IAM のアクセス許可をすべて外す。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "SCP は、組織の IAM ユーザーとロールができる操作に上限（ガードレール）を設ける。権限を与えることはしない。管理アカウントのユーザーやロールには効かないので、管理アカウントの自動化はそのまま動く。",
+      "per_choice": {
+        "A": "各アカウントの管理者が IAM のポリシーを外せるので守れず、全アカウントで作業する手間も大きい。",
+        "B": "正しい。管理者を含むメンバーアカウントの全員に上限を設け、管理アカウントには効かず、開発者の IAM のポリシーも変えない。",
+        "C": "SCP は権限を与えない。IAM のポリシーから権限を外すと、開発者の権限が変わる要件違反にもなる。",
+        "D": "メンバーアカウントの IAM の権限を広く外すことになり、開発者の権限を変えない要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "quote": "An SCP defines a permission guardrail, or sets limits, on the actions that the IAM users and IAM roles in your organization can perform."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "quote": "SCPs do not grant permissions to the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html",
+          "quote": "SCPs don't affect users or roles in the management account."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0004",
+      "stem_ja": "ある企業は AWS Control Tower を設定済みです。チームは毎週何回か新しい AWS アカウントを依頼します。新しいアカウントはそれぞれ、事前に承認された構成から始まり、管理された環境に登録され、企業のコントロールが自動で適用される必要があります。プラットフォームチームは、独自のスクリプトの実行をやめたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "AWS Organizations の CreateAccount API で各アカウントを作成し、その後スクリプトでコントロールを適用する。",
+        "B": "AWS Organizations のコンソールで各アカウントを作成し、後から手で AWS Control Tower に登録する。",
+        "C": "AWS Lambda 関数で、既存のアカウントの IAM ロールと設定を各新規アカウントに写す。",
+        "D": "AWS Control Tower の Account Factory を使い、承認済みのテンプレートから各アカウントを作成して登録する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "Account Factory は、承認済みの設定で新しいアカウントの作成をそろえる、設定できるアカウントのテンプレート。アカウントを作って登録し、コントロールやポリシーを当てるところまで自動で行う。AWS Service Catalog のプロビジョニングされた製品の上に作られている。",
+      "per_choice": {
+        "A": "アカウントは作れるが、コントロールを当てるスクリプトを持ち続けることになり、要件に反する。",
+        "B": "登録を人が行うので、自動で当てる要件に合わず、手間も大きい。",
+        "C": "自分のコードを持つことになり、要件に反する。登録やコントロールの適用もされない。",
+        "D": "正しい。作成・登録・コントロールの適用を Account Factory が自動で行う。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "quote": "An Account Factory is a configurable account template that helps to standardize the provisioning of new accounts with pre-approved account configurations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html",
+          "quote": "The Account Factory can create and enroll AWS accounts, and it automates the process of applying controls and policies to those accounts."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0005",
+      "stem_ja": "合併の後、ある企業は、組織 A に招待で加わったメンバーアカウントを組織 B に移す必要があります。一括請求を続ける必要があるため、このアカウントはどの時点でもスタンドアロンのアカウントとして動いてはなりません。組織 B は 1 か月前に作成されました。この移行について正しい説明はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "組織 B の管理アカウントが招待を送り、移行するアカウントがそれを承諾する。",
+        "B": "このアカウントは、組織 B に加わる前に組織 A を離れたり、単独で動いたりしなくてよい。",
+        "C": "組織 A の管理アカウントが、このアカウントに代わって組織 B への招待を送る。",
+        "D": "招待されたアカウントには待機期間があるため、組織 A に加わってから 4 日待つ必要がある。",
+        "E": "組織 A が外すまで、このアカウントは両方の組織に属する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "組織の間でアカウントを移すには、新しい組織の管理アカウントから招待を送り、移るアカウントで受け入れる。移るアカウントは、今の組織を先に抜けたり、単独のアカウントとして動いたりする必要は無い。組織で作ったアカウントは作ってから 4 日待つ必要があるが、招待で入ったアカウントにはこの待ちは無い。アカウントは 1 つの組織にしか入れない。",
+      "per_choice": {
+        "A": "正しい。新しい組織の管理アカウントが招待し、移るアカウントが受け入れる。",
+        "B": "正しい。先に抜ける必要は無い。",
+        "C": "招待は新しい組織の管理アカウントから送る。",
+        "D": "4 日の待ちは組織で作ったアカウントの物で、招待で入ったアカウントには無い。",
+        "E": "アカウントは 1 つの組織にしか入れない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "requires you to send an invite from the management account of the new organization, and to use the invited account to accept the invite to join the new organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "The migrating account doesn't need to leave its current organization or operate as a standalone account first."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_account_migration.html",
+          "quote": "Invited accounts are not subject to this waiting period."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "An account can only join one organization."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0006",
+      "stem_ja": "ある企業は、既存の 20 個の AWS アカウントを組織に招待しました。管理アカウントの管理者は、組織の中で作成したアカウントと同じように、これらのアカウントの OrganizationAccountAccessRole ロールに切り替えようとしましたが、ロールが存在しません。管理者は、招待したすべてのアカウントで、このアカウント間のアクセスが必要です。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "承諾の時にロールが作成されるように、アカウントを組織から外して招待し直す。",
+        "B": "招待の期間が終わると AWS Organizations がロールを作成するので、15 日待つ。",
+        "C": "管理アカウントがメンバーアカウントにアクセスできるように、一括請求を有効にする。",
+        "D": "招待した各アカウントに、管理アカウントを信頼する OrganizationAccountAccessRole を作成する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "招待で入ったメンバーアカウントには、AWS Organizations は OrganizationAccountAccessRole の IAM ロールを自動で作らない。各アカウントで、管理アカウントを信頼するロールを作る必要がある。",
+      "per_choice": {
+        "A": "招待で入ったアカウントにはロールは自動で作られないので、招待し直しても同じ。",
+        "B": "15 日は招待に返事をする期限で、ロールは作られない。",
+        "C": "一括請求は請求の仕組みで、アカウントに入る権限を与えるものではない。",
+        "D": "正しい。招待されたアカウントには自分で作る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "For invited member accounts, AWS Organizations doesn't automatically create the IAM role OrganizationAccountAccessRole."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html",
+          "quote": "Each invitation must be responded to within 15 days, or it expires."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0007",
+      "stem_ja": "AWS Organizations ですべての機能を有効にしている企業は、CostCenter のタグキーの大文字と小文字を 1 つにそろえ、Amazon EC2 インスタンスに無効な CostCenter の値を設定するタグ付けのリクエストを止めたいと考えています。FinOps チームは、CostCenter タグがまったく無い EC2 インスタンスを、タグポリシーが検出するかも確認したいと考えています。正しい説明はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "EC2 インスタンスのリソースタイプに対して強制したタグポリシーは、準拠しないタグ付けのリクエストを止める。",
+        "B": "CostCenter タグが無いリソースは、タグポリシーへの準拠を評価されない。",
+        "C": "タグポリシーは、タグの無い EC2 インスタンスを評価し、準拠していないと報告する。",
+        "D": "タグポリシーは、一括請求の機能だけを有効にした組織でも使える。",
+        "E": "強制するリソースタイプを指定しなくても、タグポリシーはすべてのリソースタイプで準拠しないタグ付けのリクエストを止める。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "タグポリシーは、タグのキーと値の大文字小文字を含めてタグをそろえる。決めたリソースの種類に強制を指定すると、そのリソースの決まりに合わないタグ付けの要求は完了しない。タグの無いリソースや、ポリシーで決めていないタグは評価されない。タグポリシーは全ての機能を有効にした組織だけで使える。",
+      "per_choice": {
+        "A": "正しい。EC2 のインスタンスに強制を指定すれば、決まりに合わないタグ付けの要求は止まる（キーの大文字小文字もポリシーで決められる）。",
+        "B": "正しい。タグの無いリソースは評価されない。",
+        "C": "タグの無いリソースは評価されない。",
+        "D": "タグポリシーは全ての機能を有効にした組織だけで使える。",
+        "E": "強制されるのは、指定したリソースの種類だけ。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "You can use tag policies to maintain consistent tags, including the preferred case treatment of tag keys and tag values."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "In other words, noncompliant tagging requests on specified resource types are prevented from completing."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "Untagged resources or tags that aren't defined in the tag policy aren't evaluated for compliance with the tag policy."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html",
+          "quote": "Tag policies are available only in an organization that has all features enabled."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0008",
+      "stem_ja": "ある企業は 1 年前に AWS Control Tower を設定しました。あるチームは、同じ組織の未登録の OU にある既存のアカウントを、管理された OU に登録して Control Tower の管理下に置きたいと考えています。アカウントにはすでに AWS Config の設定レコーダーと配信チャネルがあるため、登録が失敗します。企業は、このアカウントを今のログアーカイブアカウントの代わりにできるかも尋ねています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "ログアーカイブアカウントの役割では既存の Config のリソースが認められるので、このアカウントを新しいログアーカイブアカウントとして登録する。",
+        "B": "先にアカウントを別の組織に移し、その後管理された OU に登録する。",
+        "C": "アカウントから既存の AWS Config のリソースを削除し、管理された OU にもう一度登録する。",
+        "D": "AWS Config のリソースは残し、代わりに未登録の OU を登録する。そうすればアカウントは条件を満たす必要がない。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "既にあるアカウントは、Control Tower が管理する OU に登録すると管理の対象になる。登録するアカウントには既存の AWS Config のリソースがあってはならない。既にあるアカウントを監査やログアーカイブのアカウントにできるのは、最初のランディングゾーンの設定の時だけ。",
+      "per_choice": {
+        "A": "既にあるアカウントをログアーカイブのアカウントにできるのは、最初の設定の時だけ。",
+        "B": "登録できるのは、Control Tower の OU と同じ組織の未登録の OU にあるアカウント。",
+        "C": "正しい。Config のリソースを外してから登録し直す。",
+        "D": "既存の Config のリソースがあると登録できないという条件は変わらない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "The account to be enrolled must not have existing AWS Config resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "You cannot enroll an existing AWS account to serve as your audit or log archive account except during initial landing zone setup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/enroll-account.html",
+          "quote": "Eligible accounts exist in unregistered OUs that are part of the same AWS Organizations organization as the AWS Control Tower OU."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0009",
+      "stem_ja": "ある会社は、すべての機能を有効にした AWS Organizations を使っています。ワークロードのアカウントは Workloads という OU にあり、毎月新しいアカウントがその OU に追加されます。会社は、それらのアカウントのすべての IAM ユーザーとロール（各アカウントのルートユーザーも含む）が、承認済みの 2 つのリージョン以外で AWS のサービスを使えないようにする必要があります。各アカウントの管理者がこの制限を外せないようにする必要もあります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "承認済みの 2 つのリージョン以外へのリクエストを拒否する IAM ポリシーを作り、各ワークロードのアカウントのすべての IAM ユーザーとロールにアタッチする。",
+        "B": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、管理アカウントにアタッチする。",
+        "C": "ワークロードのアカウントのすべての IAM ロールに、承認済みの 2 つのリージョンだけを許す permissions boundary を設定し、毎月新しいアカウントを確認する。",
+        "D": "承認済みの 2 つのリージョン以外へのリクエストを拒否する Deny ステートメントを持つ SCP を作り、Workloads OU にアタッチする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "SCP はメンバーアカウントの IAM ユーザーとロール（ルートユーザーも含む）の権限を制限し、OU に付けた Deny はその下のすべてのアカウントに効きます。後から OU に入ったアカウントにも効き、アカウントの IAM の権限では SCP を超えられません。",
+      "per_choice": {
+        "A": "アカウントごとの IAM ポリシーは、そのアカウントの管理者が外せます。ルートユーザーにも付けられず、新しいアカウントごとの作業も要ります。",
+        "B": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントにだけ効くため、ワークロードのアカウントを制限できません。",
+        "C": "ロールにしか効かずルートユーザーは制限できず、アカウントの管理者が外せます。毎月の確認の手間もかかります。",
+        "D": "正しい。OU の Deny は配下のすべてのアカウントとルートユーザーに効き、新しいアカウントにも自動で効きます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "An SCP restricts permissions for IAM users and roles in member accounts, including the member account's root user."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "when they are applied at the root or the OU-level they affect all the accounts under it."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs don't affect users or roles in the management account. They affect only the member accounts in your organization."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0010",
+      "stem_ja": "ある会社の組織では、ルートに FullAWSAccess の SCP があります。Sandbox という OU では FullAWSAccess が外され、代わりに Amazon S3 と Amazon EC2 のアクションだけを許す SCP があります。Sandbox OU のメンバーアカウントには FullAWSAccess がアタッチされています。そのアカウントの開発者には Amazon DynamoDB のすべてのアクションを許す IAM ポリシーがありますが、DynamoDB へのリクエストはすべて拒否されます。組織への変更を最も少なくして、開発者が DynamoDB を使えるようにするために、DevOps エンジニアは何をすべきですか。",
+      "choices_ja": {
+        "A": "すべてのリソースへの DynamoDB のすべてのアクションを明示的に許す新しい IAM ポリシーを開発者にアタッチする。",
+        "B": "Sandbox OU にアタッチされた SCP の Allow ステートメントに、DynamoDB のアクションを追加する。",
+        "C": "DynamoDB のアクションを許す SCP を、メンバーアカウントに直接アタッチする。",
+        "D": "DynamoDB のアクションを許す SCP を、組織の管理アカウントにアタッチする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "SCP で許されるには、ルートからアカウントまでの経路のすべての段（各 OU とアカウント自身）に明示的な Allow が要ります。Sandbox OU の SCP が DynamoDB を許していないため、IAM ポリシーで許していても拒否されます。",
+      "per_choice": {
+        "A": "IAM ポリシーは既に許しています。SCP で許されていないアクションは、IAM ポリシーで許しても実行できません。",
+        "B": "正しい。経路の中で Allow が欠けている Sandbox OU の段に DynamoDB を足せば、すべての段で許されます。",
+        "C": "アカウントの段はすでに FullAWSAccess で許しています。Sandbox OU の段に Allow が無いので拒否されたままです。",
+        "D": "SCP は管理アカウントのユーザーやロールには効かず、メンバーアカウントの評価の経路にも入らないため、変わりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps_evaluation.html#orgs_manage_policies_scps_evaluation",
+          "quote": "there must be an explicit Allow statement at every level from the root through each OU in the direct path to the account (including the target account itself)."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#scp-effects-on-permissions",
+          "quote": "If a user or role has an IAM permission policy that grants access to an action that is either not allowed or explicitly denied by the applicable SCPs, the user or role can't perform that action."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0011",
+      "stem_ja": "ある会社は、ベンダーの AWS アカウントで動き、多くの顧客に提供されているサードパーティの監視サービスを導入しようとしています。サービスは会社の AWS アカウントからメトリクスを読む必要があります。会社は、ベンダーに長期の認証情報を渡したくなく、混乱した代理（confused deputy）の問題を防ぎたいと考えています。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "メトリクスを読む権限を持つ IAM ロールを作り、その信頼ポリシーでベンダーのアカウントを許し、ベンダーが会社用に示す外部 ID を必須にする。",
+        "B": "ベンダーに、会社のロールに対して行うすべての AssumeRole API の呼び出しで、会社の外部 ID を指定するよう求める。",
+        "C": "メトリクスを読む権限を持つ IAM ユーザーを作り、90 日ごとにローテーションするアクセスキーをベンダーに渡す。",
+        "D": "信頼ポリシーで条件を付けずにベンダーのアカウントを許す IAM ロールを作り、どの顧客のデータを読むかの制限はベンダーに任せる。",
+        "E": "ベンダーのアカウントにメトリクスの読み取りを許す SCP を作り、会社のアカウントにアタッチする。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "外部 ID の主な役目は混乱した代理の問題を防ぐことで、ロールの信頼ポリシーに指定し、AssumeRole の呼び出しで毎回指定します。ロールを引き受けさせれば、ベンダーに長期の認証情報を渡さずに済みます。",
+      "per_choice": {
+        "A": "正しい。信頼ポリシーで外部 ID を必須にすると、会社用の外部 ID を示した時だけロールを引き受けられます。",
+        "B": "正しい。外部 ID は AssumeRole の呼び出しで常に指定するものとされています。",
+        "C": "アクセスキーは長期の認証情報で、ローテーションしても要件に反します。",
+        "D": "ロールで長期の認証情報は避けられますが、外部 ID が無いと混乱した代理の問題を防げません。",
+        "E": "SCP は権限を与えないため、ベンダーにアクセスを許すことはできません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "The primary function of the external ID is to address and prevent The confused deputy problem."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You must specify this ID when you define the trust policy for the role."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html#id_roles_third-party_external-id",
+          "quote": "You should always specify the external ID in your AssumeRole API calls."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "No permissions are granted by an SCP."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0012",
+      "stem_ja": "あるメンバーアカウントでは、開発者が自分の AWS Lambda 関数用の IAM ロールを作れる必要があります。同じアカウントのプラットフォームチームは、完全な管理者権限を保つ必要があります。セキュリティチームは、開発者が作るロールが、開発者がより広いポリシーをアタッチしたとしても、決めた範囲を超える権限を持てないことを求めています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "アカウントのすべての IAM プリンシパルを決めた範囲の権限に制限する SCP を、メンバーアカウントにアタッチする。",
+        "B": "開発者が作るロールの権限を制限する RCP を、メンバーアカウントにアタッチする。",
+        "C": "決めた範囲の管理ポリシーを作り、そのポリシーをロールの permissions boundary に設定する場合にだけ、開発者がロールを作れるようにする。",
+        "D": "開発者が自由にロールを作れるようにし、セキュリティチームが毎週、新しい各ロールのポリシーを確認する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "permissions boundary は管理ポリシーで、アイデンティティベースのポリシーがエンティティに与えられる最大の権限を決めます。開発者が作るロールに境界を必須にすれば、広いポリシーを付けても境界を超えられず、プラットフォームチームには影響しません。",
+      "per_choice": {
+        "A": "SCP はアカウントのすべてのユーザーとロールの上限になるため、プラットフォームチームの管理者権限まで制限されます。",
+        "B": "RCP は、組織の外のプリンシパルが組織のリソースへアクセスするのを制限するためのもので、開発者が作るロールの権限の上限にはなりません。",
+        "C": "正しい。開発者が作るロールだけに上限が付き、プラットフォームチームの権限は変わりません。",
+        "D": "確認するまでの間、範囲を超えた権限を持つロールが使えてしまい、要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html#access_policies_boundaries",
+          "quote": "A permissions boundary is an advanced feature for using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html#orgs_manage_policies_scps",
+          "quote": "SCPs offer central control over the maximum available permissions for the IAM users and IAM roles in your organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_rcps.html#orgs_manage_policies_rcps",
+          "quote": "Use an RCP when you need to restrict IAM principals that are external to your organization accounts making requests to access resources within your organization’s member accounts."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0013",
+      "stem_ja": "AWS Organizations に 150 のアカウントを持つ会社は、後から組織に入るアカウントも含め、いくつかのサンドボックスのアカウントを除くすべてのアカウントに同じ一組の AWS Config ルールを置きたいと考えています。AWS Config の記録はすべてのアカウントで既に有効です。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "管理アカウントか委任管理者から PutOrganizationConfigRule を使い、サンドボックスのアカウントを除外するアカウントとして指定する。",
+        "B": "組織の AWS Config アグリゲーターを作り、アグリゲーターを通して送り元のアカウントへルールをデプロイする。",
+        "C": "各アカウントの所有者が自分のアカウントでルールを作り、新しいアカウントが入った時にはルールの一覧を送る。",
+        "D": "毎日動き、ルールが無いアカウントを探して、それぞれにルールを作る AWS Lambda 関数を書く。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "AWS Config では、組織のすべてのアカウントの Config ルールを中央で作成・更新・削除でき、共通のルールを配りつつ、作らないアカウントを指定できます。新しいアカウントが組織に入ると、ルールはそのアカウントにもデプロイされます。組織のルールは API か CLI で作ります。",
+      "per_choice": {
+        "A": "正しい。1 か所から全アカウントへ配り、除外も指定でき、新しいアカウントにも自動で配られます。",
+        "B": "アグリゲーターは送り元のアカウントを読むだけの仕組みで、アグリゲーターを通してルールをデプロイすることはできません。",
+        "C": "手作業が多く、ルールがそろう保証もありません。",
+        "D": "動きますが、独自の関数を保守する必要があります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment",
+          "quote": "Deploy a common set of AWS Config rules across all accounts and specify accounts where AWS Config rules should not be created."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/config-rule-multi-account-deployment.html#config-rule-multi-account-deployment-considerations",
+          "quote": "If a new account joins an organization, the rule or conformance pack is deployed to that account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "For example, this means that you cannot deploy rules through an aggregator or push snapshot files to a source account or region through an aggregator."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0014",
+      "stem_ja": "セキュリティの監査担当は、会社の組織のすべてのアカウントの AWS Config のリソースの構成と準拠のデータを、1 か所で見る必要があります。監査担当は送り元のアカウントで何も変えられてはならず、会社は各アカウントに承認を求めたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "監査担当に、すべてのアカウントで管理者の権限を持つ IAM ロールを与える。",
+        "B": "結果がそこに出るよう、監査のアカウントから組織の Config ルールをデプロイする。",
+        "C": "監査のアカウントに、組織の AWS Config アグリゲーターを作る。",
+        "D": "毎週、各アカウントの AWS Config のデータを表計算シートに出して監査担当に送る。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "アグリゲーターは、組織とそのすべてのアカウントから AWS Config の構成と準拠のデータを集めるリソースです。組織に入っているアカウントを集める時は承認が要らず、アグリゲーターは送り元のアカウントを読むだけで、変更はできません。",
+      "per_choice": {
+        "A": "見られますが、送り元のアカウントを変えられる強すぎる権限になります。",
+        "B": "組織のルールはルールを配る仕組みで、全アカウントの構成と準拠のデータを 1 か所で見る仕組みではありません。",
+        "C": "正しい。承認無しで組織全体のデータを 1 か所で読めて、送り元を変える権限も持ちません。",
+        "D": "手作業で、データも最大 1 週間古くなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregate-data",
+          "quote": "An aggregator is an AWS Config resource type that collects AWS Config configuration and compliance data from the following:"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Authorization is not required if you are aggregating source accounts that are part of AWS Organizations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/aggregate-data.html#aggregation-terminology",
+          "quote": "Aggregators do not provide mutating access into a source account or region."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0015",
+      "stem_ja": "ある会社は、組織のすべてのメンバーアカウントの Amazon GuardDuty を、中央のセキュリティのアカウントから管理したいと考えています。GuardDuty は us-east-1、eu-west-1、ap-northeast-1 を対象にする必要があります。DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "管理アカウントから、3 つのリージョンのそれぞれで、セキュリティのアカウントを GuardDuty の委任管理者に指定する。",
+        "B": "委任管理者のアカウントから、各リージョンでメンバーアカウントの GuardDuty を有効にして管理する。",
+        "C": "各リージョンを別々に管理するよう、リージョンごとに別の委任管理者のアカウントを指定する。",
+        "D": "GuardDuty の設定はすべてのリージョンに効くので、委任管理者は us-east-1 でだけ指定する。",
+        "E": "各メンバーアカウントの所有者が、すべてのリージョンで GuardDuty を有効にし、セキュリティのアカウントを招待する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "管理アカウントは、組織の任意のアカウントを GuardDuty の委任管理者に指定でき、委任管理者はそのリージョンで組織のすべてのメンバーアカウントの GuardDuty を有効にして管理できます。GuardDuty はリージョンのサービスなので、使う各リージョンで指定が必要で、どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+      "per_choice": {
+        "A": "正しい。GuardDuty はリージョンのサービスなので、各リージョンで同じアカウントを指定します。",
+        "B": "正しい。委任管理者は、そのリージョンのメンバーアカウントの GuardDuty を有効にして管理できます。",
+        "C": "どのリージョンでも同じアカウントを委任管理者にする必要があります。",
+        "D": "GuardDuty はリージョンのサービスで、各リージョンでの指定が必要です。",
+        "E": "手作業が多く、中央から管理する要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "In an AWS organization, the management account can designate any account within this organization as the delegated GuardDuty administrator account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#guardduty_organizations",
+          "quote": "By default, the administrator account can enable and manage GuardDuty for all the member accounts in the organization within that Region."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "It is required that you use the same account as delegated GuardDuty administrator account in all other Regions."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_organizations.html#delegated_admin_important",
+          "quote": "Unlike AWS Organizations, GuardDuty is a Regional service."
+        }
+      ]
+    },
+    {
+      "id": "q-2.2-0016",
+      "stem_ja": "セキュリティの分析担当は、不審な活動についての GuardDuty の検出結果を受け取りますが、何が起きたかを理解するために、多くの元からログを集めるのに何時間もかけています。会社は、AWS のリソースからログのデータを自動で集め、分析担当が検出結果を調べて根本の原因を素早く見つけるのを助けるサービスを求めています。これらの要件を最もよく満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "分析担当がすべてのアカウントのリソースの構成を見られるよう、AWS Config アグリゲーターを作る。",
+        "B": "Amazon Detective を有効にし、検出結果の調査に使う。",
+        "C": "すべての組織単位（OU）に、AWS Control Tower の検出のコントロールを適用する。",
+        "D": "分析担当が、検出結果ごとに CloudTrail と VPC フローログをダウンロードし、手作業で探す。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Amazon Detective は、セキュリティの検出結果や不審な活動を分析・調査し、根本の原因を素早く見つけるのを助けるサービスで、AWS のリソースからログのデータを自動で集めます。",
+      "per_choice": {
+        "A": "アグリゲーターは構成と準拠のデータを集めるもので、検出結果の調査を助ける仕組みではありません。",
+        "B": "正しい。ログを自動で集め、検出結果の調査と根本の原因の特定を助けます。",
+        "C": "コントロールは組織単位の継続的なガバナンスのための決まりで、個々の検出結果の調査には使いません。",
+        "D": "手作業で、今の何時間もかかる調査と変わりません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Amazon Detective helps you analyze, investigate, and quickly identify the root cause of security findings or suspicious activities."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html#what-is-detective",
+          "quote": "Detective automatically collects log data from your AWS resources."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/controltower/latest/userguide/controls.html#controls",
+          "quote": "A control is a high-level rule that provides ongoing governance for your overall AWS environment."
+        }
+      ]
+    }
+  ]
+}

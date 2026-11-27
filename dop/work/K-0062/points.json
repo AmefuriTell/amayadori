@@ -1,0 +1,558 @@
+{
+  "task": "2.1",
+  "questions": [
+    {
+      "id": "q-2.1-0001",
+      "stem_ja": "ある企業は、Amazon RDS の DB インスタンスと、監査ログを保存する Amazon S3 バケットを含む本番のスタックを AWS CloudFormation で管理しています。運用チームは、更新を適用する前に、置き換えや削除が起きるリソースがあるかを確認する必要があります。今後のテンプレートの変更で S3 バケットがスタックから外された場合でも、バケットは削除されてはなりません。チームは手動のバックアップの手順を追加したくありません。最も少ない運用の手間でこれらの要件を満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "S3 バケットに DeletionPolicy: Retain を追加し、ステージングでテストした後、各更新を UpdateStack の呼び出しで直接適用する。",
+        "B": "更新ごとに変更セットを作成して確認してから実行する。S3 バケットに DeletionPolicy: Retain を追加する。",
+        "C": "更新ごとに変更セットを作成して確認してから実行する。S3 バケットの DeletionPolicy は変更しない。",
+        "D": "更新ごとに変更セットを作成して確認してから実行する。バケットのスナップショットを取る既定のポリシーに任せる。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "change set を作ると、実行する前に、どのリソースが足される・変わる・消されるかを見られ、実行を決めた時だけ変更される。DeletionPolicy の Retain を付けたリソースは、スタックの削除や、更新でスタックから外れる時にも消されずに残る。",
+      "per_choice": {
+        "A": "バケットは残るが、本番に当てる前に何が変わるかを見る手段が無い。",
+        "B": "正しい。change set で事前に確かめ、Retain でバケットを残す。",
+        "C": "何も指定しないと CloudFormation はリソースを消すので、テンプレートから外した時にバケットが消える。",
+        "D": "既定の動きはリソースを消すこと。既定が Snapshot なのは RDS の一部のリソースだけ。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html",
+          "quote": "For example, you can see which resources CloudFormation will add, modify, or delete."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "quote": "If a resource has no DeletionPolicy attribute, CloudFormation deletes the resource by default."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "quote": "This capability also applies to stack update operations that lead to resources being deleted from stacks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-attribute-deletionpolicy.html",
+          "quote": "Exception: The default policy is Snapshot for AWS::RDS::DBCluster resources and for AWS::RDS::DBInstance resources that don't specify the DBClusterIdentifier property."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0002",
+      "stem_ja": "ネットワークチームの AWS CloudFormation スタックはサブネット ID をエクスポートしており、同じアカウントとリージョンにある 3 つのアプリケーションのスタックが Fn::ImportValue でそれをインポートしています。ネットワークチームは、エクスポートした値を変更する必要があります。また、別の AWS アカウントにある新しいアプリケーションのスタックも、このスタックの出力を読む必要があります。値を手で写してはなりません。企業はどのアクションを実行すべきですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "3 つのアプリケーションのスタックを更新して値のインポートをやめさせてから、エクスポートした値を変更する。",
+        "B": "新しいスタックで Fn::GetStackOutput を使い、別のアカウントのネットワークのスタックの出力を読む。",
+        "C": "別のアカウントの新しいスタックで、同じエクスポート名の Fn::ImportValue を使う。",
+        "D": "先にエクスポートした値を変更し、インポートしているスタックは CloudFormation に自動で更新させる。",
+        "E": "ネットワークのスタックを削除して新しい値で作り直し、その後インポートしているスタックを更新する。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "別のスタックが出力を import している間は、export しているスタックを消すことも、出力の値を変えることもできない。先に import を外す。Export と Fn::ImportValue は同じアカウントとリージョンの中だけで、別のアカウントやリージョンの出力は Fn::GetStackOutput で読む。",
+      "per_choice": {
+        "A": "正しい。import を全部外してから値を変える。",
+        "B": "正しい。アカウントやリージョンをまたぐ参照には Fn::GetStackOutput を使う。",
+        "C": "Export と Fn::ImportValue による参照は同じアカウントとリージョンの中だけ。",
+        "D": "import されている間は、出力の値を変えられない。",
+        "E": "import されている間は、export しているスタックを消せない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "quote": "After another stack imports an output value, you can't delete the stack that is exporting the output value or modify the exported output value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-exports.html",
+          "quote": "When using Export and Fn::ImportValue, cross-stack references are limited to the same account and Region. To reference stack outputs across accounts or Regions, use Fn::GetStackOutput."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0003",
+      "stem_ja": "あるチームは、AWS SAM のテンプレートで AWS Lambda 関数を定義しています。チームは、新しいバージョンごとにエイリアスを通じてトラフィックを受け、トラフィックの移行は AWS CodeDeploy に任せたいと考えています。チームは、CodeDeploy のアプリケーション、デプロイグループ、IAM ロールのリソースを手で書きたくなく、テンプレートを短く保ちたいと考えています。最も少ない運用の手間でこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "関数に AutoPublishAlias プロパティを追加し、デプロイのたびにエイリアスを新しいバージョンに更新する。",
+        "B": "関数の横に、AWS::CodeDeploy::Application、AWS::CodeDeploy::DeploymentGroup、IAM ロールをテンプレートに追加する。",
+        "C": "デプロイのたびに Lambda のバージョンを発行し、スクリプトで加重エイリアスの重みを変える。",
+        "D": "AWS::Serverless::Function リソースに AutoPublishAlias と DeploymentPreference のプロパティを追加する。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "AutoPublishAlias を指定すると AWS SAM が Lambda のエイリアスとバージョンを作り、DeploymentPreference を指定すると CodeDeploy のアプリケーションとデプロイグループ（Role を指定しなければ IAM ロールも）を作る。両方を書けば、手で書くリソースなしで CodeDeploy が通信を移す。",
+      "per_choice": {
+        "A": "エイリアスとバージョンはできるが、CodeDeploy のリソースは作られず、CodeDeploy が通信を移す形にならない。",
+        "B": "動くが、手で書かないという要件と、テンプレートを短くする要件に反する。",
+        "C": "CodeDeploy を使わず、スクリプトの保守も要る。",
+        "D": "正しい。2 つの性質だけで、必要なリソースを SAM が作る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "quote": "When the AutoPublishAlias property of an AWS::Serverless::Function is specified, AWS SAM generates the following CloudFormation resources: AWS::Lambda::Alias and AWS::Lambda::Version."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "quote": "AWS SAM generates the following resources CloudFormation resources: AWS::CodeDeploy::Application and AWS::CodeDeploy::DeploymentGroup."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html",
+          "quote": "if the Role property of the DeploymentPreference object is not specified, AWS SAM also generates an AWS::IAM::Role CloudFormation resource."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0004",
+      "stem_ja": "ある企業には、Lambda 関数のコードとコンテナイメージをアセットとして持つ AWS CDK のアプリがあります。企業は、このアプリを 2 つの新しい環境（us-east-1 のアカウントと eu-west-1 のアカウント）に初めてデプロイします。企業は、アセットの保存を CDK CLI に任せ、両方の環境をできるだけ少ない手作業で準備したいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "両方の環境を指定した cdk bootstrap コマンドを 1 回実行し、その後アプリの cdk deploy を実行する。",
+        "B": "各環境に cdk deploy を実行する。CDK CLI は準備なしでスタックとアセットをデプロイする。",
+        "C": "各環境に S3 バケットと ECR リポジトリを手で作成し、その後 cdk deploy を実行する。",
+        "D": "us-east-1 だけで cdk bootstrap を実行し、その後両方の環境に cdk deploy を実行する。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "cdk bootstrap は、環境に CDKToolkit という CloudFormation スタックを置き、S3 バケットと ECR リポジトリを作る。CDK CLI はデプロイの時にこれらへテンプレートとアセットを置く。環境の引数は 1 回のコマンドに何度でも書けるので、2 つの環境を一度に準備できる。",
+      "per_choice": {
+        "A": "正しい。1 回の bootstrap で両方の環境を準備できる。",
+        "B": "準備（bootstrap）していない環境では、アセットが無く、テンプレートが 51,200 バイト未満のスタックしかデプロイできない。",
+        "C": "CDK CLI に置き場所を任せる要件に反し、手の作業も増える。bootstrap がこれらを作る。",
+        "D": "bootstrap は環境ごとに要る。eu-west-1 の環境が準備されない。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "quote": "The bootstrap stack is a CloudFormation stack that provisions an Amazon S3 bucket and Amazon ECR repository in the AWS environment."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html",
+          "quote": "This argument can be provided multiple times in a single command to deploy the bootstrap stack to multiple environments."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-deploy.html",
+          "quote": "If the AWS environment is not bootstrapped, only stacks without assets and with synthesized templates under 51,200 bytes will successfully deploy."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0005",
+      "stem_ja": "ある企業は、4 つのリージョンにわたる 100 個のアカウントにスタックインスタンスを持つ StackSet を更新します。誤った変更の影響を抑えるため、更新は一度に 10 個のアカウントを処理し、1 つのリージョンを終えてから次のリージョンを始め、あるリージョンで 2 個を超えるアカウントが失敗したら、別のリージョンに進む前に止まる必要があります。これらの要件を最もよく満たすオペレーションの設定はどれですか。",
+      "choices_ja": {
+        "A": "最大同時アカウント数 10、障害耐性 2、リージョンの同時実行 Parallel。",
+        "B": "最大同時アカウント数 100、障害耐性 2、リージョンの同時実行 Sequential。",
+        "C": "最大同時アカウント数 10、障害耐性 2、リージョンの同時実行 Sequential。",
+        "D": "最大同時アカウント数 10、障害耐性 10、リージョンの同時実行 Sequential。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Maximum concurrent accounts は同時に処理するアカウントの数、Failure tolerance はリージョンごとに許すアカウントの失敗の数で、これに達すると他のリージョンへ進まずに止まる。Region concurrency は Sequential（1 リージョンずつ）か Parallel（複数のリージョンを同時に）を選ぶ。",
+      "per_choice": {
+        "A": "Parallel では複数のリージョンを同時に処理し、1 リージョンずつの要件に反する。",
+        "B": "100 アカウントを同時に処理し、10 ずつの要件に反する。",
+        "C": "正しい。10 アカウントずつ、1 リージョンずつ、失敗が許す数を超えたら止まる。",
+        "D": "10 アカウントの失敗まで許すので、2 を超えたら止める要件に反する。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Maximum concurrent accounts, specify how many accounts are processed concurrently."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Failure tolerance, specify the maximum number of account failures allowed per Region. The operation will stop and won't proceed to other Regions once this limit is reached."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-create.html",
+          "quote": "For Region concurrency, choose how to process Regions: Sequential (one Region at a time) or Parallel (multiple Regions concurrently)."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0006",
+      "stem_ja": "DevOps エンジニアは、200 個のアカウントを対象とする StackSet の更新で、既定の同時実行モードのまま、最大同時アカウント数を 20、障害耐性を 0 に設定しました。更新は一度に 1 つのアカウントしか処理せず、何時間もかかります。エンジニアは、失敗の有無にかかわらず、一度に 20 個のアカウントを処理させたいと考えています。エンジニアは最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "オペレーションの設定で、同時実行モードを SOFT_FAILURE_TOLERANCE にする。",
+        "B": "より多くのアカウントを同時に処理するように、リージョンの同時実行を Parallel にする。",
+        "C": "アカウントを 10 個の StackSet に分け、それぞれの更新を同時に実行する。",
+        "D": "最大同時アカウント数を 200 に増やし、同時実行モードは既定のままにする。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "既定の Strict Failure Tolerance では、実際の同時の数は「Maximum concurrent accounts」と「Failure tolerance + 1」の小さい方から始まる。Failure tolerance が 0 なら 1 アカウントずつになる。Soft Failure Tolerance は Failure tolerance と同時の数を切り離し、失敗の数にかかわらず Maximum concurrent accounts の数で動かす。",
+      "per_choice": {
+        "A": "正しい。失敗の数にかかわらず 20 アカウントずつ動く。",
+        "B": "リージョンを同時に処理するだけで、各リージョンの中のアカウントは 1 つずつのまま。",
+        "C": "StackSet を分けることになり、管理の手間が大きい。",
+        "D": "既定のままでは同時の数は Failure tolerance + 1 の 1 のまま。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "The initial actual concurrency is set to the lower of either the value of the Maximum concurrent accounts, or the value of Failure tolerance +1. This is the default behavior."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "This allows StackSet operations to run at the concurrency level set by the Maximum concurrent accounts value, regardless of the number of failures."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/concurrency-mode.html",
+          "quote": "ConcurrencyMode can be set to one of the following values: STRICT_FAILURE_TOLERANCE SOFT_FAILURE_TOLERANCE"
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0007",
+      "stem_ja": "ある StackSet は、InstanceType パラメータを持つテンプレートを 30 個のアカウントにデプロイしています。eu-west-1 の本番のアカウントでは、StackSet の既定値より大きい InstanceType の値が必要です。この値は今後 StackSet を更新しても維持され、値が違うことでドリフトの検出がこれらのスタックをドリフトと報告してはならず、企業は StackSet を 1 つのままにしたいと考えています。企業は最も少ない運用の手間で何をすべきですか。",
+      "choices_ja": {
+        "A": "すべてのスタックが大きい値を使うように、StackSet の InstanceType パラメータの値を変更する。",
+        "B": "eu-west-1 の本番のアカウントのスタックインスタンスで、InstanceType パラメータの値を上書きする。",
+        "C": "eu-west-1 の本番のアカウント用に、大きい値を持つ 2 つ目の StackSet を作成する。",
+        "D": "テンプレートを変えずに、本番のスタックインスタンスだけで新しい ProdInstanceType パラメータを上書きする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "パラメータの値の上書きは、選んだアカウントとリージョンのスタックに当たる。StackSet を更新しても、上書きした値は更新されずに残る。ドリフトの検出は各スタックの上書きした値を考えに入れる。上書きできるのは StackSet にあるパラメータだけで、パラメータを足すにはテンプレートを更新する。",
+      "per_choice": {
+        "A": "全てのスタックの値が変わり、本番だけ大きくする要件に反する。",
+        "B": "正しい。そのスタックだけ値が変わり、更新でも残り、ドリフトにもならない。",
+        "C": "StackSet を 1 つにする要件に反する。",
+        "D": "StackSet に無いパラメータは上書きできない。足すにはテンプレートの更新が要る。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "quote": "During StackSet updates, any parameter values overridden for a stack aren't updated, but retain their overridden value."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stackinstances-override.html",
+          "quote": "You can only override parameter values that are specified in the StackSet; to add or delete a parameter itself, you need to update the StackSet template."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-drift.html",
+          "quote": "it takes any overridden parameter values into account when determining whether a stack has drifted."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0008",
+      "stem_ja": "プラットフォームチームは AWS Organizations のメンバーアカウントで作業しており、管理アカウントにサインインせずに、組織向けにサービスマネージド型のアクセス許可の StackSet を作成・管理する必要があります。セキュリティチームは、承認する前にこの委任の仕組みを確認したいと考えています。正しい説明はどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "プラットフォームチームのアカウントを、StackSets の委任管理者として登録できる。",
+        "B": "委任管理者が作成したサービスマネージド型のアクセス許可の StackSet は、管理アカウントの中に作成される。",
+        "C": "管理アカウントは、委任管理者がデプロイできる先を特定の OU だけに制限できる。",
+        "D": "組織は、StackSets の委任管理者を同時に最大 10 個まで登録できる。",
+        "E": "委任管理者は、セルフマネージド型のアクセス許可でしか StackSet を作成できない。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "管理アカウントのほかに、委任管理者の権限を持つメンバーアカウントも、組織の service-managed の StackSet を作って管理できる。委任管理者が作った物も含め、service-managed の StackSet は管理アカウントに作られる。委任管理者は同時に 5 つまでで、組織のアカウントへ展開する全ての権限を持ち、管理アカウントは特定の OU や操作に絞れない。",
+      "per_choice": {
+        "A": "正しい。メンバーアカウントを委任管理者として登録できる。",
+        "B": "正しい。委任管理者が作った物も管理アカウントに作られる。",
+        "C": "管理アカウントは、委任管理者の展開を特定の OU や操作に絞れない。",
+        "D": "同時に登録できる委任管理者は 5 つまで。",
+        "E": "委任管理者は service-managed の StackSet を作って管理できる。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "member accounts with delegated administrator permissions can create and manage StackSets with service-managed permissions for the organization."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "StackSets with service-managed permissions are created in the management account, including StackSets created by delegated administrators."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "The management account can't limit delegated administrator permissions to deploy to specific OUs or to perform specific StackSet operations."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-orgs-delegated-admin.html",
+          "quote": "Your organization can have up to five registered delegated administrators at one time."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0009",
+      "stem_ja": "ある会社は Amazon ECS でウェブアプリケーションを動かしています。プロダクトチームは、新しいチェックアウトの機能を、新しいアプリケーションのコードをデプロイせずに、まず一部の利用者に、その後すべての利用者に有効にしたいと考えています。展開中に Amazon CloudWatch のエラー率のアラームが発生した場合は、変更を自動で元に戻す必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "フラグを AWS AppConfig に保存し、一度にすべてデプロイする。CloudWatch アラームが発生したら、運用担当者が StopDeployment API を呼ぶ。",
+        "B": "フラグを AWS AppConfig に保存する。自動ロールバック用に CloudWatch アラームを指定した AppConfig の環境へ、段階的なデプロイ戦略でデプロイする。",
+        "C": "フラグを Systems Manager Parameter Store に保存する。利用者のグループごとに値を手作業で変え、CloudWatch アラームが発生したら手作業で戻す。",
+        "D": "フラグをアプリケーションの設定ファイルに入れ、ECS のローリングデプロイでリリースする。CloudWatch アラームが発生したらデプロイをロールバックする。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "AWS AppConfig は、コードを再デプロイせずに機能フラグで本番の振る舞いを変えられ、デプロイ戦略で変更を段階的に展開します。環境に CloudWatch アラームを指定しておくと、デプロイ中にアラームが ALARM になった時に、設定を前のバージョンへ自動でロールバックします。",
+      "per_choice": {
+        "A": "コードの再デプロイは要りませんが、一度にすべての利用者へ届き、戻すのも人の操作が必要です。",
+        "B": "正しい。コードの再デプロイ無し、段階的な展開、アラームによる自動ロールバックがすべて組み込みでそろいます。",
+        "C": "コードの再デプロイは要りませんが、段階的な展開も戻しも手作業で、自動のロールバックになりません。",
+        "D": "設定ファイルを変えるためアプリケーションのデプロイが必要で、新しいコードをデプロイしないという要件に反します。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig",
+          "quote": "AWS AppConfig helps you safely change application behavior in production without redeploying code."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-benefits-overview",
+          "quote": "Deployment strategies: Gradually roll out changes over a defined period of time to reduce risk."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html#monitoring-deployments",
+          "quote": "if one or more CloudWatch alarms go into the ALARM or INSUFFICIENT_DATAstate during a deployment, AWS AppConfig automatically rolls back your configuration data to the previous version"
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0010",
+      "stem_ja": "あるアプリケーションは Amazon S3 バケットから JSON の設定ファイルを読み込みます。先月、形の崩れたファイルが原因で障害が起きました。会社は、設定の変更がアプリケーションに届く前に、JSON Schema draft-07 で書かれた JSON Schema に照らして各変更を確かめたいと考えています。ほかのツールが書き込むため、ファイルは既存の S3 バケットに置いたままにする必要があります。これらの要件を満たすために DevOps エンジニアが行うべきことはどれですか。（2 つ選択してください。）",
+      "choices_ja": {
+        "A": "既存の S3 オブジェクトをソースにする AWS AppConfig の設定プロファイルを作り、AWS AppConfig を通して設定をアプリケーションへ届ける。",
+        "B": "draft-07 のスキーマに照らしてデータを確かめる AWS Lambda 関数を作り、設定プロファイルを作る前にそれをバリデーターとして追加する。",
+        "C": "draft-07 のスキーマを、インラインの JSON Schema バリデーターとして設定プロファイルに直接追加する。",
+        "D": "設定を AWS AppConfig のホスト型設定ストアへ移し、S3 バケットからファイルを削除する。",
+        "E": "バケットの S3 バージョニングを有効にし、アプリケーションが失敗した時に前のオブジェクトのバージョンを手作業で戻す。"
+      },
+      "answer": [
+        "A",
+        "B"
+      ],
+      "summary": "AWS AppConfig は S3 などに既にある設定データをソースにして、検証・デプロイ・管理ができ、デプロイの時にバリデーターで確かめて失敗すれば変更を戻します。インラインのスキーマは JSON Schema 4.X だけに対応するため、別のバージョンのスキーマで確かめるには Lambda のバリデーターを作る必要があります。",
+      "per_choice": {
+        "A": "正しい。ファイルを S3 に置いたまま、AppConfig のデプロイを通して届ける前に確かめられます。",
+        "B": "正しい。4.X 以外のスキーマには Lambda のバリデーターが必要で、バリデーターは設定プロファイルより先に作ります。",
+        "C": "インラインのスキーマは JSON Schema 4.X に対応するもので、draft-07 のスキーマで確かめるという要件には Lambda のバリデーターが必要です。",
+        "D": "確かめることはできますが、ファイルを既存の S3 バケットに置いたままにするという要件に反します。",
+        "E": "壊れたファイルが届いた後に戻すだけで、届く前に確かめるという要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html#what-is-appconfig-how-it-works",
+          "quote": "If your configuration data already exists in cloud services such as SSM Parameter Store or Amazon S3, you can use AWS AppConfig to validate, deploy, and manage that data more effectively."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "AWS AppConfig supports JSON Schema version 4.X for inline schema. If your application configuration requires a different version of JSON Schema, then you must create a Lambda validator."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile-validators.html#appconfig-creating-configuration-and-profile-validators",
+          "quote": "If you plan to use a validator, you must create it before you create the configuration profile."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0011",
+      "stem_ja": "ある会社は、AWS Systems Manager のマネージドノードである 400 台の Amazon EC2 インスタンスを動かしています。エンジニアがときどきインスタンス上のエージェントの設定を手作業で変え、インスタンスが承認済みの構成からずれていきます。会社は、タグ Env=prod を持つすべてのインスタンス（後から起動するインスタンスも含む）に、承認済みの構成をスケジュールで適用し直したいと考えており、追加のサービスに費用を払いたくありません。運用の手間が最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "承認済みの構成を毎晩ダウンロードして適用する cron ジョブを、インスタンスのユーザーデータに追加する。",
+        "B": "タグの付いた各インスタンスへ SSH で接続して構成を適用する AWS Lambda 関数を呼ぶ Amazon EventBridge のスケジュールを作る。",
+        "C": "承認済みの構成をスケジュールで適用し、タグ Env=prod でマネージドノードを対象にする Systems Manager State Manager の関連付けを作る。",
+        "D": "運用チームが毎週、各インスタンスの設定を承認済みの構成と比べ、違いを手作業で直す。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "State Manager は、マネージドノードなどを定めた状態に保つ構成管理のサービスで、関連付けで適用のスケジュールと対象（タグなど）を指定します。構成のずれを減らす用途に向き、追加の料金はかかりません。",
+      "per_choice": {
+        "A": "動きますが、既に動いているインスタンスには入らず、構成を変えるたびに起動の設定を直す必要があります。",
+        "B": "動きますが、接続と適用の Lambda 関数を作って保守する必要があり、手間がかかります。",
+        "C": "正しい。タグで対象を決めるので後から起動したインスタンスも入り、スケジュールで適用し直します。追加の料金もかかりません。",
+        "D": "手作業で、400 台では手間が大きく、次の確認までずれが残ります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "An association specifies a schedule for when to apply the configuration and the targets for the association."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager supports targeting AWS resources by using tags, AWS Resource Groups, individual node IDs, or all managed nodes in the current AWS Region and AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state.html#systems-manager-state",
+          "quote": "State Manager is available at no additional charge."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0012",
+      "stem_ja": "セキュリティチームは、会社の Amazon S3 バケットとセキュリティグループが社内の基準に従っているかを把握する必要があります。チームには、各リソースがどう構成されているかの記録が必要で、リソースが基準に反した時に通知を受ける必要があり、確認の一式を各アカウントで 1 つの単位としてデプロイして監視したいと考えています。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "対象のリソースタイプについて AWS Config の記録を有効にし、基準に対応する AWS Config ルールをまとめてコンフォーマンスパックとしてデプロイする。",
+        "B": "対象のリソースタイプについて AWS Config の記録を有効にし、各 AWS Config ルールを、すべてのアカウントで 1 つずつ作る。",
+        "C": "毎日動き、API でバケットとセキュリティグループの設定を読み、問題があればチームにメールする AWS Lambda 関数を書く。",
+        "D": "毎月バケットとセキュリティグループの設定を表計算シートに出力し、チームが基準と比べる。"
+      },
+      "answer": [
+        "A"
+      ],
+      "summary": "AWS Config はリソースの構成を詳しく記録し、ルールで構成を評価して、反するリソースを非準拠にして通知します。コンフォーマンスパックはルールの集まりで、1 つの単位としてデプロイして監視できます。",
+      "per_choice": {
+        "A": "正しい。構成の記録、ルールによる評価と通知、一式を 1 つの単位としてデプロイして監視することがそろいます。",
+        "B": "記録・評価・通知はそろいますが、ルールを 1 つずつ作るため、一式を 1 つの単位として扱えず手間が増えます。",
+        "C": "動きますが、確認のコードを書いて保守する必要があり、構成の記録も残りません。",
+        "D": "手作業で、反した時にすぐ通知されず、オーバーヘッドも大きくなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "AWS Config provides a detailed view of the configuration of AWS resources in your AWS account."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "When AWS Config detects that a resource violates the conditions in one of your rules, AWS Config flags the resource as noncompliant and sends a notification."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html#WhatIsConfig",
+          "quote": "Use conformance packs, or a collection of rules that can be deployed and monitored as a single entity in your AWS account."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0013",
+      "stem_ja": "プラットフォームチームは、標準の環境の CloudFormation のテンプレートを承認しています。開発者は、承認済みの環境だけを自分で起動・更新・終了できる必要があります。セキュリティチームは、開発者に CloudFormation や、テンプレートが作る AWS のサービスの権限を与えたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "制約の無い Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。",
+        "B": "開発者に管理者の権限を与え、共有のバケットの承認済みのテンプレートだけを使うよう求める。",
+        "C": "起動の制約を付けた Service Catalog のポートフォリオでテンプレートを共有し、開発者にアクセスを与える。",
+        "D": "開発者がチケットで求める環境を、すべてプラットフォームチームが起動・更新・終了する。"
+      },
+      "answer": [
+        "C"
+      ],
+      "summary": "Service Catalog では、管理者が製品のポートフォリオを作って制約を足し、IAM でポートフォリオへのアクセスを与えます。起動の制約は、利用者が製品を起動・更新・終了する時に Service Catalog が引き受ける IAM ロールを決めます。起動の制約が無いと、利用者は CloudFormation や製品が使うサービスの権限を持つ必要があります。",
+      "per_choice": {
+        "A": "承認済みの物だけに絞れますが、起動の制約が無いと、開発者自身に CloudFormation と各サービスの権限が要ります。",
+        "B": "承認済みの物に絞れず、権限も広すぎます。",
+        "C": "正しい。開発者は承認済みの製品だけを扱え、起動のロールが代わりにリソースを作るので、開発者の権限は最小で済みます。",
+        "D": "開発者が自分で起動できず、プラットフォームチームの手間が大きくなります。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html#introduction",
+          "quote": "Administrators assemble portfolios of products from their catalog, add constraints and resource tags to be used at provisioning"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+          "quote": "A launch constraint specifies the AWS Identity and Access Management (IAM) role that AWS Service Catalog assumes when an end user launches, updates, or terminates a product."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html#constraints-launch",
+          "quote": "Without a launch constraint, end users must launch and manage products using their own IAM credentials."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0014",
+      "stem_ja": "ある会社は AWS Control Tower を使っています。チームは多くのアカウントで CloudFormation を使ってインフラをデプロイしています。セキュリティチームは、暗号化されていないストレージのように AWS のベストプラクティスに反するリソースの設定を、リソースが用意される前に止めたく、ポリシーのコードを書いたり保守したりしたくありません。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "すべてのリソースタイプの CloudFormation Guard のルールを書き、各アカウントで独自の Hooks として登録する。",
+        "B": "AWS Config のルールで作られた後の準拠していないリソースを見つけ、手作業で削除する。",
+        "C": "デプロイの前に、レビュー担当がすべての CloudFormation のテンプレートを読む。",
+        "D": "CloudFormation Hooks として実装される AWS Control Tower のプロアクティブなコントロールを有効にする。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "CloudFormation Hooks は、リソースを用意する前にその設定を調べ、準拠していなければ操作を失敗させて用意を止める（または警告する）機能です。AWS Control Tower のコントロールカタログは、Hooks として使える標準のプロアクティブなコントロールを用意しており、コードを書かずに組織全体で AWS のベストプラクティスに照らして設定を確かめられます。",
+      "per_choice": {
+        "A": "用意の前に止められますが、ポリシーのコードを書いて保守することになり、要件に反します。",
+        "B": "作られた後に見つけるので、用意の前に止める要件を満たさず、削除も手作業です。",
+        "C": "手作業で、多くのアカウントのデプロイに追いつきません。",
+        "D": "正しい。コードを書かずに、用意の前に準拠していない設定を止められます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#what-is-cloudformation-hooks",
+          "quote": "you can provide code that proactively inspects the configuration of your AWS resources before provisioning."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+          "quote": "The AWS Control Tower Control Catalog offers standardized proactive controls that you can implement as Hooks."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cloudformation-cli/latest/hooks-userguide/what-is-cloudformation-hooks.html#hook-control-tower-proactive-controls",
+          "quote": "validate resource configurations against AWS best practices across your organization without writing code."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0015",
+      "stem_ja": "あるチームは、多くのスタックを持ち、L2 のコンストラクトとほかのチームの高いレベルのパターンを両方使う AWS CDK のアプリでインフラを作っています。セキュリティチームは、各バケットの定義を直さずに、アプリのすべてのコンストラクトを調べて、暗号化されていない Amazon S3 バケットを報告する 1 つの決まりを求めています。この要件を最もよく満たす方法はどれですか。",
+      "choices_ja": {
+        "A": "各バケットのコンストラクトに .with() で Mixin を付けて、暗号化を足す。",
+        "B": "アプリのスコープのすべてのコンストラクトを訪れ、すべてのバケットが暗号化されているかを確かめる Aspect を書く。",
+        "C": "各バケットが CloudFormation のリソースに直接対応するよう、すべての L2 のバケットのコンストラクトを L1 に置き換える。",
+        "D": "各チームが、デプロイのたびに自分のバケットの定義を確かめる。"
+      },
+      "answer": [
+        "B"
+      ],
+      "summary": "Aspect は、あるスコープのすべてのコンストラクトに操作を当てる仕組みで、すべてのバケットが暗号化されているかを確かめることもできます。アプリ全体に決まりを当てたり確かめたりする時は Aspect、特定のコンストラクトに機能を足す時は Mixin を使います。",
+      "per_choice": {
+        "A": "Mixin は特定のコンストラクトに機能を足すもので、各バケットに付ける必要があり、アプリ全体を調べる決まりになりません。",
+        "B": "正しい。1 つの Aspect で、ほかのチームのパターンの中も含めてすべてのバケットを調べられます。",
+        "C": "各バケットの定義を直すことになり、確かめる決まりにもなりません。",
+        "D": "手作業で漏れが出やすく、1 つの決まりで調べる要件を満たしません。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+          "quote": "Aspects are a way to apply an operation to all constructs in a given scope."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects",
+          "quote": "Or it could verify something about the state of the constructs, such as making sure that all buckets are encrypted."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/cdk/v2/guide/aspects.html#aspects-vs-mixins",
+          "quote": "Use Aspects when you want to enforce rules across your entire application or validate that constructs meet certain criteria. Use Mixins when you want to add a specific feature to a specific construct."
+        }
+      ]
+    },
+    {
+      "id": "q-2.1-0016",
+      "stem_ja": "多くのチームが、自分の CloudFormation のテンプレートを書いています。セキュリティチームは、よく使う一組のリソースについて、すべてのチームが同じ強化した設定を入れることと、セキュリティの指針が変わった時にその設定を 1 か所で更新することを求めています。チームは自分のテンプレートを書き続ける必要があります。運用上のオーバーヘッドが最も少なくこれらの要件を満たすソリューションはどれですか。",
+      "choices_ja": {
+        "A": "YAML の断片を wiki に載せ、各チームがテンプレートへ写し、指針が変わったら写しを更新する。",
+        "B": "強化したリソースを CloudFormation StackSets ですべてのアカウントにデプロイし、チームにはそのリソースを自分で定義しないよう求める。",
+        "C": "各デプロイの前に各チームのテンプレートを手作業で見直し、必要な変更を戻す。",
+        "D": "設定を CloudFormation のモジュールとしてレジストリに入れ、チームがテンプレートに含め、指針が変わったらモジュールの新しいバージョンを出す。"
+      },
+      "answer": [
+        "D"
+      ],
+      "summary": "CloudFormation のモジュールは、リソースの設定を、スタックのテンプレートに含められる形でまとめる仕組みで、セキュリティやガバナンスのベストプラクティスを入れた部品として使えます。モジュールにはバージョンがあるので、指針が変わったら作成者が新しいバージョンを出せます。",
+      "per_choice": {
+        "A": "写しがチームごとに散り、指針が変わるたびにすべての写しを直す必要があります。",
+        "B": "リソースをまとめてデプロイするだけで、チームのテンプレートの中で同じ設定を使う仕組みになりません。",
+        "C": "手作業の見直しが毎回必要で、オーバーヘッドが大きくなります。",
+        "D": "正しい。チームは自分のテンプレートに同じ部品を含め、設定はモジュールの 1 か所で更新できます。"
+      },
+      "references": [
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+          "quote": "Modules are a way for you to package resource configurations for inclusion across stack templates, in a transparent, manageable, and repeatable way."
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/modules.html#modules",
+          "quote": "because modules are versioned, if security guidelines change over time, the module author can create a new version of the module that incorporates those changes."
+        }
+      ]
+    }
+  ]
+}
