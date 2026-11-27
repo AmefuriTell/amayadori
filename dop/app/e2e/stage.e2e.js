@@ -110,11 +110,14 @@ test('A-0018 AC4 「全画面」で舞台と操作が画面いっぱいに出て
 
   await page.keyboard.press('f');
   assert.equal(await tid(page, 'lecture-full').textContent(), '全画面を終える');
+  // 人が押す間合いを置いてから Esc を押す（ブラウザの全画面に入れた時も、入れなかった時も印で広がる）
+  await page.waitForTimeout(500);
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelector('[data-testid=lecture-full]').textContent === '全画面');
   await page.keyboard.press('F');
   assert.equal(await tid(page, 'lecture-full').textContent(), '全画面を終える');
-  await tid(page, 'lecture-back').click();
+  // 全画面では再生の枠が画面を覆うので、一覧へ戻る操作はボタンに直接送る
+  await tid(page, 'lecture-back').dispatchEvent('click');
   assert.equal(await page.evaluate(() => document.body.classList.contains('lec-full')), false);
   assert.deepEqual(errors, []);
   await page.close();

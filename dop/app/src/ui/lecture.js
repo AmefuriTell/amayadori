@@ -348,6 +348,8 @@ export function createLecture({ app, progress, hasTask, openTask, isActive }) {
   // ブラウザの全画面が Esc などで終わった時は印も外す。大きさが変わったら字を合わせ直す
   // こちらから終えた時の知らせ（selfExit）は、その後に押し直した全画面を消さないよう読み捨てる
   document.addEventListener('fullscreenchange', () => {
+    // 全画面に入り終える前に終えた時は、入ったところで出直す
+    if (document.fullscreenElement && !c.full) { c.selfExit = true; document.exitFullscreen?.()?.catch?.(() => {}); return; }
     if (!document.fullscreenElement && c.selfExit) c.selfExit = false;
     else if (!document.fullscreenElement && c.full) { setFull(c, false); draw(c); return; }
     fitStage(app);

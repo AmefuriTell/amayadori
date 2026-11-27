@@ -23,3 +23,5 @@ DOP 問題集の講義 {TASK}（項目 {ID}）の掛け合いの台本を、生�
 **書く先**: /home/user/amayadori/dop/work/{ID}/lecture.json を上書き。
 **確かめ方**: `cd /home/user/amayadori/dop && node tools/lec.mjs validate {ID}` が ok になるまで直す。
 **返事（短く）**: 字数、行数（先生・生徒）、validate の結果、生徒の問いの例を 2 つ（前 → 後）。git は使わないでください。
+
+**作業用のファイル**: スクリプトや控えは /tmp/claude-0/-home-user-amayadori/1a86ad4f-aa47-58a2-9a6d-56125d27a5aa/scratchpad/<項目 ID>/ の中だけに置く（ほかの作業と同時に動くので、同じ名前のファイルがぶつかると別の講義を書き換えてしまう）。ほかの講義のファイルとスクリプトには触れない。

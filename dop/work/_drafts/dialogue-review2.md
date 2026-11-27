@@ -9,3 +9,5 @@ DOP 問題集の講義 {TASK}（項目 {ID}）の 2 回目以降の検証をお�
 
 書くもの: review-consistency.json と review-clarity.json を今回の結果で上書き。形 `{ "slides": [ { "id", "issues": [ { "kind", "severity": "重|中|軽", "detail", "suggest" } ] } ], "global": [] }`。kind は整合性が fact・unsupported・mismatch・terms・flow、分かりやすさが jargon・leap・visual・listen・exam。指摘が無いファイルは `{ "slides": [], "global": [] }`。ほかのファイルは書き換えず、git も使わないでください。
 返事: pass（重・中 0）かどうかと重・中の要点を短く。
+
+**作業用のファイル**: スクリプトや控えは /tmp/claude-0/-home-user-amayadori/1a86ad4f-aa47-58a2-9a6d-56125d27a5aa/scratchpad/<項目 ID>/ の中だけに置く（ほかの作業と同時に動くので、同じ名前のファイルがぶつかると別の講義を書き換えてしまう）。ほかの講義のファイルとスクリプトには触れない。
